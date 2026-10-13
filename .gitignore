@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+.kotlin/
+
+# Local config
+local.properties
+*.keystore
+*.jks
+keystore.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+.navigation/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# QA artifacts that are regenerated
+qa/screenshots/*.tmp
+
+# Logs
+*.log
