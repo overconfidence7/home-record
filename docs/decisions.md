@@ -34,3 +34,8 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 - Repositories take `Source`, `Clock`, `IdGenerator` so tests are deterministic; `save*` methods treat a blank id as insert.
 - `MediaFileStore` stores paths relative to `filesDir` and rejects anything not directly under `media/` (also serves AC-91 later).
 - Deleting/replacing a record's photo removes the file from disk in the repository, not the UI.
+
+## 2026-10-14 — T04 onboarding and navigation
+- Added navigation-compose 2.9.6 (approved list). Start route is resolved once by `StartDestination` (no Home → onboarding, else hub); nav host renders nothing until it resolves.
+- Home + rooms are created in one Room transaction (`HomeRepository.createHomeWithRooms`); room names for quick-add chips are resolved from strings.xml in the nav host and passed to the ViewModel, so the stored name matches the UI language.
+- Duplicate custom rooms (case-insensitive) are ignored. HM-Home and HM-Panel are placeholders until T05/T06.

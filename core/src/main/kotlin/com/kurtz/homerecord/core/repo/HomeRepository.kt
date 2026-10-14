@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.model.Home
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.model.Source
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -24,6 +25,14 @@ class HomeRepository(
         val home = Home(ids.next(), name.trim(), address, yearBuilt, climateZone, now, now, source)
         db.homeDao().upsert(home.toEntity())
         return home
+    }
+
+    /** Creates the home and its rooms in one transaction (onboarding, AC-3). Blank and duplicate room names are skipped. */
+    suspend fun createHomeWithRooms(name: String, roomNames: List<String>): Home = db.withTransaction {
+        val home = createHome(name)
+        roomNames.map { it.trim() }.filter { it.isNotEmpty() }.distinctBy { it.lowercase() }
+            .forEach { addRoom(home.id, it) }
+        home
     }
 
     suspend fun updateHome(home: Home) {

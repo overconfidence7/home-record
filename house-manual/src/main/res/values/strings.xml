@@ -2,4 +2,26 @@
 <resources>
     <string name="app_name">House Manual</string>
     <string name="shell_title">HomeRecord</string>
+    <string name="onboarding_title">Set up your home</string>
+    <string name="onboarding_home_name">Home name</string>
+    <string name="onboarding_rooms_heading">Which rooms does it have?</string>
+    <string name="onboarding_custom_room">Add another room</string>
+    <string name="onboarding_add">Add</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="panel_placeholder">Panel</string>
+    <string name="room_kitchen">Kitchen</string>
+    <string name="room_living_room">Living Room</string>
+    <string name="room_dining_room">Dining Room</string>
+    <string name="room_primary_bedroom">Primary Bedroom</string>
+    <string name="room_bedroom_2">Bedroom 2</string>
+    <string name="room_bedroom_3">Bedroom 3</string>
+    <string name="room_bathroom">Bathroom</string>
+    <string name="room_primary_bath">Primary Bath</string>
+    <string name="room_garage">Garage</string>
+    <string name="room_basement">Basement</string>
+    <string name="room_attic">Attic</string>
+    <string name="room_laundry">Laundry</string>
+    <string name="room_office">Office</string>
+    <string name="room_hallway">Hallway</string>
+    <string name="room_exterior">Exterior</string>
 </resources>
