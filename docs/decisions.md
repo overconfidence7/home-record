@@ -21,3 +21,10 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 - [ ] Store names for the two apps ("House Manual" and "Field Log" are working titles; check Play and trademark conflicts).
 - [ ] LLC name → final package root (rename before the first Play upload; application IDs cannot change after).
 - [ ] Climate zones for seasonal reminders: four coarse zones or IECC zones?
+
+## Build decisions
+
+- 2026-10-14: Compose BOM pinned to 2026.06.01. BOM 2026.08.00+ (Compose 1.12) requires AGP 9.1, but CLAUDE.md fixes AGP at 8.13.x. Revisit if Nate approves AGP 9.
+- 2026-10-14: Versions: AGP 8.13.2, Kotlin 2.2.21, Gradle 8.14.3, Robolectric 4.15.1. KSP/Room are added when T02 needs them (KSP 2.2.21-2.0.5).
+- 2026-10-14: compileSdk 37 with AGP 8.13.2 (tested to 36.1) works with `android.suppressUnsupportedCompileSdk=37.0`. The SDK package is `platforms;android-37.0`; setup-android.sh now installs that and symlinks `platforms/android-37` because AGP 8.13 looks for that directory name.
+- 2026-10-14: Maven Central returns HTTP 429 under parallel resolution in the cloud proxy; use `--max-workers=2` and retry.

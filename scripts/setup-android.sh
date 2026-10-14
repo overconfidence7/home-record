@@ -35,7 +35,7 @@ fi
 CMDLINE_TOOLS_BUILD="${CMDLINE_TOOLS_BUILD:-15859902}"
 CMDLINE_TOOLS_SHA256="${CMDLINE_TOOLS_SHA256:-4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583}"
 CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_BUILD}_latest.zip"
-ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-37}"
+ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-37.0}"
 ANDROID_BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-37.0.0}"
 HOME="${HOME:-/root}"
 # Root installs to a world-readable path so a non-root session user can use it too.
@@ -178,6 +178,11 @@ if [ -f "$PROJECT_DIR/settings.gradle.kts" ] || [ -f "$PROJECT_DIR/settings.grad
   printf 'sdk.dir=%s\n' "$ANDROID_HOME" > "$PROJECT_DIR/local.properties"
 else
   log "No Gradle project at $PROJECT_DIR; skipping local.properties (Gradle will use ANDROID_HOME)"
+fi
+
+# AGP 8.13 looks for platforms/android-37, but the SDK package installs as android-37.0.
+if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
+  ln -s android-37.0 "$ANDROID_HOME/platforms/android-37"
 fi
 
 log "Done. ANDROID_HOME=$ANDROID_HOME  JAVA_HOME=$JAVA_HOME"
