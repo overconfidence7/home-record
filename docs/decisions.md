@@ -29,3 +29,8 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 - 2026-10-14: compileSdk 37 with AGP 8.13.2 (tested to 36.1) works with `android.suppressUnsupportedCompileSdk=37.0`. The SDK package is `platforms;android-37.0`; setup-android.sh now installs that and symlinks `platforms/android-37` because AGP 8.13 looks for that directory name.
 - 2026-10-14: Maven Central returns HTTP 429 under parallel resolution in the cloud proxy; use `--max-workers=2` and retry.
 - 2026-10-14: T02 added Room 2.8.4 + KSP 2.2.21-2.0.5 to `:core`. Entities/DAOs in package `core.data`, domain models in `core.model` (packages, not Gradle modules). Enums use Room's built-in name storage; only `List<Int>` slots needs a converter. DAOs use `@Upsert` (never REPLACE, which would cascade-delete children). Endpoint.breakerId is FK SET_NULL so deleting a breaker detaches endpoints (AC-12). Schema export is off (v1, no migrations yet).
+
+## 2026-10-14 — T03 repository layer
+- Repositories take `Source`, `Clock`, `IdGenerator` so tests are deterministic; `save*` methods treat a blank id as insert.
+- `MediaFileStore` stores paths relative to `filesDir` and rejects anything not directly under `media/` (also serves AC-91 later).
+- Deleting/replacing a record's photo removes the file from disk in the repository, not the UI.

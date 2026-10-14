@@ -1,0 +1,155 @@
+package com.kurtz.homerecord.core.repo
+
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.media.MediaFileStore
+import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Endpoint
+import com.kurtz.homerecord.core.model.EndpointKind
+import com.kurtz.homerecord.core.model.Equipment
+import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.model.PanelLayout
+import com.kurtz.homerecord.core.model.Shutoff
+import com.kurtz.homerecord.core.model.ShutoffKind
+import com.kurtz.homerecord.core.model.Source
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import java.io.File
+import java.nio.file.Files
+
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
+class RepositoryTest {
+    private lateinit var db: HomeRecordDatabase
+    private lateinit var dir: File
+    private lateinit var media: MediaFileStore
+    private var tick = 100L
+    private var seq = 0
+    private val clock = Clock { tick++ }
+    private val ids = IdGenerator { "id${++seq}" }
+
+    private lateinit var homes: HomeRepository
+    private lateinit var panels: PanelRepository
+    private lateinit var shutoffs: ShutoffRepository
+    private lateinit var equipment: EquipmentRepository
+
+    @Before
+    fun setUp() {
+        db = HomeRecordDatabase.inMemory(ApplicationProvider.getApplicationContext<Context>())
+        dir = Files.createTempDirectory("repo").toFile()
+        media = MediaFileStore(dir)
+        homes = HomeRepository(db, Source.HOUSE_MANUAL, clock, ids)
+        panels = PanelRepository(db, media, Source.HOUSE_MANUAL, clock, ids)
+        shutoffs = ShutoffRepository(db, media, Source.HOUSE_MANUAL, clock, ids)
+        equipment = EquipmentRepository(db, media, Source.HOUSE_MANUAL, clock, ids)
+    }
+
+    @After
+    fun tearDown() {
+        db.close()
+        dir.deleteRecursively()
+    }
+
+    private fun storeFile(): String {
+        val path = media.newPhotoPath()
+        media.resolveForWrite(path)!!.writeText("jpg")
+        return path
+    }
+
+    @Test
+    fun home_and_rooms_flow() = runTest {
+        assertNull(homes.observeHome().first())
+        val home = homes.createHome("  Maple  ")
+        assertEquals("Maple", homes.observeHome().first()?.name)
+        assertEquals(Source.HOUSE_MANUAL, home.source)
+        val room = homes.addRoom(home.id, "Kitchen")
+        homes.renameRoom(room.id, "Galley")
+        assertEquals(listOf("Galley"), homes.observeRooms(home.id).first().map { it.name })
+        homes.deleteRoom(room.id)
+        assertTrue(homes.observeRooms(home.id).first().isEmpty())
+    }
+
+    @Test
+    fun panelPhoto_persistsAndReplacementDeletesOldFile() = runTest {
+        val home = homes.createHome("H")
+        val panel = panels.createPanel(home.id, "Main", 40, PanelLayout.NA_NUMBERED)
+        val first = storeFile()
+        panels.setPanelPhoto(panel.id, first)
+        assertEquals(first, panels.getPanel(panel.id)?.photoPath)
+        assertTrue(media.exists(first))
+        val second = storeFile()
+        panels.setPanelPhoto(panel.id, second)
+        assertFalse(media.exists(first))
+        assertTrue(media.exists(second))
+        panels.deletePanel(panel.id)
+        assertFalse(media.exists(second))
+    }
+
+    @Test
+    fun deleteBreaker_detachesEndpointsAndLinks() = runTest {
+        val home = homes.createHome("H")
+        val room = homes.addRoom(home.id, "Den")
+        val panel = panels.createPanel(home.id, "Main", 20, PanelLayout.DIN)
+        val breaker = panels.saveBreaker(
+            Breaker("", panel.id, listOf(1), label = "Den", createdAt = 0, updatedAt = 0, source = Source.IMPORT),
+        )
+        assertEquals(Source.HOUSE_MANUAL, breaker.source)
+        panels.linkRoom(breaker.id, room.id)
+        panels.linkRoom(breaker.id, room.id)
+        assertEquals(1, panels.observeBreakerRooms(breaker.id).first().size)
+        val ep = panels.saveEndpoint(
+            Endpoint("", breaker.id, room.id, EndpointKind.OUTLET, "North wall", 0, 0, Source.IMPORT),
+        )
+        panels.deleteBreaker(breaker.id)
+        assertNull(panels.getBreaker(breaker.id))
+        assertTrue(panels.observeBreakerRooms(breaker.id).first().isEmpty())
+        val remaining = panels.observeEndpointsForRoom(room.id).first()
+        assertEquals(listOf(ep.id), remaining.map { it.id })
+        assertNull(remaining.single().breakerId)
+    }
+
+    @Test
+    fun shutoffPhoto_storedAndCleanedUp() = runTest {
+        val home = homes.createHome("H")
+        val photo = storeFile()
+        val saved = shutoffs.save(
+            Shutoff("", home.id, ShutoffKind.WATER_MAIN, null, photo, "Turn clockwise", 0, 0, Source.IMPORT),
+        )
+        assertEquals(photo, shutoffs.observeShutoffs(home.id).first().single().photoPath)
+        val replacement = storeFile()
+        shutoffs.save(saved.copy(photoPath = replacement))
+        assertFalse(media.exists(photo))
+        shutoffs.delete(saved.id)
+        assertFalse(media.exists(replacement))
+        assertTrue(shutoffs.observeShutoffs(home.id).first().isEmpty())
+    }
+
+    @Test
+    fun equipment_saveUpdateDelete_cleansLabelPhoto() = runTest {
+        val home = homes.createHome("H")
+        val label = storeFile()
+        val saved = equipment.save(
+            Equipment(
+                id = "", homeId = home.id, category = EquipmentCategory.FURNACE, labelPhotoPath = label,
+                createdAt = 0, updatedAt = 0, source = Source.IMPORT,
+            ),
+        )
+        equipment.save(saved.copy(make = "Carrier"))
+        assertEquals("Carrier", equipment.get(saved.id)?.make)
+        assertTrue(media.exists(label))
+        equipment.delete(saved.id)
+        assertFalse(media.exists(label))
+        assertNull(equipment.get(saved.id))
+    }
+}
