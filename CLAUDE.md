@@ -14,13 +14,14 @@ You are building HomeRecord: two native Android apps (House Manual, Field Log) o
 | PROGRESS.md | Run log, newest at the bottom, one line per run: date, tasks done, test counts, commit | Builder appends |
 | qa/last-tested.txt | Commit SHA last tested by QA, or `none` | QA |
 | docs/decisions.md | Dated log of library, architecture, pricing and scope choices with reasons | Builder |
-| scripts/setup-android.sh | Fresh-container SDK setup | Nate; builder may fix bugs in it |
+| scripts/setup-android.sh | Fresh-container SDK setup; also pasted into the cloud environment with `SETUP_SOFT_FAIL=1` | Nate; builder may fix bugs in it |
 
 ## Stack and architecture
 
 - Kotlin, Jetpack Compose, Material 3, Navigation Compose, MVVM, Kotlin coroutines + Flow.
 - Gradle Kotlin DSL, version catalog at `gradle/libs.versions.toml`. Match the conventions of CircuitSiegeDualFront (plugins via `alias(libs.plugins...)`, `RepositoriesMode.FAIL_ON_PROJECT_REPOS`, google() + mavenCentral()).
-- minSdk 26, compileSdk 37, targetSdk 37. JDK 17. Java/Kotlin target 17.
+- minSdk 26, compileSdk 37, targetSdk 37. Build with JDK 17 or newer (the cloud VM ships OpenJDK 21). Java/Kotlin target 17.
+- SDK location: `ANDROID_HOME` (the cloud setup script installs to `/opt/android-sdk`). If Gradle reports "SDK location not found", run `source /etc/profile.d/android-env.sh` or `bash scripts/setup-android.sh`.
 - Modules:
   - `:core` — Android library. Domain model, Room database, DAOs, repositories, search engine, `.homerecord` bundle reader/writer, import planner, PDF row builders, pure logic. No Compose.
   - `:core-ui` — Android library. Material 3 theme, shared composables (photo tile, room picker, empty state), FileProvider helpers.
