@@ -8,6 +8,36 @@
     <string name="onboarding_custom_room">Add another room</string>
     <string name="onboarding_add">Add</string>
     <string name="onboarding_continue">Continue</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="home_search">Search breakers, rooms, equipment</string>
+    <string name="home_card_emergency">Emergency</string>
+    <string name="home_card_panel">Panel</string>
+    <string name="home_card_equipment">Equipment</string>
+    <string name="home_card_rooms">Rooms</string>
+    <string name="home_panel_none">Not set up yet</string>
+    <string name="home_panel_summary">%1$d slots · %2$d%% labeled</string>
+    <plurals name="home_shutoff_count"><item quantity="one">%d shutoff</item><item quantity="other">%d shutoffs</item></plurals>
+    <plurals name="home_equipment_count"><item quantity="one">%d item</item><item quantity="other">%d items</item></plurals>
+    <plurals name="home_room_count"><item quantity="one">%d room</item><item quantity="other">%d rooms</item></plurals>
+    <string name="rooms_title">Rooms</string>
+    <string name="rooms_add_hint">New room</string>
+    <string name="room_missing">This room no longer exists.</string>
+    <string name="room_name">Room name</string>
+    <string name="room_rename">Rename</string>
+    <string name="room_delete">Delete</string>
+    <string name="room_delete_title">Delete room?</string>
+    <string name="room_delete_body">Delete %1$s? Breaker links to this room are removed.</string>
+    <string name="room_breakers">Breakers feeding this room</string>
+    <string name="room_no_breakers">No breakers linked yet.</string>
+    <string name="room_endpoints">Outlets and fixtures</string>
+    <string name="room_no_endpoints">None recorded.</string>
+    <string name="room_equipment">Equipment</string>
+    <string name="room_no_equipment">No equipment in this room.</string>
+    <string name="room_shutoffs">Shutoffs</string>
+    <string name="room_no_shutoffs">No shutoffs in this room.</string>
+    <string name="placeholder_emergency">Emergency</string>
+    <string name="placeholder_equipment">Equipment</string>
     <string name="panel_placeholder">Panel</string>
     <string name="room_kitchen">Kitchen</string>
     <string name="room_living_room">Living Room</string>

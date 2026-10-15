@@ -42,6 +42,9 @@ class HomeRepository(
     fun observeRooms(homeId: String): Flow<List<Room>> =
         db.roomDao().observeForHome(homeId).map { list -> list.map { it.toDomain() } }
 
+    suspend fun getRooms(homeId: String): List<Room> =
+        db.roomDao().getAll().filter { it.homeId == homeId }.map { it.toDomain() }
+
     suspend fun getRoom(id: String): Room? = db.roomDao().get(id)?.toDomain()
 
     suspend fun addRoom(homeId: String, name: String, floor: String? = null): Room {
