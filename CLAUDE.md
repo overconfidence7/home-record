@@ -21,7 +21,7 @@ You are building HomeRecord: two native Android apps (House Manual, Field Log) o
 - Kotlin, Jetpack Compose, Material 3, Navigation Compose, MVVM, Kotlin coroutines + Flow.
 - Gradle Kotlin DSL, version catalog at `gradle/libs.versions.toml`. Match the conventions of CircuitSiegeDualFront (plugins via `alias(libs.plugins...)`, `RepositoriesMode.FAIL_ON_PROJECT_REPOS`, google() + mavenCentral()).
 - minSdk 26, compileSdk 37, targetSdk 37. Build with JDK 17 or newer (the cloud VM ships OpenJDK 21). Java/Kotlin target 17.
-- SDK location: `ANDROID_HOME` (the cloud setup script installs to `/opt/android-sdk`). If Gradle reports "SDK location not found", run `source /etc/profile.d/android-env.sh` or `bash scripts/setup-android.sh`.
+- SDK location: `ANDROID_HOME` (the cloud setup script installs to `/opt/android-sdk`); Gradle cache: `GRADLE_USER_HOME=/opt/gradle-home`. If Gradle reports "SDK location not found" or re-downloads everything, run `source /etc/profile.d/android-env.sh` or `bash scripts/setup-android.sh`.
 - Modules:
   - `:core` — Android library. Domain model, Room database, DAOs, repositories, search engine, `.homerecord` bundle reader/writer, import planner, PDF row builders, pure logic. No Compose.
   - `:core-ui` — Android library. Material 3 theme, shared composables (photo tile, room picker, empty state), FileProvider helpers.
@@ -58,7 +58,7 @@ If the exact versions above do not resolve together, pick the nearest set that d
 - Tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug`
 - Setup on a fresh container: `bash scripts/setup-android.sh`
-- In the cloud, Maven Central can answer 429 under parallel resolution: add `--max-workers=2` and retry once before treating a dependency failure as real.
+- In the cloud, Maven Central can answer 429 under parallel resolution. Defenses, in order: the environment snapshot carries a pre-warmed Gradle cache at `GRADLE_USER_HOME=/opt/gradle-home` (set by `scripts/setup-android.sh`; export it if the shell lacks it), `gradle.properties` raises Gradle's repository retry count and backoff, and if a build still fails on 429, wait 60 s and retry once with `--max-workers=1` before treating it as real. Never add mirrors or change `settings.gradle.kts` repositories for this.
 
 Run the tests before every commit. A task is done only when its acceptance criteria pass and the tests are green.
 

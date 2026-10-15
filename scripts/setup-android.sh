@@ -168,6 +168,14 @@ if [ ! -e "$ANDROID_HOME/platforms/${platform_base}" ]; then
 fi
 
 # ------------------------------------------------------------- environment
+# Gradle's download cache lives outside $HOME when root installs, so a non-root
+# session user shares it. The cloud snapshot keeps it between hourly runs.
+if [ -z "${GRADLE_USER_HOME:-}" ]; then
+  if [ "$(id -u)" -eq 0 ]; then GRADLE_USER_HOME=/opt/gradle-home; else GRADLE_USER_HOME="$HOME/.gradle"; fi
+fi
+export GRADLE_USER_HOME
+mkdir -p "$GRADLE_USER_HOME"
+
 log "Writing $ENV_FILE"
 mkdir -p "$(dirname "$ENV_FILE")"
 cat > "$ENV_FILE" <<EOF
@@ -175,6 +183,7 @@ cat > "$ENV_FILE" <<EOF
 export JAVA_HOME="$JAVA_HOME"
 export ANDROID_HOME="$ANDROID_HOME"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export GRADLE_USER_HOME="$GRADLE_USER_HOME"
 case ":\$PATH:" in
   *":\$ANDROID_HOME/platform-tools:"*) ;;
   *) export PATH="\$JAVA_HOME/bin:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:\$PATH" ;;
@@ -198,5 +207,29 @@ else
   log "No Gradle project at $PROJECT_DIR; skipping local.properties (Gradle will use ANDROID_HOME)"
 fi
 
-log "Done. ANDROID_HOME=$ANDROID_HOME  JAVA_HOME=$JAVA_HOME"
+# ------------------------------------------------------ Gradle cache warm-up
+# Hourly cloud runs start from the environment snapshot. Pre-downloading the
+# wrapper, plugins and dependency set here means a run downloads only what is
+# new, which keeps Maven Central's rate limiting (HTTP 429) out of the builder.
+# Capped so the whole script stays inside the snapshot time budget; a partial
+# warm-up still leaves every finished download in the cache.
+# Set SETUP_WARM_GRADLE=0 to skip, WARM_SECONDS to change the cap.
+if [ "${SETUP_WARM_GRADLE:-1}" != "0" ] && [ -x "$PROJECT_DIR/gradlew" ]; then
+  warm_cap="${WARM_SECONDS:-150}"
+  log "Warming Gradle cache in $GRADLE_USER_HOME (cap ${warm_cap}s; log: /tmp/gradle-warm.log)"
+  targets=()
+  for m in $(sed -n 's/^include(\(.*\))/\1/p' "$PROJECT_DIR/settings.gradle.kts" | tr -d '" ' | tr ',' ' '); do
+    targets+=("${m}:dependencies")
+  done
+  [ "${#targets[@]}" -gt 0 ] || targets=(dependencies)
+  if ( cd "$PROJECT_DIR" && timeout "$warm_cap" ./gradlew --no-daemon --max-workers=1 -q \
+        "${targets[@]}" >/tmp/gradle-warm.log 2>&1 ); then
+    log "Gradle cache warm"
+  else
+    log "Gradle warm-up stopped early (status $?); partial cache kept"
+  fi
+  [ "$(id -u)" -eq 0 ] && chmod -R a+rwX "$GRADLE_USER_HOME" 2>/dev/null || true
+fi
+
+log "Done. ANDROID_HOME=$ANDROID_HOME  JAVA_HOME=$JAVA_HOME  GRADLE_USER_HOME=$GRADLE_USER_HOME"
 echo "Run:  source \"$ENV_FILE\"   before using gradlew in this shell."

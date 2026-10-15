@@ -41,3 +41,7 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 - Added navigation-compose 2.9.6 (approved list). Start route is resolved once by `StartDestination` (no Home → onboarding, else hub); nav host renders nothing until it resolves.
 - Home + rooms are created in one Room transaction (`HomeRepository.createHomeWithRooms`); room names for quick-add chips are resolved from strings.xml in the nav host and passed to the ViewModel, so the stored name matches the UI language.
 - Duplicate custom rooms (case-insensitive) are ignored. HM-Home and HM-Panel are placeholders until T05/T06.
+
+## 2026-10-15 — Maven Central 429s
+- Cause: every hourly run starts from a snapshot with an empty Gradle cache and re-downloads the whole dependency set through a shared proxy, which rate-limits Maven Central.
+- Fix: `scripts/setup-android.sh` now warms the Gradle cache (`:module:dependencies` for every module, capped at 150 s) into `GRADLE_USER_HOME=/opt/gradle-home` so it is part of the environment snapshot; `gradle.properties` raises Gradle's repository retry count (8) and initial backoff (3 s). Builder falls back to one `--max-workers=1` retry after 60 s.
