@@ -45,3 +45,7 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 ## 2026-10-15 — Maven Central 429s
 - Cause: every hourly run starts from a snapshot with an empty Gradle cache and re-downloads the whole dependency set through a shared proxy, which rate-limits Maven Central.
 - Fix: `scripts/setup-android.sh` now warms the Gradle cache (`:module:dependencies` for every module, capped at 150 s) into `GRADLE_USER_HOME=/opt/gradle-home` so it is part of the environment snapshot; `gradle.properties` raises Gradle's repository retry count (8) and initial backoff (3 s). Builder falls back to one `--max-workers=1` retry after 60 s.
+
+## 2026-10-15 (evening) — Maven mirror, SDK minor versions
+- The Gradle cache warm-up cannot fit the cloud snapshot's five-minute budget next to the SDK install, and the snapshot was never being built, so every run paid a cold download through a proxy that rate-limits Maven Central. Replaced with Google's Maven Central mirror (`maven-central.storage-download.googleapis.com`, on the default allowlist via `*.googleapis.com`) listed before `mavenCentral()` in `settings.gradle.kts`, plus `robolectric.dependency.repo.url` pointed at the same mirror for Robolectric's android-all jars. Warm-up stays in the script as opt-in (`SETUP_WARM_GRADLE=1`).
+- `scripts/setup-android.sh` now prefers `platforms;android-37` then `android-37.0` and repoints a stale `android-37` symlink from a later minor (37.1/37.2) back to 37.0; Gradle rejects the later minors for `compileSdk = 37`.

@@ -137,9 +137,16 @@ for d in "$ANDROID_HOME/platforms/${platform_base}" "$ANDROID_HOME/platforms/${p
 done
 platform_pkg=""
 if [ -z "$platform_installed" ]; then
+  # Prefer the plain name, then the .0 minor release (what compileSdk=37 expects);
+  # later minors (37.1, 37.2) are for compileSdkMinor and Gradle rejects them here.
   listed="$("$SDKMANAGER" --sdk_root="$ANDROID_HOME" --list 2>/dev/null \
-    | grep -oE "platforms;${platform_base}(\.[0-9]+)?" | sort -uV | tail -n 1 || true)"
-  platform_pkg="${listed:-platforms;${ANDROID_PLATFORM}}"
+    | grep -oE "platforms;${platform_base}(\.[0-9]+)?" | sort -uV || true)"
+  platform_pkg=""
+  for cand in "platforms;${platform_base}" "platforms;${platform_base}.0"; do
+    if printf '%s\n' "$listed" | grep -qx "$cand"; then platform_pkg="$cand"; break; fi
+  done
+  [ -n "$platform_pkg" ] || platform_pkg="$(printf '%s\n' "$listed" | head -n 1)"
+  [ -n "$platform_pkg" ] || platform_pkg="platforms;${ANDROID_PLATFORM}"
   log "Platform package resolved to $platform_pkg"
 fi
 
@@ -162,9 +169,16 @@ fi
 
 # AGP 8.x looks for platforms/android-37; give it that name if only android-37.N exists.
 if [ ! -e "$ANDROID_HOME/platforms/${platform_base}" ]; then
-  for d in "$ANDROID_HOME/platforms/${platform_base}".*; do
+  for d in "$ANDROID_HOME/platforms/${platform_base}.0" "$ANDROID_HOME/platforms/${platform_base}".*; do
     [ -d "$d" ] && ln -s "$(basename "$d")" "$ANDROID_HOME/platforms/${platform_base}" && break
   done
+fi
+# If an earlier run linked android-37 to a later minor (37.1, 37.2), repoint it to 37.0.
+if [ -L "$ANDROID_HOME/platforms/${platform_base}" ] && [ -d "$ANDROID_HOME/platforms/${platform_base}.0" ]; then
+  case "$(readlink "$ANDROID_HOME/platforms/${platform_base}")" in
+    "${platform_base}.0") ;;
+    *) ln -sfn "${platform_base}.0" "$ANDROID_HOME/platforms/${platform_base}" ;;
+  esac
 fi
 
 # ------------------------------------------------------------- environment
@@ -213,8 +227,9 @@ fi
 # new, which keeps Maven Central's rate limiting (HTTP 429) out of the builder.
 # Capped so the whole script stays inside the snapshot time budget; a partial
 # warm-up still leaves every finished download in the cache.
-# Set SETUP_WARM_GRADLE=0 to skip, WARM_SECONDS to change the cap.
-if [ "${SETUP_WARM_GRADLE:-1}" != "0" ] && [ -x "$PROJECT_DIR/gradlew" ]; then
+# Opt-in with SETUP_WARM_GRADLE=1 (it does not fit the cloud snapshot budget next to
+# the SDK install, so the cloud relies on the Maven mirror instead); WARM_SECONDS caps it.
+if [ "${SETUP_WARM_GRADLE:-0}" = "1" ] && [ -x "$PROJECT_DIR/gradlew" ]; then
   warm_cap="${WARM_SECONDS:-150}"
   log "Warming Gradle cache in $GRADLE_USER_HOME (cap ${warm_cap}s; log: /tmp/gradle-warm.log)"
   targets=()

@@ -58,7 +58,8 @@ If the exact versions above do not resolve together, pick the nearest set that d
 - Tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug`
 - Setup on a fresh container: `bash scripts/setup-android.sh`
-- In the cloud, Maven Central can answer 429 under parallel resolution. Defenses, in order: the environment snapshot carries a pre-warmed Gradle cache at `GRADLE_USER_HOME=/opt/gradle-home` (set by `scripts/setup-android.sh`; export it if the shell lacks it), `gradle.properties` raises Gradle's repository retry count and backoff, and if a build still fails on 429, wait 60 s and retry once with `--max-workers=1` before treating it as real. Never add mirrors or change `settings.gradle.kts` repositories for this.
+- Maven Central through the cloud proxy is unreliable (429 and false 404). `settings.gradle.kts` therefore lists Google's Maven Central mirror (`maven-central.storage-download.googleapis.com`) before `mavenCentral()`, and the root `build.gradle.kts` points Robolectric's own downloader at the same mirror. Keep both; do not remove `mavenCentral()` (fallback for artifacts the mirror has not synced). If a build still fails with 429/404 from `repo.maven.apache.org`, the artifact is missing from the mirror: wait 60 s, retry once with `--max-workers=1`, then push to `wip/` and stop. `GRADLE_USER_HOME=/opt/gradle-home` is set by `scripts/setup-android.sh`; export it if the shell lacks it.
+- SDK platform naming: Google publishes minor SDK releases (`platforms;android-37.0`, `37.1`, `37.2`). `compileSdk = 37` needs `platforms/android-37` to be (or link to) `android-37.0`; `scripts/setup-android.sh` handles this. Never point it at `37.1`/`37.2`.
 
 Run the tests before every commit. A task is done only when its acceptance criteria pass and the tests are green.
 
