@@ -54,4 +54,24 @@
     <string name="room_office">Office</string>
     <string name="room_hallway">Hallway</string>
     <string name="room_exterior">Exterior</string>
+    <string name="shutoff_water_main">Water main</string>
+    <string name="shutoff_gas_main">Gas main</string>
+    <string name="shutoff_electrical_main">Electrical main</string>
+    <string name="shutoff_hvac_disconnect">HVAC disconnect</string>
+    <string name="shutoff_fixture_valve">Fixture valve</string>
+    <string name="shutoff_sump">Sump</string>
+    <string name="shutoff_cleanout">Cleanout</string>
+    <string name="shutoff_other">Other shutoff</string>
+    <string name="equip_water_heater">Water heater</string>
+    <string name="equip_furnace">Furnace</string>
+    <string name="equip_ac">Air conditioner</string>
+    <string name="equip_heat_pump">Heat pump</string>
+    <string name="equip_range">Range</string>
+    <string name="equip_refrigerator">Refrigerator</string>
+    <string name="equip_dishwasher">Dishwasher</string>
+    <string name="equip_washer">Washer</string>
+    <string name="equip_dryer">Dryer</string>
+    <string name="equip_sump_pump">Sump pump</string>
+    <string name="equip_water_softener">Water softener</string>
+    <string name="equip_other">Other equipment</string>
 </resources>

@@ -103,13 +103,13 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
         Section(stringResource(R.string.room_equipment), stringResource(R.string.room_no_equipment), state.equipment.isEmpty()) {
             state.equipment.forEach { e ->
                 Text(
-                    listOfNotNull(e.make, e.model).joinToString(" ").ifBlank { e.category.name }.trim(),
+                    listOfNotNull(e.make, e.model).joinToString(" ").ifBlank { stringResource(e.category.labelRes()) }.trim(),
                     Modifier.heightIn(min = 32.dp).testTag("room_equipment"),
                 )
             }
         }
         Section(stringResource(R.string.room_shutoffs), stringResource(R.string.room_no_shutoffs), state.shutoffs.isEmpty()) {
-            state.shutoffs.forEach { Text(it.kind.name, Modifier.heightIn(min = 32.dp).testTag("room_shutoff")) }
+            state.shutoffs.forEach { Text(stringResource(it.kind.labelRes()), Modifier.heightIn(min = 32.dp).testTag("room_shutoff")) }
         }
     }
 
