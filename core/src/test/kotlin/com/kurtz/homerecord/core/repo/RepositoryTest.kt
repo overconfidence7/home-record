@@ -120,6 +120,29 @@ class RepositoryTest {
     }
 
     @Test
+    fun makeTandem_splitsOneSlotIntoTwoBreakers() = runTest {
+        val home = homes.createHome("H")
+        val panel = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val b = panels.saveBreaker(Breaker("", panel.id, listOf(4), amps = 15, label = "Hall", createdAt = 0, updatedAt = 0, source = Source.IMPORT))
+        val second = panels.makeTandem(b.id)
+        assertEquals(1, second?.tandemIndex)
+        assertEquals(listOf(4), second?.slots)
+        assertEquals(0, panels.getBreaker(b.id)?.tandemIndex)
+        assertNull(panels.makeTandem(b.id))
+    }
+
+    @Test
+    fun setSlotCount_refusesToDropOccupiedSlots() = runTest {
+        val home = homes.createHome("H")
+        val panel = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        panels.saveBreaker(Breaker("", panel.id, listOf(12, 14), poles = 2, label = "Dryer", createdAt = 0, updatedAt = 0, source = Source.IMPORT))
+        assertEquals(com.kurtz.homerecord.core.logic.ShrinkCheck.Blocked(14), panels.setSlotCount(panel.id, 13))
+        assertEquals(20, panels.getPanel(panel.id)?.slotCount)
+        assertEquals(com.kurtz.homerecord.core.logic.ShrinkCheck.Ok, panels.setSlotCount(panel.id, 14))
+        assertEquals(14, panels.getPanel(panel.id)?.slotCount)
+    }
+
+    @Test
     fun shutoffPhoto_storedAndCleanedUp() = runTest {
         val home = homes.createHome("H")
         val photo = storeFile()

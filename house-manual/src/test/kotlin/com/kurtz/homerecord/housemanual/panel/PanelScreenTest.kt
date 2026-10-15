@@ -48,7 +48,7 @@ class PanelScreenTest {
         }
         rule.onNodeWithText("Kitchen outlets · 20A").assertIsDisplayed()
         rule.onNodeWithTag("slot_1").performClick()
-        assertEquals(listOf<PanelEvent>(PanelEvent.SlotTapped(1)), events)
+        assertEquals(listOf<PanelEvent>(PanelEvent.OpenBreaker(1, null)), events)
     }
 
     @Test fun `take photo button reports event`() {

@@ -17,6 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kurtz.homerecord.housemanual.breaker.BreakerRoute
+import com.kurtz.homerecord.housemanual.breaker.BreakerViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
 import com.kurtz.homerecord.housemanual.panel.PanelRoute
@@ -88,7 +90,27 @@ fun HomeRecordNavHost(container: AppContainer) {
             val vm: PanelViewModel = viewModel(
                 factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, resources.getString(R.string.panel_title)) } },
             )
-            PanelRoute(vm, container.mediaStore, onSlot = { /* HM-Breaker arrives in T07 */ })
+            PanelRoute(vm, container.mediaStore, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) })
+        }
+        composable(
+            Routes.BREAKER,
+            arguments = listOf(
+                navArgument("panelId") { type = NavType.StringType },
+                navArgument("slot") { type = NavType.IntType },
+                navArgument("breakerId") { type = NavType.StringType; defaultValue = "" },
+                navArgument("tandem") { type = NavType.IntType; defaultValue = -1 },
+            ),
+        ) { entry ->
+            val panelId = entry.arguments?.getString("panelId").orEmpty()
+            val slot = entry.arguments?.getInt("slot") ?: 1
+            val breakerId = entry.arguments?.getString("breakerId")?.takeIf { it.isNotEmpty() }
+            val tandem = entry.arguments?.getInt("tandem")?.takeIf { it >= 0 }
+            val vm: BreakerViewModel = viewModel(
+                factory = remember(panelId, slot, breakerId, tandem) {
+                    simpleFactory { BreakerViewModel(panelId, slot, breakerId, tandem, container.panelRepository) }
+                },
+            )
+            BreakerRoute(vm, onDone = { nav.popBackStack() })
         }
     }
 }

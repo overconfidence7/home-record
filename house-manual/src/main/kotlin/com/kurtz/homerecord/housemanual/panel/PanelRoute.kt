@@ -15,7 +15,7 @@ import com.kurtz.homerecord.core.media.MediaFileStore
 
 /** Wires [PanelViewModel] and the system camera (TakePicture) to [PanelScreen]. */
 @Composable
-fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, onSlot: (Int) -> Unit) {
+fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, onOpenBreaker: (panelId: String, event: PanelEvent.OpenBreaker) -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     // Survives process death while the camera app is in front.
@@ -38,7 +38,7 @@ fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, onSlot: (Int) -
                 pending = path
                 launcher.launch(FileProvider.getUriForFile(context, authority(context), file))
             }
-            is PanelEvent.SlotTapped -> onSlot(event.slot)
+            is PanelEvent.OpenBreaker -> state.panel?.let { onOpenBreaker(it.id, event) } ?: Unit
             else -> viewModel.onEvent(event)
         }
     })

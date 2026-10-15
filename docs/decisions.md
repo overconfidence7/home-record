@@ -49,3 +49,6 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 ## 2026-10-15 (evening) — Maven mirror, SDK minor versions
 - The Gradle cache warm-up cannot fit the cloud snapshot's five-minute budget next to the SDK install, and the snapshot was never being built, so every run paid a cold download through a proxy that rate-limits Maven Central. Replaced with Google's Maven Central mirror (`maven-central.storage-download.googleapis.com`, on the default allowlist via `*.googleapis.com`) listed before `mavenCentral()` in `settings.gradle.kts`, plus `robolectric.dependency.repo.url` pointed at the same mirror for Robolectric's android-all jars. Warm-up stays in the script as opt-in (`SETUP_WARM_GRADLE=1`).
 - `scripts/setup-android.sh` now prefers `platforms;android-37` then `android-37.0` and repoints a stale `android-37` symlink from a later minor (37.1/37.2) back to 37.0; Gradle rejects the later minors for `compileSdk = 37`.
+
+## 2026-10-15 — T07 slot rendering
+Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with slot N)") instead of a spanning cell, since the LazyColumn grid is row-based. Tandem needs an existing one-pole breaker; the new half starts with a blank label and shows as Empty until filled.

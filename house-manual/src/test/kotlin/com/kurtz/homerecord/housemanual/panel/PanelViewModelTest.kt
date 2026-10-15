@@ -116,4 +116,36 @@ class PanelViewModelTest {
         assertTrue(media.exists(second))
         assertNotNull(vm.state.value.panel)
     }
+
+    private suspend fun panelWithBreaker(slots: List<Int>, poles: Int = 1): Pair<PanelViewModel, com.kurtz.homerecord.core.model.Breaker> {
+        homes.createHome("H")
+        val vm = vm()
+        vm.state.first { it.loaded }
+        vm.onEvent(PanelEvent.SavePanel)
+        val panel = vm.state.first { it.panel != null }.panel!!
+        val b = panels.saveBreaker(
+            com.kurtz.homerecord.core.model.Breaker("", panel.id, slots, poles, label = "Oven", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL),
+        )
+        vm.state.first { it.breakers.isNotEmpty() }
+        return vm to b
+    }
+
+    @Test fun `AC-10 long press splits a breaker slot into two tandem halves`() = runTest {
+        val (vm, b) = panelWithBreaker(listOf(3))
+        vm.onEvent(PanelEvent.SlotLongPressed(3))
+        val state = vm.state.first { it.breakers.size == 2 }
+        assertEquals(listOf(0, 1), state.tandemAt(3)?.map { it?.tandemIndex })
+        assertEquals(b.id, state.tandemAt(3)?.get(0)?.id)
+    }
+
+    @Test fun `AC-11 shrinking below an occupied slot is refused with the highest slot`() = runTest {
+        val (vm, _) = panelWithBreaker(listOf(12, 14), poles = 2)
+        vm.onEvent(PanelEvent.SlotEditChanged("13"))
+        vm.onEvent(PanelEvent.ApplySlotCount)
+        assertEquals(14, vm.state.first { it.shrinkBlockedAt != null }.shrinkBlockedAt)
+        assertEquals(40, vm.state.value.panel?.slotCount)
+        vm.onEvent(PanelEvent.SlotEditChanged("20"))
+        vm.onEvent(PanelEvent.ApplySlotCount)
+        assertEquals(20, vm.state.first { it.panel?.slotCount == 20 }.panel?.slotCount)
+    }
 }

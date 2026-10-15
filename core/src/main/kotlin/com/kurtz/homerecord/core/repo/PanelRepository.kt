@@ -1,9 +1,12 @@
 package com.kurtz.homerecord.core.repo
 
+import androidx.room.withTransaction
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.media.MediaFileStore
+import com.kurtz.homerecord.core.logic.ShrinkCheck
+import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
 import com.kurtz.homerecord.core.model.Endpoint
@@ -14,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -85,6 +89,23 @@ class PanelRepository(
         }
         db.breakerRoomDao().deleteForBreaker(id)
         db.breakerDao().delete(breaker)
+    }
+
+    /** AC-10: turns a one-pole breaker into tandem half 0 and adds an empty half 1 in the same slot. */
+    suspend fun makeTandem(breakerId: String, emptyLabel: String = ""): Breaker? = db.withTransaction {
+        val first = getBreaker(breakerId) ?: return@withTransaction null
+        if (first.poles != 1 || first.tandemIndex != null) return@withTransaction null
+        saveBreaker(first.copy(tandemIndex = 0))
+        saveBreaker(first.copy(id = "", label = emptyLabel, amps = null, type = com.kurtz.homerecord.core.model.BreakerType.STANDARD,
+            confidence = com.kurtz.homerecord.core.model.Confidence.UNKNOWN, tandemIndex = 1))
+    }
+
+    /** AC-11: updates the slot count; false (and no change) if occupied slots would be dropped. */
+    suspend fun setSlotCount(panelId: String, slotCount: Int): ShrinkCheck = db.withTransaction {
+        val panel = getPanel(panelId) ?: return@withTransaction ShrinkCheck.Ok
+        val check = SlotOccupancy.checkShrink(slotCount, observeBreakers(panelId).first())
+        if (check is ShrinkCheck.Ok) updatePanel(panel.copy(slotCount = slotCount))
+        check
     }
 
     /** Breakers of every panel in the home. */

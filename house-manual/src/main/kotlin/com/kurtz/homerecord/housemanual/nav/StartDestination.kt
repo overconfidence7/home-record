@@ -12,7 +12,12 @@ object Routes {
     const val ROOMS = "rooms"
     const val ROOM = "room/{roomId}"
 
+    const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
+
     fun room(id: String) = "room/$id"
+
+    fun breaker(panelId: String, slot: Int, breakerId: String?, tandemIndex: Int?) =
+        "breaker/$panelId/$slot?breakerId=${breakerId.orEmpty()}&tandem=${tandemIndex ?: -1}"
 }
 
 /** AC-1 / AC-4: no Home yet means onboarding, otherwise the hub. */

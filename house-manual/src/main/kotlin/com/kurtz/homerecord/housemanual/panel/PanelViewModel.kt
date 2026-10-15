@@ -2,7 +2,9 @@ package com.kurtz.homerecord.housemanual.panel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.logic.ShrinkCheck
 import com.kurtz.homerecord.core.logic.SlotCountRule
+import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.PanelLayout
@@ -28,7 +30,12 @@ class PanelViewModel(
     private val panels: PanelRepository,
     private val defaultPanelName: String,
 ) : ViewModel() {
-    private data class Form(val slotCount: String = SlotCountRule.DEFAULT.toString(), val layout: PanelLayout = PanelLayout.NA_NUMBERED)
+    private data class Form(
+        val slotCount: String = SlotCountRule.DEFAULT.toString(),
+        val layout: PanelLayout = PanelLayout.NA_NUMBERED,
+        val slotEdit: String? = null,
+        val blockedAt: Int? = null,
+    )
 
     private val form = MutableStateFlow(Form())
 
@@ -45,7 +52,7 @@ class PanelViewModel(
     }
 
     val state: StateFlow<PanelUiState> = combine(panelAndBreakers, form) { (loaded, panel, breakers), f ->
-        PanelUiState(loaded, panel, breakers, f.slotCount, f.layout)
+        PanelUiState(loaded, panel, breakers, f.slotCount, f.layout, f.slotEdit, f.blockedAt)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
 
     fun onEvent(event: PanelEvent) {
@@ -53,7 +60,10 @@ class PanelViewModel(
             is PanelEvent.SlotCountChanged -> form.update { it.copy(slotCount = event.value) }
             is PanelEvent.LayoutChanged -> form.update { it.copy(layout = event.layout) }
             PanelEvent.SavePanel -> savePanel()
-            PanelEvent.TakePhoto, is PanelEvent.SlotTapped -> Unit // handled by the route
+            is PanelEvent.SlotEditChanged -> form.update { it.copy(slotEdit = event.value, blockedAt = null) }
+            PanelEvent.ApplySlotCount -> applySlotCount()
+            is PanelEvent.SlotLongPressed -> makeTandem(event.slot)
+            PanelEvent.TakePhoto, is PanelEvent.OpenBreaker -> Unit // handled by the route
         }
     }
 
@@ -63,6 +73,23 @@ class PanelViewModel(
             val panel = state.value.panel ?: return@launch
             panels.setPanelPhoto(panel.id, relativePath)
         }
+    }
+
+    private fun applySlotCount() {
+        val panel = state.value.panel ?: return
+        val count = SlotCountRule.parse(state.value.slotEditInput ?: return) ?: return
+        viewModelScope.launch {
+            when (val result = panels.setSlotCount(panel.id, count)) {
+                ShrinkCheck.Ok -> form.update { it.copy(slotEdit = null, blockedAt = null) }
+                is ShrinkCheck.Blocked -> form.update { it.copy(blockedAt = result.highestOccupied) }
+            }
+        }
+    }
+
+    /** AC-10: long-press on a lone one-pole breaker splits its slot into a tandem pair. */
+    private fun makeTandem(slot: Int) {
+        val candidate = SlotOccupancy.tandemCandidate(slot, state.value.breakers) ?: return
+        viewModelScope.launch { panels.makeTandem(candidate.id) }
     }
 
     private fun savePanel() {

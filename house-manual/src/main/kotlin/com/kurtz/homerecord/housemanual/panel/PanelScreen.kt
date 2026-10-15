@@ -3,7 +3,9 @@ package com.kurtz.homerecord.housemanual.panel
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.logic.PanelLayoutCalculator
+import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
@@ -69,6 +72,7 @@ fun PanelScreen(
             )
         }
         item { PanelPhoto(photoFile, hasPhoto = panel.photoPath != null, onEvent) }
+        item { SlotCountEditor(state, panel.slotCount, onEvent) }
         items(rows, key = { it.first() }) { slots ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 slots.forEach { slot -> SlotCell(slot, state, onEvent, Modifier.weight(1f)) }
@@ -76,6 +80,27 @@ fun PanelScreen(
             }
         }
         item { Box(Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+private fun SlotCountEditor(state: PanelUiState, current: Int, onEvent: (PanelEvent) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.slotEditInput ?: current.toString(),
+            onValueChange = { onEvent(PanelEvent.SlotEditChanged(it)) },
+            label = { Text(stringResource(R.string.panel_slot_count)) },
+            isError = !state.canApplySlotCount || state.shrinkBlockedAt != null,
+            supportingText = state.shrinkBlockedAt?.let { { Text(stringResource(R.string.panel_slot_count_blocked, it), modifier = Modifier.testTag("panel_shrink_error")) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().testTag("panel_slot_edit"),
+        )
+        OutlinedButton(
+            onClick = { onEvent(PanelEvent.ApplySlotCount) },
+            enabled = state.slotEditInput != null && state.slotEditInput != current.toString() && state.canApplySlotCount,
+            modifier = Modifier.heightIn(min = 48.dp).testTag("panel_slot_apply"),
+        ) { Text(stringResource(R.string.panel_slot_count_apply)) }
+        Text(stringResource(R.string.panel_make_tandem), style = MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -104,21 +129,50 @@ private fun PanelPhoto(photoFile: File?, hasPhoto: Boolean, onEvent: (PanelEvent
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Unit, modifier: Modifier) {
-    val breaker = state.breakerAt(slot)
+    val tandem = state.tandemAt(slot)
     OutlinedCard(
-        modifier = modifier.heightIn(min = 56.dp).testTag("slot_$slot").clickable { onEvent(PanelEvent.SlotTapped(slot)) },
+        modifier = modifier.heightIn(min = 56.dp).testTag("slot_$slot"),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(slot.toString(), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 12.dp))
-            if (breaker == null) {
-                Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
-                Text(breaker.label + amps, style = MaterialTheme.typography.bodyMedium)
+        if (tandem != null) {
+            tandem.forEachIndexed { index, half ->
+                val suffix = if (index == 0) "a" else "b"
+                SlotLine(
+                    "$slot $suffix", half,
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("slot_${slot}_$suffix")
+                        .clickable { onEvent(PanelEvent.OpenBreaker(slot, half?.id, index)) },
+                )
             }
+        } else {
+            val breaker = state.breakerAt(slot)
+            SlotLine(
+                slot.toString(), breaker,
+                Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                    .combinedClickable(
+                        onClick = { onEvent(PanelEvent.OpenBreaker(slot, breaker?.id)) },
+                        onLongClick = { onEvent(PanelEvent.SlotLongPressed(slot)) },
+                    ),
+                continuedFrom = breaker?.takeIf { it.poles == 2 && slot != it.slots.min() }?.slots?.min(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, continuedFrom: Int? = null) {
+    Row(modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(number, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 12.dp))
+        if (breaker == null) {
+            Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else if (breaker.label.isBlank()) {
+            Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
+            val text = if (continuedFrom != null) stringResource(R.string.panel_two_pole_continued, continuedFrom) + " · " + breaker.label else breaker.label + amps
+            Text(text, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

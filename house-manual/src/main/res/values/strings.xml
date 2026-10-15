@@ -83,4 +83,26 @@
     <string name="equip_sump_pump">Sump pump</string>
     <string name="equip_water_softener">Water softener</string>
     <string name="equip_other">Other equipment</string>
+    <string name="breaker_title">Slot %1$d</string>
+    <string name="breaker_tandem_half">Tandem breaker, half %1$s</string>
+    <string name="breaker_label">Label</string>
+    <string name="breaker_amps">Amps (optional)</string>
+    <string name="breaker_poles">Poles</string>
+    <string name="breaker_type">Type</string>
+    <string name="breaker_type_standard">Standard</string>
+    <string name="breaker_type_gfci">GFCI</string>
+    <string name="breaker_type_afci">AFCI</string>
+    <string name="breaker_type_dual">Dual-function</string>
+    <string name="breaker_confidence">Confidence</string>
+    <string name="confidence_confirmed">Confirmed</string>
+    <string name="confidence_likely">Likely</string>
+    <string name="confidence_unknown">Unknown</string>
+    <string name="breaker_error_occupied">Slot %1$d is already taken. Free it or choose one pole.</string>
+    <string name="breaker_error_range">A two-pole breaker here would run past the last slot.</string>
+    <string name="breaker_delete_title">Delete breaker?</string>
+    <string name="breaker_delete_body">Delete %1$s? Its outlets and lights stay in the house, just unlinked.</string>
+    <string name="panel_make_tandem">Long-press a breaker to split its slot into a tandem pair.</string>
+    <string name="panel_slot_count_apply">Update slot count</string>
+    <string name="panel_slot_count_blocked">Can\'t shrink: slot %1$d is in use.</string>
+    <string name="panel_two_pole_continued">Two-pole (with slot %1$d)</string>
 </resources>
