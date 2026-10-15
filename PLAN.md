@@ -12,7 +12,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T05: HM-Home hub: search field, Panel/Emergency/Equipment/Rooms cards with live counts; HM-Rooms and HM-Room (rename, delete) screens. (acceptance: AC-21 room lists for equipment/shutoffs, AC-28 card)
 - [x] R1: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
   - R1 notes: fixed raw enum names shown in HM-Room (shutoff kind, equipment category) -> strings.xml labels. No other spec drift found for AC-1..4, AC-20, AC-21, AC-28. HM-Home overflow→Settings deferred to T34 (no Settings screen yet).
-- [ ] T06: Panel setup and slot grid: `PanelLayoutCalculator` (slot → row/column for NA_NUMBERED and DIN), HM-Panel empty state with slot count/layout, grid rendering, panel photo capture via `TakePicture`. (acceptance: AC-5, AC-6, AC-7)
+- [x] T06: Panel setup and slot grid: `PanelLayoutCalculator` (slot → row/column for NA_NUMBERED and DIN), HM-Panel empty state with slot count/layout, grid rendering, panel photo capture via `TakePicture`. (acceptance: AC-5, AC-6, AC-7)
 - [ ] T07: HM-Breaker editor: label, amps, poles, type, confidence; `SlotOccupancy` rules for two-pole and tandem; slot-count shrink guard; delete detaches endpoints. (acceptance: AC-8, AC-9, AC-10, AC-11, AC-12)
 - [ ] T08: Breaker links: room chips, endpoint add/remove on HM-Breaker, confidence dots on the grid. (acceptance: AC-13, AC-14, AC-15)
 - [ ] T09: `SearchEngine` (token match across breakers, endpoints, rooms, equipment, shutoffs), HM-Search results, highlight-and-scroll on HM-Panel, HM-Room breaker list with confidence. (acceptance: AC-17, AC-18, AC-19, AC-20)

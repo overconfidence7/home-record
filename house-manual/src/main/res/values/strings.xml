@@ -38,7 +38,16 @@
     <string name="room_no_shutoffs">No shutoffs in this room.</string>
     <string name="placeholder_emergency">Emergency</string>
     <string name="placeholder_equipment">Equipment</string>
-    <string name="panel_placeholder">Panel</string>
+    <string name="panel_title">Panel</string>
+    <string name="panel_setup_title">Set up your panel</string>
+    <string name="panel_slot_count">Number of slots</string>
+    <string name="panel_layout">Layout</string>
+    <string name="panel_layout_na">North American (two columns)</string>
+    <string name="panel_layout_din">DIN rail (one column)</string>
+    <string name="panel_take_photo">Take panel photo</string>
+    <string name="panel_replace_photo">Replace panel photo</string>
+    <string name="panel_photo_description">Photo of the breaker panel</string>
+    <string name="panel_slot_empty">Empty</string>
     <string name="room_kitchen">Kitchen</string>
     <string name="room_living_room">Living Room</string>
     <string name="room_dining_room">Dining Room</string>

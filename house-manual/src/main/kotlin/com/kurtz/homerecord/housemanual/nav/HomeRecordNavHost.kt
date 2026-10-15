@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
+import com.kurtz.homerecord.housemanual.panel.PanelRoute
+import com.kurtz.homerecord.housemanual.panel.PanelViewModel
 import com.kurtz.homerecord.housemanual.rooms.RoomRoute
 import com.kurtz.homerecord.housemanual.rooms.RoomViewModel
 import com.kurtz.homerecord.housemanual.rooms.RoomsRoute
@@ -79,10 +81,15 @@ fun HomeRecordNavHost(container: AppContainer) {
             )
             RoomRoute(vm, onDeleted = { nav.popBackStack() })
         }
-        // Placeholders until T06 (panel), T11/T12 (shutoffs, emergency) and equipment land.
+        // Placeholders until T11/T12 (shutoffs, emergency) and equipment land.
         composable(Routes.EMERGENCY) { CenteredText(stringResource(R.string.placeholder_emergency), tag = "emergency_screen") }
         composable(Routes.EQUIPMENT) { CenteredText(stringResource(R.string.placeholder_equipment), tag = "equipment_screen") }
-        composable(Routes.PANEL) { CenteredText(stringResource(R.string.panel_placeholder), tag = "panel_screen") }
+        composable(Routes.PANEL) {
+            val vm: PanelViewModel = viewModel(
+                factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, resources.getString(R.string.panel_title)) } },
+            )
+            PanelRoute(vm, container.mediaStore, onSlot = { /* HM-Breaker arrives in T07 */ })
+        }
     }
 }
 
