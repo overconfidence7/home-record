@@ -17,3 +17,7 @@ The builder fixes findings (Critical and Major before starting new tasks) and ma
 Findings that are really spec changes go to BLOCKERS.md under "Decisions to confirm" instead.
 
 ---
+
+## QA 2026-10-15 (commit 3c9f751)
+
+Tested: AC-1, AC-2, AC-3, AC-4, rotation, back button, dark mode, long text input. Passed: 4. New issues: 0.
