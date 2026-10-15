@@ -38,8 +38,8 @@ Add nothing outside this list without a BLOCKERS.md entry under "Decisions to co
 
 | Purpose | Dependency |
 | --- | --- |
-| Build | AGP 8.13.x (latest 8.13 patch), Kotlin 2.2.x (latest stable 2.2 patch), Compose compiler plugin (`org.jetbrains.kotlin.plugin.compose`), KSP matching the Kotlin version |
-| UI | Compose BOM (latest stable), material3, material-icons-extended, activity-compose, navigation-compose 2.9.x, lifecycle-viewmodel-compose, lifecycle-runtime-compose |
+| Build | AGP 9.x, latest stable (9.4.0 as of Oct 2026; needs Gradle ≥ 9.6 and supports compileSdk 37 without `android.suppressUnsupportedCompileSdk`). AGP 9 has built-in Kotlin: drop the `org.jetbrains.kotlin.android` plugin and `kotlinOptions {}`, keep `org.jetbrains.kotlin.plugin.compose` and `org.jetbrains.kotlin.plugin.serialization` at the Kotlin version AGP bundles, and use a KSP release built for that Kotlin version. If KSP/Kotlin pairing cannot be made to resolve in one run, fall back to `android.builtInKotlin=false` with the `kotlin-android` plugin (Kotlin 2.2.x) and record it. Until T04a lands, the AGP 8.13.2 + suppress-flag setup stays as is. |
+| UI | Compose BOM (latest stable once on AGP 9; 2026.06.01 while on AGP 8.13), material3, material-icons-extended, activity-compose, navigation-compose 2.9.x, lifecycle-viewmodel-compose, lifecycle-runtime-compose |
 | Data | Room 2.8.x (runtime, ktx, compiler via KSP), kotlinx-serialization-json, kotlinx-coroutines |
 | Camera (Field Log) | CameraX 1.5.x (core, camera2, lifecycle, view) |
 | OCR (House Manual) | `com.google.mlkit:text-recognition` (bundled, on-device) |
@@ -58,6 +58,7 @@ If the exact versions above do not resolve together, pick the nearest set that d
 - Tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug`
 - Setup on a fresh container: `bash scripts/setup-android.sh`
+- In the cloud, Maven Central can answer 429 under parallel resolution: add `--max-workers=2` and retry once before treating a dependency failure as real.
 
 Run the tests before every commit. A task is done only when its acceptance criteria pass and the tests are green.
 

@@ -5,7 +5,7 @@
 # Installs only what is missing:
 #   - a JDK >= 17 (uses the preinstalled one if present; otherwise apt installs 17)
 #   - Android command-line tools into $ANDROID_HOME/cmdline-tools/latest
-#   - platform-tools, platforms;android-37, build-tools;37.0.0
+#   - platform-tools, platforms;android-37 (or android-37.N, whichever sdkmanager lists), build-tools;37.0.0
 # Accepts SDK licenses, writes $HOME/.android-env.sh, hooks it into ~/.bashrc and
 # ~/.profile, and writes local.properties (sdk.dir) if a Gradle project is found.
 #
@@ -35,7 +35,7 @@ fi
 CMDLINE_TOOLS_BUILD="${CMDLINE_TOOLS_BUILD:-15859902}"
 CMDLINE_TOOLS_SHA256="${CMDLINE_TOOLS_SHA256:-4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583}"
 CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_BUILD}_latest.zip"
-ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-37.0}"
+ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-37}"
 ANDROID_BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-37.0.0}"
 HOME="${HOME:-/root}"
 # Root installs to a world-readable path so a non-root session user can use it too.
@@ -127,16 +127,27 @@ export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 log "Accepting SDK licenses"
 yes 2>/dev/null | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null 2>&1 || true
 
-packages=(
-  "platform-tools"
-  "platforms;${ANDROID_PLATFORM}"
-  "build-tools;${ANDROID_BUILD_TOOLS}"
-)
-missing=()
-for p in "${packages[@]}"; do
-  dir="$ANDROID_HOME/${p//;//}"
-  [ -d "$dir" ] || missing+=("$p")
+# Platform package names can carry a minor version (Android 17 ships as
+# "platforms;android-37.0"), while AGP looks for "platforms/android-37". Accept
+# either on disk; when installing, ask sdkmanager which name exists.
+platform_base="${ANDROID_PLATFORM%%.*}"            # android-37
+platform_installed=""
+for d in "$ANDROID_HOME/platforms/${platform_base}" "$ANDROID_HOME/platforms/${platform_base}".*; do
+  [ -d "$d" ] && { platform_installed="$(basename "$d")"; break; }
 done
+platform_pkg=""
+if [ -z "$platform_installed" ]; then
+  listed="$("$SDKMANAGER" --sdk_root="$ANDROID_HOME" --list 2>/dev/null \
+    | grep -oE "platforms;${platform_base}(\.[0-9]+)?" | sort -uV | tail -n 1 || true)"
+  platform_pkg="${listed:-platforms;${ANDROID_PLATFORM}}"
+  log "Platform package resolved to $platform_pkg"
+fi
+
+packages=("platform-tools" "build-tools;${ANDROID_BUILD_TOOLS}")
+missing=()
+[ -d "$ANDROID_HOME/platform-tools" ] || missing+=("platform-tools")
+[ -n "$platform_installed" ] || missing+=("$platform_pkg")
+[ -d "$ANDROID_HOME/build-tools/${ANDROID_BUILD_TOOLS}" ] || missing+=("build-tools;${ANDROID_BUILD_TOOLS}")
 if [ "${#missing[@]}" -gt 0 ]; then
   log "Installing SDK packages: ${missing[*]}"
   # `yes` dies of SIGPIPE when sdkmanager exits, so judge by sdkmanager's status only.
@@ -146,7 +157,14 @@ if [ "${#missing[@]}" -gt 0 ]; then
   set -o pipefail
   [ "$status" -eq 0 ] || { echo "sdkmanager --install failed with status $status" >&2; exit "$status"; }
 else
-  log "SDK packages already installed: ${packages[*]}"
+  log "SDK packages already installed: ${packages[*]} platforms;${platform_installed}"
+fi
+
+# AGP 8.x looks for platforms/android-37; give it that name if only android-37.N exists.
+if [ ! -e "$ANDROID_HOME/platforms/${platform_base}" ]; then
+  for d in "$ANDROID_HOME/platforms/${platform_base}".*; do
+    [ -d "$d" ] && ln -s "$(basename "$d")" "$ANDROID_HOME/platforms/${platform_base}" && break
+  done
 fi
 
 # ------------------------------------------------------------- environment
@@ -178,11 +196,6 @@ if [ -f "$PROJECT_DIR/settings.gradle.kts" ] || [ -f "$PROJECT_DIR/settings.grad
   printf 'sdk.dir=%s\n' "$ANDROID_HOME" > "$PROJECT_DIR/local.properties"
 else
   log "No Gradle project at $PROJECT_DIR; skipping local.properties (Gradle will use ANDROID_HOME)"
-fi
-
-# AGP 8.13 looks for platforms/android-37, but the SDK package installs as android-37.0.
-if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
-  ln -s android-37.0 "$ANDROID_HOME/platforms/android-37"
 fi
 
 log "Done. ANDROID_HOME=$ANDROID_HOME  JAVA_HOME=$JAVA_HOME"
