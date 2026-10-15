@@ -76,6 +76,31 @@ Run the tests before every commit. A task is done only when its acceptance crite
 - Commit per task: `T07: breaker editor with slot occupancy rules`. Keep commits small; never force-push `build`.
 - Keep `lintDebug` free of errors; warnings are fine but note recurring ones in REVIEW.md.
 
+## Definition of done
+
+The builder creates `DONE` only when all of these are true at the same commit:
+
+1. Every task in PLAN.md is ticked (or marked deferred with a reason) and every item in REVIEW.md is fixed.
+2. `qa/last-tested.txt` equals the current `build` HEAD, and the newest QA entry in REVIEW.md ends with `New issues: 0`.
+3. Every item on the ship-ready checklist below has been done at least once since the last code change that could affect it.
+
+When `DONE` is created, the run also: builds release APKs for both apps (`assembleRelease`), lists their paths and SHA-256 in `DONE` with install instructions and known limits, writes the same summary as the run's final reply starting with the line `SHIP READY: HomeRecord <sha>`, and, if a Gmail connector is available in the run, emails that summary to nkurtz@gmail.com with subject `SHIP READY: HomeRecord`. Later runs that find `DONE` reply `Build complete` and stop.
+
+Until all three hold, a run with no plan task and no open finding does one ship-ready item, commits, and stops. If the checklist is also exhausted and QA has not yet tested HEAD, the run appends `waiting for QA on <sha>` to PROGRESS.md and stops without changes.
+
+### Ship-ready checklist (one item per run, in this order; record each in PROGRESS.md)
+
+- S1 Lint: `lintDebug` warnings driven to zero or each remaining one justified in REVIEW.md.
+- S2 Tests: every `[unit]` acceptance criterion in SPEC.md has a named test; add the missing ones.
+- S3 Strings: every user-facing string in `strings.xml`, no typos, consistent capitalization and terminology across both apps.
+- S4 Accessibility: content descriptions on every icon button and image, touch targets ≥ 48dp (≥ 56dp Field Log capture), TalkBack order sensible, text scales to 200% without clipping.
+- S5 States: every screen has an empty state, an error state where an operation can fail, and survives rotation and process death without losing input.
+- S6 Dark mode and dynamic color: every screen checked; no hardcoded colors.
+- S7 Performance: cold start under 1.5 s on the emulator; no main-thread database or file I/O (StrictMode clean in debug).
+- S8 Release build: `assembleRelease` succeeds with R8 enabled; ProGuard/R8 keep rules for Room, kotlinx-serialization and ML Kit; app launches from the release APK.
+- S9 Icons and identity: adaptive launcher icons for both apps, correct app names, versionCode/versionName scheme in place.
+- S10 Store readiness: `docs/data-safety.md` and `docs/privacy-policy.md` match what the apps actually do; store listing drafts in `docs/store-listing.md`.
+
 ## Workflow per run
 
 1. Read PROGRESS.md (last line), PLAN.md (next unchecked task), REVIEW.md (open findings — fix Critical and Major before new tasks), BLOCKERS.md.
