@@ -10,7 +10,11 @@ import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.Source
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class PanelRepository(
@@ -82,6 +86,17 @@ class PanelRepository(
         db.breakerRoomDao().deleteForBreaker(id)
         db.breakerDao().delete(breaker)
     }
+
+    /** Breakers of every panel in the home. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeBreakersForHome(homeId: String): Flow<List<Breaker>> =
+        db.panelDao().observeForHome(homeId).flatMapLatest { panels ->
+            if (panels.isEmpty()) flowOf(emptyList())
+            else combine(panels.map { observeBreakers(it.id) }) { lists -> lists.flatMap { it } }
+        }
+
+    fun observeBreakerRoomsForRoom(roomId: String): Flow<List<BreakerRoom>> =
+        db.breakerRoomDao().observeForRoom(roomId).map { list -> list.map { it.toDomain() } }
 
     fun observeBreakerRooms(breakerId: String): Flow<List<BreakerRoom>> =
         db.breakerRoomDao().observeForBreaker(breakerId).map { list -> list.map { it.toDomain() } }
