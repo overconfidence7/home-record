@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 import org.junit.Assert.assertEquals
@@ -31,7 +32,7 @@ class HomeScreenTest {
         rule.onNodeWithText("30 slots · 40% labeled").assertIsDisplayed()
         rule.onNodeWithText("3 shutoffs").assertIsDisplayed()
         rule.onNodeWithText("1 item").assertIsDisplayed()
-        rule.onNodeWithText("8 rooms").assertIsDisplayed()
+        rule.onNodeWithText("8 rooms").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("card_emergency").performClick()
         assertEquals(listOf<HomeEvent>(HomeEvent.OpenEmergency), events)
     }
