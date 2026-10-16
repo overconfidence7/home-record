@@ -46,7 +46,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.core.logic.PanelGridPlanner
 import com.kurtz.homerecord.core.logic.PanelLayoutCalculator
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -66,6 +68,9 @@ import java.io.File
 
 /** Items before the slot rows in the panel list: title, photo, slot-count editor, legend button. */
 private const val PANEL_HEADER_ITEMS = 5
+private val SLOT_ROW_HEIGHT = 64.dp
+private val TANDEM_ROW_HEIGHT = 104.dp
+private val GRID_GAP = 8.dp
 const val HIGHLIGHT_MILLIS = 2_500L
 
 @Composable
@@ -82,13 +87,18 @@ fun PanelScreen(
         return
     }
     val rows = PanelLayoutCalculator.rows(panel.slotCount, panel.layout)
+    val rowHeights = rows.map { row -> if (row.any { state.tandemAt(it) != null }) TANDEM_ROW_HEIGHT else SLOT_ROW_HEIGHT }
+    val density = LocalDensity.current
     val listState = rememberLazyListState()
     // AC-18: scroll to the searched slot and keep it highlighted for HIGHLIGHT_MILLIS.
     var highlighted by remember(highlightSlot) { mutableStateOf(highlightSlot) }
     LaunchedEffect(highlightSlot, rows) {
         val target = highlightSlot ?: return@LaunchedEffect
         val rowIndex = rows.indexOfFirst { target in it }
-        if (rowIndex >= 0) listState.scrollToItem(rowIndex + PANEL_HEADER_ITEMS)
+        if (rowIndex >= 0) {
+            val offset = rowHeights.take(rowIndex).fold(0.dp) { acc, h -> acc + h + GRID_GAP }
+            listState.scrollToItem(PANEL_HEADER_ITEMS, with(density) { offset.roundToPx() })
+        }
         delay(HIGHLIGHT_MILLIS)
         highlighted = null
     }
@@ -118,10 +128,23 @@ fun PanelScreen(
                 modifier = Modifier.heightIn(min = 48.dp).testTag("panel_mapping_mode"),
             ) { Text(stringResource(R.string.panel_mapping_mode)) }
         }
-        items(rows, key = { it.first() }) { slots ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                slots.forEach { slot -> SlotCell(slot, state, onEvent, Modifier.weight(1f), highlighted = slot == highlighted) }
-                if (slots.size < PanelLayoutCalculator.columns(panel.layout)) Box(Modifier.weight(1f))
+        item(key = "slot_grid") {
+            val columns = PanelGridPlanner.columns(panel.slotCount, panel.layout, state.breakers)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GRID_GAP)) {
+                columns.forEach { cells ->
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(GRID_GAP)) {
+                        cells.forEach { cell ->
+                            val height = (cell.row until cell.row + cell.rowSpan).fold((cell.rowSpan - 1) * GRID_GAP.value) { acc, r -> acc + rowHeights[r].value }.dp
+                            val lit = highlighted != null && (highlighted == cell.slot || highlighted in (cell.breaker?.slots.orEmpty()))
+                            val twoPole = cell.breaker?.takeIf { cell.rowSpan == 2 }
+                            if (twoPole != null) {
+                                TwoPoleCell(twoPole, state, onEvent, Modifier.height(height), highlighted = lit)
+                            } else {
+                                SlotCell(cell.slot, state, onEvent, Modifier.height(height), highlighted = lit)
+                            }
+                        }
+                    }
+                }
             }
         }
         item { Box(Modifier.height(16.dp)) }
@@ -180,7 +203,7 @@ private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Un
     val tandem = state.tandemAt(slot)
     val highlightDescription = stringResource(R.string.panel_slot_highlighted)
     OutlinedCard(
-        modifier = modifier.heightIn(min = 56.dp).testTag("slot_$slot").then(if (highlighted) Modifier.semantics { stateDescription = highlightDescription } else Modifier),
+        modifier = modifier.testTag("slot_$slot").then(if (highlighted) Modifier.semantics { stateDescription = highlightDescription } else Modifier),
         colors = if (highlighted) CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer) else CardDefaults.outlinedCardColors(),
         border = if (highlighted) BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
@@ -202,14 +225,49 @@ private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Un
                         onClick = { onEvent(PanelEvent.OpenBreaker(slot, breaker?.id)) },
                         onLongClick = { onEvent(PanelEvent.SlotLongPressed(slot)) },
                     ),
-                continuedFrom = breaker?.takeIf { it.poles == 2 && slot != it.slots.min() }?.slots?.min(),
+            )
+        }
+    }
+}
+
+/** AC-9: one cell spanning both rows, both slot numbers, a 2-pole marker, one label and amps; tap anywhere opens the breaker. */
+@Composable
+private fun TwoPoleCell(breaker: Breaker, state: PanelUiState, onEvent: (PanelEvent) -> Unit, modifier: Modifier, highlighted: Boolean) {
+    val highlightDescription = stringResource(R.string.panel_slot_highlighted)
+    val numbers = breaker.slots.sorted().joinToString(" · ")
+    val first = breaker.slots.min()
+    val dotLabel = stringResource(R.string.confidence_dot_description, stringResource(confidenceLabel(breaker.confidence)))
+    OutlinedCard(
+        modifier = modifier.testTag("slot_$first").then(if (highlighted) Modifier.semantics { stateDescription = highlightDescription } else Modifier),
+        colors = if (highlighted) CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer) else CardDefaults.outlinedCardColors(),
+        border = if (highlighted) BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary) else BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+    ) {
+        Column(
+            Modifier.fillMaxSize()
+                .combinedClickable(onClick = { onEvent(PanelEvent.OpenBreaker(first, breaker.id)) }, onLongClick = { onEvent(PanelEvent.SlotLongPressed(first)) })
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(numbers, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 8.dp).testTag("two_pole_numbers"))
+                Box(
+                    Modifier.size(12.dp).clip(CircleShape).background(confidenceColor(breaker.confidence))
+                        .semantics { contentDescription = dotLabel }
+                        .testTag("dot_${breaker.confidence.name}"),
+                )
+            }
+            Text(stringResource(R.string.panel_two_pole_marker), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
+            Text(
+                if (breaker.label.isBlank()) stringResource(R.string.panel_slot_empty) else breaker.label + amps,
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     }
 }
 
 @Composable
-private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, continuedFrom: Int? = null) {
+private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier) {
     Row(modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(number, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 8.dp))
         if (breaker != null) {
@@ -227,8 +285,7 @@ private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, cont
             Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
-            val text = if (continuedFrom != null) stringResource(R.string.panel_two_pole_continued, continuedFrom) + " · " + breaker.label else breaker.label + amps
-            Text(text, style = MaterialTheme.typography.bodyMedium)
+            Text(breaker.label + amps, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

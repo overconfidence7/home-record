@@ -3,7 +3,10 @@ package com.kurtz.homerecord.housemanual.panel
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -52,6 +55,20 @@ class PanelScreenTest {
         rule.onNodeWithText("Kitchen outlets · 20A").assertIsDisplayed()
         rule.onNodeWithTag("slot_1").performClick()
         assertEquals(listOf<PanelEvent>(PanelEvent.OpenBreaker(1, null)), events)
+    }
+
+    @Test fun `AC-9 two-pole breaker is one cell with both slot numbers and a marker`() {
+        val events = mutableListOf<PanelEvent>()
+        val range = Breaker("r", "p", listOf(2, 4), 2, 50, label = "Range", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL)
+        rule.setContent {
+            HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(), breakers = listOf(range)), { events += it }) }
+        }
+        rule.onAllNodesWithText("Range · 50A").assertCountEquals(1)
+        rule.onNodeWithText("2 · 4").assertIsDisplayed()
+        rule.onNodeWithText("2-pole · 240 V").assertIsDisplayed()
+        rule.onAllNodesWithTag("slot_4").assertCountEquals(0)
+        rule.onNodeWithTag("slot_2").performClick()
+        assertEquals(listOf<PanelEvent>(PanelEvent.OpenBreaker(2, "r")), events)
     }
 
     @Test fun `take photo button reports event`() {

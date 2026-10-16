@@ -119,7 +119,7 @@
     <string name="panel_make_tandem">Long-press a breaker to split its slot into a tandem pair.</string>
     <string name="panel_slot_count_apply">Update slot count</string>
     <string name="panel_slot_count_blocked">Can\'t shrink: slot %1$d is in use.</string>
-    <string name="panel_two_pole_continued">Two-pole (with slot %1$d)</string>
+    <string name="panel_two_pole_marker">2-pole · 240 V</string>
     <string name="panel_legend_pdf">Legend PDF</string>
     <string name="panel_mapping_mode">Mapping mode</string>
     <string name="mapping_title">Map breakers</string>
