@@ -34,16 +34,23 @@ import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 import java.io.File
 
 @Composable
-fun JobRoute(viewModel: JobViewModel, onEdit: () -> Unit, onCapture: () -> Unit, onOpenEntry: (String) -> Unit) {
+fun JobRoute(
+    viewModel: JobViewModel,
+    onEdit: () -> Unit,
+    onCapture: () -> Unit,
+    onOpenEntry: (String) -> Unit,
+    onBehindWall: () -> Unit = {},
+) {
     val state by viewModel.state.collectAsState()
     JobScreen(
         state, onEdit, onCapture, onOpenEntry,
+        onBehindWall = onBehindWall,
         onTogglePlay = viewModel::togglePlay,
         fileFor = viewModel::file,
     )
 }
 
-/** FL-Job: header, actions and entries grouped by day (AC-61). Report/wall/handoff actions arrive in T23+. */
+/** FL-Job: header, actions and entries grouped by day (AC-61). Report/handoff actions arrive in T24+. */
 @Composable
 fun JobScreen(
     state: JobUiState,
@@ -52,6 +59,7 @@ fun JobScreen(
     onOpenEntry: (String) -> Unit,
     onTogglePlay: (String, String?) -> Unit = { _, _ -> },
     fileFor: (String?) -> File? = { null },
+    onBehindWall: () -> Unit = {},
 ) {
     val job = state.job
     if (job == null) {
@@ -65,6 +73,9 @@ fun JobScreen(
                 job.address?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
                 Button(onClick = onCapture, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                     Text(stringResource(R.string.job_capture))
+                }
+                OutlinedButton(onClick = onBehindWall, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                    Text(stringResource(R.string.job_behind_wall))
                 }
                 OutlinedButton(onClick = onEdit, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                     Text(stringResource(R.string.job_edit))

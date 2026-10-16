@@ -9,6 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kurtz.homerecord.fieldlog.AppContainer
+import com.kurtz.homerecord.fieldlog.R
+import com.kurtz.homerecord.fieldlog.behindwall.BehindWallRoute
+import com.kurtz.homerecord.fieldlog.behindwall.BehindWallViewModel
 import com.kurtz.homerecord.fieldlog.capture.CameraXPhotoCapturer
 import com.kurtz.homerecord.fieldlog.capture.CaptureRoute
 import com.kurtz.homerecord.fieldlog.capture.CaptureViewModel
@@ -29,11 +32,13 @@ object Routes {
     const val JOB_ARG = "jobId"
     const val JOB = "job/{$JOB_ARG}"
     const val CAPTURE = "capture/{$JOB_ARG}"
+    const val BEHIND_WALL = "behindwall/{$JOB_ARG}"
     const val ENTRY_ARG = "entryId"
     const val ENTRY = "entry/{$ENTRY_ARG}"
     const val JOB_NEW = "jobedit/new"
     const val JOB_EDIT = "jobedit/{$JOB_ARG}"
 
+    fun behindWall(id: String) = "behindwall/$id"
     fun capture(id: String) = "capture/$id"
     fun entry(id: String) = "entry/$id"
     fun job(id: String) = "job/$id"
@@ -77,6 +82,7 @@ fun FieldLogNavHost(container: AppContainer) {
                 vm,
                 onEdit = { nav.navigate(Routes.jobEdit(id)) },
                 onCapture = { nav.navigate(Routes.capture(id)) },
+                onBehindWall = { nav.navigate(Routes.behindWall(id)) },
                 onOpenEntry = { nav.navigate(Routes.entry(it)) },
             )
         }
@@ -90,6 +96,21 @@ fun FieldLogNavHost(container: AppContainer) {
                 },
             )
             EntryRoute(vm, onDone = { nav.popBackStack() })
+        }
+        composable(Routes.BEHIND_WALL, arguments = listOf(navArgument(Routes.JOB_ARG) { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val capturer = remember { CameraXPhotoCapturer(context.applicationContext) }
+            val labels = listOf(R.string.wall_north, R.string.wall_east, R.string.wall_south, R.string.wall_west)
+                .map { resources.getString(it) }
+            val vm: BehindWallViewModel = viewModel(
+                factory = remember(id) {
+                    simpleFactory {
+                        BehindWallViewModel(id, labels, container.jobRepository, container.behindWallRepository, container.mediaStore, capturer)
+                    }
+                },
+            )
+            BehindWallRoute(vm, capturer, container.shutterKeys, onBack = { nav.popBackStack() })
         }
         composable(Routes.CAPTURE, arguments = listOf(navArgument(Routes.JOB_ARG) { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()

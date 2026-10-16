@@ -118,7 +118,7 @@ fun CaptureRoute(
 }
 
 @Composable
-private fun CameraPreview(capturer: CameraXPhotoCapturer) {
+internal fun CameraPreview(capturer: CameraXPhotoCapturer) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
@@ -145,7 +145,12 @@ private fun CameraPreview(capturer: CameraXPhotoCapturer) {
 
 /** Full-screen preview slot plus the shutter; [preview] is the camera surface (a stub in tests). */
 @Composable
-fun CaptureScreen(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, preview: @Composable () -> Unit) {
+fun CaptureScreen(
+    state: CaptureUiState,
+    onEvent: (CaptureEvent) -> Unit,
+    showExtras: Boolean = true,
+    preview: @Composable () -> Unit,
+) {
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         preview()
         Column(
@@ -182,21 +187,25 @@ fun CaptureScreen(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, previe
             }
             val label = stringResource(R.string.capture_shutter)
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Button(
-                    onClick = { onEvent(CaptureEvent.OpenNote) },
-                    modifier = Modifier.heightIn(min = 56.dp).widthIn(min = 96.dp),
-                ) { Text(stringResource(R.string.capture_note)) }
+                if (showExtras) {
+                    Button(
+                        onClick = { onEvent(CaptureEvent.OpenNote) },
+                        modifier = Modifier.heightIn(min = 56.dp).widthIn(min = 96.dp),
+                    ) { Text(stringResource(R.string.capture_note)) }
+                }
                 Button(
                     onClick = { onEvent(CaptureEvent.Shutter) },
                     enabled = !state.busy,
                     shape = CircleShape,
                     modifier = Modifier.size(ShutterSize).semantics { contentDescription = label },
                 ) {}
-                Button(
-                    onClick = { onEvent(CaptureEvent.ToggleVoice) },
-                    modifier = Modifier.heightIn(min = 56.dp).widthIn(min = 96.dp),
-                ) {
-                    Text(stringResource(if (state.recording) R.string.capture_voice_stop else R.string.capture_voice))
+                if (showExtras) {
+                    Button(
+                        onClick = { onEvent(CaptureEvent.ToggleVoice) },
+                        modifier = Modifier.heightIn(min = 56.dp).widthIn(min = 96.dp),
+                    ) {
+                        Text(stringResource(if (state.recording) R.string.capture_voice_stop else R.string.capture_voice))
+                    }
                 }
             }
         }

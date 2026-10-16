@@ -59,6 +59,8 @@ class LogEntryRepository(
     suspend fun delete(id: String): LogEntry? {
         val entity = db.logEntryDao().get(id) ?: return null
         db.logEntryDao().delete(entity)
+        // A behind-the-wall Photo shares the entry's file; drop it so wall counts stay honest.
+        entity.mediaPath?.let { db.photoDao().deleteByPath(it) }
         return entity.toDomain()
     }
 

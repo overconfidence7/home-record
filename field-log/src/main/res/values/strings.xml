@@ -22,6 +22,21 @@
     <string name="job_no_entries">No entries yet.</string>
     <string name="job_edit">Edit job</string>
     <string name="job_capture">Capture</string>
+    <string name="job_behind_wall">Behind the wall</string>
+    <string name="wall_pick_room">Which room?</string>
+    <string name="wall_pick_wall">%1$s: which wall?</string>
+    <string name="wall_no_rooms">This job has no rooms yet. Add rooms by editing the job.</string>
+    <string name="wall_custom">Custom wall name</string>
+    <string name="wall_change_room">Change room</string>
+    <string name="wall_camera_header">%1$s · %2$s</string>
+    <string name="wall_north">North</string>
+    <string name="wall_east">East</string>
+    <string name="wall_south">South</string>
+    <string name="wall_west">West</string>
+    <plurals name="wall_count">
+        <item quantity="one">%1$s: %2$d photo</item>
+        <item quantity="other">%1$s: %2$d photos</item>
+    </plurals>
     <string name="capture_shutter">Take photo</string>
     <string name="capture_count">%1$d photos saved</string>
     <string name="capture_failed">Photo not saved. Try again.</string>

@@ -199,6 +199,9 @@ interface PhotoDao {
 
     @Query("SELECT * FROM photo WHERE homeId = :homeId ORDER BY takenAt")
     fun observeForHome(homeId: String): Flow<List<PhotoEntity>>
+
+    @Query("DELETE FROM photo WHERE path = :path")
+    suspend fun deleteByPath(path: String)
 }
 
 @Dao
