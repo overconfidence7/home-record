@@ -37,6 +37,31 @@ class LogEntryRepository(
     suspend fun addVoice(jobId: String, mediaPath: String, durationMs: Long, roomId: String? = null): LogEntry =
         add(LogEntryDraft(jobId, EntryKind.VOICE, mediaPath = mediaPath, durationMs = durationMs, roomId = roomId))
 
+    suspend fun get(id: String): LogEntry? = db.logEntryDao().get(id)?.toDomain()
+
+    fun observeEntry(id: String): Flow<LogEntry?> =
+        db.logEntryDao().observeById(id).map { it?.toDomain() }
+
+    /** FL-Entry edit: new note/caption text and room tag. Returns null if the entry is gone. */
+    suspend fun update(id: String, text: String?, roomId: String?): LogEntry? {
+        val current = db.logEntryDao().get(id)?.toDomain() ?: return null
+        val cleaned = text?.trim()?.takeIf { it.isNotEmpty() }
+        val updated = current.copy(
+            text = if (current.kind == EntryKind.NOTE) cleaned ?: current.text else cleaned,
+            roomId = roomId,
+            updatedAt = clock.now(),
+        )
+        db.logEntryDao().upsert(updated.toEntity())
+        return updated
+    }
+
+    /** Removes the row and returns it so the caller can delete its media file. */
+    suspend fun delete(id: String): LogEntry? {
+        val entity = db.logEntryDao().get(id) ?: return null
+        db.logEntryDao().delete(entity)
+        return entity.toDomain()
+    }
+
     private suspend fun add(draft: LogEntryDraft): LogEntry {
         val now = clock.now()
         val entry = LogEntry(

@@ -239,6 +239,9 @@ interface LogEntryDao {
     @Query("SELECT * FROM log_entry ORDER BY createdAt")
     fun observeAll(): Flow<List<LogEntryEntity>>
 
+    @Query("SELECT * FROM log_entry WHERE id = :id")
+    fun observeById(id: String): Flow<LogEntryEntity?>
+
     @Query("SELECT * FROM log_entry WHERE jobId = :jobId ORDER BY createdAt")
     fun observeForJob(jobId: String): Flow<List<LogEntryEntity>>
 }

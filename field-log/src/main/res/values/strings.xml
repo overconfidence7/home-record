@@ -53,4 +53,15 @@
     <string name="room_office">Office</string>
     <string name="room_hallway">Hallway</string>
     <string name="room_exterior">Exterior</string>
+    <string name="entry_photo">Photo</string>
+    <string name="entry_voice_duration">Voice memo %1$s</string>
+    <string name="entry_play">Play</string>
+    <string name="entry_stop">Stop</string>
+    <string name="entry_missing">This entry no longer exists.</string>
+    <string name="entry_note_label">Note</string>
+    <string name="entry_caption_label">Caption</string>
+    <string name="entry_room">Room</string>
+    <string name="entry_room_none">No room</string>
+    <string name="entry_save">Save</string>
+    <string name="entry_delete">Delete</string>
 </resources>
