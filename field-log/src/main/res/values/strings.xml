@@ -97,6 +97,9 @@
     <string name="report_next_steps">Next steps</string>
     <string name="report_save">Save draft</string>
     <string name="report_saved">Saved</string>
+    <string name="report_make_pdf">Make PDF</string>
+    <string name="report_making_pdf">Making PDF…</string>
+    <string name="report_pdf_failed">Could not make the PDF. Try again.</string>
     <string name="report_ok">OK</string>
     <string name="report_cancel">Cancel</string>
     <string name="delay_none">None</string>

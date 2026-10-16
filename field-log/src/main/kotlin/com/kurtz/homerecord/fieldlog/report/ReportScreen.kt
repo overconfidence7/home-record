@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.fieldlog.report
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -23,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,17 +33,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -48,8 +54,26 @@ import java.time.ZoneOffset
 @Composable
 fun ReportRoute(viewModel: ReportViewModel) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    LaunchedEffect(state.pdfReady) {
+        state.pdfReady?.let { sharePdf(context, it) }
+        if (state.pdfReady != null) viewModel.onEvent(ReportEvent.PdfShared)
+    }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flush() }
     ReportScreen(state, viewModel::onEvent)
+}
+
+private fun sharePdf(context: Context, relativePath: String) {
+    val file = File(context.cacheDir, relativePath)
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(
+        Intent.createChooser(send, context.getString(R.string.report_make_pdf)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -101,6 +125,18 @@ fun ReportScreen(state: ReportUiState, onEvent: (ReportEvent) -> Unit) {
                 onClick = { onEvent(ReportEvent.Save) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             ) { Text(stringResource(if (state.saved) R.string.report_saved else R.string.report_save)) }
+            Button(
+                onClick = { onEvent(ReportEvent.MakePdf) },
+                enabled = !state.makingPdf,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("report_make_pdf"),
+            ) { Text(stringResource(if (state.makingPdf) R.string.report_making_pdf else R.string.report_make_pdf)) }
+            if (state.pdfFailed) {
+                Text(
+                    stringResource(R.string.report_pdf_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
     if (picking) {

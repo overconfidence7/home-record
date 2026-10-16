@@ -99,7 +99,7 @@ fun FieldLogNavHost(container: AppContainer) {
             val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()
             val vm: ReportViewModel = viewModel(
                 factory = remember(id) {
-                    simpleFactory { ReportViewModel(id, LocalDate.now().toString(), container.jobRepository, container.reportRepository) }
+                    simpleFactory { ReportViewModel(id, LocalDate.now().toString(), container.jobRepository, container.reportRepository, container.reportPdfExporter) }
                 },
             )
             ReportRoute(vm)

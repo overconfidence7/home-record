@@ -35,6 +35,9 @@ class ReportViewModelTest {
     private lateinit var entries: LogEntryRepository
     private lateinit var reports: ReportRepository
     private val today = LocalDate.now().toString()
+    private var exportResult: String? = "shared/report.pdf"
+    private val exported = mutableListOf<Pair<String, String>>()
+    private val exporter = ReportPdfExporter { job, day -> exported += job to day; exportResult }
 
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -50,7 +53,7 @@ class ReportViewModelTest {
     }
 
     private suspend fun vm(jobId: String) =
-        ReportViewModel(jobId, today, jobs, reports).also { v -> v.state.first { it.loaded } }
+        ReportViewModel(jobId, today, jobs, reports, exporter).also { v -> v.state.first { it.loaded } }
 
     @Test fun `prefills work completed from notes and counts photos (AC-67)`() = runTest(dispatcher) {
         val job = jobs.createJob("Elm")
@@ -98,5 +101,28 @@ class ReportViewModelTest {
         v.state.first { it.day == "2000-01-01" && it.loaded }
         assertEquals("", v.state.value.workCompleted)
         assertEquals("Today's work", reports.draftFor(job.id, today).workCompleted)
+    }
+
+    @Test fun `make pdf saves the draft first then exposes the file to share (AC-69)`() = runTest(dispatcher) {
+        val job = jobs.createJob("Elm")
+        val v = vm(job.id)
+        v.onEvent(ReportEvent.WorkChanged("Edited"))
+        v.onEvent(ReportEvent.MakePdf)
+        val s = v.state.first { it.pdfReady != null }
+        assertEquals("shared/report.pdf", s.pdfReady)
+        assertEquals(listOf(job.id to today), exported)
+        assertEquals("Edited", reports.draftFor(job.id, today).workCompleted)
+        v.onEvent(ReportEvent.PdfShared)
+        assertEquals(null, v.state.value.pdfReady)
+    }
+
+    @Test fun `failed export shows an error and allows retry`() = runTest(dispatcher) {
+        exportResult = null
+        val job = jobs.createJob("Elm")
+        val v = vm(job.id)
+        v.onEvent(ReportEvent.MakePdf)
+        val s = v.state.first { it.pdfFailed }
+        assertEquals(false, s.makingPdf)
+        assertEquals(null, s.pdfReady)
     }
 }

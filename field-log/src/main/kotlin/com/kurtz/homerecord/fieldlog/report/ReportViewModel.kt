@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.model.DailyReport
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.repo.JobRepository
 import com.kurtz.homerecord.core.repo.ReportRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,10 @@ data class ReportUiState(
     val nextSteps: String = "",
     val photoCount: Int = 0,
     val saved: Boolean = false,
+    val makingPdf: Boolean = false,
+    /** Cache-relative path of a freshly made PDF waiting to be shared; cleared by [ReportEvent.PdfShared]. */
+    val pdfReady: String? = null,
+    val pdfFailed: Boolean = false,
 )
 
 sealed interface ReportEvent {
@@ -42,6 +47,13 @@ sealed interface ReportEvent {
     data class MaterialsChanged(val value: String) : ReportEvent
     data class NextStepsChanged(val value: String) : ReportEvent
     data object Save : ReportEvent
+    data object MakePdf : ReportEvent
+    data object PdfShared : ReportEvent
+}
+
+/** Renders the saved draft for a day to a PDF and returns its cache-relative path, or null on failure. */
+fun interface ReportPdfExporter {
+    suspend fun export(jobId: String, day: String): String?
 }
 
 /** FL-Report: an editable draft per job per day, prefilled from entries (AC-67) and autosaved. */
@@ -50,6 +62,7 @@ class ReportViewModel(
     today: String,
     private val jobs: JobRepository,
     private val reports: ReportRepository,
+    private val exporter: ReportPdfExporter,
     private val debounceMs: Long = 400,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ReportUiState(day = today))
@@ -95,6 +108,8 @@ class ReportViewModel(
             is ReportEvent.MaterialsChanged -> edit { it.copy(materials = event.value) }
             is ReportEvent.NextStepsChanged -> edit { it.copy(nextSteps = event.value) }
             ReportEvent.Save -> { dirty = true; flush() }
+            ReportEvent.MakePdf -> makePdf()
+            ReportEvent.PdfShared -> _state.update { it.copy(pdfReady = null, pdfFailed = false) }
         }
     }
 
@@ -102,6 +117,24 @@ class ReportViewModel(
     fun flush() {
         saveJob?.cancel()
         viewModelScope.launch { persist() }
+    }
+
+    private fun makePdf() {
+        if (_state.value.makingPdf) return
+        _state.update { it.copy(makingPdf = true, pdfFailed = false) }
+        saveJob?.cancel()
+        viewModelScope.launch {
+            dirty = true
+            persist()
+            val path = try {
+                exporter.export(jobId, _state.value.day)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                null
+            }
+            _state.update { it.copy(makingPdf = false, pdfReady = path, pdfFailed = path == null) }
+        }
     }
 
     private fun changeDay(day: String) {
