@@ -19,7 +19,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T10: Legend PDF: `LegendRowBuilder` (pure, tested) + `PdfDocument` renderer + share sheet via FileProvider. (acceptance: AC-22, AC-23, AC-24)
 - [x] R2: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [x] T11: Shutoffs: HM-Shutoffs list with empty state, HM-ShutoffEdit with kind/room/photo/instructions and validation. (acceptance: AC-25, AC-26, AC-27)
-- [ ] T12: HM-Emergency: `EmergencyGrouper` (pure, tested), large-type layout, full-screen zoomable photo, offline check. (acceptance: AC-28, AC-29, AC-30, AC-31)
+- [x] T12: HM-Emergency: `EmergencyGrouper` (pure, tested), large-type layout, full-screen zoomable photo, offline check. (acceptance: AC-28, AC-29, AC-30, AC-31)
 - [ ] T13: Quick Settings tile: `EmergencyTileService`, `TileStateChooser`, deep link into HM-Emergency, lock-screen handling. (acceptance: AC-32, AC-33, AC-34)
 - [ ] T14: Mapping mode core: `MappingStateMachine` (Idle/PluggedIn/Armed/Alarm/Confirm) driven by `PowerEvent`s, `ChargingMonitor` (BatteryManager + ACTION_POWER_CONNECTED/DISCONNECTED receiver), `AlarmPlayer` (ToneGenerator/AudioTrack loop + Vibrator) behind interfaces with fakes. (acceptance: AC-35, AC-37, AC-38)
 - [ ] T15: HM-Mapping screen: keep-screen-on, armed and alarm states, breaker picker, endpoint picker with "New outlet…", save confirms the link; disarm on leave. (acceptance: AC-36, AC-39, AC-40, AC-41, AC-16)
