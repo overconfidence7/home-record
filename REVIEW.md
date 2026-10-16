@@ -21,3 +21,13 @@ Findings that are really spec changes go to BLOCKERS.md under "Decisions to conf
 ## QA 2026-10-15 (commit 3c9f751)
 
 Tested: AC-1, AC-2, AC-3, AC-4, rotation, back button, dark mode, long text input. Passed: 4. New issues: 0.
+
+---
+
+## QA 2026-10-16 (commit 0a2226a)
+
+Tested: AC-1 through AC-50 (House Manual M1 complete milestone test pass: Onboarding AC-1..AC-4, Panel & Breakers AC-5..AC-12, Room Confidence & Breaker-Room Linking AC-13..AC-16 & AC-20..AC-21, Unified Search AC-17..AC-19, Shareable Legend PDF AC-22..AC-24, Emergency Shutoffs & Offline Photo Preview AC-25..AC-31, Quick Settings Emergency Tile AC-32..AC-34, Mapping Mode AC-35..AC-41, Equipment Registry & Offline ML Kit OCR AC-42..AC-50), dark mode, landscape rotation, back navigation, unit test suite (`./gradlew testDebugUnitTest`). Passed: 50. New issues: 2.
+
+- [ ] [Minor] Screens lack background Surface causing visible text bleedthrough across navigation transitions and white window background in dark mode - steps: 1. Launch app and navigate between screens (e.g., Onboarding to Panel Setup, or Search result to Panel). 2. Switch system UI to dark mode (`cmd uimode night yes`). - expected: Root composable or Window content wrapped in `Surface(color = MaterialTheme.colorScheme.background)` so screens are opaque and dark mode uses dark background / actual: Root layouts are transparent Columns, causing previous screen text to bleed through during transitions and dark mode to render dark cards on a bright white window background - screenshot: qa/screenshots/ac5_panel_setup.png
+- [ ] [Minor] Two-pole breaker grid cell rendered as two separate cards instead of one tall cell - steps: 1. In Panel, tap Slot 2. 2. Set Poles to 2 (occupying slots 2 and 4), label "Range", 50A, and save. 3. Inspect panel grid. - expected: SPEC.md AC-9: "A two-pole breaker occupies slots n and n+2; the grid draws it as one tall cell" / actual: Rendered as two separate slot cards (slot 2: "2 · Range · 50A", slot 4: "4 · Two-pole (with slot 2) · Range") - screenshot: qa/screenshots/ac9_twopole_grid.png
+
