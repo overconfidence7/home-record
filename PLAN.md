@@ -21,7 +21,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T11: Shutoffs: HM-Shutoffs list with empty state, HM-ShutoffEdit with kind/room/photo/instructions and validation. (acceptance: AC-25, AC-26, AC-27)
 - [x] T12: HM-Emergency: `EmergencyGrouper` (pure, tested), large-type layout, full-screen zoomable photo, offline check. (acceptance: AC-28, AC-29, AC-30, AC-31)
 - [x] T13: Quick Settings tile: `EmergencyTileService`, `TileStateChooser`, deep link into HM-Emergency, lock-screen handling. (acceptance: AC-32, AC-33, AC-34)
-- [ ] T14: Mapping mode core: `MappingStateMachine` (Idle/PluggedIn/Armed/Alarm/Confirm) driven by `PowerEvent`s, `ChargingMonitor` (BatteryManager + ACTION_POWER_CONNECTED/DISCONNECTED receiver), `AlarmPlayer` (ToneGenerator/AudioTrack loop + Vibrator) behind interfaces with fakes. (acceptance: AC-35, AC-37, AC-38)
+- [x] T14: Mapping mode core: `MappingStateMachine` (Idle/PluggedIn/Armed/Alarm/Confirm) driven by `PowerEvent`s, `ChargingMonitor` (BatteryManager + ACTION_POWER_CONNECTED/DISCONNECTED receiver), `AlarmPlayer` (ToneGenerator/AudioTrack loop + Vibrator) behind interfaces with fakes. (acceptance: AC-35, AC-37, AC-38)
 - [ ] T15: HM-Mapping screen: keep-screen-on, armed and alarm states, breaker picker, endpoint picker with "New outlet…", save confirms the link; disarm on leave. (acceptance: AC-36, AC-39, AC-40, AC-41, AC-16)
 - [ ] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T16: Equipment list and editor: categories, dates, `AgeAndWarrantyFormatter`, validation, delete with file cleanup. (acceptance: AC-42, AC-43, AC-44, AC-50)
