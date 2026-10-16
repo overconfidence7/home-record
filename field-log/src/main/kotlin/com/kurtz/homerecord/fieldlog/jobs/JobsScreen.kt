@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,11 +32,12 @@ import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
 @Composable
-fun JobsRoute(viewModel: JobsViewModel, onNewJob: () -> Unit, onOpenJob: (String) -> Unit) {
+fun JobsRoute(viewModel: JobsViewModel, onNewJob: () -> Unit, onOpenJob: (String) -> Unit, onSettings: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     JobsScreen(state) { event ->
         when (event) {
             JobsEvent.NewJob -> onNewJob()
+            JobsEvent.Settings -> onSettings()
             is JobsEvent.Open -> onOpenJob(event.jobId)
             is JobsEvent.ShowArchived -> viewModel.onEvent(event)
         }
@@ -50,6 +52,10 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit) {
             onClick = { onEvent(JobsEvent.NewJob) },
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("jobs_new"),
         ) { Text(stringResource(R.string.jobs_new)) }
+        OutlinedButton(
+            onClick = { onEvent(JobsEvent.Settings) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("jobs_settings"),
+        ) { Text(stringResource(R.string.jobs_settings)) }
         if (state.archivedCount > 0) {
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 48.dp),

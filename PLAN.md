@@ -36,7 +36,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T21: Notes and voice: typed note entry, `VoiceRecorder` (MediaRecorder AAC/.m4a) behind an interface with a 3:00 cap, VOICE entries with duration, mic permission state. (acceptance: AC-58, AC-59, AC-60)
 - [x] T22: FL-Job day grouping (`EntryGrouper`), thumbnails, note text, audio duration and playback, FL-Entry edit/delete, crash-safety check. (acceptance: AC-61, AC-62)
 - [x] T23: FL-BehindWall: room → wall picker (N/E/S/W/custom → Wall rows), camera reuse, Photo rows with stage BEHIND_WALL, running counts. (acceptance: AC-63, AC-64, AC-65)
-- [ ] T24: FL-Report: `ReportDraftBuilder` prefill from entries, editable draft persisted as DailyReport, delay reason picker, FL-Settings company profile. (acceptance: AC-67, AC-68)
+- [x] T24: FL-Report: `ReportDraftBuilder` prefill from entries, editable draft persisted as DailyReport, delay reason picker, FL-Settings company profile. (acceptance: AC-67, AC-68)
 - [ ] T25: Report PDF: `ReportSectionBuilder` (pure), `PdfDocument` renderer with header and two-per-row photos, overwrite per day, share sheet. (acceptance: AC-69, AC-70)
 - [ ] R5: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T26: `.homerecord` bundle format in `:core`: `RecordJson` (kotlinx.serialization), `BundleWriter` (zip + media), `BundleReader` with formatVersion guard and path sanitizer, JVM round-trip tests. (acceptance: AC-72, AC-73, AC-74, AC-91)

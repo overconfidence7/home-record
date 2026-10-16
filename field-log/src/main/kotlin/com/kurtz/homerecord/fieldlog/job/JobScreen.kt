@@ -40,11 +40,13 @@ fun JobRoute(
     onCapture: () -> Unit,
     onOpenEntry: (String) -> Unit,
     onBehindWall: () -> Unit = {},
+    onReport: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     JobScreen(
         state, onEdit, onCapture, onOpenEntry,
         onBehindWall = onBehindWall,
+        onReport = onReport,
         onTogglePlay = viewModel::togglePlay,
         fileFor = viewModel::file,
     )
@@ -60,6 +62,7 @@ fun JobScreen(
     onTogglePlay: (String, String?) -> Unit = { _, _ -> },
     fileFor: (String?) -> File? = { null },
     onBehindWall: () -> Unit = {},
+    onReport: () -> Unit = {},
 ) {
     val job = state.job
     if (job == null) {
@@ -76,6 +79,9 @@ fun JobScreen(
                 }
                 OutlinedButton(onClick = onBehindWall, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                     Text(stringResource(R.string.job_behind_wall))
+                }
+                OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                    Text(stringResource(R.string.job_report))
                 }
                 OutlinedButton(onClick = onEdit, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                     Text(stringResource(R.string.job_edit))

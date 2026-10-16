@@ -13,5 +13,6 @@ data class JobsUiState(
 sealed interface JobsEvent {
     data class ShowArchived(val show: Boolean) : JobsEvent
     data object NewJob : JobsEvent
+    data object Settings : JobsEvent
     data class Open(val jobId: String) : JobsEvent
 }

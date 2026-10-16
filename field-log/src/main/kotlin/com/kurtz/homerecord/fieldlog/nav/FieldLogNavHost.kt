@@ -26,6 +26,11 @@ import com.kurtz.homerecord.fieldlog.jobedit.QuickRoom
 import com.kurtz.homerecord.fieldlog.jobs.JobsRoute
 import com.kurtz.homerecord.fieldlog.jobs.JobsViewModel
 import com.kurtz.homerecord.fieldlog.playback.MediaPlayerAudioPlayer
+import com.kurtz.homerecord.fieldlog.report.ReportRoute
+import com.kurtz.homerecord.fieldlog.report.ReportViewModel
+import com.kurtz.homerecord.fieldlog.settings.SettingsRoute
+import com.kurtz.homerecord.fieldlog.settings.SettingsViewModel
+import java.time.LocalDate
 
 object Routes {
     const val JOBS = "jobs"
@@ -35,9 +40,12 @@ object Routes {
     const val BEHIND_WALL = "behindwall/{$JOB_ARG}"
     const val ENTRY_ARG = "entryId"
     const val ENTRY = "entry/{$ENTRY_ARG}"
+    const val REPORT = "report/{$JOB_ARG}"
+    const val SETTINGS = "settings"
     const val JOB_NEW = "jobedit/new"
     const val JOB_EDIT = "jobedit/{$JOB_ARG}"
 
+    fun report(id: String) = "report/$id"
     fun behindWall(id: String) = "behindwall/$id"
     fun capture(id: String) = "capture/$id"
     fun entry(id: String) = "entry/$id"
@@ -52,7 +60,7 @@ fun FieldLogNavHost(container: AppContainer) {
     NavHost(navController = nav, startDestination = Routes.JOBS) {
         composable(Routes.JOBS) {
             val vm: JobsViewModel = viewModel(factory = remember { simpleFactory { JobsViewModel(container.jobRepository) } })
-            JobsRoute(vm, onNewJob = { nav.navigate(Routes.JOB_NEW) }, onOpenJob = { nav.navigate(Routes.job(it)) })
+            JobsRoute(vm, onNewJob = { nav.navigate(Routes.JOB_NEW) }, onOpenJob = { nav.navigate(Routes.job(it)) }, onSettings = { nav.navigate(Routes.SETTINGS) })
         }
         composable(Routes.JOB_NEW) {
             val vm: JobEditViewModel = viewModel(
@@ -83,8 +91,24 @@ fun FieldLogNavHost(container: AppContainer) {
                 onEdit = { nav.navigate(Routes.jobEdit(id)) },
                 onCapture = { nav.navigate(Routes.capture(id)) },
                 onBehindWall = { nav.navigate(Routes.behindWall(id)) },
+                onReport = { nav.navigate(Routes.report(id)) },
                 onOpenEntry = { nav.navigate(Routes.entry(it)) },
             )
+        }
+        composable(Routes.REPORT, arguments = listOf(navArgument(Routes.JOB_ARG) { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()
+            val vm: ReportViewModel = viewModel(
+                factory = remember(id) {
+                    simpleFactory { ReportViewModel(id, LocalDate.now().toString(), container.jobRepository, container.reportRepository) }
+                },
+            )
+            ReportRoute(vm)
+        }
+        composable(Routes.SETTINGS) {
+            val vm: SettingsViewModel = viewModel(
+                factory = remember { simpleFactory { SettingsViewModel(container.reportRepository, container.mediaStore) } },
+            )
+            SettingsRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })
         }
         composable(Routes.ENTRY, arguments = listOf(navArgument(Routes.ENTRY_ARG) { type = NavType.StringType })) { entry ->
             val id = entry.arguments?.getString(Routes.ENTRY_ARG).orEmpty()

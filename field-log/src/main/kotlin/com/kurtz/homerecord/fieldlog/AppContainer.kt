@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.JobRepository
 import com.kurtz.homerecord.core.repo.LogEntryRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
+import com.kurtz.homerecord.core.repo.ReportRepository
 import com.kurtz.homerecord.core.repo.ShutoffRepository
 
 /** Manual DI: one container per process, created in [FieldLogApp.onCreate]. */
@@ -21,6 +22,7 @@ class AppContainer(context: Context) {
     val jobRepository by lazy { JobRepository(database, Source.FIELD_LOG) }
     val logEntryRepository by lazy { LogEntryRepository(database, Source.FIELD_LOG) }
     val behindWallRepository by lazy { BehindWallRepository(database, Source.FIELD_LOG, logEntryRepository) }
+    val reportRepository by lazy { ReportRepository(database, Source.FIELD_LOG) }
     val shutterKeys = com.kurtz.homerecord.fieldlog.capture.ShutterKeyRouter()
     val panelRepository by lazy { PanelRepository(database, mediaStore, Source.FIELD_LOG) }
     val shutoffRepository by lazy { ShutoffRepository(database, mediaStore, Source.FIELD_LOG) }
