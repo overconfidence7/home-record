@@ -116,6 +116,8 @@ class CaptureViewModel(
     }
 
     private fun stopVoice() {
+        // Already finishing (cap reached or stopped once): cancelling the ticker now would drop the entry.
+        if (voicePath == null) return
         ticker?.cancel()
         viewModelScope.launch { finishVoice() }
     }

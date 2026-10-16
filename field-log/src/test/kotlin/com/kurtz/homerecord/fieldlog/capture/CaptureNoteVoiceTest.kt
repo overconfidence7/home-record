@@ -150,4 +150,16 @@ class CaptureNoteVoiceTest {
         advanceUntilIdle()
         assertEquals(1, entries.observeForJob(jobId).first().size)
     }
+
+    @Test fun stoppingTwiceSavesOneEntry() = runTest(dispatcher) {
+        val recorder = FakeRecorder()
+        val vm = vm(recorder)
+        vm.onEvent(CaptureEvent.ToggleVoice)
+        advanceTimeBy(1_000)
+        vm.onLeave()
+        vm.onLeave()
+        advanceUntilIdle()
+        assertEquals(1, entries.observeForJob(jobId).first().size)
+        assertEquals(1, recorder.stopped)
+    }
 }
