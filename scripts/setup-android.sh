@@ -167,18 +167,19 @@ else
   log "SDK packages already installed: ${packages[*]} platforms;${platform_installed}"
 fi
 
-# AGP 8.x looks for platforms/android-37; give it that name if only android-37.N exists.
-if [ ! -e "$ANDROID_HOME/platforms/${platform_base}" ]; then
-  for d in "$ANDROID_HOME/platforms/${platform_base}.0" "$ANDROID_HOME/platforms/${platform_base}".*; do
-    [ -d "$d" ] && ln -s "$(basename "$d")" "$ANDROID_HOME/platforms/${platform_base}" && break
-  done
-fi
-# If an earlier run linked android-37 to a later minor (37.1, 37.2), repoint it to 37.0.
-if [ -L "$ANDROID_HOME/platforms/${platform_base}" ] && [ -d "$ANDROID_HOME/platforms/${platform_base}.0" ]; then
-  case "$(readlink "$ANDROID_HOME/platforms/${platform_base}")" in
-    "${platform_base}.0") ;;
-    *) ln -sfn "${platform_base}.0" "$ANDROID_HOME/platforms/${platform_base}" ;;
-  esac
+# AGP 8.x looks for platforms/android-37 and checks that the package id inside it is
+# "platforms;android-37". sdkmanager installs "android-37.0", so a symlink is not enough:
+# make a real copy and patch the package id.
+base_dir="$ANDROID_HOME/platforms/${platform_base}"
+if [ -L "$base_dir" ] || [ ! -e "$base_dir" ]; then
+  src=""
+  for d in "$base_dir.0" "$base_dir".*; do [ -d "$d" ] && { src="$d"; break; }; done
+  if [ -n "$src" ]; then
+    rm -f "$base_dir"
+    cp -a "$src" "$base_dir"
+    sed -i "s#path=\"platforms;${platform_base}\\.[0-9]*\"#path=\"platforms;${platform_base}\"#" "$base_dir/package.xml"
+    rm -rf "$src"
+  fi
 fi
 
 # ------------------------------------------------------------- environment

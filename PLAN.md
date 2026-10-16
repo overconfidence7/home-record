@@ -16,7 +16,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T07: HM-Breaker editor: label, amps, poles, type, confidence; `SlotOccupancy` rules for two-pole and tandem; slot-count shrink guard; delete detaches endpoints. (acceptance: AC-8, AC-9, AC-10, AC-11, AC-12)
 - [x] T08: Breaker links: room chips, endpoint add/remove on HM-Breaker, confidence dots on the grid. (acceptance: AC-13, AC-14, AC-15)
 - [x] T09: `SearchEngine` (token match across breakers, endpoints, rooms, equipment, shutoffs), HM-Search results, highlight-and-scroll on HM-Panel, HM-Room breaker list with confidence. (acceptance: AC-17, AC-18, AC-19, AC-20)
-- [ ] T10: Legend PDF: `LegendRowBuilder` (pure, tested) + `PdfDocument` renderer + share sheet via FileProvider. (acceptance: AC-22, AC-23, AC-24)
+- [x] T10: Legend PDF: `LegendRowBuilder` (pure, tested) + `PdfDocument` renderer + share sheet via FileProvider. (acceptance: AC-22, AC-23, AC-24)
 - [ ] R2: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T11: Shutoffs: HM-Shutoffs list with empty state, HM-ShutoffEdit with kind/room/photo/instructions and validation. (acceptance: AC-25, AC-26, AC-27)
 - [ ] T12: HM-Emergency: `EmergencyGrouper` (pure, tested), large-type layout, full-screen zoomable photo, offline check. (acceptance: AC-28, AC-29, AC-30, AC-31)

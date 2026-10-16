@@ -148,4 +148,16 @@ class PanelViewModelTest {
         vm.onEvent(PanelEvent.ApplySlotCount)
         assertEquals(20, vm.state.first { it.panel?.slotCount == 20 }.panel?.slotCount)
     }
+
+    @Test fun `AC-23 legend rows list linked room names for each breaker`() = runTest {
+        val (vm, b) = panelWithBreaker(listOf(2))
+        val home = homes.getHome()!!
+        val room = homes.addRoom(home.id, "Kitchen")
+        panels.linkRoom(b.id, room.id)
+        val rows = vm.legendRows { "Standard" }
+        assertEquals(40, rows.size)
+        assertEquals("Oven", rows[1].label)
+        assertEquals("Kitchen", rows[1].rooms)
+        assertEquals("—", rows[0].label)
+    }
 }

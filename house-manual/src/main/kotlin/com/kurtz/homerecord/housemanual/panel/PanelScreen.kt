@@ -64,8 +64,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/** Items before the slot rows in the panel list: title, photo, slot-count editor. */
-private const val PANEL_HEADER_ITEMS = 3
+/** Items before the slot rows in the panel list: title, photo, slot-count editor, legend button. */
+private const val PANEL_HEADER_ITEMS = 4
 const val HIGHLIGHT_MILLIS = 2_500L
 
 @Composable
@@ -106,6 +106,12 @@ fun PanelScreen(
         }
         item { PanelPhoto(photoFile, hasPhoto = panel.photoPath != null, onEvent) }
         item { SlotCountEditor(state, panel.slotCount, onEvent) }
+        item {
+            OutlinedButton(
+                onClick = { onEvent(PanelEvent.ShareLegend) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("panel_legend_pdf"),
+            ) { Text(stringResource(R.string.panel_legend_pdf)) }
+        }
         items(rows, key = { it.first() }) { slots ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 slots.forEach { slot -> SlotCell(slot, state, onEvent, Modifier.weight(1f), highlighted = slot == highlighted) }

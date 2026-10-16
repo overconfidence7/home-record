@@ -72,4 +72,11 @@ class PanelScreenTest {
         rule.mainClock.advanceTimeBy(100)
         rule.onNodeWithTag("slot_39").assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
     }
+
+    @Test fun `AC-22 legend button emits ShareLegend`() {
+        val events = mutableListOf<PanelEvent>()
+        rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel()), { events += it }) } }
+        rule.onNodeWithTag("panel_legend_pdf").performClick()
+        assertEquals(listOf<PanelEvent>(PanelEvent.ShareLegend), events)
+    }
 }

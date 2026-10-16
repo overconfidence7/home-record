@@ -122,4 +122,12 @@
     <string name="panel_slot_count_apply">Update slot count</string>
     <string name="panel_slot_count_blocked">Can\'t shrink: slot %1$d is in use.</string>
     <string name="panel_two_pole_continued">Two-pole (with slot %1$d)</string>
+    <string name="panel_legend_pdf">Legend PDF</string>
+    <string name="legend_title">Panel legend</string>
+    <string name="legend_col_slot">Slot</string>
+    <string name="legend_col_label">Label</string>
+    <string name="legend_col_amps">Amps</string>
+    <string name="legend_col_poles">Poles</string>
+    <string name="legend_col_type">Type</string>
+    <string name="legend_col_rooms">Rooms</string>
 </resources>

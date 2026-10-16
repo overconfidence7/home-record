@@ -35,6 +35,8 @@ sealed interface PanelEvent {
     data class LayoutChanged(val layout: PanelLayout) : PanelEvent
     data object SavePanel : PanelEvent
     data object TakePhoto : PanelEvent
+    /** AC-22: build the legend PDF and open the share sheet (handled by the route). */
+    data object ShareLegend : PanelEvent
     /** Open HM-Breaker for [slot]: an existing [breakerId], or an empty slot/tandem half. */
     data class OpenBreaker(val slot: Int, val breakerId: String?, val tandemIndex: Int? = null) : PanelEvent
     data class SlotLongPressed(val slot: Int) : PanelEvent

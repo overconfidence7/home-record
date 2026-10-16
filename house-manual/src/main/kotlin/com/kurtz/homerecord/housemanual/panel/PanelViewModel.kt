@@ -2,6 +2,8 @@ package com.kurtz.homerecord.housemanual.panel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.logic.LegendRow
+import com.kurtz.homerecord.core.logic.LegendRowBuilder
 import com.kurtz.homerecord.core.logic.ShrinkCheck
 import com.kurtz.homerecord.core.logic.SlotCountRule
 import com.kurtz.homerecord.core.logic.SlotOccupancy
@@ -63,7 +65,7 @@ class PanelViewModel(
             is PanelEvent.SlotEditChanged -> form.update { it.copy(slotEdit = event.value, blockedAt = null) }
             PanelEvent.ApplySlotCount -> applySlotCount()
             is PanelEvent.SlotLongPressed -> makeTandem(event.slot)
-            PanelEvent.TakePhoto, is PanelEvent.OpenBreaker -> Unit // handled by the route
+            PanelEvent.TakePhoto, PanelEvent.ShareLegend, is PanelEvent.OpenBreaker -> Unit // handled by the route
         }
     }
 
@@ -73,6 +75,20 @@ class PanelViewModel(
             val panel = state.value.panel ?: return@launch
             panels.setPanelPhoto(panel.id, relativePath)
         }
+    }
+
+    /** AC-23: legend rows for the current panel; [typeLabel] supplies the localized breaker type. */
+    suspend fun legendRows(typeLabel: (Breaker) -> String): List<LegendRow> {
+        val panel = state.value.panel ?: return emptyList()
+        val home = homes.getHome() ?: return emptyList()
+        val roomNames = homes.getRooms(home.id).associate { it.id to it.name }
+        val roomsByBreaker = panels.observeBreakerRoomsForHome(home.id).first().groupBy({ it.breakerId }, { it.roomId })
+        return LegendRowBuilder.build(
+            panel.slotCount,
+            panels.observeBreakers(panel.id).first(),
+            { b -> roomsByBreaker[b.id].orEmpty().mapNotNull { roomNames[it] } },
+            typeLabel,
+        )
     }
 
     private fun applySlotCount() {
