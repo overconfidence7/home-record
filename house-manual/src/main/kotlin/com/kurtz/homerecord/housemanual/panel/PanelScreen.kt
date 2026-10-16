@@ -39,7 +39,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.logic.PanelLayoutCalculator
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Confidence
+import com.kurtz.homerecord.housemanual.breaker.confidenceLabel
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
@@ -164,7 +173,16 @@ private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Un
 @Composable
 private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, continuedFrom: Int? = null) {
     Row(modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(number, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 12.dp))
+        Text(number, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 8.dp))
+        if (breaker != null) {
+            val dotLabel = stringResource(R.string.confidence_dot_description, stringResource(confidenceLabel(breaker.confidence)))
+            Box(
+                Modifier.padding(end = 8.dp).size(12.dp).clip(CircleShape)
+                    .background(confidenceColor(breaker.confidence))
+                    .semantics { contentDescription = dotLabel }
+                    .testTag("dot_${breaker.confidence.name}"),
+            )
+        }
         if (breaker == null) {
             Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else if (breaker.label.isBlank()) {
@@ -211,6 +229,13 @@ private fun LayoutOption(layout: PanelLayout, label: Int, state: PanelUiState, o
         RadioButton(selected = state.layoutInput == layout, onClick = null)
         Text(stringResource(label), modifier = Modifier.padding(start = 12.dp))
     }
+}
+
+/** AC-15: green Confirmed, amber Likely, grey Unknown. */
+private fun confidenceColor(c: Confidence): Color = when (c) {
+    Confidence.CONFIRMED -> Color(0xFF2E7D32)
+    Confidence.LIKELY -> Color(0xFFF9A825)
+    Confidence.UNKNOWN -> Color(0xFF9E9E9E)
 }
 
 private fun decodeScaled(file: File, maxEdge: Int): Bitmap? {

@@ -97,6 +97,17 @@
     <string name="confidence_confirmed">Confirmed</string>
     <string name="confidence_likely">Likely</string>
     <string name="confidence_unknown">Unknown</string>
+    <string name="breaker_rooms">Rooms on this breaker</string>
+    <string name="breaker_endpoints">Outlets, lights and more</string>
+    <string name="endpoint_label">Label (e.g. Freezer)</string>
+    <string name="endpoint_add">Add</string>
+    <string name="endpoint_remove">Remove</string>
+    <string name="endpoint_kind_outlet">Outlet</string>
+    <string name="endpoint_kind_light">Light</string>
+    <string name="endpoint_kind_switch">Switch</string>
+    <string name="endpoint_kind_appliance">Appliance</string>
+    <string name="endpoint_kind_hardwired">Hardwired</string>
+    <string name="confidence_dot_description">Confidence: %1$s</string>
     <string name="breaker_error_occupied">Slot %1$d is already taken. Free it or choose one pole.</string>
     <string name="breaker_error_range">A two-pole breaker here would run past the last slot.</string>
     <string name="breaker_delete_title">Delete breaker?</string>

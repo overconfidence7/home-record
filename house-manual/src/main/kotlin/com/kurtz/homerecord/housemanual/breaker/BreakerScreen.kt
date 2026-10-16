@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -28,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.BreakerType
 import com.kurtz.homerecord.core.model.Confidence
+import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
@@ -94,6 +96,61 @@ fun BreakerScreen(state: BreakerUiState, onEvent: (BreakerEvent) -> Unit) {
                 )
             }
         }
+        if (state.rooms.isNotEmpty()) {
+            Text(stringResource(R.string.breaker_rooms), style = MaterialTheme.typography.titleMedium)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                state.rooms.forEach { r ->
+                    FilterChip(
+                        selected = r.id in state.selectedRoomIds,
+                        onClick = { onEvent(BreakerEvent.RoomToggled(r.id)) },
+                        label = { Text(r.name) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("room_${r.id}"),
+                    )
+                }
+            }
+            Text(stringResource(R.string.breaker_endpoints), style = MaterialTheme.typography.titleMedium)
+            state.endpoints.forEachIndexed { i, e ->
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val roomName = state.rooms.firstOrNull { it.id == e.roomId }?.name.orEmpty()
+                    Text("${stringResource(endpointKindLabel(e.kind))}: ${e.label} ($roomName)", Modifier.weight(1f))
+                    TextButton(onClick = { onEvent(BreakerEvent.RemoveEndpoint(i)) }, modifier = Modifier.testTag("endpoint_remove_$i")) {
+                        Text(stringResource(R.string.endpoint_remove))
+                    }
+                }
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                EndpointKind.entries.forEach { k ->
+                    FilterChip(
+                        selected = state.newEndpointKind == k,
+                        onClick = { onEvent(BreakerEvent.EndpointKindChanged(k)) },
+                        label = { Text(stringResource(endpointKindLabel(k))) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("endpoint_kind_${k.name}"),
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = state.newEndpointLabel,
+                onValueChange = { onEvent(BreakerEvent.EndpointLabelChanged(it)) },
+                label = { Text(stringResource(R.string.endpoint_label)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().testTag("endpoint_label"),
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                state.rooms.forEach { r ->
+                    FilterChip(
+                        selected = state.newEndpointRoomId == r.id,
+                        onClick = { onEvent(BreakerEvent.EndpointRoomChanged(r.id)) },
+                        label = { Text(r.name) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("endpoint_room_${r.id}"),
+                    )
+                }
+            }
+            OutlinedButton(
+                onClick = { onEvent(BreakerEvent.AddEndpoint) },
+                enabled = state.canAddEndpoint,
+                modifier = Modifier.heightIn(min = 48.dp).testTag("endpoint_add"),
+            ) { Text(stringResource(R.string.endpoint_add)) }
+        }
         state.problem?.let {
             val message = when (it) {
                 is SlotProblem.Occupied -> stringResource(R.string.breaker_error_occupied, it.slot)
@@ -133,6 +190,14 @@ fun typeLabel(type: BreakerType): Int = when (type) {
     BreakerType.GFCI -> R.string.breaker_type_gfci
     BreakerType.AFCI -> R.string.breaker_type_afci
     BreakerType.DUAL -> R.string.breaker_type_dual
+}
+
+fun endpointKindLabel(kind: EndpointKind): Int = when (kind) {
+    EndpointKind.OUTLET -> R.string.endpoint_kind_outlet
+    EndpointKind.LIGHT -> R.string.endpoint_kind_light
+    EndpointKind.SWITCH -> R.string.endpoint_kind_switch
+    EndpointKind.APPLIANCE -> R.string.endpoint_kind_appliance
+    EndpointKind.HARDWIRED -> R.string.endpoint_kind_hardwired
 }
 
 fun confidenceLabel(c: Confidence): Int = when (c) {

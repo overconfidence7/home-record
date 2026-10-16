@@ -3,12 +3,17 @@ package com.kurtz.homerecord.housemanual.breaker
 import com.kurtz.homerecord.core.logic.AmpsRule
 import com.kurtz.homerecord.core.model.BreakerType
 import com.kurtz.homerecord.core.model.Confidence
+import com.kurtz.homerecord.core.model.EndpointKind
+import com.kurtz.homerecord.core.model.Room
 
 /** Why Save is blocked by slot occupancy (AC-9). */
 sealed interface SlotProblem {
     data class Occupied(val slot: Int) : SlotProblem
     data object OutOfRange : SlotProblem
 }
+
+/** An outlet/light/etc. attached to this breaker; [id] is blank until saved. */
+data class EndpointDraft(val id: String, val kind: EndpointKind, val label: String, val roomId: String)
 
 data class BreakerUiState(
     val loaded: Boolean = false,
@@ -21,10 +26,17 @@ data class BreakerUiState(
     val poles: Int = 1,
     val type: BreakerType = BreakerType.STANDARD,
     val confidence: Confidence = Confidence.UNKNOWN,
+    val rooms: List<Room> = emptyList(),
+    val selectedRoomIds: Set<String> = emptySet(),
+    val endpoints: List<EndpointDraft> = emptyList(),
+    val newEndpointKind: EndpointKind = EndpointKind.OUTLET,
+    val newEndpointLabel: String = "",
+    val newEndpointRoomId: String? = null,
     val problem: SlotProblem? = null,
     val confirmingDelete: Boolean = false,
 ) {
     val canSave: Boolean get() = loaded && label.isNotBlank() && AmpsRule.isValid(amps)
+    val canAddEndpoint: Boolean get() = newEndpointLabel.isNotBlank() && newEndpointRoomId != null
     val showPoles: Boolean get() = tandemIndex == null
 }
 
@@ -34,6 +46,12 @@ sealed interface BreakerEvent {
     data class PolesChanged(val poles: Int) : BreakerEvent
     data class TypeChanged(val type: BreakerType) : BreakerEvent
     data class ConfidenceChanged(val confidence: Confidence) : BreakerEvent
+    data class RoomToggled(val roomId: String) : BreakerEvent
+    data class EndpointKindChanged(val kind: EndpointKind) : BreakerEvent
+    data class EndpointLabelChanged(val value: String) : BreakerEvent
+    data class EndpointRoomChanged(val roomId: String) : BreakerEvent
+    data object AddEndpoint : BreakerEvent
+    data class RemoveEndpoint(val index: Int) : BreakerEvent
     data object Save : BreakerEvent
     data object DeleteClicked : BreakerEvent
     data object DeleteConfirmed : BreakerEvent

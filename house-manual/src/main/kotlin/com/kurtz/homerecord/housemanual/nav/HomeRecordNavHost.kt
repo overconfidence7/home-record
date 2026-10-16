@@ -107,7 +107,7 @@ fun HomeRecordNavHost(container: AppContainer) {
             val tandem = entry.arguments?.getInt("tandem")?.takeIf { it >= 0 }
             val vm: BreakerViewModel = viewModel(
                 factory = remember(panelId, slot, breakerId, tandem) {
-                    simpleFactory { BreakerViewModel(panelId, slot, breakerId, tandem, container.panelRepository) }
+                    simpleFactory { BreakerViewModel(panelId, slot, breakerId, tandem, container.panelRepository, container.homeRepository) }
                 },
             )
             BreakerRoute(vm, onDone = { nav.popBackStack() })

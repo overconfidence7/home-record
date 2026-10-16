@@ -55,7 +55,7 @@ class BreakerViewModelTest {
     }
 
     private suspend fun vm(slot: Int, breakerId: String? = null, tandem: Int? = null) =
-        BreakerViewModel(panel.id, slot, breakerId, tandem, panels).also { it.state.first { s -> s.loaded } }
+        BreakerViewModel(panel.id, slot, breakerId, tandem, panels, homes).also { it.state.first { s -> s.loaded } }
 
     @Test fun `AC-8 saving on an empty slot creates a breaker there with unknown confidence`() = runTest {
         val vm = vm(5)
@@ -132,5 +132,59 @@ class BreakerViewModelTest {
         assertNull(panels.observeEndpointsForBreaker(b.id).first().firstOrNull())
         assertEquals(ep.id, db.endpointDao().get(ep.id)?.id)
         assertNull(db.endpointDao().get(ep.id)?.breakerId)
+    }
+
+    @Test fun `AC-13 selecting two rooms and saving creates two BreakerRoom rows`() = runTest {
+        val kitchen = homes.addRoom(panel.homeId, "Kitchen")
+        val garage = homes.addRoom(panel.homeId, "Garage")
+        val vm = vm(4)
+        vm.onEvent(BreakerEvent.LabelChanged("Counter"))
+        vm.onEvent(BreakerEvent.RoomToggled(kitchen.id))
+        vm.onEvent(BreakerEvent.RoomToggled(garage.id))
+        vm.onEvent(BreakerEvent.Save)
+        vm.done.first()
+        val b = panels.observeBreakers(panel.id).first().single()
+        assertEquals(setOf(kitchen.id, garage.id), panels.observeBreakerRooms(b.id).first().map { it.roomId }.toSet())
+    }
+
+    @Test fun `deselecting a room on an existing breaker removes its link`() = runTest {
+        val kitchen = homes.addRoom(panel.homeId, "Kitchen")
+        val b = panels.saveBreaker(Breaker("", panel.id, listOf(4), label = "Counter", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        panels.linkRoom(b.id, kitchen.id)
+        val vm = vm(4, b.id)
+        assertEquals(setOf(kitchen.id), vm.state.value.selectedRoomIds)
+        vm.onEvent(BreakerEvent.RoomToggled(kitchen.id))
+        vm.onEvent(BreakerEvent.Save)
+        vm.done.first()
+        assertTrue(panels.observeBreakerRooms(b.id).first().isEmpty())
+    }
+
+    @Test fun `AC-14 adding an outlet endpoint links it to the breaker and room`() = runTest {
+        val garage = homes.addRoom(panel.homeId, "Garage")
+        val vm = vm(6)
+        vm.onEvent(BreakerEvent.LabelChanged("Garage"))
+        vm.onEvent(BreakerEvent.EndpointLabelChanged("Freezer"))
+        vm.onEvent(BreakerEvent.EndpointRoomChanged(garage.id))
+        assertTrue(vm.state.value.canAddEndpoint)
+        vm.onEvent(BreakerEvent.AddEndpoint)
+        assertEquals(1, vm.state.value.endpoints.size)
+        vm.onEvent(BreakerEvent.Save)
+        vm.done.first()
+        val b = panels.observeBreakers(panel.id).first().single()
+        val ep = panels.observeEndpointsForBreaker(b.id).first().single()
+        assertEquals("Freezer", ep.label)
+        assertEquals(EndpointKind.OUTLET, ep.kind)
+        assertEquals(garage.id, ep.roomId)
+    }
+
+    @Test fun `removing an endpoint draft deletes it on save`() = runTest {
+        val garage = homes.addRoom(panel.homeId, "Garage")
+        val b = panels.saveBreaker(Breaker("", panel.id, listOf(2), label = "Garage", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        panels.saveEndpoint(Endpoint("", b.id, garage.id, EndpointKind.OUTLET, "Freezer", 0, 0, Source.HOUSE_MANUAL))
+        val vm = vm(2, b.id)
+        vm.onEvent(BreakerEvent.RemoveEndpoint(0))
+        vm.onEvent(BreakerEvent.Save)
+        vm.done.first()
+        assertTrue(panels.observeEndpointsForBreaker(b.id).first().isEmpty())
     }
 }

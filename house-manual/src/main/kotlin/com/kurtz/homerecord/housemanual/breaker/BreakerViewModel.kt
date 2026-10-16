@@ -6,7 +6,9 @@ import com.kurtz.homerecord.core.logic.AmpsRule
 import com.kurtz.homerecord.core.logic.Placement
 import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Source
+import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +29,7 @@ class BreakerViewModel(
     private val breakerId: String?,
     private val newTandemIndex: Int?,
     private val panels: PanelRepository,
+    private val homes: HomeRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(BreakerUiState(slot = slot, tandemIndex = newTandemIndex))
     val state: StateFlow<BreakerUiState> = _state.asStateFlow()
@@ -36,15 +39,22 @@ class BreakerViewModel(
     val done = _done.receiveAsFlow()
 
     private var existing: Breaker? = null
+    private var originalEndpointIds: Set<String> = emptySet()
 
     init {
         viewModelScope.launch {
             val found = breakerId?.let { panels.getBreaker(it) }
             existing = found
+            val rooms = panels.getPanel(panelId)?.let { homes.getRooms(it.homeId) }.orEmpty()
+            val linkedRooms = found?.let { panels.observeBreakerRooms(it.id).first().map { l -> l.roomId }.toSet() }.orEmpty()
+            val endpoints = found?.let { panels.observeEndpointsForBreaker(it.id).first() }.orEmpty()
+                .map { EndpointDraft(it.id, it.kind, it.label, it.roomId) }
+            originalEndpointIds = endpoints.map { it.id }.toSet()
             _state.update {
-                if (found == null) it.copy(loaded = true)
-                else it.copy(
-                    loaded = true, isNew = false, slot = found.slots.min(), tandemIndex = found.tandemIndex,
+                val withLinks = it.copy(loaded = true, rooms = rooms, selectedRoomIds = linkedRooms, endpoints = endpoints, newEndpointRoomId = rooms.firstOrNull()?.id)
+                if (found == null) withLinks
+                else withLinks.copy(
+                    isNew = false, slot = found.slots.min(), tandemIndex = found.tandemIndex,
                     label = found.label, amps = found.amps?.toString().orEmpty(), poles = found.poles,
                     type = found.type, confidence = found.confidence,
                 )
@@ -59,6 +69,21 @@ class BreakerViewModel(
             is BreakerEvent.PolesChanged -> _state.update { it.copy(poles = event.poles, problem = null) }
             is BreakerEvent.TypeChanged -> _state.update { it.copy(type = event.type) }
             is BreakerEvent.ConfidenceChanged -> _state.update { it.copy(confidence = event.confidence) }
+            is BreakerEvent.RoomToggled -> _state.update {
+                it.copy(selectedRoomIds = if (event.roomId in it.selectedRoomIds) it.selectedRoomIds - event.roomId else it.selectedRoomIds + event.roomId)
+            }
+            is BreakerEvent.EndpointKindChanged -> _state.update { it.copy(newEndpointKind = event.kind) }
+            is BreakerEvent.EndpointLabelChanged -> _state.update { it.copy(newEndpointLabel = event.value) }
+            is BreakerEvent.EndpointRoomChanged -> _state.update { it.copy(newEndpointRoomId = event.roomId) }
+            BreakerEvent.AddEndpoint -> _state.update {
+                val room = it.newEndpointRoomId
+                if (!it.canAddEndpoint || room == null) it
+                else it.copy(
+                    endpoints = it.endpoints + EndpointDraft("", it.newEndpointKind, it.newEndpointLabel.trim(), room),
+                    newEndpointLabel = "",
+                )
+            }
+            is BreakerEvent.RemoveEndpoint -> _state.update { it.copy(endpoints = it.endpoints.filterIndexed { i, _ -> i != event.index }) }
             BreakerEvent.Save -> save()
             BreakerEvent.DeleteClicked -> _state.update { it.copy(confirmingDelete = true) }
             BreakerEvent.DeleteDismissed -> _state.update { it.copy(confirmingDelete = false) }
@@ -81,7 +106,7 @@ class BreakerViewModel(
                 }
             }
             val base = existing ?: Breaker("", panelId, slots, label = "", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL)
-            panels.saveBreaker(
+            val saved = panels.saveBreaker(
                 base.copy(
                     slots = slots,
                     poles = if (s.tandemIndex != null) 1 else s.poles,
@@ -92,7 +117,20 @@ class BreakerViewModel(
                     tandemIndex = s.tandemIndex,
                 ),
             )
+            syncLinks(saved.id, s)
             _done.send(Unit)
+        }
+    }
+
+    /** AC-13/AC-14: applies the chosen room chips and endpoint list to the stored breaker. */
+    private suspend fun syncLinks(breakerId: String, s: BreakerUiState) {
+        val current = panels.observeBreakerRooms(breakerId).first().map { it.roomId }.toSet()
+        (s.selectedRoomIds - current).forEach { panels.linkRoom(breakerId, it) }
+        (current - s.selectedRoomIds).forEach { panels.unlinkRoom(breakerId, it) }
+        val keptIds = s.endpoints.map { it.id }.toSet()
+        (originalEndpointIds - keptIds).forEach { panels.deleteEndpoint(it) }
+        s.endpoints.filter { it.id.isBlank() }.forEach {
+            panels.saveEndpoint(Endpoint("", breakerId, it.roomId, it.kind, it.label, createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
         }
     }
 
