@@ -1,11 +1,18 @@
 package com.kurtz.homerecord.fieldlog.nav
 
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NamedNavArgument
+import androidx.compose.ui.Modifier
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.composable as navComposable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kurtz.homerecord.fieldlog.AppContainer
@@ -51,6 +58,17 @@ object Routes {
     fun entry(id: String) = "entry/$id"
     fun job(id: String) = "job/$id"
     fun jobEdit(id: String) = "jobedit/$id"
+}
+
+/** Opaque destination so transitions never show the previous screen through (and dark mode stays dark). */
+private fun NavGraphBuilder.composable(
+    route: String,
+    arguments: List<NamedNavArgument> = emptyList(),
+    content: @Composable (NavBackStackEntry) -> Unit,
+) {
+    navComposable(route, arguments) { entry ->
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { content(entry) }
+    }
 }
 
 @Composable

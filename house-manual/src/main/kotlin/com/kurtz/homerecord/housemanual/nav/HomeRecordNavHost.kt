@@ -1,5 +1,12 @@
 package com.kurtz.homerecord.housemanual.nav
 
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NamedNavArgument
+import androidx.compose.ui.Modifier
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -8,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.composable as navComposable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kurtz.homerecord.housemanual.breaker.BreakerRoute
@@ -38,6 +45,17 @@ import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingRoute
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingViewModel
 import com.kurtz.homerecord.housemanual.onboarding.QuickRoom
+
+/** Opaque destination so transitions never show the previous screen through (and dark mode stays dark). */
+private fun NavGraphBuilder.composable(
+    route: String,
+    arguments: List<NamedNavArgument> = emptyList(),
+    content: @Composable (NavBackStackEntry) -> Unit,
+) {
+    navComposable(route, arguments) { entry ->
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { content(entry) }
+    }
+}
 
 @Composable
 fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
