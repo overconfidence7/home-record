@@ -23,7 +23,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T13: Quick Settings tile: `EmergencyTileService`, `TileStateChooser`, deep link into HM-Emergency, lock-screen handling. (acceptance: AC-32, AC-33, AC-34)
 - [x] T14: Mapping mode core: `MappingStateMachine` (Idle/PluggedIn/Armed/Alarm/Confirm) driven by `PowerEvent`s, `ChargingMonitor` (BatteryManager + ACTION_POWER_CONNECTED/DISCONNECTED receiver), `AlarmPlayer` (ToneGenerator/AudioTrack loop + Vibrator) behind interfaces with fakes. (acceptance: AC-35, AC-37, AC-38)
 - [x] T15: HM-Mapping screen: keep-screen-on, armed and alarm states, breaker picker, endpoint picker with "New outlet…", save confirms the link; disarm on leave. (acceptance: AC-36, AC-39, AC-40, AC-41, AC-16)
-- [ ] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
+- [x] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T16: Equipment list and editor: categories, dates, `AgeAndWarrantyFormatter`, validation, delete with file cleanup. (acceptance: AC-42, AC-43, AC-44, AC-50)
 - [ ] T17: Data-plate OCR: `TextRecognizer` interface with ML Kit bundled implementation, `DataPlateParser` heuristics with fixture tests, result sheet with confirm/edit, empty-result path, label photo kept. (acceptance: AC-45, AC-46, AC-47, AC-48, AC-49)
 - [ ] T18: House Manual polish for M1: app icon, string review, empty states, back-stack sanity, `lintDebug` clean, release build config (unsigned), README screenshots list. (acceptance: re-check AC-1..AC-50 on emulator; lint has no errors)
@@ -60,3 +60,5 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [ ] T39: Release prep: signing config placeholders, versionCode scheme, Data safety notes in `docs/data-safety.md`, privacy policy draft in `docs/privacy-policy.md`, store listing drafts. (acceptance: `./gradlew assembleRelease` succeeds unsigned)
 - [ ] T40: Full regression on emulator against AC-1..AC-100; update REVIEW.md and qa/last-tested.txt. (acceptance: all ACs checked)
 - [ ] R8: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
+
+  - R3 note: reviewed T11–T15 against AC-25..AC-41; no spec drift or bugs found. Recurring warning: tests use deprecated `createComposeRule` (v2 variant suggested); to be tidied in S1.
