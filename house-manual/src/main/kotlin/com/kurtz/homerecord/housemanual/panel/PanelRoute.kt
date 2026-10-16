@@ -25,7 +25,7 @@ import java.io.File
 
 /** Wires [PanelViewModel] and the system camera (TakePicture) to [PanelScreen]. */
 @Composable
-fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, highlightSlot: Int? = null, onOpenBreaker: (panelId: String, event: PanelEvent.OpenBreaker) -> Unit) {
+fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, highlightSlot: Int? = null, onOpenBreaker: (panelId: String, event: PanelEvent.OpenBreaker) -> Unit, onMapping: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     // Survives process death while the camera app is in front.
@@ -50,6 +50,7 @@ fun PanelRoute(viewModel: PanelViewModel, media: MediaFileStore, highlightSlot: 
                 launcher.launch(FileProvider.getUriForFile(context, authority(context), file))
             }
             PanelEvent.ShareLegend -> scope.launch { shareLegend(context, viewModel) }
+            PanelEvent.OpenMapping -> onMapping()
             is PanelEvent.OpenBreaker -> state.panel?.let { onOpenBreaker(it.id, event) } ?: Unit
             else -> viewModel.onEvent(event)
         }

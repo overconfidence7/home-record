@@ -23,6 +23,8 @@ import com.kurtz.homerecord.housemanual.breaker.BreakerViewModel
 import com.kurtz.homerecord.housemanual.emergency.EmergencyRoute
 import com.kurtz.homerecord.housemanual.emergency.EmergencyViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
+import com.kurtz.homerecord.housemanual.mapping.MappingRoute
+import com.kurtz.homerecord.housemanual.mapping.MappingViewModel
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
 import com.kurtz.homerecord.housemanual.panel.PanelRoute
 import com.kurtz.homerecord.housemanual.panel.PanelViewModel
@@ -127,7 +129,17 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
             val vm: PanelViewModel = viewModel(
                 factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, resources.getString(R.string.panel_title)) } },
             )
-            PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) })
+            PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) }, onMapping = { nav.navigate(Routes.MAPPING) })
+        }
+        composable(Routes.MAPPING) {
+            val vm: MappingViewModel = viewModel(
+                factory = remember {
+                    simpleFactory {
+                        MappingViewModel(container.panelRepository, container.homeRepository, container.chargingMonitor, container.alarmPlayer)
+                    }
+                },
+            )
+            MappingRoute(vm)
         }
         composable(
             Routes.BREAKER,

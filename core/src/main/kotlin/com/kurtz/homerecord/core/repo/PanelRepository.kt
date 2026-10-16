@@ -12,6 +12,7 @@ import com.kurtz.homerecord.core.model.BreakerRoom
 import com.kurtz.homerecord.core.model.BreakerType
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.Endpoint
+import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.Source
@@ -161,6 +162,29 @@ class PanelRepository(
         db.endpointDao().upsert(stored.toEntity())
         return stored
     }
+
+    /**
+     * AC-40: links an endpoint to [breakerId] and marks the breaker Confirmed. Uses the existing
+     * [endpointId] when given, otherwise creates an outlet named [newLabel] in [roomId].
+     */
+    suspend fun confirmMapping(breakerId: String, roomId: String, endpointId: String?, newLabel: String?): Endpoint? =
+        db.withTransaction {
+            val breaker = getBreaker(breakerId) ?: return@withTransaction null
+            val endpoint = if (endpointId != null) {
+                db.endpointDao().get(endpointId)?.toDomain()?.copy(breakerId = breakerId)
+            } else {
+                val label = newLabel?.trim().orEmpty()
+                if (label.isEmpty()) null
+                else Endpoint(
+                    id = "", breakerId = breakerId, roomId = roomId, kind = EndpointKind.OUTLET, label = label,
+                    createdAt = 0, updatedAt = 0, source = source,
+                )
+            } ?: return@withTransaction null
+            val saved = saveEndpoint(endpoint)
+            saveBreaker(breaker.copy(confidence = Confidence.CONFIRMED))
+            linkRoom(breakerId, saved.roomId)
+            saved
+        }
 
     suspend fun deleteEndpoint(id: String) {
         val endpoint = db.endpointDao().get(id) ?: return

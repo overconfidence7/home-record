@@ -65,7 +65,7 @@ class PanelViewModel(
             is PanelEvent.SlotEditChanged -> form.update { it.copy(slotEdit = event.value, blockedAt = null) }
             PanelEvent.ApplySlotCount -> applySlotCount()
             is PanelEvent.SlotLongPressed -> makeTandem(event.slot)
-            PanelEvent.TakePhoto, PanelEvent.ShareLegend, is PanelEvent.OpenBreaker -> Unit // handled by the route
+            PanelEvent.TakePhoto, PanelEvent.ShareLegend, PanelEvent.OpenMapping, is PanelEvent.OpenBreaker -> Unit // handled by the route
         }
     }
 

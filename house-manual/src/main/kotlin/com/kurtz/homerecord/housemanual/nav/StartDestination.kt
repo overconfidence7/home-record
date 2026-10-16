@@ -14,6 +14,7 @@ object Routes {
     const val SHUTOFFS = "shutoffs"
     const val SHUTOFF_EDIT = "shutoff?id={id}"
     const val ROOM = "room/{roomId}"
+    const val MAPPING = "mapping"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
 
