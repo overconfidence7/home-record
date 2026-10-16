@@ -41,13 +41,19 @@ import com.kurtz.homerecord.housemanual.onboarding.OnboardingViewModel
 import com.kurtz.homerecord.housemanual.onboarding.QuickRoom
 
 @Composable
-fun HomeRecordNavHost(container: AppContainer) {
+fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
     val start by produceState<String?>(initialValue = null, container) {
         value = StartDestination.resolve(container.homeRepository)
     }
     val startRoute = start ?: return
     val nav = rememberNavController()
     val resources = androidx.compose.ui.platform.LocalResources.current
+    // Quick Settings tile deep link (AC-33): only meaningful once a home exists.
+    androidx.compose.runtime.LaunchedEffect(emergencyRequests, startRoute) {
+        if (emergencyRequests > 0 && startRoute != Routes.ONBOARDING) {
+            nav.navigate(Routes.EMERGENCY) { launchSingleTop = true }
+        }
+    }
     NavHost(navController = nav, startDestination = startRoute) {
         composable(Routes.ONBOARDING) {
             val vm: OnboardingViewModel = viewModel(

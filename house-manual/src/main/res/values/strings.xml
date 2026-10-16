@@ -154,4 +154,5 @@
     <string name="emergency_manage">Manage shutoffs</string>
     <string name="emergency_close">Close</string>
     <string name="emergency_photo_description">Shutoff photo. Tap to enlarge.</string>
+    <string name="tile_label">House emergency</string>
 </resources>
