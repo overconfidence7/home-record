@@ -52,6 +52,14 @@ Homeowners do not know which breaker feeds what, where the shutoffs are, or how 
 | F13 | Template daily report PDF | AC-67..AC-70 |
 | F14 | `.homerecord` export (Field Log) and import (House Manual) | AC-71..AC-79 |
 
+### M2.5 — Panel profile and insights (added 2026-10-16)
+
+| ID | Feature | Acceptance criteria |
+| --- | --- | --- |
+| F20 | Panel profile: kind, service size, brand/model, tandem listing, main breaker, feed breaker; room kinds | AC-101..AC-105 |
+| F21 | Panel insights: capacity, tandem and circuit-count checks, hazard-brand warnings, GFCI/AFCI expectations, dedicated-circuit checklist | AC-106..AC-113 |
+| F22 | Load estimate (NEC 220.82 optional method) against service size | AC-114..AC-118 |
+
 ### M3 — Keep, protect, pay
 
 | ID | Feature | Acceptance criteria |
@@ -104,11 +112,11 @@ All entities carry `id: String (UUID)`, `createdAt`, `updatedAt` (epoch millis) 
 
 | Entity | Fields | Notes |
 | --- | --- | --- |
-| Home | name, address?, yearBuilt?, climateZone? | House Manual has exactly one Home in v1. Field Log creates one Home per Job. |
-| Room | homeId, name, floor? | |
+| Home | name, address?, yearBuilt?, climateZone?, squareFeet? (M2.5) | House Manual has exactly one Home in v1. Field Log creates one Home per Job. |
+| Room | homeId, name, floor?, kind (M2.5: `KITCHEN`, `BATHROOM`, `BEDROOM`, `LIVING`, `DINING`, `FAMILY`, `OFFICE`, `HALLWAY`, `CLOSET`, `LAUNDRY`, `GARAGE`, `BASEMENT`, `CRAWL_SPACE`, `ATTIC`, `EXTERIOR`, `UTILITY`, `OTHER`) | Quick-add names map to a kind; the user can change it. Rules in F21 key off `kind`, never the name. |
 | Wall | roomId, label | "N", "E", "S", "W" or free text |
-| Panel | homeId, name, locationRoomId?, photoPath?, slotCount, layout (`NA_NUMBERED`, `DIN`) | |
-| Breaker | panelId, slots: List<Int>, poles (1/2), amps?, type (`STANDARD`, `GFCI`, `AFCI`, `DUAL`), label, confidence (`CONFIRMED`, `LIKELY`, `UNKNOWN`), tandemIndex? (0/1) | Two-pole = two consecutive slots. Tandem = two breakers sharing one slot, tandemIndex 0 and 1. |
+| Panel | homeId, name, locationRoomId?, photoPath?, slotCount, layout (`NA_NUMBERED`, `DIN`), **M2.5:** kind (`MAIN`, `SUB`), ratingAmps? (service size for MAIN, feed size for SUB: 60, 100, 125, 150, 200, 225, 400 or custom), brand?, model?, maxCircuits? (from the panel label), tandemPolicy (`ALLOWED`, `NOT_ALLOWED`, `UNKNOWN`), hasMainBreaker (Boolean, default true; false = split-bus or back-fed), yearInstalled?, feedBreakerId? (SUB only: the breaker in another panel that feeds it) | |
+| Breaker | panelId, slots: List<Int>, poles (1/2), amps?, type (`STANDARD`, `GFCI`, `AFCI`, `DUAL`), label, confidence (`CONFIRMED`, `LIKELY`, `UNKNOWN`), tandemIndex? (0/1), **M2.5:** isMain (Boolean, default false) | Two-pole = two consecutive slots. Tandem = two breakers sharing one slot, tandemIndex 0 and 1. At most one isMain breaker per panel; it is excluded from circuit counts and protection checks. |
 | BreakerRoom | breakerId, roomId | many-to-many |
 | Endpoint | breakerId?, roomId, kind (`OUTLET`, `LIGHT`, `SWITCH`, `APPLIANCE`, `HARDWIRED`), label | breakerId null = not yet mapped |
 | Shutoff | homeId, kind (`WATER_MAIN`, `GAS_MAIN`, `ELECTRICAL_MAIN`, `HVAC_DISCONNECT`, `FIXTURE_VALVE`, `SUMP`, `CLEANOUT`, `OTHER`), roomId?, photoPath?, instructions | |
@@ -117,6 +125,7 @@ All entities carry `id: String (UUID)`, `createdAt`, `updatedAt` (epoch millis) 
 | Finish (M2) | roomId, kind (`PAINT`, `FLOORING`, `TILE`, `TRIM`), brand?, name?, code?, sheen?, sku?, leftoverLocation? | |
 | Photo | homeId, roomId?, wallId?, stage (`BEFORE`, `ROUGH_IN`, `BEHIND_WALL`, `FINISHED`, `GENERAL`), takenAt, caption?, path | path relative to app files dir |
 | MaintenanceTask (M3) | homeId, equipmentId?, title, rule (`CALENDAR`, `SEASONAL`), intervalMonths?, season?, lastDone?, nextDue | |
+| LoadProfile (M2.5) | homeId, squareFeet, appliances: List<ApplianceLoad {kind (`RANGE`, `OVEN`, `COOKTOP`, `DRYER`, `WATER_HEATER`, `DISHWASHER`, `DISPOSAL`, `MICROWAVE`, `EV_CHARGER`, `HOT_TUB`, `WELL_PUMP`, `POOL_PUMP`, `OTHER`), volts (120/240), va}>, hvac {kind (`NONE`, `AC_ONLY`, `HEAT_PUMP`, `HEAT_PUMP_WITH_STRIPS`, `ELECTRIC_HEAT_UNDER_4_UNITS`, `ELECTRIC_HEAT_4_PLUS_UNITS`), coolingVa?, heatingVa?, stripHeatVa?} | One per Home. Default VA per appliance kind comes from a table in `:core` and is editable. |
 | Job (Field Log) | homeId, name, address?, clientName?, clientContact?, archived | One Home per Job |
 | LogEntry (Field Log) | jobId, day (`yyyy-MM-dd`), kind (`PHOTO`, `NOTE`, `VOICE`), text?, mediaPath?, durationMs?, roomId? | |
 | DailyReport (Field Log) | jobId, day, weather?, crewCount?, hours?, workCompleted, delays?, delayReason?, materials?, nextSteps?, pdfPath? | Editable draft, one per job per day |
@@ -155,7 +164,7 @@ Each criterion is checkable on an emulator (and, where marked `[unit]`, also by 
 - **AC-6** Taking a panel photo stores it under app files and shows it above the grid; relaunch keeps it.
 - **AC-7** North American layout renders slots in two columns, odd numbers left, even numbers right, top to bottom. DIN renders one column.
 - **AC-8** Tapping an empty slot opens HM-Breaker with slot number prefilled; Save creates a Breaker occupying that slot and the slot shows its label and amps. `[unit]`
-- **AC-9** Setting poles = 2 on slot N makes the breaker occupy N and N+2 (same column) and the grid draws it as one tall cell; if N+2 is occupied Save is blocked with a message. `[unit]`
+- **AC-9** Setting poles = 2 on slot N makes the breaker occupy N and N+2 (same column). The grid draws it as **one cell spanning both rows** (the height of two one-pole slots) that shows both slot numbers ("2 · 4"), a "2-pole · 240 V" marker, one label and one amps value; tapping anywhere in the cell opens the same breaker. It must be obvious at a glance both that it is a single breaker and that it occupies two positions. If N+2 is occupied Save is blocked with a message. `[unit]` (occupancy) + Compose test (one node, two slot numbers)
 - **AC-10** Long-press on a slot → "Make tandem" splits it into two half-height cells with their own labels; both breakers have the same slot and tandemIndex 0 and 1. `[unit]`
 - **AC-11** Changing slot count to a smaller number that would drop occupied slots is refused with a message naming the highest occupied slot. `[unit]`
 - **AC-12** Delete on HM-Breaker removes the breaker, clears its slot(s) and detaches (not deletes) its endpoints. `[unit]`
@@ -281,3 +290,28 @@ Each criterion is checkable on an emulator (and, where marked `[unit]`, also by 
 - **AC-98** Search and legend PDF cover all panels (legend prints one page per panel). `[unit]`
 - **AC-99** Equipment edit lists consumables (kind, spec); adding "Filter 16x25x1 MERV 8" saves a Consumable. `[unit]`
 - **AC-100** Search matches consumable specs ("16x25" finds the furnace). `[unit]`
+
+### F20 Panel profile and room kinds
+- **AC-101** HM-Panel setup and edit offer: kind (Main panel / Sub-panel), rating in amps (picker 60, 100, 125, 150, 200, 225, 400, or custom), brand (free text with suggestions: Square D QO, Square D Homeline, Eaton BR, Eaton CH, Siemens, GE, Leviton, Federal Pacific, Zinsco, Challenger, Other), model or catalog number, max circuits (optional, "from the label inside the door"), tandems allowed (Yes / No / Unknown), main breaker present (Yes / No), year installed (optional). All optional except kind; defaults: Main, Unknown, Yes. `[unit]` (validation)
+- **AC-102** For a Sub-panel, the editor asks "Which breaker feeds it?" and lists breakers from the other panels; the chosen breaker's label gains a "→ feeds <panel name>" note in HM-Panel and the legend. `[unit]`
+- **AC-103** HM-Breaker offers "This is the main breaker" (isMain); only one per panel is allowed (choosing a second clears the first with a message); the main breaker renders at the top of the grid with a distinct style and is excluded from circuit counts. `[unit]`
+- **AC-104** Rooms have a kind: quick-add rooms get it automatically (Kitchen → KITCHEN, Primary Bath/Bathroom → BATHROOM, Bedroom N → BEDROOM, Garage → GARAGE, Basement → BASEMENT, Laundry → LAUNDRY, Exterior → EXTERIOR, Hallway → HALLWAY, Living Room → LIVING, Dining Room → DINING, Office → OFFICE, Attic → ATTIC); custom rooms default to OTHER and HM-Room lets the user change the kind. `[unit]` (name → kind mapper)
+- **AC-105** The legend PDF header prints panel kind, brand, model, rating ("200 A main") and year installed when known; `.homerecord` export and import carry every new field, and bundles without them still import. `[unit]`
+
+### F21 Panel insights
+Each insight is a card with a severity (**Warning**, **Check**, **Info**), one plain-English sentence, and a short "why" with the code reference. The sheet ends with: "General information based on the U.S. National Electrical Code (2023). Local codes differ and older installations are often grandfathered. This is not a substitute for a licensed electrician." All rules are pure functions in `:core` (`PanelInsights`) with unit tests; the UI only renders their output.
+- **AC-106** HM-Panel has a "Panel insights" entry point; the sheet opens in under 300 ms with no network and reflects the current data without restart. `[unit]` (rules) + Compose test (renders a given insight list)
+- **AC-107** Capacity (Info): slots used / free, circuit count (a tandem counts as 2, the main breaker as 0), number of 240 V (two-pole) circuits, % of slots labeled, % confirmed. `[unit]`
+- **AC-108** Tandem and circuit-count checks: tandems present and tandemPolicy = NOT_ALLOWED → **Warning** "This panel is not listed for tandem breakers (NEC 408.54)"; tandems present and UNKNOWN → **Check** "Look for the max-circuits label or notched bus stabs; tandems are only allowed where the panel is listed for them"; circuits > maxCircuits (when set) → **Warning**; yearInstalled < 2008 and circuits > 42 → **Warning** "Panels of this era were limited to 42 circuits". `[unit]`
+- **AC-109** Hazard-brand warning (**Warning**, shown first): brand or model matching, case-insensitively, any of "federal pacific", "fpe", "stab-lok", "federal pioneer", "zinsco", "sylvania", "challenger", "bulldog", "pushmatic", or hasMainBreaker = false → "Home inspectors and many insurers flag this panel type; have a licensed electrician evaluate it." with a one-line reason per match (FPE/Stab-Lok and Zinsco: breakers may fail to trip; Challenger/Bulldog: documented failures; no main breaker/split-bus: no single disconnect). `[unit]` (matcher with fixtures, including "GTE Sylvania", "FEDERAL PACIFIC ELECTRIC", "Square D" → no match)
+- **AC-110** GFCI expectations (**Check**): for every non-main breaker linked (directly or through an endpoint) to a room of kind BATHROOM, KITCHEN, GARAGE, EXTERIOR, BASEMENT, CRAWL_SPACE, LAUNDRY or UTILITY whose type is STANDARD or AFCI → "GFCI protection is expected for receptacles in <rooms> (NEC 210.8(A)); it may be provided at the outlet instead of the breaker — verify." One card per breaker, rooms listed. `[unit]`
+- **AC-111** AFCI expectations (**Check**): for every non-main, one-pole breaker linked to a room of kind BEDROOM, LIVING, FAMILY, DINING, KITCHEN, OFFICE, HALLWAY, CLOSET or LAUNDRY whose type is STANDARD or GFCI → "AFCI protection is required for new 15/20 A circuits in <rooms> (NEC 210.12(B)); existing circuits may be grandfathered — verify." `[unit]`
+- **AC-112** Dedicated-circuit checklist (**Info** per row, **Check** when missing): expected rows — two 20 A kitchen small-appliance circuits, 20 A bathroom, 20 A laundry, 20 A garage (NEC 210.11(C)); and appliance circuits dishwasher, disposal, microwave, range or cooktop (two-pole), dryer (two-pole), water heater (two-pole), HVAC / furnace / air handler. A row is "Found" when a breaker label, endpoint label or linked room kind matches its keyword list (e.g. range: "range", "stove", "oven", "cooktop"); otherwise "Not labeled yet — label it, or it may not exist." Keyword matching is case-insensitive and tested with fixtures. `[unit]`
+- **AC-113** Insights never block saving anything, never modify data, and are recomputed from the database on every open; a panel with no breakers shows only the capacity card and the disclaimer. `[unit]`
+
+### F22 Load estimate
+- **AC-114** From Panel insights, "Estimate load" opens a form: square feet (prefilled from Home), appliances (toggle list with default VA each: range 12,000; wall oven 8,000; cooktop 7,200; dryer 5,000; water heater 4,500; dishwasher 1,200; disposal 900; microwave 1,500; EV charger 7,200 (level 2, editable); hot tub 6,000; well pump 1,500; pool pump 1,500; other: user VA), and HVAC (none; A/C only with VA; heat pump with VA; heat pump + strip heat VA; electric heat < 4 units VA; electric heat 4+ units VA). Values are editable and saved as the LoadProfile. `[unit]` (defaults table)
+- **AC-115** `LoadEstimator` implements NEC 220.82: general load = 3 VA × sq ft + 4,500 VA (two small-appliance + laundry) + sum of appliance VA; demand = first 10,000 VA at 100% + remainder at 40%; HVAC = the single largest of: 100% A/C; 100% heat pump; 100% heat pump + 65% strips; 65% electric heat (< 4 units); 40% electric heat (4+ units); result amps = (demand + HVAC) ÷ 240, rounded up. `[unit]` with a worked example: 2,000 sq ft, range 12,000, dryer 5,000, water heater 4,500, dishwasher 1,200, disposal 900, A/C 3,500 VA → general 6,000 + 4,500 + 23,600 = 34,100 → demand 10,000 + 40% × 24,100 = 19,640 → + 3,500 = 23,140 VA → 23,140 ÷ 240 = 96.4 → 97 A.
+- **AC-116** The result card shows "Estimated demand: 97 A of 200 A service" with a bar; ≤ 80% of rating → Info "Room to grow"; 80–100% → Check "Near capacity; plan large additions with an electrician"; > 100% → Warning "Estimated load exceeds the service rating; have a licensed electrician perform a full load calculation." `[unit]`
+- **AC-117** The card explains in one line that breaker amps are not added up because breaker ratings protect wire, not predict load, and states the method ("NEC 220.82 optional method for an existing dwelling"). 
+- **AC-118** If rating is unknown the card shows the amps estimate alone with "Set your service size in panel setup to compare."

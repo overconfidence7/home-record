@@ -67,3 +67,8 @@ Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with
 - Field Log duplicates the quick-add room list from House Manual (own `room_*` strings) rather than moving it to `:core-ui`, to avoid resource-name clashes between the two apps' string files.
 - "Last activity" for AC-53 uses LogEntry.createdAt (when it was recorded), not the entry's `day`.
 - FL-JobEdit shows the room quick-add only for new jobs; editing an existing job shows the archive switch instead.
+
+## 2026-10-16 — Scope change: panel profile, insights, load estimate (Nate)
+- AC-9 rewritten: a two-pole breaker is one cell spanning both rows that still shows both slot numbers and a 2-pole marker. Reason: must read as one device occupying two positions.
+- New milestone M2.5 (F20–F22, AC-101..AC-118, tasks T30a–T30c) between M2 and M3. Reason: a filled-out panel should tell the owner something — capacity, tandem/circuit-count legality, known-hazard brands, where GFCI/AFCI protection is expected, which dedicated circuits are missing from the labels, and a NEC 220.82 load estimate against the service size. Rules are informational ("verify") never prescriptive; every card cites its NEC section; disclaimer on the sheet.
+- Sources used for the rules: 2023 NEC 210.8(A) GFCI locations, 210.12(B) AFCI locations, 210.11(C) required branch circuits, 220.82 optional dwelling calculation, 408.54 overcurrent-device limits; home-inspector guidance on tandem (CTL) breakers and on FPE Stab-Lok, Zinsco/Sylvania, Challenger, Bulldog Pushmatic and split-bus panels.
