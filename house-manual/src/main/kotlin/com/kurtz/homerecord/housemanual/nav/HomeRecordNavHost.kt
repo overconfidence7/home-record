@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +29,10 @@ import com.kurtz.homerecord.housemanual.rooms.RoomViewModel
 import com.kurtz.homerecord.housemanual.rooms.RoomsRoute
 import com.kurtz.homerecord.housemanual.rooms.RoomsViewModel
 import com.kurtz.homerecord.housemanual.AppContainer
+import com.kurtz.homerecord.housemanual.shutoffs.ShutoffEditRoute
+import com.kurtz.homerecord.housemanual.shutoffs.ShutoffEditViewModel
+import com.kurtz.homerecord.housemanual.shutoffs.ShutoffsRoute
+import com.kurtz.homerecord.housemanual.shutoffs.ShutoffsViewModel
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingRoute
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingViewModel
@@ -85,8 +90,22 @@ fun HomeRecordNavHost(container: AppContainer) {
             )
             RoomRoute(vm, onDeleted = { nav.popBackStack() })
         }
-        // Placeholders until T11/T12 (shutoffs, emergency) and equipment land.
-        composable(Routes.EMERGENCY) { CenteredText(stringResource(R.string.placeholder_emergency), tag = "emergency_screen") }
+        // Emergency opens the shutoff list until T12 adds the large-type emergency screen.
+        composable(Routes.EMERGENCY) { ShutoffsDestination(container, nav) }
+        composable(Routes.SHUTOFFS) { ShutoffsDestination(container, nav) }
+        composable(
+            Routes.SHUTOFF_EDIT,
+            arguments = listOf(navArgument("id") { type = NavType.StringType; defaultValue = "" }),
+        ) { entry ->
+            val id = entry.arguments?.getString("id")?.takeIf { it.isNotEmpty() }
+            val vm: ShutoffEditViewModel = viewModel(
+                factory = remember(id) {
+                    simpleFactory { ShutoffEditViewModel(id, container.homeRepository, container.shutoffRepository, container.mediaStore) }
+                },
+            )
+            ShutoffEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })
+        }
+        // Placeholder until equipment lands.
         composable(Routes.EQUIPMENT) { CenteredText(stringResource(R.string.placeholder_equipment), tag = "equipment_screen") }
         composable(
             Routes.PANEL_PATTERN,
@@ -119,6 +138,19 @@ fun HomeRecordNavHost(container: AppContainer) {
             BreakerRoute(vm, onDone = { nav.popBackStack() })
         }
     }
+}
+
+@Composable
+private fun ShutoffsDestination(container: AppContainer, nav: NavHostController) {
+    val vm: ShutoffsViewModel = viewModel(
+        factory = remember { simpleFactory { ShutoffsViewModel(container.homeRepository, container.shutoffRepository) } },
+    )
+    ShutoffsRoute(
+        vm,
+        container.mediaStore,
+        onAdd = { nav.navigate(Routes.shutoffEdit(null)) },
+        onOpen = { nav.navigate(Routes.shutoffEdit(it)) },
+    )
 }
 
 @Composable

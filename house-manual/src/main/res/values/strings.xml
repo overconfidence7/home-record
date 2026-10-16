@@ -42,7 +42,6 @@
     <string name="room_no_equipment">No equipment in this room.</string>
     <string name="room_shutoffs">Shutoffs</string>
     <string name="room_no_shutoffs">No shutoffs in this room.</string>
-    <string name="placeholder_emergency">Emergency</string>
     <string name="placeholder_equipment">Equipment</string>
     <string name="panel_title">Panel</string>
     <string name="panel_setup_title">Set up your panel</string>
@@ -130,4 +129,20 @@
     <string name="legend_col_poles">Poles</string>
     <string name="legend_col_type">Type</string>
     <string name="legend_col_rooms">Rooms</string>
+    <string name="shutoffs_title">Shutoffs</string>
+    <string name="shutoffs_add">Add shutoff</string>
+    <string name="shutoffs_empty">Add your three mains first: the water shutoff, the gas shutoff and the main electrical disconnect. Tap Add shutoff to start.</string>
+    <string name="shutoff_edit_new">New shutoff</string>
+    <string name="shutoff_edit_title">Edit shutoff</string>
+    <string name="shutoff_kind">Kind</string>
+    <string name="shutoff_room">Room (optional)</string>
+    <string name="shutoff_no_room">No room</string>
+    <string name="shutoff_instructions">How to shut it off</string>
+    <string name="shutoff_photo">Shutoff photo</string>
+    <string name="shutoff_take_photo">Take photo</string>
+    <string name="shutoff_retake_photo">Retake photo</string>
+    <string name="shutoff_remove_photo">Remove photo</string>
+    <string name="shutoff_delete">Delete</string>
+    <string name="shutoff_delete_confirm_title">Delete this shutoff?</string>
+    <string name="shutoff_delete_confirm_body">This also removes its photo.</string>
 </resources>

@@ -11,11 +11,15 @@ object Routes {
     const val EMERGENCY = "emergency"
     const val EQUIPMENT = "equipment"
     const val ROOMS = "rooms"
+    const val SHUTOFFS = "shutoffs"
+    const val SHUTOFF_EDIT = "shutoff?id={id}"
     const val ROOM = "room/{roomId}"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
 
     fun panelAt(slot: Int) = "panel?highlight=$slot"
+
+    fun shutoffEdit(id: String?) = "shutoff?id=${id.orEmpty()}"
 
     fun room(id: String) = "room/$id"
 
