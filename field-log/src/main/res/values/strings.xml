@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Field Log</string>
-    <string name="shell_title">HomeRecord</string>
+    <string name="jobs_title">Jobs</string>
+    <string name="jobs_new">New job</string>
+    <string name="jobs_show_archived">Show archived</string>
+    <string name="jobs_empty">No jobs yet. Create one to start logging.</string>
+    <string name="jobs_empty_active">No active jobs. Turn on Show archived to see finished ones.</string>
+    <string name="jobs_archived_tag">Archived</string>
+    <string name="jobedit_title_new">New job</string>
+    <string name="jobedit_title_edit">Edit job</string>
+    <string name="jobedit_name">Job name</string>
+    <string name="jobedit_address">Address</string>
+    <string name="jobedit_client_name">Client name</string>
+    <string name="jobedit_client_contact">Client phone or email</string>
+    <string name="jobedit_rooms_heading">Which rooms are in scope?</string>
+    <string name="jobedit_custom_room">Add another room</string>
+    <string name="jobedit_add">Add</string>
+    <string name="jobedit_archived">Archived</string>
+    <string name="jobedit_save">Save</string>
+    <string name="job_missing">This job no longer exists.</string>
+    <string name="job_no_entries">No entries yet.</string>
+    <string name="job_edit">Edit job</string>
+    <string name="room_kitchen">Kitchen</string>
+    <string name="room_living_room">Living Room</string>
+    <string name="room_dining_room">Dining Room</string>
+    <string name="room_primary_bedroom">Primary Bedroom</string>
+    <string name="room_bedroom_2">Bedroom 2</string>
+    <string name="room_bedroom_3">Bedroom 3</string>
+    <string name="room_bathroom">Bathroom</string>
+    <string name="room_primary_bath">Primary Bath</string>
+    <string name="room_garage">Garage</string>
+    <string name="room_basement">Basement</string>
+    <string name="room_attic">Attic</string>
+    <string name="room_laundry">Laundry</string>
+    <string name="room_office">Office</string>
+    <string name="room_hallway">Hallway</string>
+    <string name="room_exterior">Exterior</string>
 </resources>

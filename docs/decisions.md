@@ -61,3 +61,9 @@ Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with
 
 ## 2026-10-16 (T18)
 - House Manual release build: R8 minify + resource shrinking enabled, unsigned; keep rules in house-manual/proguard-rules.pro for Room, kotlinx-serialization, ML Kit. Adaptive launcher icon (house glyph, monochrome layer) is a simple vector placeholder-free drawable, no new dependencies.
+
+## 2026-10-16 — T19 Field Log shell
+- Room DB bumped to v2 (Job, LogEntry, DailyReport, CompanyProfile tables) with `fallbackToDestructiveMigration`: nothing has shipped, so no real user data exists to migrate. Replace with a real migration before the first release (T39).
+- Field Log duplicates the quick-add room list from House Manual (own `room_*` strings) rather than moving it to `:core-ui`, to avoid resource-name clashes between the two apps' string files.
+- "Last activity" for AC-53 uses LogEntry.createdAt (when it was recorded), not the entry's `day`.
+- FL-JobEdit shows the room quick-add only for new jobs; editing an existing job shows the archive switch instead.

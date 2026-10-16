@@ -10,6 +10,10 @@ import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Shutoff
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Photo
+import com.kurtz.homerecord.core.model.Job
+import com.kurtz.homerecord.core.model.LogEntry
+import com.kurtz.homerecord.core.model.DailyReport
+import com.kurtz.homerecord.core.model.CompanyProfile
 
 fun HomeEntity.toDomain() = Home(
     id = id,
@@ -253,4 +257,46 @@ fun Photo.toEntity() = PhotoEntity(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+)
+
+fun JobEntity.toDomain() = Job(
+    id = id, homeId = homeId, name = name, address = address, clientName = clientName,
+    clientContact = clientContact, archived = archived, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun Job.toEntity() = JobEntity(
+    id = id, homeId = homeId, name = name, address = address, clientName = clientName,
+    clientContact = clientContact, archived = archived, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun LogEntryEntity.toDomain() = LogEntry(
+    id = id, jobId = jobId, day = day, kind = kind, text = text, mediaPath = mediaPath,
+    durationMs = durationMs, roomId = roomId, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun LogEntry.toEntity() = LogEntryEntity(
+    id = id, jobId = jobId, day = day, kind = kind, text = text, mediaPath = mediaPath,
+    durationMs = durationMs, roomId = roomId, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun DailyReportEntity.toDomain() = DailyReport(
+    id = id, jobId = jobId, day = day, weather = weather, crewCount = crewCount, hours = hours,
+    workCompleted = workCompleted, delays = delays, delayReason = delayReason, materials = materials,
+    nextSteps = nextSteps, pdfPath = pdfPath, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun DailyReport.toEntity() = DailyReportEntity(
+    id = id, jobId = jobId, day = day, weather = weather, crewCount = crewCount, hours = hours,
+    workCompleted = workCompleted, delays = delays, delayReason = delayReason, materials = materials,
+    nextSteps = nextSteps, pdfPath = pdfPath, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun CompanyProfileEntity.toDomain() = CompanyProfile(
+    id = id, name = name, phone = phone, email = email, logoPath = logoPath,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun CompanyProfile.toEntity() = CompanyProfileEntity(
+    id = id, name = name, phone = phone, email = email, logoPath = logoPath,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
 )

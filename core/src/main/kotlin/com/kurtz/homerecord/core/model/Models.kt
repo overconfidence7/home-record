@@ -150,3 +150,65 @@ data class Photo(
     override val updatedAt: Long,
     override val source: Source,
 ) : Record
+
+enum class EntryKind { PHOTO, NOTE, VOICE }
+enum class DelayReason { NONE, WEATHER, MATERIALS, CLIENT, INSPECTION, SUBCONTRACTOR, OTHER }
+
+/** Field Log: one Job owns one Home (SPEC §6). */
+data class Job(
+    override val id: String,
+    val homeId: String,
+    val name: String,
+    val address: String? = null,
+    val clientName: String? = null,
+    val clientContact: String? = null,
+    val archived: Boolean = false,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record
+
+data class LogEntry(
+    override val id: String,
+    val jobId: String,
+    /** ISO yyyy-MM-dd. */
+    val day: String,
+    val kind: EntryKind,
+    val text: String? = null,
+    /** Relative to the app files dir. */
+    val mediaPath: String? = null,
+    val durationMs: Long? = null,
+    val roomId: String? = null,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record
+
+data class DailyReport(
+    override val id: String,
+    val jobId: String,
+    val day: String,
+    val weather: String? = null,
+    val crewCount: Int? = null,
+    val hours: Double? = null,
+    val workCompleted: String = "",
+    val delays: String? = null,
+    val delayReason: DelayReason? = null,
+    val materials: String? = null,
+    val nextSteps: String? = null,
+    val pdfPath: String? = null,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record
+
+data class CompanyProfile(
+    override val id: String,
+    val name: String,
+    val phone: String? = null,
+    val email: String? = null,
+    val logoPath: String? = null,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record

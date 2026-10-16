@@ -200,3 +200,75 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE homeId = :homeId ORDER BY takenAt")
     fun observeForHome(homeId: String): Flow<List<PhotoEntity>>
 }
+
+@Dao
+interface JobDao {
+    @Upsert
+    suspend fun upsert(entity: JobEntity)
+
+    @Delete
+    suspend fun delete(entity: JobEntity)
+
+    @Query("SELECT * FROM job WHERE id = :id")
+    suspend fun get(id: String): JobEntity?
+
+    @Query("SELECT * FROM job WHERE id = :id")
+    fun observe(id: String): Flow<JobEntity?>
+
+    @Query("SELECT * FROM job ORDER BY createdAt")
+    suspend fun getAll(): List<JobEntity>
+
+    @Query("SELECT * FROM job ORDER BY createdAt")
+    fun observeAll(): Flow<List<JobEntity>>
+}
+
+@Dao
+interface LogEntryDao {
+    @Upsert
+    suspend fun upsert(entity: LogEntryEntity)
+
+    @Delete
+    suspend fun delete(entity: LogEntryEntity)
+
+    @Query("SELECT * FROM log_entry WHERE id = :id")
+    suspend fun get(id: String): LogEntryEntity?
+
+    @Query("SELECT * FROM log_entry ORDER BY createdAt")
+    suspend fun getAll(): List<LogEntryEntity>
+
+    @Query("SELECT * FROM log_entry ORDER BY createdAt")
+    fun observeAll(): Flow<List<LogEntryEntity>>
+
+    @Query("SELECT * FROM log_entry WHERE jobId = :jobId ORDER BY createdAt")
+    fun observeForJob(jobId: String): Flow<List<LogEntryEntity>>
+}
+
+@Dao
+interface DailyReportDao {
+    @Upsert
+    suspend fun upsert(entity: DailyReportEntity)
+
+    @Delete
+    suspend fun delete(entity: DailyReportEntity)
+
+    @Query("SELECT * FROM daily_report WHERE jobId = :jobId AND day = :day")
+    suspend fun getForDay(jobId: String, day: String): DailyReportEntity?
+
+    @Query("SELECT * FROM daily_report ORDER BY day")
+    suspend fun getAll(): List<DailyReportEntity>
+}
+
+@Dao
+interface CompanyProfileDao {
+    @Upsert
+    suspend fun upsert(entity: CompanyProfileEntity)
+
+    @Delete
+    suspend fun delete(entity: CompanyProfileEntity)
+
+    @Query("SELECT * FROM company_profile ORDER BY createdAt LIMIT 1")
+    suspend fun getFirst(): CompanyProfileEntity?
+
+    @Query("SELECT * FROM company_profile ORDER BY createdAt LIMIT 1")
+    fun observeFirst(): Flow<CompanyProfileEntity?>
+}

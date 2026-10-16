@@ -1,0 +1,67 @@
+package com.kurtz.homerecord.fieldlog.nav
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.kurtz.homerecord.fieldlog.AppContainer
+import com.kurtz.homerecord.fieldlog.job.JobRoute
+import com.kurtz.homerecord.fieldlog.job.JobViewModel
+import com.kurtz.homerecord.fieldlog.jobedit.JobEditRoute
+import com.kurtz.homerecord.fieldlog.jobedit.JobEditViewModel
+import com.kurtz.homerecord.fieldlog.jobedit.QuickRoom
+import com.kurtz.homerecord.fieldlog.jobs.JobsRoute
+import com.kurtz.homerecord.fieldlog.jobs.JobsViewModel
+
+object Routes {
+    const val JOBS = "jobs"
+    const val JOB_ARG = "jobId"
+    const val JOB = "job/{$JOB_ARG}"
+    const val JOB_NEW = "jobedit/new"
+    const val JOB_EDIT = "jobedit/{$JOB_ARG}"
+
+    fun job(id: String) = "job/$id"
+    fun jobEdit(id: String) = "jobedit/$id"
+}
+
+@Composable
+fun FieldLogNavHost(container: AppContainer) {
+    val nav = rememberNavController()
+    val resources = androidx.compose.ui.platform.LocalResources.current
+    NavHost(navController = nav, startDestination = Routes.JOBS) {
+        composable(Routes.JOBS) {
+            val vm: JobsViewModel = viewModel(factory = remember { simpleFactory { JobsViewModel(container.jobRepository) } })
+            JobsRoute(vm, onNewJob = { nav.navigate(Routes.JOB_NEW) }, onOpenJob = { nav.navigate(Routes.job(it)) })
+        }
+        composable(Routes.JOB_NEW) {
+            val vm: JobEditViewModel = viewModel(
+                factory = remember {
+                    simpleFactory {
+                        JobEditViewModel(container.jobRepository, null) { room: QuickRoom -> resources.getString(room.label) }
+                    }
+                },
+            )
+            JobEditRoute(vm, onDone = { nav.popBackStack() })
+        }
+        composable(Routes.JOB_EDIT, arguments = listOf(navArgument(Routes.JOB_ARG) { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString(Routes.JOB_ARG)
+            val vm: JobEditViewModel = viewModel(
+                factory = remember(id) {
+                    simpleFactory {
+                        JobEditViewModel(container.jobRepository, id) { room: QuickRoom -> resources.getString(room.label) }
+                    }
+                },
+            )
+            JobEditRoute(vm, onDone = { nav.popBackStack() })
+        }
+        composable(Routes.JOB, arguments = listOf(navArgument(Routes.JOB_ARG) { type = NavType.StringType })) { entry ->
+            val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()
+            val vm: JobViewModel = viewModel(factory = remember(id) { simpleFactory { JobViewModel(container.jobRepository, id) } })
+            JobRoute(vm, onEdit = { nav.navigate(Routes.jobEdit(id)) })
+        }
+    }
+}

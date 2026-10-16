@@ -5,6 +5,8 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.kurtz.homerecord.core.model.BreakerType
+import com.kurtz.homerecord.core.model.DelayReason
+import com.kurtz.homerecord.core.model.EntryKind
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
@@ -200,6 +202,81 @@ data class PhotoEntity(
     val takenAt: Long,
     val caption: String?,
     val path: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(
+    tableName = "job",
+    foreignKeys = [ForeignKey(HomeEntity::class, ["id"], ["homeId"], onDelete = CASCADE)],
+    indices = [Index("homeId")],
+)
+data class JobEntity(
+    @PrimaryKey val id: String,
+    val homeId: String,
+    val name: String,
+    val address: String?,
+    val clientName: String?,
+    val clientContact: String?,
+    val archived: Boolean,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(
+    tableName = "log_entry",
+    foreignKeys = [
+        ForeignKey(JobEntity::class, ["id"], ["jobId"], onDelete = CASCADE),
+        ForeignKey(RoomEntity::class, ["id"], ["roomId"], onDelete = SET_NULL),
+    ],
+    indices = [Index("jobId"), Index("roomId")],
+)
+data class LogEntryEntity(
+    @PrimaryKey val id: String,
+    val jobId: String,
+    val day: String,
+    val kind: EntryKind,
+    val text: String?,
+    val mediaPath: String?,
+    val durationMs: Long?,
+    val roomId: String?,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(
+    tableName = "daily_report",
+    foreignKeys = [ForeignKey(JobEntity::class, ["id"], ["jobId"], onDelete = CASCADE)],
+    indices = [Index(value = ["jobId", "day"], unique = true)],
+)
+data class DailyReportEntity(
+    @PrimaryKey val id: String,
+    val jobId: String,
+    val day: String,
+    val weather: String?,
+    val crewCount: Int?,
+    val hours: Double?,
+    val workCompleted: String,
+    val delays: String?,
+    val delayReason: DelayReason?,
+    val materials: String?,
+    val nextSteps: String?,
+    val pdfPath: String?,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(tableName = "company_profile")
+data class CompanyProfileEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val phone: String?,
+    val email: String?,
+    val logoPath: String?,
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
