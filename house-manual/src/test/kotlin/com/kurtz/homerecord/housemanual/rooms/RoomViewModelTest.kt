@@ -99,9 +99,9 @@ class RoomViewModelTest {
         val job = launchCollect(vm)
         vm.state.first { it.room != null }
         vm.onEvent(RoomEvent.StartRename)
-        assertEquals("Den", vm.state.value.renameInput)
+        assertEquals("Den", vm.state.first { it.renaming && it.renameInput == "Den" }.renameInput)
         vm.onEvent(RoomEvent.RenameChanged("   "))
-        assertEquals(false, vm.state.value.canSaveRename)
+        assertEquals(false, vm.state.first { it.renameInput == "   " }.canSaveRename)
         vm.onEvent(RoomEvent.SaveRename)
         assertEquals("Den", homes.getRoom(room.id)?.name)
         vm.onEvent(RoomEvent.RenameChanged("  Study "))

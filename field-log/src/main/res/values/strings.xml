@@ -21,6 +21,13 @@
     <string name="job_missing">This job no longer exists.</string>
     <string name="job_no_entries">No entries yet.</string>
     <string name="job_edit">Edit job</string>
+    <string name="job_capture">Capture</string>
+    <string name="capture_shutter">Take photo</string>
+    <string name="capture_count">%1$d photos saved</string>
+    <string name="capture_failed">Photo not saved. Try again.</string>
+    <string name="capture_permission_needed">Field Log needs camera access to take job photos. You can turn it on in Settings.</string>
+    <string name="capture_open_settings">Open Settings</string>
+    <string name="capture_back">Back</string>
     <string name="room_kitchen">Kitchen</string>
     <string name="room_living_room">Living Room</string>
     <string name="room_dining_room">Dining Room</string>

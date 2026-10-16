@@ -31,7 +31,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 ## M2 — Field Log and the handoff
 
 - [x] T19: Field Log app shell: navigation, `AppContainer`, FL-Jobs list with empty state and archive toggle, FL-JobEdit with rooms quick-add; Job/LogEntry/DailyReport/CompanyProfile entities + DAOs in `:core`. (acceptance: AC-51, AC-52, AC-53, AC-54)
-- [ ] T20: FL-Capture with CameraX: full-screen preview, 72dp shutter, JPEG to app files, PHOTO entry creation, volume-key shutter handler, permission denied state. (acceptance: AC-55, AC-56, AC-57, AC-60)
+- [x] T20: FL-Capture with CameraX: full-screen preview, 72dp shutter, JPEG to app files, PHOTO entry creation, volume-key shutter handler, permission denied state. (acceptance: AC-55, AC-56, AC-57, AC-60)
 - [ ] R4: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T21: Notes and voice: typed note entry, `VoiceRecorder` (MediaRecorder AAC/.m4a) behind an interface with a 3:00 cap, VOICE entries with duration, mic permission state. (acceptance: AC-58, AC-59, AC-60)
 - [ ] T22: FL-Job day grouping (`EntryGrouper`), thumbnails, note text, audio duration and playback, FL-Entry edit/delete, crash-safety check. (acceptance: AC-61, AC-62)
