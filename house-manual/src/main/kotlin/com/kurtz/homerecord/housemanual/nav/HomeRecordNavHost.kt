@@ -20,6 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kurtz.homerecord.housemanual.breaker.BreakerRoute
 import com.kurtz.homerecord.housemanual.breaker.BreakerViewModel
+import com.kurtz.homerecord.housemanual.emergency.EmergencyRoute
+import com.kurtz.homerecord.housemanual.emergency.EmergencyViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
 import com.kurtz.homerecord.housemanual.panel.PanelRoute
@@ -90,8 +92,12 @@ fun HomeRecordNavHost(container: AppContainer) {
             )
             RoomRoute(vm, onDeleted = { nav.popBackStack() })
         }
-        // Emergency opens the shutoff list until T12 adds the large-type emergency screen.
-        composable(Routes.EMERGENCY) { ShutoffsDestination(container, nav) }
+        composable(Routes.EMERGENCY) {
+            val vm: EmergencyViewModel = viewModel(
+                factory = remember { simpleFactory { EmergencyViewModel(container.homeRepository, container.shutoffRepository) } },
+            )
+            EmergencyRoute(vm, container.mediaStore, onManage = { nav.navigate(Routes.SHUTOFFS) })
+        }
         composable(Routes.SHUTOFFS) { ShutoffsDestination(container, nav) }
         composable(
             Routes.SHUTOFF_EDIT,

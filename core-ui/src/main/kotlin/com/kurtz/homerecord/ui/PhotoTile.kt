@@ -47,3 +47,12 @@ private fun decodeSampled(file: File, targetPx: Int): ImageBitmap? {
     val opts = BitmapFactory.Options().apply { inSampleSize = sample }
     return BitmapFactory.decodeFile(file.path, opts)?.asImageBitmap()
 }
+
+/** Photo at its natural aspect ratio, decoded off the main thread; nothing is drawn when [file] is missing. */
+@Composable
+fun PhotoImage(file: File?, contentDescription: String?, modifier: Modifier = Modifier, contentScale: ContentScale = ContentScale.FillWidth, targetPx: Int = 1600) {
+    val bitmap by produceState<ImageBitmap?>(null, file) {
+        value = if (file == null) null else withContext(Dispatchers.IO) { decodeSampled(file, targetPx) }
+    }
+    bitmap?.let { Image(it, contentDescription, modifier, contentScale = contentScale) }
+}

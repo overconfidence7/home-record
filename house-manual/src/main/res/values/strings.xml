@@ -145,4 +145,13 @@
     <string name="shutoff_delete">Delete</string>
     <string name="shutoff_delete_confirm_title">Delete this shutoff?</string>
     <string name="shutoff_delete_confirm_body">This also removes its photo.</string>
+    <string name="emergency_title">Emergency shutoffs</string>
+    <string name="emergency_water">Water</string>
+    <string name="emergency_gas">Gas</string>
+    <string name="emergency_electrical">Electrical</string>
+    <string name="emergency_other">Other</string>
+    <string name="emergency_empty">No shutoffs saved yet. Add your water, gas and electrical mains so they are one tap away in an emergency.</string>
+    <string name="emergency_manage">Manage shutoffs</string>
+    <string name="emergency_close">Close</string>
+    <string name="emergency_photo_description">Shutoff photo. Tap to enlarge.</string>
 </resources>
