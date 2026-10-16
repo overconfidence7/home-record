@@ -66,6 +66,8 @@ fun HomeRecordNavHost(container: AppContainer) {
                 onEmergency = { nav.navigate(Routes.EMERGENCY) },
                 onEquipment = { nav.navigate(Routes.EQUIPMENT) },
                 onRooms = { nav.navigate(Routes.ROOMS) },
+                onSlot = { nav.navigate(Routes.panelAt(it)) },
+                onRoom = { nav.navigate(Routes.room(it)) },
             )
         }
         composable(Routes.ROOMS) {
@@ -86,11 +88,15 @@ fun HomeRecordNavHost(container: AppContainer) {
         // Placeholders until T11/T12 (shutoffs, emergency) and equipment land.
         composable(Routes.EMERGENCY) { CenteredText(stringResource(R.string.placeholder_emergency), tag = "emergency_screen") }
         composable(Routes.EQUIPMENT) { CenteredText(stringResource(R.string.placeholder_equipment), tag = "equipment_screen") }
-        composable(Routes.PANEL) {
+        composable(
+            Routes.PANEL_PATTERN,
+            arguments = listOf(navArgument("highlight") { type = NavType.IntType; defaultValue = -1 }),
+        ) { entry ->
+            val highlight = entry.arguments?.getInt("highlight")?.takeIf { it > 0 }
             val vm: PanelViewModel = viewModel(
                 factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, resources.getString(R.string.panel_title)) } },
             )
-            PanelRoute(vm, container.mediaStore, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) })
+            PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) })
         }
         composable(
             Routes.BREAKER,

@@ -10,6 +10,12 @@
     <string name="onboarding_continue">Continue</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="search_nothing_found">Nothing found</string>
+    <string name="search_breaker_subtitle">Breaker, slot %d</string>
+    <string name="search_endpoint_subtitle">Not yet linked to a breaker · %s</string>
+    <string name="search_equipment_subtitle">Equipment</string>
+    <string name="search_shutoff_subtitle">Shutoff</string>
+    <string name="panel_slot_highlighted">Highlighted from search</string>
     <string name="home_search">Search breakers, rooms, equipment</string>
     <string name="home_card_emergency">Emergency</string>
     <string name="home_card_panel">Panel</string>

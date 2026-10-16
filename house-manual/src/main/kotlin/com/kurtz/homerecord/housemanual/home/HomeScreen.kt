@@ -22,7 +22,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.core.logic.SearchResult
 import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemanual.rooms.labelRes
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
 @Composable
@@ -32,6 +34,8 @@ fun HomeRoute(
     onEmergency: () -> Unit,
     onEquipment: () -> Unit,
     onRooms: () -> Unit,
+    onSlot: (Int) -> Unit,
+    onRoom: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     HomeScreen(state) { event ->
@@ -41,6 +45,8 @@ fun HomeRoute(
             HomeEvent.OpenEmergency -> onEmergency()
             HomeEvent.OpenEquipment -> onEquipment()
             HomeEvent.OpenRooms -> onRooms()
+            is HomeEvent.OpenSlot -> onSlot(event.slot)
+            is HomeEvent.OpenRoom -> onRoom(event.roomId)
         }
     }
 }
@@ -59,6 +65,10 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth().testTag("home_search"),
         )
+        if (state.isSearching) {
+            SearchResults(state, onEvent)
+            return@Column
+        }
         HubCard(
             title = stringResource(R.string.home_card_emergency),
             summary = pluralStringResource(R.plurals.home_shutoff_count, state.shutoffCount, state.shutoffCount),
@@ -88,6 +98,47 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             tag = "card_rooms",
             onClick = { onEvent(HomeEvent.OpenRooms) },
         )
+    }
+}
+
+@Composable
+private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
+    if (state.results.isEmpty()) {
+        Text(stringResource(R.string.search_nothing_found), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("search_empty"))
+        return
+    }
+    Column(Modifier.testTag("search_results"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        state.results.forEachIndexed { index, result ->
+            val (title, subtitle, onClick) = when (result) {
+                is SearchResult.BreakerHit -> Triple(
+                    result.breaker.label.ifBlank { stringResource(R.string.panel_slot_empty) },
+                    stringResource(R.string.search_breaker_subtitle, result.breaker.slots.min()) +
+                        result.matchedEndpoints.takeIf { it.isNotEmpty() }?.joinToString(prefix = " · "),
+                    { result.breaker.slots.minOrNull()?.let { onEvent(HomeEvent.OpenSlot(it)) } ?: Unit },
+                )
+                is SearchResult.EndpointHit -> Triple(
+                    result.endpoint.label,
+                    stringResource(R.string.search_endpoint_subtitle, state.roomNames[result.endpoint.roomId].orEmpty()),
+                    { onEvent(HomeEvent.OpenRoom(result.endpoint.roomId)) },
+                )
+                is SearchResult.EquipmentHit -> Triple(
+                    listOfNotNull(result.equipment.make, result.equipment.model).joinToString(" ").ifBlank { stringResource(result.equipment.category.labelRes()) },
+                    stringResource(R.string.search_equipment_subtitle),
+                    { onEvent(HomeEvent.OpenEquipment) },
+                )
+                is SearchResult.ShutoffHit -> Triple(
+                    stringResource(result.shutoff.kind.labelRes()),
+                    stringResource(R.string.search_shutoff_subtitle),
+                    { onEvent(HomeEvent.OpenEmergency) },
+                )
+            }
+            Card(Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("search_result_$index").clickable(onClick = onClick)) {
+                Column(Modifier.padding(12.dp)) {
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    Text(subtitle, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
     }
 }
 

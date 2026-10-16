@@ -10,6 +10,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithTag
+import com.kurtz.homerecord.core.logic.SearchResult
+import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Source
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -35,5 +40,20 @@ class HomeScreenTest {
         rule.onNodeWithText("8 rooms").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("card_emergency").performClick()
         assertEquals(listOf<HomeEvent>(HomeEvent.OpenEmergency), events)
+    }
+
+    @Test fun `AC-19 no matches shows Nothing found and no list`() {
+        rule.setContent { HomeRecordTheme { HomeScreen(HomeUiState(homeName = "Maple", search = "zzz"), onEvent = {}) } }
+        rule.onNodeWithText("Nothing found").assertIsDisplayed()
+        rule.onAllNodesWithTag("search_results").assertCountEquals(0)
+    }
+
+    @Test fun `AC-18 tapping a breaker result opens its slot`() {
+        val events = mutableListOf<HomeEvent>()
+        val breaker = Breaker("b", "p", listOf(7), label = "Garage", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL)
+        val state = HomeUiState(homeName = "Maple", search = "garage", results = listOf(SearchResult.BreakerHit(breaker, listOf("Freezer"), 100)))
+        rule.setContent { HomeRecordTheme { HomeScreen(state, onEvent = { events += it }) } }
+        rule.onNodeWithTag("search_result_0").performClick()
+        assertEquals(listOf<HomeEvent>(HomeEvent.OpenSlot(7)), events)
     }
 }

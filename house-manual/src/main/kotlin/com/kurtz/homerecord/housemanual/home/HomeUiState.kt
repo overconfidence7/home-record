@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual.home
 
+import com.kurtz.homerecord.core.logic.SearchResult
+
 data class HomeUiState(
     val homeName: String = "",
     val search: String = "",
@@ -9,11 +11,19 @@ data class HomeUiState(
     val shutoffCount: Int = 0,
     val equipmentCount: Int = 0,
     val roomCount: Int = 0,
-)
+    val results: List<SearchResult> = emptyList(),
+    val roomNames: Map<String, String> = emptyMap(),
+) {
+    /** AC-19: a non-blank query replaces the hub cards with results or "Nothing found". */
+    val isSearching: Boolean get() = search.isNotBlank()
+}
 
 sealed interface HomeEvent {
     data class SearchChanged(val value: String) : HomeEvent
     data object OpenPanel : HomeEvent
+    /** AC-18: open HM-Panel scrolled to and highlighting [slot]. */
+    data class OpenSlot(val slot: Int) : HomeEvent
+    data class OpenRoom(val roomId: String) : HomeEvent
     data object OpenEmergency : HomeEvent
     data object OpenEquipment : HomeEvent
     data object OpenRooms : HomeEvent

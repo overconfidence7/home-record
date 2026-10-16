@@ -7,12 +7,15 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
     const val PANEL = "panel"
+    const val PANEL_PATTERN = "panel?highlight={highlight}"
     const val EMERGENCY = "emergency"
     const val EQUIPMENT = "equipment"
     const val ROOMS = "rooms"
     const val ROOM = "room/{roomId}"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
+
+    fun panelAt(slot: Int) = "panel?highlight=$slot"
 
     fun room(id: String) = "room/$id"
 

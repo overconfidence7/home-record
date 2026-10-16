@@ -26,7 +26,15 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.stateDescription
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
@@ -56,11 +64,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/** Items before the slot rows in the panel list: title, photo, slot-count editor. */
+private const val PANEL_HEADER_ITEMS = 3
+const val HIGHLIGHT_MILLIS = 2_500L
+
 @Composable
 fun PanelScreen(
     state: PanelUiState,
     onEvent: (PanelEvent) -> Unit,
     photoFile: File? = null,
+    highlightSlot: Int? = null,
 ) {
     if (!state.loaded) return
     val panel = state.panel
@@ -69,8 +82,19 @@ fun PanelScreen(
         return
     }
     val rows = PanelLayoutCalculator.rows(panel.slotCount, panel.layout)
+    val listState = rememberLazyListState()
+    // AC-18: scroll to the searched slot and keep it highlighted for HIGHLIGHT_MILLIS.
+    var highlighted by remember(highlightSlot) { mutableStateOf(highlightSlot) }
+    LaunchedEffect(highlightSlot, rows) {
+        val target = highlightSlot ?: return@LaunchedEffect
+        val rowIndex = rows.indexOfFirst { target in it }
+        if (rowIndex >= 0) listState.scrollToItem(rowIndex + PANEL_HEADER_ITEMS)
+        delay(HIGHLIGHT_MILLIS)
+        highlighted = null
+    }
     LazyColumn(
-        Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("panel_grid"),
+        state = listState,
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("panel_grid"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
@@ -84,7 +108,7 @@ fun PanelScreen(
         item { SlotCountEditor(state, panel.slotCount, onEvent) }
         items(rows, key = { it.first() }) { slots ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                slots.forEach { slot -> SlotCell(slot, state, onEvent, Modifier.weight(1f)) }
+                slots.forEach { slot -> SlotCell(slot, state, onEvent, Modifier.weight(1f), highlighted = slot == highlighted) }
                 if (slots.size < PanelLayoutCalculator.columns(panel.layout)) Box(Modifier.weight(1f))
             }
         }
@@ -140,11 +164,13 @@ private fun PanelPhoto(photoFile: File?, hasPhoto: Boolean, onEvent: (PanelEvent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Unit, modifier: Modifier) {
+private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Unit, modifier: Modifier, highlighted: Boolean = false) {
     val tandem = state.tandemAt(slot)
+    val highlightDescription = stringResource(R.string.panel_slot_highlighted)
     OutlinedCard(
-        modifier = modifier.heightIn(min = 56.dp).testTag("slot_$slot"),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = modifier.heightIn(min = 56.dp).testTag("slot_$slot").then(if (highlighted) Modifier.semantics { stateDescription = highlightDescription } else Modifier),
+        colors = if (highlighted) CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer) else CardDefaults.outlinedCardColors(),
+        border = if (highlighted) BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         if (tandem != null) {
             tandem.forEachIndexed { index, half ->

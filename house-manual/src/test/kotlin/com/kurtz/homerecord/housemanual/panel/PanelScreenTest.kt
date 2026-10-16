@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.housemanual.panel
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -56,5 +59,17 @@ class PanelScreenTest {
         rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(PanelLayout.DIN)), { events += it }) } }
         rule.onNodeWithText("Take panel photo").performClick()
         assertEquals(listOf<PanelEvent>(PanelEvent.TakePhoto), events)
+    }
+
+    @Test fun `AC-18 searched slot is scrolled into view and highlighted for two seconds`() {
+        rule.mainClock.autoAdvance = false
+        rule.setContent {
+            HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(slots = 40)), {}, highlightSlot = 39) }
+        }
+        rule.mainClock.advanceTimeBy(100)
+        rule.onNodeWithTag("slot_39").assertIsDisplayed().assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.StateDescription))
+        rule.mainClock.advanceTimeBy(HIGHLIGHT_MILLIS - 100)
+        rule.mainClock.advanceTimeBy(100)
+        rule.onNodeWithTag("slot_39").assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
     }
 }

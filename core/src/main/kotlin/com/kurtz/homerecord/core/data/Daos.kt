@@ -116,6 +116,9 @@ interface BreakerRoomDao {
     @Query("SELECT * FROM breaker_room WHERE roomId = :roomId")
     fun observeForRoom(roomId: String): Flow<List<BreakerRoomEntity>>
 
+    @Query("SELECT * FROM breaker_room WHERE roomId IN (SELECT id FROM room WHERE homeId = :homeId)")
+    fun observeForHome(homeId: String): Flow<List<BreakerRoomEntity>>
+
     @Query("DELETE FROM breaker_room WHERE breakerId = :breakerId")
     suspend fun deleteForBreaker(breakerId: String)
 }
@@ -139,6 +142,9 @@ interface EndpointDao {
 
     @Query("SELECT * FROM endpoint WHERE roomId = :roomId ORDER BY createdAt")
     fun observeForRoom(roomId: String): Flow<List<EndpointEntity>>
+
+    @Query("SELECT * FROM endpoint WHERE roomId IN (SELECT id FROM room WHERE homeId = :homeId) ORDER BY createdAt")
+    fun observeForHome(homeId: String): Flow<List<EndpointEntity>>
 }
 
 @Dao

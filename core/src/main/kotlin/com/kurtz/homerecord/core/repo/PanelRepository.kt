@@ -116,6 +116,12 @@ class PanelRepository(
             else combine(panels.map { observeBreakers(it.id) }) { lists -> lists.flatMap { it } }
         }
 
+    fun observeBreakerRoomsForHome(homeId: String): Flow<List<BreakerRoom>> =
+        db.breakerRoomDao().observeForHome(homeId).map { list -> list.map { it.toDomain() } }
+
+    fun observeEndpointsForHome(homeId: String): Flow<List<Endpoint>> =
+        db.endpointDao().observeForHome(homeId).map { list -> list.map { it.toDomain() } }
+
     fun observeBreakerRoomsForRoom(roomId: String): Flow<List<BreakerRoom>> =
         db.breakerRoomDao().observeForRoom(roomId).map { list -> list.map { it.toDomain() } }
 

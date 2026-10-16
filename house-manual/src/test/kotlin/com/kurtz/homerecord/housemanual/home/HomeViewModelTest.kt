@@ -5,7 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.MediaFileStore
+import com.kurtz.homerecord.core.logic.SearchResult
 import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Endpoint
+import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.Source
 import com.kurtz.homerecord.core.repo.EquipmentRepository
@@ -61,7 +64,14 @@ class HomeViewModelTest {
         val s1 = vm.state.first { it.percentLabeled == 10 }
         assertEquals(20, s1.panelSlotCount)
 
-        vm.onSearchChanged("garage")
-        assertEquals("garage", vm.state.first { it.search == "garage" }.search)
+        val garage = homes.observeRooms(home.id).first().first { it.name == "Garage" }
+        val saved = panels.saveBreaker(Breaker("", panel.id, listOf(5), label = "Garage", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        panels.saveEndpoint(Endpoint("", saved.id, garage.id, EndpointKind.OUTLET, "Freezer", 0, 0, Source.HOUSE_MANUAL))
+
+        vm.onSearchChanged("garage freezer")
+        val hit = vm.state.first { it.search == "garage freezer" && it.results.isNotEmpty() }.results.first() as SearchResult.BreakerHit
+        assertEquals(saved.id, hit.breaker.id)
+        vm.onSearchChanged("zzz")
+        assertEquals(true, vm.state.first { it.search == "zzz" && it.results.isEmpty() }.isSearching)
     }
 }
