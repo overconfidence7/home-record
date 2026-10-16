@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.repo.LogEntryRepository
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +33,13 @@ class CaptureViewModel(
         viewModelScope.launch {
             val path = media.newPhotoPath()
             val file = media.resolveForWrite(path)
-            val saved = file != null && runCatching { capturer.capture(file) }.getOrDefault(false)
+            val saved = file != null && try {
+                capturer.capture(file)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                false
+            }
             if (saved) {
                 entries.addPhoto(jobId, path)
             } else {
