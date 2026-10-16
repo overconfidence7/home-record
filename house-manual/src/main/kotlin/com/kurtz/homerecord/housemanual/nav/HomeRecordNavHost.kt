@@ -1,16 +1,9 @@
 package com.kurtz.homerecord.housemanual.nav
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -22,6 +15,10 @@ import com.kurtz.homerecord.housemanual.breaker.BreakerRoute
 import com.kurtz.homerecord.housemanual.breaker.BreakerViewModel
 import com.kurtz.homerecord.housemanual.emergency.EmergencyRoute
 import com.kurtz.homerecord.housemanual.emergency.EmergencyViewModel
+import com.kurtz.homerecord.housemanual.equipment.EquipmentEditRoute
+import com.kurtz.homerecord.housemanual.equipment.EquipmentEditViewModel
+import com.kurtz.homerecord.housemanual.equipment.EquipmentRoute
+import com.kurtz.homerecord.housemanual.equipment.EquipmentViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.mapping.MappingRoute
 import com.kurtz.homerecord.housemanual.mapping.MappingViewModel
@@ -119,8 +116,28 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
             )
             ShutoffEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })
         }
-        // Placeholder until equipment lands.
-        composable(Routes.EQUIPMENT) { CenteredText(stringResource(R.string.placeholder_equipment), tag = "equipment_screen") }
+        composable(Routes.EQUIPMENT) {
+            val vm: EquipmentViewModel = viewModel(
+                factory = remember { simpleFactory { EquipmentViewModel(container.homeRepository, container.equipmentRepository) } },
+            )
+            EquipmentRoute(
+                vm,
+                onAdd = { nav.navigate(Routes.equipmentEdit(null)) },
+                onOpen = { nav.navigate(Routes.equipmentEdit(it)) },
+            )
+        }
+        composable(
+            Routes.EQUIPMENT_EDIT,
+            arguments = listOf(navArgument("id") { type = NavType.StringType; defaultValue = "" }),
+        ) { entry ->
+            val id = entry.arguments?.getString("id")?.takeIf { it.isNotEmpty() }
+            val vm: EquipmentEditViewModel = viewModel(
+                factory = remember(id) {
+                    simpleFactory { EquipmentEditViewModel(id, container.homeRepository, container.equipmentRepository, container.mediaStore) }
+                },
+            )
+            EquipmentEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })
+        }
         composable(
             Routes.PANEL_PATTERN,
             arguments = listOf(navArgument("highlight") { type = NavType.IntType; defaultValue = -1 }),
@@ -175,11 +192,4 @@ private fun ShutoffsDestination(container: AppContainer, nav: NavHostController)
         onAdd = { nav.navigate(Routes.shutoffEdit(null)) },
         onOpen = { nav.navigate(Routes.shutoffEdit(it)) },
     )
-}
-
-@Composable
-private fun CenteredText(text: String, tag: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text, modifier = Modifier.testTag(tag))
-    }
 }

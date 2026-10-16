@@ -52,3 +52,5 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 
 ## 2026-10-15 — T07 slot rendering
 Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with slot N)") instead of a spanning cell, since the LazyColumn grid is row-based. Tandem needs an existing one-pole breaker; the new half starts with a blank label and shows as Empty until filled.
+- 2026-10-16: Equipment dates are entered as typed `yyyy-MM-dd` text fields with inline validation (no date-picker dependency or Material DatePicker state), matching the spec's ISO storage format. A picker can replace them in polish if QA finds them clumsy.
+- 2026-10-16: setup-android.sh no longer creates `platforms/android-37`; AGP 8.13 finds `android-37.0` itself, and having both makes target lookup fail.
