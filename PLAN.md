@@ -26,7 +26,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [x] T16: Equipment list and editor: categories, dates, `AgeAndWarrantyFormatter`, validation, delete with file cleanup. (acceptance: AC-42, AC-43, AC-44, AC-50)
 - [x] T17: Data-plate OCR: `TextRecognizer` interface with ML Kit bundled implementation, `DataPlateParser` heuristics with fixture tests, result sheet with confirm/edit, empty-result path, label photo kept. (acceptance: AC-45, AC-46, AC-47, AC-48, AC-49)
-- [ ] T18: House Manual polish for M1: app icon, string review, empty states, back-stack sanity, `lintDebug` clean, release build config (unsigned), README screenshots list. (acceptance: re-check AC-1..AC-50 on emulator; lint has no errors)
+- [x] T18: House Manual polish for M1: app icon, string review, empty states, back-stack sanity, `lintDebug` clean, release build config (unsigned), README screenshots list. (acceptance: re-check AC-1..AC-50 on emulator; lint has no errors)
 
 ## M2 — Field Log and the handoff
 

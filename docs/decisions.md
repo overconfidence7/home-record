@@ -58,3 +58,6 @@ Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with
 ## 2026-10-16 — T17 OCR
 - Added `com.google.mlkit:text-recognition:16.0.1` (approved in CLAUDE.md, bundled model, no network) in `:house-manual` only. Wrapped by `TextRecognizer` in `:core` so tests use a fake; parsing is pure in `DataPlateParser`.
 - Recognizer exceptions are treated as "no text found" (AC-47: never crash).
+
+## 2026-10-16 (T18)
+- House Manual release build: R8 minify + resource shrinking enabled, unsigned; keep rules in house-manual/proguard-rules.pro for Room, kotlinx-serialization, ML Kit. Adaptive launcher icon (house glyph, monochrome layer) is a simple vector placeholder-free drawable, no new dependencies.
