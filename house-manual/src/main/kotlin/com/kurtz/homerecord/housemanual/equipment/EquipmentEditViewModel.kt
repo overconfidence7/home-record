@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Source
+import com.kurtz.homerecord.core.ocr.DataPlateParser
+import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +23,7 @@ class EquipmentEditViewModel(
     private val homes: HomeRepository,
     private val equipment: EquipmentRepository,
     private val media: MediaFileStore,
+    private val recognizer: TextRecognizer,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EquipmentEditUiState())
     val state: StateFlow<EquipmentEditUiState> = _state
@@ -68,7 +72,12 @@ class EquipmentEditViewModel(
             is EquipmentEditEvent.WarrantyEndsChanged -> _state.update { it.copy(warrantyEnds = event.value) }
             is EquipmentEditEvent.NotesChanged -> _state.update { it.copy(notes = event.value) }
             EquipmentEditEvent.RemoveLabelPhoto -> replacePhoto(null)
-            EquipmentEditEvent.TakeLabelPhoto -> Unit // handled by the route (camera)
+            EquipmentEditEvent.TakeLabelPhoto, EquipmentEditEvent.ScanDataPlate -> Unit // handled by the route (camera)
+            is EquipmentEditEvent.ScanMakeChanged -> updateScan { it.copy(make = event.value) }
+            is EquipmentEditEvent.ScanModelChanged -> updateScan { it.copy(model = event.value) }
+            is EquipmentEditEvent.ScanSerialChanged -> updateScan { it.copy(serial = event.value) }
+            EquipmentEditEvent.ApplyScan -> applyScan()
+            EquipmentEditEvent.DismissScan -> _state.update { it.copy(scan = ScanState.None) }
             EquipmentEditEvent.Save -> save()
             EquipmentEditEvent.AskDelete -> _state.update { it.copy(confirmingDelete = true) }
             EquipmentEditEvent.CancelDelete -> _state.update { it.copy(confirmingDelete = false) }
@@ -77,6 +86,39 @@ class EquipmentEditViewModel(
     }
 
     fun onPhotoCaptured(path: String) = replacePhoto(path)
+
+    /** A data-plate photo was taken: keep it as the label photo (AC-48) and read it on-device. */
+    fun onDataPlateCaptured(path: String) {
+        replacePhoto(path)
+        _state.update { it.copy(scan = ScanState.Reading) }
+        viewModelScope.launch {
+            val lines = try {
+                media.resolve(path)?.let { recognizer.recognize(it) }.orEmpty()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                emptyList() // AC-47: a recognizer failure behaves like "no text found".
+            }
+            val fields = DataPlateParser.parse(lines)
+            _state.update {
+                it.copy(scan = ScanState.Result(lines, fields.make.orEmpty(), fields.model.orEmpty(), fields.serial.orEmpty()))
+            }
+        }
+    }
+
+    private fun updateScan(change: (ScanState.Result) -> ScanState.Result) =
+        _state.update { s -> (s.scan as? ScanState.Result)?.let { s.copy(scan = change(it)) } ?: s }
+
+    /** Fills only the fields the user confirmed (non-blank); blank proposals leave existing values alone. */
+    private fun applyScan() = _state.update { s ->
+        val r = s.scan as? ScanState.Result ?: return@update s
+        s.copy(
+            make = r.make.trim().ifEmpty { s.make },
+            model = r.model.trim().ifEmpty { s.model },
+            serial = r.serial.trim().ifEmpty { s.serial },
+            scan = ScanState.None,
+        )
+    }
 
     /** Drops an unsaved photo file when the user leaves without saving. */
     override fun onCleared() {

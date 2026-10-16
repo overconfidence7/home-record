@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.EquipmentCategory
 import com.kurtz.homerecord.core.model.Source
+import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
 import java.nio.file.Files
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,6 +37,7 @@ class EquipmentEditViewModelTest {
     private lateinit var homes: HomeRepository
     private lateinit var equipment: EquipmentRepository
     private lateinit var media: MediaFileStore
+    private val recognizer = FakeTextRecognizer()
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -50,7 +53,7 @@ class EquipmentEditViewModelTest {
     }
 
     private suspend fun vm(id: String? = null) =
-        EquipmentEditViewModel(id, homes, equipment, media).also { v -> v.state.first { it.loaded } }
+        EquipmentEditViewModel(id, homes, equipment, media, recognizer).also { v -> v.state.first { it.loaded } }
 
     private fun writePhoto(): String {
         val path = media.newPhotoPath()
@@ -122,5 +125,60 @@ class EquipmentEditViewModelTest {
         vm.onPhotoCaptured(second)
         assertFalse(media.resolve(first)!!.exists())
         assertTrue(media.resolve(second)!!.exists())
+    }
+
+    @Test fun scanKeepsPhotoAndProposesFields() = runTest {
+        recognizer.lines = listOf("RHEEM", "MODEL NO. XE50T10", "SERIAL NO. 12345678")
+        val v = vm()
+        val path = writePhoto()
+        v.onDataPlateCaptured(path)
+        val s = v.state.value
+        assertEquals(path, s.labelPhotoPath)
+        val r = s.scan as ScanState.Result
+        assertEquals(listOf("Rheem", "XE50T10", "12345678"), listOf(r.make, r.model, r.serial))
+        assertEquals("", s.make) // nothing is filled until the user confirms
+        v.onEvent(EquipmentEditEvent.ScanModelChanged("XE50T10H"))
+        v.onEvent(EquipmentEditEvent.ApplyScan)
+        val after = v.state.value
+        assertEquals(ScanState.None, after.scan)
+        assertEquals(listOf("Rheem", "XE50T10H", "12345678"), listOf(after.make, after.model, after.serial))
+    }
+
+    @Test fun scanWithNoTextOffersManualEntryAndKeepsPhoto() = runTest {
+        recognizer.lines = emptyList()
+        val v = vm()
+        val path = writePhoto()
+        v.onDataPlateCaptured(path)
+        val r = v.state.value.scan as ScanState.Result
+        assertTrue(r.lines.isEmpty())
+        assertEquals(path, v.state.value.labelPhotoPath)
+        v.onEvent(EquipmentEditEvent.DismissScan)
+        assertEquals(ScanState.None, v.state.value.scan)
+    }
+
+    @Test fun recognizerFailureDoesNotCrash() = runTest {
+        recognizer.fail = true
+        val v = vm()
+        v.onDataPlateCaptured(writePhoto())
+        assertTrue((v.state.value.scan as ScanState.Result).lines.isEmpty())
+    }
+
+    @Test fun applyKeepsExistingValuesForBlankProposals() = runTest {
+        recognizer.lines = listOf("MODEL ABC123")
+        val v = vm()
+        v.onEvent(EquipmentEditEvent.MakeChanged("Trane"))
+        v.onDataPlateCaptured(writePhoto())
+        v.onEvent(EquipmentEditEvent.ApplyScan)
+        assertEquals("Trane", v.state.value.make)
+        assertEquals("ABC123", v.state.value.model)
+    }
+}
+
+class FakeTextRecognizer : TextRecognizer {
+    var lines: List<String> = emptyList()
+    var fail = false
+    override suspend fun recognize(image: File): List<String> {
+        if (fail) error("boom")
+        return lines
     }
 }

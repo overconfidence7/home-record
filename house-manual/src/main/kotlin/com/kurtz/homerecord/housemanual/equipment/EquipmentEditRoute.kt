@@ -19,21 +19,28 @@ fun EquipmentEditRoute(viewModel: EquipmentEditViewModel, media: MediaFileStore,
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var pending by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingIsScan by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(viewModel) { viewModel.done.collect { onDone() } }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val path = pending
+        val scan = pendingIsScan
         pending = null
         if (path != null) {
-            if (ok) viewModel.onPhotoCaptured(path) else media.delete(path)
+            when {
+                !ok -> media.delete(path)
+                scan -> viewModel.onDataPlateCaptured(path)
+                else -> viewModel.onPhotoCaptured(path)
+            }
         }
     }
 
     EquipmentEditScreen(state, photoFile = state.labelPhotoPath?.let { media.resolve(it) }) { event ->
-        if (event == EquipmentEditEvent.TakeLabelPhoto) {
+        if (event == EquipmentEditEvent.TakeLabelPhoto || event == EquipmentEditEvent.ScanDataPlate) {
             val path = media.newPhotoPath()
             val file = media.resolveForWrite(path) ?: return@EquipmentEditScreen
             pending = path
+            pendingIsScan = event == EquipmentEditEvent.ScanDataPlate
             launcher.launch(FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file))
         } else {
             viewModel.onEvent(event)

@@ -133,7 +133,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
             val id = entry.arguments?.getString("id")?.takeIf { it.isNotEmpty() }
             val vm: EquipmentEditViewModel = viewModel(
                 factory = remember(id) {
-                    simpleFactory { EquipmentEditViewModel(id, container.homeRepository, container.equipmentRepository, container.mediaStore) }
+                    simpleFactory { EquipmentEditViewModel(id, container.homeRepository, container.equipmentRepository, container.mediaStore, container.textRecognizer) }
                 },
             )
             EquipmentEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })

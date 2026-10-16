@@ -8,6 +8,8 @@ import com.kurtz.homerecord.housemanual.mapping.AndroidAlarmPlayer
 import com.kurtz.homerecord.housemanual.mapping.AndroidChargingMonitor
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.Source
+import com.kurtz.homerecord.core.ocr.TextRecognizer
+import com.kurtz.homerecord.housemanual.equipment.MlKitTextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
@@ -23,5 +25,6 @@ class AppContainer(context: Context) {
     val shutoffRepository by lazy { ShutoffRepository(database, mediaStore, Source.HOUSE_MANUAL) }
     val chargingMonitor: ChargingMonitor by lazy { AndroidChargingMonitor(appContext) }
     val alarmPlayer: AlarmPlayer by lazy { AndroidAlarmPlayer(appContext) }
+    val textRecognizer: TextRecognizer by lazy { MlKitTextRecognizer(appContext) }
     val equipmentRepository by lazy { EquipmentRepository(database, mediaStore, Source.HOUSE_MANUAL) }
 }

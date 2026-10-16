@@ -25,7 +25,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T15: HM-Mapping screen: keep-screen-on, armed and alarm states, breaker picker, endpoint picker with "New outlet…", save confirms the link; disarm on leave. (acceptance: AC-36, AC-39, AC-40, AC-41, AC-16)
 - [x] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [x] T16: Equipment list and editor: categories, dates, `AgeAndWarrantyFormatter`, validation, delete with file cleanup. (acceptance: AC-42, AC-43, AC-44, AC-50)
-- [ ] T17: Data-plate OCR: `TextRecognizer` interface with ML Kit bundled implementation, `DataPlateParser` heuristics with fixture tests, result sheet with confirm/edit, empty-result path, label photo kept. (acceptance: AC-45, AC-46, AC-47, AC-48, AC-49)
+- [x] T17: Data-plate OCR: `TextRecognizer` interface with ML Kit bundled implementation, `DataPlateParser` heuristics with fixture tests, result sheet with confirm/edit, empty-result path, label photo kept. (acceptance: AC-45, AC-46, AC-47, AC-48, AC-49)
 - [ ] T18: House Manual polish for M1: app icon, string review, empty states, back-stack sanity, `lintDebug` clean, release build config (unsigned), README screenshots list. (acceptance: re-check AC-1..AC-50 on emulator; lint has no errors)
 
 ## M2 — Field Log and the handoff

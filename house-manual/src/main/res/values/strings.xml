@@ -165,6 +165,14 @@
     <string name="equipment_label_photo">Label photo</string>
     <string name="equipment_take_photo">Take label photo</string>
     <string name="equipment_retake_photo">Retake label photo</string>
+    <string name="equipment_scan">Scan data plate</string>
+    <string name="equipment_scan_reading">Reading the label…</string>
+    <string name="equipment_scan_title">Data plate</string>
+    <string name="equipment_scan_lines">Text found</string>
+    <string name="equipment_scan_confirm">Check these before filling the form</string>
+    <string name="equipment_scan_use">Use these</string>
+    <string name="equipment_scan_empty">No text was found on the photo. The photo is kept as the label photo. You can type the details yourself.</string>
+    <string name="equipment_scan_manual">Enter manually</string>
     <string name="equipment_delete_confirm_title">Delete this equipment?</string>
     <string name="equipment_delete_confirm_body">This also removes its label photo.</string>
     <string name="shutoffs_title">Shutoffs</string>

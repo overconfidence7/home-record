@@ -74,6 +74,10 @@ fun EquipmentEditScreen(state: EquipmentEditUiState, photoFile: File?, onEvent: 
                 }
             }
         }
+        OutlinedButton(
+            onClick = { onEvent(EquipmentEditEvent.ScanDataPlate) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("equipment_scan"),
+        ) { Text(stringResource(R.string.equipment_scan)) }
         TextField(state.make, R.string.equipment_make, "equipment_make") { onEvent(EquipmentEditEvent.MakeChanged(it)) }
         TextField(state.model, R.string.equipment_model, "equipment_model") { onEvent(EquipmentEditEvent.ModelChanged(it)) }
         TextField(state.serial, R.string.equipment_serial, "equipment_serial") { onEvent(EquipmentEditEvent.SerialChanged(it)) }
@@ -113,6 +117,7 @@ fun EquipmentEditScreen(state: EquipmentEditUiState, photoFile: File?, onEvent: 
             ) { Text(stringResource(R.string.shutoff_delete)) }
         }
     }
+    ScanDialog(state.scan, onEvent)
     if (state.confirmingDelete) {
         AlertDialog(
             onDismissRequest = { onEvent(EquipmentEditEvent.CancelDelete) },
@@ -124,6 +129,57 @@ fun EquipmentEditScreen(state: EquipmentEditUiState, photoFile: File?, onEvent: 
                 }
             },
             dismissButton = { TextButton(onClick = { onEvent(EquipmentEditEvent.CancelDelete) }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+}
+
+/** Result sheet for a data-plate scan: recognized lines plus editable proposals (AC-45..AC-47). */
+@Composable
+private fun ScanDialog(scan: ScanState, onEvent: (EquipmentEditEvent) -> Unit) {
+    when (scan) {
+        ScanState.None -> Unit
+        ScanState.Reading -> AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text(stringResource(R.string.equipment_scan_reading)) },
+            modifier = Modifier.testTag("scan_reading"),
+        )
+        is ScanState.Result -> AlertDialog(
+            onDismissRequest = { onEvent(EquipmentEditEvent.DismissScan) },
+            title = { Text(stringResource(R.string.equipment_scan_title)) },
+            modifier = Modifier.testTag("scan_result"),
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (scan.lines.isEmpty()) {
+                        Text(stringResource(R.string.equipment_scan_empty), modifier = Modifier.testTag("scan_empty"))
+                    } else {
+                        Text(stringResource(R.string.equipment_scan_lines), style = MaterialTheme.typography.titleSmall)
+                        scan.lines.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                        Text(stringResource(R.string.equipment_scan_confirm), style = MaterialTheme.typography.titleSmall)
+                        TextField(scan.make, R.string.equipment_make, "scan_make") { onEvent(EquipmentEditEvent.ScanMakeChanged(it)) }
+                        TextField(scan.model, R.string.equipment_model, "scan_model") { onEvent(EquipmentEditEvent.ScanModelChanged(it)) }
+                        TextField(scan.serial, R.string.equipment_serial, "scan_serial") { onEvent(EquipmentEditEvent.ScanSerialChanged(it)) }
+                    }
+                }
+            },
+            confirmButton = {
+                if (scan.lines.isNotEmpty()) {
+                    TextButton(onClick = { onEvent(EquipmentEditEvent.ApplyScan) }, modifier = Modifier.heightIn(min = 48.dp).testTag("scan_apply")) {
+                        Text(stringResource(R.string.equipment_scan_use))
+                    }
+                } else {
+                    TextButton(onClick = { onEvent(EquipmentEditEvent.DismissScan) }, modifier = Modifier.heightIn(min = 48.dp).testTag("scan_manual")) {
+                        Text(stringResource(R.string.equipment_scan_manual))
+                    }
+                }
+            },
+            dismissButton = {
+                if (scan.lines.isNotEmpty()) {
+                    TextButton(onClick = { onEvent(EquipmentEditEvent.DismissScan) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            },
         )
     }
 }
