@@ -9,6 +9,8 @@ import com.kurtz.homerecord.core.logic.ShrinkCheck
 import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
+import com.kurtz.homerecord.core.model.BreakerType
+import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.PanelLayout
@@ -81,8 +83,8 @@ class PanelRepository(
     }
 
     /** Deletes a breaker, its room links, and detaches (not deletes) its endpoints. */
-    suspend fun deleteBreaker(id: String) {
-        val breaker = db.breakerDao().get(id) ?: return
+    suspend fun deleteBreaker(id: String): Unit = db.withTransaction {
+        val breaker = db.breakerDao().get(id) ?: return@withTransaction
         val now = clock.now()
         db.endpointDao().getAll().filter { it.breakerId == id }.forEach {
             db.endpointDao().upsert(it.copy(breakerId = null, updatedAt = now))
@@ -96,8 +98,8 @@ class PanelRepository(
         val first = getBreaker(breakerId) ?: return@withTransaction null
         if (first.poles != 1 || first.tandemIndex != null) return@withTransaction null
         saveBreaker(first.copy(tandemIndex = 0))
-        saveBreaker(first.copy(id = "", label = emptyLabel, amps = null, type = com.kurtz.homerecord.core.model.BreakerType.STANDARD,
-            confidence = com.kurtz.homerecord.core.model.Confidence.UNKNOWN, tandemIndex = 1))
+        saveBreaker(first.copy(id = "", label = emptyLabel, amps = null, type = BreakerType.STANDARD,
+            confidence = Confidence.UNKNOWN, tandemIndex = 1))
     }
 
     /** AC-11: updates the slot count; false (and no change) if occupied slots would be dropped. */
