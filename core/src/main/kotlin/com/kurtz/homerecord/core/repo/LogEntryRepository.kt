@@ -26,6 +26,17 @@ class LogEntryRepository(
     suspend fun addPhoto(jobId: String, mediaPath: String, roomId: String? = null): LogEntry =
         add(LogEntryDraft(jobId, EntryKind.PHOTO, mediaPath = mediaPath, roomId = roomId))
 
+    /** AC-58: a NOTE entry dated today; blank text is not saved and returns null. */
+    suspend fun addNote(jobId: String, text: String, roomId: String? = null): LogEntry? {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return null
+        return add(LogEntryDraft(jobId, EntryKind.NOTE, text = trimmed, roomId = roomId))
+    }
+
+    /** AC-59: a VOICE entry dated today with its recorded [durationMs]. */
+    suspend fun addVoice(jobId: String, mediaPath: String, durationMs: Long, roomId: String? = null): LogEntry =
+        add(LogEntryDraft(jobId, EntryKind.VOICE, mediaPath = mediaPath, durationMs = durationMs, roomId = roomId))
+
     private suspend fun add(draft: LogEntryDraft): LogEntry {
         val now = clock.now()
         val entry = LogEntry(

@@ -33,7 +33,7 @@ Ordered checklist. Each task is about one hour of focused work. Tick a task only
 - [x] T19: Field Log app shell: navigation, `AppContainer`, FL-Jobs list with empty state and archive toggle, FL-JobEdit with rooms quick-add; Job/LogEntry/DailyReport/CompanyProfile entities + DAOs in `:core`. (acceptance: AC-51, AC-52, AC-53, AC-54)
 - [x] T20: FL-Capture with CameraX: full-screen preview, 72dp shutter, JPEG to app files, PHOTO entry creation, volume-key shutter handler, permission denied state. (acceptance: AC-55, AC-56, AC-57, AC-60)
 - [x] R4: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [ ] T21: Notes and voice: typed note entry, `VoiceRecorder` (MediaRecorder AAC/.m4a) behind an interface with a 3:00 cap, VOICE entries with duration, mic permission state. (acceptance: AC-58, AC-59, AC-60)
+- [x] T21: Notes and voice: typed note entry, `VoiceRecorder` (MediaRecorder AAC/.m4a) behind an interface with a 3:00 cap, VOICE entries with duration, mic permission state. (acceptance: AC-58, AC-59, AC-60)
 - [ ] T22: FL-Job day grouping (`EntryGrouper`), thumbnails, note text, audio duration and playback, FL-Entry edit/delete, crash-safety check. (acceptance: AC-61, AC-62)
 - [ ] T23: FL-BehindWall: room → wall picker (N/E/S/W/custom → Wall rows), camera reuse, Photo rows with stage BEHIND_WALL, running counts. (acceptance: AC-63, AC-64, AC-65)
 - [ ] T24: FL-Report: `ReportDraftBuilder` prefill from entries, editable draft persisted as DailyReport, delay reason picker, FL-Settings company profile. (acceptance: AC-67, AC-68)

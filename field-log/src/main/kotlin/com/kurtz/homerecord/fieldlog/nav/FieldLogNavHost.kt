@@ -12,6 +12,7 @@ import com.kurtz.homerecord.fieldlog.AppContainer
 import com.kurtz.homerecord.fieldlog.capture.CameraXPhotoCapturer
 import com.kurtz.homerecord.fieldlog.capture.CaptureRoute
 import com.kurtz.homerecord.fieldlog.capture.CaptureViewModel
+import com.kurtz.homerecord.fieldlog.capture.MediaRecorderVoiceRecorder
 import com.kurtz.homerecord.fieldlog.job.JobRoute
 import com.kurtz.homerecord.fieldlog.job.JobViewModel
 import com.kurtz.homerecord.fieldlog.jobedit.JobEditRoute
@@ -72,9 +73,10 @@ fun FieldLogNavHost(container: AppContainer) {
             val id = entry.arguments?.getString(Routes.JOB_ARG).orEmpty()
             val context = androidx.compose.ui.platform.LocalContext.current
             val capturer = remember { CameraXPhotoCapturer(context.applicationContext) }
+            val recorder = remember { MediaRecorderVoiceRecorder(context.applicationContext) }
             val vm: CaptureViewModel = viewModel(
                 factory = remember(id) {
-                    simpleFactory { CaptureViewModel(id, container.logEntryRepository, container.mediaStore, capturer) }
+                    simpleFactory { CaptureViewModel(id, container.logEntryRepository, container.mediaStore, capturer, recorder) }
                 },
             )
             CaptureRoute(vm, capturer, container.shutterKeys, onBack = { nav.popBackStack() })

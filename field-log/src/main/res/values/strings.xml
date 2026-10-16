@@ -27,6 +27,16 @@
     <string name="capture_failed">Photo not saved. Try again.</string>
     <string name="capture_permission_needed">Field Log needs camera access to take job photos. You can turn it on in Settings.</string>
     <string name="capture_open_settings">Open Settings</string>
+    <string name="capture_mic_permission_needed">Field Log needs microphone access to record voice notes. You can turn it on in Settings.</string>
+    <string name="capture_note">Note</string>
+    <string name="capture_note_title">Add a note</string>
+    <string name="capture_note_save">Save</string>
+    <string name="capture_note_cancel">Cancel</string>
+    <string name="capture_voice">Voice</string>
+    <string name="capture_voice_stop">Stop</string>
+    <string name="capture_recording">Recording %1$s</string>
+    <string name="capture_voice_failed">Recording failed. Try again.</string>
+    <string name="capture_extras_count">%1$d notes, %2$d voice memos saved</string>
     <string name="capture_back">Back</string>
     <string name="room_kitchen">Kitchen</string>
     <string name="room_living_room">Living Room</string>

@@ -30,9 +30,20 @@ class CaptureScreenTest {
 
     @Test fun permissionDeniedShowsExplanationAndSettingsButton() {
         var settings = 0
-        rule.setContent { HomeRecordTheme { PermissionDenied(onOpenSettings = { settings++ }, onBack = {}) } }
+        rule.setContent { HomeRecordTheme { PermissionDenied(message = "Field Log needs camera access", onOpenSettings = { settings++ }, onBack = {}) } }
         rule.onNodeWithText("Field Log needs camera access", substring = true).assertExists()
         rule.onNodeWithText("Open Settings").performClick()
         assertEquals(1, settings)
+    }
+
+    @Test fun noteAndVoiceButtonsFireEventsAndRecordingShowsElapsed() {
+        val events = mutableListOf<CaptureEvent>()
+        rule.setContent {
+            HomeRecordTheme { CaptureScreen(CaptureUiState(recording = true, elapsedMs = 65_000), onEvent = { events += it }) {} }
+        }
+        rule.onNodeWithText("Recording 1:05").assertExists()
+        rule.onNodeWithText("Note").performClick()
+        rule.onNodeWithText("Stop").performClick()
+        assertEquals(listOf(CaptureEvent.OpenNote, CaptureEvent.ToggleVoice), events)
     }
 }
