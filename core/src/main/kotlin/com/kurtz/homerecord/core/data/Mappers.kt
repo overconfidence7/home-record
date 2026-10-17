@@ -15,6 +15,7 @@ import com.kurtz.homerecord.core.model.LogEntry
 import com.kurtz.homerecord.core.model.DailyReport
 import com.kurtz.homerecord.core.model.CompanyProfile
 import com.kurtz.homerecord.core.model.LoadProfile
+import com.kurtz.homerecord.core.model.MaintenanceTask
 import com.kurtz.homerecord.core.logic.HvacKind
 import com.kurtz.homerecord.core.logic.LoadProfileCodec
 
@@ -337,4 +338,16 @@ fun LoadProfileEntity.toDomain() = LoadProfile(
 fun LoadProfile.toEntity() = LoadProfileEntity(
     id = id, homeId = homeId, appliances = LoadProfileCodec.encode(appliances), hvac = hvac.name,
     hvacVa = hvacVa, stripVa = stripVa, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun MaintenanceTaskEntity.toDomain() = MaintenanceTask(
+    id = id, homeId = homeId, equipmentId = equipmentId, title = title, rule = rule,
+    intervalMonths = intervalMonths, season = season, lastDone = lastDone, nextDue = nextDue,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun MaintenanceTask.toEntity() = MaintenanceTaskEntity(
+    id = id, homeId = homeId, equipmentId = equipmentId, title = title, rule = rule,
+    intervalMonths = intervalMonths, season = season, lastDone = lastDone, nextDue = nextDue,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
 )

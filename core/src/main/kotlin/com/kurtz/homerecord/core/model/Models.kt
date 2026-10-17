@@ -274,3 +274,22 @@ data class LoadProfile(
     override val updatedAt: Long,
     override val source: Source,
 ) : Record
+
+enum class MaintenanceRule { CALENDAR, SEASONAL }
+enum class Season { SPRING, SUMMER, FALL, WINTER }
+
+/** F15: a recurring home chore. [equipmentId] is set for per-equipment reminders; dates are ISO `yyyy-MM-dd`. */
+data class MaintenanceTask(
+    override val id: String,
+    val homeId: String,
+    val equipmentId: String? = null,
+    val title: String,
+    val rule: MaintenanceRule,
+    val intervalMonths: Int? = null,
+    val season: Season? = null,
+    val lastDone: String? = null,
+    val nextDue: String,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record

@@ -51,7 +51,9 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 
 ## M3 — Keep, protect, pay
 
-- [ ] T31: Reminders data: MaintenanceTask entity, `SeasonalTaskSeeder` per climate zone, equipment interval tasks, due-date math with tests. (acceptance: AC-80, AC-81, AC-85)
+- [x] T31: Reminders data: MaintenanceTask entity, `SeasonalTaskSeeder` per climate zone, equipment interval tasks, due-date math with tests. (acceptance: AC-80, AC-81, AC-85)
+  - [ ] T31a: "Remind me every N months" field (1–24) on HM-EquipmentEdit calling `MaintenanceRepository.setEquipmentReminder` on save (AC-81 UI); do it with T32.
+  - [ ] T31b: climate-zone picker calling `MaintenanceRepository.applyClimateZone` (AC-80 UI); belongs on HM-Settings (T34) and, until then, the Reminders screen (T32).
 - [ ] T32: Reminders screen (Done/Snooze), WorkManager daily check, notification with deep link, permission request on first task. (acceptance: AC-82, AC-83, AC-84)
 - [ ] T33: Emergency widget (Glance or RemoteViews) with shutoff count and update on change. (acceptance: AC-86, AC-87)
 - [ ] T34: Encrypted backup: `BundleCrypto` (AES-256-GCM, PBKDF2), export from HM-Settings, import detection and passphrase prompt, restore test. (acceptance: AC-88, AC-89, AC-90)

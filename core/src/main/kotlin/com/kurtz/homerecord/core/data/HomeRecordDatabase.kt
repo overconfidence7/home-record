@@ -12,8 +12,9 @@ import androidx.room.TypeConverters
         BreakerEntity::class, BreakerRoomEntity::class, EndpointEntity::class,
         ShutoffEntity::class, EquipmentEntity::class, PhotoEntity::class,
         JobEntity::class, LogEntryEntity::class, DailyReportEntity::class, CompanyProfileEntity::class, LoadProfileEntity::class,
+        MaintenanceTaskEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -33,13 +34,14 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun dailyReportDao(): DailyReportDao
     abstract fun companyProfileDao(): CompanyProfileDao
     abstract fun loadProfileDao(): LoadProfileDao
+    abstract fun maintenanceTaskDao(): MaintenanceTaskDao
 
     companion object {
         const val FILE_NAME = "homerecord.db"
 
         fun open(context: Context): HomeRecordDatabase =
             Room.databaseBuilder(context.applicationContext, HomeRecordDatabase::class.java, FILE_NAME)
-                // Pre-release: v3 -> v4 added load_profile (v2 -> v3: panel profile and room kinds); no shipped data to preserve.
+                // Pre-release: v4 -> v5 added maintenance_task, v3 -> v4 added load_profile (v2 -> v3: panel profile and room kinds); no shipped data to preserve.
                 .fallbackToDestructiveMigration(true).build()
 
         fun inMemory(context: Context): HomeRecordDatabase =

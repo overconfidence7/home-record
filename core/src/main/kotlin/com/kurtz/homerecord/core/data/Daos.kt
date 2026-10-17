@@ -290,3 +290,30 @@ interface LoadProfileDao {
     @Query("SELECT * FROM load_profile WHERE homeId = :homeId LIMIT 1")
     fun observeForHome(homeId: String): Flow<LoadProfileEntity?>
 }
+
+@Dao
+interface MaintenanceTaskDao {
+    @Upsert
+    suspend fun upsert(entity: MaintenanceTaskEntity)
+
+    @Upsert
+    suspend fun upsertAll(entities: List<MaintenanceTaskEntity>)
+
+    @Query("SELECT * FROM maintenance_task WHERE id = :id")
+    suspend fun get(id: String): MaintenanceTaskEntity?
+
+    @Query("SELECT * FROM maintenance_task WHERE equipmentId = :equipmentId LIMIT 1")
+    suspend fun getForEquipment(equipmentId: String): MaintenanceTaskEntity?
+
+    @Query("SELECT * FROM maintenance_task WHERE homeId = :homeId ORDER BY nextDue, title")
+    fun observeForHome(homeId: String): Flow<List<MaintenanceTaskEntity>>
+
+    @Query("SELECT * FROM maintenance_task WHERE homeId = :homeId ORDER BY nextDue, title")
+    suspend fun getForHome(homeId: String): List<MaintenanceTaskEntity>
+
+    @Query("DELETE FROM maintenance_task WHERE id = :id")
+    suspend fun delete(id: String)
+
+    @Query("DELETE FROM maintenance_task WHERE homeId = :homeId AND equipmentId IS NULL AND rule = 'SEASONAL'")
+    suspend fun deleteSeasonalForHome(homeId: String)
+}

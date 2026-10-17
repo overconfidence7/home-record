@@ -10,7 +10,9 @@ import com.kurtz.homerecord.core.model.EntryKind
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.model.MaintenanceRule
 import com.kurtz.homerecord.core.model.PanelKind
+import com.kurtz.homerecord.core.model.Season
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.RoomKind
 import com.kurtz.homerecord.core.model.TandemPolicy
@@ -310,6 +312,29 @@ data class LoadProfileEntity(
     val hvac: String,
     val hvacVa: Int,
     val stripVa: Int,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(
+    tableName = "maintenance_task",
+    foreignKeys = [
+        ForeignKey(HomeEntity::class, ["id"], ["homeId"], onDelete = CASCADE),
+        ForeignKey(EquipmentEntity::class, ["id"], ["equipmentId"], onDelete = CASCADE),
+    ],
+    indices = [Index("homeId"), Index("equipmentId")],
+)
+data class MaintenanceTaskEntity(
+    @PrimaryKey val id: String,
+    val homeId: String,
+    val equipmentId: String?,
+    val title: String,
+    val rule: MaintenanceRule,
+    val intervalMonths: Int?,
+    val season: Season?,
+    val lastDone: String?,
+    val nextDue: String,
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
