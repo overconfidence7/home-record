@@ -175,15 +175,6 @@ class EquipmentEditViewModelTest {
         assertEquals("Trane", v.state.value.make)
         assertEquals("ABC123", v.state.value.model)
     }
-}
-
-class FakeTextRecognizer : TextRecognizer {
-    var lines: List<String> = emptyList()
-    var fail = false
-    override suspend fun recognize(image: File): List<String> {
-        if (fail) error("boom")
-        return lines
-    }
 
     @Test fun `AC-81 remind months creates a task and signals the route`() = runTest {
         val home = homes.createHome("H")
@@ -225,5 +216,14 @@ class FakeTextRecognizer : TextRecognizer {
         edit.onEvent(EquipmentEditEvent.Save)
         assertFalse(edit.done.first())
         assertTrue(maintenance.getTasks(home.id).isEmpty())
+    }
+}
+
+class FakeTextRecognizer : TextRecognizer {
+    var lines: List<String> = emptyList()
+    var fail = false
+    override suspend fun recognize(image: File): List<String> {
+        if (fail) error("boom")
+        return lines
     }
 }
