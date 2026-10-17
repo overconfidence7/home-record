@@ -97,3 +97,4 @@ Rules are pure functions in `:core` (`PanelInsights`) returning typed `Insight` 
 - `maintenance_task` table (DB v5, destructive fallback, pre-release). Equipment FK cascades so deleting equipment deletes its tasks (AC-85).
 - Pure rules in `DueDateMath` (interval 1–24, first due with roll-forward, Done/Snooze math ready for T32) and `SeasonalTaskSeeder` (per-zone templates plus common ones).
 - Not added to the bundle: spec does not list MaintenanceTask in the `.homerecord` format.
+- 2026-10-17: WorkManager 2.10.5 added (approved list). App implements Configuration.Provider with the default initializer removed from the manifest, so scheduling also works under Robolectric. Reminder check runs daily with an initial delay to 08:00 local (KEEP policy).
