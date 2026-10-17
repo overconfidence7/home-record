@@ -71,7 +71,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Items before the slot rows in the panel list: title, photo, profile, slot-count editor, legend, mapping, main breaker. */
-private const val PANEL_HEADER_ITEMS = 7
+private const val PANEL_HEADER_ITEMS = 8
 private val SLOT_ROW_HEIGHT = 64.dp
 private val TANDEM_ROW_HEIGHT = 104.dp
 private val GRID_GAP = 8.dp
@@ -106,6 +106,7 @@ fun PanelScreen(
         delay(HIGHLIGHT_MILLIS)
         highlighted = null
     }
+    state.insights?.let { PanelInsightsSheet(it, onDismiss = { onEvent(PanelEvent.DismissInsights) }) }
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("panel_grid"),
@@ -126,6 +127,12 @@ fun PanelScreen(
                 onClick = { onEvent(PanelEvent.ShareLegend) },
                 modifier = Modifier.heightIn(min = 48.dp).testTag("panel_legend_pdf"),
             ) { Text(stringResource(R.string.panel_legend_pdf)) }
+        }
+        item {
+            OutlinedButton(
+                onClick = { onEvent(PanelEvent.ShowInsights) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("panel_insights"),
+            ) { Text(stringResource(R.string.panel_insights)) }
         }
         item {
             OutlinedButton(

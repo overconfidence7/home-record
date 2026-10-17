@@ -126,4 +126,26 @@ class PanelScreenTest {
         rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(), breakers = listOf(b), feedNotes = mapOf("b" to "Shed sub")), {}) } }
         rule.onNodeWithText("Garage · 20A → feeds Shed sub").assertIsDisplayed()
     }
+
+    @Test fun `AC-106 insights content renders capacity, cards, and the disclaimer`() {
+        val result = com.kurtz.homerecord.core.logic.PanelInsightsResult(
+            com.kurtz.homerecord.core.logic.PanelCapacity(8, 12, 7, 1, 40, 20),
+            listOf(
+                com.kurtz.homerecord.core.logic.Insight.Hazard(listOf(com.kurtz.homerecord.core.logic.HazardReason.FPE)),
+                com.kurtz.homerecord.core.logic.Insight.Dedicated(com.kurtz.homerecord.core.logic.DedicatedRow.MICROWAVE, false),
+            ),
+        )
+        rule.setContent { HomeRecordTheme { PanelInsightsContent(result, onClose = {}) } }
+        rule.onNodeWithText("8 slots used, 12 free").assertIsDisplayed()
+        rule.onNodeWithText("Home inspectors and many insurers flag this panel type; have a licensed electrician evaluate it.").assertIsDisplayed()
+        rule.onNodeWithText("Microwave: not labeled yet — label it, or it may not exist.").assertIsDisplayed()
+        rule.onNodeWithTag("insights_disclaimer").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test fun `insights button asks to open the sheet`() {
+        val events = mutableListOf<PanelEvent>()
+        rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel()), { events += it }) } }
+        rule.onNodeWithTag("panel_insights").performScrollTo().performClick()
+        assertEquals(listOf<PanelEvent>(PanelEvent.ShowInsights), events)
+    }
 }

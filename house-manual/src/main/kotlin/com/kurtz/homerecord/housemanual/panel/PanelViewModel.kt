@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.logic.LegendRow
 import com.kurtz.homerecord.core.logic.LegendRowBuilder
+import com.kurtz.homerecord.core.logic.PanelInsights
+import com.kurtz.homerecord.core.logic.PanelInsightsResult
 import com.kurtz.homerecord.core.logic.PanelProfileInput
 import com.kurtz.homerecord.core.logic.PanelProfileError
 import com.kurtz.homerecord.core.logic.PanelProfileResult
@@ -45,6 +47,7 @@ class PanelViewModel(
         val profile: PanelProfileInput = PanelProfileInput(),
         val profileEdit: PanelProfileInput? = null,
         val profileErrors: Set<PanelProfileError> = emptySet(),
+        val insights: PanelInsightsResult? = null,
     )
 
     private data class Content(
@@ -77,7 +80,7 @@ class PanelViewModel(
         }.orEmpty()
         PanelUiState(
             c.loaded, c.panel, c.breakers, f.slotCount, f.layout, f.slotEdit, f.blockedAt,
-            f.profile, f.profileEdit, f.profileErrors, feedOptions, PanelProfileRule.feedsByBreaker(c.allPanels),
+            f.profile, f.profileEdit, f.profileErrors, feedOptions, PanelProfileRule.feedsByBreaker(c.allPanels), f.insights,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
 
@@ -95,6 +98,8 @@ class PanelViewModel(
             }
             PanelEvent.CancelProfile -> form.update { it.copy(profileEdit = null, profileErrors = emptySet()) }
             PanelEvent.SaveProfile -> saveProfile()
+            PanelEvent.ShowInsights -> showInsights()
+            PanelEvent.DismissInsights -> form.update { it.copy(insights = null) }
             is PanelEvent.SlotEditChanged -> form.update { it.copy(slotEdit = event.value, blockedAt = null) }
             PanelEvent.ApplySlotCount -> applySlotCount()
             is PanelEvent.SlotLongPressed -> makeTandem(event.slot)
@@ -123,6 +128,22 @@ class PanelViewModel(
             typeLabel,
             { b -> state.value.feedNotes[b.id]?.let(feedsNote) },
         )
+    }
+
+    /** AC-106/AC-113: recomputed from the database on every open; nothing is written. */
+    private fun showInsights() {
+        viewModelScope.launch {
+            val panel = state.value.panel ?: return@launch
+            val home = homes.getHome() ?: return@launch
+            val result = PanelInsights.compute(
+                panel,
+                panels.observeBreakers(panel.id).first(),
+                homes.getRooms(home.id),
+                panels.observeBreakerRoomsForHome(home.id).first(),
+                panels.observeEndpointsForHome(home.id).first(),
+            )
+            form.update { it.copy(insights = result) }
+        }
     }
 
     private fun applySlotCount() {

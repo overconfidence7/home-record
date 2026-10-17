@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual.panel
 
 import com.kurtz.homerecord.core.logic.MainBreakerRule
+import com.kurtz.homerecord.core.logic.PanelInsightsResult
 import com.kurtz.homerecord.core.logic.PanelProfileError
 import com.kurtz.homerecord.core.logic.PanelProfileInput
 import com.kurtz.homerecord.core.logic.SlotCountRule
@@ -27,6 +28,8 @@ data class PanelUiState(
     val feedOptions: List<FeedOption> = emptyList(),
     /** Breaker id -> name of the sub-panel it feeds. */
     val feedNotes: Map<String, String> = emptyMap(),
+    /** AC-106: insights computed when the sheet was opened; null while it is closed. */
+    val insights: PanelInsightsResult? = null,
 ) {
     val mainBreaker: Breaker? get() = MainBreakerRule.mainOf(breakers)
 
@@ -58,6 +61,8 @@ sealed interface PanelEvent {
     data object ShareLegend : PanelEvent
     /** Open HM-Mapping (handled by the route). */
     data object OpenMapping : PanelEvent
+    data object ShowInsights : PanelEvent
+    data object DismissInsights : PanelEvent
     /** Open HM-Breaker for [slot]: an existing [breakerId], or an empty slot/tandem half. */
     data class OpenBreaker(val slot: Int, val breakerId: String?, val tandemIndex: Int? = null) : PanelEvent
     data class SlotLongPressed(val slot: Int) : PanelEvent

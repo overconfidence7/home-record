@@ -89,3 +89,6 @@ HM-Import opens from a Home hub card now (Settings screen is T34) and from an AC
 - Quick-add and custom rooms both go through `RoomKindMapper` (keyword match); unmatched names become OTHER, editable on HM-Room.
 - Feed breaker: deleting the feeding breaker or its panel clears `feedBreakerId` on the sub-panel. HM-Panel still shows one panel until T37, so the feed picker is empty (with a hint) until a second panel exists.
 - Home.squareFeet has no UI yet (T30c form prefill).
+
+## 2026-10-17 — T30b panel insights
+Rules are pure functions in `:core` (`PanelInsights`) returning typed `Insight` values; the UI maps them to strings. Keyword matching is whole-word (optional plural) so "Orange" never matches "range" and "Square D" never matches "fpe". Interpretations are listed in BLOCKERS.md.

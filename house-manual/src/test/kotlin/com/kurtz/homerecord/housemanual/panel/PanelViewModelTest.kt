@@ -215,4 +215,23 @@ class PanelViewModelTest {
         val rows = vm.legendRows({ "-> feeds $it" }, { "Standard" })
         assertEquals("Garage feed -> feeds Garage sub", rows.first().label)
     }
+
+    @Test fun `AC-106 and AC-113 insights open from current data, dismiss, and write nothing`() = runTest {
+        val home = homes.createHome("H")
+        val panel = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val vm = vm()
+        vm.state.first { it.panel != null }
+        assertNull(vm.state.value.insights)
+
+        vm.onEvent(PanelEvent.ShowInsights)
+        assertEquals(0, vm.state.first { it.insights != null }.insights?.capacity?.circuits)
+
+        panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", panel.id, listOf(3), label = "Dishwasher", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        vm.onEvent(PanelEvent.DismissInsights)
+        assertNull(vm.state.value.insights)
+        vm.onEvent(PanelEvent.ShowInsights)
+        val result = vm.state.first { it.insights != null }.insights
+        assertEquals(1, result?.capacity?.circuits)
+        assertEquals(1, panels.observeBreakers(panel.id).first().size)
+    }
 }
