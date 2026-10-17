@@ -31,6 +31,9 @@ import com.kurtz.homerecord.housemanual.equipment.EquipmentViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.imports.AndroidBundleSource
 import com.kurtz.homerecord.housemanual.imports.ImportRoute
+import com.kurtz.homerecord.housemanual.settings.AndroidBackupExporter
+import com.kurtz.homerecord.housemanual.settings.SettingsRoute
+import com.kurtz.homerecord.housemanual.settings.SettingsViewModel
 import com.kurtz.homerecord.housemanual.imports.ImportViewModel
 import com.kurtz.homerecord.housemanual.mapping.MappingRoute
 import com.kurtz.homerecord.housemanual.mapping.MappingViewModel
@@ -87,7 +90,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
     }
     val pendingImport by container.pendingImportUri.collectAsState()
     androidx.compose.runtime.LaunchedEffect(pendingImport, startRoute) {
-        if (pendingImport != null && startRoute != Routes.ONBOARDING) {
+        if (pendingImport != null) {
             nav.navigate(Routes.IMPORT) { launchSingleTop = true }
         }
     }
@@ -103,7 +106,26 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                     }
                 },
             )
-            ImportRoute(vm, onDone = { nav.popBackStack() })
+            ImportRoute(vm, onDone = {
+                // A restore from onboarding creates the Home, so land on the hub instead of the setup form.
+                val previous = nav.previousBackStackEntry?.destination?.route
+                if (previous == null || previous == Routes.ONBOARDING) {
+                    nav.navigate(Routes.HOME) { popUpTo(0) }
+                } else {
+                    nav.popBackStack()
+                }
+            })
+        }
+        composable(Routes.SETTINGS) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val vm: SettingsViewModel = viewModel(
+                factory = remember {
+                    simpleFactory {
+                        SettingsViewModel(container.homeRepository, AndroidBackupExporter(context.applicationContext, container.backupRepository))
+                    }
+                },
+            )
+            SettingsRoute(vm, onImport = { nav.navigate(Routes.IMPORT) }, onReminders = { nav.navigate(Routes.reminders()) })
         }
         composable(Routes.ONBOARDING) {
             val vm: OnboardingViewModel = viewModel(
@@ -111,7 +133,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                     simpleFactory { OnboardingViewModel(container.homeRepository) { room: QuickRoom -> resources.getString(room.label) } }
                 },
             )
-            OnboardingRoute(vm, onDone = {
+            OnboardingRoute(vm, onRestore = { nav.navigate(Routes.IMPORT) }, onDone = {
                 nav.navigate(Routes.PANEL) { popUpTo(Routes.ONBOARDING) { inclusive = true } }
             })
         }
@@ -130,6 +152,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                 onEquipment = { nav.navigate(Routes.EQUIPMENT) },
                 onRooms = { nav.navigate(Routes.ROOMS) },
                 onImport = { nav.navigate(Routes.IMPORT) },
+                onSettings = { nav.navigate(Routes.SETTINGS) },
                 onReminders = { nav.navigate(Routes.reminders()) },
                 onSlot = { nav.navigate(Routes.panelAt(it)) },
                 onRoom = { nav.navigate(Routes.room(it)) },

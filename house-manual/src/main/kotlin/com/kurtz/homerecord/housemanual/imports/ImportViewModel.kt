@@ -2,11 +2,14 @@ package com.kurtz.homerecord.housemanual.imports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.bundle.BundleContents
+import com.kurtz.homerecord.core.bundle.BundleCrypto
 import com.kurtz.homerecord.core.bundle.BundleFormatException
 import com.kurtz.homerecord.core.bundle.BundleReader
-import com.kurtz.homerecord.core.imports.ConflictChoice
+import com.kurtz.homerecord.core.bundle.WrongPassphraseException
 import com.kurtz.homerecord.core.imports.ImportApplier
 import com.kurtz.homerecord.core.imports.ImportPlan
+import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -39,6 +42,7 @@ class ImportViewModel(
 
     private var plan: ImportPlan? = null
     private var staging: File? = null
+    private var chosenUri: String? = null
 
     init {
         if (initialUri != null) load(initialUri)
@@ -48,6 +52,7 @@ class ImportViewModel(
         when (event) {
             is ImportEvent.FileChosen -> load(event.uri)
             is ImportEvent.Choose -> _state.update { it.copy(choices = it.choices + (event.id to event.choice)) }
+            is ImportEvent.PassphraseEntered -> chosenUri?.let { load(it, event.passphrase) }
             ImportEvent.Confirm -> apply()
             ImportEvent.Reset -> {
                 cleanup()
@@ -56,30 +61,47 @@ class ImportViewModel(
         }
     }
 
-    private fun load(uri: String) {
+    /** Reads the file; an encrypted backup (AC-89) returns null until a [passphrase] is supplied. */
+    private fun readContents(uri: String, dir: File, passphrase: String?): BundleContents? {
+        val input = source.open(uri) ?: throw IOException("cannot open")
+        BufferedInputStream(input).use { buffered ->
+            if (!BundleCrypto.isEncrypted(buffered)) return reader.read(buffered, dir)
+            if (passphrase == null) return null
+            val decrypted = File(dir.apply { mkdirs() }, "decrypted.zip")
+            try {
+                decrypted.outputStream().use { BundleCrypto.decrypt(buffered, it, passphrase) }
+                return decrypted.inputStream().use { reader.read(it, dir) }
+            } finally {
+                decrypted.delete()
+            }
+        }
+    }
+
+    private fun load(uri: String, passphrase: String? = null) {
         cleanup()
+        chosenUri = uri
         _state.value = ImportUiState(phase = ImportPhase.READING)
         viewModelScope.launch {
             val next = try {
                 val dir = source.newStagingDir().also { staging = it }
-                val contents = withContext(io) {
-                    val input = source.open(uri) ?: throw IOException("cannot open")
-                    input.use { reader.read(it, dir) }
-                }
-                val planned = applier.plan(contents.record)
-                if (planned == null) {
-                    ImportUiState(phase = ImportPhase.NO_HOME)
+                val contents = withContext(io) { readContents(uri, dir, passphrase) }
+                if (contents == null) {
+                    ImportUiState(phase = ImportPhase.NEEDS_PASSPHRASE)
                 } else {
+                    val planned = applier.plan(contents.record)
                     plan = planned
                     ImportUiState(
                         phase = ImportPhase.PREVIEW,
                         counts = planned.newCounts.map { it.key to it.value },
                         conflicts = planned.conflicts,
                         alreadyPresent = planned.alreadyPresent,
+                        restoresHome = planned.homeToCreate != null,
                     )
                 }
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: WrongPassphraseException) {
+                ImportUiState(phase = ImportPhase.NEEDS_PASSPHRASE, wrongPassphrase = true)
             } catch (e: BundleFormatException) {
                 ImportUiState(phase = ImportPhase.ERROR)
             } catch (e: IOException) {

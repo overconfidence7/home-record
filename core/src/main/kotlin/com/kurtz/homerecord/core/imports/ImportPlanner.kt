@@ -21,9 +21,11 @@ data class ImportPlan(
     val conflicts: List<ImportConflict>,
     /** Records whose id is already present locally and that are not house-manual edits (e.g. a re-import). */
     val alreadyPresent: Int,
+    /** Set when there was no local Home: the Home to create before inserting (restore onto a fresh install). */
+    val homeToCreate: com.kurtz.homerecord.core.model.Home? = null,
 ) {
     val newTotal: Int get() = newCounts.values.sum()
-    val isEmpty: Boolean get() = newTotal == 0 && conflicts.isEmpty()
+    val isEmpty: Boolean get() = newTotal == 0 && conflicts.isEmpty() && homeToCreate == null
 }
 
 /** Pure: sorts every record in a bundle into new / conflict / already-present (SPEC §6 import rules, AC-76..79). */

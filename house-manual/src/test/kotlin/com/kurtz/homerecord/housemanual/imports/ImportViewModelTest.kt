@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.imports
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kurtz.homerecord.core.bundle.BundleCrypto
 import com.kurtz.homerecord.core.bundle.BundleWriter
 import com.kurtz.homerecord.core.bundle.RecordBundle
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
@@ -162,9 +163,38 @@ class ImportViewModelTest {
         assertEquals(ImportPhase.ERROR, vm("missing").loaded().phase)
     }
 
-    @Test fun `no local home asks to set one up first`() = runTest {
+    @Test fun `no local home restores the bundle's home on import (AC-90)`() = runTest {
         files["u"] = fieldLogBundle()
-        assertEquals(ImportPhase.NO_HOME, vm("u").loaded().phase)
+        val vm = vm("u")
+        val preview = vm.loaded()
+        assertEquals(ImportPhase.PREVIEW, preview.phase)
+        assertTrue(preview.restoresHome)
+        assertFalse(preview.nothingToImport)
+        vm.confirm()
+        assertEquals(listOf("fl-home"), db.homeDao().getAll().map { it.id })
+        assertEquals("jpeg", File(filesDir, "media/bw1.jpg").readText())
+    }
+
+    private fun encrypted(plain: ByteArray, pass: String): ByteArray =
+        ByteArrayOutputStream().also { BundleCrypto.encrypt(ByteArrayInputStream(plain), it, pass) }.toByteArray()
+
+    @Test fun `encrypted bundle asks for the passphrase, wrong one is an error, right one previews (AC-89)`() = runTest {
+        homes.createHome("Mine")
+        files["u"] = encrypted(fieldLogBundle(), "correct horse")
+        val vm = vm("u")
+        assertEquals(ImportPhase.NEEDS_PASSPHRASE, vm.loaded().phase)
+        assertFalse(vm.state.value.wrongPassphrase)
+
+        vm.onEvent(ImportEvent.PassphraseEntered("wrong horse"))
+        val wrong = vm.state.first { it.phase == ImportPhase.NEEDS_PASSPHRASE && it.wrongPassphrase }
+        assertTrue(wrong.wrongPassphrase)
+        assertTrue(db.roomDao().getAll().isEmpty())
+
+        vm.onEvent(ImportEvent.PassphraseEntered("correct horse"))
+        val preview = vm.state.first { it.phase == ImportPhase.PREVIEW }
+        assertEquals(listOf(ImportEntityType.ROOM to 1, ImportEntityType.PHOTO to 1), preview.counts)
+        vm.confirm()
+        assertEquals("jpeg", File(filesDir, "media/bw1.jpg").readText())
     }
 
     @Test fun `starts at the picker when there is no uri`() = runTest {

@@ -15,9 +15,16 @@ class ImportApplier(
     private val db: HomeRecordDatabase,
     private val media: MediaFileStore,
 ) {
-    /** Null when there is no local Home to merge into. */
-    suspend fun plan(bundle: RecordBundle): ImportPlan? {
-        val localHome = db.homeDao().getAll().firstOrNull() ?: return null
+    /**
+     * Merges into the first local Home. On a fresh install (no local Home) the bundle's own Home is recreated
+     * with its original id so a restored backup matches the original (AC-90).
+     */
+    suspend fun plan(bundle: RecordBundle): ImportPlan {
+        val localHome = db.homeDao().getAll().firstOrNull()
+        if (localHome == null) {
+            val plan = ImportPlanner.plan(bundle, bundle.home.id, emptyMap())
+            return plan.copy(homeToCreate = bundle.home.copy(source = Source.IMPORT))
+        }
         val sources = HashMap<String, Source>()
         db.roomDao().getAll().forEach { sources[it.id] = it.source }
         db.wallDao().getAll().forEach { sources[it.id] = it.source }
@@ -38,7 +45,7 @@ class ImportApplier(
     suspend fun apply(plan: ImportPlan, choices: Map<String, ConflictChoice>, stagingDir: File): ImportResult {
         val imported = plan.conflicting.pickChosen(choices)
         val keptMine = plan.conflicts.size - plan.conflicts.count { choices[it.id] == ConflictChoice.USE_IMPORTED }
-        db.withTransaction { write(plan.toInsert); write(imported) }
+        db.withTransaction { plan.homeToCreate?.let { db.homeDao().upsert(it.toEntity()) }; write(plan.toInsert); write(imported) }
         var copied = 0
         val replacedIds = choices.filterValues { it == ConflictChoice.USE_IMPORTED }.keys
         for (path in plan.toInsert.mediaPaths() + imported.mediaPaths()) {

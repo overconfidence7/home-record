@@ -18,7 +18,6 @@ import java.io.File
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -92,13 +91,19 @@ class ImportApplierTest {
 
     @After fun tearDown() = db.close()
 
-    @Test fun `no local home means no plan`() = runTest {
+    @Test fun `no local home recreates the bundle's home with its own id (AC-90)`() = runTest {
+        db.roomDao().delete(db.roomDao().get("r1")!!)
         db.homeDao().delete(db.homeDao().get("local")!!)
-        assertNull(applier.plan(bundle))
+        val plan = applier.plan(bundle)
+        assertEquals("fl-home", plan.homeToCreate?.id)
+        applier.apply(plan, emptyMap(), staging)
+        assertEquals(listOf("fl-home"), db.homeDao().getAll().map { it.id })
+        assertEquals(setOf("r1", "r2"), db.roomDao().getAll().map { it.id }.toSet())
+        assertEquals(listOf("fl-home"), db.roomDao().getAll().map { it.homeId }.distinct())
     }
 
     @Test fun `keep mine leaves the local room and inserts the rest with media (AC-77, AC-78)`() = runTest {
-        val plan = checkNotNull(applier.plan(bundle))
+        val plan = applier.plan(bundle)
         val result = applier.apply(plan, mapOf("r1" to ConflictChoice.KEEP_MINE), staging)
         assertEquals(1, result.keptMine)
         assertEquals("Kitchen", db.roomDao().get("r1")!!.name)
@@ -113,7 +118,7 @@ class ImportApplierTest {
     }
 
     @Test fun `use imported replaces the local room exactly (AC-78)`() = runTest {
-        val plan = checkNotNull(applier.plan(bundle))
+        val plan = applier.plan(bundle)
         val result = applier.apply(plan, mapOf("r1" to ConflictChoice.USE_IMPORTED), staging)
         assertEquals(1, result.replaced)
         val r1 = db.roomDao().get("r1")!!.toDomain()
@@ -123,13 +128,13 @@ class ImportApplierTest {
     }
 
     @Test fun `missing choice defaults to keep mine`() = runTest {
-        applier.apply(checkNotNull(applier.plan(bundle)), emptyMap(), staging)
+        applier.apply(applier.plan(bundle), emptyMap(), staging)
         assertEquals("Kitchen", db.roomDao().get("r1")!!.name)
     }
 
     @Test fun `importing twice duplicates nothing (AC-79)`() = runTest {
-        applier.apply(checkNotNull(applier.plan(bundle)), emptyMap(), staging)
-        val second = checkNotNull(applier.plan(bundle))
+        applier.apply(applier.plan(bundle), emptyMap(), staging)
+        val second = applier.plan(bundle)
         assertEquals(0, second.newTotal)
         assertEquals(listOf("r1"), second.conflicts.map { it.id })
         applier.apply(second, emptyMap(), staging)

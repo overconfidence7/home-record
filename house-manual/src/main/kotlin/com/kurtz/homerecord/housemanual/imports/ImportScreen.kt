@@ -14,10 +14,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -62,9 +69,31 @@ fun ImportScreen(state: ImportUiState, onPick: () -> Unit, onEvent: (ImportEvent
                 Text(stringResource(R.string.import_error_unreadable), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("import_error"))
                 PickButton(onPick)
             }
-            ImportPhase.NO_HOME -> Text(stringResource(R.string.import_no_home), modifier = Modifier.testTag("import_no_home"))
+            ImportPhase.NEEDS_PASSPHRASE -> PassphrasePrompt(state.wrongPassphrase, onEvent)
         }
     }
+}
+
+@Composable
+private fun PassphrasePrompt(wrong: Boolean, onEvent: (ImportEvent) -> Unit) {
+    var passphrase by rememberSaveable { mutableStateOf("") }
+    Text(stringResource(R.string.import_encrypted_prompt), modifier = Modifier.testTag("import_encrypted"))
+    OutlinedTextField(
+        value = passphrase,
+        onValueChange = { passphrase = it },
+        label = { Text(stringResource(R.string.backup_passphrase)) },
+        singleLine = true,
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        isError = wrong,
+        supportingText = if (wrong) ({ Text(stringResource(R.string.import_wrong_passphrase)) }) else null,
+        modifier = Modifier.fillMaxWidth().testTag("import_passphrase"),
+    )
+    Button(
+        onClick = { onEvent(ImportEvent.PassphraseEntered(passphrase)) },
+        enabled = passphrase.isNotEmpty(),
+        modifier = Modifier.heightIn(min = 48.dp).testTag("import_unlock"),
+    ) { Text(stringResource(R.string.import_unlock)) }
 }
 
 @Composable
@@ -76,6 +105,7 @@ private fun PickButton(onPick: () -> Unit) {
 
 @Composable
 private fun Preview(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
+    if (state.restoresHome) Text(stringResource(R.string.import_restore_note), modifier = Modifier.testTag("import_restore_note"))
     if (state.nothingToImport) {
         Text(stringResource(R.string.import_nothing_new), modifier = Modifier.testTag("import_nothing_new"))
     } else {

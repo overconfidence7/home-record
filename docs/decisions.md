@@ -100,3 +100,6 @@ Rules are pure functions in `:core` (`PanelInsights`) returning typed `Insight` 
 - Pure rules in `DueDateMath` (interval 1–24, first due with roll-forward, Done/Snooze math ready for T32) and `SeasonalTaskSeeder` (per-zone templates plus common ones).
 - Not added to the bundle: spec does not list MaintenanceTask in the `.homerecord` format.
 - 2026-10-17: WorkManager 2.10.5 added (approved list). App implements Configuration.Provider with the default initializer removed from the manifest, so scheduling also works under Robolectric. Reminder check runs daily with an initial delay to 08:00 local (KEEP policy).
+
+## 2026-10-17 — Encrypted backup format (T34)
+AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16-byte salt, 12-byte IV), file = `HRENC001` magic + iterations + salt + IV + ciphertext/tag, magic used as AAD. Encrypts the whole `.homerecord` zip so plain bundles stay unchanged. No new dependency.

@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,15 +32,15 @@ import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
 @Composable
-fun OnboardingRoute(viewModel: OnboardingViewModel, onDone: () -> Unit) {
+fun OnboardingRoute(viewModel: OnboardingViewModel, onDone: () -> Unit, onRestore: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
     androidx.compose.runtime.LaunchedEffect(viewModel) { viewModel.done.collect { onDone() } }
-    OnboardingScreen(state = state, onEvent = viewModel::onEvent)
+    OnboardingScreen(state = state, onRestore = onRestore, onEvent = viewModel::onEvent)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Unit) {
+fun OnboardingScreen(state: OnboardingUiState, onRestore: () -> Unit = {}, onEvent: (OnboardingEvent) -> Unit) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -91,6 +92,10 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
             enabled = state.canContinue,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         ) { Text(stringResource(R.string.onboarding_continue)) }
+        androidx.compose.material3.TextButton(
+            onClick = onRestore,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("onboarding_restore"),
+        ) { Text(stringResource(R.string.onboarding_restore)) }
     }
 }
 

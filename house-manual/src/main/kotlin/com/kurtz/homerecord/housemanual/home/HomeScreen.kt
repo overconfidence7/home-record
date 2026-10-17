@@ -35,6 +35,7 @@ fun HomeRoute(
     onEquipment: () -> Unit,
     onRooms: () -> Unit,
     onImport: () -> Unit,
+    onSettings: () -> Unit,
     onReminders: () -> Unit,
     onSlot: (Int) -> Unit,
     onRoom: (String) -> Unit,
@@ -48,6 +49,7 @@ fun HomeRoute(
             HomeEvent.OpenEquipment -> onEquipment()
             HomeEvent.OpenRooms -> onRooms()
             HomeEvent.OpenImport -> onImport()
+            HomeEvent.OpenSettings -> onSettings()
             HomeEvent.OpenReminders -> onReminders()
             is HomeEvent.OpenSlot -> onSlot(event.slot)
             is HomeEvent.OpenRoom -> onRoom(event.roomId)
@@ -107,6 +109,12 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             summary = stringResource(R.string.home_reminders_summary),
             tag = "card_reminders",
             onClick = { onEvent(HomeEvent.OpenReminders) },
+        )
+        HubCard(
+            title = stringResource(R.string.home_card_settings),
+            summary = stringResource(R.string.home_settings_summary),
+            tag = "card_settings",
+            onClick = { onEvent(HomeEvent.OpenSettings) },
         )
         HubCard(
             title = stringResource(R.string.home_card_import),

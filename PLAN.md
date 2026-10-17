@@ -57,7 +57,7 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 - [x] T32: Reminders screen (Done/Snooze), WorkManager daily check, notification with deep link, permission request on first task. (acceptance: AC-82, AC-83, AC-84)
 - [x] T33: Emergency widget (Glance or RemoteViews) with shutoff count and update on change. (acceptance: AC-86, AC-87)
   - Built with RemoteViews (no new dependency); flaky PanelViewModelTest AC-106 test failed once on a cold run, passed on rerun — look at it in R7.
-- [ ] T34: Encrypted backup: `BundleCrypto` (AES-256-GCM, PBKDF2), export from HM-Settings, import detection and passphrase prompt, restore test. (acceptance: AC-88, AC-89, AC-90)
+- [x] T34: Encrypted backup: `BundleCrypto` (AES-256-GCM, PBKDF2), export from HM-Settings, import detection and passphrase prompt, restore test. (acceptance: AC-88, AC-89, AC-90)
 - [ ] T35: `Entitlements` interface + `FakeEntitlements`, `FreeLimits` checker, paywall screen with yearly/lifetime placeholders, limit gates on panel and equipment save. (acceptance: AC-92, AC-93, AC-94, AC-95)
 - [ ] R7: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T36: RevenueCat implementation of `Entitlements` (API key from `local.properties`/BuildConfig, never committed), offline state, Retry. (acceptance: AC-95, AC-96)

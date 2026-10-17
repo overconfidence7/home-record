@@ -17,6 +17,7 @@ object Routes {
     const val ROOM = "room/{roomId}"
     const val MAPPING = "mapping"
     const val IMPORT = "import"
+    const val SETTINGS = "settings"
     const val REMINDERS_PATTERN = "reminders?highlight={highlight}"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
