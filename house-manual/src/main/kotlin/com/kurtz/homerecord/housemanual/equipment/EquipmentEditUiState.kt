@@ -2,7 +2,9 @@ package com.kurtz.homerecord.housemanual.equipment
 
 import com.kurtz.homerecord.core.logic.DueDateMath
 import com.kurtz.homerecord.core.logic.EquipmentRule
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.repo.ConsumableDraft
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.ocr.DataPlateFields
 
@@ -20,10 +22,15 @@ data class EquipmentEditUiState(
     val notes: String = "",
     val remindMonths: String = "",
     val labelPhotoPath: String? = null,
+    /** AC-99: saved with the equipment; the pending* fields are the add-row inputs. */
+    val consumables: List<ConsumableDraft> = emptyList(),
+    val pendingKind: ConsumableKind = ConsumableKind.FILTER,
+    val pendingSpec: String = "",
     val rooms: List<Room> = emptyList(),
     val confirmingDelete: Boolean = false,
     val scan: ScanState = ScanState.None,
 ) {
+    val canAddConsumable get() = pendingSpec.isNotBlank()
     val manufacturedOnValid get() = EquipmentRule.isValidDate(manufacturedOn)
     val installedOnValid get() = EquipmentRule.isValidDate(installedOn)
     val warrantyEndsValid get() = EquipmentRule.isValidDate(warrantyEnds)
@@ -59,6 +66,10 @@ sealed interface EquipmentEditEvent {
     data class WarrantyEndsChanged(val value: String) : EquipmentEditEvent
     data class RemindMonthsChanged(val value: String) : EquipmentEditEvent
     data class NotesChanged(val value: String) : EquipmentEditEvent
+    data class PendingKindChanged(val kind: ConsumableKind) : EquipmentEditEvent
+    data class PendingSpecChanged(val value: String) : EquipmentEditEvent
+    data object AddConsumable : EquipmentEditEvent
+    data class RemoveConsumable(val index: Int) : EquipmentEditEvent
     data object TakeLabelPhoto : EquipmentEditEvent
     data object RemoveLabelPhoto : EquipmentEditEvent
     data object Save : EquipmentEditEvent

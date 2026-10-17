@@ -9,6 +9,7 @@ import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.model.EntryKind
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.EndpointKind
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
 import com.kurtz.homerecord.core.model.MaintenanceRule
 import com.kurtz.homerecord.core.model.PanelKind
@@ -294,6 +295,22 @@ data class CompanyProfileEntity(
     val phone: String?,
     val email: String?,
     val logoPath: String?,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)
+
+@Entity(
+    tableName = "consumable",
+    foreignKeys = [ForeignKey(EquipmentEntity::class, ["id"], ["equipmentId"], onDelete = CASCADE)],
+    indices = [Index("equipmentId")],
+)
+data class ConsumableEntity(
+    @PrimaryKey val id: String,
+    val equipmentId: String,
+    val kind: ConsumableKind,
+    val spec: String,
+    val reorderUrl: String?,
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,

@@ -202,6 +202,15 @@
     <string name="equipment_manufactured_on">Manufactured on (yyyy-MM-dd)</string>
     <string name="equipment_warranty_ends">Warranty ends (yyyy-MM-dd)</string>
     <string name="equipment_remind_months">Remind me every N months (1–24, blank for none)</string>
+    <string name="consumables_title">Consumables</string>
+    <string name="consumable_row">%1$s: %2$s</string>
+    <string name="consumable_remove">Remove</string>
+    <string name="consumable_spec">Spec (e.g. Filter 16x25x1 MERV 8)</string>
+    <string name="consumable_add">Add consumable</string>
+    <string name="consumable_kind_filter">Filter</string>
+    <string name="consumable_kind_bulb">Bulb</string>
+    <string name="consumable_kind_cartridge">Cartridge</string>
+    <string name="consumable_kind_other">Other</string>
     <string name="equipment_remind_error">Enter a whole number from 1 to 24</string>
     <string name="equipment_notes">Notes</string>
     <string name="equipment_date_error">Use the format yyyy-MM-dd, for example 2024-03-15.</string>

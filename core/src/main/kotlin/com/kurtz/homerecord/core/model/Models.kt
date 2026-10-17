@@ -35,6 +35,8 @@ enum class EquipmentCategory {
     WASHER, DRYER, SUMP_PUMP, WATER_SOFTENER, OTHER,
 }
 @Serializable
+enum class ConsumableKind { FILTER, BULB, CARTRIDGE, OTHER }
+@Serializable
 enum class PhotoStage { BEFORE, ROUGH_IN, BEHIND_WALL, FINISHED, GENERAL }
 
 /** Fields shared by every record (SPEC §6). */
@@ -173,6 +175,19 @@ data class Equipment(
     val warrantyEnds: String? = null,
     val labelPhotoPath: String? = null,
     val notes: String? = null,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record
+
+@Serializable
+data class Consumable(
+    override val id: String,
+    val equipmentId: String,
+    val kind: ConsumableKind,
+    /** Free text such as "Filter 16x25x1 MERV 8". */
+    val spec: String,
+    val reorderUrl: String? = null,
     override val createdAt: Long,
     override val updatedAt: Long,
     override val source: Source,

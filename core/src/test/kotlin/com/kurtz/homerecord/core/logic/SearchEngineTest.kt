@@ -2,6 +2,8 @@ package com.kurtz.homerecord.core.logic
 
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
+import com.kurtz.homerecord.core.model.Consumable
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.Equipment
@@ -29,6 +31,15 @@ class SearchEngineTest {
         equipment = listOf(Equipment(id = "q1", homeId = "h", category = EquipmentCategory.FURNACE, make = "Carrier", model = "59TP6", createdAt = 0, updatedAt = 0, source = src)),
         shutoffs = listOf(Shutoff(id = "s1", homeId = "h", kind = ShutoffKind.WATER_MAIN, roomId = "r1", instructions = "Turn clockwise", createdAt = 0, updatedAt = 0, source = src)),
     )
+
+    @Test fun `AC-100 consumable spec finds its equipment`() {
+        val filter = Consumable("c1", "q1", ConsumableKind.FILTER, "Filter 16x25x1 MERV 8", null, 0, 0, src)
+        val withFilter = data.copy(consumables = listOf(filter))
+        val hit = SearchEngine.search("16x25", withFilter).single() as SearchResult.EquipmentHit
+        assertEquals("q1", hit.equipment.id)
+        assertEquals("q1", (SearchEngine.search("carrier merv", withFilter).single() as SearchResult.EquipmentHit).equipment.id)
+        assertTrue(SearchEngine.search("16x25", data).isEmpty())
+    }
 
     @Test fun `garage freezer returns garage breaker first (AC-17)`() {
         val results = SearchEngine.search("Garage Freezer", data)

@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Source
 import com.kurtz.homerecord.core.ocr.DataPlateParser
 import com.kurtz.homerecord.core.ocr.TextRecognizer
+import com.kurtz.homerecord.core.repo.ConsumableDraft
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.MaintenanceRepository
@@ -53,6 +54,7 @@ class EquipmentEditViewModel(
             val rooms = home?.let { homes.getRooms(it.id) }.orEmpty().sortedBy { it.name.lowercase() }
             val found = equipmentId?.let { equipment.get(it) }
             existing = found
+            val consumables = found?.let { equipment.getConsumables(it.id) }.orEmpty().map { ConsumableDraft(it.kind, it.spec) }
             val reminder = found?.let { maintenance.getForEquipment(it.id) }
             _state.value = EquipmentEditUiState(
                 loaded = true,
@@ -68,6 +70,7 @@ class EquipmentEditViewModel(
                 notes = found?.notes.orEmpty(),
                 remindMonths = reminder?.intervalMonths?.toString().orEmpty(),
                 labelPhotoPath = found?.labelPhotoPath,
+                consumables = consumables,
                 rooms = rooms,
             )
         }
@@ -85,6 +88,15 @@ class EquipmentEditViewModel(
             is EquipmentEditEvent.WarrantyEndsChanged -> _state.update { it.copy(warrantyEnds = event.value) }
             is EquipmentEditEvent.RemindMonthsChanged -> _state.update { it.copy(remindMonths = event.value.filter(Char::isDigit).take(2)) }
             is EquipmentEditEvent.NotesChanged -> _state.update { it.copy(notes = event.value) }
+            is EquipmentEditEvent.PendingKindChanged -> _state.update { it.copy(pendingKind = event.kind) }
+            is EquipmentEditEvent.PendingSpecChanged -> _state.update { it.copy(pendingSpec = event.value) }
+            EquipmentEditEvent.AddConsumable -> _state.update {
+                if (!it.canAddConsumable) it
+                else it.copy(consumables = it.consumables + ConsumableDraft(it.pendingKind, it.pendingSpec.trim()), pendingSpec = "")
+            }
+            is EquipmentEditEvent.RemoveConsumable -> _state.update {
+                it.copy(consumables = it.consumables.filterIndexed { i, _ -> i != event.index })
+            }
             EquipmentEditEvent.RemoveLabelPhoto -> replacePhoto(null)
             EquipmentEditEvent.TakeLabelPhoto, EquipmentEditEvent.ScanDataPlate -> Unit // handled by the route (camera)
             is EquipmentEditEvent.ScanMakeChanged -> updateScan { it.copy(make = event.value) }
@@ -175,6 +187,9 @@ class EquipmentEditViewModel(
                 labelPhotoPath = s.labelPhotoPath,
             )
             val saved = equipment.save(record)
+            // A typed-but-not-added spec is kept rather than lost.
+            val pending = s.pendingSpec.trim().takeIf { it.isNotEmpty() }?.let { ConsumableDraft(s.pendingKind, it) }
+            equipment.saveConsumables(saved.id, s.consumables + listOfNotNull(pending))
             val months = s.remindMonthsValue
             // AC-81: blank removes the reminder, 1-24 creates or updates it.
             maintenance.setEquipmentReminder(saved, months, reminderTitle(saved))

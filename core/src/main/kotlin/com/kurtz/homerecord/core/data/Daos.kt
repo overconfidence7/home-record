@@ -184,6 +184,24 @@ interface EquipmentDao {
 }
 
 @Dao
+interface ConsumableDao {
+    @Upsert
+    suspend fun upsertAll(entities: List<ConsumableEntity>)
+
+    @Query("SELECT * FROM consumable WHERE equipmentId = :equipmentId ORDER BY createdAt, id")
+    suspend fun getForEquipment(equipmentId: String): List<ConsumableEntity>
+
+    @Query("DELETE FROM consumable WHERE equipmentId = :equipmentId")
+    suspend fun deleteForEquipment(equipmentId: String)
+
+    @Query(
+        "SELECT c.* FROM consumable c JOIN equipment e ON e.id = c.equipmentId " +
+            "WHERE e.homeId = :homeId ORDER BY c.createdAt, c.id",
+    )
+    fun observeForHome(homeId: String): Flow<List<ConsumableEntity>>
+}
+
+@Dao
 interface PhotoDao {
     @Upsert
     suspend fun upsert(entity: PhotoEntity)

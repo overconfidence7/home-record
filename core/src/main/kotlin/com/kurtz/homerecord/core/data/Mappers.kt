@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Shutoff
+import com.kurtz.homerecord.core.model.Consumable
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Photo
 import com.kurtz.homerecord.core.model.Job
@@ -349,5 +350,15 @@ fun MaintenanceTaskEntity.toDomain() = MaintenanceTask(
 fun MaintenanceTask.toEntity() = MaintenanceTaskEntity(
     id = id, homeId = homeId, equipmentId = equipmentId, title = title, rule = rule,
     intervalMonths = intervalMonths, season = season, lastDone = lastDone, nextDue = nextDue,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun ConsumableEntity.toDomain() = Consumable(
+    id = id, equipmentId = equipmentId, kind = kind, spec = spec, reorderUrl = reorderUrl,
+    createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun Consumable.toEntity() = ConsumableEntity(
+    id = id, equipmentId = equipmentId, kind = kind, spec = spec, reorderUrl = reorderUrl,
     createdAt = createdAt, updatedAt = updatedAt, source = source,
 )

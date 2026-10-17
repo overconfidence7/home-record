@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemanual.rooms.labelRes
@@ -93,6 +94,35 @@ fun EquipmentEditScreen(state: EquipmentEditUiState, photoFile: File?, onEvent: 
         TextField(state.remindMonths, R.string.equipment_remind_months, "equipment_remind_months", !state.remindMonthsValid, errorRes = R.string.equipment_remind_error) {
             onEvent(EquipmentEditEvent.RemindMonthsChanged(it))
         }
+        Text(stringResource(R.string.consumables_title), style = MaterialTheme.typography.titleMedium)
+        state.consumables.forEachIndexed { index, item ->
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().testTag("consumable_row")) {
+                Text(
+                    stringResource(R.string.consumable_row, stringResource(item.kind.labelRes()), item.spec),
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(
+                    onClick = { onEvent(EquipmentEditEvent.RemoveConsumable(index)) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("consumable_remove"),
+                ) { Text(stringResource(R.string.consumable_remove)) }
+            }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ConsumableKind.entries.forEach { kind ->
+                FilterChip(
+                    selected = state.pendingKind == kind,
+                    onClick = { onEvent(EquipmentEditEvent.PendingKindChanged(kind)) },
+                    label = { Text(stringResource(kind.labelRes())) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("consumable_kind_${kind.name}"),
+                )
+            }
+        }
+        TextField(state.pendingSpec, R.string.consumable_spec, "consumable_spec") { onEvent(EquipmentEditEvent.PendingSpecChanged(it)) }
+        OutlinedButton(
+            onClick = { onEvent(EquipmentEditEvent.AddConsumable) },
+            enabled = state.canAddConsumable,
+            modifier = Modifier.heightIn(min = 48.dp).testTag("consumable_add"),
+        ) { Text(stringResource(R.string.consumable_add)) }
         TextField(state.notes, R.string.equipment_notes, "equipment_notes", minLines = 3) { onEvent(EquipmentEditEvent.NotesChanged(it)) }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (state.labelPhotoPath != null) {

@@ -2,6 +2,7 @@ package com.kurtz.homerecord.core.logic
 
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
+import com.kurtz.homerecord.core.model.Consumable
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Room
@@ -14,6 +15,7 @@ data class SearchData(
     val rooms: List<Room> = emptyList(),
     val equipment: List<Equipment> = emptyList(),
     val shutoffs: List<Shutoff> = emptyList(),
+    val consumables: List<Consumable> = emptyList(),
 )
 
 sealed interface SearchResult {
@@ -38,6 +40,7 @@ object SearchEngine {
         val tokens = tokens(query)
         if (tokens.isEmpty()) return emptyList()
         val roomName = data.rooms.associate { it.id to it.name.lowercase() }
+        val consumablesByEquipment = data.consumables.groupBy { it.equipmentId }
         val results = mutableListOf<SearchResult>()
 
         for (b in data.breakers) {
@@ -58,7 +61,8 @@ object SearchEngine {
             }
         }
         for (q in data.equipment) {
-            val fields = listOfNotNull(q.make, q.model, q.category.searchName(), q.roomId?.let { roomName[it] }).map { it.lowercase() }
+            val specs = consumablesByEquipment[q.id].orEmpty().map { it.spec }
+            val fields = (listOfNotNull(q.make, q.model, q.category.searchName(), q.roomId?.let { roomName[it] }) + specs).map { it.lowercase() }
             if (matchesAll(tokens, fields)) results += SearchResult.EquipmentHit(q, 40)
         }
         for (s in data.shutoffs) {

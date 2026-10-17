@@ -27,6 +27,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import com.kurtz.homerecord.core.model.ConsumableKind
+import com.kurtz.homerecord.core.repo.ConsumableDraft
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -119,6 +121,33 @@ class EquipmentEditViewModelTest {
         val path = media.newPhotoPath()
         media.resolveForWrite(path)!!.writeBytes(byteArrayOf(1, 2, 3))
         return path
+    }
+
+    @Test fun `AC-99 consumable is added, saved with the equipment, reloaded and removable`() = runTest {
+        val home = homes.createHome("H")
+        val vm = vm()
+        vm.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.FURNACE))
+        vm.onEvent(EquipmentEditEvent.AddConsumable) // blank spec is ignored
+        assertTrue(vm.state.value.consumables.isEmpty())
+        vm.onEvent(EquipmentEditEvent.PendingSpecChanged("Filter 16x25x1 MERV 8"))
+        vm.onEvent(EquipmentEditEvent.AddConsumable)
+        assertEquals(1, vm.state.value.consumables.size)
+        assertEquals("", vm.state.value.pendingSpec)
+        vm.onEvent(EquipmentEditEvent.Save)
+        vm.done.first()
+        val saved = equipment.observeEquipment(home.id).first().single()
+        val stored = equipment.getConsumables(saved.id).single()
+        assertEquals("Filter 16x25x1 MERV 8", stored.spec)
+        assertEquals(ConsumableKind.FILTER, stored.kind)
+        val again = vm(saved.id)
+        assertEquals(1, again.state.value.consumables.size)
+        again.onEvent(EquipmentEditEvent.RemoveConsumable(0))
+        again.onEvent(EquipmentEditEvent.Save)
+        again.done.first()
+        assertTrue(equipment.getConsumables(saved.id).isEmpty())
+        equipment.saveConsumables(saved.id, listOf(ConsumableDraft(ConsumableKind.BULB, "A19")))
+        equipment.delete(saved.id)
+        assertTrue(equipment.getConsumables(saved.id).isEmpty()) // cascade
     }
 
     @Test fun `AC-43 category alone is enough to save`() = runTest {

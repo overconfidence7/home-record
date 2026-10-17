@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual.rooms
 
 import androidx.annotation.StringRes
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
 import com.kurtz.homerecord.core.model.PhotoStage
 import com.kurtz.homerecord.core.model.ShutoffKind
@@ -16,6 +17,14 @@ fun ShutoffKind.labelRes(): Int = when (this) {
     ShutoffKind.SUMP -> R.string.shutoff_sump
     ShutoffKind.CLEANOUT -> R.string.shutoff_cleanout
     ShutoffKind.OTHER -> R.string.shutoff_other
+}
+
+@StringRes
+fun ConsumableKind.labelRes(): Int = when (this) {
+    ConsumableKind.FILTER -> R.string.consumable_kind_filter
+    ConsumableKind.BULB -> R.string.consumable_kind_bulb
+    ConsumableKind.CARTRIDGE -> R.string.consumable_kind_cartridge
+    ConsumableKind.OTHER -> R.string.consumable_kind_other
 }
 
 @StringRes

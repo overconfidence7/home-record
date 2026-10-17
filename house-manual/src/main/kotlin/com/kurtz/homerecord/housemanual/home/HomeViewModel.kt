@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.logic.SearchEngine
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.BreakerRoom
 import com.kurtz.homerecord.core.model.Endpoint
+import com.kurtz.homerecord.core.model.Consumable
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.Room
@@ -44,6 +45,7 @@ class HomeViewModel(
             equipment.observeEquipment(home.id),
             homes.observeRooms(home.id),
             combine(panels.observeBreakerRoomsForHome(home.id), panels.observeEndpointsForHome(home.id)) { l, e -> l to e },
+            equipment.observeConsumables(home.id),
             search,
         ) { values ->
             val panelList = values[0] as List<Panel>
@@ -52,7 +54,8 @@ class HomeViewModel(
             val equipmentList = values[3] as List<Equipment>
             val rooms = values[4] as List<Room>
             val (links, endpoints) = values[5] as Pair<List<BreakerRoom>, List<Endpoint>>
-            val query = values[6] as String
+            val consumables = values[6] as List<Consumable>
+            val query = values[7] as String
             val slots = panelList.sumOf { it.slotCount }
             HomeUiState(
                 homeName = home.name,
@@ -63,7 +66,7 @@ class HomeViewModel(
                 equipmentCount = equipmentList.size,
                 roomCount = rooms.size,
                 search = query,
-                results = SearchEngine.search(query, SearchData(breakers, links, endpoints, rooms, equipmentList, shutoffList)),
+                results = SearchEngine.search(query, SearchData(breakers, links, endpoints, rooms, equipmentList, shutoffList, consumables)),
                 roomNames = rooms.associate { it.id to it.name },
                 panelNames = if (panelList.size > 1) panelList.associate { it.id to it.name } else emptyMap(),
             )
