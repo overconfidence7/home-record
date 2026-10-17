@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -37,6 +36,11 @@ private class FakeCapturer(var succeed: Boolean = true) : PhotoCapturer {
         if (succeed) file.writeBytes(byteArrayOf(1, 2, 3))
         return succeed
     }
+}
+
+/** Room writes run on its own executor, so advanceUntilIdle() alone can return before the insert lands. */
+private suspend fun CaptureViewModel.awaitIdle() {
+    state.first { !it.busy }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,7 +73,7 @@ class CaptureViewModelTest {
     @Test fun shutterSavesJpegAndCreatesPhotoEntryForToday() = runTest(dispatcher) {
         val vm = CaptureViewModel(jobId, entries, media, FakeCapturer())
         vm.onShutter()
-        advanceUntilIdle()
+        vm.awaitIdle()
         val list = entries.observeForJob(jobId).first()
         assertEquals(1, list.size)
         val e = list.single()
@@ -84,7 +88,7 @@ class CaptureViewModelTest {
     @Test fun failedCaptureCreatesNoEntryAndShowsError() = runTest(dispatcher) {
         val vm = CaptureViewModel(jobId, entries, media, FakeCapturer(succeed = false))
         vm.onShutter()
-        advanceUntilIdle()
+        vm.awaitIdle()
         assertTrue(entries.observeForJob(jobId).first().isEmpty())
         assertTrue(vm.state.value.failed)
         assertEquals(0, vm.state.value.photosThisSession)
@@ -96,7 +100,7 @@ class CaptureViewModelTest {
         val vm = CaptureViewModel(jobId, entries, media, capturer)
         vm.onShutter()
         vm.onShutter()
-        advanceUntilIdle()
+        vm.awaitIdle()
         assertEquals(1, capturer.calls)
         assertEquals(1, entries.observeForJob(jobId).first().size)
     }
