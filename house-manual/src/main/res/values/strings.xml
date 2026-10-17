@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">House Manual</string>
-    <string name="shell_title">HomeRecord</string>
     <string name="onboarding_title">Set up your home</string>
     <string name="onboarding_home_name">Home name</string>
     <string name="onboarding_rooms_heading">Which rooms does it have?</string>
@@ -331,7 +330,6 @@
     <string name="panel_year_installed">Year installed (optional)</string>
     <string name="panel_details">Panel details</string>
     <string name="panel_edit_details">Edit panel details</string>
-    <string name="panel_summary_none">Tap to add brand, rating and more.</string>
     <string name="panel_main_breaker_title">Main breaker</string>
     <string name="panel_main_tag">MAIN</string>
     <string name="panel_summary_main">Main panel</string>

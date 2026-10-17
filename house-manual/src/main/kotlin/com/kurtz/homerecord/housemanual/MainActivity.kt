@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.kurtz.homerecord.housemanual.billing.RevenueCatEntitlements
@@ -13,7 +14,7 @@ import com.kurtz.homerecord.housemanual.nav.ReminderRequest
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
 class MainActivity : ComponentActivity() {
-    private var emergencyRequests by mutableStateOf(0)
+    private var emergencyRequests by mutableIntStateOf(0)
     private var reminderRequest by mutableStateOf<ReminderRequest?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {

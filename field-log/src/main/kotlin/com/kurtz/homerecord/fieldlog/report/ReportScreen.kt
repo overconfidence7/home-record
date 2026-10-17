@@ -95,18 +95,18 @@ fun ReportScreen(state: ReportUiState, onEvent: (ReportEvent) -> Unit) {
             style = MaterialTheme.typography.bodyLarge,
         )
         if (state.loaded) {
-            field(R.string.report_weather, state.weather, { onEvent(ReportEvent.WeatherChanged(it)) }, singleLine = true)
+            ReportField(R.string.report_weather, state.weather, { onEvent(ReportEvent.WeatherChanged(it)) }, singleLine = true)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                field(
+                ReportField(
                     R.string.report_crew, state.crew, { onEvent(ReportEvent.CrewChanged(it)) },
                     Modifier.weight(1f), singleLine = true, keyboardType = KeyboardType.Number,
                 )
-                field(
+                ReportField(
                     R.string.report_hours, state.hours, { onEvent(ReportEvent.HoursChanged(it)) },
                     Modifier.weight(1f), singleLine = true, keyboardType = KeyboardType.Decimal,
                 )
             }
-            field(R.string.report_work, state.workCompleted, { onEvent(ReportEvent.WorkChanged(it)) }, minLines = 4, tag = "report_work")
+            ReportField(R.string.report_work, state.workCompleted, { onEvent(ReportEvent.WorkChanged(it)) }, minLines = 4, tag = "report_work")
             Text(stringResource(R.string.report_delay_reason), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DelayReason.entries.forEach { reason ->
@@ -118,9 +118,9 @@ fun ReportScreen(state: ReportUiState, onEvent: (ReportEvent) -> Unit) {
                     )
                 }
             }
-            field(R.string.report_delays, state.delays, { onEvent(ReportEvent.DelaysChanged(it)) }, minLines = 2)
-            field(R.string.report_materials, state.materials, { onEvent(ReportEvent.MaterialsChanged(it)) }, minLines = 2)
-            field(R.string.report_next_steps, state.nextSteps, { onEvent(ReportEvent.NextStepsChanged(it)) }, minLines = 2)
+            ReportField(R.string.report_delays, state.delays, { onEvent(ReportEvent.DelaysChanged(it)) }, minLines = 2)
+            ReportField(R.string.report_materials, state.materials, { onEvent(ReportEvent.MaterialsChanged(it)) }, minLines = 2)
+            ReportField(R.string.report_next_steps, state.nextSteps, { onEvent(ReportEvent.NextStepsChanged(it)) }, minLines = 2)
             Button(
                 onClick = { onEvent(ReportEvent.Save) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
@@ -159,7 +159,7 @@ fun ReportScreen(state: ReportUiState, onEvent: (ReportEvent) -> Unit) {
 }
 
 @Composable
-private fun field(
+private fun ReportField(
     label: Int,
     value: String,
     onChange: (String) -> Unit,
