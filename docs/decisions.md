@@ -75,3 +75,6 @@ Two-pole breakers draw as two cells (one per slot, second marked "Two-pole (with
 
 ## 2026-10-17 — kotlinx-serialization for `.homerecord` (T26)
 Added `kotlinx-serialization-json` 1.9.0 and the serialization compiler plugin (both on the approved list) to `:core`. Core model classes are annotated `@Serializable` directly instead of keeping parallel DTOs; `Source` uses `@SerialName` for the wire values. The reader ignores unknown keys (tolerant of newer writers) but rejects `formatVersion` > 1 before decoding. Media travels only as direct children of `media/`; the reader extracts to a staging dir and skips unsafe names.
+
+## 2026-10-17 (T27)
+- FL-Handoff finishes count is always 0: the Finish entity has no storage or screen yet, so there is nothing to count. Panels are listed as an extra row ("panel changes" in the screen table). The handoff PDF is a counts-only summary rendered through `ReportPdfWriter`.

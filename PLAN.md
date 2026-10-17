@@ -40,7 +40,7 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 - [x] T25: Report PDF: `ReportSectionBuilder` (pure), `PdfDocument` renderer with header and two-per-row photos, overwrite per day, share sheet. (acceptance: AC-69, AC-70)
 - [x] R5: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [x] T26: `.homerecord` bundle format in `:core`: `RecordJson` (kotlinx.serialization), `BundleWriter` (zip + media), `BundleReader` with formatVersion guard and path sanitizer, JVM round-trip tests. (acceptance: AC-72, AC-73, AC-74, AC-91)
-- [ ] T27: FL-Handoff screen: counts, export via share sheet, PDF summary of the handoff. (acceptance: AC-71, AC-72)
+- [x] T27: FL-Handoff screen: counts, export via share sheet, PDF summary of the handoff. (acceptance: AC-71, AC-72)
 - [ ] T28: Import engine in `:core`: `ImportPlanner` (counts, conflicts, homeId remap), `ImportApplier` with keep-mine/use-imported choices, idempotent re-import. (acceptance: AC-76, AC-77, AC-78, AC-79)
 - [ ] T29: HM-Import screen and `ACTION_VIEW` intent filter for `.homerecord`; end-to-end check: Field Log export → House Manual import → behind-wall photos visible in HM-Room. (acceptance: AC-75, AC-66, AC-77)
 - [ ] T30: M2 polish: Field Log icon, glove-size audit of FL-Capture targets (≥56dp), lint clean, string review. (acceptance: re-check AC-51..AC-79 on emulator)

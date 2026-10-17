@@ -119,4 +119,20 @@
     <string name="settings_take_logo">Take logo photo</string>
     <string name="settings_retake_logo">Retake logo photo</string>
     <string name="settings_remove_logo">Remove logo</string>
+    <string name="job_handoff">Handoff</string>
+    <string name="handoff_title">Handoff</string>
+    <string name="handoff_includes">The export will include:</string>
+    <string name="handoff_row">%1$s: %2$d</string>
+    <string name="handoff_rooms">Rooms</string>
+    <string name="handoff_walls">Walls</string>
+    <string name="handoff_behind_wall">Behind-wall photos</string>
+    <string name="handoff_equipment">Equipment</string>
+    <string name="handoff_finishes">Finishes</string>
+    <string name="handoff_shutoffs">Shutoffs</string>
+    <string name="handoff_panels">Panels</string>
+    <string name="handoff_missing">This job\'s home record could not be found.</string>
+    <string name="handoff_export_bundle">Export .homerecord</string>
+    <string name="handoff_export_pdf">Export PDF</string>
+    <string name="handoff_exporting">Exporting…</string>
+    <string name="handoff_failed">The export could not be made. Try again.</string>
 </resources>

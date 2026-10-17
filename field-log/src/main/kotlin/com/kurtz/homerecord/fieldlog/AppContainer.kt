@@ -26,6 +26,10 @@ class AppContainer(context: Context) {
     val reportPdfExporter by lazy {
         com.kurtz.homerecord.fieldlog.report.AndroidReportPdfExporter(appContext, jobRepository, reportRepository, mediaStore)
     }
+    val handoffRepository by lazy { com.kurtz.homerecord.core.repo.HandoffRepository(database) }
+    val handoffExporter by lazy {
+        com.kurtz.homerecord.fieldlog.handoff.AndroidHandoffExporter(appContext, jobRepository, handoffRepository, reportRepository, mediaStore)
+    }
     val shutterKeys = com.kurtz.homerecord.fieldlog.capture.ShutterKeyRouter()
     val panelRepository by lazy { PanelRepository(database, mediaStore, Source.FIELD_LOG) }
     val shutoffRepository by lazy { ShutoffRepository(database, mediaStore, Source.FIELD_LOG) }
