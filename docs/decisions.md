@@ -4,6 +4,8 @@ Newest first. Each entry: date, decision, reason. Open questions at the bottom.
 
 ## Log
 
+- 2026-10-17: T33 widget uses RemoteViews + AppWidgetProvider instead of Glance (PLAN allows either): 2x1 fixed layout, no extra dependency, count pushed from a Flow collector in HouseManualApp.
+
 - **2026-10-13** Two apps in one repo (`:house-manual`, `:field-log`) sharing `:core` and `:core-ui`. Reason: Nate's call; the apps have different users and store listings but one data model.
 - **2026-10-13** Native Android (Kotlin + Jetpack Compose), not Kotlin Multiplatform or Flutter. Reason: build constraints for the autonomous builder; matches CircuitSiegeDualFront; iOS can be revisited once the apps earn it.
 - **2026-10-13** AGP 8.13.x rather than 9.x. Reason: same plugin model as CircuitSiegeDualFront (`kotlin-android` + `kotlin-compose` plugins); AGP 9 changes the Kotlin integration and is a separate upgrade task once the build is stable.

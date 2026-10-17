@@ -240,6 +240,7 @@
     <string name="emergency_close">Close</string>
     <string name="emergency_photo_description">Shutoff photo. Tap to enlarge.</string>
     <string name="tile_label">House emergency</string>
+    <string name="widget_description">Shows how many shutoffs you have recorded; tap to open House emergency.</string>
     <string name="room_photos">Photos</string>
     <string name="room_no_photos">No photos in this room.</string>
     <string name="photo_stage_before">Before</string>
