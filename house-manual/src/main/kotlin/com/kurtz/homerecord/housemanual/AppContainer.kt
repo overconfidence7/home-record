@@ -15,6 +15,7 @@ import com.kurtz.homerecord.core.repo.EquipmentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.LoadProfileRepository
+import com.kurtz.homerecord.core.repo.MaintenanceRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
 import com.kurtz.homerecord.core.repo.ShutoffRepository
 
@@ -31,6 +32,7 @@ class AppContainer(context: Context) {
     val alarmPlayer: AlarmPlayer by lazy { AndroidAlarmPlayer(appContext) }
     val textRecognizer: TextRecognizer by lazy { MlKitTextRecognizer(appContext) }
     val equipmentRepository by lazy { EquipmentRepository(database, mediaStore, Source.HOUSE_MANUAL) }
+    val maintenanceRepository by lazy { MaintenanceRepository(database, Source.HOUSE_MANUAL) }
     val importApplier by lazy { ImportApplier(database, mediaStore) }
 
     /** A `.homerecord` URI handed to us by ACTION_VIEW, waiting for the nav host to open HM-Import (AC-75). */

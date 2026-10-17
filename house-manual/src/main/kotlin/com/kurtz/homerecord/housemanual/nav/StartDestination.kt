@@ -17,8 +17,11 @@ object Routes {
     const val ROOM = "room/{roomId}"
     const val MAPPING = "mapping"
     const val IMPORT = "import"
+    const val REMINDERS_PATTERN = "reminders?highlight={highlight}"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"
+
+    fun reminders(highlightId: String? = null) = "reminders?highlight=${highlightId.orEmpty()}"
 
     fun panelAt(slot: Int) = "panel?highlight=$slot"
 
@@ -38,3 +41,6 @@ object StartDestination {
 
     suspend fun resolve(homes: HomeRepository): String = resolve(homes.getHome())
 }
+
+/** A notification tap asking to open HM-Reminders; [serial] makes repeated taps distinct. */
+data class ReminderRequest(val taskId: String?, val serial: Int)

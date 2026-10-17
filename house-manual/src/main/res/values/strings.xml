@@ -197,6 +197,8 @@
     <string name="equipment_installed_on">Installed on (yyyy-MM-dd)</string>
     <string name="equipment_manufactured_on">Manufactured on (yyyy-MM-dd)</string>
     <string name="equipment_warranty_ends">Warranty ends (yyyy-MM-dd)</string>
+    <string name="equipment_remind_months">Remind me every N months (1–24, blank for none)</string>
+    <string name="equipment_remind_error">Enter a whole number from 1 to 24</string>
     <string name="equipment_notes">Notes</string>
     <string name="equipment_date_error">Use the format yyyy-MM-dd, for example 2024-03-15.</string>
     <string name="equipment_label_photo">Label photo</string>
@@ -360,4 +362,21 @@
     <string name="load_verdict_near">Check: Near capacity; plan large additions with an electrician</string>
     <string name="load_verdict_exceeds">Warning: Estimated load exceeds the service rating; have a licensed electrician perform a full load calculation.</string>
     <string name="load_explain">Breaker amps are not added up because breaker ratings protect the wire, not predict load. Method: NEC 220.82 optional method for an existing dwelling.</string>
+    <string name="home_card_reminders">Reminders</string>
+    <string name="home_reminders_summary">Seasonal chores and equipment service</string>
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_climate_label">Climate zone (sets the seasonal checklist)</string>
+    <string name="climate_cold">Cold</string>
+    <string name="climate_mixed">Mixed</string>
+    <string name="climate_hot_humid">Hot-humid</string>
+    <string name="climate_hot_dry">Hot-dry</string>
+    <string name="reminders_empty">No reminders yet. Pick a climate zone above, or add a reminder when you edit equipment.</string>
+    <string name="reminders_due">Due %s</string>
+    <string name="reminders_due_today">Due today</string>
+    <string name="reminders_overdue">Overdue since %s</string>
+    <string name="reminders_done">Done</string>
+    <string name="reminders_snooze">Snooze 1 week</string>
+    <string name="reminders_channel">Home reminders</string>
+    <string name="reminders_notification_title">Home maintenance due</string>
+    <string name="reminders_notification_many">%1$s and %2$d more</string>
 </resources>

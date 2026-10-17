@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.logic.ClimateZone
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.EquipmentCategory
@@ -126,5 +127,48 @@ class MaintenanceRepositoryTest {
         equipment.delete(wh.id)
         val left = tasks.getTasks(home.id)
         assertEquals(listOf(other.id), left.map { it.equipmentId })
+    }
+
+    @Test
+    fun doneOnCalendarTaskSetsLastDoneAndAdvancesByInterval() = runTest {
+        val home = homes.createHome("Maple")
+        val task = checkNotNull(tasks.setEquipmentReminder(heater(home.id), 6, "Flush"))
+        val done = checkNotNull(tasks.markDone(task.id))
+        assertEquals("2026-10-17", done.lastDone)
+        assertEquals("2027-04-17", done.nextDue)
+        assertEquals(done, tasks.get(task.id))
+    }
+
+    @Test
+    fun doneOnSeasonalTaskAdvancesToNextSeasonStart() = runTest {
+        val home = homes.createHome("Maple")
+        val seeded = tasks.applyClimateZone(home.id, ClimateZone.COLD).first()
+        val done = checkNotNull(tasks.markDone(seeded.id))
+        assertEquals("2026-10-17", done.lastDone)
+        assertTrue(done.nextDue > "2026-10-17")
+    }
+
+    @Test
+    fun snoozePushesNextDueOneWeek() = runTest {
+        val home = homes.createHome("Maple")
+        val task = checkNotNull(tasks.setEquipmentReminder(heater(home.id), 1, "Filter"))
+        val snoozed = checkNotNull(tasks.snooze(task.id))
+        assertEquals(java.time.LocalDate.parse(task.nextDue).plusDays(7).toString(), snoozed.nextDue)
+    }
+
+    @Test
+    fun doneAndSnoozeOnMissingTaskReturnNull() = runTest {
+        assertNull(tasks.markDone("nope"))
+        assertNull(tasks.snooze("nope"))
+    }
+
+    @Test
+    fun getDueReturnsOnlyTasksDueTodayOrEarlier() = runTest {
+        val home = homes.createHome("Maple")
+        val a = checkNotNull(tasks.setEquipmentReminder(heater(home.id), 1, "Soon"))
+        val past = a.copy(nextDue = "2026-10-01")
+        db.maintenanceTaskDao().upsert(past.toEntity())
+        tasks.setEquipmentReminder(heater(home.id), 12, "Later")
+        assertEquals(listOf("Soon"), tasks.getDue(home.id).map { it.title })
     }
 }

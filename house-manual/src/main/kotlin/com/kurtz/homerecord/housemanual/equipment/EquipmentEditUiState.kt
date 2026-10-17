@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.equipment
 
+import com.kurtz.homerecord.core.logic.DueDateMath
 import com.kurtz.homerecord.core.logic.EquipmentRule
 import com.kurtz.homerecord.core.model.EquipmentCategory
 import com.kurtz.homerecord.core.model.Room
@@ -17,6 +18,7 @@ data class EquipmentEditUiState(
     val installedOn: String = "",
     val warrantyEnds: String = "",
     val notes: String = "",
+    val remindMonths: String = "",
     val labelPhotoPath: String? = null,
     val rooms: List<Room> = emptyList(),
     val confirmingDelete: Boolean = false,
@@ -25,8 +27,11 @@ data class EquipmentEditUiState(
     val manufacturedOnValid get() = EquipmentRule.isValidDate(manufacturedOn)
     val installedOnValid get() = EquipmentRule.isValidDate(installedOn)
     val warrantyEndsValid get() = EquipmentRule.isValidDate(warrantyEnds)
+    /** AC-81: blank means no reminder; otherwise 1-24 months. */
+    val remindMonthsValue: Int? get() = remindMonths.trim().toIntOrNull()
+    val remindMonthsValid get() = remindMonths.isBlank() || remindMonthsValue?.let(DueDateMath::isValidInterval) == true
     val canSave: Boolean
-        get() = EquipmentRule.canSave(category) && manufacturedOnValid && installedOnValid && warrantyEndsValid
+        get() = EquipmentRule.canSave(category) && remindMonthsValid && manufacturedOnValid && installedOnValid && warrantyEndsValid
 }
 
 /** Data-plate scan flow (AC-45..AC-47). */
@@ -52,6 +57,7 @@ sealed interface EquipmentEditEvent {
     data class ManufacturedOnChanged(val value: String) : EquipmentEditEvent
     data class InstalledOnChanged(val value: String) : EquipmentEditEvent
     data class WarrantyEndsChanged(val value: String) : EquipmentEditEvent
+    data class RemindMonthsChanged(val value: String) : EquipmentEditEvent
     data class NotesChanged(val value: String) : EquipmentEditEvent
     data object TakeLabelPhoto : EquipmentEditEvent
     data object RemoveLabelPhoto : EquipmentEditEvent

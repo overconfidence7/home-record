@@ -90,6 +90,9 @@ fun EquipmentEditScreen(state: EquipmentEditUiState, photoFile: File?, onEvent: 
         TextField(state.warrantyEnds, R.string.equipment_warranty_ends, "equipment_warranty_ends", !state.warrantyEndsValid) {
             onEvent(EquipmentEditEvent.WarrantyEndsChanged(it))
         }
+        TextField(state.remindMonths, R.string.equipment_remind_months, "equipment_remind_months", !state.remindMonthsValid, errorRes = R.string.equipment_remind_error) {
+            onEvent(EquipmentEditEvent.RemindMonthsChanged(it))
+        }
         TextField(state.notes, R.string.equipment_notes, "equipment_notes", minLines = 3) { onEvent(EquipmentEditEvent.NotesChanged(it)) }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (state.labelPhotoPath != null) {
@@ -191,6 +194,7 @@ private fun TextField(
     tag: String,
     isError: Boolean = false,
     minLines: Int = 1,
+    errorRes: Int = R.string.equipment_date_error,
     onChange: (String) -> Unit,
 ) {
     OutlinedTextField(
@@ -198,7 +202,7 @@ private fun TextField(
         onValueChange = onChange,
         label = { Text(stringResource(label)) },
         isError = isError,
-        supportingText = if (isError) ({ Text(stringResource(R.string.equipment_date_error)) }) else null,
+        supportingText = if (isError) ({ Text(stringResource(errorRes)) }) else null,
         minLines = minLines,
         modifier = Modifier.fillMaxWidth().testTag(tag),
     )

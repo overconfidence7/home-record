@@ -35,6 +35,9 @@ import com.kurtz.homerecord.housemanual.imports.ImportViewModel
 import com.kurtz.homerecord.housemanual.mapping.MappingRoute
 import com.kurtz.homerecord.housemanual.mapping.MappingViewModel
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
+import com.kurtz.homerecord.housemanual.reminders.RemindersRoute
+import com.kurtz.homerecord.housemanual.reminders.RemindersViewModel
+import com.kurtz.homerecord.housemanual.rooms.labelRes
 import com.kurtz.homerecord.housemanual.panel.PanelRoute
 import com.kurtz.homerecord.housemanual.panel.PanelViewModel
 import com.kurtz.homerecord.housemanual.rooms.RoomRoute
@@ -63,7 +66,7 @@ private fun NavGraphBuilder.composable(
 }
 
 @Composable
-fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
+fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, reminderRequest: ReminderRequest? = null) {
     val start by produceState<String?>(initialValue = null, container) {
         value = StartDestination.resolve(container.homeRepository)
     }
@@ -74,6 +77,12 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
     androidx.compose.runtime.LaunchedEffect(emergencyRequests, startRoute) {
         if (emergencyRequests > 0 && startRoute != Routes.ONBOARDING) {
             nav.navigate(Routes.EMERGENCY) { launchSingleTop = true }
+        }
+    }
+    // Reminder notification deep link (AC-83).
+    androidx.compose.runtime.LaunchedEffect(reminderRequest, startRoute) {
+        if (reminderRequest != null && startRoute != Routes.ONBOARDING) {
+            nav.navigate(Routes.reminders(reminderRequest.taskId)) { launchSingleTop = true }
         }
     }
     val pendingImport by container.pendingImportUri.collectAsState()
@@ -121,9 +130,20 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
                 onEquipment = { nav.navigate(Routes.EQUIPMENT) },
                 onRooms = { nav.navigate(Routes.ROOMS) },
                 onImport = { nav.navigate(Routes.IMPORT) },
+                onReminders = { nav.navigate(Routes.reminders()) },
                 onSlot = { nav.navigate(Routes.panelAt(it)) },
                 onRoom = { nav.navigate(Routes.room(it)) },
             )
+        }
+        composable(
+            Routes.REMINDERS_PATTERN,
+            arguments = listOf(navArgument("highlight") { type = NavType.StringType; defaultValue = "" }),
+        ) { entry ->
+            val highlight = entry.arguments?.getString("highlight")?.takeIf { it.isNotEmpty() }
+            val vm: RemindersViewModel = viewModel(
+                factory = remember(highlight) { simpleFactory { RemindersViewModel(container.homeRepository, container.maintenanceRepository, highlight) } },
+            )
+            RemindersRoute(vm)
         }
         composable(Routes.ROOMS) {
             val vm: RoomsViewModel = viewModel(factory = remember { simpleFactory { RoomsViewModel(container.homeRepository) } })
@@ -176,7 +196,10 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
             val id = entry.arguments?.getString("id")?.takeIf { it.isNotEmpty() }
             val vm: EquipmentEditViewModel = viewModel(
                 factory = remember(id) {
-                    simpleFactory { EquipmentEditViewModel(id, container.homeRepository, container.equipmentRepository, container.mediaStore, container.textRecognizer) }
+                    simpleFactory { EquipmentEditViewModel(
+                        id, container.homeRepository, container.equipmentRepository, container.mediaStore, container.textRecognizer,
+                        container.maintenanceRepository,
+                    ) { e -> listOfNotNull(e.make, e.model).joinToString(" ").ifBlank { resources.getString(e.category.labelRes()) } } }
                 },
             )
             EquipmentEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })

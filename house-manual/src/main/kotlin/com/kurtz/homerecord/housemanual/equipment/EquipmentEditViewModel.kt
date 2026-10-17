@@ -9,6 +9,7 @@ import com.kurtz.homerecord.core.ocr.DataPlateParser
 import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
+import com.kurtz.homerecord.core.repo.MaintenanceRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,11 +25,13 @@ class EquipmentEditViewModel(
     private val equipment: EquipmentRepository,
     private val media: MediaFileStore,
     private val recognizer: TextRecognizer,
+    private val maintenance: MaintenanceRepository,
+    private val reminderTitle: (Equipment) -> String,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EquipmentEditUiState())
     val state: StateFlow<EquipmentEditUiState> = _state
 
-    private val _done = Channel<Unit>(Channel.BUFFERED)
+    private val _done = Channel<Boolean>(Channel.BUFFERED)
     val done = _done.receiveAsFlow()
 
     private var existing: Equipment? = null
@@ -42,6 +45,7 @@ class EquipmentEditViewModel(
             val rooms = home?.let { homes.getRooms(it.id) }.orEmpty().sortedBy { it.name.lowercase() }
             val found = equipmentId?.let { equipment.get(it) }
             existing = found
+            val reminder = found?.let { maintenance.getForEquipment(it.id) }
             _state.value = EquipmentEditUiState(
                 loaded = true,
                 isNew = found == null,
@@ -54,6 +58,7 @@ class EquipmentEditViewModel(
                 installedOn = found?.installedOn.orEmpty(),
                 warrantyEnds = found?.warrantyEnds.orEmpty(),
                 notes = found?.notes.orEmpty(),
+                remindMonths = reminder?.intervalMonths?.toString().orEmpty(),
                 labelPhotoPath = found?.labelPhotoPath,
                 rooms = rooms,
             )
@@ -70,6 +75,7 @@ class EquipmentEditViewModel(
             is EquipmentEditEvent.ManufacturedOnChanged -> _state.update { it.copy(manufacturedOn = event.value) }
             is EquipmentEditEvent.InstalledOnChanged -> _state.update { it.copy(installedOn = event.value) }
             is EquipmentEditEvent.WarrantyEndsChanged -> _state.update { it.copy(warrantyEnds = event.value) }
+            is EquipmentEditEvent.RemindMonthsChanged -> _state.update { it.copy(remindMonths = event.value.filter(Char::isDigit).take(2)) }
             is EquipmentEditEvent.NotesChanged -> _state.update { it.copy(notes = event.value) }
             EquipmentEditEvent.RemoveLabelPhoto -> replacePhoto(null)
             EquipmentEditEvent.TakeLabelPhoto, EquipmentEditEvent.ScanDataPlate -> Unit // handled by the route (camera)
@@ -155,9 +161,12 @@ class EquipmentEditViewModel(
                 notes = s.notes.orNull(),
                 labelPhotoPath = s.labelPhotoPath,
             )
-            equipment.save(record)
+            val saved = equipment.save(record)
+            val months = s.remindMonthsValue
+            // AC-81: blank removes the reminder, 1-24 creates or updates it.
+            maintenance.setEquipmentReminder(saved, months, reminderTitle(saved))
             finished = true
-            _done.send(Unit)
+            _done.send(months != null)
         }
     }
 
@@ -167,7 +176,7 @@ class EquipmentEditViewModel(
             media.delete(_state.value.labelPhotoPath?.takeIf { it != existing?.labelPhotoPath })
             equipment.delete(id)
             finished = true
-            _done.send(Unit)
+            _done.send(false)
         }
     }
 }

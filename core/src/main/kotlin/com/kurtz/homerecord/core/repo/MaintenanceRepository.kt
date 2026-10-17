@@ -6,10 +6,12 @@ import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.logic.ClimateZone
 import com.kurtz.homerecord.core.logic.DueDateMath
+import com.kurtz.homerecord.core.logic.EquipmentRule
 import com.kurtz.homerecord.core.logic.SeasonalTaskSeeder
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.MaintenanceRule
 import com.kurtz.homerecord.core.model.MaintenanceTask
+import com.kurtz.homerecord.core.model.Season
 import com.kurtz.homerecord.core.model.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,6 +38,34 @@ class MaintenanceRepository(
 
     suspend fun getForEquipment(equipmentId: String): MaintenanceTask? =
         db.maintenanceTaskDao().getForEquipment(equipmentId)?.toDomain()
+
+    /** AC-82: sets lastDone = today and advances nextDue by the task's rule. Null if the task is gone. */
+    suspend fun markDone(id: String): MaintenanceTask? {
+        val task = get(id) ?: return null
+        val today = today()
+        val next = when (task.rule) {
+            MaintenanceRule.CALENDAR -> DueDateMath.afterDoneCalendar(today, task.intervalMonths ?: 12)
+            MaintenanceRule.SEASONAL -> DueDateMath.afterDoneSeasonal(today, task.season ?: Season.SPRING)
+        }
+        val updated = task.copy(lastDone = today.toString(), nextDue = next.toString(), updatedAt = clock.now())
+        db.maintenanceTaskDao().upsert(updated.toEntity())
+        return updated
+    }
+
+    /** AC-82: pushes nextDue one week out. Null if the task is gone. */
+    suspend fun snooze(id: String): MaintenanceTask? {
+        val task = get(id) ?: return null
+        val current = EquipmentRule.parseDate(task.nextDue) ?: today()
+        val updated = task.copy(nextDue = DueDateMath.snooze(today(), current).toString(), updatedAt = clock.now())
+        db.maintenanceTaskDao().upsert(updated.toEntity())
+        return updated
+    }
+
+    /** AC-83: tasks whose nextDue is today or earlier, for the morning notification. */
+    suspend fun getDue(homeId: String): List<MaintenanceTask> {
+        val today = today().toString()
+        return getTasks(homeId).filter { it.nextDue <= today }
+    }
 
     /** AC-80: stores [zone] on the home and replaces its seasonal task list with that zone's. */
     suspend fun applyClimateZone(homeId: String, zone: ClimateZone): List<MaintenanceTask> = db.withTransaction {

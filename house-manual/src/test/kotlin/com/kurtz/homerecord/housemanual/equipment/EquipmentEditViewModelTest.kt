@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.model.Source
 import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
+import com.kurtz.homerecord.core.repo.MaintenanceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -38,6 +39,7 @@ class EquipmentEditViewModelTest {
     private lateinit var equipment: EquipmentRepository
     private lateinit var media: MediaFileStore
     private val recognizer = FakeTextRecognizer()
+    private lateinit var maintenance: MaintenanceRepository
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -45,6 +47,7 @@ class EquipmentEditViewModelTest {
         media = MediaFileStore(Files.createTempDirectory("media").toFile())
         homes = HomeRepository(db, Source.HOUSE_MANUAL)
         equipment = EquipmentRepository(db, media, Source.HOUSE_MANUAL)
+        maintenance = MaintenanceRepository(db, Source.HOUSE_MANUAL)
     }
 
     @After fun tearDown() {
@@ -53,7 +56,7 @@ class EquipmentEditViewModelTest {
     }
 
     private suspend fun vm(id: String? = null) =
-        EquipmentEditViewModel(id, homes, equipment, media, recognizer).also { v -> v.state.first { it.loaded } }
+        EquipmentEditViewModel(id, homes, equipment, media, recognizer, maintenance) { "Service" }.also { v -> v.state.first { it.loaded } }
 
     private fun writePhoto(): String {
         val path = media.newPhotoPath()
@@ -180,5 +183,47 @@ class FakeTextRecognizer : TextRecognizer {
     override suspend fun recognize(image: File): List<String> {
         if (fail) error("boom")
         return lines
+    }
+
+    @Test fun `AC-81 remind months creates a task and signals the route`() = runTest {
+        val home = homes.createHome("H")
+        val vm = vm()
+        vm.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.FURNACE))
+        vm.onEvent(EquipmentEditEvent.RemindMonthsChanged("6"))
+        assertTrue(vm.state.value.canSave)
+        vm.onEvent(EquipmentEditEvent.Save)
+        assertTrue(vm.done.first())
+        val task = maintenance.getTasks(home.id).single()
+        assertEquals(6, task.intervalMonths)
+        assertEquals("Service", task.title)
+    }
+
+    @Test fun `AC-81 out of range or non numeric interval blocks save`() = runTest {
+        homes.createHome("H")
+        val vm = vm()
+        vm.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.FURNACE))
+        vm.onEvent(EquipmentEditEvent.RemindMonthsChanged("25"))
+        assertFalse(vm.state.value.canSave)
+        vm.onEvent(EquipmentEditEvent.RemindMonthsChanged("0"))
+        assertFalse(vm.state.value.canSave)
+        vm.onEvent(EquipmentEditEvent.RemindMonthsChanged("abc"))
+        assertEquals("", vm.state.value.remindMonths)
+        assertTrue(vm.state.value.canSave)
+    }
+
+    @Test fun `AC-81 clearing the field removes an existing reminder`() = runTest {
+        val home = homes.createHome("H")
+        val first = vm()
+        first.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.FURNACE))
+        first.onEvent(EquipmentEditEvent.RemindMonthsChanged("3"))
+        first.onEvent(EquipmentEditEvent.Save)
+        first.done.first()
+        val id = equipment.observeEquipment(home.id).first().single().id
+        val edit = vm(id)
+        assertEquals("3", edit.state.value.remindMonths)
+        edit.onEvent(EquipmentEditEvent.RemindMonthsChanged(""))
+        edit.onEvent(EquipmentEditEvent.Save)
+        assertFalse(edit.done.first())
+        assertTrue(maintenance.getTasks(home.id).isEmpty())
     }
 }
