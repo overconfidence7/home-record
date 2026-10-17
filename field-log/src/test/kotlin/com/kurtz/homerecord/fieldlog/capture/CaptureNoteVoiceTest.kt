@@ -84,7 +84,7 @@ class CaptureNoteVoiceTest {
         vm.onEvent(CaptureEvent.NoteChanged("  Cracked joist near sink  "))
         vm.onEvent(CaptureEvent.SaveNote)
         advanceUntilIdle()
-        val e = entries.observeForJob(jobId).first().single()
+        val e = entries.observeForJob(jobId).first { it.isNotEmpty() }.single()
         assertEquals(EntryKind.NOTE, e.kind)
         assertEquals("Cracked joist near sink", e.text)
         assertEquals("2026-03-05", e.day)
@@ -110,7 +110,7 @@ class CaptureNoteVoiceTest {
         advanceTimeBy(2_100)
         vm.onEvent(CaptureEvent.ToggleVoice)
         advanceUntilIdle()
-        val e = entries.observeForJob(jobId).first().single()
+        val e = entries.observeForJob(jobId).first { it.isNotEmpty() }.single()
         assertEquals(EntryKind.VOICE, e.kind)
         assertEquals(2_000L, e.durationMs)
         assertTrue(e.mediaPath!!.endsWith(".m4a"))
@@ -148,7 +148,7 @@ class CaptureNoteVoiceTest {
         advanceTimeBy(1_000)
         vm.onLeave()
         advanceUntilIdle()
-        assertEquals(1, entries.observeForJob(jobId).first().size)
+        assertEquals(1, entries.observeForJob(jobId).first { it.isNotEmpty() }.size)
     }
 
     @Test fun stoppingTwiceSavesOneEntry() = runTest(dispatcher) {
@@ -159,7 +159,7 @@ class CaptureNoteVoiceTest {
         vm.onLeave()
         vm.onLeave()
         advanceUntilIdle()
-        assertEquals(1, entries.observeForJob(jobId).first().size)
+        assertEquals(1, entries.observeForJob(jobId).first { it.isNotEmpty() }.size)
         assertEquals(1, recorder.stopped)
     }
 }
