@@ -36,6 +36,10 @@ data class PanelUiState(
     val loadForm: LoadForm? = null,
     /** AC-116: result card once Calculate succeeded. */
     val loadResult: LoadResult? = null,
+    /** AC-97: every panel in the home, oldest first, for the switcher. */
+    val allPanels: List<Panel> = emptyList(),
+    /** True while the setup form is open to add another panel. */
+    val addingPanel: Boolean = false,
 ) {
     val mainBreaker: Breaker? get() = MainBreakerRule.mainOf(breakers)
 
@@ -57,6 +61,9 @@ sealed interface PanelEvent {
     data class SlotCountChanged(val value: String) : PanelEvent
     data class LayoutChanged(val layout: PanelLayout) : PanelEvent
     data object SavePanel : PanelEvent
+    data class SelectPanel(val panelId: String) : PanelEvent
+    data object AddPanel : PanelEvent
+    data object CancelAddPanel : PanelEvent
     /** Any change to the profile form (setup or editor). */
     data class ProfileChanged(val input: PanelProfileInput) : PanelEvent
     data object EditProfile : PanelEvent

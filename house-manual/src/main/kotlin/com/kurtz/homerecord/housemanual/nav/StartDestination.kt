@@ -7,7 +7,7 @@ object Routes {
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
     const val PANEL = "panel"
-    const val PANEL_PATTERN = "panel?highlight={highlight}"
+    const val PANEL_PATTERN = "panel?highlight={highlight}&panelId={panelId}"
     const val EMERGENCY = "emergency"
     const val EQUIPMENT = "equipment"
     const val EQUIPMENT_EDIT = "equipment/edit?id={id}"
@@ -25,7 +25,7 @@ object Routes {
 
     fun reminders(highlightId: String? = null) = "reminders?highlight=${highlightId.orEmpty()}"
 
-    fun panelAt(slot: Int) = "panel?highlight=$slot"
+    fun panelAt(slot: Int, panelId: String) = "panel?highlight=$slot&panelId=$panelId"
 
     fun shutoffEdit(id: String?) = "shutoff?id=${id.orEmpty()}"
 

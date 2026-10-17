@@ -156,7 +156,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                 onImport = { nav.navigate(Routes.IMPORT) },
                 onSettings = { nav.navigate(Routes.SETTINGS) },
                 onReminders = { nav.navigate(Routes.reminders()) },
-                onSlot = { nav.navigate(Routes.panelAt(it)) },
+                onSlot = { slot, panelId -> nav.navigate(Routes.panelAt(slot, panelId)) },
                 onRoom = { nav.navigate(Routes.room(it)) },
             )
         }
@@ -231,13 +231,17 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
         }
         composable(
             Routes.PANEL_PATTERN,
-            arguments = listOf(navArgument("highlight") { type = NavType.IntType; defaultValue = -1 }),
+            arguments = listOf(
+                navArgument("highlight") { type = NavType.IntType; defaultValue = -1 },
+                navArgument("panelId") { type = NavType.StringType; defaultValue = "" },
+            ),
         ) { entry ->
             val highlight = entry.arguments?.getInt("highlight")?.takeIf { it > 0 }
+            val panelId = entry.arguments?.getString("panelId")?.takeIf { it.isNotBlank() }
             val vm: PanelViewModel = viewModel(
-                factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, container.loadProfileRepository, resources.getString(R.string.panel_title)) } },
+                factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, container.loadProfileRepository, container.limitGate, resources.getString(R.string.panel_title), resources.getString(R.string.panel_sub_default_name), panelId) } },
             )
-            PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) }, onMapping = { nav.navigate(Routes.MAPPING) })
+            PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) }, onMapping = { nav.navigate(Routes.MAPPING) }, onPaywall = { nav.navigate(Routes.PAYWALL) })
         }
         composable(Routes.PAYWALL) {
             val vm: PaywallViewModel = viewModel(factory = remember { simpleFactory { PaywallViewModel(container.entitlements) } })

@@ -65,6 +65,7 @@ class HomeViewModel(
                 search = query,
                 results = SearchEngine.search(query, SearchData(breakers, links, endpoints, rooms, equipmentList, shutoffList)),
                 roomNames = rooms.associate { it.id to it.name },
+                panelNames = if (panelList.size > 1) panelList.associate { it.id to it.name } else emptyMap(),
             )
         }
     }.combine(search) { s, q -> if (s.homeName.isEmpty()) s.copy(search = q) else s }

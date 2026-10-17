@@ -43,6 +43,10 @@
     <string name="room_shutoffs">Shutoffs</string>
     <string name="room_no_shutoffs">No shutoffs in this room.</string>
     <string name="panel_title">Panel</string>
+    <string name="panel_add_sub">Add sub-panel</string>
+    <string name="panel_add_title">Add a sub-panel</string>
+    <string name="panel_sub_default_name">Sub-panel</string>
+    <string name="search_breaker_in_panel">%1$s, slot %2$d</string>
     <string name="panel_setup_title">Set up your panel</string>
     <string name="panel_slot_count">Number of slots</string>
     <string name="panel_layout">Layout</string>

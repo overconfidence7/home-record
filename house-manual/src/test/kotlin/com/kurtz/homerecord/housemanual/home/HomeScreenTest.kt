@@ -54,6 +54,6 @@ class HomeScreenTest {
         val state = HomeUiState(homeName = "Maple", search = "garage", results = listOf(SearchResult.BreakerHit(breaker, listOf("Freezer"), 100)))
         rule.setContent { HomeRecordTheme { HomeScreen(state, onEvent = { events += it }) } }
         rule.onNodeWithTag("search_result_0").performClick()
-        assertEquals(listOf<HomeEvent>(HomeEvent.OpenSlot(7)), events)
+        assertEquals(listOf<HomeEvent>(HomeEvent.OpenSlot(7, "p")), events)
     }
 }

@@ -37,7 +37,7 @@ fun HomeRoute(
     onImport: () -> Unit,
     onSettings: () -> Unit,
     onReminders: () -> Unit,
-    onSlot: (Int) -> Unit,
+    onSlot: (Int, String) -> Unit,
     onRoom: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -51,7 +51,7 @@ fun HomeRoute(
             HomeEvent.OpenImport -> onImport()
             HomeEvent.OpenSettings -> onSettings()
             HomeEvent.OpenReminders -> onReminders()
-            is HomeEvent.OpenSlot -> onSlot(event.slot)
+            is HomeEvent.OpenSlot -> onSlot(event.slot, event.panelId)
             is HomeEvent.OpenRoom -> onRoom(event.roomId)
         }
     }
@@ -136,9 +136,10 @@ private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             val (title, subtitle, onClick) = when (result) {
                 is SearchResult.BreakerHit -> Triple(
                     result.breaker.label.ifBlank { stringResource(R.string.panel_slot_empty) },
-                    stringResource(R.string.search_breaker_subtitle, result.breaker.slots.min()) +
+                    (state.panelNames[result.breaker.panelId]?.let { stringResource(R.string.search_breaker_in_panel, it, result.breaker.slots.min()) }
+                        ?: stringResource(R.string.search_breaker_subtitle, result.breaker.slots.min())) +
                         result.matchedEndpoints.takeIf { it.isNotEmpty() }?.joinToString(prefix = " · "),
-                    { result.breaker.slots.minOrNull()?.let { onEvent(HomeEvent.OpenSlot(it)) } ?: Unit },
+                    { result.breaker.slots.minOrNull()?.let { onEvent(HomeEvent.OpenSlot(it, result.breaker.panelId)) } ?: Unit },
                 )
                 is SearchResult.EndpointHit -> Triple(
                     result.endpoint.label,

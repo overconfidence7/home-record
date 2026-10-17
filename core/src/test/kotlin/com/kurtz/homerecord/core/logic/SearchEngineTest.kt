@@ -37,6 +37,14 @@ class SearchEngineTest {
         assertEquals(listOf("Freezer"), top.matchedEndpoints)
     }
 
+    @Test fun `AC-98 search covers breakers in every panel and reports each hit's panel`() {
+        val sub = Breaker(id = "b9", panelId = "sub", slots = listOf(4), label = "Workshop saw", createdAt = 0, updatedAt = 0, source = src)
+        val hits = SearchEngine.search("workshop", data.copy(breakers = data.breakers + sub))
+        val hit = hits.single() as SearchResult.BreakerHit
+        assertEquals("sub", hit.breaker.panelId)
+        assertEquals(listOf("p"), (SearchEngine.search("kitchen", data.copy(breakers = data.breakers + sub)).filterIsInstance<SearchResult.BreakerHit>()).map { it.breaker.panelId }.distinct())
+    }
+
     @Test fun `matching is case insensitive`() {
         assertEquals("b2", ((SearchEngine.search("KITCHEN", data).first()) as SearchResult.BreakerHit).breaker.id)
     }

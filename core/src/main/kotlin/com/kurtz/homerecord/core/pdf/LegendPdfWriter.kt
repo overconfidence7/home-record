@@ -3,6 +3,7 @@ package com.kurtz.homerecord.core.pdf
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import com.kurtz.homerecord.core.logic.LegendPage
 import com.kurtz.homerecord.core.logic.LegendRow
 import java.io.File
 
@@ -17,19 +18,22 @@ data class LegendHeadings(
     val rooms: String,
 )
 
-/** AC-22: renders the legend as a single Letter portrait page; row height shrinks so any slot count fits. */
+/** AC-22 / AC-98: renders one Letter portrait page per panel; row height shrinks so any slot count fits. */
 object LegendPdfWriter {
     private const val PAGE_WIDTH = 612
     private const val PAGE_HEIGHT = 792
     private const val MARGIN = 36f
     private const val MAX_ROW_HEIGHT = 18f
 
-    fun write(file: File, headings: LegendHeadings, rows: List<LegendRow>, subtitle: String? = null) {
+    fun write(file: File, headings: LegendHeadings, pages: List<LegendPage>) {
         val doc = PdfDocument()
         try {
-            val page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, 1).create())
-            draw(page.canvas, headings, rows, subtitle)
-            doc.finishPage(page)
+            pages.forEachIndexed { index, content ->
+                val page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, index + 1).create())
+                val title = listOfNotNull(headings.title, content.panelName).joinToString(" — ")
+                draw(page.canvas, headings, title, content.rows, content.subtitle)
+                doc.finishPage(page)
+            }
             file.parentFile?.mkdirs()
             file.outputStream().use { doc.writeTo(it) }
         } finally {
@@ -37,9 +41,9 @@ object LegendPdfWriter {
         }
     }
 
-    private fun draw(canvas: android.graphics.Canvas, h: LegendHeadings, rows: List<LegendRow>, subtitle: String?) {
+    private fun draw(canvas: android.graphics.Canvas, h: LegendHeadings, titleText: String, rows: List<LegendRow>, subtitle: String?) {
         val title = Paint().apply { textSize = 18f; typeface = Typeface.DEFAULT_BOLD }
-        canvas.drawText(h.title, MARGIN, MARGIN + 14f, title)
+        canvas.drawText(titleText, MARGIN, MARGIN + 14f, title)
 
         if (!subtitle.isNullOrBlank()) {
             val sub = Paint().apply { textSize = 11f }

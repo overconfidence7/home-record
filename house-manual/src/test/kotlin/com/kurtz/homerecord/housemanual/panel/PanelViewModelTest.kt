@@ -3,7 +3,10 @@ package com.kurtz.homerecord.housemanual.panel
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kurtz.homerecord.core.billing.LimitGate
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.repo.EquipmentRepository
+import com.kurtz.homerecord.housemanual.paywall.FakeEntitlements
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.Source
@@ -54,7 +57,12 @@ class PanelViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm() = PanelViewModel(homes, panels, LoadProfileRepository(db, Source.HOUSE_MANUAL), "Main panel").also { it.state.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
+    private val entitlements = FakeEntitlements()
+
+    private fun vm(initialPanelId: String? = null) = PanelViewModel(
+        homes, panels, LoadProfileRepository(db, Source.HOUSE_MANUAL),
+        LimitGate(entitlements, panels, EquipmentRepository(db, media, Source.HOUSE_MANUAL)), "Main panel", "Sub-panel", initialPanelId,
+    ).also { it.state.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
 
     @Test fun `AC-5 no panel shows setup with default 40 slots and saving creates the panel`() = runTest {
         val home = homes.createHome("H")
@@ -155,7 +163,7 @@ class PanelViewModelTest {
         val home = homes.getHome()!!
         val room = homes.addRoom(home.id, "Kitchen")
         panels.linkRoom(b.id, room.id)
-        val rows = vm.legendRows { "Standard" }
+        val rows = vm.legendPages { "Standard" }.single().rows
         assertEquals(40, rows.size)
         assertEquals("Oven", rows[1].label)
         assertEquals("Kitchen", rows[1].rooms)
@@ -213,8 +221,68 @@ class PanelViewModelTest {
         panels.updateProfile(sub.id, com.kurtz.homerecord.core.logic.PanelProfile(com.kurtz.homerecord.core.model.PanelKind.SUB, null, null, null, null, com.kurtz.homerecord.core.model.TandemPolicy.UNKNOWN, true, null, feed.id))
         val s = vm.state.first { it.feedNotes.isNotEmpty() }
         assertEquals("Garage sub", s.feedNotes[feed.id])
-        val rows = vm.legendRows({ "-> feeds $it" }, { "Standard" })
+        val rows = vm.legendPages({ "-> feeds $it" }) { "Standard" }.first().rows
         assertEquals("Garage feed -> feeds Garage sub", rows.first().label)
+    }
+
+    @Test fun `AC-97 adding a sub-panel creates a second panel with its own grid and selects it`() = runTest {
+        val home = homes.createHome("H")
+        val main = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val vm = vm()
+        vm.state.first { it.panel != null }
+        vm.onEvent(PanelEvent.AddPanel)
+        val adding = vm.state.first { it.addingPanel }
+        assertEquals(com.kurtz.homerecord.core.model.PanelKind.SUB, adding.profileInput.kind)
+        vm.onEvent(PanelEvent.SlotCountChanged("12"))
+        vm.onEvent(PanelEvent.SavePanel)
+        val s = vm.state.first { it.allPanels.size == 2 && !it.addingPanel }
+        assertEquals("Sub-panel 2", s.panel?.name)
+        assertEquals(12, s.panel?.slotCount)
+        assertEquals(com.kurtz.homerecord.core.model.PanelKind.SUB, s.panel?.kind)
+        assertTrue(s.breakers.isEmpty())
+        vm.onEvent(PanelEvent.SelectPanel(main.id))
+        assertEquals(main.id, vm.state.first { it.panel?.id == main.id }.panel?.id)
+    }
+
+    @Test fun `AC-97 breakers shown belong to the selected panel only`() = runTest {
+        val home = homes.createHome("H")
+        val main = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val sub = panels.createPanel(home.id, "Sub", 10, PanelLayout.NA_NUMBERED)
+        panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", main.id, listOf(1), label = "Oven", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", sub.id, listOf(1), label = "Shop", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        val vm = vm(initialPanelId = sub.id)
+        assertEquals(listOf("Shop"), vm.state.first { it.panel?.id == sub.id && it.breakers.isNotEmpty() }.breakers.map { it.label })
+        vm.onEvent(PanelEvent.SelectPanel(main.id))
+        assertEquals(listOf("Oven"), vm.state.first { it.panel?.id == main.id && it.breakers.isNotEmpty() }.breakers.map { it.label })
+    }
+
+    @Test fun `AC-92 and AC-97 second panel opens the paywall on free tier once a breaker is labeled, never before`() = runTest {
+        val home = homes.createHome("H")
+        val main = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val vm = vm()
+        vm.state.first { it.panel != null }
+        vm.onEvent(PanelEvent.AddPanel)
+        assertTrue(vm.state.first { it.addingPanel }.addingPanel) // AC-93: no labeled breaker yet
+        vm.onEvent(PanelEvent.CancelAddPanel)
+        vm.state.first { !it.addingPanel }
+        panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", main.id, listOf(1), label = "Oven", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        vm.onEvent(PanelEvent.AddPanel)
+        vm.paywall.first()
+        assertFalse(vm.state.value.addingPanel)
+        entitlements.setPro(true)
+        vm.onEvent(PanelEvent.AddPanel)
+        assertTrue(vm.state.first { it.addingPanel }.addingPanel)
+    }
+
+    @Test fun `AC-98 legend has one page per panel`() = runTest {
+        val home = homes.createHome("H")
+        panels.createPanel(home.id, "Main", 4, PanelLayout.NA_NUMBERED)
+        panels.createPanel(home.id, "Garage", 2, PanelLayout.NA_NUMBERED)
+        val vm = vm()
+        vm.state.first { it.allPanels.size == 2 }
+        val pages = vm.legendPages { "Standard" }
+        assertEquals(2, pages.size)
+        assertEquals(listOf(4, 2), pages.map { it.rows.size })
     }
 
     @Test fun `AC-106 and AC-113 insights open from current data, dismiss, and write nothing`() = runTest {

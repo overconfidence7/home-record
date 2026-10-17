@@ -21,7 +21,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -70,8 +73,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/** Items before the slot rows in the panel list: title, photo, profile, slot-count editor, legend, mapping, main breaker. */
-private const val PANEL_HEADER_ITEMS = 8
+/** Items before the slot rows in the panel list: title, panel switcher, photo, profile, slot-count editor, legend, mapping, main breaker. */
+private const val PANEL_HEADER_ITEMS = 9
 private val SLOT_ROW_HEIGHT = 64.dp
 private val TANDEM_ROW_HEIGHT = 104.dp
 private val GRID_GAP = 8.dp
@@ -86,7 +89,7 @@ fun PanelScreen(
 ) {
     if (!state.loaded) return
     val panel = state.panel
-    if (panel == null) {
+    if (panel == null || state.addingPanel) {
         PanelSetup(state, onEvent)
         return
     }
@@ -122,6 +125,7 @@ fun PanelScreen(
                 modifier = Modifier.padding(top = 16.dp),
             )
         }
+        item { PanelSwitcher(state, onEvent) }
         item { PanelPhoto(photoFile, hasPhoto = panel.photoPath != null, onEvent) }
         item { ProfileSection(state, onEvent) }
         item { SlotCountEditor(state, panel.slotCount, onEvent) }
@@ -164,6 +168,28 @@ fun PanelScreen(
             }
         }
         item { Box(Modifier.height(16.dp)) }
+    }
+}
+
+/** AC-97: one chip per panel plus "Add sub-panel". */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PanelSwitcher(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("panel_switcher")) {
+        if (state.allPanels.size > 1) {
+            state.allPanels.forEach { p ->
+                FilterChip(
+                    selected = p.id == state.panel?.id,
+                    onClick = { onEvent(PanelEvent.SelectPanel(p.id)) },
+                    label = { Text(p.name) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("panel_chip_${p.id}"),
+                )
+            }
+        }
+        OutlinedButton(
+            onClick = { onEvent(PanelEvent.AddPanel) },
+            modifier = Modifier.heightIn(min = 48.dp).testTag("panel_add"),
+        ) { Text(stringResource(R.string.panel_add_sub)) }
     }
 }
 
@@ -372,7 +398,7 @@ private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, feed
 @Composable
 private fun PanelSetup(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.panel_setup_title), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(if (state.addingPanel) R.string.panel_add_title else R.string.panel_setup_title), style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
             value = state.slotCountInput,
             onValueChange = { onEvent(PanelEvent.SlotCountChanged(it)) },
@@ -390,6 +416,12 @@ private fun PanelSetup(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
             enabled = state.canSave,
             modifier = Modifier.heightIn(min = 48.dp).testTag("panel_save"),
         ) { Text(stringResource(R.string.save)) }
+        if (state.addingPanel) {
+            OutlinedButton(
+                onClick = { onEvent(PanelEvent.CancelAddPanel) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("panel_add_cancel"),
+            ) { Text(stringResource(R.string.cancel)) }
+        }
     }
 }
 
