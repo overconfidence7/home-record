@@ -187,4 +187,33 @@ class BreakerViewModelTest {
         vm.done.first()
         assertTrue(panels.observeEndpointsForBreaker(b.id).first().isEmpty())
     }
+
+    @Test fun `AC-103 choosing a second main breaker warns and clears the first`() = runTest {
+        val first = vm(1)
+        first.onEvent(BreakerEvent.LabelChanged("Main"))
+        first.onEvent(BreakerEvent.MainChanged(true))
+        assertNull(first.state.value.otherMainLabel)
+        first.onEvent(BreakerEvent.Save)
+        first.done.first()
+
+        val second = vm(3)
+        assertEquals("Main", second.state.value.otherMainLabel)
+        second.onEvent(BreakerEvent.LabelChanged("New main"))
+        second.onEvent(BreakerEvent.MainChanged(true))
+        second.onEvent(BreakerEvent.Save)
+        second.done.first()
+
+        val mains = panels.observeBreakers(panel.id).first().filter { it.isMain }
+        assertEquals(listOf("New main"), mains.map { it.label })
+    }
+
+    @Test fun `tandem halves cannot be the main breaker`() = runTest {
+        val vm = vm(2, tandem = 0)
+        assertFalse(vm.state.value.showMainToggle)
+        vm.onEvent(BreakerEvent.LabelChanged("Half"))
+        vm.onEvent(BreakerEvent.MainChanged(true))
+        vm.onEvent(BreakerEvent.Save)
+        vm.done.first()
+        assertFalse(panels.observeBreakers(panel.id).first().single().isMain)
+    }
 }

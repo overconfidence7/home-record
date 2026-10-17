@@ -13,7 +13,7 @@ import androidx.room.TypeConverters
         ShutoffEntity::class, EquipmentEntity::class, PhotoEntity::class,
         JobEntity::class, LogEntryEntity::class, DailyReportEntity::class, CompanyProfileEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -38,7 +38,7 @@ abstract class HomeRecordDatabase : RoomDatabase() {
 
         fun open(context: Context): HomeRecordDatabase =
             Room.databaseBuilder(context.applicationContext, HomeRecordDatabase::class.java, FILE_NAME)
-                // Pre-release: v1 -> v2 only added Field Log tables; no shipped data to preserve.
+                // Pre-release: v2 -> v3 added panel profile and room kinds; no shipped data to preserve.
                 .fallbackToDestructiveMigration(true).build()
 
         fun inMemory(context: Context): HomeRecordDatabase =

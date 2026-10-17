@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import android.content.Intent
+import com.kurtz.homerecord.core.logic.LegendHeaderBuilder
+import com.kurtz.homerecord.core.logic.LegendHeaderText
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.pdf.LegendHeadings
 import com.kurtz.homerecord.core.pdf.LegendPdfWriter
@@ -61,7 +63,12 @@ private fun authority(context: Context) = "${context.packageName}.fileprovider"
 
 /** AC-22: writes the legend to cache/shared and opens the system share sheet. */
 private suspend fun shareLegend(context: Context, viewModel: PanelViewModel) {
-    val rows = viewModel.legendRows { context.getString(typeLabel(it.type)) }
+    val rows = viewModel.legendRows(
+        typeLabel = { context.getString(typeLabel(it.type)) },
+        feedsNote = { context.getString(R.string.panel_feeds_note, it) },
+    )
+    val panel = viewModel.state.value.panel
+    val subtitle = panel?.let { LegendHeaderBuilder.build(it, legendHeaderText(context)) }
     val headings = LegendHeadings(
         title = context.getString(R.string.legend_title),
         slot = context.getString(R.string.legend_col_slot),
@@ -72,7 +79,7 @@ private suspend fun shareLegend(context: Context, viewModel: PanelViewModel) {
         rooms = context.getString(R.string.legend_col_rooms),
     )
     val file = File(context.cacheDir, "shared/legend.pdf")
-    withContext(Dispatchers.IO) { LegendPdfWriter.write(file, headings, rows) }
+    withContext(Dispatchers.IO) { LegendPdfWriter.write(file, headings, rows, subtitle) }
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "application/pdf"
         putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, authority(context), file))
@@ -80,3 +87,12 @@ private suspend fun shareLegend(context: Context, viewModel: PanelViewModel) {
     }
     context.startActivity(Intent.createChooser(send, context.getString(R.string.panel_legend_pdf)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
+
+/** Localized fragments for the panel summary line and legend header (AC-105). */
+fun legendHeaderText(context: Context) = LegendHeaderText(
+    mainPanel = context.getString(R.string.panel_summary_main),
+    subPanel = context.getString(R.string.panel_summary_sub),
+    ratingMain = { context.getString(R.string.panel_summary_rating_main, it) },
+    ratingSub = { context.getString(R.string.panel_summary_rating_sub, it) },
+    installed = { context.getString(R.string.panel_summary_installed, it) },
+)

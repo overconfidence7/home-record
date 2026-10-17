@@ -24,11 +24,11 @@ object LegendPdfWriter {
     private const val MARGIN = 36f
     private const val MAX_ROW_HEIGHT = 18f
 
-    fun write(file: File, headings: LegendHeadings, rows: List<LegendRow>) {
+    fun write(file: File, headings: LegendHeadings, rows: List<LegendRow>, subtitle: String? = null) {
         val doc = PdfDocument()
         try {
             val page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, 1).create())
-            draw(page.canvas, headings, rows)
+            draw(page.canvas, headings, rows, subtitle)
             doc.finishPage(page)
             file.parentFile?.mkdirs()
             file.outputStream().use { doc.writeTo(it) }
@@ -37,11 +37,15 @@ object LegendPdfWriter {
         }
     }
 
-    private fun draw(canvas: android.graphics.Canvas, h: LegendHeadings, rows: List<LegendRow>) {
+    private fun draw(canvas: android.graphics.Canvas, h: LegendHeadings, rows: List<LegendRow>, subtitle: String?) {
         val title = Paint().apply { textSize = 18f; typeface = Typeface.DEFAULT_BOLD }
         canvas.drawText(h.title, MARGIN, MARGIN + 14f, title)
 
-        val top = MARGIN + 30f
+        if (!subtitle.isNullOrBlank()) {
+            val sub = Paint().apply { textSize = 11f }
+            canvas.drawText(clip(subtitle, sub, PAGE_WIDTH - 2 * MARGIN), MARGIN, MARGIN + 30f, sub)
+        }
+        val top = MARGIN + if (subtitle.isNullOrBlank()) 30f else 40f
         val available = PAGE_HEIGHT - MARGIN - top
         val rowHeight = minOf(MAX_ROW_HEIGHT, available / (rows.size + 1).coerceAtLeast(1))
         val text = Paint().apply { textSize = (rowHeight * 0.62f).coerceAtMost(11f) }

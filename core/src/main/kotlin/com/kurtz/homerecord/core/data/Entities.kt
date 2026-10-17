@@ -10,7 +10,10 @@ import com.kurtz.homerecord.core.model.EntryKind
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.model.PanelKind
 import com.kurtz.homerecord.core.model.PanelLayout
+import com.kurtz.homerecord.core.model.RoomKind
+import com.kurtz.homerecord.core.model.TandemPolicy
 import com.kurtz.homerecord.core.model.PhotoStage
 import com.kurtz.homerecord.core.model.ShutoffKind
 import com.kurtz.homerecord.core.model.Source
@@ -28,6 +31,7 @@ data class HomeEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
+    val squareFeet: Int? = null,
 )
 
 @Entity(
@@ -43,6 +47,7 @@ data class RoomEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
+    val kind: RoomKind = RoomKind.OTHER,
 )
 
 @Entity(
@@ -78,6 +83,15 @@ data class PanelEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
+    val kind: PanelKind = PanelKind.MAIN,
+    val ratingAmps: Int? = null,
+    val brand: String? = null,
+    val model: String? = null,
+    val maxCircuits: Int? = null,
+    val tandemPolicy: TandemPolicy = TandemPolicy.UNKNOWN,
+    val hasMainBreaker: Boolean = true,
+    val yearInstalled: Int? = null,
+    val feedBreakerId: String? = null,
 )
 
 @Entity(
@@ -99,6 +113,7 @@ data class BreakerEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val source: Source,
+    val isMain: Boolean = false,
 )
 
 @Entity(

@@ -13,6 +13,15 @@ enum class Source(val wire: String) {
 @Serializable
 enum class PanelLayout { NA_NUMBERED, DIN }
 @Serializable
+enum class PanelKind { MAIN, SUB }
+@Serializable
+enum class TandemPolicy { ALLOWED, NOT_ALLOWED, UNKNOWN }
+@Serializable
+enum class RoomKind {
+    KITCHEN, BATHROOM, BEDROOM, GARAGE, BASEMENT, LAUNDRY, EXTERIOR, HALLWAY, LIVING, DINING,
+    OFFICE, ATTIC, FAMILY, CLOSET, CRAWL_SPACE, UTILITY, OTHER,
+}
+@Serializable
 enum class BreakerType { STANDARD, GFCI, AFCI, DUAL }
 @Serializable
 enum class Confidence { CONFIRMED, LIKELY, UNKNOWN }
@@ -46,6 +55,7 @@ data class Home(
     override val createdAt: Long,
     override val updatedAt: Long,
     override val source: Source,
+    val squareFeet: Int? = null,
 ) : Record
 
 @Serializable
@@ -57,6 +67,7 @@ data class Room(
     override val createdAt: Long,
     override val updatedAt: Long,
     override val source: Source,
+    val kind: RoomKind = RoomKind.OTHER,
 ) : Record
 
 @Serializable
@@ -81,6 +92,16 @@ data class Panel(
     override val createdAt: Long,
     override val updatedAt: Long,
     override val source: Source,
+    val kind: PanelKind = PanelKind.MAIN,
+    val ratingAmps: Int? = null,
+    val brand: String? = null,
+    val model: String? = null,
+    val maxCircuits: Int? = null,
+    val tandemPolicy: TandemPolicy = TandemPolicy.UNKNOWN,
+    val hasMainBreaker: Boolean = true,
+    val yearInstalled: Int? = null,
+    /** Sub-panels: the breaker (in another panel) that feeds this one. */
+    val feedBreakerId: String? = null,
 ) : Record
 
 @Serializable
@@ -98,6 +119,7 @@ data class Breaker(
     override val createdAt: Long,
     override val updatedAt: Long,
     override val source: Source,
+    val isMain: Boolean = false,
 ) : Record
 
 @Serializable

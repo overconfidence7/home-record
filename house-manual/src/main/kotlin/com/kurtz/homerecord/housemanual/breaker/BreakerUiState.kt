@@ -34,10 +34,15 @@ data class BreakerUiState(
     val newEndpointRoomId: String? = null,
     val problem: SlotProblem? = null,
     val confirmingDelete: Boolean = false,
+    /** AC-103: flagged as this panel's main breaker. */
+    val isMain: Boolean = false,
+    /** Label of another breaker in this panel already flagged main; choosing main here clears it. */
+    val otherMainLabel: String? = null,
 ) {
     val canSave: Boolean get() = loaded && label.isNotBlank() && AmpsRule.isValid(amps)
     val canAddEndpoint: Boolean get() = newEndpointLabel.isNotBlank() && newEndpointRoomId != null
     val showPoles: Boolean get() = tandemIndex == null
+    val showMainToggle: Boolean get() = tandemIndex == null
 }
 
 sealed interface BreakerEvent {
@@ -52,6 +57,7 @@ sealed interface BreakerEvent {
     data class EndpointRoomChanged(val roomId: String) : BreakerEvent
     data object AddEndpoint : BreakerEvent
     data class RemoveEndpoint(val index: Int) : BreakerEvent
+    data class MainChanged(val isMain: Boolean) : BreakerEvent
     data object Save : BreakerEvent
     data object DeleteClicked : BreakerEvent
     data object DeleteConfirmed : BreakerEvent

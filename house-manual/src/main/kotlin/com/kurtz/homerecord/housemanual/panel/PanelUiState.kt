@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.housemanual.panel
 
+import com.kurtz.homerecord.core.logic.MainBreakerRule
+import com.kurtz.homerecord.core.logic.PanelProfileError
+import com.kurtz.homerecord.core.logic.PanelProfileInput
 import com.kurtz.homerecord.core.logic.SlotCountRule
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Panel
@@ -15,7 +18,18 @@ data class PanelUiState(
     val slotEditInput: String? = null,
     /** Highest occupied slot that blocked the last shrink attempt (AC-11). */
     val shrinkBlockedAt: Int? = null,
+    /** Profile fields on the first-time setup form (AC-101). */
+    val profileInput: PanelProfileInput = PanelProfileInput(),
+    /** Profile editor on an existing panel; null while closed. */
+    val profileEdit: PanelProfileInput? = null,
+    val profileErrors: Set<PanelProfileError> = emptySet(),
+    /** Breakers from other panels that can feed a sub-panel (AC-102). */
+    val feedOptions: List<FeedOption> = emptyList(),
+    /** Breaker id -> name of the sub-panel it feeds. */
+    val feedNotes: Map<String, String> = emptyMap(),
 ) {
+    val mainBreaker: Breaker? get() = MainBreakerRule.mainOf(breakers)
+
     val canApplySlotCount: Boolean get() = SlotCountRule.parse(slotEditInput ?: panel?.slotCount?.toString().orEmpty()) != null
 
     val canSave: Boolean get() = SlotCountRule.parse(slotCountInput) != null
@@ -34,6 +48,11 @@ sealed interface PanelEvent {
     data class SlotCountChanged(val value: String) : PanelEvent
     data class LayoutChanged(val layout: PanelLayout) : PanelEvent
     data object SavePanel : PanelEvent
+    /** Any change to the profile form (setup or editor). */
+    data class ProfileChanged(val input: PanelProfileInput) : PanelEvent
+    data object EditProfile : PanelEvent
+    data object CancelProfile : PanelEvent
+    data object SaveProfile : PanelEvent
     data object TakePhoto : PanelEvent
     /** AC-22: build the legend PDF and open the share sheet (handled by the route). */
     data object ShareLegend : PanelEvent

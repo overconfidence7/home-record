@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.repo
 
 import androidx.room.withTransaction
+import com.kurtz.homerecord.core.logic.RoomKindMapper
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
@@ -49,7 +50,7 @@ class JobRepository(
             val home = Home(ids.next(), trimmed, address.clean(), null, null, now, now, source)
             db.homeDao().upsert(home.toEntity())
             roomNames.map { it.trim() }.filter { it.isNotEmpty() }.distinctBy { it.lowercase() }.forEach {
-                db.roomDao().upsert(Room(ids.next(), home.id, it, null, now, now, source).toEntity())
+                db.roomDao().upsert(Room(ids.next(), home.id, it, null, now, now, source, RoomKindMapper.kindFor(it)).toEntity())
             }
             val job = Job(ids.next(), home.id, trimmed, address.clean(), clientName.clean(), clientContact.clean(), false, now, now, source)
             db.jobDao().upsert(job.toEntity())

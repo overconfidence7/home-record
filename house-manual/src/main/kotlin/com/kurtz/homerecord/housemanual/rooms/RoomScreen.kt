@@ -14,7 +14,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.Room
+import com.kurtz.homerecord.core.model.RoomKind
 import com.kurtz.homerecord.core.model.Source
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.housemanual.R
@@ -48,6 +52,7 @@ fun RoomRoute(viewModel: RoomViewModel, mediaStore: MediaFileStore, onDeleted: (
     RoomScreen(state, viewModel::onEvent, photoFile = { mediaStore.resolve(it) })
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit, photoFile: (String) -> File? = { null }) {
     val room = state.room
@@ -86,6 +91,18 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit, photoFile: (Str
                 OutlinedButton(onClick = { onEvent(RoomEvent.AskDelete) }, Modifier.heightIn(min = 48.dp).testTag("room_delete")) {
                     Text(stringResource(R.string.room_delete))
                 }
+            }
+        }
+
+        Text(stringResource(R.string.room_kind), style = MaterialTheme.typography.titleMedium)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            RoomKind.entries.forEach { k ->
+                FilterChip(
+                    selected = room.kind == k,
+                    onClick = { onEvent(RoomEvent.KindChanged(k)) },
+                    label = { Text(stringResource(roomKindLabel(k))) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("room_kind_${k.name}"),
+                )
             }
         }
 
@@ -167,4 +184,24 @@ private fun RoomScreenPreview() {
     HomeRecordTheme {
         RoomScreen(RoomUiState(loaded = true, room = Room("r", "h", "Kitchen", null, 0, 0, Source.HOUSE_MANUAL), breakers = listOf(breaker)), onEvent = {})
     }
+}
+
+fun roomKindLabel(kind: RoomKind): Int = when (kind) {
+    RoomKind.KITCHEN -> R.string.room_kind_kitchen
+    RoomKind.BATHROOM -> R.string.room_kind_bathroom
+    RoomKind.BEDROOM -> R.string.room_kind_bedroom
+    RoomKind.GARAGE -> R.string.room_kind_garage
+    RoomKind.BASEMENT -> R.string.room_kind_basement
+    RoomKind.LAUNDRY -> R.string.room_kind_laundry
+    RoomKind.EXTERIOR -> R.string.room_kind_exterior
+    RoomKind.HALLWAY -> R.string.room_kind_hallway
+    RoomKind.LIVING -> R.string.room_kind_living
+    RoomKind.DINING -> R.string.room_kind_dining
+    RoomKind.OFFICE -> R.string.room_kind_office
+    RoomKind.ATTIC -> R.string.room_kind_attic
+    RoomKind.FAMILY -> R.string.room_kind_family
+    RoomKind.CLOSET -> R.string.room_kind_closet
+    RoomKind.CRAWL_SPACE -> R.string.room_kind_crawl_space
+    RoomKind.UTILITY -> R.string.room_kind_utility
+    RoomKind.OTHER -> R.string.room_kind_other
 }

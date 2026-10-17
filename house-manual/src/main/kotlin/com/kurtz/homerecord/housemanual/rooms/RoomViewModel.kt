@@ -72,6 +72,7 @@ class RoomViewModel(
                 ui.update { it.copy(renaming = false) }
                 viewModelScope.launch { homes.renameRoom(roomId, name) }
             }
+            is RoomEvent.KindChanged -> viewModelScope.launch { homes.setRoomKind(roomId, event.kind) }
             RoomEvent.AskDelete -> ui.update { it.copy(confirmingDelete = true) }
             RoomEvent.CancelDelete -> ui.update { it.copy(confirmingDelete = false) }
             RoomEvent.ConfirmDelete -> {

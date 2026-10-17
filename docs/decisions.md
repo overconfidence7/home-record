@@ -81,3 +81,11 @@ Added `kotlinx-serialization-json` 1.9.0 and the serialization compiler plugin (
 
 ## 2026-10-17 — T29 import entry points
 HM-Import opens from a Home hub card now (Settings screen is T34) and from an ACTION_VIEW filter (content scheme, application/octet-stream, `.homerecord` path pattern). A shared URI is parked in `AppContainer.pendingImportUri` and consumed once by the import view model. Staging extraction goes to `cacheDir/import-<uuid>` and is deleted after apply/cancel.
+
+## 2026-10-17 — T30a panel profile and room kinds
+- Room DB bumped to v3 with the existing destructive fallback (nothing is released; no migration to maintain). New columns: Panel profile fields, Breaker.isMain, Room.kind, Home.squareFeet. All new model fields have defaults so older `.homerecord` bundles still decode.
+- The main breaker keeps its normal slot(s) (so slot occupancy rules are untouched). It is shown in a "Main breaker" banner above the grid and tagged MAIN in its grid cell; excluded-from-circuit-count is applied by the T30b insights rules.
+- Saving a breaker with isMain clears the flag on the panel's previous main inside one transaction; the breaker editor shows the replacement message before Save. Tandem halves cannot be main.
+- Quick-add and custom rooms both go through `RoomKindMapper` (keyword match); unmatched names become OTHER, editable on HM-Room.
+- Feed breaker: deleting the feeding breaker or its panel clears `feedBreakerId` on the sub-panel. HM-Panel still shows one panel until T37, so the feed picker is empty (with a hint) until a second panel exists.
+- Home.squareFeet has no UI yet (T30c form prefill).

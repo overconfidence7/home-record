@@ -41,6 +41,7 @@ sealed interface RoomEvent {
     data class RenameChanged(val value: String) : RoomEvent
     data object SaveRename : RoomEvent
     data object CancelRename : RoomEvent
+    data class KindChanged(val kind: com.kurtz.homerecord.core.model.RoomKind) : RoomEvent
     data object AskDelete : RoomEvent
     data object CancelDelete : RoomEvent
     data object ConfirmDelete : RoomEvent

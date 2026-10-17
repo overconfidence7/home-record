@@ -4,7 +4,9 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.model.Home
+import com.kurtz.homerecord.core.logic.RoomKindMapper
 import com.kurtz.homerecord.core.model.Photo
+import com.kurtz.homerecord.core.model.RoomKind
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.model.Source
 import androidx.room.withTransaction
@@ -51,9 +53,10 @@ class HomeRepository(
 
     suspend fun getRoom(id: String): Room? = db.roomDao().get(id)?.toDomain()
 
-    suspend fun addRoom(homeId: String, name: String, floor: String? = null): Room {
+    /** [kind] defaults to what [RoomKindMapper] makes of the name (AC-104); custom names give OTHER. */
+    suspend fun addRoom(homeId: String, name: String, floor: String? = null, kind: RoomKind? = null): Room {
         val now = clock.now()
-        val room = Room(ids.next(), homeId, name.trim(), floor, now, now, source)
+        val room = Room(ids.next(), homeId, name.trim(), floor, now, now, source, kind ?: RoomKindMapper.kindFor(name))
         db.roomDao().upsert(room.toEntity())
         return room
     }
@@ -61,6 +64,11 @@ class HomeRepository(
     suspend fun renameRoom(id: String, name: String) {
         val room = db.roomDao().get(id)?.toDomain() ?: return
         db.roomDao().upsert(room.copy(name = name.trim(), updatedAt = clock.now()).toEntity())
+    }
+
+    suspend fun setRoomKind(id: String, kind: RoomKind) {
+        val room = db.roomDao().get(id)?.toDomain() ?: return
+        db.roomDao().upsert(room.copy(kind = kind, updatedAt = clock.now()).toEntity())
     }
 
     suspend fun deleteRoom(id: String) {

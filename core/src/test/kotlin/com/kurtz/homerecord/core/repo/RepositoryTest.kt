@@ -10,7 +10,11 @@ import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.EndpointKind
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.logic.PanelProfile
+import com.kurtz.homerecord.core.model.PanelKind
 import com.kurtz.homerecord.core.model.PanelLayout
+import com.kurtz.homerecord.core.model.RoomKind
+import com.kurtz.homerecord.core.model.TandemPolicy
 import com.kurtz.homerecord.core.model.Shutoff
 import com.kurtz.homerecord.core.model.ShutoffKind
 import com.kurtz.homerecord.core.model.Source
@@ -174,5 +178,40 @@ class RepositoryTest {
         equipment.delete(saved.id)
         assertFalse(media.exists(label))
         assertNull(equipment.get(saved.id))
+    }
+
+    @Test fun quickAddRoomsGetKindsAndCustomRoomsAreOther() = runTest {
+        val home = homes.createHomeWithRooms("H", listOf("Kitchen", "Primary Bath", "Mud Room"))
+        val kinds = homes.getRooms(home.id).associate { it.name to it.kind }
+        assertEquals(RoomKind.KITCHEN, kinds["Kitchen"])
+        assertEquals(RoomKind.BATHROOM, kinds["Primary Bath"])
+        assertEquals(RoomKind.OTHER, kinds["Mud Room"])
+        val mud = homes.getRooms(home.id).first { it.name == "Mud Room" }
+        homes.setRoomKind(mud.id, RoomKind.LAUNDRY)
+        assertEquals(RoomKind.LAUNDRY, homes.getRoom(mud.id)?.kind)
+    }
+
+    @Test fun profileIsStoredAndSecondMainBreakerClearsTheFirst() = runTest {
+        val home = homes.createHome("H")
+        val profile = PanelProfile(PanelKind.MAIN, 200, "Eaton BR", "BR2040", 40, TandemPolicy.NOT_ALLOWED, true, 2004, null)
+        val panel = panels.createPanel(home.id, "Main", 40, PanelLayout.NA_NUMBERED, profile = profile)
+        assertEquals(200, panels.getPanel(panel.id)?.ratingAmps)
+        assertEquals(TandemPolicy.NOT_ALLOWED, panels.getPanel(panel.id)?.tandemPolicy)
+
+        fun b(slot: Int, main: Boolean) = Breaker("", panel.id, listOf(slot), label = "b$slot", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL, isMain = main)
+        val first = panels.saveBreaker(b(1, true))
+        val second = panels.saveBreaker(b(2, true))
+        assertFalse(panels.getBreaker(first.id)!!.isMain)
+        assertTrue(panels.getBreaker(second.id)!!.isMain)
+    }
+
+    @Test fun deletingTheFeedBreakerDetachesTheSubPanel() = runTest {
+        val home = homes.createHome("H")
+        val main = panels.createPanel(home.id, "Main", 40, PanelLayout.NA_NUMBERED)
+        val feed = panels.saveBreaker(Breaker("", main.id, listOf(1), label = "Sub", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        val sub = panels.createPanel(home.id, "Sub", 12, PanelLayout.NA_NUMBERED, profile = PanelProfile(PanelKind.SUB, null, null, null, null, TandemPolicy.UNKNOWN, true, null, feed.id))
+        assertEquals(feed.id, panels.getPanel(sub.id)?.feedBreakerId)
+        panels.deleteBreaker(feed.id)
+        assertNull(panels.getPanel(sub.id)?.feedBreakerId)
     }
 }

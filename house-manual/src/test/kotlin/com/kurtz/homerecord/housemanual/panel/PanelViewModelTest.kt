@@ -160,4 +160,59 @@ class PanelViewModelTest {
         assertEquals("Kitchen", rows[1].rooms)
         assertEquals("—", rows[0].label)
     }
+
+    @Test fun `AC-101 setup saves the profile with defaults Main, Unknown, main breaker yes`() = runTest {
+        val home = homes.createHome("H")
+        val vm = vm()
+        vm.state.first { it.loaded }
+        vm.onEvent(PanelEvent.SavePanel)
+        val p = panels.observePanels(home.id).first { it.isNotEmpty() }.single()
+        assertEquals(com.kurtz.homerecord.core.model.PanelKind.MAIN, p.kind)
+        assertEquals(com.kurtz.homerecord.core.model.TandemPolicy.UNKNOWN, p.tandemPolicy)
+        assertTrue(p.hasMainBreaker)
+        assertNull(p.ratingAmps)
+    }
+
+    @Test fun `AC-101 invalid profile blocks creating the panel and reports the field`() = runTest {
+        val home = homes.createHome("H")
+        val vm = vm()
+        vm.state.first { it.loaded }
+        vm.onEvent(PanelEvent.ProfileChanged(com.kurtz.homerecord.core.logic.PanelProfileInput(yearInstalled = "3000")))
+        vm.onEvent(PanelEvent.SavePanel)
+        assertEquals(setOf(com.kurtz.homerecord.core.logic.PanelProfileError.YEAR), vm.state.value.profileErrors)
+        assertTrue(panels.observePanels(home.id).first().isEmpty())
+    }
+
+    @Test fun `AC-101 details editor saves and cancel discards`() = runTest {
+        val home = homes.createHome("H")
+        panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val vm = vm()
+        vm.state.first { it.panel != null }
+        vm.onEvent(PanelEvent.EditProfile)
+        val edit = vm.state.value.profileEdit!!
+        vm.onEvent(PanelEvent.ProfileChanged(edit.copy(brand = "Eaton BR", ratingAmps = "200", tandemPolicy = com.kurtz.homerecord.core.model.TandemPolicy.NOT_ALLOWED)))
+        vm.onEvent(PanelEvent.CancelProfile)
+        assertNull(panels.observePanels(home.id).first().single().brand)
+
+        vm.onEvent(PanelEvent.EditProfile)
+        vm.onEvent(PanelEvent.ProfileChanged(vm.state.value.profileEdit!!.copy(brand = "Eaton BR", ratingAmps = "200")))
+        vm.onEvent(PanelEvent.SaveProfile)
+        val saved = vm.state.first { it.profileEdit == null && it.panel?.brand != null }.panel!!
+        assertEquals("Eaton BR", saved.brand)
+        assertEquals(200, saved.ratingAmps)
+    }
+
+    @Test fun `AC-102 sub-panel feed breaker produces a feeds note and legend label`() = runTest {
+        val home = homes.createHome("H")
+        val main = panels.createPanel(home.id, "Main", 20, PanelLayout.NA_NUMBERED)
+        val feed = panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", main.id, listOf(1), label = "Garage feed", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        val vm = vm()
+        vm.state.first { it.panel != null }
+        val sub = panels.createPanel(home.id, "Garage sub", 12, PanelLayout.NA_NUMBERED)
+        panels.updateProfile(sub.id, com.kurtz.homerecord.core.logic.PanelProfile(com.kurtz.homerecord.core.model.PanelKind.SUB, null, null, null, null, com.kurtz.homerecord.core.model.TandemPolicy.UNKNOWN, true, null, feed.id))
+        val s = vm.state.first { it.feedNotes.isNotEmpty() }
+        assertEquals("Garage sub", s.feedNotes[feed.id])
+        val rows = vm.legendRows({ "-> feeds $it" }, { "Standard" })
+        assertEquals("Garage feed -> feeds Garage sub", rows.first().label)
+    }
 }

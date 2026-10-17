@@ -4,7 +4,10 @@ import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Home
 import com.kurtz.homerecord.core.model.Panel
+import com.kurtz.homerecord.core.model.PanelKind
 import com.kurtz.homerecord.core.model.PanelLayout
+import com.kurtz.homerecord.core.model.RoomKind
+import com.kurtz.homerecord.core.model.TandemPolicy
 import com.kurtz.homerecord.core.model.Photo
 import com.kurtz.homerecord.core.model.PhotoStage
 import com.kurtz.homerecord.core.model.Room
@@ -138,5 +141,30 @@ class BundleTest {
         for (p in listOf("", "media/", "media/..", "media/a/b.jpg", "a.jpg", "/media/a.jpg", "media\\a.jpg", "../media/a.jpg")) {
             assertFalse(p, MediaPathSanitizer.isSafe(p))
         }
+    }
+
+    @Test fun newProfileFieldsRoundTripAndOldBundlesStillDecode() {
+        val b = bundle().copy(
+            home = Home("h1", "Maple St", createdAt = 1, updatedAt = 2, source = Source.FIELD_LOG, squareFeet = 2000),
+            rooms = listOf(Room("r1", "h1", "Kitchen", createdAt = 1, updatedAt = 1, source = Source.FIELD_LOG, kind = RoomKind.KITCHEN)),
+            panels = listOf(
+                Panel("p1", "h1", "Main", slotCount = 40, layout = PanelLayout.NA_NUMBERED, createdAt = 1, updatedAt = 1,
+                    source = Source.HOUSE_MANUAL, kind = PanelKind.SUB, ratingAmps = 100, brand = "Eaton BR", model = "BR1",
+                    maxCircuits = 20, tandemPolicy = TandemPolicy.NOT_ALLOWED, hasMainBreaker = false, yearInstalled = 1999, feedBreakerId = "b1"),
+            ),
+            breakers = listOf(Breaker("b1", "p1", listOf(1), label = "Main", createdAt = 1, updatedAt = 1, source = Source.HOUSE_MANUAL, isMain = true)),
+        )
+        assertEquals(b, RecordJson.decode(RecordJson.encode(b)))
+
+        val old = """{"formatVersion":1,"home":{"id":"h","name":"N","createdAt":1,"updatedAt":1,"source":"house-manual"},
+            "rooms":[{"id":"r","homeId":"h","name":"Kitchen","createdAt":1,"updatedAt":1,"source":"house-manual"}],
+            "panels":[{"id":"p","homeId":"h","name":"Main","slotCount":40,"layout":"NA_NUMBERED","createdAt":1,"updatedAt":1,"source":"house-manual"}],
+            "breakers":[{"id":"b","panelId":"p","slots":[1],"label":"x","createdAt":1,"updatedAt":1,"source":"house-manual"}]}"""
+        val decoded = RecordJson.decode(old)
+        assertEquals(RoomKind.OTHER, decoded.rooms.single().kind)
+        assertEquals(PanelKind.MAIN, decoded.panels.single().kind)
+        assertEquals(TandemPolicy.UNKNOWN, decoded.panels.single().tandemPolicy)
+        assertTrue(decoded.panels.single().hasMainBreaker)
+        assertFalse(decoded.breakers.single().isMain)
     }
 }

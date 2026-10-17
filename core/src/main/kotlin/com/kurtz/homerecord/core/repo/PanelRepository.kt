@@ -5,6 +5,8 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.media.MediaFileStore
+import com.kurtz.homerecord.core.logic.MainBreakerRule
+import com.kurtz.homerecord.core.logic.PanelProfile
 import com.kurtz.homerecord.core.logic.ShrinkCheck
 import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
@@ -42,9 +44,11 @@ class PanelRepository(
         slotCount: Int,
         layout: PanelLayout,
         locationRoomId: String? = null,
+        profile: PanelProfile? = null,
     ): Panel {
         val now = clock.now()
-        val panel = Panel(ids.next(), homeId, name.trim(), locationRoomId, null, slotCount, layout, now, now, source)
+        val base = Panel(ids.next(), homeId, name.trim(), locationRoomId, null, slotCount, layout, now, now, source)
+        val panel = profile?.applyTo(base) ?: base
         db.panelDao().upsert(panel.toEntity())
         return panel
     }
@@ -60,10 +64,27 @@ class PanelRepository(
         updatePanel(panel.copy(photoPath = relativePath))
     }
 
-    suspend fun deletePanel(id: String) {
-        val panel = db.panelDao().get(id) ?: return
+    /** AC-101: saves the profile fields of an existing panel. */
+    suspend fun updateProfile(panelId: String, profile: PanelProfile) {
+        val panel = getPanel(panelId) ?: return
+        updatePanel(profile.applyTo(panel))
+    }
+
+    suspend fun deletePanel(id: String): Unit = db.withTransaction {
+        val panel = db.panelDao().get(id) ?: return@withTransaction
+        val fedBy = db.breakerDao().getAll().filter { it.panelId == id }.map { it.id }.toSet()
+        detachFeeds(fedBy)
         media.delete(panel.photoPath)
         db.panelDao().delete(panel)
+    }
+
+    /** Sub-panels fed by any of [breakerIds] lose their feed link (AC-102). */
+    private suspend fun detachFeeds(breakerIds: Set<String>) {
+        if (breakerIds.isEmpty()) return
+        val now = clock.now()
+        db.panelDao().getAll().filter { it.feedBreakerId in breakerIds }.forEach {
+            db.panelDao().upsert(it.copy(feedBreakerId = null, updatedAt = now))
+        }
     }
 
     fun observeBreakers(panelId: String): Flow<List<Breaker>> =
@@ -71,16 +92,25 @@ class PanelRepository(
 
     suspend fun getBreaker(id: String): Breaker? = db.breakerDao().get(id)?.toDomain()
 
-    /** Inserts (blank id) or updates a breaker; returns the stored copy. */
-    suspend fun saveBreaker(breaker: Breaker): Breaker {
+    /**
+     * Inserts (blank id) or updates a breaker; returns the stored copy. Saving a main breaker clears the
+     * flag on the panel's previous main (AC-103).
+     */
+    suspend fun saveBreaker(breaker: Breaker): Breaker = db.withTransaction {
         val now = clock.now()
         val stored = if (breaker.id.isBlank()) {
             breaker.copy(id = ids.next(), createdAt = now, updatedAt = now, source = source)
         } else {
             breaker.copy(updatedAt = now)
         }
+        if (stored.isMain) {
+            val siblings = db.breakerDao().getAll().filter { it.panelId == stored.panelId }.map { it.toDomain() }
+            MainBreakerRule.toClear(siblings, stored.id).forEach {
+                db.breakerDao().upsert(it.copy(isMain = false, updatedAt = now).toEntity())
+            }
+        }
         db.breakerDao().upsert(stored.toEntity())
-        return stored
+        stored
     }
 
     /** Deletes a breaker, its room links, and detaches (not deletes) its endpoints. */
@@ -91,6 +121,7 @@ class PanelRepository(
             db.endpointDao().upsert(it.copy(breakerId = null, updatedAt = now))
         }
         db.breakerRoomDao().deleteForBreaker(id)
+        detachFeeds(setOf(id))
         db.breakerDao().delete(breaker)
     }
 

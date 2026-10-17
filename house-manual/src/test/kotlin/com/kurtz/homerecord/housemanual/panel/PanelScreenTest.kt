@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.panel
 
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -25,7 +26,8 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [34])
+// Tall window: the panel header (photo, profile, slot count, buttons) now precedes the lazily composed grid.
+@Config(sdk = [34], qualifiers = "w360dp-h1400dp")
 class PanelScreenTest {
     @get:Rule val rule = createComposeRule()
 
@@ -37,7 +39,7 @@ class PanelScreenTest {
         rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true), { events += it }) } }
         rule.onNodeWithText("Set up your panel").assertIsDisplayed()
         rule.onNodeWithText("40").assertIsDisplayed()
-        rule.onNodeWithTag("panel_save").performClick()
+        rule.onNodeWithTag("panel_save").performScrollTo().performClick()
         assertEquals(listOf<PanelEvent>(PanelEvent.SavePanel), events)
     }
 
@@ -95,5 +97,33 @@ class PanelScreenTest {
         rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel()), { events += it }) } }
         rule.onNodeWithTag("panel_legend_pdf").performClick()
         assertEquals(listOf<PanelEvent>(PanelEvent.ShareLegend), events)
+    }
+
+    @Test fun `AC-101 setup form offers kind, rating, brand, tandem and main breaker choices`() {
+        val events = mutableListOf<PanelEvent>()
+        rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true), { events += it }) } }
+        rule.onNodeWithTag("kind_SUB").performScrollTo().performClick()
+        rule.onNodeWithTag("rating_200").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("brand_Square D QO").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("tandem_NOT_ALLOWED").performScrollTo().performClick()
+        rule.onNodeWithTag("has_main_no").performScrollTo().performClick()
+        val changes = events.filterIsInstance<PanelEvent.ProfileChanged>().map { it.input }
+        assertEquals(com.kurtz.homerecord.core.model.PanelKind.SUB, changes[0].kind)
+        assertEquals(com.kurtz.homerecord.core.model.TandemPolicy.NOT_ALLOWED, changes[1].tandemPolicy)
+        assertEquals(false, changes[2].hasMainBreaker)
+    }
+
+    @Test fun `AC-103 main breaker is shown above the grid`() {
+        val main = Breaker("m", "p", listOf(1, 3), 2, 200, label = "House main", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL, isMain = true)
+        val events = mutableListOf<PanelEvent>()
+        rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(), breakers = listOf(main)), { events += it }) } }
+        rule.onNodeWithTag("main_breaker_banner").performScrollTo().assertIsDisplayed().performClick()
+        assertEquals(listOf<PanelEvent>(PanelEvent.OpenBreaker(1, "m")), events)
+    }
+
+    @Test fun `AC-102 grid cell shows the feeds note`() {
+        val b = Breaker("b", "p", listOf(2), 1, 20, label = "Garage", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL)
+        rule.setContent { HomeRecordTheme { PanelScreen(PanelUiState(loaded = true, panel = panel(), breakers = listOf(b), feedNotes = mapOf("b" to "Shed sub")), {}) } }
+        rule.onNodeWithText("Garage · 20A → feeds Shed sub").assertIsDisplayed()
     }
 }

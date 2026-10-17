@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.breaker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.logic.AmpsRule
+import com.kurtz.homerecord.core.logic.MainBreakerRule
 import com.kurtz.homerecord.core.logic.Placement
 import com.kurtz.homerecord.core.logic.SlotOccupancy
 import com.kurtz.homerecord.core.model.Breaker
@@ -50,13 +51,14 @@ class BreakerViewModel(
             val endpoints = found?.let { panels.observeEndpointsForBreaker(it.id).first() }.orEmpty()
                 .map { EndpointDraft(it.id, it.kind, it.label, it.roomId) }
             originalEndpointIds = endpoints.map { it.id }.toSet()
+            val otherMain = MainBreakerRule.toClear(panels.observeBreakers(panelId).first(), found?.id.orEmpty()).firstOrNull()
             _state.update {
-                val withLinks = it.copy(loaded = true, rooms = rooms, selectedRoomIds = linkedRooms, endpoints = endpoints, newEndpointRoomId = rooms.firstOrNull()?.id)
+                val withLinks = it.copy(loaded = true, otherMainLabel = otherMain?.let { m -> m.label.ifBlank { m.slots.min().toString() } }, rooms = rooms, selectedRoomIds = linkedRooms, endpoints = endpoints, newEndpointRoomId = rooms.firstOrNull()?.id)
                 if (found == null) withLinks
                 else withLinks.copy(
                     isNew = false, slot = found.slots.min(), tandemIndex = found.tandemIndex,
                     label = found.label, amps = found.amps?.toString().orEmpty(), poles = found.poles,
-                    type = found.type, confidence = found.confidence,
+                    type = found.type, confidence = found.confidence, isMain = found.isMain,
                 )
             }
         }
@@ -84,6 +86,7 @@ class BreakerViewModel(
                 )
             }
             is BreakerEvent.RemoveEndpoint -> _state.update { it.copy(endpoints = it.endpoints.filterIndexed { i, _ -> i != event.index }) }
+            is BreakerEvent.MainChanged -> _state.update { it.copy(isMain = event.isMain) }
             BreakerEvent.Save -> save()
             BreakerEvent.DeleteClicked -> _state.update { it.copy(confirmingDelete = true) }
             BreakerEvent.DeleteDismissed -> _state.update { it.copy(confirmingDelete = false) }
@@ -115,6 +118,7 @@ class BreakerViewModel(
                     label = s.label.trim(),
                     confidence = s.confidence,
                     tandemIndex = s.tandemIndex,
+                    isMain = s.isMain && s.tandemIndex == null,
                 ),
             )
             syncLinks(saved.id, s)

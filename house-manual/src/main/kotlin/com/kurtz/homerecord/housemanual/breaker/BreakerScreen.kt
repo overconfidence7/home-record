@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -72,6 +75,24 @@ fun BreakerScreen(state: BreakerUiState, onEvent: (BreakerEvent) -> Unit) {
                         modifier = Modifier.heightIn(min = 48.dp).testTag("poles_$p"),
                     )
                 }
+            }
+        }
+        if (state.showMainToggle) {
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .toggleable(value = state.isMain, role = Role.Checkbox, onValueChange = { onEvent(BreakerEvent.MainChanged(it)) })
+                    .testTag("breaker_is_main"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = state.isMain, onCheckedChange = null)
+                Text(stringResource(R.string.breaker_is_main), Modifier.padding(start = 12.dp))
+            }
+            if (state.isMain && state.otherMainLabel != null) {
+                Text(
+                    stringResource(R.string.breaker_main_replaces, state.otherMainLabel),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.testTag("breaker_main_message"),
+                )
             }
         }
         Text(stringResource(R.string.breaker_type), style = MaterialTheme.typography.titleMedium)

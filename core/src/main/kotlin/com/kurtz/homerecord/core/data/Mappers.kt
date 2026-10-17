@@ -24,6 +24,7 @@ fun HomeEntity.toDomain() = Home(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    squareFeet = squareFeet,
 )
 
 fun Home.toEntity() = HomeEntity(
@@ -35,6 +36,7 @@ fun Home.toEntity() = HomeEntity(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    squareFeet = squareFeet,
 )
 
 fun RoomEntity.toDomain() = Room(
@@ -45,6 +47,7 @@ fun RoomEntity.toDomain() = Room(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    kind = kind,
 )
 
 fun Room.toEntity() = RoomEntity(
@@ -55,6 +58,7 @@ fun Room.toEntity() = RoomEntity(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    kind = kind,
 )
 
 fun WallEntity.toDomain() = Wall(
@@ -86,6 +90,15 @@ fun PanelEntity.toDomain() = Panel(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    kind = kind,
+    ratingAmps = ratingAmps,
+    brand = brand,
+    model = model,
+    maxCircuits = maxCircuits,
+    tandemPolicy = tandemPolicy,
+    hasMainBreaker = hasMainBreaker,
+    yearInstalled = yearInstalled,
+    feedBreakerId = feedBreakerId,
 )
 
 fun Panel.toEntity() = PanelEntity(
@@ -99,6 +112,15 @@ fun Panel.toEntity() = PanelEntity(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    kind = kind,
+    ratingAmps = ratingAmps,
+    brand = brand,
+    model = model,
+    maxCircuits = maxCircuits,
+    tandemPolicy = tandemPolicy,
+    hasMainBreaker = hasMainBreaker,
+    yearInstalled = yearInstalled,
+    feedBreakerId = feedBreakerId,
 )
 
 fun BreakerEntity.toDomain() = Breaker(
@@ -114,6 +136,7 @@ fun BreakerEntity.toDomain() = Breaker(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    isMain = isMain,
 )
 
 fun Breaker.toEntity() = BreakerEntity(
@@ -129,6 +152,7 @@ fun Breaker.toEntity() = BreakerEntity(
     createdAt = createdAt,
     updatedAt = updatedAt,
     source = source,
+    isMain = isMain,
 )
 
 fun BreakerRoomEntity.toDomain() = BreakerRoom(

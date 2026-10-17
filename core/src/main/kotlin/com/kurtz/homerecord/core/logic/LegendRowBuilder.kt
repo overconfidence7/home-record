@@ -21,6 +21,7 @@ object LegendRowBuilder {
         breakers: List<Breaker>,
         roomNamesFor: (Breaker) -> List<String>,
         typeLabel: (Breaker) -> String,
+        feedsNote: (Breaker) -> String? = { null },
     ): List<LegendRow> {
         val rows = mutableListOf<LegendRow>()
         for (slot in 1..slotCount) {
@@ -28,15 +29,15 @@ object LegendRowBuilder {
             val tandem = here.filter { it.tandemIndex != null }
             when {
                 tandem.isNotEmpty() -> {
-                    rows += rowFor("$slot a", tandem.firstOrNull { it.tandemIndex == 0 }, roomNamesFor, typeLabel)
-                    rows += rowFor("$slot b", tandem.firstOrNull { it.tandemIndex == 1 }, roomNamesFor, typeLabel)
+                    rows += rowFor("$slot a", tandem.firstOrNull { it.tandemIndex == 0 }, roomNamesFor, typeLabel, feedsNote)
+                    rows += rowFor("$slot b", tandem.firstOrNull { it.tandemIndex == 1 }, roomNamesFor, typeLabel, feedsNote)
                 }
-                here.isEmpty() -> rows += rowFor(slot.toString(), null, roomNamesFor, typeLabel)
+                here.isEmpty() -> rows += rowFor(slot.toString(), null, roomNamesFor, typeLabel, feedsNote)
                 else -> {
                     val breaker = here.first()
                     // A multi-slot breaker prints once, at its first slot.
                     if (slot == breaker.slots.min()) {
-                        rows += rowFor(breaker.slots.sorted().joinToString(", "), breaker, roomNamesFor, typeLabel)
+                        rows += rowFor(breaker.slots.sorted().joinToString(", "), breaker, roomNamesFor, typeLabel, feedsNote)
                     }
                 }
             }
@@ -49,11 +50,12 @@ object LegendRowBuilder {
         breaker: Breaker?,
         roomNamesFor: (Breaker) -> List<String>,
         typeLabel: (Breaker) -> String,
+        feedsNote: (Breaker) -> String?,
     ): LegendRow {
         if (breaker == null) return LegendRow(slot, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY)
         return LegendRow(
             slot = slot,
-            label = breaker.label.ifBlank { EMPTY },
+            label = listOfNotNull(breaker.label.takeIf { it.isNotBlank() }, feedsNote(breaker)).joinToString(" ").ifEmpty { EMPTY },
             amps = breaker.amps?.toString() ?: EMPTY,
             poles = breaker.poles.toString(),
             type = typeLabel(breaker),

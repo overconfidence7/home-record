@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.height
@@ -46,6 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import com.kurtz.homerecord.core.logic.LegendHeaderBuilder
 import com.kurtz.homerecord.core.logic.PanelGridPlanner
 import com.kurtz.homerecord.core.logic.PanelLayoutCalculator
 import androidx.compose.ui.platform.LocalDensity
@@ -66,8 +70,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/** Items before the slot rows in the panel list: title, photo, slot-count editor, legend button. */
-private const val PANEL_HEADER_ITEMS = 5
+/** Items before the slot rows in the panel list: title, photo, profile, slot-count editor, legend, mapping, main breaker. */
+private const val PANEL_HEADER_ITEMS = 7
 private val SLOT_ROW_HEIGHT = 64.dp
 private val TANDEM_ROW_HEIGHT = 104.dp
 private val GRID_GAP = 8.dp
@@ -115,6 +119,7 @@ fun PanelScreen(
             )
         }
         item { PanelPhoto(photoFile, hasPhoto = panel.photoPath != null, onEvent) }
+        item { ProfileSection(state, onEvent) }
         item { SlotCountEditor(state, panel.slotCount, onEvent) }
         item {
             OutlinedButton(
@@ -128,6 +133,7 @@ fun PanelScreen(
                 modifier = Modifier.heightIn(min = 48.dp).testTag("panel_mapping_mode"),
             ) { Text(stringResource(R.string.panel_mapping_mode)) }
         }
+        item(key = "main_breaker") { MainBreakerBanner(state, onEvent) }
         item(key = "slot_grid") {
             val columns = PanelGridPlanner.columns(panel.slotCount, panel.layout, state.breakers)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(GRID_GAP)) {
@@ -214,6 +220,7 @@ private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Un
                     "$slot $suffix", half,
                     Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("slot_${slot}_$suffix")
                         .clickable { onEvent(PanelEvent.OpenBreaker(slot, half?.id, index)) },
+                    half?.let { feedSuffix(it, state) }.orEmpty(),
                 )
             }
         } else {
@@ -225,6 +232,7 @@ private fun SlotCell(slot: Int, state: PanelUiState, onEvent: (PanelEvent) -> Un
                         onClick = { onEvent(PanelEvent.OpenBreaker(slot, breaker?.id)) },
                         onLongClick = { onEvent(PanelEvent.SlotLongPressed(slot)) },
                     ),
+                breaker?.let { feedSuffix(it, state) }.orEmpty(),
             )
         }
     }
@@ -256,10 +264,13 @@ private fun TwoPoleCell(breaker: Breaker, state: PanelUiState, onEvent: (PanelEv
                         .testTag("dot_${breaker.confidence.name}"),
                 )
             }
-            Text(stringResource(R.string.panel_two_pole_marker), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.panel_two_pole_marker) + if (breaker.isMain) " · " + stringResource(R.string.panel_main_tag) else "",
+                style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+            )
             val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
             Text(
-                if (breaker.label.isBlank()) stringResource(R.string.panel_slot_empty) else breaker.label + amps,
+                if (breaker.label.isBlank()) stringResource(R.string.panel_slot_empty) else breaker.label + amps + feedSuffix(breaker, state),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -267,7 +278,62 @@ private fun TwoPoleCell(breaker: Breaker, state: PanelUiState, onEvent: (PanelEv
 }
 
 @Composable
-private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier) {
+private fun feedSuffix(breaker: Breaker, state: PanelUiState): String =
+    state.feedNotes[breaker.id]?.let { " " + stringResource(R.string.panel_feeds_note, it) }.orEmpty()
+
+@Composable
+private fun ProfileSection(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
+    val panel = state.panel ?: return
+    val edit = state.profileEdit
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (edit == null) {
+            val summary = LegendHeaderBuilder.build(panel, legendHeaderText(LocalContext.current))
+            Text(summary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("panel_profile_summary"))
+            OutlinedButton(
+                onClick = { onEvent(PanelEvent.EditProfile) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("panel_edit_details"),
+            ) { Text(stringResource(R.string.panel_edit_details)) }
+        } else {
+            Text(stringResource(R.string.panel_details), style = MaterialTheme.typography.titleMedium)
+            PanelProfileForm(edit, state.profileErrors, state.feedOptions) { onEvent(PanelEvent.ProfileChanged(it)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { onEvent(PanelEvent.SaveProfile) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("panel_profile_save"),
+                ) { Text(stringResource(R.string.save)) }
+                OutlinedButton(
+                    onClick = { onEvent(PanelEvent.CancelProfile) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("panel_profile_cancel"),
+                ) { Text(stringResource(R.string.cancel)) }
+            }
+        }
+    }
+}
+
+/** AC-103: the main breaker is pulled out above the grid in a distinct style. */
+@Composable
+private fun MainBreakerBanner(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
+    val panel = state.panel ?: return
+    val main = state.mainBreaker ?: return
+    val amps = main.amps?.let { " · ${it}A" }.orEmpty()
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("main_breaker_banner")
+            .clickable { onEvent(PanelEvent.OpenBreaker(main.slots.min(), main.id)) },
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+    ) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Text(stringResource(R.string.panel_main_breaker_title), style = MaterialTheme.typography.labelLarge)
+            Text(
+                main.label.ifBlank { stringResource(R.string.panel_slot_empty) } + amps + feedSuffix(main, state),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier, feedSuffix: String = "") {
     Row(modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(number, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 8.dp))
         if (breaker != null) {
@@ -279,20 +345,23 @@ private fun SlotLine(number: String, breaker: Breaker?, modifier: Modifier) {
                     .testTag("dot_${breaker.confidence.name}"),
             )
         }
+        if (breaker?.isMain == true) {
+            Text(stringResource(R.string.panel_main_tag), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 8.dp))
+        }
         if (breaker == null) {
             Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else if (breaker.label.isBlank()) {
             Text(stringResource(R.string.panel_slot_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             val amps = breaker.amps?.let { " · ${it}A" }.orEmpty()
-            Text(breaker.label + amps, style = MaterialTheme.typography.bodyMedium)
+            Text(breaker.label + amps + feedSuffix, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
 private fun PanelSetup(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.panel_setup_title), style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
             value = state.slotCountInput,
@@ -305,6 +374,7 @@ private fun PanelSetup(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
         Text(stringResource(R.string.panel_layout), style = MaterialTheme.typography.titleMedium)
         LayoutOption(PanelLayout.NA_NUMBERED, R.string.panel_layout_na, state, onEvent)
         LayoutOption(PanelLayout.DIN, R.string.panel_layout_din, state, onEvent)
+        PanelProfileForm(state.profileInput, state.profileErrors, state.feedOptions) { onEvent(PanelEvent.ProfileChanged(it)) }
         Button(
             onClick = { onEvent(PanelEvent.SavePanel) },
             enabled = state.canSave,

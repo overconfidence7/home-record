@@ -149,4 +149,17 @@ class RoomViewModelTest {
     private fun TestScope.launchCollect(vm: RoomViewModel) = launchCollect(vm.state)
 
     private fun TestScope.launchCollect(flow: StateFlow<*>) = backgroundScope.launch { flow.collect { } }
+
+    @Test fun `AC-104 quick-add room has a kind and the user can change it`() = runTest {
+        val home = homes.createHome("H")
+        val kitchen = homes.addRoom(home.id, "Kitchen")
+        val mud = homes.addRoom(home.id, "Mud room")
+        val vm = vm(mud.id)
+        val job = launchCollect(vm)
+        assertEquals(com.kurtz.homerecord.core.model.RoomKind.KITCHEN, homes.getRoom(kitchen.id)?.kind)
+        assertEquals(com.kurtz.homerecord.core.model.RoomKind.OTHER, vm.state.first { it.room != null }.room?.kind)
+        vm.onEvent(RoomEvent.KindChanged(com.kurtz.homerecord.core.model.RoomKind.LAUNDRY))
+        assertEquals(com.kurtz.homerecord.core.model.RoomKind.LAUNDRY, vm.state.first { it.room?.kind == com.kurtz.homerecord.core.model.RoomKind.LAUNDRY }.room?.kind)
+        job.cancel()
+    }
 }
