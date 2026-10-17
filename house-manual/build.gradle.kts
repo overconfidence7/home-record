@@ -1,3 +1,10 @@
+import java.util.Properties
+
+// RevenueCat public SDK key lives in the gitignored local.properties (never committed).
+val revenueCatKey: String = Properties().also { props ->
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(props::load)
+}.getProperty("revenuecat.apiKey", "")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +21,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "REVENUECAT_API_KEY", "\"$revenueCatKey\"")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -27,7 +35,10 @@ android {
         }
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 
@@ -42,6 +53,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.mlkit.text.recognition)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.revenuecat.purchases)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     testImplementation(libs.junit)

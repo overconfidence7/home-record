@@ -229,7 +229,7 @@ class PanelViewModelTest {
 
         panels.saveBreaker(com.kurtz.homerecord.core.model.Breaker("", panel.id, listOf(3), label = "Dishwasher", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
         vm.onEvent(PanelEvent.DismissInsights)
-        assertNull(vm.state.value.insights)
+        vm.state.first { it.insights == null } // derived state lags the form; wait for the dismiss to land
         vm.onEvent(PanelEvent.ShowInsights)
         val result = vm.state.first { it.insights != null }.insights
         assertEquals(1, result?.capacity?.circuits)

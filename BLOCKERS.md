@@ -3,6 +3,7 @@
 ## Needs Nate
 
 (Things the builder cannot do without Nate: credentials, accounts, purchases, device-only checks.)
+- T36: RevenueCat public Android SDK key. Add `revenuecat.apiKey=goog_...` to `local.properties` (gitignored) for local builds; the release build needs it too. In the RevenueCat dashboard create an entitlement with id `pro` and a current offering containing an Annual package and a Lifetime package, backed by Play products. Until then the paywall shows "can't load prices" + Retry. Purchase flow can only be verified on a Play-signed build.
 
 ## Decisions to confirm
 
@@ -18,3 +19,4 @@
 - 2026-10-17 (T30b): No-main-breaker hazard applies to MAIN panels only (sub-panels normally lack a main). Pushmatic has no reason line in AC-109, so it reads "discontinued, replacement breakers are hard to find". Two-pole dedicated rows (range, dryer, water heater) only match two-pole breakers. 20 A rows match by linked room kind only when the breaker is ≥ 20 A. Percent confirmed is by slots, like percent labeled.
 - 2026-10-17 (T31): New-equipment reminders: first nextDue = (installedOn, else today) + N months, rolled forward by whole intervals if that is in the past (a 2015 install date would otherwise be years overdue). Seeded seasonal titles are stored as editable English data (no string resources in :core); seasons start Mar 1 / Jun 1 / Sep 1 / Dec 1. Picking a zone replaces seasonal tasks but keeps equipment reminders. MaintenanceTask is not carried in the .homerecord bundle (not in spec). DB v5, destructive fallback pre-release.
 - 2026-10-17 (T34): Import with no local Home now restores the bundle's Home (same id) instead of showing 'set up your home first'. Climate-zone chips stay on the Reminders screen; HM-Settings links to it (AC-80 picker not duplicated). Backup carries what the .homerecord bundle carries (no MaintenanceTask/LoadProfile, as before). PBKDF2 iterations stored in file header (210000).
+- 2026-10-17 (T36): added `com.revenuecat.purchases:purchases` 10.28.1 (latest stable; approved list). Entitlement id `pro`; plans map from package types ANNUAL/LIFETIME; blank key -> UnavailableEntitlements. Purchase needs the resumed Activity, set from MainActivity.onResume/onPause.

@@ -61,7 +61,8 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 - [x] T35: `Entitlements` interface + `FakeEntitlements`, `FreeLimits` checker, paywall screen with yearly/lifetime placeholders, limit gates on panel and equipment save. (acceptance: AC-92, AC-93, AC-94, AC-95)
   - Second-panel gate (`LimitGate.check(ADD_PANEL)`) is ready but has no caller until T37 adds the add-sub-panel UI; app uses `UnavailableEntitlements` (free tier, paywall shows Retry state) until T36.
 - [x] R7: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [ ] T36: RevenueCat implementation of `Entitlements` (API key from `local.properties`/BuildConfig, never committed), offline state, Retry. (acceptance: AC-95, AC-96)
+- [x] T36: RevenueCat implementation of `Entitlements` (API key from `local.properties`/BuildConfig, never committed), offline state, Retry. (acceptance: AC-95, AC-96)
+  - Implemented, but real purchases stay unverified until Nate supplies the RevenueCat key (BLOCKERS.md). Without `revenuecat.apiKey` the app runs the free tier with the Retry paywall.
 - [ ] T37: Multiple panels: panel switcher, per-panel grid, search and legend across panels. (acceptance: AC-97, AC-98)
 - [ ] T38: Consumables per equipment and search over specs. (acceptance: AC-99, AC-100)
 - [ ] T39: Release prep: signing config placeholders, versionCode scheme, Data safety notes in `docs/data-safety.md`, privacy policy draft in `docs/privacy-policy.md`, store listing drafts. (acceptance: `./gradlew assembleRelease` succeeds unsigned)

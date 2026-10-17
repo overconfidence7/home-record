@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.kurtz.homerecord.housemanual.billing.RevenueCatEntitlements
 import com.kurtz.homerecord.housemanual.nav.HomeRecordNavHost
 import com.kurtz.homerecord.housemanual.nav.ReminderRequest
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
@@ -26,6 +27,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             HomeRecordTheme { HomeRecordNavHost(container, emergencyRequests, reminderRequest) }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ((application as HouseManualApp).container.entitlements as? RevenueCatEntitlements)?.activity = this
+    }
+
+    override fun onPause() {
+        ((application as HouseManualApp).container.entitlements as? RevenueCatEntitlements)?.activity = null
+        super.onPause()
     }
 
     override fun onNewIntent(intent: Intent) {
