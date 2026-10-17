@@ -27,4 +27,5 @@ sealed interface HomeEvent {
     data object OpenEmergency : HomeEvent
     data object OpenEquipment : HomeEvent
     data object OpenRooms : HomeEvent
+    data object OpenImport : HomeEvent
 }

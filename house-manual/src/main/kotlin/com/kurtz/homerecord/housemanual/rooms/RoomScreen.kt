@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.rooms
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,18 +35,21 @@ import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Confidence
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.model.Source
+import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.ui.PhotoTile
+import java.io.File
 import com.kurtz.homerecord.ui.theme.HomeRecordTheme
 
 @Composable
-fun RoomRoute(viewModel: RoomViewModel, onDeleted: () -> Unit) {
+fun RoomRoute(viewModel: RoomViewModel, mediaStore: MediaFileStore, onDeleted: () -> Unit) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(viewModel) { viewModel.deleted.collect { onDeleted() } }
-    RoomScreen(state, viewModel::onEvent)
+    RoomScreen(state, viewModel::onEvent, photoFile = { mediaStore.resolve(it) })
 }
 
 @Composable
-fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
+fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit, photoFile: (String) -> File? = { null }) {
     val room = state.room
     if (room == null) {
         if (state.loaded) Text(stringResource(R.string.room_missing), Modifier.padding(16.dp))
@@ -110,6 +114,18 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
         }
         Section(stringResource(R.string.room_shutoffs), stringResource(R.string.room_no_shutoffs), state.shutoffs.isEmpty()) {
             state.shutoffs.forEach { Text(stringResource(it.kind.labelRes()), Modifier.heightIn(min = 32.dp).testTag("room_shutoff")) }
+        }
+        Section(stringResource(R.string.room_photos), stringResource(R.string.room_no_photos), state.photos.isEmpty()) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                state.photos.forEach { photo ->
+                    PhotoTile(
+                        photoFile(photo.path),
+                        contentDescription = photo.caption ?: stringResource(photo.stage.labelRes()),
+                        modifier = Modifier.testTag("room_photo"),
+                        size = 96.dp,
+                    )
+                }
+            }
         }
     }
 

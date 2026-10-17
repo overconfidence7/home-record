@@ -8,6 +8,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.flow.getAndUpdate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -27,6 +29,9 @@ import com.kurtz.homerecord.housemanual.equipment.EquipmentEditViewModel
 import com.kurtz.homerecord.housemanual.equipment.EquipmentRoute
 import com.kurtz.homerecord.housemanual.equipment.EquipmentViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
+import com.kurtz.homerecord.housemanual.imports.AndroidBundleSource
+import com.kurtz.homerecord.housemanual.imports.ImportRoute
+import com.kurtz.homerecord.housemanual.imports.ImportViewModel
 import com.kurtz.homerecord.housemanual.mapping.MappingRoute
 import com.kurtz.homerecord.housemanual.mapping.MappingViewModel
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
@@ -71,7 +76,26 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
             nav.navigate(Routes.EMERGENCY) { launchSingleTop = true }
         }
     }
+    val pendingImport by container.pendingImportUri.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(pendingImport, startRoute) {
+        if (pendingImport != null && startRoute != Routes.ONBOARDING) {
+            nav.navigate(Routes.IMPORT) { launchSingleTop = true }
+        }
+    }
     NavHost(navController = nav, startDestination = startRoute) {
+        composable(Routes.IMPORT) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val vm: ImportViewModel = viewModel(
+                factory = remember {
+                    simpleFactory {
+                        // Consume the shared URI exactly once so re-entering HM-Import starts at the picker.
+                        val uri = container.pendingImportUri.getAndUpdate { null }
+                        ImportViewModel(container.importApplier, AndroidBundleSource(context.applicationContext), uri)
+                    }
+                },
+            )
+            ImportRoute(vm, onDone = { nav.popBackStack() })
+        }
         composable(Routes.ONBOARDING) {
             val vm: OnboardingViewModel = viewModel(
                 factory = remember {
@@ -96,6 +120,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
                 onEmergency = { nav.navigate(Routes.EMERGENCY) },
                 onEquipment = { nav.navigate(Routes.EQUIPMENT) },
                 onRooms = { nav.navigate(Routes.ROOMS) },
+                onImport = { nav.navigate(Routes.IMPORT) },
                 onSlot = { nav.navigate(Routes.panelAt(it)) },
                 onRoom = { nav.navigate(Routes.room(it)) },
             )
@@ -113,7 +138,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
                     }
                 },
             )
-            RoomRoute(vm, onDeleted = { nav.popBackStack() })
+            RoomRoute(vm, container.mediaStore, onDeleted = { nav.popBackStack() })
         }
         composable(Routes.EMERGENCY) {
             val vm: EmergencyViewModel = viewModel(

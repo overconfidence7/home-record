@@ -34,6 +34,7 @@ fun HomeRoute(
     onEmergency: () -> Unit,
     onEquipment: () -> Unit,
     onRooms: () -> Unit,
+    onImport: () -> Unit,
     onSlot: (Int) -> Unit,
     onRoom: (String) -> Unit,
 ) {
@@ -45,6 +46,7 @@ fun HomeRoute(
             HomeEvent.OpenEmergency -> onEmergency()
             HomeEvent.OpenEquipment -> onEquipment()
             HomeEvent.OpenRooms -> onRooms()
+            HomeEvent.OpenImport -> onImport()
             is HomeEvent.OpenSlot -> onSlot(event.slot)
             is HomeEvent.OpenRoom -> onRoom(event.roomId)
         }
@@ -97,6 +99,12 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             summary = pluralStringResource(R.plurals.home_room_count, state.roomCount, state.roomCount),
             tag = "card_rooms",
             onClick = { onEvent(HomeEvent.OpenRooms) },
+        )
+        HubCard(
+            title = stringResource(R.string.home_card_import),
+            summary = stringResource(R.string.home_import_summary),
+            tag = "card_import",
+            onClick = { onEvent(HomeEvent.OpenImport) },
         )
     }
 }

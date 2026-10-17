@@ -43,8 +43,8 @@ class RoomViewModel(
             panels.observeBreakersForHome(home.id),
             panels.observeBreakerRoomsForRoom(roomId),
             panels.observeEndpointsForRoom(roomId),
-            combine(shutoffs.observeShutoffs(home.id), equipment.observeEquipment(home.id)) { s, e -> s to e },
-        ) { rooms, breakers, links, endpoints, (shutoffList, equipmentList) ->
+            combine(shutoffs.observeShutoffs(home.id), equipment.observeEquipment(home.id), homes.observePhotos(home.id)) { s, e, p -> Triple(s, e, p) },
+        ) { rooms, breakers, links, endpoints, (shutoffList, equipmentList, photoList) ->
             RoomUiState(
                 loaded = true,
                 room = rooms.firstOrNull { it.id == roomId },
@@ -52,6 +52,7 @@ class RoomViewModel(
                 endpoints = endpoints,
                 equipment = equipmentList.filter { it.roomId == roomId },
                 shutoffs = shutoffList.filter { it.roomId == roomId },
+                photos = photoList.filter { it.roomId == roomId },
             )
         }
     }

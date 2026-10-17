@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemanual.rooms
 
 import androidx.annotation.StringRes
 import com.kurtz.homerecord.core.model.EquipmentCategory
+import com.kurtz.homerecord.core.model.PhotoStage
 import com.kurtz.homerecord.core.model.ShutoffKind
 import com.kurtz.homerecord.housemanual.R
 
@@ -31,4 +32,13 @@ fun EquipmentCategory.labelRes(): Int = when (this) {
     EquipmentCategory.SUMP_PUMP -> R.string.equip_sump_pump
     EquipmentCategory.WATER_SOFTENER -> R.string.equip_water_softener
     EquipmentCategory.OTHER -> R.string.equip_other
+}
+
+@StringRes
+fun PhotoStage.labelRes(): Int = when (this) {
+    PhotoStage.BEFORE -> R.string.photo_stage_before
+    PhotoStage.ROUGH_IN -> R.string.photo_stage_rough_in
+    PhotoStage.BEHIND_WALL -> R.string.photo_stage_behind_wall
+    PhotoStage.FINISHED -> R.string.photo_stage_finished
+    PhotoStage.GENERAL -> R.string.photo_stage_general
 }

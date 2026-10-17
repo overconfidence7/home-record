@@ -78,3 +78,6 @@ Added `kotlinx-serialization-json` 1.9.0 and the serialization compiler plugin (
 
 ## 2026-10-17 (T27)
 - FL-Handoff finishes count is always 0: the Finish entity has no storage or screen yet, so there is nothing to count. Panels are listed as an extra row ("panel changes" in the screen table). The handoff PDF is a counts-only summary rendered through `ReportPdfWriter`.
+
+## 2026-10-17 — T29 import entry points
+HM-Import opens from a Home hub card now (Settings screen is T34) and from an ACTION_VIEW filter (content scheme, application/octet-stream, `.homerecord` path pattern). A shared URI is parked in `AppContainer.pendingImportUri` and consumed once by the import view model. Staging extraction goes to `cacheDir/import-<uuid>` and is deleted after apply/cancel.

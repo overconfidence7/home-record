@@ -16,7 +16,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val container = (application as HouseManualApp).container
-        if (savedInstanceState == null && intent?.action == ACTION_OPEN_EMERGENCY) emergencyRequests++
+        if (savedInstanceState == null) {
+            if (intent?.action == ACTION_OPEN_EMERGENCY) emergencyRequests++
+            offerImport(container, intent)
+        }
         setContent {
             HomeRecordTheme { HomeRecordNavHost(container, emergencyRequests) }
         }
@@ -25,6 +28,12 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.action == ACTION_OPEN_EMERGENCY) emergencyRequests++
+        offerImport((application as HouseManualApp).container, intent)
+    }
+
+    private fun offerImport(container: AppContainer, intent: Intent?) {
+        val uri = intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data ?: return
+        container.pendingImportUri.value = uri.toString()
     }
 
     companion object {

@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.rooms
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Equipment
+import com.kurtz.homerecord.core.model.Photo
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.model.Shutoff
 
@@ -29,6 +30,8 @@ data class RoomUiState(
     val endpoints: List<Endpoint> = emptyList(),
     val equipment: List<Equipment> = emptyList(),
     val shutoffs: List<Shutoff> = emptyList(),
+    /** AC-66: photos for this room, including behind-wall ones imported from Field Log. */
+    val photos: List<Photo> = emptyList(),
 ) {
     val canSaveRename: Boolean get() = renameInput.isNotBlank()
 }

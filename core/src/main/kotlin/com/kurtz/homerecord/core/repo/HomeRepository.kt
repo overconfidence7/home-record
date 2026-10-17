@@ -4,6 +4,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.toDomain
 import com.kurtz.homerecord.core.data.toEntity
 import com.kurtz.homerecord.core.model.Home
+import com.kurtz.homerecord.core.model.Photo
 import com.kurtz.homerecord.core.model.Room
 import com.kurtz.homerecord.core.model.Source
 import androidx.room.withTransaction
@@ -38,6 +39,9 @@ class HomeRepository(
     suspend fun updateHome(home: Home) {
         db.homeDao().upsert(home.copy(updatedAt = clock.now()).toEntity())
     }
+
+    fun observePhotos(homeId: String): Flow<List<Photo>> =
+        db.photoDao().observeForHome(homeId).map { list -> list.map { it.toDomain() } }
 
     fun observeRooms(homeId: String): Flow<List<Room>> =
         db.roomDao().observeForHome(homeId).map { list -> list.map { it.toDomain() } }
