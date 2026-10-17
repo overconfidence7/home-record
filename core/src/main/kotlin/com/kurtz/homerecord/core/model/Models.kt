@@ -1,20 +1,31 @@
 package com.kurtz.homerecord.core.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Source(val wire: String) {
-    HOUSE_MANUAL("house-manual"),
-    FIELD_LOG("field-log"),
-    IMPORT("import"),
+    @SerialName("house-manual") HOUSE_MANUAL("house-manual"),
+    @SerialName("field-log") FIELD_LOG("field-log"),
+    @SerialName("import") IMPORT("import"),
 }
 
+@Serializable
 enum class PanelLayout { NA_NUMBERED, DIN }
+@Serializable
 enum class BreakerType { STANDARD, GFCI, AFCI, DUAL }
+@Serializable
 enum class Confidence { CONFIRMED, LIKELY, UNKNOWN }
+@Serializable
 enum class EndpointKind { OUTLET, LIGHT, SWITCH, APPLIANCE, HARDWIRED }
+@Serializable
 enum class ShutoffKind { WATER_MAIN, GAS_MAIN, ELECTRICAL_MAIN, HVAC_DISCONNECT, FIXTURE_VALVE, SUMP, CLEANOUT, OTHER }
+@Serializable
 enum class EquipmentCategory {
     WATER_HEATER, FURNACE, AC, HEAT_PUMP, RANGE, REFRIGERATOR, DISHWASHER,
     WASHER, DRYER, SUMP_PUMP, WATER_SOFTENER, OTHER,
 }
+@Serializable
 enum class PhotoStage { BEFORE, ROUGH_IN, BEHIND_WALL, FINISHED, GENERAL }
 
 /** Fields shared by every record (SPEC §6). */
@@ -25,6 +36,7 @@ interface Record {
     val source: Source
 }
 
+@Serializable
 data class Home(
     override val id: String,
     val name: String,
@@ -36,6 +48,7 @@ data class Home(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Room(
     override val id: String,
     val homeId: String,
@@ -46,6 +59,7 @@ data class Room(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Wall(
     override val id: String,
     val roomId: String,
@@ -55,6 +69,7 @@ data class Wall(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Panel(
     override val id: String,
     val homeId: String,
@@ -68,6 +83,7 @@ data class Panel(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Breaker(
     override val id: String,
     val panelId: String,
@@ -84,6 +100,7 @@ data class Breaker(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class BreakerRoom(
     override val id: String,
     val breakerId: String,
@@ -93,6 +110,7 @@ data class BreakerRoom(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Endpoint(
     override val id: String,
     /** null = not yet mapped to a breaker. */
@@ -105,6 +123,7 @@ data class Endpoint(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Shutoff(
     override val id: String,
     val homeId: String,
@@ -117,6 +136,7 @@ data class Shutoff(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Equipment(
     override val id: String,
     val homeId: String,
@@ -136,6 +156,7 @@ data class Equipment(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class Photo(
     override val id: String,
     val homeId: String,
@@ -151,10 +172,13 @@ data class Photo(
     override val source: Source,
 ) : Record
 
+@Serializable
 enum class EntryKind { PHOTO, NOTE, VOICE }
+@Serializable
 enum class DelayReason { NONE, WEATHER, MATERIALS, CLIENT, INSPECTION, SUBCONTRACTOR, OTHER }
 
 /** Field Log: one Job owns one Home (SPEC §6). */
+@Serializable
 data class Job(
     override val id: String,
     val homeId: String,
@@ -168,6 +192,7 @@ data class Job(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class LogEntry(
     override val id: String,
     val jobId: String,
@@ -184,6 +209,7 @@ data class LogEntry(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class DailyReport(
     override val id: String,
     val jobId: String,
@@ -202,6 +228,7 @@ data class DailyReport(
     override val source: Source,
 ) : Record
 
+@Serializable
 data class CompanyProfile(
     override val id: String,
     val name: String,
