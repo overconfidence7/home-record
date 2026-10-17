@@ -60,7 +60,7 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 - [x] T34: Encrypted backup: `BundleCrypto` (AES-256-GCM, PBKDF2), export from HM-Settings, import detection and passphrase prompt, restore test. (acceptance: AC-88, AC-89, AC-90)
 - [x] T35: `Entitlements` interface + `FakeEntitlements`, `FreeLimits` checker, paywall screen with yearly/lifetime placeholders, limit gates on panel and equipment save. (acceptance: AC-92, AC-93, AC-94, AC-95)
   - Second-panel gate (`LimitGate.check(ADD_PANEL)`) is ready but has no caller until T37 adds the add-sub-panel UI; app uses `UnavailableEntitlements` (free tier, paywall shows Retry state) until T36.
-- [ ] R7: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
+- [x] R7: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 - [ ] T36: RevenueCat implementation of `Entitlements` (API key from `local.properties`/BuildConfig, never committed), offline state, Retry. (acceptance: AC-95, AC-96)
 - [ ] T37: Multiple panels: panel switcher, per-panel grid, search and legend across panels. (acceptance: AC-97, AC-98)
 - [ ] T38: Consumables per equipment and search over specs. (acceptance: AC-99, AC-100)
