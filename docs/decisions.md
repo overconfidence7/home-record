@@ -103,3 +103,6 @@ Rules are pure functions in `:core` (`PanelInsights`) returning typed `Insight` 
 
 ## 2026-10-17 — Encrypted backup format (T34)
 AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16-byte salt, 12-byte IV), file = `HRENC001` magic + iterations + salt + IV + ciphertext/tag, magic used as AAD. Encrypts the whole `.homerecord` zip so plain bundles stay unchanged. No new dependency.
+
+## 2026-10-17 T35
+- Billing boundary lives in :core (`Entitlements`); `LimitGate` reads counts from repositories. Paywall is skipped when no breaker has a label (AC-93). Until T36 the app binds `UnavailableEntitlements`, so the paywall shows the AC-96 state rather than fake prices.

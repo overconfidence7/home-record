@@ -399,4 +399,12 @@
     <string name="reminders_channel">Home reminders</string>
     <string name="reminders_notification_title">Home maintenance due</string>
     <string name="reminders_notification_many">%1$s and %2$d more</string>
+    <string name="paywall_title">HomeRecord Pro</string>
+    <string name="paywall_body">The free plan includes %1$d panel and %2$d equipment items. Pro removes both limits.</string>
+    <string name="paywall_yearly">Yearly — %s</string>
+    <string name="paywall_lifetime">Lifetime — %s</string>
+    <string name="paywall_prices_unavailable">Can\'t load prices right now. Check your connection and try again.</string>
+    <string name="paywall_retry">Retry</string>
+    <string name="paywall_not_now">Not now</string>
+    <string name="paywall_purchase_failed">The purchase didn\'t go through. Nothing was charged.</string>
 </resources>

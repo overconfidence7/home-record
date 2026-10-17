@@ -28,6 +28,8 @@ import com.kurtz.homerecord.housemanual.equipment.EquipmentEditRoute
 import com.kurtz.homerecord.housemanual.equipment.EquipmentEditViewModel
 import com.kurtz.homerecord.housemanual.equipment.EquipmentRoute
 import com.kurtz.homerecord.housemanual.equipment.EquipmentViewModel
+import com.kurtz.homerecord.housemanual.paywall.PaywallRoute
+import com.kurtz.homerecord.housemanual.paywall.PaywallViewModel
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.imports.AndroidBundleSource
 import com.kurtz.homerecord.housemanual.imports.ImportRoute
@@ -221,11 +223,11 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                 factory = remember(id) {
                     simpleFactory { EquipmentEditViewModel(
                         id, container.homeRepository, container.equipmentRepository, container.mediaStore, container.textRecognizer,
-                        container.maintenanceRepository,
+                        container.maintenanceRepository, container.limitGate,
                     ) { e -> listOfNotNull(e.make, e.model).joinToString(" ").ifBlank { resources.getString(e.category.labelRes()) } } }
                 },
             )
-            EquipmentEditRoute(vm, container.mediaStore, onDone = { nav.popBackStack() })
+            EquipmentEditRoute(vm, container.mediaStore, onPaywall = { nav.navigate(Routes.PAYWALL) }, onDone = { nav.popBackStack() })
         }
         composable(
             Routes.PANEL_PATTERN,
@@ -236,6 +238,10 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
                 factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, container.loadProfileRepository, resources.getString(R.string.panel_title)) } },
             )
             PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) }, onMapping = { nav.navigate(Routes.MAPPING) })
+        }
+        composable(Routes.PAYWALL) {
+            val vm: PaywallViewModel = viewModel(factory = remember { simpleFactory { PaywallViewModel(container.entitlements) } })
+            PaywallRoute(vm, onClose = { nav.popBackStack() })
         }
         composable(Routes.MAPPING) {
             val vm: MappingViewModel = viewModel(

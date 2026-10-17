@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.equipment
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kurtz.homerecord.core.billing.LimitGate
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.EquipmentCategory
@@ -11,6 +12,10 @@ import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import com.kurtz.homerecord.core.repo.HomeRepository
 import com.kurtz.homerecord.core.repo.MaintenanceRepository
+import com.kurtz.homerecord.core.repo.PanelRepository
+import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.PanelLayout
+import com.kurtz.homerecord.housemanual.paywall.FakeEntitlements
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -40,6 +45,8 @@ class EquipmentEditViewModelTest {
     private lateinit var media: MediaFileStore
     private val recognizer = FakeTextRecognizer()
     private lateinit var maintenance: MaintenanceRepository
+    private lateinit var panels: PanelRepository
+    private val entitlements = FakeEntitlements()
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -48,6 +55,7 @@ class EquipmentEditViewModelTest {
         homes = HomeRepository(db, Source.HOUSE_MANUAL)
         equipment = EquipmentRepository(db, media, Source.HOUSE_MANUAL)
         maintenance = MaintenanceRepository(db, Source.HOUSE_MANUAL)
+        panels = PanelRepository(db, media, Source.HOUSE_MANUAL)
     }
 
     @After fun tearDown() {
@@ -56,7 +64,56 @@ class EquipmentEditViewModelTest {
     }
 
     private suspend fun vm(id: String? = null) =
-        EquipmentEditViewModel(id, homes, equipment, media, recognizer, maintenance) { "Service" }.also { v -> v.state.first { it.loaded } }
+        EquipmentEditViewModel(id, homes, equipment, media, recognizer, maintenance, LimitGate(entitlements, panels, equipment)) { "Service" }.also { v -> v.state.first { it.loaded } }
+
+    private suspend fun fillToLimit(homeId: String, labeledBreaker: Boolean) {
+        if (labeledBreaker) {
+            val panel = panels.createPanel(homeId, "Main", 20, PanelLayout.NA_NUMBERED)
+            panels.saveBreaker(Breaker("", panel.id, listOf(1), label = "Oven", createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL))
+        }
+        repeat(10) {
+            equipment.save(
+                com.kurtz.homerecord.core.model.Equipment(
+                    "", homeId, category = EquipmentCategory.FURNACE, createdAt = 0, updatedAt = 0, source = Source.HOUSE_MANUAL,
+                ),
+            )
+        }
+    }
+
+    @Test fun `AC-92 eleventh equipment shows paywall instead of saving and pro lifts it`() = runTest {
+        val home = homes.createHome("H")
+        fillToLimit(home.id, labeledBreaker = true)
+        val vm = vm()
+        vm.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.AC))
+        vm.onEvent(EquipmentEditEvent.Save)
+        vm.paywall.first()
+        assertEquals(10, equipment.observeEquipment(home.id).first().size)
+        entitlements.setPro(true)
+        vm.onEvent(EquipmentEditEvent.Save)
+        vm.done.first()
+        assertEquals(11, equipment.observeEquipment(home.id).first().size)
+    }
+
+    @Test fun `AC-93 no paywall before a labeled breaker exists`() = runTest {
+        val home = homes.createHome("H")
+        fillToLimit(home.id, labeledBreaker = false)
+        val vm = vm()
+        vm.onEvent(EquipmentEditEvent.CategoryChanged(EquipmentCategory.AC))
+        vm.onEvent(EquipmentEditEvent.Save)
+        vm.done.first()
+        assertEquals(11, equipment.observeEquipment(home.id).first().size)
+    }
+
+    @Test fun `editing existing equipment at the limit is not gated`() = runTest {
+        val home = homes.createHome("H")
+        fillToLimit(home.id, labeledBreaker = true)
+        val id = equipment.observeEquipment(home.id).first().first().id
+        val vm = vm(id)
+        vm.onEvent(EquipmentEditEvent.MakeChanged("Trane"))
+        vm.onEvent(EquipmentEditEvent.Save)
+        vm.done.first()
+        assertEquals(10, equipment.observeEquipment(home.id).first().size)
+    }
 
     private fun writePhoto(): String {
         val path = media.newPhotoPath()

@@ -2,6 +2,9 @@ package com.kurtz.homerecord.housemanual.equipment
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.billing.LimitGate
+import com.kurtz.homerecord.core.billing.LimitResult
+import com.kurtz.homerecord.core.billing.LimitedAction
 import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.Equipment
 import com.kurtz.homerecord.core.model.Source
@@ -26,6 +29,7 @@ class EquipmentEditViewModel(
     private val media: MediaFileStore,
     private val recognizer: TextRecognizer,
     private val maintenance: MaintenanceRepository,
+    private val limits: LimitGate,
     private val reminderTitle: (Equipment) -> String,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EquipmentEditUiState())
@@ -33,6 +37,10 @@ class EquipmentEditViewModel(
 
     private val _done = Channel<Boolean>(Channel.BUFFERED)
     val done = _done.receiveAsFlow()
+
+    /** Fires when a new item would exceed the free limit (AC-92); the route opens the paywall. */
+    private val _paywall = Channel<Unit>(Channel.BUFFERED)
+    val paywall = _paywall.receiveAsFlow()
 
     private var existing: Equipment? = null
     private var homeId: String? = null
@@ -143,8 +151,13 @@ class EquipmentEditViewModel(
         val s = _state.value
         val category = s.category
         val home = homeId
+        val base0 = existing
         if (!s.canSave || category == null || home == null) return
         viewModelScope.launch {
+            if (base0 == null && limits.check(home, LimitedAction.ADD_EQUIPMENT) == LimitResult.SHOW_PAYWALL) {
+                _paywall.send(Unit)
+                return@launch
+            }
             fun String.orNull() = trim().ifEmpty { null }
             val base = existing
             val record = (base ?: Equipment(

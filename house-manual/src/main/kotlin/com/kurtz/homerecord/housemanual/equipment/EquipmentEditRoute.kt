@@ -16,13 +16,15 @@ import com.kurtz.homerecord.housemanual.reminders.rememberNotificationPermission
 
 /** Wires [EquipmentEditViewModel] and the system camera (AC-48) to [EquipmentEditScreen]. */
 @Composable
-fun EquipmentEditRoute(viewModel: EquipmentEditViewModel, media: MediaFileStore, onDone: () -> Unit) {
+fun EquipmentEditRoute(viewModel: EquipmentEditViewModel, media: MediaFileStore, onPaywall: () -> Unit, onDone: () -> Unit) {
     val askNotifications = rememberNotificationPermissionRequester(onDone)
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var pending by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingIsScan by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(viewModel) { viewModel.done.collect { reminderSet -> if (reminderSet) askNotifications() else onDone() } }
+
+    LaunchedEffect(viewModel) { viewModel.paywall.collect { onPaywall() } }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val path = pending

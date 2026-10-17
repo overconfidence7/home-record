@@ -18,6 +18,7 @@ object Routes {
     const val MAPPING = "mapping"
     const val IMPORT = "import"
     const val SETTINGS = "settings"
+    const val PAYWALL = "paywall"
     const val REMINDERS_PATTERN = "reminders?highlight={highlight}"
 
     const val BREAKER = "breaker/{panelId}/{slot}?breakerId={breakerId}&tandem={tandem}"

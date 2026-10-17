@@ -1,6 +1,9 @@
 package com.kurtz.homerecord.housemanual
 
 import android.content.Context
+import com.kurtz.homerecord.core.billing.Entitlements
+import com.kurtz.homerecord.core.billing.LimitGate
+import com.kurtz.homerecord.core.billing.UnavailableEntitlements
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.mapping.AlarmPlayer
 import com.kurtz.homerecord.core.mapping.ChargingMonitor
@@ -35,6 +38,9 @@ class AppContainer(context: Context) {
     val textRecognizer: TextRecognizer by lazy { MlKitTextRecognizer(appContext) }
     val equipmentRepository by lazy { EquipmentRepository(database, mediaStore, Source.HOUSE_MANUAL) }
     val maintenanceRepository by lazy { MaintenanceRepository(database, Source.HOUSE_MANUAL) }
+    /** Swapped for the RevenueCat implementation in T36. */
+    val entitlements: Entitlements by lazy { UnavailableEntitlements() }
+    val limitGate by lazy { LimitGate(entitlements, panelRepository, equipmentRepository) }
     val importApplier by lazy { ImportApplier(database, mediaStore) }
     val backupRepository by lazy { BackupRepository(HandoffRepository(database), mediaStore) }
 
