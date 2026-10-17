@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual.panel
 
+import com.kurtz.homerecord.core.logic.LoadForm
+import com.kurtz.homerecord.core.logic.LoadResult
 import com.kurtz.homerecord.core.logic.MainBreakerRule
 import com.kurtz.homerecord.core.logic.PanelInsightsResult
 import com.kurtz.homerecord.core.logic.PanelProfileError
@@ -30,6 +32,10 @@ data class PanelUiState(
     val feedNotes: Map<String, String> = emptyMap(),
     /** AC-106: insights computed when the sheet was opened; null while it is closed. */
     val insights: PanelInsightsResult? = null,
+    /** AC-114: estimate form while the load sheet is open; null otherwise. */
+    val loadForm: LoadForm? = null,
+    /** AC-116: result card once Calculate succeeded. */
+    val loadResult: LoadResult? = null,
 ) {
     val mainBreaker: Breaker? get() = MainBreakerRule.mainOf(breakers)
 
@@ -63,6 +69,10 @@ sealed interface PanelEvent {
     data object OpenMapping : PanelEvent
     data object ShowInsights : PanelEvent
     data object DismissInsights : PanelEvent
+    data object OpenLoadEstimate : PanelEvent
+    data class LoadFormChanged(val form: LoadForm) : PanelEvent
+    data object CalculateLoad : PanelEvent
+    data object CloseLoadEstimate : PanelEvent
     /** Open HM-Breaker for [slot]: an existing [breakerId], or an empty slot/tandem half. */
     data class OpenBreaker(val slot: Int, val breakerId: String?, val tandemIndex: Int? = null) : PanelEvent
     data class SlotLongPressed(val slot: Int) : PanelEvent

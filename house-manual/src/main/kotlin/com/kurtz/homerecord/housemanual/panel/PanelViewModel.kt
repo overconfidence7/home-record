@@ -3,6 +3,9 @@ package com.kurtz.homerecord.housemanual.panel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.logic.LegendRow
+import com.kurtz.homerecord.core.logic.LoadEstimator
+import com.kurtz.homerecord.core.logic.LoadForm
+import com.kurtz.homerecord.core.logic.LoadResult
 import com.kurtz.homerecord.core.logic.LegendRowBuilder
 import com.kurtz.homerecord.core.logic.PanelInsights
 import com.kurtz.homerecord.core.logic.PanelInsightsResult
@@ -17,6 +20,7 @@ import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Panel
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.repo.HomeRepository
+import com.kurtz.homerecord.core.repo.LoadProfileRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +40,7 @@ import kotlinx.coroutines.launch
 class PanelViewModel(
     private val homes: HomeRepository,
     private val panels: PanelRepository,
+    private val loads: LoadProfileRepository,
     private val defaultPanelName: String,
     private val currentYear: () -> Int = { java.time.Year.now().value },
 ) : ViewModel() {
@@ -48,6 +53,8 @@ class PanelViewModel(
         val profileEdit: PanelProfileInput? = null,
         val profileErrors: Set<PanelProfileError> = emptySet(),
         val insights: PanelInsightsResult? = null,
+        val loadForm: LoadForm? = null,
+        val loadResult: LoadResult? = null,
     )
 
     private data class Content(
@@ -81,6 +88,7 @@ class PanelViewModel(
         PanelUiState(
             c.loaded, c.panel, c.breakers, f.slotCount, f.layout, f.slotEdit, f.blockedAt,
             f.profile, f.profileEdit, f.profileErrors, feedOptions, PanelProfileRule.feedsByBreaker(c.allPanels), f.insights,
+            f.loadForm, f.loadResult,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
 
@@ -100,6 +108,10 @@ class PanelViewModel(
             PanelEvent.SaveProfile -> saveProfile()
             PanelEvent.ShowInsights -> showInsights()
             PanelEvent.DismissInsights -> form.update { it.copy(insights = null) }
+            PanelEvent.OpenLoadEstimate -> openLoadEstimate()
+            is PanelEvent.LoadFormChanged -> form.update { it.copy(loadForm = event.form, loadResult = null) }
+            PanelEvent.CalculateLoad -> calculateLoad()
+            PanelEvent.CloseLoadEstimate -> form.update { it.copy(loadForm = null, loadResult = null) }
             is PanelEvent.SlotEditChanged -> form.update { it.copy(slotEdit = event.value, blockedAt = null) }
             PanelEvent.ApplySlotCount -> applySlotCount()
             is PanelEvent.SlotLongPressed -> makeTandem(event.slot)
@@ -143,6 +155,27 @@ class PanelViewModel(
                 panels.observeEndpointsForHome(home.id).first(),
             )
             form.update { it.copy(insights = result) }
+        }
+    }
+
+    /** AC-114: prefill square feet from the Home and everything else from the saved LoadProfile. */
+    private fun openLoadEstimate() {
+        viewModelScope.launch {
+            val home = homes.getHome() ?: return@launch
+            form.update { it.copy(loadForm = LoadForm.from(home.squareFeet, loads.get(home.id)), loadResult = null) }
+        }
+    }
+
+    /** AC-114/AC-115: saves the inputs as the LoadProfile (and square feet on the Home), then estimates. */
+    private fun calculateLoad() {
+        val loadForm = form.value.loadForm ?: return
+        val panel = state.value.panel ?: return
+        val input = loadForm.toInput(panel.ratingAmps) ?: return
+        viewModelScope.launch {
+            val home = homes.getHome() ?: return@launch
+            loads.save(home.id, input.appliances, input.hvac, input.hvacVa, input.stripVa)
+            if (home.squareFeet != input.squareFeet) homes.updateHome(home.copy(squareFeet = input.squareFeet))
+            form.update { it.copy(loadResult = LoadEstimator.estimate(input)) }
         }
     }
 

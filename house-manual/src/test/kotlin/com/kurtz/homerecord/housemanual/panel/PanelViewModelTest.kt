@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.media.MediaFileStore
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.Source
 import com.kurtz.homerecord.core.repo.HomeRepository
+import com.kurtz.homerecord.core.repo.LoadProfileRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,7 +54,7 @@ class PanelViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm() = PanelViewModel(homes, panels, "Main panel").also { it.state.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
+    private fun vm() = PanelViewModel(homes, panels, LoadProfileRepository(db, Source.HOUSE_MANUAL), "Main panel").also { it.state.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
 
     @Test fun `AC-5 no panel shows setup with default 40 slots and saving creates the panel`() = runTest {
         val home = homes.createHome("H")
@@ -233,5 +234,40 @@ class PanelViewModelTest {
         val result = vm.state.first { it.insights != null }.insights
         assertEquals(1, result?.capacity?.circuits)
         assertEquals(1, panels.observeBreakers(panel.id).first().size)
+    }
+
+    @Test fun `AC-114 AC-116 load estimate prefills sq ft, saves profile, and compares to rating`() = runTest {
+        val home = homes.createHome("H")
+        homes.updateHome(home.copy(squareFeet = 2000))
+        val vm = vm()
+        vm.state.first { it.loaded }
+        vm.onEvent(PanelEvent.SavePanel)
+        vm.state.first { it.panel != null }
+
+        vm.onEvent(PanelEvent.OpenLoadEstimate)
+        val form = vm.state.first { it.loadForm != null }.loadForm!!
+        assertEquals("2000", form.squareFeet)
+
+        var f = form
+        listOf(
+            com.kurtz.homerecord.core.logic.LoadAppliance.RANGE, com.kurtz.homerecord.core.logic.LoadAppliance.DRYER,
+            com.kurtz.homerecord.core.logic.LoadAppliance.WATER_HEATER, com.kurtz.homerecord.core.logic.LoadAppliance.DISHWASHER,
+            com.kurtz.homerecord.core.logic.LoadAppliance.DISPOSAL,
+        ).forEach { f = f.toggled(it) }
+        f = f.withHvac(com.kurtz.homerecord.core.logic.HvacKind.AC_ONLY)
+        vm.onEvent(PanelEvent.LoadFormChanged(f))
+        vm.onEvent(PanelEvent.CalculateLoad)
+
+        val result = vm.state.first { it.loadResult != null }.loadResult!!
+        assertEquals(97, result.amps)
+        assertEquals(com.kurtz.homerecord.core.logic.LoadVerdict.UNKNOWN_RATING, result.verdict) // default panel has no rating
+
+        val saved = LoadProfileRepository(db, Source.HOUSE_MANUAL).get(home.id)!!
+        assertEquals(5, saved.appliances.size)
+
+        vm.onEvent(PanelEvent.CloseLoadEstimate)
+        vm.onEvent(PanelEvent.OpenLoadEstimate)
+        val reopened = vm.state.first { it.loadForm != null }.loadForm!!
+        assertEquals(f.appliances, reopened.appliances)
     }
 }

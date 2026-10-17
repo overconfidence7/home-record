@@ -14,6 +14,7 @@ import com.kurtz.homerecord.core.imports.ImportApplier
 import com.kurtz.homerecord.core.repo.EquipmentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.kurtz.homerecord.core.repo.HomeRepository
+import com.kurtz.homerecord.core.repo.LoadProfileRepository
 import com.kurtz.homerecord.core.repo.PanelRepository
 import com.kurtz.homerecord.core.repo.ShutoffRepository
 
@@ -24,6 +25,7 @@ class AppContainer(context: Context) {
     val mediaStore = MediaFileStore(appContext.filesDir)
     val homeRepository by lazy { HomeRepository(database, Source.HOUSE_MANUAL) }
     val panelRepository by lazy { PanelRepository(database, mediaStore, Source.HOUSE_MANUAL) }
+    val loadProfileRepository by lazy { LoadProfileRepository(database, Source.HOUSE_MANUAL) }
     val shutoffRepository by lazy { ShutoffRepository(database, mediaStore, Source.HOUSE_MANUAL) }
     val chargingMonitor: ChargingMonitor by lazy { AndroidChargingMonitor(appContext) }
     val alarmPlayer: AlarmPlayer by lazy { AndroidAlarmPlayer(appContext) }

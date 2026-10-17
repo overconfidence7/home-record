@@ -187,7 +187,7 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0) {
         ) { entry ->
             val highlight = entry.arguments?.getInt("highlight")?.takeIf { it > 0 }
             val vm: PanelViewModel = viewModel(
-                factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, resources.getString(R.string.panel_title)) } },
+                factory = remember { simpleFactory { PanelViewModel(container.homeRepository, container.panelRepository, container.loadProfileRepository, resources.getString(R.string.panel_title)) } },
             )
             PanelRoute(vm, container.mediaStore, highlightSlot = highlight, onOpenBreaker = { panelId, e -> nav.navigate(Routes.breaker(panelId, e.slot, e.breakerId, e.tandemIndex)) }, onMapping = { nav.navigate(Routes.MAPPING) })
         }

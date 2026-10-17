@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,20 +31,23 @@ import com.kurtz.homerecord.housemanual.R
 /** AC-106: bottom sheet wrapper; the content is separate so it can be tested without a window. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PanelInsightsSheet(result: PanelInsightsResult, onDismiss: () -> Unit) {
+fun PanelInsightsSheet(result: PanelInsightsResult, onDismiss: () -> Unit, onEstimateLoad: () -> Unit = {}) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-        PanelInsightsContent(result, onDismiss)
+        PanelInsightsContent(result, onDismiss, onEstimateLoad)
     }
 }
 
 @Composable
-fun PanelInsightsContent(result: PanelInsightsResult, onClose: () -> Unit) {
+fun PanelInsightsContent(result: PanelInsightsResult, onClose: () -> Unit, onEstimateLoad: () -> Unit = {}) {
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp).verticalScroll(rememberScrollState()).testTag("insights_content"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(stringResource(R.string.insights_title), style = MaterialTheme.typography.headlineSmall)
         CapacityCard(result)
+        Button(onClick = onEstimateLoad, modifier = Modifier.heightIn(min = 48.dp).testTag("estimate_load")) {
+            Text(stringResource(R.string.load_estimate_button))
+        }
         result.insights.forEachIndexed { index, insight ->
             InsightCard(insight, Modifier.testTag("insight_$index"))
         }

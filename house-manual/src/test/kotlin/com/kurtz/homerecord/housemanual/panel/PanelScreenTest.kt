@@ -148,4 +148,26 @@ class PanelScreenTest {
         rule.onNodeWithTag("panel_insights").performScrollTo().performClick()
         assertEquals(listOf<PanelEvent>(PanelEvent.ShowInsights), events)
     }
+
+    @Test fun `AC-116 AC-117 load result card shows demand against rating and the method line`() {
+        val result = com.kurtz.homerecord.core.logic.LoadEstimator.estimate(
+            com.kurtz.homerecord.core.logic.LoadInput(2000, mapOf(com.kurtz.homerecord.core.logic.LoadAppliance.RANGE to 12_000), serviceRatingAmps = 200),
+        )
+        rule.setContent {
+            HomeRecordTheme {
+                LoadEstimateContent(com.kurtz.homerecord.core.logic.LoadForm("2000"), result, 200) {}
+            }
+        }
+        rule.onNodeWithText("Estimated demand: ${result.amps} A of 200 A service").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("Info: Room to grow").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("Breaker amps are not added up", substring = true).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test fun `AC-118 unknown rating shows amps alone with the setup hint`() {
+        val result = com.kurtz.homerecord.core.logic.LoadEstimator.estimate(
+            com.kurtz.homerecord.core.logic.LoadInput(2000, emptyMap()),
+        )
+        rule.setContent { HomeRecordTheme { LoadEstimateContent(com.kurtz.homerecord.core.logic.LoadForm("2000"), result, null) {} } }
+        rule.onNodeWithText("Set your service size in panel setup to compare.").performScrollTo().assertIsDisplayed()
+    }
 }

@@ -296,3 +296,21 @@ data class CompanyProfileEntity(
     val updatedAt: Long,
     val source: Source,
 )
+
+@Entity(
+    tableName = "load_profile",
+    foreignKeys = [ForeignKey(HomeEntity::class, ["id"], ["homeId"], onDelete = CASCADE)],
+    indices = [Index("homeId", unique = true)],
+)
+data class LoadProfileEntity(
+    @PrimaryKey val id: String,
+    val homeId: String,
+    /** "RANGE:12000,DRYER:5000" (enabled appliances only). */
+    val appliances: String,
+    val hvac: String,
+    val hvacVa: Int,
+    val stripVa: Int,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val source: Source,
+)

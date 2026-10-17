@@ -261,3 +261,16 @@ data class CompanyProfile(
     override val updatedAt: Long,
     override val source: Source,
 ) : Record
+
+/** AC-114: the saved inputs of the load estimate form, one per home. [appliances] holds only enabled ones. */
+data class LoadProfile(
+    override val id: String,
+    val homeId: String,
+    val appliances: Map<com.kurtz.homerecord.core.logic.LoadAppliance, Int>,
+    val hvac: com.kurtz.homerecord.core.logic.HvacKind,
+    val hvacVa: Int,
+    val stripVa: Int,
+    override val createdAt: Long,
+    override val updatedAt: Long,
+    override val source: Source,
+) : Record

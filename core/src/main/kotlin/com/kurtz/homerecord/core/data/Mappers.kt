@@ -14,6 +14,9 @@ import com.kurtz.homerecord.core.model.Job
 import com.kurtz.homerecord.core.model.LogEntry
 import com.kurtz.homerecord.core.model.DailyReport
 import com.kurtz.homerecord.core.model.CompanyProfile
+import com.kurtz.homerecord.core.model.LoadProfile
+import com.kurtz.homerecord.core.logic.HvacKind
+import com.kurtz.homerecord.core.logic.LoadProfileCodec
 
 fun HomeEntity.toDomain() = Home(
     id = id,
@@ -323,4 +326,15 @@ fun CompanyProfileEntity.toDomain() = CompanyProfile(
 fun CompanyProfile.toEntity() = CompanyProfileEntity(
     id = id, name = name, phone = phone, email = email, logoPath = logoPath,
     createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun LoadProfileEntity.toDomain() = LoadProfile(
+    id = id, homeId = homeId, appliances = LoadProfileCodec.decode(appliances),
+    hvac = runCatching { HvacKind.valueOf(hvac) }.getOrDefault(HvacKind.NONE),
+    hvacVa = hvacVa, stripVa = stripVa, createdAt = createdAt, updatedAt = updatedAt, source = source,
+)
+
+fun LoadProfile.toEntity() = LoadProfileEntity(
+    id = id, homeId = homeId, appliances = LoadProfileCodec.encode(appliances), hvac = hvac.name,
+    hvacVa = hvacVa, stripVa = stripVa, createdAt = createdAt, updatedAt = updatedAt, source = source,
 )

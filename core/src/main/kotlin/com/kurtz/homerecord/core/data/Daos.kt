@@ -278,3 +278,15 @@ interface CompanyProfileDao {
     @Query("SELECT * FROM company_profile ORDER BY createdAt LIMIT 1")
     fun observeFirst(): Flow<CompanyProfileEntity?>
 }
+
+@Dao
+interface LoadProfileDao {
+    @Upsert
+    suspend fun upsert(entity: LoadProfileEntity)
+
+    @Query("SELECT * FROM load_profile WHERE homeId = :homeId LIMIT 1")
+    suspend fun getForHome(homeId: String): LoadProfileEntity?
+
+    @Query("SELECT * FROM load_profile WHERE homeId = :homeId LIMIT 1")
+    fun observeForHome(homeId: String): Flow<LoadProfileEntity?>
+}

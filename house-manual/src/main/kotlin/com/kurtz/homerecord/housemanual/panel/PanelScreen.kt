@@ -106,7 +106,10 @@ fun PanelScreen(
         delay(HIGHLIGHT_MILLIS)
         highlighted = null
     }
-    state.insights?.let { PanelInsightsSheet(it, onDismiss = { onEvent(PanelEvent.DismissInsights) }) }
+    state.insights?.let {
+        PanelInsightsSheet(it, onDismiss = { onEvent(PanelEvent.DismissInsights) }, onEstimateLoad = { onEvent(PanelEvent.OpenLoadEstimate) })
+    }
+    state.loadForm?.let { LoadEstimateSheet(it, state.loadResult, state.panel?.ratingAmps, onEvent) }
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("panel_grid"),
