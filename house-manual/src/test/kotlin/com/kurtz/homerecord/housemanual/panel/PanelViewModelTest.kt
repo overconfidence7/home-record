@@ -80,7 +80,7 @@ class PanelViewModelTest {
         val vm = vm()
         vm.state.first { it.loaded }
         vm.onEvent(PanelEvent.SlotCountChanged("0"))
-        assertFalse(vm.state.value.canSave)
+        assertFalse(vm.state.first { it.slotCountInput == "0" }.canSave)
         vm.onEvent(PanelEvent.SavePanel)
         withContext(Dispatchers.Default) { delay(300) }
         assertTrue(panels.observePanels(home.id).first().isEmpty())
@@ -190,7 +190,7 @@ class PanelViewModelTest {
         val vm = vm()
         vm.state.first { it.panel != null }
         vm.onEvent(PanelEvent.EditProfile)
-        val edit = vm.state.value.profileEdit!!
+        val edit = vm.state.first { it.profileEdit != null }.profileEdit!!
         vm.onEvent(PanelEvent.ProfileChanged(edit.copy(brand = "Eaton BR", ratingAmps = "200", tandemPolicy = com.kurtz.homerecord.core.model.TandemPolicy.NOT_ALLOWED)))
         vm.onEvent(PanelEvent.CancelProfile)
         assertNull(panels.observePanels(home.id).first().single().brand)

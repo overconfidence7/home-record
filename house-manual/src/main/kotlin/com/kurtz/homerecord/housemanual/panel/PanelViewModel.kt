@@ -181,7 +181,7 @@ class PanelViewModel(
 
     private fun applySlotCount() {
         val panel = state.value.panel ?: return
-        val count = SlotCountRule.parse(state.value.slotEditInput ?: return) ?: return
+        val count = SlotCountRule.parse(form.value.slotEdit ?: return) ?: return
         viewModelScope.launch {
             when (val result = panels.setSlotCount(panel.id, count)) {
                 ShrinkCheck.Ok -> form.update { it.copy(slotEdit = null, blockedAt = null) }
