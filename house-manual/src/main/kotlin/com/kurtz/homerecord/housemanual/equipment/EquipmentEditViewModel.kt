@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.equipment
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.billing.LimitGate
@@ -31,6 +32,7 @@ class EquipmentEditViewModel(
     private val recognizer: TextRecognizer,
     private val maintenance: MaintenanceRepository,
     private val limits: LimitGate,
+    private val saved: SavedStateHandle = SavedStateHandle(),
     private val reminderTitle: (Equipment) -> String,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EquipmentEditUiState())
@@ -56,7 +58,7 @@ class EquipmentEditViewModel(
             existing = found
             val consumables = found?.let { equipment.getConsumables(it.id) }.orEmpty().map { ConsumableDraft(it.kind, it.spec) }
             val reminder = found?.let { maintenance.getForEquipment(it.id) }
-            _state.value = EquipmentEditUiState(
+            val loadedState = EquipmentEditUiState(
                 loaded = true,
                 isNew = found == null,
                 category = found?.category,
@@ -73,6 +75,8 @@ class EquipmentEditViewModel(
                 consumables = consumables,
                 rooms = rooms,
             )
+            _state.value = EquipmentFormDraft.restore(saved, loadedState)
+            _state.collect { if (it.loaded) EquipmentFormDraft.save(saved, it) }
         }
     }
 

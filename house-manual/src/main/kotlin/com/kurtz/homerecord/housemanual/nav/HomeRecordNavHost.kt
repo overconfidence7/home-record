@@ -221,9 +221,9 @@ fun HomeRecordNavHost(container: AppContainer, emergencyRequests: Int = 0, remin
             val id = entry.arguments?.getString("id")?.takeIf { it.isNotEmpty() }
             val vm: EquipmentEditViewModel = viewModel(
                 factory = remember(id) {
-                    simpleFactory { EquipmentEditViewModel(
+                    savedStateFactory { handle -> EquipmentEditViewModel(
                         id, container.homeRepository, container.equipmentRepository, container.mediaStore, container.textRecognizer,
-                        container.maintenanceRepository, container.limitGate,
+                        container.maintenanceRepository, container.limitGate, handle,
                     ) { e -> listOfNotNull(e.make, e.model).joinToString(" ").ifBlank { resources.getString(e.category.labelRes()) } } }
                 },
             )

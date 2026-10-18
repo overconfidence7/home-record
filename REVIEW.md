@@ -46,3 +46,6 @@ Tested: AC-1 through AC-50 (House Manual M1 complete milestone test pass: Onboar
 - IntentFilterUniqueDataAttributes: `.homerecord` filter needs scheme/mimeType/pathPattern together to match senders (see BLOCKERS T29).
 - TypographyDashes in `equipment_date_error`: false positive, "yyyy-MM-dd" is a literal date format.
 - UseKtx `String.toUri`: core-ktx is not on the approved list.
+
+## Accepted limits (S5)
+- Process death restores input only on the equipment form; breaker/room/shutoff/job forms are short and restore from rotation (retained ViewModel) but would restart empty after the OS kills the process. Acceptable for v1.
