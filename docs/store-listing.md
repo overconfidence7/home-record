@@ -15,6 +15,7 @@
   - Unified search: "garage freezer" finds the breaker
   - Equipment registry with model, serial and warranty; scan labels on-device
   - Maintenance reminders and consumables (filter sizes)
+  - Home-screen widget for quick access
   - Shareable PDF legend and encrypted backups
   - Imports a contractor's close-out package from Field Log
   - Works fully offline. No account. Your data stays on your phone.

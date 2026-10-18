@@ -1,6 +1,6 @@
 # Play Console "Data safety" notes (draft)
 
-Answers for both apps, based on the code as of T39. Re-check before each release.
+Answers for both apps, verified against the manifests and code at S10 (2026-10-18). Re-check before each release.
 
 ## House Manual (`com.kurtz.homerecord.housemanual`)
 
@@ -13,7 +13,7 @@ Answers for both apps, based on the code as of T39. Re-check before each release
 | Encrypted in transit | Yes (HTTPS) | |
 | Can users request deletion? | Purchases are tied to the Google Play account; no account exists in the app. | |
 | Photos / files | Not collected. Photos stay on the device; they leave only when the user exports a PDF or `.homerecord` bundle through the Android share sheet. | |
-| Camera | Used for panel / shutoff / equipment photos and label OCR. OCR runs on device (bundled ML Kit model). Nothing is uploaded. | |
+| Camera | Photos are taken through the system camera app (no CAMERA permission is declared); used for panel / shutoff / equipment photos and label OCR. OCR runs on device (bundled ML Kit model). Nothing is uploaded. | |
 | Location, contacts, identifiers, ads | None. No advertising ID, no analytics, no crash reporting SDK. | |
 | Notifications | `POST_NOTIFICATIONS` for maintenance reminders the user sets. | |
 | Backups | `allowBackup=false`. Optional encrypted `.homerecord` export is user initiated. | |
