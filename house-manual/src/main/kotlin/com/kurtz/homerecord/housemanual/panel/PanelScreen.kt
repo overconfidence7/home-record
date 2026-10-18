@@ -60,11 +60,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.kurtz.homerecord.core.model.Breaker
 import com.kurtz.homerecord.core.model.Confidence
+import com.kurtz.homerecord.housemanual.confidenceColor
 import com.kurtz.homerecord.housemanual.breaker.confidenceLabel
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.housemanual.R
@@ -436,13 +436,6 @@ private fun LayoutOption(layout: PanelLayout, label: Int, state: PanelUiState, o
         RadioButton(selected = state.layoutInput == layout, onClick = null)
         Text(stringResource(label), modifier = Modifier.padding(start = 12.dp))
     }
-}
-
-/** AC-15: green Confirmed, amber Likely, grey Unknown. */
-private fun confidenceColor(c: Confidence): Color = when (c) {
-    Confidence.CONFIRMED -> Color(0xFF2E7D32)
-    Confidence.LIKELY -> Color(0xFFF9A825)
-    Confidence.UNKNOWN -> Color(0xFF9E9E9E)
 }
 
 private fun decodeScaled(file: File, maxEdge: Int): Bitmap? {

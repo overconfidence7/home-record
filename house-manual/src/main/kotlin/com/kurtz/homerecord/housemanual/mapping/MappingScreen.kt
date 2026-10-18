@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -90,13 +89,13 @@ private fun StartPanel(state: MappingUiState, onEvent: (MappingEvent) -> Unit) {
 @Composable
 private fun AlarmPanel(onEvent: (MappingEvent) -> Unit) {
     Column(
-        Modifier.fillMaxSize().background(Color(0xFFB00020)).padding(24.dp).testTag("mapping_alarm"),
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.error).padding(24.dp).testTag("mapping_alarm"),
         verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             stringResource(R.string.mapping_power_lost),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onError,
             fontSize = 44.sp,
             textAlign = TextAlign.Center,
         )

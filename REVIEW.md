@@ -49,3 +49,8 @@ Tested: AC-1 through AC-50 (House Manual M1 complete milestone test pass: Onboar
 
 ## Accepted limits (S5)
 - Process death restores input only on the equipment form; breaker/room/shutoff/job forms are short and restore from rotation (retained ViewModel) but would restart empty after the OS kills the process. Acceptable for v1.
+
+## Accepted fixed colors (S6)
+- Camera/viewfinder surfaces (Field Log capture, behind-wall header, HM-Emergency photo zoom) stay black with white text on purpose: they sit over a live preview or full-screen photo in either theme.
+- Widget (red background, white text) and launcher icons are fixed brand colors by design.
+- Confidence dots use green/amber/grey per AC-15 with lighter tones in dark mode (ConfidenceColors.kt); alarm panel uses colorScheme.error/onError. Everything else comes from MaterialTheme (dynamic color on API 31+, static light/dark fallback).
