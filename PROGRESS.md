@@ -87,3 +87,4 @@ One line per run, newest at the bottom: `YYYY-MM-DD HH:MM TZ — tasks — tests
 2026-10-18 ET — waiting for QA on 23da202 (code unchanged since 1e36102; qa/last-tested.txt still 0a2226a)
 2026-10-18 ET — waiting for QA on 93a028c (code unchanged since 1e36102; qa/last-tested.txt still 0a2226a)
 2026-10-18 ET — waiting for QA on 8de96ce (code unchanged since 1e36102; qa/last-tested.txt still 0a2226a)
+2026-10-18 ET — FIX CameraX Major: Field Log binds back camera if present, else front (CameraChoice + 3 tests); 417 tests pass; assembleDebug+testDebugUnitTest+lintDebug green; SDK: shadow SDK dir without platforms/android-37 symlink — emulator: Field Log Capture on a front-camera-only emulator shows preview and shutter saves a photo (no 'Photo not saved'). Edge-to-edge status bar Major is next
