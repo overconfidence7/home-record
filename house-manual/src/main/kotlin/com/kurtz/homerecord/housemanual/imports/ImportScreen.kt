@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -122,7 +123,7 @@ private fun Preview(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
         }
     }
     if (state.alreadyPresent > 0) {
-        Text(stringResource(R.string.import_already_present, state.alreadyPresent), style = MaterialTheme.typography.bodyMedium)
+        Text(pluralStringResource(R.plurals.import_already_present, state.alreadyPresent, state.alreadyPresent), style = MaterialTheme.typography.bodyMedium)
     }
     Button(
         onClick = { onEvent(ImportEvent.Confirm) },
@@ -154,7 +155,7 @@ private fun ConflictRow(conflict: ImportConflict, choice: ConflictChoice, onEven
 
 @Composable
 private fun Done(result: ImportResult?, onEvent: (ImportEvent) -> Unit) {
-    Text(stringResource(R.string.import_done, result?.inserted ?: 0), modifier = Modifier.testTag("import_done"))
+    Text(pluralStringResource(R.plurals.import_done, result?.inserted ?: 0, result?.inserted ?: 0), modifier = Modifier.testTag("import_done"))
     if ((result?.replaced ?: 0) > 0) Text(stringResource(R.string.import_done_replaced, result?.replaced ?: 0))
     if ((result?.keptMine ?: 0) > 0) Text(stringResource(R.string.import_done_kept, result?.keptMine ?: 0))
     Button(onClick = { onEvent(ImportEvent.Reset) }, modifier = Modifier.heightIn(min = 48.dp).testTag("import_back")) {

@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -163,7 +164,7 @@ fun CaptureScreen(
             }
             if (state.photosThisSession > 0) {
                 Text(
-                    stringResource(R.string.capture_count, state.photosThisSession),
+                    pluralStringResource(R.plurals.capture_count, state.photosThisSession, state.photosThisSession),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -180,7 +181,11 @@ fun CaptureScreen(
             }
             if (state.notesThisSession > 0 || state.voiceThisSession > 0) {
                 Text(
-                    stringResource(R.string.capture_extras_count, state.notesThisSession, state.voiceThisSession),
+                    stringResource(
+                        R.string.capture_extras_count,
+                        pluralStringResource(R.plurals.capture_notes_count, state.notesThisSession, state.notesThisSession),
+                        pluralStringResource(R.plurals.capture_voice_count, state.voiceThisSession, state.voiceThisSession),
+                    ),
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                 )

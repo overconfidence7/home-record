@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -76,7 +77,7 @@ private fun EquipmentRow(item: EquipmentItem, roomNames: Map<String, String>, on
         val name = listOfNotNull(e.make, e.model).joinToString(" ")
         if (name.isNotBlank()) Text(name)
         e.roomId?.let { roomNames[it] }?.let { Text(it, style = MaterialTheme.typography.labelLarge) }
-        item.ageYears?.let { Text(stringResource(R.string.equipment_age, it), modifier = Modifier.testTag("equipment_age")) }
+        item.ageYears?.let { Text(pluralStringResource(R.plurals.equipment_age, it, it), modifier = Modifier.testTag("equipment_age")) }
         when (val w = item.warranty) {
             is WarrantyStatus.Until -> Text(stringResource(R.string.equipment_warranty_until, w.date), modifier = Modifier.testTag("equipment_warranty"))
             WarrantyStatus.Expired -> Text(stringResource(R.string.equipment_warranty_expired), modifier = Modifier.testTag("equipment_warranty"))

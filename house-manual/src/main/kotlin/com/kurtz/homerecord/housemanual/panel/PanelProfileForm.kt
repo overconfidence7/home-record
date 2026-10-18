@@ -63,7 +63,7 @@ fun PanelProfileForm(
         Text(stringResource(R.string.panel_rating), style = MaterialTheme.typography.titleMedium)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PanelProfileRule.RATING_CHOICES.forEach { amps ->
-                FilterChip(input.ratingAmps == amps.toString(), { onChange(input.copy(ratingAmps = amps.toString())) }, { Text("$amps A") }, chip.testTag("rating_$amps"))
+                FilterChip(input.ratingAmps == amps.toString(), { onChange(input.copy(ratingAmps = amps.toString())) }, { Text(stringResource(R.string.panel_rating_amps_chip, amps)) }, chip.testTag("rating_$amps"))
             }
         }
         OutlinedTextField(

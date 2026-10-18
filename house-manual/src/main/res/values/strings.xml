@@ -187,7 +187,10 @@
     <string name="equipment_title">Equipment</string>
     <string name="equipment_add">Add equipment</string>
     <string name="equipment_empty">Start with your water heater, your furnace or air handler, and your AC or heat pump. Tap Add equipment to begin.</string>
-    <string name="equipment_age">%d yrs</string>
+    <plurals name="equipment_age">
+        <item quantity="one">%d yr</item>
+        <item quantity="other">%d yrs</item>
+    </plurals>
     <string name="equipment_warranty_until">Warranty until %s</string>
     <string name="equipment_warranty_expired">Warranty expired</string>
     <string name="equipment_edit_new">New equipment</string>
@@ -268,13 +271,19 @@
     <string name="import_reading">Reading file…</string>
     <string name="import_preview_title">This file will add</string>
     <string name="import_nothing_new">Nothing new to import. Everything in this file is already here.</string>
-    <string name="import_already_present">%1$d records are already here and will be skipped.</string>
+    <plurals name="import_already_present">
+        <item quantity="one">%1$d record is already here and will be skipped.</item>
+        <item quantity="other">%1$d records are already here and will be skipped.</item>
+    </plurals>
     <string name="import_conflicts_title">Same item, edited here</string>
     <string name="import_conflicts_hint">These were also entered in House Manual. Choose which version to keep.</string>
     <string name="import_keep_mine">Keep mine</string>
     <string name="import_use_imported">Use imported</string>
     <string name="import_button">Import</string>
-    <string name="import_done">Imported %1$d new records.</string>
+    <plurals name="import_done">
+        <item quantity="one">Imported %1$d new record.</item>
+        <item quantity="other">Imported %1$d new records.</item>
+    </plurals>
     <string name="import_done_replaced">%1$d replaced with the imported version.</string>
     <string name="import_done_kept">%1$d kept as they were here.</string>
     <string name="import_done_open_home">Back to home</string>
@@ -320,6 +329,7 @@
     <string name="panel_feed_option">%1$s · slot %2$d · %3$s</string>
     <string name="panel_feeds_note">→ feeds %1$s</string>
     <string name="panel_rating">Service or panel rating</string>
+    <string name="panel_rating_amps_chip">%1$d A</string>
     <string name="panel_rating_custom">Rating in amps (optional)</string>
     <string name="panel_brand">Brand (optional)</string>
     <string name="panel_model">Model or catalog number (optional)</string>

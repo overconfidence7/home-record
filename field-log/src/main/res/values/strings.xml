@@ -38,7 +38,10 @@
         <item quantity="other">%1$s: %2$d photos</item>
     </plurals>
     <string name="capture_shutter">Take photo</string>
-    <string name="capture_count">%1$d photos saved</string>
+    <plurals name="capture_count">
+        <item quantity="one">%1$d photo saved</item>
+        <item quantity="other">%1$d photos saved</item>
+    </plurals>
     <string name="capture_failed">Photo not saved. Try again.</string>
     <string name="capture_permission_needed">Field Log needs camera access to take job photos. You can turn it on in Settings.</string>
     <string name="capture_open_settings">Open Settings</string>
@@ -51,7 +54,15 @@
     <string name="capture_voice_stop">Stop</string>
     <string name="capture_recording">Recording %1$s</string>
     <string name="capture_voice_failed">Recording failed. Try again.</string>
-    <string name="capture_extras_count">%1$d notes, %2$d voice memos saved</string>
+    <plurals name="capture_notes_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <plurals name="capture_voice_count">
+        <item quantity="one">%1$d voice memo</item>
+        <item quantity="other">%1$d voice memos</item>
+    </plurals>
+    <string name="capture_extras_count">%1$s, %2$s saved</string>
     <string name="capture_back">Back</string>
     <string name="room_kitchen">Kitchen</string>
     <string name="room_living_room">Living Room</string>
