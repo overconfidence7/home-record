@@ -77,3 +77,4 @@ One line per run, newest at the bottom: `YYYY-MM-DD HH:MM TZ — tasks — tests
 2026-10-18 ET — S10 Store readiness: verified docs/data-safety.md, privacy-policy.md, store-listing.md against manifests and code (permissions, no INTERNET permission beyond RevenueCat billing, free limits, tile, widget, volume-key shutter); House Manual photos go through system camera app, noted in data-safety; added widget to listing; docs only, tests unchanged (414) — emulator: nothing new. Ship-ready checklist S1..S10 complete; next run waits for QA on HEAD
 2026-10-18 ET — waiting for QA on 1e36102
 2026-10-18 ET — waiting for QA on 96f6fa9 (code unchanged since 1e36102; qa/last-tested.txt still 0a2226a)
+2026-10-18 ET — waiting for QA on 0ba166b (code unchanged since 1e36102; qa/last-tested.txt still 0a2226a)
