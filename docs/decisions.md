@@ -107,3 +107,6 @@ AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16
 ## 2026-10-17 T35
 - Billing boundary lives in :core (`Entitlements`); `LimitGate` reads counts from repositories. Paywall is skipped when no breaker has a label (AC-93). Until T36 the app binds `UnavailableEntitlements`, so the paywall shows the AC-96 state rather than fake prices.
 - **2026-10-17** T36: RevenueCat `purchases` 10.28.1 in :house-manual only (RevenueCatEntitlements is the sole SDK importer, AC-95). API key read from gitignored local.properties `revenuecat.apiKey` into BuildConfig; blank key falls back to UnavailableEntitlements. Reason: key must never be committed; app must not crash without it (AC-96).
+
+## 2026-10-18 (S7 Performance)
+- Added `DebugStrictMode` (core-ui), enabled from both Application classes only when the app is debuggable. Policy is detectAll + penaltyLog (not penaltyDeath) so QA can read violations from logcat tag `StrictMode` without crashing. Audit found photo decoding already runs on Dispatchers.IO, Room is opened lazily and queried via suspend/Flow, no runBlocking in main code. Cold-start timing needs an emulator and is left to QA.

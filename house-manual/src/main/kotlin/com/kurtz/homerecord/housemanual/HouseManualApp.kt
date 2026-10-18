@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.work.Configuration
 import com.kurtz.homerecord.housemanual.reminders.ReminderWorker
 import com.kurtz.homerecord.housemanual.widget.EmergencyWidgetProvider
+import com.kurtz.homerecord.ui.DebugStrictMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +22,7 @@ class HouseManualApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        DebugStrictMode.enableIfDebuggable(this)
         container = AppContainer(this)
         ReminderWorker.schedule(this)
         keepWidgetFresh()
