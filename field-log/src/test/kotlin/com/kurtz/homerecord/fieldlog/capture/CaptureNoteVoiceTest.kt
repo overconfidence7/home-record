@@ -88,7 +88,7 @@ class CaptureNoteVoiceTest {
         assertEquals(EntryKind.NOTE, e.kind)
         assertEquals("Cracked joist near sink", e.text)
         assertEquals("2026-03-05", e.day)
-        assertFalse(vm.state.value.noteOpen)
+        assertFalse(vm.state.first { !it.noteOpen }.noteOpen)
     }
 
     @Test fun emptyNoteIsNotSaved() = runTest(dispatcher) {
