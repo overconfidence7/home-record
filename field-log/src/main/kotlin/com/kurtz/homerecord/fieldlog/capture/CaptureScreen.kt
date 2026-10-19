@@ -131,7 +131,10 @@ internal fun CameraPreview(capturer: CameraXPhotoCapturer) {
             val imageCapture = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
             runCatching {
                 provider.unbindAll()
-                val selector = when (CameraChoice.pick(provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA), provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA))) {
+                val selector = when (CameraChoice.pick(
+                    runCatching { provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) }.getOrDefault(false),
+                    runCatching { provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) }.getOrDefault(false),
+                )) {
                     CameraChoice.Lens.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
                     CameraChoice.Lens.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
                     CameraChoice.Lens.NONE -> return@runCatching
