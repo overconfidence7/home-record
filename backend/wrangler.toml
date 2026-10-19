@@ -1,0 +1,23 @@
+name = "homerecord-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Replace the placeholder ids with the real ones from `wrangler d1 create`, `wrangler kv namespace create`
+# before the first deploy (see README.md). Tests use local simulators and ignore them.
+[[d1_databases]]
+binding = "DB"
+database_name = "homerecord"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "homerecord-media"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "00000000000000000000000000000000"
+
+[vars]
+ENVIRONMENT = "production"
