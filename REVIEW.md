@@ -49,6 +49,14 @@ Tested: AC-1..AC-100 regression pass across both apps on emulator (House Manual:
 
 ---
 
+## QA 2026-10-18 (commit 6746054)
+
+Tested: Re-test of builder fixes on emulator (fd86092 edge-to-edge insets, 2936c5c CameraX back-camera hardcode fallback), AC-1..AC-100 regression check across House Manual and Field Log screens (House Manual Home, Panel, Emergency, Reminders, Settings; Field Log Jobs, Job Details, Behind the Wall, Daily Report, Handoff, CameraX capture), unit test suite (`./gradlew testDebugUnitTest` — 417/417 passed), `./gradlew lintDebug` (0 errors). Passed: 38. Fixes verified: 1 (edge-to-edge status bar insets fd86092). Existing open issues: 1 (CameraX capture failure on single-camera devices). New issues: 0.
+
+- [ ] [Major] CameraX initialization fails on single-camera devices/emulators (CameraValidator$CameraIdListIncorrectException: Expected camera missing from device), releasing camera and blocking in-app capture - steps: 1. Launch Field Log on an emulator or device with only one camera (e.g. qa_pixel where front camera is absent). 2. Open any job, tap "Capture" (or "Behind the wall"). 3. Tap shutter button. - expected: CameraX initializes with available camera and successfully captures and saves photo / actual: CameraX logs CameraValidator$CameraIdListIncorrectException (LENS_FACING_FRONT verification failed: "No available camera can be found"), releases camera internal state (RELEASING -> RELEASED), and shutter tap shows "Photo not saved. Try again." - screenshot: qa/screenshots/verify_fl_photo_captured.png
+
+---
+
 ## Lint warnings accepted (S1, 2026-10-17)
 
 `lintDebug` has 0 errors. Fixed: ComposableNaming, 2 UnusedResources, AutoboxingStateCreation. Remaining warnings, each justified:
