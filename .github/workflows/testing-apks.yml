@@ -74,6 +74,9 @@ jobs:
               rm -rf "$src"
             fi
           fi
+          echo "::notice title=source.properties::$(tr '\n' ' ' < "$base/source.properties")"
+          echo "::notice title=package.xml::$(grep -oE '<type-details.*</type-details>|<localPackage[^>]*>' "$base/package.xml" | tr '\n' ' ' | cut -c1-900)"
+          echo "::notice title=installed::$("$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --list_installed 2>/dev/null | grep -E 'platforms|build-tools' | tr '\n' ' ')"
           echo "::notice title=SDK platforms after::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ') / $(grep -o 'path="platforms;[^"]*"' "$base/package.xml" | head -n1)"
 
       - name: Testing keystore (kept in cache so builds install over each other)
