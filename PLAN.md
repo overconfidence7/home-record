@@ -71,3 +71,4 @@ Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change;
 - [x] R8: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
 
   - R3 note: reviewed T11–T15 against AC-25..AC-41; no spec drift or bugs found. Recurring warning: tests use deprecated `createComposeRule` (v2 variant suggested); to be tidied in S1.
+- [ ] T41: Include Consumable rows in the `.homerecord` bundle, the encrypted backup and import (new optional array; older bundles still import); round-trip test. Follow-up from the T38 decision. (acceptance: AC-72, AC-73, AC-79, AC-88, AC-90 re-verified with consumables present)
