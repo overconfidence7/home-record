@@ -101,8 +101,12 @@ jobs:
       # Gradle output is piped through scripts/ci-gradle.sh, which turns a failure into a
       # check-run annotation (readable through the REST API, which is what the builder
       # has; raw logs sit behind a blob host it cannot reach).
-      - name: Unit tests
-        run: bash scripts/ci-gradle.sh testDebugUnitTest
+      - name: Unit tests and screenshot checks
+        run: bash scripts/ci-gradle.sh testDebugUnitTest validateDebugScreenshotTest
+
+      - name: Backend tests
+        if: hashFiles('backend/package.json') != ''
+        run: cd backend && npm ci && npm test
 
       - name: Build APKs
         run: bash scripts/ci-gradle.sh :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease

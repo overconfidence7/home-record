@@ -167,7 +167,7 @@ else
   log "SDK packages already installed: ${packages[*]} platforms;${platform_installed}"
 fi
 
-# AGP 8.13 resolves compileSdk 37 to platforms/android-37.0 by itself. Do NOT add an
+# AGP resolves compileSdk 37 to platforms/android-37.0 by itself. Do NOT add an
 # android-37 symlink or copy next to it: with both present AGP fails with
 # "Failed to find target with hash string 'android-37'" and re-downloads 37.0 every build.
 if [ -e "$ANDROID_HOME/platforms/${platform_base}" ] && [ -d "$ANDROID_HOME/platforms/${platform_base}.0" ]; then

@@ -1,77 +1,133 @@
-# HomeRecord — build plan
+# Build plan
 
-Ordered checklist (M2.5 tasks T30a–T30c added 2026-10-16 after a scope change; see SPEC.md). Each task is about one hour of focused work. Tick a task only when its acceptance criteria (SPEC.md §8) pass and `./gradlew testDebugUnitTest` is green. After every 5 build tasks there is a review task. Log choices in `docs/decisions.md`; log each run in PROGRESS.md.
+Ordered tasks, about one focused hour each. The builder ticks a task only when its acceptance criteria pass and `./gradlew assembleDebug testDebugUnitTest lintDebug` (and `npm test` in `backend/` for backend tasks) are green. After every five build tasks there is a review task (R) and after every milestone a visual review (V) that looks at the committed screenshot PNGs against `docs/ui-standards.md`. Format: `- [ ] T012: <what> (acceptance: AC-C5, AC-C6)`.
 
-## M1 — House Manual
+The builder may append notes and new subtasks under a task (as `  - [ ] T012a: ...`) and never reorders or deletes tasks. Tasks the builder cannot do are marked `(blocked: see BLOCKERS)` and skipped.
 
-- [x] T01: Scaffold the Gradle project: wrapper, `gradle/libs.versions.toml`, `settings.gradle.kts` with modules `:core`, `:core-ui`, `:house-manual`, `:field-log`; Compose Material 3 theme in `:core-ui`; one empty "HomeRecord" screen in each app; a passing sample unit test in `:core`; Android `.gitignore`. (acceptance: `./gradlew assembleDebug` and `./gradlew testDebugUnitTest` succeed)
-- [x] T02: `:core` domain model and Room schema for Home, Room, Wall, Panel, Breaker, BreakerRoom, Endpoint, Shutoff, Equipment, Photo per SPEC §6, with enum converters, `HomeRecordDatabase`, DAOs and Robolectric in-memory DAO tests for insert/update/delete of each entity. (acceptance: AC-3 data part, AC-12 data part)
-- [x] T03: Repository layer in `:core` (`HomeRepository`, `PanelRepository`, `ShutoffRepository`, `EquipmentRepository`) exposing Flows; `AppContainer` manual DI in each app; photo file store (`MediaStore`-free, app files dir) with path helper and tests. (acceptance: AC-6 storage part, AC-27 storage part)
-- [x] T04: House Manual navigation (single activity, Navigation Compose), start-destination logic, HM-Onboarding with quick-add rooms and custom room, OnboardingViewModel tests, Compose test for Continue disabled state. (acceptance: AC-1, AC-2, AC-3, AC-4)
-- [x] T04a (DEFERRED, see PROGRESS.md/BLOCKERS.md): Upgrade the build to AGP 9.x (latest stable) and the Gradle wrapper it requires (≥ 9.6): built-in Kotlin per CLAUDE.md, remove `android.suppressUnsupportedCompileSdk` from gradle.properties, move Compose BOM to the latest stable, bump Room/KSP/navigation only as far as the new Kotlin requires. Keep every existing test. If the upgrade is not green by the end of the run, push to `wip/T04a`, reset `build`, note why in PROGRESS.md and BLOCKERS.md, and tick this task as "deferred" so T05 proceeds on AGP 8.13.2. (acceptance: `./gradlew assembleDebug testDebugUnitTest lintDebug` green with no suppress flag; 31/31 tests still pass)
-- [x] T05: HM-Home hub: search field, Panel/Emergency/Equipment/Rooms cards with live counts; HM-Rooms and HM-Room (rename, delete) screens. (acceptance: AC-21 room lists for equipment/shutoffs, AC-28 card)
-- [x] R1: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-  - R1 notes: fixed raw enum names shown in HM-Room (shutoff kind, equipment category) -> strings.xml labels. No other spec drift found for AC-1..4, AC-20, AC-21, AC-28. HM-Home overflow→Settings deferred to T34 (no Settings screen yet).
-- [x] T06: Panel setup and slot grid: `PanelLayoutCalculator` (slot → row/column for NA_NUMBERED and DIN), HM-Panel empty state with slot count/layout, grid rendering, panel photo capture via `TakePicture`. (acceptance: AC-5, AC-6, AC-7)
-- [x] T07: HM-Breaker editor: label, amps, poles, type, confidence; `SlotOccupancy` rules for two-pole and tandem; slot-count shrink guard; delete detaches endpoints. (acceptance: AC-8, AC-9, AC-10, AC-11, AC-12)
-- [x] T08: Breaker links: room chips, endpoint add/remove on HM-Breaker, confidence dots on the grid. (acceptance: AC-13, AC-14, AC-15)
-- [x] T09: `SearchEngine` (token match across breakers, endpoints, rooms, equipment, shutoffs), HM-Search results, highlight-and-scroll on HM-Panel, HM-Room breaker list with confidence. (acceptance: AC-17, AC-18, AC-19, AC-20)
-- [x] T10: Legend PDF: `LegendRowBuilder` (pure, tested) + `PdfDocument` renderer + share sheet via FileProvider. (acceptance: AC-22, AC-23, AC-24)
-- [x] R2: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [x] T11: Shutoffs: HM-Shutoffs list with empty state, HM-ShutoffEdit with kind/room/photo/instructions and validation. (acceptance: AC-25, AC-26, AC-27)
-- [x] T12: HM-Emergency: `EmergencyGrouper` (pure, tested), large-type layout, full-screen zoomable photo, offline check. (acceptance: AC-28, AC-29, AC-30, AC-31)
-- [x] T13: Quick Settings tile: `EmergencyTileService`, `TileStateChooser`, deep link into HM-Emergency, lock-screen handling. (acceptance: AC-32, AC-33, AC-34)
-- [x] T14: Mapping mode core: `MappingStateMachine` (Idle/PluggedIn/Armed/Alarm/Confirm) driven by `PowerEvent`s, `ChargingMonitor` (BatteryManager + ACTION_POWER_CONNECTED/DISCONNECTED receiver), `AlarmPlayer` (ToneGenerator/AudioTrack loop + Vibrator) behind interfaces with fakes. (acceptance: AC-35, AC-37, AC-38)
-- [x] T15: HM-Mapping screen: keep-screen-on, armed and alarm states, breaker picker, endpoint picker with "New outlet…", save confirms the link; disarm on leave. (acceptance: AC-36, AC-39, AC-40, AC-41, AC-16)
-- [x] R3: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [x] T16: Equipment list and editor: categories, dates, `AgeAndWarrantyFormatter`, validation, delete with file cleanup. (acceptance: AC-42, AC-43, AC-44, AC-50)
-- [x] T17: Data-plate OCR: `TextRecognizer` interface with ML Kit bundled implementation, `DataPlateParser` heuristics with fixture tests, result sheet with confirm/edit, empty-result path, label photo kept. (acceptance: AC-45, AC-46, AC-47, AC-48, AC-49)
-- [x] T18: House Manual polish for M1: app icon, string review, empty states, back-stack sanity, `lintDebug` clean, release build config (unsigned), README screenshots list. (acceptance: re-check AC-1..AC-50 on emulator; lint has no errors)
+## M0 Foundation
 
-## M2 — Field Log and the handoff
+- [ ] T001: Scaffold the Gradle project: wrapper (Gradle 9.x), version catalog with every approved dependency from CLAUDE.md, modules `:core`, `:core-ui`, `:house-model`, `:house-manual`, `:field-log`, Compose + Material 3 1.4 + Navigation 3, AGP 9.x built-in Kotlin, KSP, Room, screenshot-test plugin, one empty screen per app, a passing sample test in each module, `.gitignore`, `README.md` links (acceptance: builds, both apps launch)
+- [ ] T002: Design system in `:core-ui`: `MaterialExpressiveTheme` with dynamic color + brand fallbacks (HM blue/teal, FL orange/amber), typography, shapes, `MotionScheme.standard()`, `enableEdgeToEdge`, light/dark window themes, adaptive launcher icons for both apps (acceptance: AC-U8, AC-U9)
+- [ ] T003: App shell in `:core-ui`: `HomeRecordApp` with `NavigationSuiteScaffold`, per-tab `NavDisplay` back stacks (Navigation 3, saveable), `ScreenScaffold` with top app bar + back arrow, predictive back wired; House Manual tabs Home/House/Items/Reminders/More and Field Log tabs Today/Jobs/Clock/Schedule/More with placeholder screens (acceptance: AC-U1, AC-U2)
+- [ ] T004: Core-ui components: `RecordListItem`, `EmptyState`/`LoadingState`/`ErrorState`, `LinkChipRow`, `FormScaffold` with discard prompt, `LabeledField`, `DateField`, `MoneyField`, `LengthField` + `LengthParser` `[unit]`, `EnumPicker`, `QuickAddSheet`, `OptionsSheet`, previews for each (acceptance: AC-U3..U7, AC-C4)
+- [ ] T005: Screenshot testing: `com.android.compose.screenshot` plugin in every UI module, `@Preview` conventions (light, dark, 200% font), `updateDebugScreenshotTest` wired, reference PNGs committed for the shells and components; CI workflow (`.github/workflows/testing-apks.yml`) updated for the new module names and to run `validateDebugScreenshotTest` (acceptance: AC-U12)
+- [ ] R01: Review T001–T005 against SPEC.md sections 2, 3, 8 and `docs/ui-standards.md`; fix drift, missing previews, missing tests
+- [ ] T006: `:core` data foundation: Room database `homerecord.db` with every entity in SPEC.md section 9 (house model + Field Log), DAOs, converters, soft delete, `updatedAt` triggers in repositories, `ItemCategory` taxonomy with icons and defaults `[unit]` (acceptance: AC-C29, section 9)
+- [ ] T007: Backend skeleton in `backend/`: Hono Worker, `wrangler.toml` (D1, R2, KV bindings), D1 migrations for tenancy tables, `/health`, `/me`, JWT sessions, vitest with workers pool, `npm test` green, README with the secrets list (acceptance: AC-B1 partial, AC-B2, AC-B60)
+- [ ] T008: Auth end to end: Sign in with Google (Credential Manager) and email code (Resend; dev mode logs the code) in both apps (`:core` `AuthRepository`, secure token store), backend verification, `/me` returns memberships (acceptance: AC-B1, AC-B2, AC-H15 sign-in part, AC-F4)
+- [ ] T009: Field Log company and team: create company, invite code and link, join, roles, FL-Team, FL-Company settings; backend endpoints with role enforcement tests (acceptance: AC-F1, AC-F2, AC-F3, AC-B3)
+- [ ] T010: Sync engine in `:core`: outbox, push/pull, conflict rules, device id, `SyncState`; backend `/sync/push` and `/sync/pull` with `serverSeq` and idempotency; `SyncStatusChip` (acceptance: AC-F53, AC-B20)
+- [ ] R02: Review T006–T010; run a two-device sync scenario in unit tests (two in-memory databases through a fake server)
+- [ ] V0: Visual review of M0: open every committed screenshot PNG, compare with `docs/ui-standards.md` rules 1–12 and 24–30, fix what fails, record in REVIEW.md under "Builder visual review"
 
-- [x] T19: Field Log app shell: navigation, `AppContainer`, FL-Jobs list with empty state and archive toggle, FL-JobEdit with rooms quick-add; Job/LogEntry/DailyReport/CompanyProfile entities + DAOs in `:core`. (acceptance: AC-51, AC-52, AC-53, AC-54)
-- [x] T20: FL-Capture with CameraX: full-screen preview, 72dp shutter, JPEG to app files, PHOTO entry creation, volume-key shutter handler, permission denied state. (acceptance: AC-55, AC-56, AC-57, AC-60)
-- [x] R4: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [x] T21: Notes and voice: typed note entry, `VoiceRecorder` (MediaRecorder AAC/.m4a) behind an interface with a 3:00 cap, VOICE entries with duration, mic permission state. (acceptance: AC-58, AC-59, AC-60)
-- [x] T22: FL-Job day grouping (`EntryGrouper`), thumbnails, note text, audio duration and playback, FL-Entry edit/delete, crash-safety check. (acceptance: AC-61, AC-62)
-- [x] T23: FL-BehindWall: room → wall picker (N/E/S/W/custom → Wall rows), camera reuse, Photo rows with stage BEHIND_WALL, running counts. (acceptance: AC-63, AC-64, AC-65)
-- [x] T24: FL-Report: `ReportDraftBuilder` prefill from entries, editable draft persisted as DailyReport, delay reason picker, FL-Settings company profile. (acceptance: AC-67, AC-68)
-- [x] T25: Report PDF: `ReportSectionBuilder` (pure), `PdfDocument` renderer with header and two-per-row photos, overwrite per day, share sheet. (acceptance: AC-69, AC-70)
-- [x] R5: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [x] T26: `.homerecord` bundle format in `:core`: `RecordJson` (kotlinx.serialization), `BundleWriter` (zip + media), `BundleReader` with formatVersion guard and path sanitizer, JVM round-trip tests. (acceptance: AC-72, AC-73, AC-74, AC-91)
-- [x] T27: FL-Handoff screen: counts, export via share sheet, PDF summary of the handoff. (acceptance: AC-71, AC-72)
-- [x] T28: Import engine in `:core`: `ImportPlanner` (counts, conflicts, homeId remap), `ImportApplier` with keep-mine/use-imported choices, idempotent re-import. (acceptance: AC-76, AC-77, AC-78, AC-79)
-- [x] T29: HM-Import screen and `ACTION_VIEW` intent filter for `.homerecord`; end-to-end check: Field Log export → House Manual import → behind-wall photos visible in HM-Room. (acceptance: AC-75, AC-66, AC-77)
-- [x] T30: M2 polish: Field Log icon, glove-size audit of FL-Capture targets (≥56dp), lint clean, string review. (acceptance: re-check AC-51..AC-79 on emulator)
-- [x] T30a: Panel profile and room kinds (SPEC F20): add Panel.kind/ratingAmps/brand/model/maxCircuits/tandemPolicy/hasMainBreaker/yearInstalled/feedBreakerId, Breaker.isMain, Room.kind, Home.squareFeet with a Room DB migration (or a version bump with destructive migration, recorded in decisions.md — nothing is released yet); `RoomKindMapper` for quick-add names; panel setup/edit form with the brand suggestion list and the sub-panel feed-breaker picker; main-breaker option on HM-Breaker; legend PDF header; bundle export/import of the new fields with a tolerant reader. (acceptance: AC-101, AC-102, AC-103, AC-104, AC-105)
-- [x] T30b: Panel insights (SPEC F21): `PanelInsights` rules in `:core` — capacity, tandem/circuit-count checks, `HazardBrandMatcher`, `ProtectionRules` (GFCI 210.8(A) and AFCI 210.12(B) by room kind), `DedicatedCircuitChecklist` with keyword fixtures — each a pure function with tests; "Panel insights" sheet on HM-Panel rendering severity cards and the disclaimer. (acceptance: AC-106, AC-107, AC-108, AC-109, AC-110, AC-111, AC-112, AC-113)
-- [x] T30c: Load estimate (SPEC F22): LoadProfile entity and DAO, appliance defaults table, `LoadEstimator` implementing NEC 220.82 with the worked-example test, estimate form and result card inside Panel insights. (acceptance: AC-114, AC-115, AC-116, AC-117, AC-118)
-- [x] R6: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
+## M1 House model
 
-## M3 — Keep, protect, pay
+- [ ] T011: Home creation and house types: `HouseTypeTemplate` `[unit]`, HM-Onboarding (name, type, foundation, garage), floors seeded, floor management screen (acceptance: AC-C1, AC-C2, AC-C3)
+- [ ] T012: Plan geometry in `:house-model`: `PlanModel` (rooms as polygons in inches), grid snapping, neighbor-edge snapping, `WallDeriver` `[unit]`, `PlanValidator` `[unit]`, undo/redo stack `[unit]` (acceptance: AC-C8, AC-C11, AC-C10 logic)
+- [ ] T013: Plan editor screen: Canvas rendering, pinch zoom and pan, floor switcher, Add room (rectangle, name, kind, typed W×L), drag to move, edge handles to resize, selection, delete, autosave on leave, saved-state across rotation (acceptance: AC-C5, AC-C6, AC-C10, AC-C12)
+- [ ] T014: Polygon rooms: Edit shape mode (add corner on edge, drag, delete corner), L-shapes; doors, windows and stairs placement with floor link (acceptance: AC-C7, AC-C9)
+- [ ] T015: Blueprint view: clean plan renderer (walls, names, dimensions, doors, windows, stairs, north arrow), room tap → room page, long-press sheet, layer toggles persisted per home, light/dark/200% (acceptance: AC-C13, AC-C14, AC-C15)
+- [ ] R03: Review T011–T015; geometry edge cases (concave rooms, shared walls between a rectangle and a polygon, zero-length edges)
+- [ ] T016: Blueprint PDF export (one page per floor, to scale, scale bar, home name) through the share sheet (acceptance: AC-C16)
+- [ ] T017: HM-House tab and HM-Room skeleton: floor chips, blueprint, Edit plan / 3D (placeholder) / Export actions; HM-Room with sections (Items, Walls, Photos, Overlays, Breakers, Shutoffs, Notes) as empty states; Add room FAB inside the editor (acceptance: AC-H4, AC-H10 shell)
+- [ ] T018: Field Log jobs with rooms: FL-Jobs list, FL-JobEdit (client, address with on-device Geocoder → lat/lng, rooms chips, dates, crew, phases, budget, office emails), FL-Job Overview tab and tab shell, `JobOrdering` `[unit]`, sync (acceptance: AC-F5, AC-F6, AC-F7)
+- [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
+- [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
+- [ ] R04: Review T016–T020
+- [ ] V1: Visual review of M1 screenshots
 
-- [x] T31: Reminders data: MaintenanceTask entity, `SeasonalTaskSeeder` per climate zone, equipment interval tasks, due-date math with tests. (acceptance: AC-80, AC-81, AC-85)
-  - [x] T31a: "Remind me every N months" field (1–24) on HM-EquipmentEdit calling `MaintenanceRepository.setEquipmentReminder` on save (AC-81 UI); do it with T32.
-  - [x] T31b: climate-zone picker calling `MaintenanceRepository.applyClimateZone` (AC-80 UI); belongs on HM-Settings (T34) and, until then, the Reminders screen (T32).
-- [x] T32: Reminders screen (Done/Snooze), WorkManager daily check, notification with deep link, permission request on first task. (acceptance: AC-82, AC-83, AC-84)
-- [x] T33: Emergency widget (Glance or RemoteViews) with shutoff count and update on change. (acceptance: AC-86, AC-87)
-  - Built with RemoteViews (no new dependency); flaky PanelViewModelTest AC-106 test failed once on a cold run, passed on rerun — look at it in R7.
-- [x] T34: Encrypted backup: `BundleCrypto` (AES-256-GCM, PBKDF2), export from HM-Settings, import detection and passphrase prompt, restore test. (acceptance: AC-88, AC-89, AC-90)
-- [x] T35: `Entitlements` interface + `FakeEntitlements`, `FreeLimits` checker, paywall screen with yearly/lifetime placeholders, limit gates on panel and equipment save. (acceptance: AC-92, AC-93, AC-94, AC-95)
-  - Second-panel gate (`LimitGate.check(ADD_PANEL)`) is ready but has no caller until T37 adds the add-sub-panel UI; app uses `UnavailableEntitlements` (free tier, paywall shows Retry state) until T36.
-- [x] R7: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
-- [x] T36: RevenueCat implementation of `Entitlements` (API key from `local.properties`/BuildConfig, never committed), offline state, Retry. (acceptance: AC-95, AC-96)
-  - Implemented, but real purchases stay unverified until Nate supplies the RevenueCat key (BLOCKERS.md). Without `revenuecat.apiKey` the app runs the free tier with the Retry paywall.
-- [x] T37: Multiple panels: panel switcher, per-panel grid, search and legend across panels. (acceptance: AC-97, AC-98)
-- [x] T38: Consumables per equipment and search over specs. (acceptance: AC-99, AC-100)
-- [x] T39: Release prep: signing config placeholders, versionCode scheme, Data safety notes in `docs/data-safety.md`, privacy policy draft in `docs/privacy-policy.md`, store listing drafts. (acceptance: `./gradlew assembleRelease` succeeds unsigned)
-- [x] T40 (DEFERRED to nightly QA, see note): Full regression on emulator against AC-1..AC-100; update REVIEW.md and qa/last-tested.txt. (acceptance: all ACs checked)
-  - The builder has no emulator; QA owns REVIEW.md entries and qa/last-tested.txt. QA should run the full AC-1..AC-100 pass against build HEAD.
-- [x] R8: Review all changes since the last review against SPEC.md; fix bugs, missing tests, and spec drift.
+## M2 Items and warranty (House Manual usable)
 
-  - R3 note: reviewed T11–T15 against AC-25..AC-41; no spec drift or bugs found. Recurring warning: tests use deprecated `createComposeRule` (v2 variant suggested); to be tidied in S1.
-- [x] T41: Make the backup complete: include Consumable, MaintenanceTask and LoadProfile rows in the `.homerecord` bundle, the encrypted backup and import (new optional arrays; older bundles still import; the Field Log handoff export may omit MaintenanceTask/LoadProfile); round-trip tests. Follow-up from the T31/T34/T38 decisions. (acceptance: AC-72, AC-73, AC-79, AC-88, AC-90 re-verified with all three present; restoring a backup onto a fresh install brings back reminders and the load estimate)
-- [x] T40b: Language pass (Nate, 2026-10-18: do this before T42). Rewrite every user-facing string in both apps' `strings.xml`, plus `docs/store-listing.md`, `docs/privacy-policy.md` and `docs/data-safety.md`, to follow `docs/voice.md`: plain, specific, no dashes in prose, no filler or marketing words, sentence case, one term per thing across both apps, errors say what happened and what to do. Keep string names and placeholders; update any test that asserts on changed text. Run the checklist searches at the end of `docs/voice.md` and list in the commit message how many strings changed. (acceptance: the checklist searches in `docs/voice.md` return nothing in `strings.xml` or the three docs; tests green; lint 0 errors)
-- [x] T42: Wire the RevenueCat keys (see `docs/billing.md`): `house-manual/build.gradle.kts` resolves the key per build type — debug: `revenuecat.testApiKey` (local.properties) → `REVENUECAT_TEST_API_KEY` env → release chain; release: `revenuecat.apiKey` → `REVENUECAT_API_KEY` env → "". Keys never land in git. `RevenueCatEntitlements` reads offering `default` and maps `$rc_annual`/`$rc_lifetime` packages to the Annual/Lifetime plans (already the case; confirm with a test on package-type mapping). Update `docs/release.md` and BLOCKERS.md (T36 Needs-Nate item is resolved). (acceptance: with `REVENUECAT_TEST_API_KEY` set, a debug build's paywall lists Annual and Lifetime with Test Store prices and a Test Store purchase unlocks Pro — QA verifies on the emulator; with no key at all the build still compiles and shows the Retry paywall, AC-96)
-- [x] T43: Testing APKs on GitHub. `.github/workflows/testing-apks.yml` (added by Nate 2026-10-18) builds debug + release APKs of both apps on every push to `build` and republishes the rolling `testing` pre-release. Builder: on the first run after this task becomes current, check the workflow result (`gh api repos/overconfidence7/home-record/releases/tags/testing`, or the Actions tab if the proxy blocks it); if the run failed, fix the workflow or build so it passes, and add a line to `docs/release.md` pointing testers at the Releases page. If the proxy blocks the check, note it in PROGRESS.md and tick the task when the release exists. (acceptance: the `testing` release carries four APKs and SHA256SUMS.txt for the current `build` HEAD)
+- [ ] T021: Item model and HM-ItemEdit form: category/subtype picker (grouped sheet with icons), room, name, make/model/serial, dates, price, vendor, notes, photos (data plate, item), `FormScaffold`; save creates default reminders and consumables from the subtype (acceptance: AC-C30, AC-C35 defaults)
+- [ ] T022: Data plate OCR: ML Kit text recognition (bundled), recognized lines sheet, tap-to-assign, `DataPlateParser` `[unit]`, works offline (acceptance: AC-C31)
+- [ ] T023: `SerialAgeDecoder` `[unit]` for the brands in AC-C32 with documented rules and tests per brand; "manufactured on" fill with override (acceptance: AC-C32)
+- [ ] T024: Warranty record and status: `Warranty` entity, `WarrantyStatus` `[unit]` (expired / expiring 60 days / active / unknown), `WarrantyStatusLine` component, item page warranty section with Registered toggle and source link (acceptance: AC-C33)
+- [ ] T025: Backend warranty lookup: `POST /lookup/warranty` with Claude API web search (allowed domains, max 3 searches, structured JSON), KV cache by normalized make+model `[unit]`, per-account rate limit, cost log; vitest with a recorded response (acceptance: AC-B10)
+- [ ] R05: Review T021–T025
+- [ ] T026: Warranty lookup in the app: automatic on first save when online, "Look up warranty" and "Look up again", confirm/edit/discard sheet, offline queue with badge, stored once (acceptance: AC-C34, AC-H5)
+- [ ] T027: HM-Items tab: grouped by category with counts, by-room toggle, filter chips (category, room, warranty status), search, FAB; HM-Item detail screen with hero photo and all sections; overflow Move/Duplicate/Delete (acceptance: AC-H6, AC-H7 chips shell)
+- [ ] T028: Consumables, service history, contacts: consumables editor and search, service record form, HM-Contacts with tap-to-call/email and links to items (acceptance: AC-C35, AC-C36, AC-C39)
+- [ ] T029: Documents: `Document` entity, HM-Documents folders, upload from Files and camera scan (ML Kit document scanner), in-app PDF/image viewer with pinch zoom, attach to home/room/item, share (acceptance: AC-C37)
+- [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
+- [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
+- [ ] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)
+- [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
+- [ ] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5
+
+## M3 Field Log core (Field Log usable)
+
+- [ ] T033: Time clock data and rules: `Punch`, `Shift` derivation `[unit]`, `PunchDistance` `[unit]`, `ShiftFlags` `[unit]`, `TimesheetMath` `[unit]` (OT rules, breaks, rounding), sync (acceptance: AC-F9, AC-F12, AC-F13)
+- [ ] T034: FL-Clock screen: Clock in with job picker, GPS fix (FusedLocationProvider, while-in-use, 5 s cap), far-from-job reason sheet, Break / Switch / Clock out, elapsed ticker, permission explanation and no-GPS path, "My timesheet" week view (acceptance: AC-F8, AC-F10, AC-F18)
+- [ ] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
+- [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
+- [ ] T037: Time exports and reports: shift CSV, QuickBooks-ready CSV, `HoursReport` `[unit]`, FL-Reports hours by job/person (acceptance: AC-F15, AC-F46)
+- [ ] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)
+- [ ] T038: Media pipeline: `MediaStore`-free app-private storage, thumbnails, upload queue with presigned R2 PUT (backend `/media/presign`), retry/resume, download cache with cap and "Free up" (acceptance: AC-F54, AC-B21)
+- [ ] T039: FL-Capture: CameraX with lens limiter, 80 dp shutter, volume keys, job/room/phase chips, flash/flip, gallery import, Note and Voice (3 min, on-device transcription best effort), permission-denied states (acceptance: AC-F24, AC-F27, AC-F29)
+- [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
+- [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
+- [ ] T042: PDF markup and document scanner: `MarkupCanvas` (pen, arrow, rectangle, text, highlight) → new version with author/time, version history; ML Kit document scanner to PDF into Files (acceptance: AC-F21, AC-F22)
+- [ ] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
+- [ ] T043: Daily log: `LogAssembler` `[unit]`, FL-Log sections (crew/hours, work done, photos, tasks, materials, delays, weather, visitors, safety, client notes), delay picker, backend `/weather` proxy (Open-Meteo) with cache, "No weather (offline)" (acceptance: AC-F30, AC-F31, AC-F32, AC-B32)
+- [ ] T044: Tasks: entity, FL-Tasks per job and My tasks on Today, swipe complete with Undo, punch filter, reorder, pin on plan (FL-House) and on a file page (acceptance: AC-F34, AC-F35)
+- [ ] T045: Log PDF and Send: logo header, sections, photos; share sheet and email to client/office; Sent status, re-send (acceptance: AC-F33)
+- [ ] T046: Offline hardening: airplane-mode pass over every FL flow, pending count on Today, reconnect sync within 60 s, conflict log viewer under Settings (acceptance: AC-F52, AC-F55)
+- [ ] T047: Push notifications: FCM registration per member (delivery only), backend send for task assigned / schedule changed / change order signed / timesheet approved, deep links (acceptance: AC-B30, AC-F36)
+- [ ] R09: Review T043–T047
+- [ ] V3: Visual review of M3 screenshots; walk PRODUCT.md Field Log steps 1–6
+
+## M4 Walls, overlays and 3D
+
+- [ ] T048: Wall photos: `WallPhoto` per stage, "Photograph this wall" flow, outline screen with four handles, loupe, aspect guide; `WallTextureBuilder` `[unit]` (setPolyToPoly, 2048 px, JPEG) (acceptance: AC-C17, AC-C18, AC-C19)
+- [ ] T049: 3D scene foundation: SceneView in `:house-model`, `PlanMeshBuilder` `[unit]` (extrude rooms to walls, floor plane, openings, UVs), stock lit material, textured faces from wall photos, room colors for untextured faces, orbit/pan/zoom, Reset view, HM-3D and FL-House 3D entry (acceptance: AC-C20)
+- [ ] T050: Floors in 3D (ghost below, All floors exploded), stage selector (Framing/Rough-in/Insulation/Finished), performance pass to hit 30 fps on a 20-wall home (texture downscale, frustum culling via Filament), first render < 2 s (acceptance: AC-C21, AC-C24)
+- [ ] T051: Room view: tap room → camera inside at eye height facing the longest wall, drag to look, pinch zoom, Back to floor; shared-element transition from the room page (acceptance: AC-C22)
+- [ ] T052: Overlays: entity and kinds with icons/colors, `WallSpaceMapper` `[unit]`, overlay editor on a wall photo (polyline/point, kind, label, note, depth, photo, linked item, stage) and on the plan, edit/delete, search (acceptance: AC-C25..C28)
+- [ ] R10: Review T048–T052; texture memory under rotation; overlay coordinates after a wall is resized in the editor
+- [ ] T053: Overlays and item markers in 3D with layer toggles; tap marker opens the record; blueprint layers show overlays and items (acceptance: AC-C23, AC-C15 overlays part)
+- [ ] T054: Field Log behind the wall: room → wall → capture writes Rough-in; second capture after drywall writes Finished; overlays carry stage; HM-Room shows stages (acceptance: AC-F49, AC-H8, AC-H9)
+- [ ] T055: Item positions: place an item on the plan (drag marker) and on a wall; item page "Where" section; markers in blueprint and 3D (acceptance: AC-C30 position, AC-C23)
+- [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
+
+## M5 Field Log complete
+
+- [ ] T056: Change orders: entity, `MoneyMath` `[unit]`, FL-ChangeOrder form with voice description, photos, line items, total (acceptance: AC-F37)
+- [ ] T057: Signature pad and CO PDF: `SignaturePad` in `:core-ui`, Signed state read-only with Duplicate, PDF with signature, share (acceptance: AC-F38, AC-F39)
+- [ ] T058: Share links backend: `/share/gallery/:token`, `/share/log/:token`, `/share/co/:token` with web signature, revocation; app "Share link" actions and Signed on pull (acceptance: AC-B35, AC-B36, AC-F40, AC-F28 gallery link)
+- [ ] T059: Schedule: `Assignment` entity, FL-Schedule week view (crew rows, day cells, tap/drag assign), crew's own week and "Tomorrow" on Today, conflict badges, push on change for tomorrow (acceptance: AC-F41, AC-F42, AC-F43)
+- [ ] T060: Materials and clients: receipt capture with scanner and OCR total suggestion, list per job with totals, CSV; FL-Clients list (acceptance: AC-F44, AC-F45)
+- [ ] R11: Review T056–T060
+- [ ] T061: Reports: photo report PDF (range, 4 per page), job summary PDF (hours vs budget, COs, tasks, delays) (acceptance: AC-F28 report, AC-F47)
+- [ ] T062: Installed items on the job: FL-House rooms with items (same editor as HM), warranty lookup, data plate OCR (acceptance: AC-F50)
+- [ ] T063: `.homerecord` v2 bundle writer/reader `[unit]`, `ImportPlanner` `[unit]`, handoff summary and export from FL-House; `/handoff` backend with claim email; HM import (file, share, claim link) with preview and conflicts (acceptance: AC-C46, AC-C47, AC-F51, AC-B40, AC-H17)
+- [ ] T064: Field Log billing: trial clock from company creation, RevenueCat entitlements `fieldlog_solo`/`fieldlog_crew`, FL-Paywall (Owner), backend webhook + `/me` entitlement, crew-side read-only state (acceptance: AC-F56, AC-B50)
+- [ ] T065: FL-More and Settings: Team, Timesheets, Reports, Company, Billing, Materials, Clients, Settings (units, offline storage, notifications), Account (sign out clears after confirm), About (acceptance: AC-F4, More shell)
+- [ ] R12: Review T061–T065
+- [ ] V5: Visual review of M5 screenshots; walk PRODUCT.md Field Log steps 1–10
+
+## M6 House Manual complete
+
+- [ ] T066: Breaker panel item: `Panel`/`Breaker` entities, `SlotOccupancy` `[unit]`, HM-Panel grid (two-pole tall cell, tandem), panel photo, HM-Breaker editor with rooms and items fed (acceptance: AC-C40)
+- [ ] T067: Breaker links everywhere: item `poweredBy` chip, breaker "feeds" list, room "Breakers feeding this room" with confidence dots, search highlights slot (acceptance: AC-C41, AC-H7)
+- [ ] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
+- [ ] T069: Legend PDF per panel (acceptance: AC-C43)
+- [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
+- [ ] R13: Review T066–T070
+- [ ] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)
+- [ ] T072: Reminders: `MaintenanceRule` `[unit]`, seeds per subtype and climate zone, warranty-expiry reminders, HM-Reminders (Due/Upcoming/Done, Done/Snooze, zone chips, Add), WorkManager 08:00 notification with deep link, permission after first reminder (acceptance: AC-C49, AC-C50, AC-H12)
+- [ ] T073: Home report PDF (cover, blueprints, rooms with items and warranty status, shutoffs, legend) under 5 s for 40 items (acceptance: AC-H13)
+- [ ] T074: Encrypted backup export/restore (`BundleCrypto` `[unit]`), onboarding "Restore from a backup" (acceptance: AC-C48, AC-H14)
+- [ ] T075: House Manual cloud sync: sign-in uploads the home (reuse the sync engine with `homeId` tenancy), second device sees it, merges, sign out keeps local; HM-Account screen (acceptance: AC-H15)
+- [ ] R14: Review T071–T075
+- [ ] T076: Sharing: editor/viewer invites by link, HM-Share people list, viewer mode hides edit controls; backend membership on homes (acceptance: AC-H16)
+- [ ] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
+- [ ] T078: House Manual walkthrough pass: run `qa/product-walkthrough.md` House Manual section on the emulator if available, otherwise against screenshots; fix every blocked step (acceptance: AC-H19)
+- [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
+- [ ] V6: Visual review of M6 screenshots
+
+## M7 Ship
+
+- [ ] T080: Language pass over both apps and docs per `docs/voice.md`
+- [ ] T081: Store readiness: `docs/data-safety.md`, `docs/privacy-policy.md` (both apps, including backend data handling), `docs/store-listing.md`, release signing config, versioning scheme
+- [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
+- [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

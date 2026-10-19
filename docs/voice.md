@@ -10,9 +10,9 @@ Applies to every user-facing string in both apps (`strings.xml`), the store list
 4. Specifics over polish. Say what happened and what to do next: "Couldn't save the photo. Check free space and try again." beats "Something went wrong."
 5. Short over clever. One idea per sentence. Titles are nouns ("Breaker", "Shutoffs"), buttons are verbs ("Save", "Add breaker", "Retry").
 6. Plain words: "sort out", "walk through", "heads up", "either way", "when you get the chance". Never "please note that", "kindly", "utilize", "ensure" (say "make sure"), "in order to" (say "to").
-7. Keep the user's own terms. Breaker, panel, slot, shutoff, main, two-pole, tandem, GFCI, AFCI. Electricians and homeowners both know them. Explain a term once, in a helper line, only where a first-time homeowner would be lost (for example what a two-pole breaker is).
+7. Keep the user's own terms. Breaker, panel, slot, shutoff, main, two-pole, tandem, GFCI, AFCI, punch, timesheet, change order, punch list, rough-in, drywall. Electricians, contractors and homeowners know them. Explain a term once, in a helper line, only where a first-time homeowner would be lost (for example what a two-pole breaker is).
 8. Capitalization: sentence case everywhere ("Add breaker", not "Add Breaker"). App names and proper nouns keep their capitals (House Manual, Field Log, Google Play, RevenueCat is never shown to users).
-9. Consistent terms across both apps. One word per thing: "shutoff" (not "shut-off" or "valve"), "photo" (not "image" or "picture"), "job" in Field Log, "home" in House Manual, "handoff" for the Field Log to House Manual transfer, "backup" for the encrypted file, "legend" for the panel PDF, "Pro" for the paid tier.
+9. Consistent terms across both apps. One word per thing: "item" (not "equipment" or "asset"), "room", "floor" (not "level" or "story"), "wall", "plan" for the floor plan and "plans" for a job's drawings, "shutoff" (not "shut-off" or "valve"), "photo" (not "image" or "picture"), "job" in Field Log, "home" in House Manual, "crew" for the team, "clock in" and "clock out" (not "punch in"), "daily log" (not "report"), "change order", "handoff" for the Field Log to House Manual transfer, "backup" for the encrypted file, "legend" for the panel PDF, "Pro" for the paid tier.
 
 ## Patterns
 
