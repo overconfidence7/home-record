@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .android-sdk
-          key: android-sdk-v3-${{ hashFiles('scripts/setup-android.sh') }}
+          key: android-sdk-v4-${{ hashFiles('scripts/setup-android.sh') }}
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -81,6 +81,17 @@ jobs:
           echo "::notice title=source.properties::$(tr '\n' ' ' < "$base/source.properties")"
           echo "::notice title=package.xml::$(grep -oE '<type-details.*</type-details>|<localPackage[^>]*>' "$base/package.xml" | tr '\n' ' ' | cut -c1-900)"
           echo "::notice title=installed::$("$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --list_installed 2>/dev/null | grep -E 'platforms|build-tools' | tr '\n' ' ')"
+          python3 - "$base/package.xml" <<'PY'
+          import sys,re
+          x=open(sys.argv[1]).read()
+          x=re.sub(r'<license[^>]*>.*?</license>','',x,flags=re.S)
+          x=re.sub(r'\s+',' ',x)
+          for i in range(0,min(len(x),9000),3000):
+              print(f"::notice title=package.xml part {i//3000}::{x[i:i+3000]}")
+          PY
+          # Experiment: let AGP fetch the platform itself (licenses are accepted by the
+          # setup script), so the package layout is the one AGP's own sdklib writes.
+          rm -rf "$ANDROID_HOME/platforms"
           echo "::notice title=SDK platforms after::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ') / $(grep -o 'path="platforms;[^"]*"' "$base/package.xml" | head -n1)"
 
       - name: Testing keystore (kept in cache so builds install over each other)
