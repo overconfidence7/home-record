@@ -110,3 +110,11 @@ AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16
 
 ## 2026-10-18 (S7 Performance)
 - Added `DebugStrictMode` (core-ui), enabled from both Application classes only when the app is debuggable. Policy is detectAll + penaltyLog (not penaltyDeath) so QA can read violations from logcat tag `StrictMode` without crashing. Audit found photo decoding already runs on Dispatchers.IO, Room is opened lazily and queried via suspend/Flow, no runBlocking in main code. Cold-start timing needs an emulator and is left to QA.
+
+## 2026-10-18 — RevenueCat account and key handling
+
+- RevenueCat project HomeRecord (`b05900f1`) with one Play Store app (House Manual) and the built-in Test Store; entitlement `pro`; offering `default` with `$rc_annual` → `pro_annual` and `$rc_lifetime` → `pro_lifetime`. Details and keys in `docs/billing.md`.
+- Debug builds use the RevenueCat Test Store key so the paywall and purchase flow can be exercised on the emulator (nightly QA) before Play Console exists; release builds use the Play key. Reason: Play products and the service-account JSON wait on the Play Console account, and QA should not be blocked on that.
+- Keys stay out of source (local.properties on the PC, environment variables in the cloud builder). RevenueCat public SDK keys are designed to ship in the APK, so this is hygiene, not secrecy; a secret key (`sk_`) never goes anywhere in the repo.
+- Field Log stays free in v1 (no billing module).
+

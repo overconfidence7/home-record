@@ -45,7 +45,7 @@ Add nothing outside this list without a BLOCKERS.md entry under "Decisions to co
 | OCR (House Manual) | `com.google.mlkit:text-recognition` (bundled, on-device) |
 | Reminders (M3) | WorkManager 2.10.x |
 | Widget (M3) | Glance for App Widgets 1.1.x |
-| Billing (M3, T36 only) | RevenueCat `purchases` (latest stable) |
+| Billing (M3, T36/T42 only) | RevenueCat `purchases` (latest stable). Keys, entitlement and offering ids: `docs/billing.md`. Keys come from `local.properties` or the `REVENUECAT_API_KEY` / `REVENUECAT_TEST_API_KEY` env vars, never from source; debug builds use the Test Store key. |
 | Tests | JUnit 4, Robolectric 4.15.x, androidx.test core/ext-junit, compose-ui-test-junit4 (run under Robolectric), kotlinx-coroutines-test, Truth or kotlin.test |
 
 PDFs use the platform `android.graphics.pdf.PdfDocument`. Zip uses `java.util.zip`. Crypto uses `javax.crypto`. No other libraries.

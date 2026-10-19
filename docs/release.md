@@ -9,5 +9,5 @@
   homerecord.keyPassword=...
   ```
   Without them `./gradlew assembleRelease` produces `app-release-unsigned.apk`.
-- House Manual billing needs `revenuecat.apiKey=goog_...` in `local.properties`.
+- House Manual billing keys: see `docs/billing.md` (`revenuecat.apiKey` / `revenuecat.testApiKey` in `local.properties`, or `REVENUECAT_API_KEY` / `REVENUECAT_TEST_API_KEY` env vars; debug builds use the Test Store key).
 - Output: `house-manual/build/outputs/apk/release/`, `field-log/build/outputs/apk/release/`.

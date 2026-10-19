@@ -3,7 +3,7 @@
 ## Needs Nate
 
 (Things the builder cannot do without Nate: credentials, accounts, purchases, device-only checks.)
-- T36: RevenueCat public Android SDK key. Add `revenuecat.apiKey=goog_...` to `local.properties` (gitignored) for local builds; the release build needs it too. In the RevenueCat dashboard create an entitlement with id `pro` and a current offering containing an Annual package and a Lifetime package, backed by Play products. Until then the paywall shows "can't load prices" + Retry. Purchase flow can only be verified on a Play-signed build.
+- ~~T36: RevenueCat public Android SDK key. Add `revenuecat.apiKey=goog_...` to `local.properties` (gitignored) for local builds; the release build needs it too. In the RevenueCat dashboard create an entitlement with id `pro` and a current offering containing an Annual package and a Lifetime package, backed by Play products. Until then the paywall shows "can't load prices" + Retry. Purchase flow can only be verified on a Play-signed build.~~ **Nate 2026-10-18: done. Account, project, entitlement `pro`, Test Store + offering exist; keys and the env-var/local.properties scheme are in `docs/billing.md`. Builder: do PLAN T42. Still open on Nate's side (not blocking): Play Console products + service-account JSON before the Play key returns real prices.**
 
 ## Decisions to confirm
 
