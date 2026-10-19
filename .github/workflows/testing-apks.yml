@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .android-sdk
-          key: android-sdk-v5-${{ hashFiles('scripts/setup-android.sh') }}
+          key: android-sdk-v6-${{ hashFiles('scripts/setup-android.sh') }}
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -62,38 +62,10 @@ jobs:
       # On the runner AGP 8.13 could not find 'android-37' when only android-37.0 was
       # installed (unlike the cloud builder's snapshot). Give it a real android-37 dir
       # whose package id matches, and keep exactly one of the two.
-      - name: Platform dir AGP can find
+      - name: SDK diagnostics
         run: |
-          base="$ANDROID_HOME/platforms/android-37"
-          echo "::notice title=SDK platforms before::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
-          if [ ! -d "$base" ]; then
-            src=$(ls -d "$base".* 2>/dev/null | sort -V | head -n1 || true)
-            if [ -n "$src" ]; then
-              cp -a "$src" "$base"
-              sed -i 's#path="platforms;android-37\.[0-9]*"#path="platforms;android-37"#' "$base/package.xml"
-              rm -rf "$src"
-            fi
-          fi
-          # The runner's platform package reports AndroidVersion.ApiLevel=37.0 (minor-version
-          # encoding); AGP 8.13 then hashes it as something other than 'android-37'.
-          sed -i 's/^AndroidVersion.ApiLevel=37\.0$/AndroidVersion.ApiLevel=37/' "$base/source.properties"
-          sed -i 's#<api-level>37\.0</api-level>#<api-level>37</api-level>#g' "$base/package.xml"
-          echo "::notice title=source.properties::$(tr '\n' ' ' < "$base/source.properties")"
-          echo "::notice title=package.xml::$(grep -oE '<type-details.*</type-details>|<localPackage[^>]*>' "$base/package.xml" | tr '\n' ' ' | cut -c1-900)"
-          echo "::notice title=installed::$("$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --list_installed 2>/dev/null | grep -E 'platforms|build-tools' | tr '\n' ' ')"
-          # The package.xml that today's sdkmanager writes declares the platform details
-          # with the repository2/04 schema, which AGP 8.13's sdklib does not know, so the
-          # platform is silently ignored. Re-declare it with the /03 schema (same elements).
-          python3 - "$base/package.xml" <<'PY'
-          import re,sys
-          p=sys.argv[1]; x=open(p).read()
-          m=re.search(r'xmlns:(ns\d+)="http://schemas.android.com/sdk/android/repo/repository2/03"',x)
-          if m:
-              x=re.sub(r'xsi:type="ns\d+:platformDetailsType"', f'xsi:type="{m.group(1)}:platformDetailsType"', x)
-              open(p,'w').write(x)
-          print(re.search(r'xsi:type="[^"]+"',x).group(0))
-          PY
-          echo "::notice title=SDK platforms after::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ') / $(grep -o 'path="platforms;[^"]*"' "$base/package.xml" | head -n1)"
+          echo "::notice title=SDK platforms::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --install "build-tools;35.0.0" >/dev/null 2>&1 < /dev/null || true
 
       - name: Testing keystore (kept in cache so builds install over each other)
         id: keystore
