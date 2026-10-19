@@ -50,3 +50,10 @@ See BLOCKERS.md "Decisions to confirm".
 - 2026-10-19: Added `com.android.tools.screenshot:screenshot-validation-api` (same version as the screenshot plugin, alpha16) as `screenshotTestImplementation` in :core-ui; it supplies `@PreviewTest`, without which the plugin discovers no previews. Plugin needs the flag both in gradle.properties and as `experimentalProperties` in the module.
 
 - 2026-10-19: backend npm uses `.npmrc legacy-peer-deps=true` because npm 10.9 crashes (arborist `edgesOut`) resolving @cloudflare/vitest-pool-workers peers. Pool package is deprecated in favor of @cloudflare/vitest-plugin (not on the approved list); kept the approved one. wrangler.toml compatibility_date 2026-08-01 (local workerd supports up to 2026-08-22).
+
+## 2026-10-19 T009 company and team
+
+- One live invite code per company (8 chars, no 0/O/1/I); rotation replaces it. Joiners always start as Crew. Reason: simple revocation, matches AC-F2.
+- Admin routes (Team, Company profile, invite) return 404 to non-admin members, same as a missing company, so role gates reveal nothing (AC-B3).
+- Field Log caches the last membership in SharedPreferences so it opens offline; sign out clears it through an AuthRepository sign-out listener (AC-F4).
+- Added Robolectric and compose-ui-test (already approved) to :field-log tests; applied the screenshot plugin to :field-log (closes T005a for that module).

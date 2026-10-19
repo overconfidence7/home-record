@@ -199,3 +199,17 @@ company.delete("/:kind{companies}/:tenantId/members/:userId", requireSession, re
   await c.env.DB.prepare("DELETE FROM memberships WHERE tenant_kind = 'company' AND tenant_id = ? AND user_id = ?").bind(companyId, c.req.param("userId")).run();
   return c.json({ ok: true });
 });
+
+/** Landing page for shared invite links: opens Field Log with the code, or shows the code to type in. */
+company.get("/join/:code", (c) => {
+  const code = normalizeCode(c.req.param("code"));
+  if (!/^[A-Z0-9]{8}$/.test(code)) return notFound(c);
+  return c.html(
+    `<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Join on Field Log</title>` +
+      `<body style="font-family:sans-serif;max-width:28rem;margin:2rem auto;padding:0 1rem">` +
+      `<h1>Join your crew on Field Log</h1><p>Your invite code:</p>` +
+      `<p style="font-size:2rem;letter-spacing:.2em;font-family:monospace">${code}</p>` +
+      `<p><a href="fieldlog://join/${code}" style="font-size:1.25rem">Open Field Log</a></p>` +
+      `<p>In the app, sign in, pick Join and enter the code if it does not fill in on its own.</p></body>`,
+  );
+});

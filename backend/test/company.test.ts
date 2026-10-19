@@ -167,3 +167,16 @@ describe("FL-Company profile", () => {
     expect((await call("PATCH", `/companies/${id}/profile`, owner, { settings: { punchDistanceFt: 5 } })).status).toBe(400);
   });
 });
+
+describe("invite landing page", () => {
+  it("shows the normalized code and an app link without auth", async () => {
+    const res = await app.request("/join/k7m2-qx9r", {}, env);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("K7M2QX9R");
+    expect(html).toContain("fieldlog://join/K7M2QX9R");
+  });
+  it("404s on a malformed code (no HTML injection)", async () => {
+    expect((await app.request("/join/%3Cscript%3E", {}, env)).status).toBe(404);
+  });
+});

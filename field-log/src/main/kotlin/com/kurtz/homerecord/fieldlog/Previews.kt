@@ -1,0 +1,129 @@
+package com.kurtz.homerecord.fieldlog
+
+import android.content.res.Configuration
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.company.CompanyRole
+import com.kurtz.homerecord.core.company.CompanySettings
+import com.kurtz.homerecord.core.company.OvertimeRule
+import com.kurtz.homerecord.core.company.CompanyProfile
+import com.kurtz.homerecord.core.company.TeamMember
+import com.kurtz.homerecord.coreui.theme.Brand
+import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
+import com.kurtz.homerecord.fieldlog.company.CompanyScreen
+import com.kurtz.homerecord.fieldlog.company.CompanyUiState
+import com.kurtz.homerecord.fieldlog.company.TeamScreen
+import com.kurtz.homerecord.fieldlog.company.TeamStatus
+import com.kurtz.homerecord.fieldlog.company.TeamUiState
+import com.kurtz.homerecord.fieldlog.company.WelcomeMode
+import com.kurtz.homerecord.fieldlog.company.WelcomeScreen
+import com.kurtz.homerecord.fieldlog.company.WelcomeUiState
+import com.kurtz.homerecord.fieldlog.more.MoreScreen
+import com.kurtz.homerecord.fieldlog.more.MoreUiState
+import com.kurtz.homerecord.fieldlog.today.TodayScreen
+import com.kurtz.homerecord.fieldlog.today.TodayUiState
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(name = "200% font", fontScale = 2f, showBackground = true)
+annotation class ThemePreviews
+
+@Composable
+private fun Frame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { Surface { content() } }
+
+private val crew = listOf(
+    TeamMember("u1", "Nate Kurtz", "nate@kurtzelectric.com", CompanyRole.Owner, null),
+    TeamMember("u2", "Dana Whitfield", "dana@kurtzelectric.com", CompanyRole.Office, 4200),
+    TeamMember("u3", "Marcus Ortiz", "marcus.ortiz@gmail.com", CompanyRole.Lead, 5500),
+    TeamMember("u4", null, "sam.rivera@gmail.com", CompanyRole.Crew, 3200),
+    TeamMember("u5", "Priya Nair", "priya@kurtzelectric.com", CompanyRole.Crew, null),
+)
+
+@ThemePreviews
+@Composable
+fun WelcomeCreatePreview() = Frame {
+    WelcomeScreen(WelcomeUiState(name = "Kurtz Electric", trade = "Electrical", phone = "(555) 014-2290"), {})
+}
+
+@ThemePreviews
+@Composable
+fun WelcomeJoinErrorPreview() = Frame {
+    WelcomeScreen(WelcomeUiState(mode = WelcomeMode.Join, code = "K7M2QX9R", error = ApiFailure.InvalidCode), {})
+}
+
+@ThemePreviews
+@Composable
+fun TeamOwnerPreview() = Frame {
+    TeamScreen(
+        TeamUiState(
+            status = TeamStatus.Ready,
+            callerRole = CompanyRole.Owner,
+            companyName = "Kurtz Electric",
+            members = crew,
+            inviteCode = "K7M2QX9R",
+            inviteLink = "https://example.test/join/K7M2QX9R",
+        ),
+        onEvent = {},
+        onShareInvite = { _, _ -> },
+        onBack = {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TeamOfficePreview() = Frame {
+    TeamScreen(
+        TeamUiState(
+            status = TeamStatus.Ready,
+            callerRole = CompanyRole.Office,
+            companyName = "Kurtz Electric",
+            members = crew.map { it.copy(rateCents = null) },
+            inviteCode = "K7M2QX9R",
+            actionError = ApiFailure.Offline,
+        ),
+        onEvent = {},
+        onShareInvite = { _, _ -> },
+        onBack = {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TeamErrorPreview() = Frame {
+    TeamScreen(TeamUiState(status = TeamStatus.Failed, failure = ApiFailure.Offline, companyName = "Kurtz Electric"), {}, { _, _ -> }, {})
+}
+
+@ThemePreviews
+@Composable
+fun CompanyFormPreview() = Frame {
+    val profile = CompanyProfile(
+        "c1", "Kurtz Electric", "Electrical", "(555) 014-2290", "office@kurtzelectric.com", "418 Alder St, Harlan",
+        CompanySettings(OvertimeRule.Daily8Weekly40, breakRule = true, requireGps = true, punchDistanceFt = 500),
+    )
+    CompanyScreen(
+        CompanyUiState(
+            status = TeamStatus.Ready, loaded = profile, name = profile.name, trade = "Electrical", phone = "(555) 014-2290",
+            email = "office@kurtzelectric.com", address = "418 Alder St, Harlan", overtimeRule = OvertimeRule.Daily8Weekly40,
+            breakRule = true, requireGps = true, punchDistanceText = "500",
+        ),
+        {}, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TodayAdminPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), onInviteCrew = {}) }
+
+@ThemePreviews
+@Composable
+fun TodayCrewPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Crew), onInviteCrew = {}) }
+
+@ThemePreviews
+@Composable
+fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Owner), {}) }
+
+@ThemePreviews
+@Composable
+fun MoreCrewPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew), {}) }

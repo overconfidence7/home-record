@@ -6,4 +6,80 @@
     <string name="tab_clock">Clock</string>
     <string name="tab_schedule">Schedule</string>
     <string name="tab_more">More</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="dismiss">Dismiss</string>
+
+    <string name="welcome_title">Set up your company</string>
+    <string name="welcome_intro">Start a company for your crew, or join one with the code your boss gave you.</string>
+    <string name="welcome_mode_create">Create</string>
+    <string name="welcome_mode_join">Join</string>
+    <string name="welcome_create">Create company</string>
+    <string name="welcome_join">Join company</string>
+    <string name="welcome_wrong_account">Use a different account</string>
+    <string name="company_name">Company name</string>
+    <string name="company_trade">Trade</string>
+    <string name="company_trade_helper">Electrical, plumbing, remodeling, whatever you do most.</string>
+    <string name="company_phone">Phone</string>
+    <string name="company_email">Email</string>
+    <string name="company_address">Address</string>
+    <string name="invite_code">Invite code</string>
+    <string name="invite_code_helper">8 letters and numbers. Dashes and spaces are fine.</string>
+
+    <string name="company_err_offline">Can\'t reach the server. Check your connection and try again.</string>
+    <string name="company_err_invalid_code">That code doesn\'t match a company. Check it with your boss, or ask for a new one.</string>
+    <string name="company_err_invalid">Some of that couldn\'t be saved. Check the fields and try again.</string>
+    <string name="company_err_forbidden">Your role can\'t do that.</string>
+    <string name="company_err_not_found">That isn\'t available to you anymore. Go back and refresh.</string>
+    <string name="company_err_failed">Couldn\'t finish that. Try again in a minute.</string>
+
+    <string name="role_owner">Owner</string>
+    <string name="role_office">Office</string>
+    <string name="role_lead">Lead</string>
+    <string name="role_crew">Crew</string>
+    <string name="role_sub">Sub</string>
+
+    <string name="today_empty_title">No jobs yet at %1$s</string>
+    <string name="today_empty_admin">Add a job or invite your crew. Anyone with your code can join from their own phone.</string>
+    <string name="today_invite_crew">Invite crew</string>
+    <string name="today_empty_crew">Nothing scheduled for you yet. Your boss adds you to a job and it shows up here.</string>
+
+    <string name="more_team">Team</string>
+    <string name="more_company">Company</string>
+    <string name="more_sign_out">Sign out</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_body">Company details saved on this phone are cleared. Sign back in to load them again.</string>
+
+    <string name="team_title">Team</string>
+    <string name="team_members_header">Members (%1$d)</string>
+    <string name="team_member_with_rate">%1$s · %2$s an hour</string>
+    <string name="team_invite_title">Invite code</string>
+    <string name="team_invite_body">Share this code. The person signs in, picks Join and enters it. They join as Crew.</string>
+    <string name="team_invite_share">Share invite</string>
+    <string name="team_invite_new">Make a new code</string>
+    <string name="team_invite_message">Join %1$s on Field Log. Code: %2$s. Link: %3$s</string>
+    <string name="team_make_role">Make %1$s</string>
+    <string name="team_set_rate">Set hourly rate</string>
+    <string name="team_remove">Remove from company</string>
+    <string name="team_remove_title">Remove %1$s?</string>
+    <string name="team_remove_body">They lose access to the company on their phone. Their past punches stay in the timesheets.</string>
+    <string name="team_remove_confirm">Remove</string>
+    <string name="team_rate_title">Hourly rate for %1$s</string>
+    <string name="team_rate_label">Rate per hour</string>
+
+    <string name="company_title">Company</string>
+    <string name="company_ot_title">Overtime</string>
+    <string name="ot_none">No overtime rule</string>
+    <string name="ot_daily8">Over 8 hours a day</string>
+    <string name="ot_weekly40">Over 40 hours a week</string>
+    <string name="ot_both">Over 8 a day or 40 a week</string>
+    <string name="company_break_rule">Flag shifts with no break</string>
+    <string name="company_break_rule_helper">Marks any shift over 6 hours that has no break.</string>
+    <string name="company_require_gps">Require location to clock in</string>
+    <string name="company_require_gps_helper">Crew can\'t clock in until their phone finds a location.</string>
+    <string name="company_distance">Far from job distance (feet)</string>
+    <string name="company_distance_helper">Punches farther than this from the job address ask for a reason.</string>
+    <string name="company_distance_error">Enter a number from %1$d to %2$d.</string>
+    <string name="company_photo_on_punch">Photo at clock in</string>
+    <string name="company_photo_on_punch_helper">Asks for a quick photo with each punch. Off by default.</string>
 </resources>

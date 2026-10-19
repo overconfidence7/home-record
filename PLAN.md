@@ -19,7 +19,7 @@ The builder may append notes and new subtasks under a task (as `  - [ ] T012a: .
 - [x] T008a: Backend `/auth/email/start`, `/auth/email/verify`, `/auth/google` (Resend via fetch, dev mode logs code, Google ID token verified with jose JWKS), `[unit]` tests (acceptance: AC-B1)
 - [x] T008b: `:core` `AuthRepository` with `AuthApi`, `TokenStore`, `GoogleCredentialSource` interfaces, fakes and tests (acceptance: AC-F4 logic)
 - [x] T008c: Android implementations: Retrofit `AuthApi` (reads `X-Refreshed-Token`), `EncryptedSharedPreferences` `TokenStore`, Credential Manager `GoogleCredentialSource`, HM-Account and FL sign-in screens with email-code flow and previews, `AppContainer` wiring (acceptance: AC-B1, AC-H15 sign-in part, AC-F4)
-- [ ] T009: Field Log company and team: create company, invite code and link, join, roles, FL-Team, FL-Company settings; backend endpoints with role enforcement tests (acceptance: AC-F1, AC-F2, AC-F3, AC-B3)
+- [x] T009: Field Log company and team: create company, invite code and link, join, roles, FL-Team, FL-Company settings; backend endpoints with role enforcement tests (acceptance: AC-F1, AC-F2, AC-F3, AC-B3)
 - [ ] T010: Sync engine in `:core`: outbox, push/pull, conflict rules, device id, `SyncState`; backend `/sync/push` and `/sync/pull` with `serverSeq` and idempotency; `SyncStatusChip` (acceptance: AC-F53, AC-B20)
 - [ ] R02: Review T006–T010; run a two-device sync scenario in unit tests (two in-memory databases through a fake server)
 - [ ] V0: Visual review of M0: open every committed screenshot PNG, compare with `docs/ui-standards.md` rules 1–12 and 24–30, fix what fails, record in REVIEW.md under "Builder visual review"
