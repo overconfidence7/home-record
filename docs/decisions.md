@@ -118,3 +118,10 @@ AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16
 - Keys stay out of source (local.properties on the PC, environment variables in the cloud builder). RevenueCat public SDK keys are designed to ship in the APK, so this is hygiene, not secrecy; a secret key (`sk_`) never goes anywhere in the repo.
 - Field Log stays free in v1 (no billing module).
 
+## 2026-10-18 — Testing APKs from GitHub Actions
+
+- `.github/workflows/testing-apks.yml` builds debug and release (R8) APKs of both apps on every push to `build`, runs the unit tests first, and republishes the rolling pre-release `testing` (https://github.com/overconfidence7/home-record/releases/tag/testing). Reason: Nate wants to install and test on a phone without Android Studio or the cloud builder in the loop.
+- Both variants are signed with a throwaway keystore kept in the Actions cache (`testing-keystore-v1`) so builds install over each other. Store builds keep the real key from `docs/release.md`.
+- SDK layout on the runner: leave `platforms/android-37.0` as sdkmanager installs it and pre-install `build-tools;35.0.0`. Copying, symlinking or re-declaring an `android-37` package made AGP 8.13 re-download 37.0 and fail with "Failed to find target with hash string 'android-37'". Same conclusion the cloud builder reached; recorded here so nobody tries it a third time.
+- Gradle failures in CI are surfaced as check-run annotations (`scripts/ci-gradle.sh`) because the raw log host is unreachable from the builder's proxy.
+

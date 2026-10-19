@@ -59,13 +59,16 @@ jobs:
       - name: Install Android SDK
         run: bash scripts/setup-android.sh
 
-      # On the runner AGP 8.13 could not find 'android-37' when only android-37.0 was
-      # installed (unlike the cloud builder's snapshot). Give it a real android-37 dir
-      # whose package id matches, and keep exactly one of the two.
-      - name: SDK diagnostics
+      # Leave platforms/android-37.0 exactly as sdkmanager installs it: AGP 8.13 resolves
+      # compileSdk 37 to that directory itself. Adding, copying or symlinking an
+      # android-37 next to it makes AGP re-download 37.0 and then fail with
+      # "Failed to find target with hash string 'android-37'" (seen on the first runs).
+      # AGP also wants its default build-tools (35.0.0); install them up front so the
+      # build does not depend on AGP's own downloader.
+      - name: Build-tools AGP expects
         run: |
-          echo "::notice title=SDK platforms::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --install "build-tools;35.0.0" >/dev/null 2>&1 < /dev/null || true
+          echo "SDK platforms: $(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
 
       - name: Testing keystore (kept in cache so builds install over each other)
         id: keystore
@@ -99,7 +102,7 @@ jobs:
       # check-run annotation (readable through the REST API, which is what the builder
       # has; raw logs sit behind a blob host it cannot reach).
       - name: Unit tests
-        run: bash scripts/ci-gradle.sh --info --stacktrace testDebugUnitTest
+        run: bash scripts/ci-gradle.sh testDebugUnitTest
 
       - name: Build APKs
         run: bash scripts/ci-gradle.sh :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease
