@@ -4,7 +4,7 @@
     <string name="jobs_title">Jobs</string>
     <string name="jobs_new">New job</string>
     <string name="jobs_show_archived">Show archived</string>
-    <string name="jobs_empty">No jobs yet. Create one to start logging.</string>
+    <string name="jobs_empty">No jobs yet. Tap New job to start logging.</string>
     <string name="jobs_empty_active">No active jobs. Turn on Show archived to see finished ones.</string>
     <string name="jobs_archived_tag">Archived</string>
     <string name="jobedit_title_new">New job</string>
@@ -18,14 +18,14 @@
     <string name="jobedit_add">Add</string>
     <string name="jobedit_archived">Archived</string>
     <string name="jobedit_save">Save</string>
-    <string name="job_missing">This job no longer exists.</string>
+    <string name="job_missing">Can\'t find this job. It may have been deleted.</string>
     <string name="job_no_entries">No entries yet.</string>
     <string name="job_edit">Edit job</string>
     <string name="job_capture">Capture</string>
     <string name="job_behind_wall">Behind the wall</string>
     <string name="wall_pick_room">Which room?</string>
     <string name="wall_pick_wall">%1$s: which wall?</string>
-    <string name="wall_no_rooms">This job has no rooms yet. Add rooms by editing the job.</string>
+    <string name="wall_no_rooms">This job has no rooms yet. Tap Edit job to add some.</string>
     <string name="wall_custom">Custom wall name</string>
     <string name="wall_change_room">Change room</string>
     <string name="wall_camera_header">%1$s · %2$s</string>
@@ -42,10 +42,10 @@
         <item quantity="one">%1$d photo saved</item>
         <item quantity="other">%1$d photos saved</item>
     </plurals>
-    <string name="capture_failed">Photo not saved. Try again.</string>
-    <string name="capture_permission_needed">Field Log needs camera access to take job photos. You can turn it on in Settings.</string>
+    <string name="capture_failed">Couldn\'t save the photo. Check free space and try again.</string>
+    <string name="capture_permission_needed">Field Log uses the camera to take job photos. Without it you can still add notes and voice memos. You can turn it on in Settings.</string>
     <string name="capture_open_settings">Open Settings</string>
-    <string name="capture_mic_permission_needed">Field Log needs microphone access to record voice notes. You can turn it on in Settings.</string>
+    <string name="capture_mic_permission_needed">Field Log uses the microphone to record voice memos. Without it you can still take photos and add notes. You can turn it on in Settings.</string>
     <string name="capture_note">Note</string>
     <string name="capture_note_title">Add a note</string>
     <string name="capture_note_save">Save</string>
@@ -53,7 +53,7 @@
     <string name="capture_voice">Voice</string>
     <string name="capture_voice_stop">Stop</string>
     <string name="capture_recording">Recording %1$s</string>
-    <string name="capture_voice_failed">Recording failed. Try again.</string>
+    <string name="capture_voice_failed">Couldn\'t save the recording. Check free space and try again.</string>
     <plurals name="capture_notes_count">
         <item quantity="one">%1$d note</item>
         <item quantity="other">%1$d notes</item>
@@ -65,13 +65,13 @@
     <string name="capture_extras_count">%1$s, %2$s saved</string>
     <string name="capture_back">Back</string>
     <string name="room_kitchen">Kitchen</string>
-    <string name="room_living_room">Living Room</string>
-    <string name="room_dining_room">Dining Room</string>
-    <string name="room_primary_bedroom">Primary Bedroom</string>
+    <string name="room_living_room">Living room</string>
+    <string name="room_dining_room">Dining room</string>
+    <string name="room_primary_bedroom">Primary bedroom</string>
     <string name="room_bedroom_2">Bedroom 2</string>
     <string name="room_bedroom_3">Bedroom 3</string>
     <string name="room_bathroom">Bathroom</string>
-    <string name="room_primary_bath">Primary Bath</string>
+    <string name="room_primary_bath">Primary bath</string>
     <string name="room_garage">Garage</string>
     <string name="room_basement">Basement</string>
     <string name="room_attic">Attic</string>
@@ -83,7 +83,7 @@
     <string name="entry_voice_duration">Voice memo %1$s</string>
     <string name="entry_play">Play</string>
     <string name="entry_stop">Stop</string>
-    <string name="entry_missing">This entry no longer exists.</string>
+    <string name="entry_missing">Can\'t find this entry. It may have been deleted.</string>
     <string name="entry_note_label">Note</string>
     <string name="entry_caption_label">Caption</string>
     <string name="entry_room">Room</string>
@@ -110,7 +110,7 @@
     <string name="report_saved">Saved</string>
     <string name="report_make_pdf">Make PDF</string>
     <string name="report_making_pdf">Making PDF…</string>
-    <string name="report_pdf_failed">Could not make the PDF. Try again.</string>
+    <string name="report_pdf_failed">Couldn\'t make the PDF. Check free space and try again.</string>
     <string name="report_ok">OK</string>
     <string name="report_cancel">Cancel</string>
     <string name="delay_none">None</string>
@@ -132,18 +132,18 @@
     <string name="settings_remove_logo">Remove logo</string>
     <string name="job_handoff">Handoff</string>
     <string name="handoff_title">Handoff</string>
-    <string name="handoff_includes">The export will include:</string>
+    <string name="handoff_includes">The export includes:</string>
     <string name="handoff_row">%1$s: %2$d</string>
     <string name="handoff_rooms">Rooms</string>
     <string name="handoff_walls">Walls</string>
-    <string name="handoff_behind_wall">Behind-wall photos</string>
+    <string name="handoff_behind_wall">Behind the wall photos</string>
     <string name="handoff_equipment">Equipment</string>
     <string name="handoff_finishes">Finishes</string>
     <string name="handoff_shutoffs">Shutoffs</string>
     <string name="handoff_panels">Panels</string>
-    <string name="handoff_missing">This job\'s home record could not be found.</string>
+    <string name="handoff_missing">Can\'t find the home record for this job.</string>
     <string name="handoff_export_bundle">Export .homerecord</string>
     <string name="handoff_export_pdf">Export PDF</string>
     <string name="handoff_exporting">Exporting…</string>
-    <string name="handoff_failed">The export could not be made. Try again.</string>
+    <string name="handoff_failed">Couldn\'t export. Check free space and try again.</string>
 </resources>

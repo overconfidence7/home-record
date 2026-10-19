@@ -23,7 +23,7 @@ class JobsScreenTest {
         val events = mutableListOf<JobsEvent>()
         rule.setContent { HomeRecordTheme { JobsScreen(JobsUiState(loaded = true), events::add) } }
         rule.onAllNodesWithText("New job").assertCountEquals(1)
-        rule.onNodeWithText("No jobs yet. Create one to start logging.").assertIsDisplayed()
+        rule.onNodeWithText("No jobs yet. Tap New job to start logging.").assertIsDisplayed()
         rule.onNodeWithText("New job").performClick()
         assertEquals(listOf<JobsEvent>(JobsEvent.NewJob), events)
     }

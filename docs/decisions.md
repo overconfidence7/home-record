@@ -125,3 +125,4 @@ AES-256-GCM via javax.crypto, key from PBKDF2WithHmacSHA256 (210k iterations, 16
 - SDK layout on the runner: leave `platforms/android-37.0` as sdkmanager installs it and pre-install `build-tools;35.0.0`. Copying, symlinking or re-declaring an `android-37` package made AGP 8.13 re-download 37.0 and fail with "Failed to find target with hash string 'android-37'". Same conclusion the cloud builder reached; recorded here so nobody tries it a third time.
 - Gradle failures in CI are surfaced as check-run annotations (`scripts/ci-gradle.sh`) because the raw log host is unreachable from the builder's proxy.
 
+- 2026-10-19 T40b: room quick-add names now sentence case (Living room); stored names of existing homes keep their old casing. Kind mapping is case-insensitive.

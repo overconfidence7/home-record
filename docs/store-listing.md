@@ -2,43 +2,43 @@
 
 ## House Manual
 
-- **Title (30):** House Manual: Panel & Shutoffs
-- **Short description (80):** Label your breaker panel, find shutoffs fast, and keep home records offline.
+- **Title (30):** House Manual: Panel and Shutoffs
+- **Short description (80):** Label your breaker panel, find shutoffs fast and keep home records offline.
 - **Full description:**
-  Know your house before something goes wrong.
+  House Manual maps your breaker panel, shutoffs and equipment so anyone in the house can find them in a hurry.
 
-  House Manual is the owner's manual your home never came with. Map every breaker in your panel, link breakers to rooms and outlets, and print a clean legend to tape inside the door.
-
-  - Breaker panel grid with labels, amps, two-pole and tandem breakers, and label confidence
+  - Panel grid with labels, amps, two-pole and tandem breakers, and how sure you are of each label
   - Emergency mode: water, gas and electrical shutoffs with photos and plain instructions, one tap from a Quick Settings tile
-  - Mapping mode: flip a breaker, see which outlets lost power
-  - Unified search: "garage freezer" finds the breaker
-  - Equipment registry with model, serial and warranty; scan labels on-device
-  - Maintenance reminders and consumables (filter sizes)
-  - Home-screen widget for quick access
-  - Shareable PDF legend and encrypted backups
-  - Imports a contractor's close-out package from Field Log
-  - Works fully offline. No account. Your data stays on your phone.
+  - Mapping mode: flip a breaker and see which outlets lost power
+  - Search: "garage freezer" finds the breaker
+  - Equipment list with model, serial number and warranty, plus label scanning on your phone
+  - Reminders for seasonal chores, equipment service and filter sizes
+  - Home screen widget for quick access
+  - A PDF legend of the panel to tape inside the door, and encrypted backups
+  - Imports a contractor's handoff from Field Log
 
-  Free: one panel and ten equipment items. Pro (yearly or lifetime): unlimited.
+  No account and no cloud. Everything stays on your phone.
+
+  Free: one panel and ten equipment items. Pro removes both limits and adds reminders. Annual or lifetime, your call.
 - **Category:** House & Home
 - **Screenshots to capture:** Panel grid, Emergency card, Mapping result, Search, Legend PDF, Equipment list.
 
 ## Field Log
 
-- **Title (30):** Field Log: Job Photos & Notes
-- **Short description (80):** Fast job photos, notes and voice memos for contractors, with a client handoff.
+- **Title (30):** Field Log: Job Photos and Notes
+- **Short description (80):** Job photos, notes and voice memos for contractors, with a handoff to the homeowner.
 - **Full description:**
-  Built for work sites: big buttons, gloves-friendly, works without signal.
+  Field Log is for people working on a house. Big buttons, one-handed capture, and it works without signal.
 
-  - One-tap capture with a large shutter; volume keys work too
-  - Notes and voice recordings per job, tagged by room
-  - Behind-the-wall photo checklist before drywall closes
-  - Template daily report as PDF
-  - Close-out package: export a `.homerecord` file your client opens in House Manual and starts with a filled-in record
-  - Offline, no account, no ads.
+  - Large shutter button for job photos, tagged by room
+  - Notes and voice memos on every job
+  - Behind the wall photos before the drywall closes
+  - Daily report as a PDF
+  - Handoff: export a `.homerecord` file that your client opens in House Manual and starts with a filled-in record
+
+  No account, no ads and no cloud.
 - **Category:** Business
-- **Screenshots to capture:** Job list, Capture, Job timeline, Daily report PDF, Close-out export.
+- **Screenshots to capture:** Job list, Capture, Job timeline, Daily report PDF, Handoff export.
 
 ## Shared
 

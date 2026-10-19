@@ -137,8 +137,8 @@ class PanelScreenTest {
         )
         rule.setContent { HomeRecordTheme { PanelInsightsContent(result, onClose = {}) } }
         rule.onNodeWithText("8 slots used, 12 free").assertIsDisplayed()
-        rule.onNodeWithText("Home inspectors and many insurers flag this panel type; have a licensed electrician evaluate it.").assertIsDisplayed()
-        rule.onNodeWithText("Microwave: not labeled yet — label it, or it may not exist.").assertIsDisplayed()
+        rule.onNodeWithText("Home inspectors and many insurers flag this panel type. Have a licensed electrician evaluate it.").assertIsDisplayed()
+        rule.onNodeWithText("Microwave: not labeled yet. Label it, or it may not exist.").assertIsDisplayed()
         rule.onNodeWithTag("insights_disclaimer").performScrollTo().assertIsDisplayed()
     }
 
