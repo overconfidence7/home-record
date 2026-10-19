@@ -66,8 +66,16 @@ class AuthRepository(
     /** Called on a 401: the session is gone. */
     fun onUnauthorized() = signOut()
 
+    private val signOutListeners = mutableListOf<() -> Unit>()
+
+    /** Lets other repositories drop their cached data when the session ends (AC-F4). */
+    fun addSignOutListener(listener: () -> Unit) {
+        signOutListeners += listener
+    }
+
     fun signOut() {
         store.clear()
+        signOutListeners.forEach { it() }
         _state.value = AuthState.SignedOut
     }
 
