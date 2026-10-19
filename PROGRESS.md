@@ -99,3 +99,4 @@ One line per run, newest at the bottom: `YYYY-MM-DD HH:MM TZ — tasks — tests
 2026-10-19 ET — FIX Minor (Behind the wall empty-state copy): wall_no_rooms no longer points to Edit job, says rooms are added when a job is created — 424 tests pass; assembleDebug+testDebugUnitTest+lintDebug green; SDK: platforms/android-37 symlink REMOVED this run — emulator: in Field Log, job without rooms > Behind the wall shows the new copy
 2026-10-19 ET — waiting for QA on a6b68b1 (assembleDebug+testDebugUnitTest green; qa/last-tested.txt still a86884c; strings-only Behind the wall copy fix needs emulator re-test)
 2026-10-19 ET — waiting for QA on 02d9341 (code unchanged since a6b68b1; qa/last-tested.txt still a86884c)
+2026-10-19 ET — waiting for QA on 997b93d (code unchanged since a6b68b1; qa/last-tested.txt still a86884c)
