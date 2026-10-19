@@ -58,11 +58,7 @@ class RevenueCatEntitlements(context: Context, apiKey: String) : Entitlements {
             val available = Purchases.sharedInstance.awaitOfferings().current?.availablePackages.orEmpty()
             packages.clear()
             val offers = available.mapNotNull { pkg ->
-                val plan = when (pkg.packageType) {
-                    PackageType.ANNUAL -> Plan.YEARLY
-                    PackageType.LIFETIME -> Plan.LIFETIME
-                    else -> return@mapNotNull null
-                }
+                val plan = planFor(pkg.packageType) ?: return@mapNotNull null
                 packages[plan] = pkg
                 Offer(plan, pkg.product.price.formatted)
             }.sortedBy { it.plan.ordinal }
@@ -94,7 +90,14 @@ class RevenueCatEntitlements(context: Context, apiKey: String) : Entitlements {
         }
     }
 
-    private companion object {
+    internal companion object {
         const val PRO_ENTITLEMENT = "pro"
+
+        /** `$rc_annual` is the Annual plan, `$rc_lifetime` the Lifetime plan; other packages are ignored. */
+        fun planFor(type: PackageType): Plan? = when (type) {
+            PackageType.ANNUAL -> Plan.YEARLY
+            PackageType.LIFETIME -> Plan.LIFETIME
+            else -> null
+        }
     }
 }

@@ -9,6 +9,6 @@
   homerecord.keyPassword=...
   ```
   Without them `./gradlew assembleRelease` produces `app-release-unsigned.apk`.
-- House Manual billing keys: see `docs/billing.md` (`revenuecat.apiKey` / `revenuecat.testApiKey` in `local.properties`, or `REVENUECAT_API_KEY` / `REVENUECAT_TEST_API_KEY` env vars; debug builds use the Test Store key).
+- House Manual billing keys: see `docs/billing.md`. Debug builds read `revenuecat.testApiKey` (local.properties) then `REVENUECAT_TEST_API_KEY`, then the release chain; release builds read `revenuecat.apiKey` then `REVENUECAT_API_KEY`, else blank (free tier with the Retry paywall). Keys never land in git.
 - Output: `house-manual/build/outputs/apk/release/`, `field-log/build/outputs/apk/release/`.
 - Testing builds: every push to `build` runs `.github/workflows/testing-apks.yml`, which attaches debug and release APKs of both apps (signed with a throwaway testing key) to the rolling pre-release https://github.com/overconfidence7/home-record/releases/tag/testing. Install from a phone's browser. Not for the store.

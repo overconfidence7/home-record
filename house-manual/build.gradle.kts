@@ -4,7 +4,14 @@ import java.util.Properties
 val localProps: Properties = Properties().also { props ->
     rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(props::load)
 }
-val revenueCatKey: String = localProps.getProperty("revenuecat.apiKey", "")
+// Release key: local.properties, then env, then blank (blank means UnavailableEntitlements).
+val revenueCatKey: String = localProps.getProperty("revenuecat.apiKey")
+    ?: System.getenv("REVENUECAT_API_KEY")
+    ?: ""
+// Debug builds prefer the Test Store key, then fall back to the release chain.
+val revenueCatDebugKey: String = localProps.getProperty("revenuecat.testApiKey")
+    ?: System.getenv("REVENUECAT_TEST_API_KEY")
+    ?: revenueCatKey
 
 // versionCode derives from versionName (major*10000 + minor*100 + patch); bump homerecord.versionName in gradle.properties.
 val appVersionName: String = providers.gradleProperty("homerecord.versionName").get()
@@ -32,7 +39,6 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
-        buildConfigField("String", "REVENUECAT_API_KEY", "\"$revenueCatKey\"")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -50,7 +56,11 @@ android {
         }
     }
     buildTypes {
+        debug {
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$revenueCatDebugKey\"")
+        }
         release {
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$revenueCatKey\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
