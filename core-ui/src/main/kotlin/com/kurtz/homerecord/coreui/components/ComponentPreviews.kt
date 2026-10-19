@@ -85,3 +85,26 @@ fun FormFieldsPreview() = Frame {
         EnumPicker(listOf("1-pole", "2-pole", "Tandem"), "2-pole", {}, { it })
     }
 }
+
+@ThemePreviews
+@Composable
+fun SignInEmailPreview() = Frame {
+    com.kurtz.homerecord.coreui.auth.SignInScreen(
+        com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.whitfield@gmail.com"),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun SignInCodePreview() = Frame {
+    com.kurtz.homerecord.coreui.auth.SignInScreen(
+        com.kurtz.homerecord.coreui.auth.SignInUiState(
+            step = com.kurtz.homerecord.coreui.auth.SignInStep.Code,
+            email = "dana.whitfield@gmail.com",
+            code = "48",
+            error = com.kurtz.homerecord.core.auth.AuthResult.InvalidCode,
+        ),
+        {},
+    )
+}

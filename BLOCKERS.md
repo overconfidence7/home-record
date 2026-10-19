@@ -16,3 +16,4 @@
 - 2026-10-19 (Nate, at re-scope): push notifications use Firebase Cloud Messaging for delivery only (free; Cloudflare has no push service). No other Firebase product. Confirm or choose "no push in v2".
 - 2026-10-19 (Nate, at re-scope): email codes and handoff emails go through Resend (free tier 3,000/month). Confirm or name another sender.
 - 2026-10-19 (Nate, at re-scope): Field Log pricing stays at Solo $39/mo and Crew $79/mo (up to 10), 14-day trial; House Manual at free / $24.99 yr / $59 lifetime with a 15-item free limit. Confirm or change.
+- 2026-10-19 (builder, T008c): Google sign-in needs `google.webClientId` in local.properties (BuildConfig.GOOGLE_WEB_CLIENT_ID); blank means the Google button reports a failure and email code still works. Sign-in lives on the More tab root until the HM-Account and FL-Team screens land. Cleartext HTTP is allowed in all builds for now (for 10.0.2.2); restrict to debug at S8.

@@ -6,6 +6,8 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import com.kurtz.homerecord.core.auth.AuthRepository
+import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
 import com.kurtz.homerecord.coreui.shell.PlaceholderDetail
@@ -25,13 +27,15 @@ private val tabDefs = listOf(
 )
 
 @Composable
-fun FieldLogApp() {
+fun FieldLogApp(auth: AuthRepository) {
     val tabs = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     HomeRecordApp(tabs = tabs, entries = { nav ->
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
-            if (key.depth == 0) {
+            if (key.depth == 0 && key.title == "more") {
+                AccountRoute(auth)
+            } else if (key.depth == 0) {
                 PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
             } else {
                 PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })

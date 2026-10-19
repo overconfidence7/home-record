@@ -33,6 +33,7 @@ dependencies {
     api(libs.navigation3.runtime)
     api(libs.navigation3.ui)
     api(libs.lifecycle.viewmodel.navigation3)
+    api(libs.lifecycle.viewmodel.compose)
     api(libs.kotlinx.serialization.json)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 
 }
 
@@ -22,6 +23,15 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.room.runtime)
     api(libs.room.ktx)
+    api(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
+    api(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.serialization)
+    implementation(libs.security.crypto)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.truth)

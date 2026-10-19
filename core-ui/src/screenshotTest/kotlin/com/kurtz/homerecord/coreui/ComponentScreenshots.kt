@@ -33,3 +33,13 @@ fun LoadingStateScreenshot() = LoadingStatePreview()
 @ThemeScreenshots
 @Composable
 fun ErrorStateScreenshot() = ErrorStatePreview()
+
+@PreviewTest
+@ThemeScreenshots
+@Composable
+fun SignInEmailScreenshot() = com.kurtz.homerecord.coreui.components.SignInEmailPreview()
+
+@PreviewTest
+@ThemeScreenshots
+@Composable
+fun SignInCodeScreenshot() = com.kurtz.homerecord.coreui.components.SignInCodePreview()

@@ -14,6 +14,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
         buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
     }
     compileOptions {
@@ -27,6 +28,13 @@ android {
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 
+
+fun localProp(key: String, default: String): String {
+    val f = rootProject.file("local.properties")
+    val p = Properties()
+    if (f.exists()) f.inputStream().use { p.load(it) }
+    return p.getProperty(key, default)
+}
 
 fun apiBaseUrl(): String {
     val f = rootProject.file("local.properties")

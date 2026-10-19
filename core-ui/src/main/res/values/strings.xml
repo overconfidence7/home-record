@@ -20,4 +20,22 @@
     <string name="length_helper_metric">Type 3.8 m, 380 cm or 3.8.</string>
     <string name="length_error">Can\'t read that length. Try 12\'6\" or 12.5.</string>
     <string name="money_error">Enter an amount like 24.99.</string>
+    <string name="sign_in_title">Sign in</string>
+    <string name="sign_in_intro">An account backs up your records and keeps your other devices in step. Signing out keeps what is on this phone.</string>
+    <string name="sign_in_email">Email</string>
+    <string name="sign_in_send_code">Send code</string>
+    <string name="sign_in_google">Continue with Google</string>
+    <string name="sign_in_code_sent">We sent a 6 digit code to %1$s. It works for 10 minutes.</string>
+    <string name="sign_in_code">Code</string>
+    <string name="sign_in_code_helper">Check your spam folder if it has not arrived.</string>
+    <string name="sign_in_verify">Sign in</string>
+    <string name="sign_in_change_email">Use a different email</string>
+    <string name="sign_in_err_invalid">That code is not right. Check it and try again.</string>
+    <string name="sign_in_err_expired">That code has expired. Go back and send a new one.</string>
+    <string name="sign_in_err_locked">Too many wrong codes. Go back and send a new one.</string>
+    <string name="sign_in_err_offline">Can\'t reach the server. Check your connection and try again.</string>
+    <string name="sign_in_err_failed">Couldn\'t sign in. Try again in a minute.</string>
+    <string name="account_signed_in">You are signed in.</string>
+    <string name="account_sign_out_note">Signing out keeps your records on this phone.</string>
+    <string name="account_sign_out">Sign out</string>
 </resources>
