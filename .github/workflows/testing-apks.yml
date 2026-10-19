@@ -1,0 +1,140 @@
+name: Testing APKs
+
+# Builds both apps on every push to `build` and attaches the APKs to a rolling
+# GitHub pre-release called "testing", so Nate can install the newest build on a
+# phone straight from the Releases page. Debug and release (R8) variants of each.
+#
+# Signing: both variants are signed with a "testing" keystore that is created on
+# the first run and kept in the Actions cache, so later builds install over earlier
+# ones. If the cache is ever evicted the key changes and the phone will ask for an
+# uninstall first (noted in the release body). Store builds use the real key via
+# docs/release.md and never come from here.
+
+on:
+  push:
+    branches: [build]
+  workflow_dispatch:
+
+concurrency:
+  group: testing-apks
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  apks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/.android-sdk
+      # RevenueCat public SDK keys (docs/billing.md). Optional repository secrets;
+      # without them the paywall shows the Retry state and everything else works.
+      REVENUECAT_API_KEY: ${{ secrets.REVENUECAT_API_KEY }}
+      REVENUECAT_TEST_API_KEY: ${{ secrets.REVENUECAT_TEST_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: .android-sdk
+          key: android-sdk-${{ hashFiles('scripts/setup-android.sh') }}
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository/org/robolectric
+          key: gradle-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts') }}
+          restore-keys: gradle-
+
+      - name: Install Android SDK
+        run: bash scripts/setup-android.sh
+
+      - name: Testing keystore (kept in cache so builds install over each other)
+        id: keystore
+        uses: actions/cache@v4
+        with:
+          path: |
+            testing.jks
+            ~/.android/debug.keystore
+          key: testing-keystore-v1
+
+      - name: Create testing keystore
+        if: steps.keystore.outputs.cache-hit != 'true'
+        run: |
+          keytool -genkeypair -v -keystore testing.jks -storepass testing123 -keypass testing123 \
+            -alias testing -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=HomeRecord testing, O=Kurtz, C=US"
+
+      - name: Keys for the build (gitignored local.properties)
+        run: |
+          {
+            echo "sdk.dir=$ANDROID_HOME"
+            [ -n "$REVENUECAT_API_KEY" ] && echo "revenuecat.apiKey=$REVENUECAT_API_KEY"
+            [ -n "$REVENUECAT_TEST_API_KEY" ] && echo "revenuecat.testApiKey=$REVENUECAT_TEST_API_KEY"
+            echo "homerecord.storeFile=$PWD/testing.jks"
+            echo "homerecord.storePassword=testing123"
+            echo "homerecord.keyAlias=testing"
+            echo "homerecord.keyPassword=testing123"
+          } > local.properties
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Build APKs
+        run: ./gradlew --no-daemon :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease
+
+      - name: Collect APKs
+        id: collect
+        run: |
+          sha=$(git rev-parse --short HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          mkdir -p out
+          cp house-manual/build/outputs/apk/debug/house-manual-debug.apk      "out/house-manual-debug-$sha.apk"
+          cp field-log/build/outputs/apk/debug/field-log-debug.apk            "out/field-log-debug-$sha.apk"
+          cp house-manual/build/outputs/apk/release/house-manual-release.apk  "out/house-manual-release-$sha.apk"
+          cp field-log/build/outputs/apk/release/field-log-release.apk        "out/field-log-release-$sha.apk"
+          (cd out && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt)
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: homerecord-apks-${{ steps.collect.outputs.sha }}
+          path: out/*
+          retention-days: 30
+
+      - name: Publish rolling "testing" pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=${{ steps.collect.outputs.sha }}
+          subject=$(git log -1 --pretty=%s)
+          when=$(date -u +"%Y-%m-%d %H:%M UTC")
+          cat > notes.md <<EOF
+          Testing build of commit \`$sha\` ($when): $subject
+
+          Install on a phone: open this page on the phone, download the APK, allow installs from your browser if asked, open the file.
+
+          - **house-manual-release-$sha.apk** / **field-log-release-$sha.apk**: what will ship (R8 shrunk). Test these.
+          - **house-manual-debug-$sha.apk** / **field-log-debug-$sha.apk**: debug variant, same code, easier to attach a debugger to.
+          - Both signed with the throwaway testing key, so a new build installs over the old one. If a phone refuses an update ("app not installed"), the key was rotated: uninstall the old build first.
+          - Billing: without RevenueCat keys in the repository secrets the paywall shows "can't load prices" and Retry. See docs/billing.md.
+
+          SHA-256:
+          \`\`\`
+          $(cat out/SHA256SUMS.txt)
+          \`\`\`
+          EOF
+          gh release delete testing --cleanup-tag --yes 2>/dev/null || true
+          gh release create testing out/*.apk out/SHA256SUMS.txt \
+            --prerelease --target "$GITHUB_SHA" \
+            --title "Testing build $sha" --notes-file notes.md

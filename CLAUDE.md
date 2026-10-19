@@ -14,6 +14,8 @@ You are building HomeRecord: two native Android apps (House Manual, Field Log) o
 | PROGRESS.md | Run log, newest at the bottom, one line per run: date, tasks done, test counts, commit | Builder appends |
 | qa/last-tested.txt | Commit SHA last tested by QA, or `none` | QA |
 | docs/decisions.md | Dated log of library, architecture, pricing and scope choices with reasons | Builder |
+| docs/voice.md | Voice and wording rules for every user-facing string and store document. Follow it for any new or changed string. | Nate; builder may add examples |
+| .github/workflows/testing-apks.yml | Builds and publishes testing APKs (rolling `testing` pre-release) on every push to `build` | Builder fixes it when it breaks |
 | scripts/setup-android.sh | Fresh-container SDK setup; also pasted into the cloud environment with `SETUP_SOFT_FAIL=1` | Nate; builder may fix bugs in it |
 
 ## Stack and architecture
@@ -71,7 +73,7 @@ Run the tests before every commit. A task is done only when its acceptance crite
 - IDs are `UUID.randomUUID().toString()`. Timestamps are epoch millis; dates are ISO `yyyy-MM-dd` strings.
 - Every pure rule (slot occupancy, search matching, grouping, parsing, due-date math) is its own class with unit tests before the UI that uses it.
 - Compose tests use `createComposeRule()` under Robolectric (`@RunWith(AndroidJUnit4::class)`, `@Config(sdk = [34])` where Robolectric does not yet support 37).
-- Strings go in `strings.xml`. No hardcoded user-facing text in Kotlin.
+- Strings go in `strings.xml`. No hardcoded user-facing text in Kotlin. Wording follows `docs/voice.md` (plain, specific, no dashes in prose, no filler).
 - Touch targets ≥ 48dp everywhere; ≥ 56dp in Field Log capture screens; shutter ≥ 72dp.
 - No `!!`. No `GlobalScope`. No `runBlocking` outside tests.
 - Commit per task: `T07: breaker editor with slot occupancy rules`. Keep commits small; never force-push `build`.
