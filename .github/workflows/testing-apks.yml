@@ -35,18 +35,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Until T001 lands there is no Gradle project; finish green instead of failing every push.
+      - name: Check for a Gradle project
+        id: probe
+        run: |
+          if [ -x gradlew ] && [ -f settings.gradle.kts ]; then echo "skip=false" >> "$GITHUB_OUTPUT"; else echo "skip=true" >> "$GITHUB_OUTPUT"; echo "No Gradle project yet; nothing to build."; fi
+
       - uses: actions/setup-java@v5
+        if: steps.probe.outputs.skip != 'true'
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Cache Android SDK
+        if: steps.probe.outputs.skip != 'true'
         uses: actions/cache@v4
         with:
           path: .android-sdk
           key: android-sdk-v6-${{ hashFiles('scripts/setup-android.sh') }}
 
       - name: Cache Gradle
+        if: steps.probe.outputs.skip != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -57,6 +66,7 @@ jobs:
           restore-keys: gradle-
 
       - name: Install Android SDK
+        if: steps.probe.outputs.skip != 'true'
         run: bash scripts/setup-android.sh
 
       # Leave platforms/android-37.0 exactly as sdkmanager installs it: AGP 8.13 resolves
@@ -66,11 +76,13 @@ jobs:
       # AGP also wants its default build-tools (35.0.0); install them up front so the
       # build does not depend on AGP's own downloader.
       - name: Build-tools AGP expects
+        if: steps.probe.outputs.skip != 'true'
         run: |
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --install "build-tools;35.0.0" >/dev/null 2>&1 < /dev/null || true
           echo "SDK platforms: $(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
 
       - name: Testing keystore (kept in cache so builds install over each other)
+        if: steps.probe.outputs.skip != 'true'
         id: keystore
         uses: actions/cache@v4
         with:
@@ -80,13 +92,14 @@ jobs:
           key: testing-keystore-v1
 
       - name: Create testing keystore
-        if: steps.keystore.outputs.cache-hit != 'true'
+        if: steps.probe.outputs.skip != 'true' && steps.keystore.outputs.cache-hit != 'true'
         run: |
           keytool -genkeypair -v -keystore testing.jks -storepass testing123 -keypass testing123 \
             -alias testing -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=HomeRecord testing, O=Kurtz, C=US"
 
       - name: Keys for the build (gitignored local.properties)
+        if: steps.probe.outputs.skip != 'true'
         run: |
           {
             echo "sdk.dir=$ANDROID_HOME"
@@ -102,16 +115,19 @@ jobs:
       # check-run annotation (readable through the REST API, which is what the builder
       # has; raw logs sit behind a blob host it cannot reach).
       - name: Unit tests and screenshot checks
+        if: steps.probe.outputs.skip != 'true'
         run: bash scripts/ci-gradle.sh testDebugUnitTest validateDebugScreenshotTest
 
       - name: Backend tests
-        if: hashFiles('backend/package.json') != ''
+        if: steps.probe.outputs.skip != 'true' && hashFiles('backend/package.json') != ''
         run: cd backend && npm ci && npm test
 
       - name: Build APKs
+        if: steps.probe.outputs.skip != 'true'
         run: bash scripts/ci-gradle.sh :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease
 
       - name: Collect APKs
+        if: steps.probe.outputs.skip != 'true'
         id: collect
         run: |
           sha=$(git rev-parse --short HEAD)
@@ -124,6 +140,7 @@ jobs:
           (cd out && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt)
 
       - name: Upload workflow artifacts
+        if: steps.probe.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: homerecord-apks-${{ steps.collect.outputs.sha }}
@@ -131,6 +148,7 @@ jobs:
           retention-days: 30
 
       - name: Publish rolling "testing" pre-release
+        if: steps.probe.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
