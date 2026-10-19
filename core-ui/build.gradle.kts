@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -26,6 +27,16 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     api(project(":core"))
     api(libs.activity.compose)
+    api(libs.material3.adaptive.navigation.suite)
+    api(libs.navigation3.runtime)
+    api(libs.navigation3.ui)
+    api(libs.lifecycle.viewmodel.navigation3)
+    api(libs.kotlinx.serialization.json)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
 }

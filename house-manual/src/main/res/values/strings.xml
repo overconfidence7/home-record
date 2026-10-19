@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">House Manual</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_house">House</string>
+    <string name="tab_items">Items</string>
+    <string name="tab_reminders">Reminders</string>
+    <string name="tab_more">More</string>
 </resources>

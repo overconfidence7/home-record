@@ -1,0 +1,5 @@
+<resources>
+    <string name="back">Back</string>
+    <string name="placeholder_coming_soon">Nothing here yet. This screen is on its way.</string>
+    <string name="placeholder_open_detail">Open a detail screen</string>
+</resources>
