@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.screenshot)
 }
 
 android {
@@ -14,6 +15,7 @@ android {
     }
     buildFeatures { compose = true }
     testOptions { unitTests.isIncludeAndroidResources = true }
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 
@@ -39,4 +41,6 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
+    screenshotTestImplementation(libs.compose.ui.tooling)
+    screenshotTestImplementation(libs.screenshot.validation.api)
 }

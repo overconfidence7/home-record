@@ -46,3 +46,5 @@ See BLOCKERS.md "Decisions to confirm".
 ## 2026-10-19 — T002 theme
 - Brand palettes are hand-picked tonal values in `core-ui/.../theme/Brand.kt` (no seed-color generator library). Typography and shapes use M3 defaults with 8 dp-grid radii; revisit at V review.
 - Window theme: Material.Light on API 26-28, DeviceDefault.DayNight on 29+ (lint NewApi).
+
+- 2026-10-19: Added `com.android.tools.screenshot:screenshot-validation-api` (same version as the screenshot plugin, alpha16) as `screenshotTestImplementation` in :core-ui; it supplies `@PreviewTest`, without which the plugin discovers no previews. Plugin needs the flag both in gradle.properties and as `experimentalProperties` in the module.
