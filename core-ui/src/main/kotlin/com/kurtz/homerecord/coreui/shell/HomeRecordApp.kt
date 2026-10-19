@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 
@@ -72,6 +74,11 @@ fun HomeRecordApp(
         Box {
             NavDisplay(
                 backStack = stack,
+                // Scopes each screen's ViewModel to its back stack entry, so it is cleared on pop.
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
                 onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
                 entryProvider = entryProvider {
                     entries(object : ShellNav {
