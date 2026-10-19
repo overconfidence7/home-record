@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .android-sdk
-          key: android-sdk-${{ hashFiles('scripts/setup-android.sh') }}
+          key: android-sdk-v2-${{ hashFiles('scripts/setup-android.sh') }}
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -58,6 +58,23 @@ jobs:
 
       - name: Install Android SDK
         run: bash scripts/setup-android.sh
+
+      # On the runner AGP 8.13 could not find 'android-37' when only android-37.0 was
+      # installed (unlike the cloud builder's snapshot). Give it a real android-37 dir
+      # whose package id matches, and keep exactly one of the two.
+      - name: Platform dir AGP can find
+        run: |
+          base="$ANDROID_HOME/platforms/android-37"
+          echo "::notice title=SDK platforms before::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ')"
+          if [ ! -d "$base" ]; then
+            src=$(ls -d "$base".* 2>/dev/null | sort -V | head -n1 || true)
+            if [ -n "$src" ]; then
+              cp -a "$src" "$base"
+              sed -i 's#path="platforms;android-37\.[0-9]*"#path="platforms;android-37"#' "$base/package.xml"
+              rm -rf "$src"
+            fi
+          fi
+          echo "::notice title=SDK platforms after::$(ls "$ANDROID_HOME/platforms" | tr '\n' ' ') / $(grep -o 'path="platforms;[^"]*"' "$base/package.xml" | head -n1)"
 
       - name: Testing keystore (kept in cache so builds install over each other)
         id: keystore
