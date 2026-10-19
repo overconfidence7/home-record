@@ -2,4 +2,22 @@
     <string name="back">Back</string>
     <string name="placeholder_coming_soon">Nothing here yet. This screen is on its way.</string>
     <string name="placeholder_open_detail">Open a detail screen</string>
+    <string name="loading">Loading</string>
+    <string name="retry">Retry</string>
+    <string name="close">Close</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep editing</string>
+    <string name="discard_title">Discard changes?</string>
+    <string name="discard_body">Your edits on this screen won\'t be saved.</string>
+    <string name="required_label">%1$s (required)</string>
+    <string name="remove_link">Remove %1$s</string>
+    <string name="pick_date">Pick date for %1$s</string>
+    <string name="length_helper_imperial">Type 12\'6\", 12.5 or 12 6.</string>
+    <string name="length_helper_metric">Type 3.8 m, 380 cm or 3.8.</string>
+    <string name="length_error">Can\'t read that length. Try 12\'6\" or 12.5.</string>
+    <string name="money_error">Enter an amount like 24.99.</string>
 </resources>
