@@ -135,8 +135,18 @@ jobs:
           mkdir -p out
           cp house-manual/build/outputs/apk/debug/house-manual-debug.apk      "out/house-manual-debug-$sha.apk"
           cp field-log/build/outputs/apk/debug/field-log-debug.apk            "out/field-log-debug-$sha.apk"
-          cp house-manual/build/outputs/apk/release/house-manual-release.apk  "out/house-manual-release-$sha.apk"
-          cp field-log/build/outputs/apk/release/field-log-release.apk        "out/field-log-release-$sha.apk"
+          # Until the release signing config lands (PLAN T081) Gradle emits *-release-unsigned.apk;
+          # sign those with the testing key here so the release variant still installs.
+          signer="$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)"
+          for app in house-manual field-log; do
+            dir="$app/build/outputs/apk/release"
+            if [ -f "$dir/$app-release.apk" ]; then
+              cp "$dir/$app-release.apk" "out/$app-release-$sha.apk"
+            else
+              "$signer" sign --ks testing.jks --ks-pass pass:testing123 --ks-key-alias testing --key-pass pass:testing123 \
+                --out "out/$app-release-$sha.apk" "$dir/$app-release-unsigned.apk"
+            fi
+          done
           (cd out && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt)
 
       - name: Upload workflow artifacts
