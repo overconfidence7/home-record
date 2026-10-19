@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -87,11 +87,14 @@ jobs:
             echo "homerecord.keyPassword=testing123"
           } > local.properties
 
+      # Gradle output is piped through scripts/ci-gradle.sh, which turns a failure into a
+      # check-run annotation (readable through the REST API, which is what the builder
+      # has; raw logs sit behind a blob host it cannot reach).
       - name: Unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
+        run: bash scripts/ci-gradle.sh testDebugUnitTest
 
       - name: Build APKs
-        run: ./gradlew --no-daemon :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease
+        run: bash scripts/ci-gradle.sh :house-manual:assembleDebug :field-log:assembleDebug :house-manual:assembleRelease :field-log:assembleRelease
 
       - name: Collect APKs
         id: collect
