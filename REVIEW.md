@@ -57,6 +57,15 @@ Tested: Re-test of builder fixes on emulator (fd86092 edge-to-edge insets, 2936c
 
 ---
 
+## QA 2026-10-19 (commit a86884c)
+
+Tested: Re-test of CameraX fix (89e432a/409a9b1) on single-camera emulator (`qa_pixel` API 37), verification of T40b language pass (~55 updated strings per docs/voice.md across both apps), House Manual feature verification (AC-9 two-pole spanning tall cell, Panel insights T30b, Load estimate sheet T30c, Emergency shutoffs, Reminders & maintenance checklists, Settings & encrypted backup export/import T34/T41), Field Log feature verification (Jobs list, job creation, Behind the Wall empty state and room navigation, Daily report PDF export, Handoff export), full unit test suite (`./gradlew testDebugUnitTest` — 420/420 passed). Passed: 39. Fixes verified: 0 (CameraX fix does not resolve capture on single-camera devices). Open issues: 2 (1 Major re-opened with new root cause, 1 Minor new).
+
+- [ ] [Major] CameraX viewfinder is black and photo capture fails on single-camera devices due to uncaught IllegalArgumentException in provider.hasCamera(DEFAULT_FRONT_CAMERA) - steps: 1. Launch Field Log on an emulator or device with only a back camera (e.g. qa_pixel). 2. Open any job and tap "Capture" (or tap "Behind the wall" -> select room/wall). 3. View the preview and tap the shutter button. - expected: CameraX selects the available back camera via CameraChoice.pick, binds preview to the viewfinder, and captures photo to storage when shutter is tapped / actual: Viewfinder is black; tapping shutter shows toast "Couldn't save the photo. Check free space and try again." In CaptureScreen.kt (lines 132-137) and BehindWallScreen.kt, runCatching wraps CameraChoice.pick(provider.hasCamera(DEFAULT_BACK_CAMERA), provider.hasCamera(DEFAULT_FRONT_CAMERA)). Under FieldLogApp's setAvailableCamerasLimiter(DEFAULT_BACK_CAMERA), calling provider.hasCamera(DEFAULT_FRONT_CAMERA) throws IllegalArgumentException ("No available camera can be found"). runCatching catches this exception and returns early before provider.bindToLifecycle and capturer.imageCapture = imageCapture execute, leaving imageCapture null and capturer.capture returning false - screenshot: qa/screenshots/verify_fl_photo_taken.png
+- [ ] [Minor] Behind the Wall empty state copy directs user to "Tap Edit job to add some" rooms, but Edit Job does not allow adding rooms - steps: 1. In Field Log, create a job without rooms. 2. Open the job and tap "Behind the wall". 3. Observe empty state text, then tap "Edit job". - expected: Copy in wall_no_rooms directs user to an action that can actually add rooms, or JobEditScreen supports adding/editing rooms / actual: wall_no_rooms displays "This job has no rooms yet. Tap Edit job to add some.", but JobEditScreen.kt (line 81) gates rooms behind `if (!state.isEdit)`, meaning rooms can only be specified during initial job creation and cannot be added from Edit Job - screenshot: qa/screenshots/verify_fl_btw_failed.png
+
+---
+
 ## Lint warnings accepted (S1, 2026-10-17)
 
 `lintDebug` has 0 errors. Fixed: ComposableNaming, 2 UnusedResources, AutoboxingStateCreation. Remaining warnings, each justified:
