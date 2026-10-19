@@ -35,3 +35,10 @@ Dated log of library, architecture, pricing and scope choices, with the reason. 
 ## Open questions
 
 See BLOCKERS.md "Decisions to confirm".
+
+## 2026-10-19 — T001 scaffold versions
+
+- Gradle 9.8.1, AGP 9.4.1 (built-in Kotlin), Kotlin 2.4.21, KSP 2.3.12, Compose BOM 2026.09.00, Room 2.8.5, Nav3 1.2.0, screenshot plugin 0.0.1-alpha16 (applied in T005).
+- **material3 1.5.0-beta01 instead of 1.4.0**: in 1.4.0 `MaterialExpressiveTheme` and `ExperimentalMaterial3ExpressiveApi` are internal; the 1.5.0 line is the first to expose them. Revisit when 1.5.0 is stable.
+- No `jvmToolchain`: the VM has only JDK 21, so Java/Kotlin target 17 is set through `compileOptions`.
+- Catalog versions for dependencies not yet used (okhttp, retrofit, mlkit, firebase, googleid, camerax, etc.) are best guesses; verify when each is first added.
