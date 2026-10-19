@@ -25,7 +25,7 @@
     <string name="job_behind_wall">Behind the wall</string>
     <string name="wall_pick_room">Which room?</string>
     <string name="wall_pick_wall">%1$s: which wall?</string>
-    <string name="wall_no_rooms">This job has no rooms yet. Tap Edit job to add some.</string>
+    <string name="wall_no_rooms">This job has no rooms. Rooms are added when a job is created, so start a new job with rooms to use this screen.</string>
     <string name="wall_custom">Custom wall name</string>
     <string name="wall_change_room">Change room</string>
     <string name="wall_camera_header">%1$s · %2$s</string>
