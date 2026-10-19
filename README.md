@@ -4,4 +4,4 @@ Two native Android apps on one shared house model. **House Manual** is the homeo
 
 Read [PRODUCT.md](PRODUCT.md) first (what this is for), then [SPEC.md](SPEC.md) (the contract) and [PLAN.md](PLAN.md) (the build order). Builder rules are in [CLAUDE.md](CLAUDE.md); UI rules in [docs/ui-standards.md](docs/ui-standards.md); nightly QA in [qa/](qa/).
 
-v1 (October 13 to 19, 2026) is archived in this repo's history as tag `v1-final` and branch `archive/v1`, for reference only; the builder does not copy code from it.
+v1 (October 13 to 19, 2026) is archived in this repo's history as branch `archive/v1`, for reference only; the builder does not copy code from it.

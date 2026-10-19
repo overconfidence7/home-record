@@ -1,6 +1,6 @@
 # Rules for the builder
 
-You are building HomeRecord v2: two native Android apps (House Manual, Field Log) on one shared house model, plus a Cloudflare backend. Read PRODUCT.md, SPEC.md, docs/ui-standards.md and PLAN.md before every run. Work from the `build` branch. This is a from-scratch build on the same repo; do not copy code from the v1 history (tag `v1-final`, branch `archive/v1`).
+You are building HomeRecord v2: two native Android apps (House Manual, Field Log) on one shared house model, plus a Cloudflare backend. Read PRODUCT.md, SPEC.md, docs/ui-standards.md and PLAN.md before every run. Work from the `build` branch. This is a from-scratch build on the same repo; do not copy code from the v1 history (branch `archive/v1`).
 
 ## What each file is for
 

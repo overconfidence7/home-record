@@ -47,5 +47,5 @@ RULES
 - Never edit SPEC.md, PRODUCT.md or docs/ui-standards.md.
 - Only use dependencies approved in CLAUDE.md. If you truly need another, add it and explain why in PROGRESS.md and under "Decisions to confirm."
 - Both apps must build and launch after every task.
-- Do not copy code from the v1 history (tag v1-final, branch archive/v1); this is a from-scratch build.
+- Do not copy code from the v1 history (branch archive/v1); this is a from-scratch build.
 ```

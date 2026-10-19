@@ -55,7 +55,7 @@ This is the walkthrough the nightly tester performs. Every step must be possible
 
 ## What v1 got wrong (so it is not repeated)
 
-The first build (this repo's history up to tag `v1-final`, branch `archive/v1`, October 13 to 19, 2026) was spec-driven and passed its own acceptance criteria, and it missed the product. Specifically:
+The first build (this repo's history up to branch `archive/v1`, October 13 to 19, 2026) was spec-driven and passed its own acceptance criteria, and it missed the product. Specifically:
 
 - It treated the breaker panel as the product. The panel is one feature.
 - There was no house model: no floor plan, no 3D, no place to put things.
@@ -64,4 +64,4 @@ The first build (this repo's history up to tag `v1-final`, branch `archive/v1`, 
 - The UI was a stack of plain cards with no navigation bar, no top app bar, no back arrow, no icons. Users got stuck inside screens.
 - The tester checked acceptance criteria and never asked whether the app did what it was for.
 
-This build starts from zero on the same repo: the v1 tree was removed and lives only in git history (tag `v1-final`, branch `archive/v1`). Nothing from v1 is carried forward except the voice guide, the billing notes, the SDK setup script and the CI workflow.
+This build starts from zero on the same repo: the v1 tree was removed and lives only in git history (branch `archive/v1`). Nothing from v1 is carried forward except the voice guide, the billing notes, the SDK setup script and the CI workflow.
