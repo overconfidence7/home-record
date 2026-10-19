@@ -12,3 +12,4 @@ build/
 *.jks
 *.keystore
 .kotlin/
+local.properties
