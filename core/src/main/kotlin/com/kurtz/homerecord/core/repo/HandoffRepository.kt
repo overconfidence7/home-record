@@ -17,6 +17,8 @@ class HandoffRepository(
         val panels = db.panelDao().getAll().filter { it.homeId == homeId }
         val breakers = db.breakerDao().getAll().filter { b -> panels.any { it.id == b.panelId } }
         val breakerIds = breakers.map { it.id }.toSet()
+        val equipment = db.equipmentDao().getAll().filter { it.homeId == homeId }
+        val equipmentIds = equipment.map { it.id }.toSet()
         return RecordBundle(
             exportedAt = clock.now(),
             home = home,
@@ -29,8 +31,11 @@ class HandoffRepository(
                 .filter { it.roomId in roomIds || (it.breakerId != null && it.breakerId in breakerIds) }
                 .map { it.toDomain() },
             shutoffs = db.shutoffDao().getAll().filter { it.homeId == homeId }.map { it.toDomain() },
-            equipment = db.equipmentDao().getAll().filter { it.homeId == homeId }.map { it.toDomain() },
+            equipment = equipment.map { it.toDomain() },
             photos = db.photoDao().getAll().filter { it.homeId == homeId }.map { it.toDomain() },
+            consumables = db.consumableDao().getAll().filter { it.equipmentId in equipmentIds }.map { it.toDomain() },
+            maintenanceTasks = db.maintenanceTaskDao().getForHome(homeId).map { it.toDomain() },
+            loadProfiles = listOfNotNull(db.loadProfileDao().getForHome(homeId)?.toDomain()),
         )
     }
 }

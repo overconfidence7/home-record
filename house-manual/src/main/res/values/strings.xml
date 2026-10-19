@@ -317,6 +317,9 @@
     <string name="import_type_shutoff">Shutoffs</string>
     <string name="import_type_equipment">Equipment</string>
     <string name="import_type_photo">Photos</string>
+    <string name="import_type_consumable">Filters and consumables</string>
+    <string name="import_type_maintenance_task">Reminders</string>
+    <string name="import_type_load_profile">Load estimate</string>
     <!-- Panel profile (F20) -->
     <string name="yes">Yes</string>
     <string name="no">No</string>

@@ -35,7 +35,15 @@ class ImportApplier(
         db.shutoffDao().getAll().forEach { sources[it.id] = it.source }
         db.equipmentDao().getAll().forEach { sources[it.id] = it.source }
         db.photoDao().getAll().forEach { sources[it.id] = it.source }
-        return ImportPlanner.plan(bundle, localHome.id, sources)
+        db.consumableDao().getAll().forEach { sources[it.id] = it.source }
+        db.maintenanceTaskDao().getAll().forEach { sources[it.id] = it.source }
+        // One load profile per Home: an imported one takes the id of the local one so it can only conflict, never duplicate.
+        val localLoad = db.loadProfileDao().getForHome(localHome.id)
+        localLoad?.let { sources[it.id] = it.source }
+        val aligned = if (localLoad == null) bundle else bundle.copy(
+            loadProfiles = bundle.loadProfiles.take(1).map { it.copy(id = localLoad.id) },
+        )
+        return ImportPlanner.plan(aligned, localHome.id, sources)
     }
 
     /**
@@ -69,6 +77,9 @@ class ImportApplier(
         b.shutoffs.forEach { db.shutoffDao().upsert(it.toEntity()) }
         b.equipment.forEach { db.equipmentDao().upsert(it.toEntity()) }
         b.photos.forEach { db.photoDao().upsert(it.toEntity()) }
+        db.consumableDao().upsertAll(b.consumables.map { it.toEntity() })
+        db.maintenanceTaskDao().upsertAll(b.maintenanceTasks.map { it.toEntity() })
+        b.loadProfiles.forEach { db.loadProfileDao().upsert(it.toEntity()) }
     }
 
     private fun copyMedia(path: String, stagingDir: File): Boolean {
@@ -86,7 +97,8 @@ class ImportApplier(
             panels = panels.filter { use(it.id) }, breakers = breakers.filter { use(it.id) },
             breakerRooms = breakerRooms.filter { use(it.id) }, endpoints = endpoints.filter { use(it.id) },
             shutoffs = shutoffs.filter { use(it.id) }, equipment = equipment.filter { use(it.id) },
-            photos = photos.filter { use(it.id) },
+            photos = photos.filter { use(it.id) }, consumables = consumables.filter { use(it.id) },
+            maintenanceTasks = maintenanceTasks.filter { use(it.id) }, loadProfiles = loadProfiles.filter { use(it.id) },
         )
     }
 }

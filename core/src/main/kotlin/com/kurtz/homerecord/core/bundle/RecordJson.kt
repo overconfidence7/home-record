@@ -1,6 +1,9 @@
 package com.kurtz.homerecord.core.bundle
 
 import com.kurtz.homerecord.core.model.Breaker
+import com.kurtz.homerecord.core.model.Consumable
+import com.kurtz.homerecord.core.model.LoadProfile
+import com.kurtz.homerecord.core.model.MaintenanceTask
 import com.kurtz.homerecord.core.model.BreakerRoom
 import com.kurtz.homerecord.core.model.Endpoint
 import com.kurtz.homerecord.core.model.Equipment
@@ -17,7 +20,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 
-/** Contents of `record.json`: every entity for one Home except Job, LogEntry, DailyReport, CompanyProfile (SPEC §6). */
+/** Contents of `record.json`: every entity for one Home plus Consumable, MaintenanceTask and LoadProfile, except Job, LogEntry, DailyReport, CompanyProfile (SPEC §6). */
 @Serializable
 data class RecordBundle(
     val formatVersion: Int = RecordJson.FORMAT_VERSION,
@@ -32,6 +35,10 @@ data class RecordBundle(
     val shutoffs: List<Shutoff> = emptyList(),
     val equipment: List<Equipment> = emptyList(),
     val photos: List<Photo> = emptyList(),
+    // Optional arrays added after format 1 shipped: older bundles omit them and still import.
+    val consumables: List<Consumable> = emptyList(),
+    val maintenanceTasks: List<MaintenanceTask> = emptyList(),
+    val loadProfiles: List<LoadProfile> = emptyList(),
 ) {
     /** Relative media paths referenced by any record, in stable order, without duplicates. */
     fun mediaPaths(): List<String> = buildList {

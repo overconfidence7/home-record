@@ -173,6 +173,9 @@ private fun ImportEntityType.labelRes(): Int = when (this) {
     ImportEntityType.SHUTOFF -> R.string.import_type_shutoff
     ImportEntityType.EQUIPMENT -> R.string.import_type_equipment
     ImportEntityType.PHOTO -> R.string.import_type_photo
+    ImportEntityType.CONSUMABLE -> R.string.import_type_consumable
+    ImportEntityType.MAINTENANCE_TASK -> R.string.import_type_maintenance_task
+    ImportEntityType.LOAD_PROFILE -> R.string.import_type_load_profile
 }
 
 @Preview(showBackground = true)

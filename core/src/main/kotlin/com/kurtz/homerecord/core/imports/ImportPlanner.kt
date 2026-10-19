@@ -3,7 +3,7 @@ package com.kurtz.homerecord.core.imports
 import com.kurtz.homerecord.core.bundle.RecordBundle
 import com.kurtz.homerecord.core.model.Source
 
-enum class ImportEntityType { ROOM, WALL, PANEL, BREAKER, BREAKER_ROOM, ENDPOINT, SHUTOFF, EQUIPMENT, PHOTO }
+enum class ImportEntityType { ROOM, WALL, PANEL, BREAKER, BREAKER_ROOM, ENDPOINT, SHUTOFF, EQUIPMENT, PHOTO, CONSUMABLE, MAINTENANCE_TASK, LOAD_PROFILE }
 
 enum class ConflictChoice { KEEP_MINE, USE_IMPORTED }
 
@@ -89,6 +89,16 @@ object ImportPlanner {
             it.copy(homeId = localHomeId, source = Source.IMPORT)
         }
 
+        val consumables = split(ImportEntityType.CONSUMABLE, bundle.consumables, { it.id }, { it.spec }) {
+            it.copy(source = Source.IMPORT)
+        }
+        val tasks = split(ImportEntityType.MAINTENANCE_TASK, bundle.maintenanceTasks, { it.id }, { it.title }) {
+            it.copy(homeId = localHomeId, source = Source.IMPORT)
+        }
+        val loads = split(ImportEntityType.LOAD_PROFILE, bundle.loadProfiles, { it.id }, { it.hvac.name }) {
+            it.copy(homeId = localHomeId, source = Source.IMPORT)
+        }
+
         val home = bundle.home.copy(id = localHomeId, source = Source.IMPORT)
         fun bundleOf(first: Boolean) = bundle.copy(
             home = home,
@@ -96,6 +106,8 @@ object ImportPlanner {
             breakers = breakers.pick(first), breakerRooms = breakerRooms.pick(first),
             endpoints = endpoints.pick(first), shutoffs = shutoffs.pick(first),
             equipment = equipment.pick(first), photos = photos.pick(first),
+            consumables = consumables.pick(first), maintenanceTasks = tasks.pick(first),
+            loadProfiles = loads.pick(first),
         )
         return ImportPlan(bundleOf(true), bundleOf(false), counts, conflicts, present)
     }

@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.logic
 
 /** AC-114: appliances offered in the estimate form, with the default VA shown (editable). */
+@kotlinx.serialization.Serializable
 enum class LoadAppliance(val defaultVa: Int) {
     RANGE(12_000),
     WALL_OVEN(8_000),
@@ -18,6 +19,7 @@ enum class LoadAppliance(val defaultVa: Int) {
 }
 
 /** AC-114: HVAC choices; [defaultVa] is 0 for NONE. */
+@kotlinx.serialization.Serializable
 enum class HvacKind(val defaultVa: Int) {
     NONE(0),
     AC_ONLY(3_500),

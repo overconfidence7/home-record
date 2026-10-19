@@ -191,6 +191,9 @@ interface ConsumableDao {
     @Query("SELECT * FROM consumable WHERE equipmentId = :equipmentId ORDER BY createdAt, id")
     suspend fun getForEquipment(equipmentId: String): List<ConsumableEntity>
 
+    @Query("SELECT * FROM consumable")
+    suspend fun getAll(): List<ConsumableEntity>
+
     @Query("DELETE FROM consumable WHERE equipmentId = :equipmentId")
     suspend fun deleteForEquipment(equipmentId: String)
 
@@ -302,6 +305,9 @@ interface LoadProfileDao {
     @Upsert
     suspend fun upsert(entity: LoadProfileEntity)
 
+    @Query("SELECT * FROM load_profile")
+    suspend fun getAll(): List<LoadProfileEntity>
+
     @Query("SELECT * FROM load_profile WHERE homeId = :homeId LIMIT 1")
     suspend fun getForHome(homeId: String): LoadProfileEntity?
 
@@ -316,6 +322,9 @@ interface MaintenanceTaskDao {
 
     @Upsert
     suspend fun upsertAll(entities: List<MaintenanceTaskEntity>)
+
+    @Query("SELECT * FROM maintenance_task")
+    suspend fun getAll(): List<MaintenanceTaskEntity>
 
     @Query("SELECT * FROM maintenance_task WHERE id = :id")
     suspend fun get(id: String): MaintenanceTaskEntity?

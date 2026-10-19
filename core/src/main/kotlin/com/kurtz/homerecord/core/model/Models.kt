@@ -278,6 +278,7 @@ data class CompanyProfile(
 ) : Record
 
 /** AC-114: the saved inputs of the load estimate form, one per home. [appliances] holds only enabled ones. */
+@Serializable
 data class LoadProfile(
     override val id: String,
     val homeId: String,
@@ -290,10 +291,13 @@ data class LoadProfile(
     override val source: Source,
 ) : Record
 
+@Serializable
 enum class MaintenanceRule { CALENDAR, SEASONAL }
+@Serializable
 enum class Season { SPRING, SUMMER, FALL, WINTER }
 
 /** F15: a recurring home chore. [equipmentId] is set for per-equipment reminders; dates are ISO `yyyy-MM-dd`. */
+@Serializable
 data class MaintenanceTask(
     override val id: String,
     val homeId: String,
