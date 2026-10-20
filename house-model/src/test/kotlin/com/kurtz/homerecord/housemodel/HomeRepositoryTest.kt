@@ -5,7 +5,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanCodec
+import com.kurtz.homerecord.housemodel.plan.PlanOpening
+import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
 import kotlinx.coroutines.flow.first
@@ -119,6 +122,32 @@ class HomeRepositoryTest {
         repo.savePlan(main.id, listOf(kitchen))
         assertThat(repo.loadPlan(main.id).placed).containsExactly(kitchen)
         assertThat(changes).contains("room/d1")
+    }
+
+    @Test fun doorsWindowsAndStairsRoundTripThroughWallRows() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val upper = repo.observeFloors(id).first().single { it.name == "Upper" }
+        val hall = PlanRoom.rectangle("h1", "Hall", "HALL", 0, 0, 144, 120)
+            .withOpening(PlanOpening("o1", 0, OpeningKind.DOOR, 20, 32, 80))
+            .withOpening(PlanOpening("o2", 2, OpeningKind.WINDOW, 40, 36, 48))
+            .withStair(PlanStair("s1", upper.id, listOf(Pt(10, 10), Pt(46, 10), Pt(46, 130), Pt(10, 130))))
+        repo.savePlan(main.id, listOf(hall))
+        val loaded = repo.loadPlan(main.id).placed.single()
+        assertThat(loaded.openings).containsExactlyElementsIn(hall.openings)
+        assertThat(loaded.stairs).containsExactlyElementsIn(hall.stairs)
+        assertThat(db.wallDao().listFor("h1")).hasSize(2)
+        assertThat(changes).containsAtLeast("opening/o1", "opening/o2", "stair/s1")
+
+        changes.clear()
+        repo.savePlan(main.id, listOf(hall))
+        assertThat(changes).isEmpty()
+
+        repo.savePlan(main.id, listOf(hall.withoutOpening("o1").withoutStair("s1")))
+        val after = repo.loadPlan(main.id).placed.single()
+        assertThat(after.openings.map { it.id }).containsExactly("o2")
+        assertThat(after.stairs).isEmpty()
+        assertThat(changes).containsAtLeast("opening/o1", "stair/s1")
     }
 
     @Test fun savePlanOnlyRecordsRowsThatChanged() = runTest {

@@ -4,8 +4,15 @@ import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.OpeningEntity
+import com.kurtz.homerecord.core.data.StairEntity
+import com.kurtz.homerecord.core.data.WallEntity
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanCodec
+import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.plan.PlanStair
+import com.kurtz.homerecord.housemodel.plan.WallDeriver
 import com.kurtz.homerecord.core.data.RoomEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -143,15 +150,79 @@ class HomeRepository(
 
     suspend fun loadPlan(floorId: String): FloorPlan = toFloorPlan(db.roomDao().listFor(floorId))
 
-    private fun toFloorPlan(rows: List<RoomEntity>): FloorPlan {
+    private suspend fun toFloorPlan(rows: List<RoomEntity>): FloorPlan {
         val placed = mutableListOf<PlanRoom>()
         val unplaced = mutableListOf<UnplacedRoom>()
         rows.forEach { row ->
             val points = PlanCodec.decode(row.polygonJson)
-            if (points.isEmpty()) unplaced += UnplacedRoom(row.id, row.name, row.kind)
-            else placed += PlanRoom(row.id, row.name, row.kind, points)
+            if (points.isEmpty()) {
+                unplaced += UnplacedRoom(row.id, row.name, row.kind)
+            } else {
+                val edgeOfWall = db.wallDao().listFor(row.id).associate { it.id to it.edgeIndex }
+                val openings = edgeOfWall.keys.flatMap { wallId -> db.openingDao().listFor(wallId) }.mapNotNull { o ->
+                    val edge = edgeOfWall[o.wallId]?.takeIf { it in points.indices } ?: return@mapNotNull null
+                    PlanOpening(o.id, edge, OpeningKind.entries.firstOrNull { it.name == o.kind } ?: OpeningKind.DOOR, o.offsetIn, o.widthIn, o.heightIn)
+                }
+                val stairs = db.stairDao().listFor(row.id).map { PlanStair(it.id, it.toFloorId, PlanCodec.decode(it.polygonJson)) }
+                placed += PlanRoom(row.id, row.name, row.kind, points, openings, stairs).clampOpenings()
+            }
         }
         return FloorPlan(placed, unplaced)
+    }
+
+    /** Writes doors, windows and stairs of [room]; walls are created for edges that carry an opening. */
+    private suspend fun saveOpeningsAndStairs(room: PlanRoom, allRooms: List<PlanRoom>, ceilingHeightIn: Int, at: Long) {
+        val derived = WallDeriver().derive(allRooms).filter { it.roomId == room.id }.associateBy { it.edgeIndex }
+        val walls = db.wallDao().listFor(room.id).toMutableList()
+        fun wallFor(edge: Int): WallEntity {
+            val d = derived[edge]
+            val fresh = { id: String ->
+                WallEntity(
+                    id = id, roomId = room.id, edgeIndex = edge, orientation = d?.orientation ?: "N",
+                    lengthIn = d?.lengthIn ?: 0, heightIn = ceilingHeightIn, exterior = d?.exterior ?: false, createdAt = at, updatedAt = at,
+                )
+            }
+            return walls.firstOrNull { it.edgeIndex == edge } ?: fresh(Ids.newId()).also { walls += it }
+        }
+        val existingOpenings = walls.flatMap { db.openingDao().listFor(it.id) }.associateBy { it.id }
+        val keepOpenings = room.openings.map { it.id }.toSet()
+        existingOpenings.values.filter { it.id !in keepOpenings }.forEach {
+            db.openingDao().softDelete(it.id, at)
+            onChange("opening", it.id)
+        }
+        room.openings.forEach { o ->
+            val wall = wallFor(o.edgeIndex)
+            val d = derived[o.edgeIndex]
+            val stored = db.wallDao().get(wall.id)
+            if (stored == null || (d != null && (stored.lengthIn != d.lengthIn || stored.orientation != d.orientation || stored.exterior != d.exterior))) {
+                db.wallDao().upsert(wall.copy(lengthIn = d?.lengthIn ?: wall.lengthIn, orientation = d?.orientation ?: wall.orientation, exterior = d?.exterior ?: wall.exterior, updatedAt = at))
+                onChange("wall", wall.id)
+            }
+            val row = existingOpenings[o.id]
+            if (row == null || row.wallId != wall.id || row.kind != o.kind.name || row.offsetIn != o.offsetIn || row.widthIn != o.widthIn || row.heightIn != o.heightIn) {
+                db.openingDao().upsert(
+                    OpeningEntity(
+                        id = o.id, wallId = wall.id, kind = o.kind.name, offsetIn = o.offsetIn, widthIn = o.widthIn, heightIn = o.heightIn,
+                        createdAt = row?.createdAt ?: at, updatedAt = at,
+                    ),
+                )
+                onChange("opening", o.id)
+            }
+        }
+        val existingStairs = db.stairDao().listFor(room.id).associateBy { it.id }
+        val keepStairs = room.stairs.map { it.id }.toSet()
+        existingStairs.values.filter { it.id !in keepStairs }.forEach {
+            db.stairDao().softDelete(it.id, at)
+            onChange("stair", it.id)
+        }
+        room.stairs.forEach { st ->
+            val json = PlanCodec.encode(st.points)
+            val row = existingStairs[st.id]
+            if (row == null || row.toFloorId != st.toFloorId || row.polygonJson != json) {
+                db.stairDao().upsert(StairEntity(id = st.id, roomId = room.id, toFloorId = st.toFloorId, polygonJson = json, createdAt = row?.createdAt ?: at, updatedAt = at))
+                onChange("stair", st.id)
+            }
+        }
     }
 
     /**
@@ -162,10 +233,12 @@ class HomeRepository(
         val at = now()
         val existing = db.roomDao().listFor(floorId).associateBy { it.id }
         val keep = rooms.map { it.id }.toSet()
+        val ceiling = db.floorDao().get(floorId)?.ceilingHeightIn ?: DEFAULT_CEILING_IN
         existing.values.filter { it.id !in keep && PlanCodec.decode(it.polygonJson).isNotEmpty() }.forEach {
             db.roomDao().softDelete(it.id, at)
             onChange("room", it.id)
         }
+        rooms.forEach { saveOpeningsAndStairs(it, rooms, ceiling, at) }
         rooms.forEach { room ->
             val json = PlanCodec.encode(room.points)
             val row = existing[room.id]
@@ -195,5 +268,6 @@ class HomeRepository(
 
     private companion object {
         const val STORY_IN = 108
+        const val DEFAULT_CEILING_IN = 96
     }
 }

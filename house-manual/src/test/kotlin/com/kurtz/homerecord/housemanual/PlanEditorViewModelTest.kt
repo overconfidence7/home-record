@@ -12,6 +12,7 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemodel.NewHome
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 import kotlinx.coroutines.Dispatchers
@@ -122,6 +123,52 @@ class PlanEditorViewModelTest {
         assertThat(vm.state.value.selected!!.minX).isEqualTo(startX)
     }
 
+    @Test fun tapAWallThenAddDoorSelectsItAndSaves() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.SelectWall(0, Pt(600, 328)))
+        assertThat(vm.state.value.selectedWall).isEqualTo(0)
+        vm.onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR))
+        val s = vm.state.value
+        assertThat(s.selected!!.openings).hasSize(1)
+        assertThat(s.selectedOpening?.kind).isEqualTo(OpeningKind.DOOR)
+        assertThat(s.selectedWall).isNull()
+        assertThat(savedPlan(vm) { it.placed.singleOrNull()?.openings?.size == 1 }.placed.single().openings).hasSize(1)
+    }
+
+    @Test fun dragOpeningWidthDeleteAndUndo() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        val room = vm.state.value.selected!!
+        vm.onEvent(PlanEditorEvent.SelectWall(0, Pt(room.minX + 72, room.minY)))
+        vm.onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW))
+        val id = vm.state.value.selectedOpeningId!!
+        vm.onEvent(PlanEditorEvent.DragOpening(id, Pt(room.minX + 120, room.minY)))
+        vm.onEvent(PlanEditorEvent.DragEnd)
+        assertThat(vm.state.value.selectedOpening!!.offsetIn).isEqualTo(102)
+        vm.onEvent(PlanEditorEvent.SetOpeningWidth(48))
+        assertThat(vm.state.value.selectedOpening!!.widthIn).isEqualTo(48)
+        vm.onEvent(PlanEditorEvent.DeleteOpening)
+        assertThat(vm.state.value.selected!!.openings).isEmpty()
+        vm.onEvent(PlanEditorEvent.Undo)
+        assertThat(vm.state.value.selected!!.openings).hasSize(1)
+    }
+
+    @Test fun stairsLinkToTheFloorAboveAndCanBeRelinked() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.AddStair)
+        val stair = vm.state.value.selected!!.stairs.single()
+        val floors = vm.state.value.floors
+        val here = floors.indexOfFirst { it.id == vm.state.value.floorId }
+        assertThat(stair.toFloorId).isEqualTo(floors[here + 1].id)
+        vm.onEvent(PlanEditorEvent.LinkStair(stair.id, floors[here - 1].id))
+        assertThat(vm.state.value.selected!!.stairs.single().toFloorId).isEqualTo(floors[here - 1].id)
+        assertThat(savedPlan(vm) { it.placed.singleOrNull()?.stairs?.singleOrNull()?.toFloorId == floors[here - 1].id }.placed).hasSize(1)
+        vm.onEvent(PlanEditorEvent.DeleteStair(stair.id))
+        assertThat(vm.state.value.selected!!.stairs).isEmpty()
+    }
+
     @Test fun deleteRemovesRoomAndClearsSelection() = test {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
@@ -189,7 +236,7 @@ class PlanEditorViewModelTest {
         vm.onEvent(PlanEditorEvent.DragCorner(2, -72, 0))
         vm.onEvent(PlanEditorEvent.DragEnd)
         assertThat(vm.state.value.selected!!.points[2].x).isEqualTo(east.x - 72)
-        savedPlan(vm) { it.placed.single().points.size == 5 }
+        savedPlan(vm) { it.placed.singleOrNull()?.points?.size == 5 }
         vm.onEvent(PlanEditorEvent.DeleteCorner(2))
         assertThat(vm.state.value.selected!!.points).hasSize(4)
         vm.onEvent(PlanEditorEvent.Select(null))

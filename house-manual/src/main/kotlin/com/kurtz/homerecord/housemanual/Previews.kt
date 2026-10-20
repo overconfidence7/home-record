@@ -19,6 +19,9 @@ import com.kurtz.homerecord.housemanual.plan.PlanEditorScreen
 import com.kurtz.homerecord.housemanual.plan.PlanEditorUiState
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemodel.UnplacedRoom
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
+import com.kurtz.homerecord.housemodel.plan.PlanOpening
+import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
 
@@ -128,6 +131,36 @@ fun PlanEditorShapePreview() = Frame {
     val lShape = PlanRoom("r2", "Living room", "LIVING_ROOM", listOf(Pt(168, 0), Pt(408, 0), Pt(408, 96), Pt(288, 96), Pt(288, 192), Pt(168, 192)))
     val rooms = planRooms.map { if (it.id == "r2") lShape else it }
     PlanEditorScreen(planState({ copy(rooms = rooms, selectedId = "r2", editShape = true) }), {}, {}, "Maple St")
+}
+
+private val planRoomsWithOpenings = planRooms.map { room ->
+    when (room.id) {
+        "r1" -> room
+            .withOpening(PlanOpening("o1", 2, OpeningKind.DOOR, 60, 36, 80))
+            .withOpening(PlanOpening("o2", 0, OpeningKind.WINDOW, 48, 48, 48))
+        "r2" -> room
+            .withOpening(PlanOpening("o3", 0, OpeningKind.WINDOW, 80, 60, 48))
+            .withStair(PlanStair("s1", "f3", listOf(Pt(300, 40), Pt(336, 40), Pt(336, 160), Pt(300, 160))))
+        else -> room
+    }
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorWallPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, selectedId = "r1", selectedWall = 3, wallTap = Pt(0, 70)) }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorDoorPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, selectedId = "r1", selectedOpeningId = "o1") }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorStairsPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, selectedId = "r2") }), {}, {}, "Maple St")
 }
 
 @ThemePreviews

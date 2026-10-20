@@ -98,7 +98,60 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
     fun setSize(id: String, widthIn: Int, lengthIn: Int) = change(id) { room ->
         if (!room.isRectangle() || widthIn < MIN_SIDE_IN || lengthIn < MIN_SIDE_IN) room
         else PlanRoom.rectangle(room.id, room.name, room.kind, room.minX, room.minY, widthIn, lengthIn)
+            .copy(openings = room.openings, stairs = room.stairs)
+            .clampOpenings()
     }
+
+    /** Adds a door or window centered on the point of edge [edgeIndex] nearest [at]. Returns its id, or null when the edge is too short. */
+    fun addOpening(roomId: String, id: String, edgeIndex: Int, kind: OpeningKind, at: Pt? = null): String? {
+        val room = rooms.firstOrNull { it.id == roomId } ?: return null
+        if (edgeIndex !in room.points.indices) return null
+        val length = room.edgeLength(edgeIndex)
+        val width = minOf(if (kind == OpeningKind.DOOR) PlanRoom.DEFAULT_DOOR_IN else PlanRoom.DEFAULT_WINDOW_IN, length)
+        if (width < PlanRoom.MIN_OPENING_IN) return null
+        val centre = if (at == null) length / 2 else alongEdge(room, edgeIndex, at)
+        val height = if (kind == OpeningKind.DOOR) DOOR_HEIGHT_IN else WINDOW_HEIGHT_IN
+        val opening = PlanOpening(id, edgeIndex, kind, (centre - width / 2).coerceIn(0, length - width), width, height)
+        change(roomId) { it.withOpening(opening) }
+        return id
+    }
+
+    /** Shows opening [id] slid so its centre sits nearest [at]; [commit] makes it one undo step. */
+    fun dragOpening(roomId: String, id: String, at: Pt) {
+        val room = history.current.firstOrNull { it.id == roomId } ?: return
+        val o = room.openings.firstOrNull { it.id == id } ?: return
+        val centre = alongEdge(room, o.edgeIndex, at)
+        val moved = o.copy(offsetIn = snapper.snap(centre - o.widthIn / 2))
+        draft = history.current.map { if (it.id == roomId) it.withOpening(moved) else it }
+    }
+
+    fun setOpeningWidth(roomId: String, id: String, widthIn: Int) = change(roomId) { room ->
+        val o = room.openings.firstOrNull { it.id == id } ?: return@change room
+        if (widthIn < PlanRoom.MIN_OPENING_IN || widthIn > room.edgeLength(o.edgeIndex)) room
+        else room.withOpening(o.copy(widthIn = widthIn))
+    }
+
+    fun deleteOpening(roomId: String, id: String) = change(roomId) { it.withoutOpening(id) }
+
+    /** Puts stairs of [widthIn] x [lengthIn] in the middle of the room, linked to [toFloorId]. */
+    fun addStair(roomId: String, id: String, toFloorId: String?, widthIn: Int = STAIR_WIDTH_IN, lengthIn: Int = STAIR_LENGTH_IN): Boolean {
+        val room = rooms.firstOrNull { it.id == roomId } ?: return false
+        val w = minOf(widthIn, room.widthIn)
+        val l = minOf(lengthIn, room.lengthIn)
+        if (w < MIN_SIDE_IN || l < MIN_SIDE_IN) return false
+        val left = snapper.snap((room.minX + room.maxX) / 2 - w / 2).coerceIn(room.minX, room.maxX - w)
+        val top = snapper.snap((room.minY + room.maxY) / 2 - l / 2).coerceIn(room.minY, room.maxY - l)
+        val corners = listOf(Pt(left, top), Pt(left + w, top), Pt(left + w, top + l), Pt(left, top + l))
+        change(roomId) { it.withStair(PlanStair(id, toFloorId, corners)) }
+        return true
+    }
+
+    fun linkStair(roomId: String, id: String, toFloorId: String?) = change(roomId) { room ->
+        val s = room.stairs.firstOrNull { it.id == id } ?: return@change room
+        room.withStair(s.copy(toFloorId = toFloorId))
+    }
+
+    fun deleteStair(roomId: String, id: String) = change(roomId) { it.withoutStair(id) }
 
     fun delete(id: String) = history.push(rooms.filterNot { it.id == id })
 
@@ -142,6 +195,18 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
         return if (distance(snapped, a) < minGap || distance(snapped, b) < minGap) a else snapped
     }
 
+    /** Distance in inches from the first corner of edge [edgeIndex] to the point of the edge nearest [p]. */
+    private fun alongEdge(room: PlanRoom, edgeIndex: Int, p: Pt): Int {
+        val a = room.points[edgeIndex]
+        val b = room.points[(edgeIndex + 1) % room.points.size]
+        val dx = (b.x - a.x).toDouble()
+        val dy = (b.y - a.y).toDouble()
+        val len2 = dx * dx + dy * dy
+        if (len2 == 0.0) return 0
+        val t = (((p.x - a.x) * dx + (p.y - a.y) * dy) / len2).coerceIn(0.0, 1.0)
+        return Math.round(t * Math.sqrt(len2)).toInt()
+    }
+
     private fun distance(a: Pt, b: Pt) = Math.hypot((a.x - b.x).toDouble(), (a.y - b.y).toDouble())
 
     private fun PlanRoom.isRectangle(): Boolean =
@@ -154,5 +219,9 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
     companion object {
         const val DEFAULT_SIDE_IN = 144
         const val MIN_SIDE_IN = 12
+        const val DOOR_HEIGHT_IN = 80
+        const val WINDOW_HEIGHT_IN = 48
+        const val STAIR_WIDTH_IN = 36
+        const val STAIR_LENGTH_IN = 120
     }
 }

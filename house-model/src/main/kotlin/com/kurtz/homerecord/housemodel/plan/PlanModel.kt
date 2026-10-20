@@ -5,12 +5,59 @@ import kotlin.math.abs
 /** A point on a floor plan, in whole inches. */
 data class Pt(val x: Int, val y: Int)
 
+enum class OpeningKind { DOOR, WINDOW }
+
+/** A door or window on edge [edgeIndex] of its room; [offsetIn] runs along the edge from its first corner. */
+data class PlanOpening(
+    val id: String,
+    val edgeIndex: Int,
+    val kind: OpeningKind,
+    val offsetIn: Int,
+    val widthIn: Int,
+    val heightIn: Int,
+)
+
+/** Stairs inside a room, linked to the floor they lead to when known. */
+data class PlanStair(
+    val id: String,
+    val toFloorId: String? = null,
+    val points: List<Pt>,
+)
+
 data class PlanRoom(
     val id: String,
     val name: String,
     val kind: String = "OTHER",
     val points: List<Pt>,
+    val openings: List<PlanOpening> = emptyList(),
+    val stairs: List<PlanStair> = emptyList(),
 ) {
+    fun edgeLength(edgeIndex: Int): Int {
+        val a = points[edgeIndex]
+        val b = points[(edgeIndex + 1) % points.size]
+        return Math.round(Math.hypot((b.x - a.x).toDouble(), (b.y - a.y).toDouble())).toInt()
+    }
+
+    /** Pulls every opening back onto its edge after an edge got shorter; openings that cannot fit are narrowed. */
+    fun clampOpenings(): PlanRoom {
+        if (openings.isEmpty()) return this
+        val fixed = openings.filter { it.edgeIndex in points.indices }.map { o ->
+            val length = edgeLength(o.edgeIndex)
+            val width = o.widthIn.coerceIn(MIN_OPENING_IN, maxOf(length, MIN_OPENING_IN))
+            o.copy(widthIn = width, offsetIn = o.offsetIn.coerceIn(0, maxOf(length - width, 0)))
+        }
+        return if (fixed == openings) this else copy(openings = fixed)
+    }
+
+    fun withOpening(opening: PlanOpening): PlanRoom =
+        copy(openings = openings.filterNot { it.id == opening.id } + opening).clampOpenings()
+
+    fun withoutOpening(id: String): PlanRoom = copy(openings = openings.filterNot { it.id == id })
+
+    fun withStair(stair: PlanStair): PlanRoom = copy(stairs = stairs.filterNot { it.id == stair.id } + stair)
+
+    fun withoutStair(id: String): PlanRoom = copy(stairs = stairs.filterNot { it.id == id })
+
     val minX get() = points.minOf { it.x }
     val maxX get() = points.maxOf { it.x }
     val minY get() = points.minOf { it.y }
@@ -18,7 +65,10 @@ data class PlanRoom(
     val widthIn get() = maxX - minX
     val lengthIn get() = maxY - minY
 
-    fun moved(dx: Int, dy: Int) = copy(points = points.map { Pt(it.x + dx, it.y + dy) })
+    fun moved(dx: Int, dy: Int) = copy(
+        points = points.map { Pt(it.x + dx, it.y + dy) },
+        stairs = stairs.map { st -> st.copy(points = st.points.map { Pt(it.x + dx, it.y + dy) }) },
+    )
 
     /** Replaces one corner; ignored when [index] is out of range. */
     fun withPoint(index: Int, p: Pt): PlanRoom =
@@ -27,12 +77,27 @@ data class PlanRoom(
     /** Inserts a corner on edge [edgeIndex] (edge i runs from point i to i+1). */
     fun withCornerOnEdge(edgeIndex: Int, p: Pt): PlanRoom =
         if (edgeIndex !in points.indices) this
-        else copy(points = points.toMutableList().also { it.add(edgeIndex + 1, p) })
+        else {
+            val firstLength = Math.round(Math.hypot((p.x - points[edgeIndex].x).toDouble(), (p.y - points[edgeIndex].y).toDouble())).toInt()
+            val shifted = openings.map { o ->
+                when {
+                    o.edgeIndex > edgeIndex -> o.copy(edgeIndex = o.edgeIndex + 1)
+                    o.edgeIndex == edgeIndex && o.offsetIn >= firstLength -> o.copy(edgeIndex = edgeIndex + 1, offsetIn = o.offsetIn - firstLength)
+                    else -> o
+                }
+            }
+            copy(points = points.toMutableList().also { it.add(edgeIndex + 1, p) }, openings = shifted).clampOpenings()
+        }
 
     /** Deletes a corner; a room keeps at least three. */
     fun withoutCorner(index: Int): PlanRoom =
         if (points.size <= 3 || index !in points.indices) this
-        else copy(points = points.filterIndexed { i, _ -> i != index })
+        else {
+            val before = (index - 1 + points.size) % points.size
+            val kept = openings.filter { it.edgeIndex != index && it.edgeIndex != before }
+                .map { if (it.edgeIndex > index) it.copy(edgeIndex = it.edgeIndex - 1) else it }
+            copy(points = points.filterIndexed { i, _ -> i != index }, openings = kept).clampOpenings()
+        }
 
     /** Resizes an axis-aligned room by moving one side; other shapes are returned unchanged. */
     fun resizedEdge(edgeIndex: Int, newCoordinate: Int): PlanRoom {
@@ -40,8 +105,8 @@ data class PlanRoom(
         val a = points[edgeIndex]
         val b = points[(edgeIndex + 1) % points.size]
         return when {
-            a.y == b.y -> copy(points = points.map { if (it.y == a.y) it.copy(y = newCoordinate) else it })
-            a.x == b.x -> copy(points = points.map { if (it.x == a.x) it.copy(x = newCoordinate) else it })
+            a.y == b.y -> copy(points = points.map { if (it.y == a.y) it.copy(y = newCoordinate) else it }).clampOpenings()
+            a.x == b.x -> copy(points = points.map { if (it.x == a.x) it.copy(x = newCoordinate) else it }).clampOpenings()
             else -> this
         }
     }
@@ -72,6 +137,10 @@ data class PlanRoom(
     }
 
     companion object {
+        const val MIN_OPENING_IN = 12
+        const val DEFAULT_DOOR_IN = 32
+        const val DEFAULT_WINDOW_IN = 36
+
         fun rectangle(id: String, name: String, kind: String, left: Int, top: Int, widthIn: Int, lengthIn: Int) =
             PlanRoom(
                 id, name, kind,

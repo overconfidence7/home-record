@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.rounded.CenterFocusStrong
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Polyline
+import androidx.compose.material.icons.rounded.Stairs
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
@@ -80,12 +82,16 @@ import com.kurtz.homerecord.coreui.components.OptionsSheet
 import com.kurtz.homerecord.coreui.components.SheetOption
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
+import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 
 private const val HANDLE_RADIUS_DP = 10f
 private const val HANDLE_HIT_DP = 24f
+private const val STAIR_TREAD_IN = 10
 
 /** What a touch landed on. */
 private sealed interface Target {
@@ -93,6 +99,8 @@ private sealed interface Target {
     data class Corner(val roomId: String, val index: Int) : Target
     data class Edge(val roomId: String, val edgeIndex: Int, val at: Pt) : Target
     data class Body(val roomId: String) : Target
+    data class Opening(val roomId: String, val openingId: String) : Target
+    data class Wall(val roomId: String, val edgeIndex: Int, val at: Pt) : Target
     data object None : Target
 }
 
@@ -278,7 +286,13 @@ private fun PlanCanvas(
                                         send(PlanEditorEvent.DragCorner(target.index, PlanEditorViewModel.toInches(dxDp, start.zoom), PlanEditorViewModel.toInches(dyDp, start.zoom)))
                                         dragging = true
                                     }
-                                    is Target.Edge -> send(PlanEditorEvent.Transform(start.zoom, start.panX + dxDp, start.panY + dyDp))
+                                    is Target.Edge, is Target.Wall -> send(PlanEditorEvent.Transform(start.zoom, start.panX + dxDp, start.panY + dyDp))
+                                    is Target.Opening -> {
+                                        val p = change.position
+                                        val at = Pt(((p.x / density - start.panX) / start.zoom).roundToInt(), ((p.y / density - start.panY) / start.zoom).roundToInt())
+                                        send(PlanEditorEvent.DragOpening(target.openingId, at))
+                                        dragging = true
+                                    }
                                     is Target.Body -> {
                                         send(PlanEditorEvent.DragMove(target.roomId, PlanEditorViewModel.toInches(dxDp, start.zoom), PlanEditorViewModel.toInches(dyDp, start.zoom)))
                                         dragging = true
@@ -294,6 +308,8 @@ private fun PlanCanvas(
                         when (target) {
                             is Target.Corner -> send(PlanEditorEvent.DeleteCorner(target.index))
                             is Target.Edge -> send(PlanEditorEvent.AddCorner(target.edgeIndex, target.at))
+                            is Target.Opening -> send(PlanEditorEvent.SelectOpening(target.openingId))
+                            is Target.Wall -> send(PlanEditorEvent.SelectWall(target.edgeIndex, target.at))
                             else -> send(PlanEditorEvent.Select((target as? Target.Body)?.roomId ?: (target as? Target.Handle)?.roomId))
                         }
                     }
@@ -332,6 +348,13 @@ private fun hit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {
     }
     val wx = (xDp - s.panX) / s.zoom
     val wy = (yDp - s.panY) / s.zoom
+    if (sel != null && !s.editShape) {
+        val reach = HANDLE_HIT_DP / s.zoom
+        sel.openings.firstOrNull { o -> openingDistance(sel, o, wx, wy) <= reach }?.let { return Target.Opening(sel.id, it.id) }
+        sel.points.indices.minByOrNull { distanceToEdge(sel, it, wx, wy) }?.let { i ->
+            if (distanceToEdge(sel, i, wx, wy) <= reach) return Target.Wall(sel.id, i, Pt(wx.roundToInt(), wy.roundToInt()))
+        }
+    }
     val ordered = s.rooms.sortedBy { if (it.id == s.selectedId) 1 else 0 }.reversed()
     ordered.firstOrNull { it.contains(wx, wy) }?.let { return Target.Body(it.id) }
     return Target.None
@@ -345,6 +368,23 @@ private fun distanceToEdge(room: PlanRoom, edgeIndex: Int, x: Float, y: Float): 
     val len2 = dx * dx + dy * dy
     val t = if (len2 == 0f) 0f else (((x - a.x) * dx + (y - a.y) * dy) / len2).coerceIn(0f, 1f)
     return hypot(x - (a.x + t * dx), y - (a.y + t * dy))
+}
+
+/** Distance from a point to the stretch of wall an opening covers, in inches. */
+private fun openingDistance(room: PlanRoom, o: PlanOpening, x: Float, y: Float): Float {
+    val a = room.points[o.edgeIndex]
+    val b = room.points[(o.edgeIndex + 1) % room.points.size]
+    val len = room.edgeLength(o.edgeIndex).toFloat()
+    if (len == 0f) return Float.MAX_VALUE
+    val ux = (b.x - a.x) / len
+    val uy = (b.y - a.y) / len
+    val from = Offset(a.x + ux * o.offsetIn, a.y + uy * o.offsetIn)
+    val to = Offset(a.x + ux * (o.offsetIn + o.widthIn), a.y + uy * (o.offsetIn + o.widthIn))
+    val dx = to.x - from.x
+    val dy = to.y - from.y
+    val len2 = dx * dx + dy * dy
+    val t = if (len2 == 0f) 0f else (((x - from.x) * dx + (y - from.y) * dy) / len2).coerceIn(0f, 1f)
+    return hypot(x - (from.x + t * dx), y - (from.y + t * dy))
 }
 
 private fun PlanRoom.isAxisAligned(): Boolean = points.size == 4 &&
@@ -413,6 +453,17 @@ private fun DrawScope.drawPlan(
         if (layout.size.width < (room.maxX - room.minX) * z) {
             drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
         }
+        room.stairs.forEach { st -> drawStair(st, z, ox, oy, density, textColor) }
+        room.openings.forEach { o ->
+            drawOpening(room, o, z, ox, oy, density, if (o.id == s.selectedOpeningId) primary else textColor, if (o.id == s.selectedOpeningId) selectedFill else roomFill)
+        }
+    }
+    s.selected?.takeIf { !s.editShape }?.let { room ->
+        s.selectedWall?.takeIf { it in room.points.indices }?.let { edge ->
+            val a = room.points[edge]
+            val b = room.points[(edge + 1) % room.points.size]
+            drawLine(primary, Offset(a.x * z + ox, a.y * z + oy), Offset(b.x * z + ox, b.y * z + oy), strokeWidth = 6f * density)
+        }
     }
     s.selected?.takeIf { s.editShape }?.let { room ->
         room.points.forEach { p ->
@@ -427,6 +478,60 @@ private fun DrawScope.drawPlan(
             val b = room.points[(i + 1) % room.points.size]
             drawCircle(primary, HANDLE_RADIUS_DP * density, Offset((a.x + b.x) / 2f * z + ox, (a.y + b.y) / 2f * z + oy))
         }
+    }
+}
+
+/** A door is a gap in the wall with its swing arc; a window is three thin lines across the wall. */
+private fun DrawScope.drawOpening(room: PlanRoom, o: PlanOpening, z: Float, ox: Float, oy: Float, density: Float, line: Color, gap: Color) {
+    val a = room.points[o.edgeIndex]
+    val b = room.points[(room.points.size + o.edgeIndex + 1) % room.points.size]
+    val len = room.edgeLength(o.edgeIndex).toFloat()
+    if (len == 0f) return
+    val ux = (b.x - a.x) / len
+    val uy = (b.y - a.y) / len
+    val start = Offset((a.x + ux * o.offsetIn) * z + ox, (a.y + uy * o.offsetIn) * z + oy)
+    val end = Offset((a.x + ux * (o.offsetIn + o.widthIn)) * z + ox, (a.y + uy * (o.offsetIn + o.widthIn)) * z + oy)
+    // Inward normal: the interior lies to the right of travel when the signed area is positive (y down).
+    val sign = if (room.points.indices.sumOf { i -> val p = room.points[i]; val q = room.points[(i + 1) % room.points.size]; p.x.toLong() * q.y - q.x.toLong() * p.y } >= 0) 1f else -1f
+    val nx = -uy * sign
+    val ny = ux * sign
+    val width = o.widthIn * z
+    when (o.kind) {
+        OpeningKind.DOOR -> {
+            drawLine(gap, start, end, strokeWidth = 5f * density)
+            drawLine(line, start, Offset(start.x + nx * width, start.y + ny * width), strokeWidth = 1.5f * density)
+            val path = Path().apply {
+                moveTo(end.x, end.y)
+                quadraticTo(start.x + nx * width + (end.x - start.x) * 0.55f, start.y + ny * width + (end.y - start.y) * 0.55f, start.x + nx * width, start.y + ny * width)
+            }
+            drawPath(path, line, style = Stroke(width = 1.25f * density))
+        }
+        OpeningKind.WINDOW -> {
+            drawLine(gap, start, end, strokeWidth = 5f * density)
+            for (k in -1..1) {
+                val off = k * 2f * density
+                drawLine(line, Offset(start.x + nx * off, start.y + ny * off), Offset(end.x + nx * off, end.y + ny * off), strokeWidth = 1.25f * density)
+            }
+        }
+    }
+}
+
+/** Stairs as a rectangle crossed by treads along its long side, with an arrow toward the way up. */
+private fun DrawScope.drawStair(st: PlanStair, z: Float, ox: Float, oy: Float, density: Float, line: Color) {
+    if (st.points.size < 3) return
+    val minX = st.points.minOf { it.x }
+    val maxX = st.points.maxOf { it.x }
+    val minY = st.points.minOf { it.y }
+    val maxY = st.points.maxOf { it.y }
+    val topLeft = Offset(minX * z + ox, minY * z + oy)
+    val size = androidx.compose.ui.geometry.Size((maxX - minX) * z, (maxY - minY) * z)
+    drawRect(line, topLeft, size, style = Stroke(width = 1.25f * density))
+    val vertical = (maxY - minY) >= (maxX - minX)
+    val treads = ((if (vertical) maxY - minY else maxX - minX) / STAIR_TREAD_IN).coerceAtLeast(2)
+    for (k in 1 until treads) {
+        val f = k / treads.toFloat()
+        if (vertical) drawLine(line, Offset(topLeft.x, topLeft.y + size.height * f), Offset(topLeft.x + size.width, topLeft.y + size.height * f), strokeWidth = 1f * density)
+        else drawLine(line, Offset(topLeft.x + size.width * f, topLeft.y), Offset(topLeft.x + size.width * f, topLeft.y + size.height), strokeWidth = 1f * density)
     }
 }
 
@@ -479,6 +584,7 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+                if (!state.editShape) OpeningControls(state, room, onEvent)
                 if (state.editShape) {
                     Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
                 }
@@ -502,6 +608,12 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                             Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
+                    if (!state.editShape) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                            Icon(Icons.Rounded.Stairs, contentDescription = null)
+                            Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
                     OutlinedButton(onClick = { onEvent(PlanEditorEvent.Delete) }, modifier = Modifier.heightIn(min = 48.dp)) {
                         Icon(Icons.Rounded.Delete, contentDescription = null)
                         Text(stringResource(R.string.plan_delete_room), modifier = Modifier.padding(start = 8.dp))
@@ -519,6 +631,76 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
         )
     }
 }
+
+/** Door and window controls for the tapped wall or opening, and the stairs list (AC-C9). */
+@Composable
+private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEditorEvent) -> Unit) {
+    val opening = state.selectedOpening
+    if (state.selectedWall != null) {
+        Text(
+            stringResource(R.string.plan_wall_selected, LengthParser.format(room.edgeLength(state.selectedWall), state.system)),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.plan_add_door))
+            }
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.plan_add_window))
+            }
+        }
+    } else if (opening == null && room.openings.isEmpty() && room.stairs.isEmpty()) {
+        Text(stringResource(R.string.plan_wall_hint), style = MaterialTheme.typography.bodyMedium)
+    }
+    if (opening != null) {
+        key(opening.id, state.fieldsVersion) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                LengthField(
+                    label = stringResource(if (opening.kind == OpeningKind.DOOR) R.string.plan_door_width else R.string.plan_window_width),
+                    inches = opening.widthIn,
+                    onInchesChange = { w -> if (w != null) onEvent(PlanEditorEvent.SetOpeningWidth(w)) },
+                    system = state.system,
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedButton(onClick = { onEvent(PlanEditorEvent.DeleteOpening) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Icon(Icons.Rounded.Delete, contentDescription = null)
+                    Text(
+                        stringResource(if (opening.kind == OpeningKind.DOOR) R.string.plan_delete_door else R.string.plan_delete_window),
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            }
+        }
+    }
+    room.stairs.forEach { stair -> StairRow(state, stair, onEvent) }
+}
+
+@Composable
+private fun StairRow(state: PlanEditorUiState, stair: PlanStair, onEvent: (PlanEditorEvent) -> Unit) {
+    var picking by rememberSaveable(stair.id) { mutableStateOf(false) }
+    val target = state.floors.firstOrNull { it.id == stair.toFloorId }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+            Text(
+                if (target != null) stringResource(R.string.plan_stairs_to, target.name) else stringResource(R.string.plan_stairs_unlinked),
+            )
+        }
+        IconButton(onClick = { onEvent(PlanEditorEvent.DeleteStair(stair.id)) }, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_stairs))
+        }
+    }
+    if (picking) {
+        val none = stringResource(R.string.plan_stairs_no_link)
+        OptionsSheet(
+            title = stringResource(R.string.plan_stairs_link_title),
+            options = state.floors.filter { it.id != state.floorId }.map { SheetOption(it.id, it.name) } + SheetOption(NO_FLOOR, none),
+            onDismiss = { picking = false },
+            onPick = { picking = false; onEvent(PlanEditorEvent.LinkStair(stair.id, it.id.takeIf { id -> id != NO_FLOOR })) },
+        )
+    }
+}
+
+private const val NO_FLOOR = "none"
 
 private fun commitSize(width: Int?, length: Int?, onEvent: (PlanEditorEvent) -> Unit) {
     if (width != null && length != null) onEvent(PlanEditorEvent.SetSize(width, length))

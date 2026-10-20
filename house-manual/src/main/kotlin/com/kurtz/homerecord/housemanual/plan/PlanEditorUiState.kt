@@ -3,6 +3,8 @@ package com.kurtz.homerecord.housemanual.plan
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.UnplacedRoom
+import com.kurtz.homerecord.housemodel.plan.OpeningKind
+import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
@@ -31,8 +33,14 @@ data class PlanEditorUiState(
     val system: UnitSystem = UnitSystem.IMPERIAL,
     /** Edit shape mode for the selected room (AC-C7): corners drag, tapping an edge adds one, tapping a corner deletes it. */
     val editShape: Boolean = false,
+    /** Edge of the selected room the user tapped, where a door or window can be added (AC-C9). */
+    val selectedWall: Int? = null,
+    /** Where on that wall the tap landed, so a new door or window starts there. */
+    val wallTap: Pt? = null,
+    val selectedOpeningId: String? = null,
 ) {
     val selected: PlanRoom? get() = rooms.firstOrNull { it.id == selectedId }
+    val selectedOpening: PlanOpening? get() = selected?.openings?.firstOrNull { it.id == selectedOpeningId }
 }
 
 sealed interface PlanEditorEvent {
@@ -50,6 +58,16 @@ sealed interface PlanEditorEvent {
     data class AddCorner(val edgeIndex: Int, val at: Pt) : PlanEditorEvent
     data class DragCorner(val index: Int, val dxIn: Int, val dyIn: Int) : PlanEditorEvent
     data class DeleteCorner(val index: Int) : PlanEditorEvent
+    data class SelectWall(val edgeIndex: Int, val at: Pt) : PlanEditorEvent
+    data class AddOpening(val kind: OpeningKind) : PlanEditorEvent
+    data class SelectOpening(val openingId: String?) : PlanEditorEvent
+    /** Slides the opening so its centre follows [at], a point on the plan in inches. */
+    data class DragOpening(val openingId: String, val at: Pt) : PlanEditorEvent
+    data class SetOpeningWidth(val widthIn: Int) : PlanEditorEvent
+    data object DeleteOpening : PlanEditorEvent
+    data object AddStair : PlanEditorEvent
+    data class LinkStair(val stairId: String, val toFloorId: String?) : PlanEditorEvent
+    data class DeleteStair(val stairId: String) : PlanEditorEvent
     data object Delete : PlanEditorEvent
     data object Undo : PlanEditorEvent
     data object Redo : PlanEditorEvent

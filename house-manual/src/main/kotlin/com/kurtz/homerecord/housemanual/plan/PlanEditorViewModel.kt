@@ -110,6 +110,39 @@ class PlanEditorViewModel(
             is PlanEditorEvent.DeleteCorner -> selectedId()?.let { id ->
                 if (editor.deleteCorner(id, event.index)) commit(id)
             }
+            is PlanEditorEvent.SelectWall -> {
+                _state.update { it.copy(selectedWall = event.edgeIndex, wallTap = event.at, selectedOpeningId = null) }
+            }
+            is PlanEditorEvent.AddOpening -> selectedId()?.let { id ->
+                val state = _state.value
+                val edge = state.selectedWall ?: return
+                val openingId = newId()
+                if (editor.addOpening(id, openingId, edge, event.kind, state.wallTap) != null) {
+                    commit(id, bumpFields = false)
+                    _state.update { it.copy(selectedOpeningId = openingId, selectedWall = null) }
+                }
+            }
+            is PlanEditorEvent.SelectOpening -> _state.update { it.copy(selectedOpeningId = event.openingId, selectedWall = null) }
+            is PlanEditorEvent.DragOpening -> selectedId()?.let { id ->
+                editor.dragOpening(id, event.openingId, event.at)
+                if (_state.value.selectedOpeningId != event.openingId) _state.update { it.copy(selectedOpeningId = event.openingId, selectedWall = null) }
+                refresh()
+            }
+            is PlanEditorEvent.SetOpeningWidth -> selectedId()?.let { id ->
+                _state.value.selectedOpeningId?.let { editor.setOpeningWidth(id, it, event.widthIn); commit(id, bumpFields = false) }
+            }
+            PlanEditorEvent.DeleteOpening -> selectedId()?.let { id ->
+                _state.value.selectedOpeningId?.let { editor.deleteOpening(id, it); _state.update { s -> s.copy(selectedOpeningId = null) }; commit(id, bumpFields = false) }
+            }
+            PlanEditorEvent.AddStair -> selectedId()?.let { id ->
+                // A new staircase leads to the floor above when there is one, otherwise the floor below.
+                val floors = _state.value.floors
+                val here = floors.indexOfFirst { it.id == _state.value.floorId }
+                val target = (floors.getOrNull(here + 1) ?: floors.getOrNull(here - 1))?.id
+                if (editor.addStair(id, newId(), target)) commit(id, bumpFields = false)
+            }
+            is PlanEditorEvent.LinkStair -> selectedId()?.let { editor.linkStair(it, event.stairId, event.toFloorId); commit(it, bumpFields = false) }
+            is PlanEditorEvent.DeleteStair -> selectedId()?.let { editor.deleteStair(it, event.stairId); commit(it, bumpFields = false) }
             PlanEditorEvent.Delete -> selectedId()?.let { editor.delete(it); commit(null) }
             PlanEditorEvent.Undo -> { editor.undo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
             PlanEditorEvent.Redo -> { editor.redo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
@@ -137,6 +170,8 @@ class PlanEditorViewModel(
                 selectedId = keep,
                 editShape = false,
                 focusName = false,
+                selectedWall = null,
+                selectedOpeningId = null,
                 fieldsVersion = it.fieldsVersion + 1,
             )
         }
@@ -146,7 +181,9 @@ class PlanEditorViewModel(
     private fun select(id: String?) {
         saved[SELECTED] = id
         saved[EDIT_SHAPE] = false
-        _state.update { it.copy(selectedId = id, editShape = false, focusName = false, fieldsVersion = it.fieldsVersion + 1) }
+        _state.update {
+            it.copy(selectedId = id, editShape = false, focusName = false, selectedWall = null, selectedOpeningId = null, fieldsVersion = it.fieldsVersion + 1)
+        }
     }
 
     private fun setEditShape(on: Boolean) {
@@ -185,6 +222,8 @@ class PlanEditorViewModel(
                 canUndo = editor.canUndo,
                 canRedo = editor.canRedo,
                 flaggedIds = validator.flaggedRoomIds(rooms),
+                selectedOpeningId = it.selectedOpeningId?.takeIf { oid -> rooms.any { r -> r.openings.any { o -> o.id == oid } } },
+                selectedWall = it.selectedWall?.takeIf { e -> rooms.firstOrNull { r -> r.id == it.selectedId }?.let { r -> e in r.points.indices } == true },
             )
         }
     }
