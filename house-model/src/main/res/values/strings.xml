@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layer_items">Items</string>
+    <string name="layer_electrical">Electrical</string>
+    <string name="layer_plumbing">Plumbing</string>
+    <string name="layer_hvac">HVAC</string>
+    <string name="layer_low_voltage">Low-voltage</string>
+    <string name="layer_gas">Gas</string>
+    <string name="layer_drain_vent">Drain and vent</string>
+    <string name="layers_group">Layers</string>
+    <string name="blueprint_north">North</string>
+    <plurals name="blueprint_description">
+        <item quantity="one">Blueprint with %1$d room</item>
+        <item quantity="other">Blueprint with %1$d rooms</item>
+    </plurals>
+</resources>

@@ -32,7 +32,11 @@ class PlanEditorViewModel(
     private val saved: SavedStateHandle,
     private val system: UnitSystem = UnitSystem.IMPERIAL,
     private val newId: () -> String = Ids::newId,
+    initialFloorId: String? = null,
+    initialRoomId: String? = null,
+    initialEditShape: Boolean = false,
 ) : ViewModel() {
+    private var pendingEditShape = initialEditShape
     private val snapper = if (system == UnitSystem.METRIC) GridSnapper(gridIn = 4) else GridSnapper()
     private val validator = PlanValidator()
     private val saveLock = Mutex()
@@ -40,8 +44,8 @@ class PlanEditorViewModel(
 
     private val _state = MutableStateFlow(
         PlanEditorUiState(
-            floorId = saved[FLOOR],
-            selectedId = saved[SELECTED],
+            floorId = saved[FLOOR] ?: initialFloorId,
+            selectedId = saved[SELECTED] ?: initialRoomId,
             editShape = saved[EDIT_SHAPE] ?: false,
             zoom = saved[ZOOM] ?: 1f,
             panX = saved[PAN_X] ?: 0f,
@@ -160,15 +164,17 @@ class PlanEditorViewModel(
         editor = PlanEditor(plan.placed, snapper)
         saved[FLOOR] = floor.id
         val keep = _state.value.selectedId?.takeIf { id -> plan.placed.any { it.id == id } }
+        val shape = pendingEditShape && keep != null
+        pendingEditShape = false
         saved[SELECTED] = keep
-        saved[EDIT_SHAPE] = false
+        saved[EDIT_SHAPE] = shape
         _state.update {
             it.copy(
                 loading = false,
                 floorId = floor.id,
                 unplaced = plan.unplaced,
                 selectedId = keep,
-                editShape = false,
+                editShape = shape,
                 focusName = false,
                 selectedWall = null,
                 selectedOpeningId = null,

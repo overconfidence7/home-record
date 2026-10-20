@@ -56,6 +56,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import com.kurtz.homerecord.housemodel.blueprint.drawOpening
+import com.kurtz.homerecord.housemodel.blueprint.drawStair
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -91,7 +93,6 @@ import com.kurtz.homerecord.housemodel.plan.RoomKind
 
 private const val HANDLE_RADIUS_DP = 10f
 private const val HANDLE_HIT_DP = 24f
-private const val STAIR_TREAD_IN = 10
 
 /** What a touch landed on. */
 private sealed interface Target {
@@ -478,60 +479,6 @@ private fun DrawScope.drawPlan(
             val b = room.points[(i + 1) % room.points.size]
             drawCircle(primary, HANDLE_RADIUS_DP * density, Offset((a.x + b.x) / 2f * z + ox, (a.y + b.y) / 2f * z + oy))
         }
-    }
-}
-
-/** A door is a gap in the wall with its swing arc; a window is three thin lines across the wall. */
-private fun DrawScope.drawOpening(room: PlanRoom, o: PlanOpening, z: Float, ox: Float, oy: Float, density: Float, line: Color, gap: Color) {
-    val a = room.points[o.edgeIndex]
-    val b = room.points[(room.points.size + o.edgeIndex + 1) % room.points.size]
-    val len = room.edgeLength(o.edgeIndex).toFloat()
-    if (len == 0f) return
-    val ux = (b.x - a.x) / len
-    val uy = (b.y - a.y) / len
-    val start = Offset((a.x + ux * o.offsetIn) * z + ox, (a.y + uy * o.offsetIn) * z + oy)
-    val end = Offset((a.x + ux * (o.offsetIn + o.widthIn)) * z + ox, (a.y + uy * (o.offsetIn + o.widthIn)) * z + oy)
-    // Inward normal: the interior lies to the right of travel when the signed area is positive (y down).
-    val sign = if (room.points.indices.sumOf { i -> val p = room.points[i]; val q = room.points[(i + 1) % room.points.size]; p.x.toLong() * q.y - q.x.toLong() * p.y } >= 0) 1f else -1f
-    val nx = -uy * sign
-    val ny = ux * sign
-    val width = o.widthIn * z
-    when (o.kind) {
-        OpeningKind.DOOR -> {
-            drawLine(gap, start, end, strokeWidth = 5f * density)
-            drawLine(line, start, Offset(start.x + nx * width, start.y + ny * width), strokeWidth = 1.5f * density)
-            val path = Path().apply {
-                moveTo(end.x, end.y)
-                quadraticTo(start.x + nx * width + (end.x - start.x) * 0.55f, start.y + ny * width + (end.y - start.y) * 0.55f, start.x + nx * width, start.y + ny * width)
-            }
-            drawPath(path, line, style = Stroke(width = 1.25f * density))
-        }
-        OpeningKind.WINDOW -> {
-            drawLine(gap, start, end, strokeWidth = 5f * density)
-            for (k in -1..1) {
-                val off = k * 2f * density
-                drawLine(line, Offset(start.x + nx * off, start.y + ny * off), Offset(end.x + nx * off, end.y + ny * off), strokeWidth = 1.25f * density)
-            }
-        }
-    }
-}
-
-/** Stairs as a rectangle crossed by treads along its long side, with an arrow toward the way up. */
-private fun DrawScope.drawStair(st: PlanStair, z: Float, ox: Float, oy: Float, density: Float, line: Color) {
-    if (st.points.size < 3) return
-    val minX = st.points.minOf { it.x }
-    val maxX = st.points.maxOf { it.x }
-    val minY = st.points.minOf { it.y }
-    val maxY = st.points.maxOf { it.y }
-    val topLeft = Offset(minX * z + ox, minY * z + oy)
-    val size = androidx.compose.ui.geometry.Size((maxX - minX) * z, (maxY - minY) * z)
-    drawRect(line, topLeft, size, style = Stroke(width = 1.25f * density))
-    val vertical = (maxY - minY) >= (maxX - minX)
-    val treads = ((if (vertical) maxY - minY else maxX - minX) / STAIR_TREAD_IN).coerceAtLeast(2)
-    for (k in 1 until treads) {
-        val f = k / treads.toFloat()
-        if (vertical) drawLine(line, Offset(topLeft.x, topLeft.y + size.height * f), Offset(topLeft.x + size.width, topLeft.y + size.height * f), strokeWidth = 1f * density)
-        else drawLine(line, Offset(topLeft.x + size.width * f, topLeft.y), Offset(topLeft.x + size.width * f, topLeft.y + size.height), strokeWidth = 1f * density)
     }
 }
 

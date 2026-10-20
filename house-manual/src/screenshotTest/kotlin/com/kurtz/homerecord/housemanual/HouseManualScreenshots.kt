@@ -43,10 +43,6 @@ fun FloorsDeleteDialogScreenshot() = FloorsDeleteDialogPreview()
 @Composable
 fun FloorsEditDialogScreenshot() = FloorsEditDialogPreview()
 
-@PreviewTest
-@ThemePreviews
-@Composable
-fun HouseRootScreenshot() = HouseRootPreview()
 
 @PreviewTest
 @ThemePreviews
@@ -102,3 +98,43 @@ fun PlanEditorLoadingScreenshot() = PlanEditorLoadingPreview()
 @ThemePreviews
 @Composable
 fun PlanEditorNoFloorsScreenshot() = PlanEditorNoFloorsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseBlueprintScreenshot() = HouseBlueprintPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseLayersScreenshot() = HouseLayersPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseRoomMenuScreenshot() = HouseRoomMenuPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseEmptyFloorScreenshot() = HouseEmptyFloorPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseLoadingScreenshot() = HouseLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseNoFloorsScreenshot() = HouseNoFloorsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RoomPageScreenshot() = RoomPagePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RoomMissingScreenshot() = RoomMissingPreview()

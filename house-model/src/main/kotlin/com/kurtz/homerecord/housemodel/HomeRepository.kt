@@ -148,6 +148,12 @@ class HomeRepository(
     /** Rooms on [floorId] split into those with a shape and those still waiting to be placed (AC-C6, AC-F48). */
     fun observePlan(floorId: String): Flow<FloorPlan> = db.roomDao().observeFor(floorId).map { rows -> toFloorPlan(rows) }
 
+    /** One placed room by id, or null when it is gone or has no shape yet. */
+    suspend fun findRoom(roomId: String): PlanRoom? {
+        val row = db.roomDao().get(roomId) ?: return null
+        return loadPlan(row.floorId).placed.firstOrNull { it.id == roomId }
+    }
+
     suspend fun loadPlan(floorId: String): FloorPlan = toFloorPlan(db.roomDao().listFor(floorId))
 
     private suspend fun toFloorPlan(rows: List<RoomEntity>): FloorPlan {

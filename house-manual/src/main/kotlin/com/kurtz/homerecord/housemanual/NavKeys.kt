@@ -7,4 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object FloorsKey : NavKey
 
-@Serializable data object PlanKey : NavKey
+@Serializable data class PlanKey(val floorId: String? = null, val roomId: String? = null, val editShape: Boolean = false) : NavKey
+
+@Serializable data class RoomKey(val roomId: String) : NavKey

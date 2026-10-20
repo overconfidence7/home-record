@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.auth.SessionInterceptor
 import androidx.room.Room
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
 import com.kurtz.homerecord.core.sync.DeviceIdStore
@@ -68,6 +69,8 @@ class AppContainer(app: Application) {
             syncCoordinator.requestSync()
         }
     }
+
+    val layers = PrefsLayerStore(app)
 
     init {
         syncCoordinator.start()

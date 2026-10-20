@@ -19,7 +19,12 @@ import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.housemanual.plan.PlanEditorRoute
 import com.kurtz.homerecord.housemanual.house.FloorsRoute
-import com.kurtz.homerecord.housemanual.house.HouseRoot
+import com.kurtz.homerecord.housemanual.house.HouseRoute
+import com.kurtz.homerecord.housemanual.house.RoomRoute
+import com.kurtz.homerecord.housemanual.onboarding.foundationLabel
+import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel
+import com.kurtz.homerecord.housemodel.Foundation
+import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemanual.house.OnboardingRoute
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.coreui.shell.AppTab
@@ -64,10 +69,30 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity) {
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     HomeRecordApp(tabs = tabs, entries = { nav ->
         entry<HouseKey> {
-            val floors by remember(home.id) { container.homes.observeFloors(home.id) }.collectAsState(initial = emptyList())
-            HouseRoot(home, floors.size, onOpenFloors = { nav.push(FloorsKey) }, onOpenPlan = { nav.push(PlanKey) })
+            val summary = stringResource(
+                R.string.house_summary,
+                houseTypeLabel(HouseType.parse(home.houseType)),
+                foundationLabel(Foundation.parse(home.foundation)),
+            )
+            HouseRoute(
+                repo = container.homes,
+                layerStore = container.layers,
+                homeId = home.id,
+                homeName = home.name,
+                summary = summary,
+                onOpenRoom = { nav.push(RoomKey(it.id)) },
+                onEditPlan = { nav.push(PlanKey(floorId = it)) },
+                onEditShape = { floorId, room -> nav.push(PlanKey(floorId, room.id, editShape = true)) },
+                onOpenFloors = { nav.push(FloorsKey) },
+            )
         }
-        entry<PlanKey> { PlanEditorRoute(container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) }) }
+        entry<PlanKey> { key ->
+            PlanEditorRoute(
+                container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) },
+                floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
+            )
+        }
+        entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title

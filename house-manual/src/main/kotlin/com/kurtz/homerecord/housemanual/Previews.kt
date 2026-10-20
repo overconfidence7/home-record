@@ -10,11 +10,17 @@ import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 import com.kurtz.homerecord.housemanual.house.FloorsDialog
 import com.kurtz.homerecord.housemanual.house.FloorsScreen
 import com.kurtz.homerecord.housemanual.house.FloorsUiState
-import com.kurtz.homerecord.housemanual.house.HouseRoot
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingScreen
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingUiState
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.Foundation
+import com.kurtz.homerecord.housemanual.house.HouseDialog
+import com.kurtz.homerecord.housemanual.house.HouseScreen
+import com.kurtz.homerecord.housemanual.house.HouseUiState
+import com.kurtz.homerecord.housemanual.house.RoomScreen
+import com.kurtz.homerecord.housemanual.house.RoomUiState
+import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
+import com.kurtz.homerecord.housemodel.blueprint.LayerSet
 import com.kurtz.homerecord.housemanual.plan.PlanEditorScreen
 import com.kurtz.homerecord.housemanual.plan.PlanEditorUiState
 import com.kurtz.homerecord.housemodel.HouseType
@@ -90,9 +96,6 @@ fun FloorsEditDialogPreview() = Frame {
     FloorsScreen(FloorsUiState(loading = false, floors = floors, dialog = FloorsDialog.Edit(floors[2])), {}, {}, "Maple St")
 }
 
-@ThemePreviews
-@Composable
-fun HouseRootPreview() = Frame { HouseRoot(home, floorCount = 3, onOpenFloors = {}) }
 
 private val planRooms = listOf(
     PlanRoom.rectangle("r1", "Kitchen", "KITCHEN", 0, 0, 168, 144),
@@ -192,3 +195,49 @@ fun PlanEditorLoadingPreview() = Frame { PlanEditorScreen(PlanEditorUiState(), {
 @ThemePreviews
 @Composable
 fun PlanEditorNoFloorsPreview() = Frame { PlanEditorScreen(PlanEditorUiState(loading = false), {}, {}, "Maple St") }
+
+private val houseRooms = planRoomsWithOpenings + PlanRoom(
+    "r6", "Mudroom", "OTHER", listOf(Pt(240, 192), Pt(408, 192), Pt(408, 264), Pt(312, 264), Pt(312, 336), Pt(240, 336)),
+)
+
+private fun houseState(vararg changes: HouseUiState.() -> HouseUiState): HouseUiState =
+    changes.fold(
+        HouseUiState(loading = false, homeName = "Maple St", summary = "Colonial · Basement", floors = floors, floorId = "f2", rooms = houseRooms),
+    ) { acc, f -> acc.f() }
+
+@Composable
+private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {})
+
+@ThemePreviews
+@Composable
+fun HouseBlueprintPreview() = Frame { houseScreen(houseState()) }
+
+@ThemePreviews
+@Composable
+fun HouseLayersPreview() = Frame {
+    houseScreen(houseState({ copy(layers = LayerSet(setOf(BlueprintLayer.PLUMBING, BlueprintLayer.ELECTRICAL))) }))
+}
+
+@ThemePreviews
+@Composable
+fun HouseRoomMenuPreview() = Frame { houseScreen(houseState({ copy(dialog = HouseDialog.Menu(houseRooms[0])) })) }
+
+@ThemePreviews
+@Composable
+fun HouseEmptyFloorPreview() = Frame { houseScreen(houseState({ copy(rooms = emptyList(), floorId = "f1") })) }
+
+@ThemePreviews
+@Composable
+fun HouseLoadingPreview() = Frame { houseScreen(HouseUiState(homeName = "Maple St", summary = "Colonial · Basement")) }
+
+@ThemePreviews
+@Composable
+fun HouseNoFloorsPreview() = Frame { houseScreen(HouseUiState(loading = false, homeName = "Maple St", summary = "Colonial · Basement")) }
+
+@ThemePreviews
+@Composable
+fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0]), {}) }
+
+@ThemePreviews
+@Composable
+fun RoomMissingPreview() = Frame { RoomScreen(RoomUiState(loading = false), {}) }
