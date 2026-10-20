@@ -112,3 +112,41 @@ Automated suite run at 2026-10-20 12:52 UTC. Full output (screenshots, logs, Mae
 - [ ] [Major] T015 is ticked but these acceptance criteria have no test or flow: AC-C15 [auto:coverage:T015] - steps: automated, see qa-results branch latest/ for commit cbf81fa - expected: every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules) - actual: no reference found
 
 Tested: 0 device stages, 229 unit tests, 51 backend tests, coverage 20/41 ACs. Passed: 0. New issues: 13. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-10-20 (commit cbf81fa)
+
+Judged the results the suite published for cbf81fa (run 39419820023, the first run of qa.yml). `build` HEAD is already two commits ahead (3fd544b Q001, 65ec903 the auto entry); the suite has not tested HEAD. There are no screenshots to judge: all three emulator jobs failed before the first flow ran, so `results.json` has `stages: []` and `latest/` holds only JVM, lint, backend and coverage output. The UI audit (ui-standards rules 1-36), the committed-PNG comparison and the walkthrough scoring could not be done this run; the builder's own reference PNGs under `*/src/screenshotTest*/reference/` are the only pictures of the apps that exist and they are not evidence of what runs on a device.
+
+Verdict: House Manual: nobody has seen this build on a device; the QA pipeline that was supposed to be Nate's eyes died at emulator boot, so M0 and the plan editor (T011-T015) are still only unit-tested. The single biggest gap is that the device suite does not run, and until it does every ticked task is unverified against PRODUCT.md. / Field Log: same story; sign-in, company and team (T008-T009) have JVM tests and 51 backend tests but no on-device check, and the walkthrough cannot start at F1. Fix the suite before building more surface area.
+
+- [ ] [Major] QA device jobs never boot the emulator: `emulator` exits at once with `FATAL | Not enough space to create userdata partition. Available: 6236 MB at /home/runner/.android/avd/test.avd, need 7372.80 MB`, then android-emulator-runner polls adb for 600 s and fails with "Timeout waiting for emulator to boot" [judge:qa-emulator-disk] - steps: open run 39419820023, jobs "Device suite (house-manual)" step "Create AVD snapshot" (12:28:56 UTC), "Device suite (field-log)" and "Handoff between the apps" (12:42:13 UTC); all three carry the same FATAL line - expected: qa.yml runs the device suite per app plus handoff and publishes screenshots (CLAUDE.md "What each file is for", qa/README.md) - actual: 0 device stages, no screenshots, `qa-out/device/*` empty. Cause: qa.yml installs a second SDK under `${{ github.workspace }}/.android-sdk` (`ANDROID_HOME`, line 32) on the same filesystem as `~/.android/avd`, leaving ~6.2 GB, while emulator 37.2.12 needs a 7.2 GB userdata partition for the pixel_7 / API 36 image. Fix in qa.yml (builder, not app code): set `disk-size` on the three `reactivecircus/android-emulator-runner@v2` steps (e.g. `disk-size: 4096M`) and/or free runner disk before the emulator steps (`/usr/share/dotnet`, `/opt/ghc`, `/usr/local/.ghcup`, CodeQL) or use the runner's preinstalled SDK for the device jobs. Also: the AVD cache key `avd-36-google_apis-x86_64-pixel7-v1` missed in all three jobs; check that the cache save step runs after a successful boot. - screenshot: none (no device output on qa-results:latest/)
+- [ ] [Major] The suite reports a run with zero device stages as a clean run: summary.md says "Device stages: 0/0 passed", the auto entry says "Tested: 0 device stages ... Passed: 0. New issues: 13" and files nothing about the three failed jobs, and `qa/last-tested.txt` was advanced to cbf81fa as if it had been tested [judge:qa-silent-device-failure] - steps: compare `git show origin/qa-results:latest/results.json` (`"stages": []`) with the "## QA auto 2026-10-20 (commit cbf81fa)" entry above and with the run's job conclusions (3 failures) - expected: a device job that produces no results is itself a Critical finding (the definition of done keys on "QA has tested HEAD" and on `qa/last-tested.txt`, so an empty suite must not count as a test) - actual: no finding, last-tested advanced. Fix in qa/scripts/summarize.py and publish-results.sh: when any device job's output directory is missing or `stages` is empty, file `[Critical] device suite produced no results for <app>` with the job's failure step, and do not write `qa/last-tested.txt`. - screenshot: none
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Blocked (untested) | T011 ticked; flow H01-onboarding.yaml exists but never ran (no emulator) | none |
+| H2 | Blocked (untested) | T012-T014b ticked; flow H02 never ran; the walkthrough's 5-minute, 10-room, one-L-shape target has never been attempted on a device | none |
+| H3 | Blocked (untested) | T015 ticked; flow H03 never ran | none |
+
+Not built yet: H4-H19.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Blocked (untested) | T008a-c, T009 ticked; flow F01 never ran; `/dev/last-code` sign-in path untested on device | none |
+| F2 | Blocked (untested) | T009 ticked; no F02 flow in qa/flows/field-log/ yet (only F01 and the tour) | none |
+
+Not built yet: F3-F18.
+
+"Blocked (untested)" above is not scored as a Product gap: the feature may well work, the suite simply never reached it. These five steps become Product gap findings only if they fail once the emulator boots.
+
+Focus check: nothing to check on screen this run. From the strings and screen catalogs in the repo the two apps keep separate tab sets (HM: Home/House/Items/Reminders/More; FL: Today/Jobs/Files/Capture/More); re-check on screenshots next run.
+
+Auto entry review: the 13 `[auto:coverage:T004…T015]` findings are real (41 ACs claimed, 21 without a test or flow); none is a flow error. The builder clears them by tagging existing tests with the AC ids or adding the missing Maestro flows, not by code changes.
+
+Coverage note: the auto entry lists T004, T005, T006, T007, T008b, T008c, T009, T010, T011, T012, T014a, T014b and T015 as ticked with untested ACs (21 of 41); T001-T003, T005a, T008a, T010a and T013 are clean.
+
+Judged: 0 screenshots, 5 walkthrough steps. New issues: 2. Product gaps: 0.
