@@ -25,6 +25,7 @@ import argparse, datetime, glob, json, os, re, sys
 import xml.etree.ElementTree as ET
 
 CRIT, MAJOR, MINOR = "Critical", "Major", "Minor"
+EXPECTED_DEVICE_APPS = ("house-manual", "field-log", "handoff")
 
 
 def read(p, default=""):
@@ -131,12 +132,17 @@ def main():
     # ------------------------------------------------------------- device
     stage_rows = []
     walkthrough = {}
-    for appdir in sorted(glob.glob(os.path.join(inp, "qa-device-*"))):
-        app = os.path.basename(appdir)[len("qa-device-"):]
+    device_ok = True   # False when any expected device job produced no stages: the run does not count as a test
+    for app in sorted(set(EXPECTED_DEVICE_APPS) | {os.path.basename(d)[len("qa-device-"):] for d in glob.glob(os.path.join(inp, "qa-device-*"))}):
+        appdir = os.path.join(inp, "qa-device-" + app)
         try:
             stages = json.load(open(os.path.join(appdir, "stages.json")))
+            if not stages:
+                raise ValueError("empty")
         except Exception:
-            add(f"auto:device:{app}:missing", CRIT, f"Device suite for {app} produced no stages.json (emulator job failed)", "device suite completes", "see the workflow run", app=app)
+            device_ok = False
+            add(f"auto:device:{app}:no-results", CRIT, f"device suite produced no results for {app}", "a device job that produces no results is a finding, and the run does not count as tested",
+                "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run", app=app)
             continue
         for s in stages:
             stage_rows.append((app, s["stage"], s["status"], s["details"]))
@@ -218,7 +224,7 @@ def main():
         lines += ["", "Walkthrough steps exercised by flows: " + ", ".join(f"{app} {step} {res}" for (app, step), res in sorted(walkthrough.items()))]
     if skipped:
         lines += ["", "Not built yet or skipped: " + "; ".join(f"{app} {stage} ({det})" for app, stage, det in skipped)]
-    lines += ["", f"Tested: {total_stages} device stages, {unit_tests} unit tests, {stats.get('backendTests', 0)} backend tests, coverage {stats['coverage'].get('acs_claimed', 0) - (stats['coverage'].get('acs_missing') or 0)}/{stats['coverage'].get('acs_claimed', 0)} ACs. Passed: {passed}. New issues: {len(new)}. Critical: {crit}. Product gaps: n/a (judge entry follows).", ""]
+    lines += ["", f"Tested: {total_stages} device stages, {unit_tests} unit tests, {stats.get('backendTests', 0)} backend tests, coverage {(stats['coverage'].get('acs_claimed') or 0) - (stats['coverage'].get('acs_missing') or 0)}/{(stats['coverage'].get('acs_claimed') or 0)} ACs. Passed: {passed}. New issues: {len(new)}. Critical: {crit}. Product gaps: n/a (judge entry follows).", ""]
     entry = "\n".join(lines)
 
     summary = ["# QA suite summary", f"Commit `{a.sha}`, {now}", "",
@@ -230,6 +236,11 @@ def main():
     summary += ["", "## Findings", ""] + ([bullet(f) for f in new] or ["none new"]) + ["", "## REVIEW.md entry", "", entry]
     open(os.path.join(a.out, "summary.md"), "w").write("\n".join(summary))
     open(os.path.join(a.out, "review-entry.md"), "w").write(entry)
+    ok_marker = os.path.join(a.out, "tested-ok")
+    if device_ok:
+        open(ok_marker, "w").write(a.sha)
+    elif os.path.exists(ok_marker):
+        os.remove(ok_marker)
     json.dump({"sha": a.sha, "at": now, "stats": stats, "stages": stage_rows, "findings": findings,
                "new": [f["id"] for f in new], "stillOpen": [f["id"] for f in still_open], "skipped": skipped,
                "walkthrough": {f"{k[0]}:{k[1]}": v for k, v in walkthrough.items()}}, open(os.path.join(a.out, "results.json"), "w"), indent=1)
