@@ -83,3 +83,12 @@ Builder visual reviews (V0, V1, ...) go under `## Builder visual review V<n> (co
 Not built yet: H1, H2, H3, H4, H5, H6, H7, H8, H9, H10, H11, H12, H13, H14, H15, H16, H17, H18, H19, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18.
 
 Tested: AC-C4, AC-C29, AC-B1, AC-B2, AC-B60, AC-F4 (logic), AC-U1..AC-U12. Passed: 15. New issues: 3. Product gaps: 0. Walkthrough: HM 0/0, FL 0/0.
+
+## Builder visual review V0 (commit 3dbf5e2)
+
+Opened committed PNGs (light, dark, 200% font) for Team, More (Owner/Crew), Today (Admin/Crew), Welcome (create/join error), Sign in (email/code), plus the core-ui component sets. Rules checked: 1-12, 24-30.
+- Rules 9, 10, 21, 24, 25, 26, 28, 30: pass. Section headers, error supporting text, labelled fields, theme colors, 56 dp+ buttons, empty states with one primary action all present.
+- Rule 32: pass. At 200% the Team and Sign in screens grow and scroll; nothing clips.
+- Dark mode: orange/amber scheme has adequate contrast; error text readable.
+- Not yet applicable: rules 11-14 (search, FAB, hub layout) land with Jobs/Today content (T034+); Today empty state is a root with no hub widgets yet.
+- Open Minor items in the QA section (nav label wrapping at 200%, missing LinkChipRow/FormFields screenshots) are left for their turn; no changes needed for V0.

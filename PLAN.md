@@ -23,7 +23,7 @@ The builder may append notes and new subtasks under a task (as `  - [ ] T012a: .
 - [x] T010: Sync engine in `:core`: outbox, push/pull, conflict rules, device id, `SyncState`; backend `/sync/push` and `/sync/pull` with `serverSeq` and idempotency; `SyncStatusChip` (acceptance: AC-F53, AC-B20)
 - [ ] T010a: Wire `SyncEngine` into both `AppContainer`s (device id, `RetrofitSyncApi`, sync on sign-in, after local writes, on reconnect and every 30 s while open) and show `SyncStatusChip` on Today; repositories call `recordChange` after each write (lands with the first repository that writes synced entities, T011)
 - [x] R02: Review T006–T010; run a two-device sync scenario in unit tests (two in-memory databases through a fake server)
-- [ ] V0: Visual review of M0: open every committed screenshot PNG, compare with `docs/ui-standards.md` rules 1–12 and 24–30, fix what fails, record in REVIEW.md under "Builder visual review"
+- [x] V0: Visual review of M0: open every committed screenshot PNG, compare with `docs/ui-standards.md` rules 1–12 and 24–30, fix what fails, record in REVIEW.md under "Builder visual review"
 
 ## M1 House model
 
