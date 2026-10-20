@@ -1,37 +1,10 @@
 {
- "ticked_tasks": 19,
- "acs_claimed": 42,
- "acs_missing": 8,
+ "ticked_tasks": 20,
+ "acs_claimed": 49,
+ "acs_missing": 1,
  "unit_test_files": 36,
- "device_test_files": 12,
+ "device_test_files": 15,
  "tasks": [
-  {
-   "task": "T004",
-   "acs": [
-    "AC-C4",
-    "AC-U3",
-    "AC-U4",
-    "AC-U5",
-    "AC-U6",
-    "AC-U7"
-   ],
-   "missing": [
-    "AC-U3",
-    "AC-U4",
-    "AC-U5",
-    "AC-U6",
-    "AC-U7"
-   ]
-  },
-  {
-   "task": "T005",
-   "acs": [
-    "AC-U12"
-   ],
-   "missing": [
-    "AC-U12"
-   ]
-  },
   {
    "task": "T008c",
    "acs": [
@@ -41,15 +14,6 @@
    ],
    "missing": [
     "AC-H15"
-   ]
-  },
-  {
-   "task": "Q001",
-   "acs": [
-    "AC-U12"
-   ],
-   "missing": [
-    "AC-U12"
    ]
   }
  ]

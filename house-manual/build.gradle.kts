@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.navigation3)
     implementation(libs.lifecycle.runtime.compose)
     debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -68,6 +69,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.truth)
     screenshotTestImplementation(libs.compose.ui.tooling)
     screenshotTestImplementation(libs.screenshot.validation.api)
 }
