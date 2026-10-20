@@ -24,6 +24,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        container.syncCoordinator.setForeground(true)
+    }
+
+    override fun onStop() {
+        container.syncCoordinator.setForeground(false)
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         container.activityContext = this

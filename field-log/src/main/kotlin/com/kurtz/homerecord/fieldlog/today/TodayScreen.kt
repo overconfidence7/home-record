@@ -18,14 +18,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.company.CompanyRole
+import com.kurtz.homerecord.core.sync.SyncPhase
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.SyncStatusChip
 import com.kurtz.homerecord.fieldlog.R
 
-data class TodayUiState(val companyName: String, val role: CompanyRole)
+data class TodayUiState(
+    val companyName: String,
+    val role: CompanyRole,
+    val syncPhase: SyncPhase = SyncPhase.Idle,
+    val pendingChanges: Int = 0,
+)
 
 /** FL-Today. Jobs, the clock card and tasks arrive with later tasks; until then it explains what to do first (AC-F1). */
 @Composable
-fun TodayScreen(state: TodayUiState, onInviteCrew: () -> Unit, modifier: Modifier = Modifier) {
+fun TodayScreen(state: TodayUiState, onInviteCrew: () -> Unit, modifier: Modifier = Modifier, onSyncNow: () -> Unit = {}) {
+    Column(modifier.fillMaxSize()) {
+        SyncStatusChip(state.syncPhase, state.pendingChanges, onSyncNow, Modifier.padding(horizontal = 16.dp))
+        TodayBody(state, onInviteCrew, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun TodayBody(state: TodayUiState, onInviteCrew: () -> Unit, modifier: Modifier) {
     if (state.role.isAdmin) {
         EmptyState(
             icon = Icons.Rounded.Work,

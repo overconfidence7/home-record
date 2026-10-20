@@ -83,7 +83,15 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             val title = titles[key.title] ?: key.title
             when {
                 key.depth == 0 && key.title == "today" ->
-                    TodayScreen(TodayUiState(membership.companyName, membership.role), onInviteCrew = { nav.push(TeamKey) })
+                {
+                    val phase by container.syncEngine.phase.collectAsState()
+                    val pending by container.syncEngine.pendingCount.collectAsState(0)
+                    TodayScreen(
+                        TodayUiState(membership.companyName, membership.role, phase, pending),
+                        onInviteCrew = { nav.push(TeamKey) },
+                        onSyncNow = container.syncCoordinator::requestSync,
+                    )
+                }
                 key.depth == 0 && key.title == "more" -> MoreScreen(
                     MoreUiState(membership.companyName, membership.role),
                     onEvent = { event ->

@@ -10,6 +10,16 @@ import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 class MainActivity : ComponentActivity() {
     private val container get() = (application as HomeRecordApplication).container
 
+    override fun onStart() {
+        super.onStart()
+        container.syncCoordinator.setForeground(true)
+    }
+
+    override fun onStop() {
+        container.syncCoordinator.setForeground(false)
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         container.activityContext = this
