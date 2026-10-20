@@ -143,7 +143,7 @@ Not built yet: F3-F18.
 
 "Blocked (untested)" above is not scored as a Product gap: the feature may well work, the suite simply never reached it. These five steps become Product gap findings only if they fail once the emulator boots.
 
-Focus check: nothing to check on screen this run. From the strings and screen catalogs in the repo the two apps keep separate tab sets (HM: Home/House/Items/Reminders/More; FL: Today/Jobs/Files/Capture/More); re-check on screenshots next run.
+Focus check: nothing to check on screen this run. From the strings and screen catalogs in the repo the two apps keep separate tab sets (HM: Home/House/Items/Reminders/More; FL: Today/Jobs/Clock/Schedule/More); re-check on screenshots next run.
 
 Auto entry review: the 13 `[auto:coverage:T004…T015]` findings are real (41 ACs claimed, 21 without a test or flow); none is a flow error. The builder clears them by tagging existing tests with the AC ids or adding the missing Maestro flows, not by code changes.
 
