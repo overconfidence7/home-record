@@ -1,0 +1,99 @@
+import { env } from "cloudflare:workers";
+import { describe, expect, it } from "vitest";
+import app from "../src/index";
+import { mergeRow, unionLists } from "../src/sync/merge";
+import { seedCompany, seedUser } from "./helpers";
+
+const call = (method: string, path: string, token: string, body?: unknown) =>
+  app.request(
+    path,
+    { method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined },
+    env,
+  );
+const json = async <T = Record<string, any>>(res: Response) => (await res.json()) as T;
+const op = (outboxId: number, entityId: string, row: Record<string, unknown>, updatedAt: number, entity = "task") => ({
+  outboxId, entity, entityId, op: "upsert", payload: JSON.stringify({ id: entityId, ...row }), updatedAt,
+});
+const push = (token: string, company: string, deviceId: string, ops: unknown[]) =>
+  call("POST", `/companies/${company}/sync/push`, token, { deviceId, ops });
+const pull = async (token: string, company: string, since = 0) => json(await call("GET", `/companies/${company}/sync/pull?since=${since}`, token));
+
+describe("AC-B20 merge rules (unit)", () => {
+  it("last writer wins per field, not per row", () => {
+    const first = mergeRow(null, { id: "t", title: "A", done: false }, 10, false);
+    const second = mergeRow({ ...first, authoritative: false }, { id: "t", title: "B" }, 20, false);
+    const third = mergeRow({ ...second, authoritative: false }, { id: "t", done: true }, 15, false);
+    expect(third.row).toMatchObject({ title: "B", done: true });
+  });
+  it("an older write to a field is dropped and logged", () => {
+    const first = mergeRow(null, { id: "t", title: "New" }, 20, false);
+    const stale = mergeRow({ ...first, authoritative: false }, { id: "t", title: "Old" }, 10, false);
+    expect(stale.row.title).toBe("New");
+    expect(stale.conflicts).toEqual([{ field: "title", kept: "New", dropped: "Old", reason: "older" }]);
+  });
+  it("unions *Json lists by id and by value", () => {
+    expect(unionLists([{ id: "a" }, { id: "b" }], [{ id: "b" }, { id: "c" }])).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
+    const a = mergeRow(null, { id: "j", phasesJson: '["Demo","Frame"]' }, 10, false);
+    const b = mergeRow({ ...a, authoritative: false }, { id: "j", phasesJson: '["Frame","Paint"]' }, 5, false);
+    expect(JSON.parse(b.row.phasesJson as string)).toEqual(["Demo", "Frame", "Paint"]);
+  });
+  it("an authoritative row rejects non-authoritative writes", () => {
+    const first = mergeRow(null, { id: "p", at: 100 }, 10, true);
+    const crew = mergeRow({ ...first, authoritative: true }, { id: "p", at: 200 }, 99, false);
+    expect(crew.row.at).toBe(100);
+    expect(crew.conflicts[0].reason).toBe("authoritative");
+    expect(mergeRow({ ...first, authoritative: true }, { id: "p", at: 300 }, 11, true).row.at).toBe(300);
+  });
+});
+
+describe("AC-B20 push and pull", () => {
+  it("assigns increasing serverSeq and returns changes since a cursor", async () => {
+    const owner = await seedUser("s-o1", "s-o1@x.com");
+    await seedCompany("s-c1", "Co", "s-o1");
+    const res = await push(owner, "s-c1", "dev-a", [op(1, "t1", { title: "One" }, 10), op(2, "t2", { title: "Two" }, 11)]);
+    expect(res.status).toBe(200);
+    expect((await json(res)).accepted.map((a: any) => a.serverSeq)).toEqual([1, 2]);
+    const all = await pull(owner, "s-c1");
+    expect(all.rows.map((r: any) => r.entityId)).toEqual(["t1", "t2"]);
+    expect(all.serverSeq).toBe(2);
+    expect((await pull(owner, "s-c1", 1)).rows.map((r: any) => r.entityId)).toEqual(["t2"]);
+  });
+  it("is idempotent on retry by (deviceId, outboxId)", async () => {
+    const owner = await seedUser("s-o2", "s-o2@x.com");
+    await seedCompany("s-c2", "Co", "s-o2");
+    const ops = [op(7, "t1", { title: "One" }, 10)];
+    const a = await json(await push(owner, "s-c2", "dev-a", ops));
+    const b = await json(await push(owner, "s-c2", "dev-a", ops));
+    expect(b.accepted).toEqual(a.accepted);
+    expect((await pull(owner, "s-c2")).rows).toHaveLength(1);
+    expect((await pull(owner, "s-c2")).serverSeq).toBe(1);
+  });
+  it("merges two devices editing different fields of one row", async () => {
+    const owner = await seedUser("s-o3", "s-o3@x.com");
+    await seedCompany("s-c3", "Co", "s-o3");
+    await push(owner, "s-c3", "dev-a", [op(1, "t1", { title: "Base", done: false }, 10)]);
+    await push(owner, "s-c3", "dev-a", [op(2, "t1", { title: "Edited" }, 20)]);
+    await push(owner, "s-c3", "dev-b", [op(1, "t1", { done: true }, 15)]);
+    expect((await pull(owner, "s-c3")).rows[0].row).toMatchObject({ title: "Edited", done: true });
+  });
+  it("crew cannot overwrite a punch the Owner edited", async () => {
+    const owner = await seedUser("s-o4", "s-o4@x.com");
+    await seedCompany("s-c4", "Co", "s-o4");
+    const crew = await seedUser("s-w4", "s-w4@x.com");
+    await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at) VALUES ('m-s-w4', 's-w4', 'company', 's-c4', 'crew', 1)").run();
+    await push(crew, "s-c4", "phone", [op(1, "p1", { at: 1000, kind: "in" }, 10, "punch")]);
+    await push(owner, "s-c4", "office", [op(1, "p1", { at: 900 }, 20, "punch")]);
+    const res = await json(await push(crew, "s-c4", "phone", [op(2, "p1", { at: 1100 }, 30, "punch")]));
+    expect(res.conflicts[0]).toMatchObject({ field: "at", reason: "authoritative" });
+    expect((await pull(owner, "s-c4")).rows[0].row.at).toBe(900);
+  });
+  it("404s for another tenant and 400s for an unknown entity or mismatched id", async () => {
+    const owner = await seedUser("s-o5", "s-o5@x.com");
+    await seedCompany("s-c5", "Co", "s-o5");
+    const other = await seedUser("s-o6", "s-o6@x.com");
+    expect((await push(other, "s-c5", "d", [])).status).toBe(404);
+    expect((await call("GET", "/companies/s-c5/sync/pull", other)).status).toBe(404);
+    expect((await push(owner, "s-c5", "d", [op(1, "x", {}, 1, "item")])).status).toBe(400);
+    expect((await push(owner, "s-c5", "d", [{ ...op(1, "x", {}, 1), entityId: "y" }])).status).toBe(400);
+  });
+});
