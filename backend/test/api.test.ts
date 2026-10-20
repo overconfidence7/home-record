@@ -1,3 +1,4 @@
+// AC-B60: every endpoint has a vitest test; npm test is green
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 import app from "../src/index";

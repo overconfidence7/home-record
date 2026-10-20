@@ -188,6 +188,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: false
@@ -199,6 +200,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: true
@@ -254,6 +256,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: true

@@ -5,6 +5,7 @@ import org.junit.Test
 
 private fun rect(id: String, l: Int, t: Int, w: Int, h: Int) = PlanRoom.rectangle(id, id, "OTHER", l, t, w, h)
 
+// AC-C8
 class WallDeriverTest {
     private val deriver = WallDeriver()
 
@@ -65,6 +66,7 @@ class WallDeriverTest {
     }
 }
 
+// AC-C11
 class PlanValidatorTest {
     private val v = PlanValidator()
 

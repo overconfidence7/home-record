@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemodel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
+// AC-C2
 class HouseTypeTemplateTest {
     private fun names(type: HouseType, foundation: Foundation, garage: Boolean = false) =
         HouseTypeTemplate.forHome(type, foundation, garage).floors.map { it.name }

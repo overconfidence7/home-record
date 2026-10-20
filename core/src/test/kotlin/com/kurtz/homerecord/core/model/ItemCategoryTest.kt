@@ -3,6 +3,7 @@ package com.kurtz.homerecord.core.model
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
+// AC-C29
 class ItemCategoryTest {
     @Test fun hasTwelveCategories() {
         assertThat(ItemCategory.entries).hasSize(12)

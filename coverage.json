@@ -1,0 +1,100 @@
+{
+ "ticked_tasks": 18,
+ "acs_claimed": 41,
+ "acs_missing": 15,
+ "unit_test_files": 36,
+ "device_test_files": 9,
+ "tasks": [
+  {
+   "task": "T004",
+   "acs": [
+    "AC-C4",
+    "AC-U3",
+    "AC-U4",
+    "AC-U5",
+    "AC-U6",
+    "AC-U7"
+   ],
+   "missing": [
+    "AC-C4",
+    "AC-U3",
+    "AC-U4",
+    "AC-U5",
+    "AC-U6",
+    "AC-U7"
+   ]
+  },
+  {
+   "task": "T005",
+   "acs": [
+    "AC-U12"
+   ],
+   "missing": [
+    "AC-U12"
+   ]
+  },
+  {
+   "task": "T008b",
+   "acs": [
+    "AC-F4"
+   ],
+   "missing": [
+    "AC-F4"
+   ]
+  },
+  {
+   "task": "T008c",
+   "acs": [
+    "AC-B1",
+    "AC-F4",
+    "AC-H15"
+   ],
+   "missing": [
+    "AC-F4",
+    "AC-H15"
+   ]
+  },
+  {
+   "task": "T009",
+   "acs": [
+    "AC-B3",
+    "AC-F1",
+    "AC-F2",
+    "AC-F3"
+   ],
+   "missing": [
+    "AC-F2",
+    "AC-F3"
+   ]
+  },
+  {
+   "task": "T014a",
+   "acs": [
+    "AC-C7"
+   ],
+   "missing": [
+    "AC-C7"
+   ]
+  },
+  {
+   "task": "T014b",
+   "acs": [
+    "AC-C9"
+   ],
+   "missing": [
+    "AC-C9"
+   ]
+  },
+  {
+   "task": "T015",
+   "acs": [
+    "AC-C13",
+    "AC-C14",
+    "AC-C15"
+   ],
+   "missing": [
+    "AC-C15"
+   ]
+  }
+ ]
+}
