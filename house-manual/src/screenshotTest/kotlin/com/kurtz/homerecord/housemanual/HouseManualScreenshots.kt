@@ -112,11 +112,6 @@ fun HouseLayersScreenshot() = HouseLayersPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
-fun HouseRoomMenuScreenshot() = HouseRoomMenuPreview()
-
-@PreviewTest
-@ThemePreviews
-@Composable
 fun HouseEmptyFloorScreenshot() = HouseEmptyFloorPreview()
 
 @PreviewTest

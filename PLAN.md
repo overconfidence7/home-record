@@ -32,7 +32,7 @@ The builder may append notes and new subtasks under a task (as `  - [ ] T012a: .
 - [x] T013: Plan editor screen: Canvas rendering, pinch zoom and pan, floor switcher, Add room (rectangle, name, kind, typed W×L), drag to move, edge handles to resize, selection, delete, autosave on leave, saved-state across rotation (acceptance: AC-C5, AC-C6, AC-C10, AC-C12)
 - [x] T014a: Polygon rooms: Edit shape mode (add corner on edge, drag, delete corner), L-shapes (acceptance: AC-C7)
 - [x] T014b: Doors, windows and stairs placement on walls/rooms with floor link, persisted as opening/stair rows (acceptance: AC-C9)
-- [ ] T015: Blueprint view: clean plan renderer (walls, names, dimensions, doors, windows, stairs, north arrow), room tap → room page, long-press sheet, layer toggles persisted per home, light/dark/200% (acceptance: AC-C13, AC-C14, AC-C15)
+- [x] T015: Blueprint view: clean plan renderer (walls, names, dimensions, doors, windows, stairs, north arrow), room tap → room page, long-press sheet, layer toggles persisted per home, light/dark/200% (acceptance: AC-C13, AC-C14, AC-C15)
 - [ ] R03: Review T011–T015; geometry edge cases (concave rooms, shared walls between a rectangle and a polygon, zero-length edges)
 - [ ] T016: Blueprint PDF export (one page per floor, to scale, scale bar, home name) through the share sheet (acceptance: AC-C16)
 - [ ] T017: HM-House tab and HM-Room skeleton: floor chips, blueprint, Edit plan / 3D (placeholder) / Export actions; HM-Room with sections (Items, Walls, Photos, Overlays, Breakers, Shutoffs, Notes) as empty states; Add room FAB inside the editor (acceptance: AC-H4, AC-H10 shell)
