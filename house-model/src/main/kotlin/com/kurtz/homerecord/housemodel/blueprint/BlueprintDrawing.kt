@@ -116,9 +116,23 @@ fun DrawScope.drawBlueprint(
     }
     rooms.forEach { room ->
         val layout = measurer.measure(room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text))
-        val cx = (room.minX + room.maxX) / 2f * z + ox
-        val cy = (room.minY + room.maxY) / 2f * z + oy
-        if (layout.size.width < room.widthIn * z) drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
+        val (clx, cly) = labelAnchor(room)
+        var cx = clx * z + ox
+        val cy = cly * z + oy
+        val half = layout.size.width / 2f
+        // Keep the name off any stairs: slide it left of them when it would overlap.
+        room.stairs.forEach { st ->
+            if (st.points.isEmpty()) return@forEach
+            val left = st.points.minOf { it.x } * z + ox
+            val right = st.points.maxOf { it.x } * z + ox
+            val top = st.points.minOf { it.y } * z + oy
+            val bottom = st.points.maxOf { it.y } * z + oy
+            if (cx + half > left && cx - half < right && cy + layout.size.height / 2f > top && cy - layout.size.height / 2f < bottom) {
+                cx = left - 4f * density - half
+            }
+        }
+        val fits = layout.size.width < room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
+        if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
     markers.filter { it.layer in layers }.forEach { m ->
@@ -182,3 +196,21 @@ private fun DrawScope.drawNorthArrow(measurer: TextMeasurer, style: TextStyle, c
     drawText(label, topLeft = Offset(cx - label.size.width / 2f, top))
 }
 
+
+/** Where a room's name goes: the area centroid when it lies inside the room, else the middle of the bounding box. */
+internal fun labelAnchor(room: PlanRoom): Pair<Float, Float> {
+    val area2 = room.signedArea2().toDouble()
+    val mid = (room.minX + room.maxX) / 2f to (room.minY + room.maxY) / 2f
+    if (area2 == 0.0) return mid
+    var cx = 0.0
+    var cy = 0.0
+    for (i in room.points.indices) {
+        val a = room.points[i]
+        val b = room.points[(i + 1) % room.points.size]
+        val cross = a.x.toLong() * b.y - b.x.toLong() * a.y
+        cx += (a.x + b.x) * cross
+        cy += (a.y + b.y) * cross
+    }
+    val c = (cx / (3 * area2)).toFloat() to (cy / (3 * area2)).toFloat()
+    return if (RoomHitTester.contains(room, c.first, c.second)) c else mid
+}

@@ -46,4 +46,12 @@ class BlueprintTest {
         val closet = PlanRoom.rectangle("c", "Closet", "CLOSET", 10, 10, 30, 30)
         assertThat(RoomHitTester.roomAt(listOf(kitchen, closet), 20f, 20f)?.id).isEqualTo("c")
     }
+
+    @Test fun labelAnchorStaysInsideConcaveRooms() {
+        val (x, y) = labelAnchor(lShape)
+        assertThat(RoomHitTester.contains(lShape, x, y)).isTrue()
+        val (kx, ky) = labelAnchor(kitchen)
+        assertThat(kx).isWithin(0.5f).of(60f)
+        assertThat(ky).isWithin(0.5f).of(60f)
+    }
 }
