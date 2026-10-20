@@ -188,6 +188,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: false
@@ -199,6 +200,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: true
@@ -254,6 +256,7 @@ jobs:
           target: ${{ env.QA_TARGET }}
           arch: ${{ env.QA_ARCH }}
           profile: pixel_7
+          disk-size: 3072M
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
           disable-animations: true
@@ -286,7 +289,8 @@ jobs:
           for attempt in 1 2 3 4; do
             git fetch origin build && git reset --hard origin/build
             python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.sha }}" --review REVIEW.md --out qa-publish --apply-review
-            git rev-parse "${{ needs.prepare.outputs.sha }}" > qa/last-tested.txt
+            # only a run whose device jobs all produced results counts as having tested the commit
+            if [ -f qa-publish/tested-ok ]; then git rev-parse "${{ needs.prepare.outputs.sha }}" > qa/last-tested.txt; fi
             git add REVIEW.md qa/last-tested.txt
             git commit -q -m "QA auto $(date -u +%Y-%m-%d\ %H:%M) UTC (commit ${{ needs.prepare.outputs.sha }})" || { echo "nothing to record"; break; }
             git push origin HEAD:build && break
