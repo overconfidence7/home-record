@@ -67,3 +67,6 @@ See BLOCKERS.md "Decisions to confirm".
 
 ## 2026-10-20 Plan editor lives in :house-manual for now
 T013 puts the editor screen, ViewModel and canvas in `:house-manual` (`...housemanual.plan`). The editing rules are in `:house-model` (`PlanEditor`) and are shared. When FL-House (AC-F48) is built the canvas composable moves to a shared UI module. Room polygons are stored as JSON via `org.json` (no new dependency). Metric grid is 4 in (about 10 cm). Rooms with no polygon (the seeded Garage) show as "Place" chips rather than on the canvas. Room selection by TalkBack is not covered yet; tracked for S4.
+
+## 2026-10-20 — Blueprint lives in :house-model with Compose
+The blueprint renderer is shared by House Manual and Field Log (T019), so :house-model now applies the Compose plugin and exposes :core-ui as api. Layer toggles persist per home in SharedPreferences (PrefsLayerStore), not Room, since they are per-device view state and need no sync. Layer markers are drawn from a BlueprintMarker list; nothing feeds it until items and overlays exist (later tasks).
