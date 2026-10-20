@@ -29,6 +29,8 @@ data class PlanEditorUiState(
     /** Bumps when the size fields must reload from the rooms (selection, drag end, undo), not while typing. */
     val fieldsVersion: Int = 0,
     val system: UnitSystem = UnitSystem.IMPERIAL,
+    /** Edit shape mode for the selected room (AC-C7): corners drag, tapping an edge adds one, tapping a corner deletes it. */
+    val editShape: Boolean = false,
 ) {
     val selected: PlanRoom? get() = rooms.firstOrNull { it.id == selectedId }
 }
@@ -44,6 +46,10 @@ sealed interface PlanEditorEvent {
     data class Rename(val name: String) : PlanEditorEvent
     data class SetKind(val kind: RoomKind) : PlanEditorEvent
     data class SetSize(val widthIn: Int, val lengthIn: Int) : PlanEditorEvent
+    data class SetEditShape(val on: Boolean) : PlanEditorEvent
+    data class AddCorner(val edgeIndex: Int, val at: Pt) : PlanEditorEvent
+    data class DragCorner(val index: Int, val dxIn: Int, val dyIn: Int) : PlanEditorEvent
+    data class DeleteCorner(val index: Int) : PlanEditorEvent
     data object Delete : PlanEditorEvent
     data object Undo : PlanEditorEvent
     data object Redo : PlanEditorEvent

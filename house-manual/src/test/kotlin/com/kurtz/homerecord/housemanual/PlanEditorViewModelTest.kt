@@ -178,6 +178,24 @@ class PlanEditorViewModelTest {
         assertThat(cx).isWithin(1f).of(200f)
     }
 
+    @Test fun editShapeAddsDragsAndDeletesCornersAndSavesTheLShape() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.SetEditShape(true))
+        assertThat(vm.state.value.editShape).isTrue()
+        val east = vm.state.value.selected!!.let { Pt(it.maxX, (it.minY + it.maxY) / 2) }
+        vm.onEvent(PlanEditorEvent.AddCorner(1, east))
+        assertThat(vm.state.value.selected!!.points).hasSize(5)
+        vm.onEvent(PlanEditorEvent.DragCorner(2, -72, 0))
+        vm.onEvent(PlanEditorEvent.DragEnd)
+        assertThat(vm.state.value.selected!!.points[2].x).isEqualTo(east.x - 72)
+        savedPlan(vm) { it.placed.single().points.size == 5 }
+        vm.onEvent(PlanEditorEvent.DeleteCorner(2))
+        assertThat(vm.state.value.selected!!.points).hasSize(4)
+        vm.onEvent(PlanEditorEvent.Select(null))
+        assertThat(vm.state.value.editShape).isFalse()
+    }
+
     @Test fun pinchKeepsThePointUnderTheFingersFixed() {
         val s = com.kurtz.homerecord.housemanual.plan.PlanEditorUiState(zoom = 1f, panX = 10f, panY = 10f)
         val t = PlanEditorViewModel.zoomAround(s, 2f, 100f, 100f)

@@ -20,6 +20,7 @@ import com.kurtz.homerecord.housemanual.plan.PlanEditorUiState
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemodel.UnplacedRoom
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.plan.Pt
 
 @Preview(name = "Light", showBackground = true)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
@@ -119,6 +120,14 @@ fun PlanEditorPreview() = Frame { PlanEditorScreen(planState(), {}, {}, "Maple S
 @Composable
 fun PlanEditorSelectedPreview() = Frame {
     PlanEditorScreen(planState({ copy(selectedId = "r1", canRedo = true) }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorShapePreview() = Frame {
+    val lShape = PlanRoom("r2", "Living room", "LIVING_ROOM", listOf(Pt(168, 0), Pt(408, 0), Pt(408, 96), Pt(288, 96), Pt(288, 192), Pt(168, 192)))
+    val rooms = planRooms.map { if (it.id == "r2") lShape else it }
+    PlanEditorScreen(planState({ copy(rooms = rooms, selectedId = "r2", editShape = true) }), {}, {}, "Maple St")
 }
 
 @ThemePreviews

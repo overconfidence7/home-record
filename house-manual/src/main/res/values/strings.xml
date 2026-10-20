@@ -87,6 +87,8 @@
     <string name="plan_room_size_summary">%1$s by %2$s</string>
     <string name="plan_room_flagged">This room overlaps another or is under 2 by 2 ft. You can still save it.</string>
     <string name="plan_done">Done</string>
+    <string name="plan_edit_shape">Edit shape</string>
+    <string name="plan_edit_shape_hint">Drag a corner to move it. Tap an edge to add a corner. Tap a corner to remove it.</string>
     <string name="plan_delete_room">Delete room</string>
     <string name="plan_kind_title">Room kind</string>
     <string name="room_kind_kitchen">Kitchen</string>

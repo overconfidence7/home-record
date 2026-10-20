@@ -42,6 +42,7 @@ class PlanEditorViewModel(
         PlanEditorUiState(
             floorId = saved[FLOOR],
             selectedId = saved[SELECTED],
+            editShape = saved[EDIT_SHAPE] ?: false,
             zoom = saved[ZOOM] ?: 1f,
             panX = saved[PAN_X] ?: 0f,
             panY = saved[PAN_Y] ?: 0f,
@@ -98,6 +99,17 @@ class PlanEditorViewModel(
             is PlanEditorEvent.Rename -> selectedId()?.let { editor.rename(it, event.name); commit(it, bumpFields = false) }
             is PlanEditorEvent.SetKind -> selectedId()?.let { editor.setKind(it, event.kind); commit(it, bumpFields = false) }
             is PlanEditorEvent.SetSize -> selectedId()?.let { editor.setSize(it, event.widthIn, event.lengthIn); commit(it, bumpFields = false) }
+            is PlanEditorEvent.SetEditShape -> setEditShape(event.on && selectedId() != null)
+            is PlanEditorEvent.AddCorner -> selectedId()?.let { id ->
+                if (editor.addCorner(id, event.edgeIndex, event.at) != null) commit(id, bumpFields = false)
+            }
+            is PlanEditorEvent.DragCorner -> selectedId()?.let { id ->
+                editor.dragCorner(id, event.index, event.dxIn, event.dyIn)
+                refresh()
+            }
+            is PlanEditorEvent.DeleteCorner -> selectedId()?.let { id ->
+                if (editor.deleteCorner(id, event.index)) commit(id)
+            }
             PlanEditorEvent.Delete -> selectedId()?.let { editor.delete(it); commit(null) }
             PlanEditorEvent.Undo -> { editor.undo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
             PlanEditorEvent.Redo -> { editor.redo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
@@ -116,12 +128,14 @@ class PlanEditorViewModel(
         saved[FLOOR] = floor.id
         val keep = _state.value.selectedId?.takeIf { id -> plan.placed.any { it.id == id } }
         saved[SELECTED] = keep
+        saved[EDIT_SHAPE] = false
         _state.update {
             it.copy(
                 loading = false,
                 floorId = floor.id,
                 unplaced = plan.unplaced,
                 selectedId = keep,
+                editShape = false,
                 focusName = false,
                 fieldsVersion = it.fieldsVersion + 1,
             )
@@ -131,7 +145,13 @@ class PlanEditorViewModel(
 
     private fun select(id: String?) {
         saved[SELECTED] = id
-        _state.update { it.copy(selectedId = id, focusName = false, fieldsVersion = it.fieldsVersion + 1) }
+        saved[EDIT_SHAPE] = false
+        _state.update { it.copy(selectedId = id, editShape = false, focusName = false, fieldsVersion = it.fieldsVersion + 1) }
+    }
+
+    private fun setEditShape(on: Boolean) {
+        saved[EDIT_SHAPE] = on
+        _state.update { it.copy(editShape = on) }
     }
 
     private fun keepSelectionIfPresent() {
@@ -142,9 +162,11 @@ class PlanEditorViewModel(
     /** Pushes the editor's rooms into the state and, once an edit is final, to the database. */
     private fun commit(selectId: String?, focusName: Boolean = false, bumpFields: Boolean = true) {
         saved[SELECTED] = selectId
+        if (selectId == null) saved[EDIT_SHAPE] = false
         _state.update {
             it.copy(
                 selectedId = selectId,
+                editShape = it.editShape && selectId != null,
                 focusName = focusName,
                 fieldsVersion = if (bumpFields) it.fieldsVersion + 1 else it.fieldsVersion,
             )
@@ -194,6 +216,7 @@ class PlanEditorViewModel(
     companion object {
         private const val FLOOR = "floorId"
         private const val SELECTED = "selectedId"
+        private const val EDIT_SHAPE = "editShape"
         private const val ZOOM = "zoom"
         private const val PAN_X = "panX"
         private const val PAN_Y = "panY"

@@ -59,6 +59,37 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
         dragBase = null
     }
 
+    /** Shows corner [index] dragged by ([dxIn], [dyIn]) from where the drag began. A move that would cross the outline is ignored. */
+    fun dragCorner(id: String, index: Int, dxIn: Int, dyIn: Int) {
+        val base = baseFor(id) ?: return
+        val start = base.points.getOrNull(index) ?: return
+        val others = history.current.filterNot { it.id == id }
+        val x = snapper.snapCoordinate(start.x + dxIn, others.flatMap { o -> o.points.map { it.x } })
+        val y = snapper.snapCoordinate(start.y + dyIn, others.flatMap { o -> o.points.map { it.y } })
+        val moved = base.withPoint(index, Pt(x, y))
+        if (moved.isSimple()) draft = history.current.map { if (it.id == id) moved else it }
+    }
+
+    /** Adds a corner on edge [edgeIndex] at [at] (snapped to the grid, projected onto the edge). Returns the new corner's index. */
+    fun addCorner(id: String, edgeIndex: Int, at: Pt): Int? {
+        val room = rooms.firstOrNull { it.id == id } ?: return null
+        val a = room.points.getOrNull(edgeIndex) ?: return null
+        val b = room.points[(edgeIndex + 1) % room.points.size]
+        val p = projectOnto(a, b, at)
+        if (p == a || p == b) return null
+        change(id) { it.withCornerOnEdge(edgeIndex, p) }
+        return edgeIndex + 1
+    }
+
+    /** Deletes corner [index]; a room keeps at least three. Returns false when nothing changed. */
+    fun deleteCorner(id: String, index: Int): Boolean {
+        val room = rooms.firstOrNull { it.id == id } ?: return false
+        val next = room.withoutCorner(index)
+        if (next === room || !next.isSimple()) return false
+        change(id) { next }
+        return true
+    }
+
     fun rename(id: String, name: String) = change(id) { it.copy(name = name) }
 
     fun setKind(id: String, kind: RoomKind) = change(id) { it.copy(kind = kind.name) }
@@ -92,6 +123,26 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
         dragBase?.takeIf { it.id == id }?.let { return it }
         return history.current.firstOrNull { it.id == id }?.also { dragBase = it }
     }
+
+    /** The point of segment a-b nearest [p], snapped to the grid along the segment; a and b themselves when too close. */
+    private fun projectOnto(a: Pt, b: Pt, p: Pt): Pt {
+        val dx = (b.x - a.x).toDouble()
+        val dy = (b.y - a.y).toDouble()
+        val len2 = dx * dx + dy * dy
+        if (len2 == 0.0) return a
+        val t = (((p.x - a.x) * dx + (p.y - a.y) * dy) / len2).coerceIn(0.0, 1.0)
+        val raw = Pt(Math.round(a.x + t * dx).toInt(), Math.round(a.y + t * dy).toInt())
+        // Axis-aligned edges keep their line; snapping the free coordinate only.
+        val snapped = when {
+            a.y == b.y -> Pt(snapper.snap(raw.x), a.y)
+            a.x == b.x -> Pt(a.x, snapper.snap(raw.y))
+            else -> raw
+        }
+        val minGap = snapper.gridIn
+        return if (distance(snapped, a) < minGap || distance(snapped, b) < minGap) a else snapped
+    }
+
+    private fun distance(a: Pt, b: Pt) = Math.hypot((a.x - b.x).toDouble(), (a.y - b.y).toDouble())
 
     private fun PlanRoom.isRectangle(): Boolean =
         points.size == 4 && (0..3).all { i ->

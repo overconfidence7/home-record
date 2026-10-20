@@ -87,4 +87,49 @@ class PlanEditorTest {
         e.place(rect("g", 10, 10, 240, 240))
         assertThat(e.rooms).hasSize(1)
     }
+
+    @Test fun addCornerOnEdgeInsertsSnappedPointAndMakesAnLShapePossible() {
+        val e = editor(rect("a", 0, 0, 144, 144))
+        val index = e.addCorner("a", 0, Pt(100, 5))
+        assertThat(index).isEqualTo(1)
+        assertThat(e.rooms.single().points[1]).isEqualTo(Pt(102, 0))
+        assertThat(e.rooms.single().points).hasSize(5)
+        e.undo()
+        assertThat(e.rooms.single().points).hasSize(4)
+    }
+
+    @Test fun addCornerNearAnExistingCornerIsIgnored() {
+        val e = editor(rect("a", 0, 0, 144, 144))
+        assertThat(e.addCorner("a", 0, Pt(2, 0))).isNull()
+        assertThat(e.rooms.single().points).hasSize(4)
+    }
+
+    @Test fun dragCornerBuildsAnLShapeInOneUndoStep() {
+        val e = editor(rect("a", 0, 0, 144, 144))
+        e.addCorner("a", 1, Pt(144, 72)) // east edge midpoint becomes index 2
+        e.dragCorner("a", 2, -70, 3)
+        e.dragCorner("a", 2, -72, 0)
+        e.commit()
+        val room = e.rooms.single()
+        assertThat(room.points[2]).isEqualTo(Pt(72, 72))
+        assertThat(room.isSimple()).isTrue()
+        e.undo()
+        assertThat(e.rooms.single().points[2]).isEqualTo(Pt(144, 72))
+    }
+
+    @Test fun dragCornerAcrossTheOutlineIsRejected() {
+        val e = editor(rect("a", 0, 0, 144, 144))
+        e.dragCorner("a", 2, -194, -72) // swings the SE corner past the west wall, so two edges cross
+        e.commit()
+        assertThat(e.rooms.single().points[2]).isEqualTo(Pt(144, 144))
+        assertThat(e.canUndo).isFalse()
+    }
+
+    @Test fun deleteCornerKeepsAtLeastThree() {
+        val e = editor(rect("a", 0, 0, 144, 144))
+        assertThat(e.deleteCorner("a", 3)).isTrue()
+        assertThat(e.rooms.single().points).hasSize(3)
+        assertThat(e.deleteCorner("a", 0)).isFalse()
+        assertThat(e.rooms.single().points).hasSize(3)
+    }
 }

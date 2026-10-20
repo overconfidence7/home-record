@@ -46,6 +46,18 @@ data class PlanRoom(
         }
     }
 
+    /** True when no two edges that are not neighbors cross or touch (a usable outline). */
+    fun isSimple(): Boolean {
+        val n = points.size
+        if (n < 3) return false
+        for (i in 0 until n) for (j in i + 1 until n) {
+            val adjacent = j == i + 1 || (i == 0 && j == n - 1)
+            if (adjacent) continue
+            if (segmentsIntersect(points[i], points[(i + 1) % n], points[j], points[(j + 1) % n])) return false
+        }
+        return signedArea2() != 0L
+    }
+
     /** Shoelace area in square inches. */
     fun areaSqIn(): Long = abs(signedArea2()) / 2
 
@@ -66,6 +78,24 @@ data class PlanRoom(
                 listOf(Pt(left, top), Pt(left + widthIn, top), Pt(left + widthIn, top + lengthIn), Pt(left, top + lengthIn)),
             )
     }
+}
+
+private fun orient(a: Pt, b: Pt, c: Pt): Int {
+    val v = (b.x - a.x).toLong() * (c.y - a.y) - (b.y - a.y).toLong() * (c.x - a.x)
+    return if (v > 0) 1 else if (v < 0) -1 else 0
+}
+
+private fun onSegment(a: Pt, b: Pt, c: Pt) =
+    c.x in minOf(a.x, b.x)..maxOf(a.x, b.x) && c.y in minOf(a.y, b.y)..maxOf(a.y, b.y)
+
+internal fun segmentsIntersect(a: Pt, b: Pt, c: Pt, d: Pt): Boolean {
+    val o1 = orient(a, b, c)
+    val o2 = orient(a, b, d)
+    val o3 = orient(c, d, a)
+    val o4 = orient(c, d, b)
+    if (o1 != o2 && o3 != o4) return true
+    return (o1 == 0 && onSegment(a, b, c)) || (o2 == 0 && onSegment(a, b, d)) ||
+        (o3 == 0 && onSegment(c, d, a)) || (o4 == 0 && onSegment(c, d, b))
 }
 
 data class PlanModel(val rooms: List<PlanRoom> = emptyList()) {

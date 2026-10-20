@@ -61,6 +61,11 @@ fun PlanEditorSelectedScreenshot() = PlanEditorSelectedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PlanEditorShapeScreenshot() = PlanEditorShapePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PlanEditorOverlapScreenshot() = PlanEditorOverlapPreview()
 
 @PreviewTest

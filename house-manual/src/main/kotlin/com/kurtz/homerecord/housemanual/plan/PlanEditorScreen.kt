@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CenterFocusStrong
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Polyline
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
@@ -68,6 +69,8 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.hypot
+import kotlin.math.roundToInt
 import com.kurtz.homerecord.core.units.LengthParser
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LabeledField
@@ -87,6 +90,8 @@ private const val HANDLE_HIT_DP = 24f
 /** What a touch landed on. */
 private sealed interface Target {
     data class Handle(val roomId: String, val edgeIndex: Int) : Target
+    data class Corner(val roomId: String, val index: Int) : Target
+    data class Edge(val roomId: String, val edgeIndex: Int, val at: Pt) : Target
     data class Body(val roomId: String) : Target
     data object None : Target
 }
@@ -269,6 +274,11 @@ private fun PlanCanvas(
                                         send(PlanEditorEvent.DragEdge(target.roomId, target.edgeIndex, delta))
                                         dragging = true
                                     }
+                                    is Target.Corner -> {
+                                        send(PlanEditorEvent.DragCorner(target.index, PlanEditorViewModel.toInches(dxDp, start.zoom), PlanEditorViewModel.toInches(dyDp, start.zoom)))
+                                        dragging = true
+                                    }
+                                    is Target.Edge -> send(PlanEditorEvent.Transform(start.zoom, start.panX + dxDp, start.panY + dyDp))
                                     is Target.Body -> {
                                         send(PlanEditorEvent.DragMove(target.roomId, PlanEditorViewModel.toInches(dxDp, start.zoom), PlanEditorViewModel.toInches(dyDp, start.zoom)))
                                         dragging = true
@@ -281,7 +291,11 @@ private fun PlanCanvas(
                     } while (event.changes.any { it.pressed })
                     if (dragging) send(PlanEditorEvent.DragEnd)
                     if (!moved && !multi) {
-                        send(PlanEditorEvent.Select((target as? Target.Body)?.roomId ?: (target as? Target.Handle)?.roomId))
+                        when (target) {
+                            is Target.Corner -> send(PlanEditorEvent.DeleteCorner(target.index))
+                            is Target.Edge -> send(PlanEditorEvent.AddCorner(target.edgeIndex, target.at))
+                            else -> send(PlanEditorEvent.Select((target as? Target.Body)?.roomId ?: (target as? Target.Handle)?.roomId))
+                        }
                     }
                 }
             },
@@ -293,7 +307,21 @@ private fun PlanCanvas(
 
 private fun hit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {
     val sel = s.selected
-    if (sel != null && sel.isAxisAligned()) {
+    if (sel != null && s.editShape) {
+        // Corners first, so a tap on one deletes it instead of adding a corner beside it.
+        sel.points.forEachIndexed { i, p ->
+            if (kotlin.math.abs(p.x * s.zoom + s.panX - xDp) <= HANDLE_HIT_DP && kotlin.math.abs(p.y * s.zoom + s.panY - yDp) <= HANDLE_HIT_DP) {
+                return Target.Corner(sel.id, i)
+            }
+        }
+        val wx = (xDp - s.panX) / s.zoom
+        val wy = (yDp - s.panY) / s.zoom
+        val reach = HANDLE_HIT_DP / s.zoom
+        sel.points.indices.minByOrNull { distanceToEdge(sel, it, wx, wy) }?.let { i ->
+            if (distanceToEdge(sel, i, wx, wy) <= reach) return Target.Edge(sel.id, i, Pt(wx.roundToInt(), wy.roundToInt()))
+        }
+    }
+    if (sel != null && !s.editShape && sel.isAxisAligned()) {
         for (i in sel.points.indices) {
             val a = sel.points[i]
             val b = sel.points[(i + 1) % sel.points.size]
@@ -307,6 +335,16 @@ private fun hit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {
     val ordered = s.rooms.sortedBy { if (it.id == s.selectedId) 1 else 0 }.reversed()
     ordered.firstOrNull { it.contains(wx, wy) }?.let { return Target.Body(it.id) }
     return Target.None
+}
+
+private fun distanceToEdge(room: PlanRoom, edgeIndex: Int, x: Float, y: Float): Float {
+    val a = room.points[edgeIndex]
+    val b = room.points[(edgeIndex + 1) % room.points.size]
+    val dx = (b.x - a.x).toFloat()
+    val dy = (b.y - a.y).toFloat()
+    val len2 = dx * dx + dy * dy
+    val t = if (len2 == 0f) 0f else (((x - a.x) * dx + (y - a.y) * dy) / len2).coerceIn(0f, 1f)
+    return hypot(x - (a.x + t * dx), y - (a.y + t * dy))
 }
 
 private fun PlanRoom.isAxisAligned(): Boolean = points.size == 4 &&
@@ -376,7 +414,14 @@ private fun DrawScope.drawPlan(
             drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
         }
     }
-    s.selected?.takeIf { it.isAxisAligned() }?.let { room ->
+    s.selected?.takeIf { s.editShape }?.let { room ->
+        room.points.forEach { p ->
+            val c = Offset(p.x * z + ox, p.y * z + oy)
+            drawCircle(primary, HANDLE_RADIUS_DP * density, c)
+            drawCircle(roomText, (HANDLE_RADIUS_DP - 4f) * density, c)
+        }
+    }
+    s.selected?.takeIf { !s.editShape && it.isAxisAligned() }?.let { room ->
         room.points.indices.forEach { i ->
             val a = room.points[i]
             val b = room.points[(i + 1) % room.points.size]
@@ -434,12 +479,28 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+                if (state.editShape) {
+                    Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
+                }
                 if (room.id in state.flaggedIds) {
                     Text(stringResource(R.string.plan_room_flagged), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilledTonalButton(onClick = { onEvent(PlanEditorEvent.Select(null)) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                androidx.compose.foundation.layout.FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilledTonalButton(
+                        onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
+                        modifier = Modifier.heightIn(min = 48.dp),
+                    ) {
                         Text(stringResource(R.string.plan_done))
+                    }
+                    if (!state.editShape) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                            Icon(Icons.Rounded.Polyline, contentDescription = null)
+                            Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                     OutlinedButton(onClick = { onEvent(PlanEditorEvent.Delete) }, modifier = Modifier.heightIn(min = 48.dp)) {
                         Icon(Icons.Rounded.Delete, contentDescription = null)
