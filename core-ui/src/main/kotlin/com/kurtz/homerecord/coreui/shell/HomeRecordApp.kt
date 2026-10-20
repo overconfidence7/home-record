@@ -3,7 +3,10 @@ package com.kurtz.homerecord.coreui.shell
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,8 +52,13 @@ fun HomeRecordApp(
     val selected = tabs.firstOrNull { it.id == selectedId } ?: tabs.first()
     val stack = stacks.getValue(selected.id)
 
+    // The default suite type keeps a bottom bar in phone landscape (compact height); the UI
+    // standard wants a rail on any width >= 600 dp.
+    val wideEnough = currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     NavigationSuiteScaffold(
         modifier = modifier,
+        layoutType = if (wideEnough) NavigationSuiteType.NavigationRail else NavigationSuiteType.NavigationBar,
         navigationSuiteItems = {
             tabs.forEach { tab ->
                 val isSelected = tab.id == selected.id
