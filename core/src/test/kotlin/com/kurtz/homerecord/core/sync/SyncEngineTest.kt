@@ -127,6 +127,29 @@ class SyncEngineTest {
         }
     }
 
+    @Test fun sameFieldEditedOnTwoDevicesLatestWriteWins() = runTest {
+        save(dbA, a, task("Base", 10))
+        a.sync(tenant); b.sync(tenant)
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "From A", updatedAt = 30))
+        save(dbB, b, dbB.taskDao().get("t1")!!.copy(title = "From B", updatedAt = 20))
+        b.sync(tenant); a.sync(tenant); b.sync(tenant)
+        assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("From A")
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("From A")
+    }
+
+    @Test fun unsentLocalEditNewerThanServerSurvivesAPull() = runTest {
+        save(dbA, a, task("Base", 10))
+        a.sync(tenant); b.sync(tenant)
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Server side", updatedAt = 20))
+        a.sync(tenant)
+        server.online = true
+        save(dbB, b, dbB.taskDao().get("t1")!!.copy(title = "Newer local", updatedAt = 50))
+        b.sync(tenant)
+        a.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Newer local")
+        assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Newer local")
+    }
+
     @Test fun softDeletePropagates() = runTest {
         save(dbA, a, task("Gone soon", 10))
         a.sync(tenant); b.sync(tenant)
