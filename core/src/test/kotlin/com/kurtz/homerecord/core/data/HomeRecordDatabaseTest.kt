@@ -56,8 +56,8 @@ class HomeRecordDatabaseTest {
 
     @Test fun outboxReturnsPendingInOrderAndMarksSent() = runTest {
         val dao = db.outboxDao()
-        val a = dao.add(OutboxEntity(entity = "home", entityId = "h1", op = "upsert", payload = "{}", updatedAt = 1, deviceId = "d"))
-        val b = dao.add(OutboxEntity(entity = "home", entityId = "h2", op = "upsert", payload = "{}", updatedAt = 2, deviceId = "d"))
+        val a = dao.add(OutboxEntity(tenantKind = "home", tenantId = "h", entity = "home", entityId = "h1", op = "upsert", payload = "{}", updatedAt = 1, deviceId = "d"))
+        val b = dao.add(OutboxEntity(tenantKind = "home", tenantId = "h", entity = "home", entityId = "h2", op = "upsert", payload = "{}", updatedAt = 2, deviceId = "d"))
         assertThat(dao.pending().map { it.seq }).containsExactly(a, b).inOrder()
         dao.markSent(listOf(a))
         assertThat(dao.pending().map { it.seq }).containsExactly(b)

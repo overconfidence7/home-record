@@ -38,4 +38,16 @@
     <string name="account_signed_in">You are signed in.</string>
     <string name="account_sign_out_note">Signing out keeps your records on this phone.</string>
     <string name="account_sign_out">Sign out</string>
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_up_to_date">Everything is synced</string>
+    <string name="sync_offline">Offline</string>
+    <string name="sync_failed">Sync failed. Tap to retry</string>
+    <plurals name="sync_waiting">
+        <item quantity="one">%d change waiting to sync</item>
+        <item quantity="other">%d changes waiting to sync</item>
+    </plurals>
+    <plurals name="sync_waiting_offline">
+        <item quantity="one">Offline · %d change waiting</item>
+        <item quantity="other">Offline · %d changes waiting</item>
+    </plurals>
 </resources>

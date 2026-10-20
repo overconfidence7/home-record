@@ -43,3 +43,8 @@ fun SignInEmailScreenshot() = com.kurtz.homerecord.coreui.components.SignInEmail
 @ThemeScreenshots
 @Composable
 fun SignInCodeScreenshot() = com.kurtz.homerecord.coreui.components.SignInCodePreview()
+
+@PreviewTest
+@ThemeScreenshots
+@Composable
+fun SyncStatusChipScreenshot() = com.kurtz.homerecord.coreui.components.SyncStatusChipPreview()

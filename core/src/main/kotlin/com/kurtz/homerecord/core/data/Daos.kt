@@ -321,11 +321,22 @@ interface ShareLinkDao {
 interface OutboxDao {
     @androidx.room.Insert suspend fun add(row: OutboxEntity): Long
     @Query("SELECT * FROM outbox WHERE sent = 0 ORDER BY seq") suspend fun pending(): List<OutboxEntity>
+    @Query("SELECT * FROM outbox WHERE sent = 0 AND tenantKind = :kind AND tenantId = :tenantId ORDER BY seq LIMIT :limit")
+    suspend fun pendingFor(kind: String, tenantId: String, limit: Int): List<OutboxEntity>
+    @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0") fun observePendingCount(): kotlinx.coroutines.flow.Flow<Int>
+    @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0 AND entity = :entity AND entityId = :entityId") suspend fun pendingCountFor(entity: String, entityId: String): Int
     @Query("UPDATE outbox SET sent = 1 WHERE seq IN (:seqs)") suspend fun markSent(seqs: List<Long>)
+    @Query("UPDATE outbox SET sent = 1, serverSeq = :serverSeq WHERE seq = :seq") suspend fun markSent(seq: Long, serverSeq: Long)
 }
 
 @Dao
 interface SyncStateDao {
     @Upsert suspend fun set(state: SyncStateEntity)
     @Query("SELECT * FROM sync_state WHERE id = 1") suspend fun get(): SyncStateEntity?
+}
+
+@Dao
+interface SyncBaseDao {
+    @Upsert suspend fun set(row: SyncBaseEntity)
+    @Query("SELECT rowJson FROM sync_base WHERE `key` = :key") suspend fun get(key: String): String?
 }

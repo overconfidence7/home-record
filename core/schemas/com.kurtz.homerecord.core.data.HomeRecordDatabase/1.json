@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "305499099b70e111d7bb11f8e4b4df10",
+    "identityHash": "3c473bf2d13954a4266d19d3ef219866",
     "entities": [
       {
         "tableName": "home",
@@ -3408,12 +3408,24 @@
       },
       {
         "tableName": "outbox",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seq` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `entity` TEXT NOT NULL, `entityId` TEXT NOT NULL, `op` TEXT NOT NULL, `payload` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `deviceId` TEXT NOT NULL, `sent` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`seq` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tenantKind` TEXT NOT NULL, `tenantId` TEXT NOT NULL, `entity` TEXT NOT NULL, `entityId` TEXT NOT NULL, `op` TEXT NOT NULL, `payload` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `deviceId` TEXT NOT NULL, `sent` INTEGER NOT NULL, `serverSeq` INTEGER)",
         "fields": [
           {
             "fieldPath": "seq",
             "columnName": "seq",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tenantKind",
+            "columnName": "tenantKind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tenantId",
+            "columnName": "tenantId",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -3457,6 +3469,11 @@
             "columnName": "sent",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "serverSeq",
+            "columnName": "serverSeq",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -3500,11 +3517,35 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "sync_base",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `rowJson` TEXT NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rowJson",
+            "columnName": "rowJson",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '305499099b70e111d7bb11f8e4b4df10')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3c473bf2d13954a4266d19d3ef219866')"
     ]
   }
 }

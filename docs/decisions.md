@@ -57,3 +57,8 @@ See BLOCKERS.md "Decisions to confirm".
 - Admin routes (Team, Company profile, invite) return 404 to non-admin members, same as a missing company, so role gates reveal nothing (AC-B3).
 - Field Log caches the last membership in SharedPreferences so it opens offline; sign out clears it through an AuthRepository sign-out listener (AC-F4).
 - Added Robolectric and compose-ui-test (already approved) to :field-log tests; applied the screenshot plugin to :field-log (closes T005a for that module).
+
+## 2026-10-20 — Sync design (T010)
+- Sync reads and writes rows as JSON straight from the Room tables (`RoomRowStore`, entity name = table name) instead of one adapter per DAO, so new entities sync with no extra code; the server whitelists entity names per tenant kind.
+- Pushes carry only fields changed since the server-confirmed row (`sync_base` table), because whole-row payloads would defeat field-level last-writer-wins. Fields named `*Json` that hold arrays are unioned. Outbox gained `tenantKind`/`tenantId`/`serverSeq`; schema v1 edited in place (no released build).
+- Only punches are server-authoritative: an Owner/Office edit of an existing punch pins it; later Crew/Lead/Sub writes are refused and logged in `sync_conflicts`.

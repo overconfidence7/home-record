@@ -272,6 +272,8 @@ data class ShareLinkEntity(
 @Entity(tableName = "outbox", indices = [Index("sent")])
 data class OutboxEntity(
     @PrimaryKey(autoGenerate = true) val seq: Long = 0,
+    val tenantKind: String,
+    val tenantId: String,
     val entity: String,
     val entityId: String,
     val op: String,
@@ -279,10 +281,18 @@ data class OutboxEntity(
     val updatedAt: Long,
     val deviceId: String,
     val sent: Boolean = false,
+    val serverSeq: Long? = null,
 )
 
 @Entity(tableName = "sync_state")
 data class SyncStateEntity(
     @PrimaryKey val id: Int = 1,
     val lastServerSeq: Long = 0,
+)
+
+/** The row as the server last confirmed it; a push carries only the fields that differ from it (field-level merge). */
+@Entity(tableName = "sync_base")
+data class SyncBaseEntity(
+    @PrimaryKey val key: String,
+    val rowJson: String,
 )

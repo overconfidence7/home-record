@@ -42,6 +42,7 @@ import androidx.room.RoomDatabase
         ShareLinkEntity::class,
         OutboxEntity::class,
         SyncStateEntity::class,
+        SyncBaseEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -84,6 +85,7 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun shareLinkDao(): ShareLinkDao
     abstract fun outboxDao(): OutboxDao
     abstract fun syncStateDao(): SyncStateDao
+    abstract fun syncBaseDao(): SyncBaseDao
 
     companion object {
         const val NAME = "homerecord.db"
