@@ -150,3 +150,13 @@ Auto entry review: the 13 `[auto:coverage:T004…T015]` findings are real (41 AC
 Coverage note: the auto entry lists T004, T005, T006, T007, T008b, T008c, T009, T010, T011, T012, T014a, T014b and T015 as ticked with untested ACs (21 of 41); T001-T003, T005a, T008a, T010a and T013 are clean.
 
 Judged: 0 screenshots, 5 walkthrough steps. New issues: 2. Product gaps: 0.
+
+## QA auto 2026-10-20 (commit 7823ec2)
+
+Automated suite run at 2026-10-20 21:23 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Critical] device suite produced no results for field-log [auto:device:field-log:no-results] - steps: automated, see qa-results branch latest/ for commit 7823ec2 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
+- [ ] [Critical] device suite produced no results for handoff [auto:device:handoff:no-results] - steps: automated, see qa-results branch latest/ for commit 7823ec2 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
+- [ ] [Critical] device suite produced no results for house-manual [auto:device:house-manual:no-results] - steps: automated, see qa-results branch latest/ for commit 7823ec2 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
+
+Tested: 0 device stages, 230 unit tests, 51 backend tests, coverage 49/49 ACs. Passed: 0. New issues: 3. Critical: 3. Product gaps: n/a (judge entry follows).
