@@ -1,0 +1,66 @@
+# Walkthrough F2: invite a crew member, role gates, sign-out (AC-F2, AC-F3, AC-F4).
+# One emulator plays both people: the Owner creates the company and copies the invite code,
+# signs out, then a second account joins as Crew and sees no admin screens.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn: "Company name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn: "Trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+# Owner sees Team and Company on More (AC-F3)
+- tapOn: "More"
+- assertVisible: "Team"
+- assertVisible: "Company"
+- tapOn: "Team"
+- assertVisible: "Invite code"
+- copyTextFrom:
+    text: "[A-Z0-9]{8}"
+- takeScreenshot: F02-team-owner
+- tapOn: "Back"
+# Sign-in survives a restart (AC-F4)
+- stopApp
+- launchApp
+- assertVisible: "Today"
+# Sign out asks first, then clears the company (AC-F4)
+- tapOn: "More"
+- tapOn: "Sign out"
+- assertVisible: "Sign out?"
+- tapOn: "Sign out"
+- assertVisible: "Email"
+# Second account joins with the code
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-crew@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Join"
+- tapOn: "Invite code"
+- pasteText
+- hideKeyboard
+- tapOn: "Join company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+# Crew cannot see Team or Company (AC-F3: hidden, not greyed out)
+- tapOn: "More"
+- assertNotVisible: "Team"
+- assertNotVisible: "Company"
+- takeScreenshot: F02-more-crew

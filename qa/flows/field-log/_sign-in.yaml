@@ -1,0 +1,18 @@
+# Subflow: sign in with the email code from the dev backend. Needs env EMAIL.
+appId: com.kurtz.homerecord.fieldlog
+---
+- tapOn: "Email"
+- inputText: ${EMAIL}
+- hideKeyboard
+- tapOn: "Send code"
+- extendedWaitUntil:
+    visible: "Code"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: ${EMAIL}
+- tapOn: "Code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn: "Sign in"

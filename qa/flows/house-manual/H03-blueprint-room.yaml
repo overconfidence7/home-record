@@ -16,6 +16,13 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Delete"
 - takeScreenshot: H03-room-long-press
 - back
+# Layer chips toggle overlays and stay set after a restart (AC-C15)
+- tapOn: "Electrical"
+- takeScreenshot: H03-layer-electrical
+- stopApp
+- launchApp
+- tapOn: "House"
+- assertVisible: "Electrical"
 # Floors screen: add a floor, see it listed (AC-C3)
 - tapOn: "Floors"
 - assertVisible: "Add floor"

@@ -1,0 +1,22 @@
+# Walkthrough H2b: L-shaped room, door, window, stairs (AC-C7, AC-C9). Builds on H02.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: H02-draw-plan.yaml
+- tapOn: "House"
+- tapOn: "Edit plan"
+- tapOn: "Kitchen"
+# Edit shape: the hint explains the gestures (AC-C7)
+- tapOn: "Edit shape"
+- assertVisible: "Drag a corner to move it. Tap an edge to add a corner. Tap a corner to remove it."
+- takeScreenshot: H02b-edit-shape
+- tapOn: "Undo"
+- tapOn: "Redo"
+- tapOn: "Done"
+# Doors and windows go on a wall (AC-C9)
+- assertVisible: "Tap a wall to add a door or window. Stairs go in the room."
+- tapOn: "Add stairs"
+- assertVisible: "Delete stairs"
+- takeScreenshot: H02b-stairs
+- tapOn: "Delete stairs"
+- tapOn: "Back"
+- assertVisible: "Kitchen"

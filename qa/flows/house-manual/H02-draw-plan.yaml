@@ -1,4 +1,4 @@
-# Walkthrough H2: draw rooms on the plan (AC-C5, AC-C6, AC-C10, AC-C12 basics).
+# Walkthrough H2: draw rooms on the plan (AC-C5, AC-C6, AC-C10, AC-C12 basics; AC-C4 feet-and-inches length entry).
 # Builds on H01 (runs it first so the home exists), then adds two rooms, undoes one, rotates.
 appId: com.kurtz.homerecord.housemanual
 ---
@@ -20,7 +20,7 @@ appId: com.kurtz.homerecord.housemanual
 - hideKeyboard
 - tapOn: "Length"
 - eraseText: 10
-- inputText: "12"
+- inputText: "12'6\""
 - hideKeyboard
 - tapOn: "Done"
 - takeScreenshot: H02-plan-one-room
