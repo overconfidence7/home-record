@@ -40,6 +40,10 @@ python3 qa/scripts/summarize.py --input <artifacts dir> --sha <short sha> --revi
 
 Maestro: `curl -fsSL https://get.maestro.mobile.dev | bash`, then `maestro test qa/flows/house-manual/H01-onboarding.yaml` against any emulator.
 
+## Where the schedule lives
+
+GitHub runs scheduled workflows from the default branch (`main`), so `qa.yml` must exist there; the workflow's own `sync-workflow` job copies it from `build` to `main` whenever it changes (the builder never pushes `main` itself). Everything the suite tests is checked out from `build`.
+
 ## Cost
 
 GitHub Actions on a private repo: 2,000 free minutes a month (Free plan), then $0.008 a minute if the account's spending limit allows it (the default limit is $0, so runs stop rather than bill). A full suite run is about 35–55 billed minutes; at four runs a day that is roughly 4,500–6,500 minutes a month. To cut it, change the cron line in `qa.yml` to two runs a day (`"20 11,23 * * *"`), or make the repo public.

@@ -292,3 +292,22 @@ jobs:
             git push origin HEAD:build && break
             echo "push rejected, retrying ($attempt)"; sleep 10
           done
+
+  sync-workflow:
+    # GitHub reads scheduled workflows from the default branch (main). The builder works on
+    # build and never pushes main, so this job copies qa.yml to main whenever it changes.
+    name: Keep qa.yml on main in step with build
+    needs: prepare
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: Copy qa.yml from build if it differs
+        run: |
+          git fetch origin build
+          if git diff --quiet HEAD origin/build -- .github/workflows/qa.yml; then echo "qa.yml already in sync"; exit 0; fi
+          git config user.name "homerecord-qa"; git config user.email "qa@homerecord.invalid"
+          git checkout origin/build -- .github/workflows/qa.yml
+          git commit -q -m "QA: sync qa.yml from build" && git push origin HEAD:main
