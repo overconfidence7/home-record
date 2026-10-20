@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,6 +48,7 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
                     label = stringResource(R.string.company_name),
                     value = state.name,
                     onValueChange = { onEvent(WelcomeEvent.NameChanged(it)) },
+                    modifier = Modifier.testTag("fl_welcome_name"),
                     required = true,
                     error = error,
                 )
@@ -54,12 +56,14 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
                     label = stringResource(R.string.company_trade),
                     value = state.trade,
                     onValueChange = { onEvent(WelcomeEvent.TradeChanged(it)) },
+                    modifier = Modifier.testTag("fl_welcome_trade"),
                     helper = stringResource(R.string.company_trade_helper),
                 )
                 LabeledField(
                     label = stringResource(R.string.company_phone),
                     value = state.phone,
                     onValueChange = { onEvent(WelcomeEvent.PhoneChanged(it)) },
+                    modifier = Modifier.testTag("fl_welcome_phone"),
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Done,
                 )
@@ -68,6 +72,7 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
                 label = stringResource(R.string.invite_code),
                 value = state.code,
                 onValueChange = { onEvent(WelcomeEvent.CodeChanged(it)) },
+                modifier = Modifier.testTag("fl_welcome_code"),
                 helper = stringResource(R.string.invite_code_helper),
                 error = error,
                 imeAction = ImeAction.Done,
@@ -76,7 +81,7 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
         Button(
             onClick = { onEvent(WelcomeEvent.Submit) },
             enabled = state.canSubmit,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_welcome_submit"),
         ) {
             if (state.busy) {
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -84,7 +89,7 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
                 Text(stringResource(if (state.mode == WelcomeMode.Create) R.string.welcome_create else R.string.welcome_join))
             }
         }
-        TextButton(onClick = { onEvent(WelcomeEvent.SignOut) }, modifier = Modifier.heightIn(min = 48.dp)) {
+        TextButton(onClick = { onEvent(WelcomeEvent.SignOut) }, modifier = Modifier.heightIn(min = 48.dp).testTag("fl_welcome_sign_out")) {
             Text(stringResource(R.string.welcome_wrong_account))
         }
     }

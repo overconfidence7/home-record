@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
@@ -47,17 +48,17 @@ fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClos
             onSave = { onEvent(CompanyEvent.Save) },
         ) {
             state.saveFailure?.let { Text(failureText(it), color = MaterialTheme.colorScheme.error) }
-            LabeledField(stringResource(R.string.company_name), state.name, { onEvent(CompanyEvent.Name(it)) }, required = true)
-            LabeledField(stringResource(R.string.company_trade), state.trade, { onEvent(CompanyEvent.Trade(it)) })
-            LabeledField(stringResource(R.string.company_phone), state.phone, { onEvent(CompanyEvent.Phone(it)) }, keyboardType = KeyboardType.Phone)
-            LabeledField(stringResource(R.string.company_email), state.email, { onEvent(CompanyEvent.Email(it)) }, keyboardType = KeyboardType.Email)
-            LabeledField(stringResource(R.string.company_address), state.address, { onEvent(CompanyEvent.Address(it)) })
+            LabeledField(stringResource(R.string.company_name), state.name, { onEvent(CompanyEvent.Name(it)) }, Modifier.testTag("fl_company_name"), required = true)
+            LabeledField(stringResource(R.string.company_trade), state.trade, { onEvent(CompanyEvent.Trade(it)) }, Modifier.testTag("fl_company_trade"))
+            LabeledField(stringResource(R.string.company_phone), state.phone, { onEvent(CompanyEvent.Phone(it)) }, Modifier.testTag("fl_company_phone"), keyboardType = KeyboardType.Phone)
+            LabeledField(stringResource(R.string.company_email), state.email, { onEvent(CompanyEvent.Email(it)) }, Modifier.testTag("fl_company_email"), keyboardType = KeyboardType.Email)
+            LabeledField(stringResource(R.string.company_address), state.address, { onEvent(CompanyEvent.Address(it)) }, Modifier.testTag("fl_company_address"))
 
             Text(stringResource(R.string.company_ot_title), style = MaterialTheme.typography.titleSmall)
             Column {
                 OvertimeRule.entries.forEach { rule ->
                     Row(
-                        Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_company_ot_${rule.name.lowercase()}")
                             .selectable(state.overtimeRule == rule, onClick = { onEvent(CompanyEvent.Overtime(rule)) }, role = Role.RadioButton),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -73,6 +74,7 @@ fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClos
                 label = stringResource(R.string.company_distance),
                 value = state.punchDistanceText,
                 onValueChange = { onEvent(CompanyEvent.PunchDistance(it)) },
+                modifier = Modifier.testTag("fl_company_distance"),
                 helper = stringResource(R.string.company_distance_helper),
                 error = if (state.distanceInvalid) {
                     stringResource(R.string.company_distance_error, CompanySettings.MIN_PUNCH_DISTANCE_FT, CompanySettings.MAX_PUNCH_DISTANCE_FT)

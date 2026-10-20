@@ -50,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -121,13 +122,13 @@ fun PlanEditorScreen(
         subtitle = homeName,
         onBack = onBack,
         actions = {
-            IconButton(onClick = { onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp)) }, enabled = state.rooms.isNotEmpty()) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp)) }, enabled = state.rooms.isNotEmpty(), modifier = Modifier.testTag("hm_plan_fit")) {
                 Icon(Icons.Rounded.CenterFocusStrong, contentDescription = stringResource(R.string.plan_fit))
             }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("hm_plan_undo")) {
                 Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.plan_undo))
             }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo, modifier = Modifier.testTag("hm_plan_redo")) {
                 Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(R.string.plan_redo))
             }
         },
@@ -141,6 +142,7 @@ fun PlanEditorScreen(
                     },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.plan_add_room)) },
+                    modifier = Modifier.testTag("hm_plan_add_room"),
                 )
             }
         },
@@ -192,6 +194,7 @@ private fun FloorSwitcher(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
             FilterChip(
                 selected = floor.id == state.floorId,
                 onClick = { onEvent(PlanEditorEvent.SelectFloor(floor.id)) },
+                modifier = Modifier.testTag("hm_plan_floor_${floor.id}"),
                 label = { Text(floor.name) },
             )
         }
@@ -241,6 +244,7 @@ private fun PlanCanvas(
     }
     Canvas(
         modifier
+            .testTag("hm_plan_canvas")
             .semantics { contentDescription = summary }
             .onSizeChanged {
                 onSized(it.width / density, it.height / density)
@@ -498,10 +502,10 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                         label = stringResource(R.string.plan_room_name),
                         value = room.name,
                         onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
-                        modifier = Modifier.focusRequester(focus),
+                        modifier = Modifier.focusRequester(focus).testTag("hm_plan_room_name"),
                     )
                 }
-                OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_plan_room_kind")) {
                     Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
                 }
                 if (room.points.size == 4) {
@@ -514,14 +518,14 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                                 inches = room.widthIn,
                                 onInchesChange = { width = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).testTag("hm_plan_room_width"),
                             )
                             LengthField(
                                 label = stringResource(R.string.plan_room_length),
                                 inches = room.lengthIn,
                                 onInchesChange = { length = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).testTag("hm_plan_room_length"),
                             )
                         }
                     }
@@ -545,23 +549,23 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                 ) {
                     FilledTonalButton(
                         onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
-                        modifier = Modifier.heightIn(min = 48.dp),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_done"),
                     ) {
                         Text(stringResource(R.string.plan_done))
                     }
                     if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_edit_shape")) {
                             Icon(Icons.Rounded.Polyline, contentDescription = null)
                             Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                     if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_stairs")) {
                             Icon(Icons.Rounded.Stairs, contentDescription = null)
                             Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
-                    OutlinedButton(onClick = { onEvent(PlanEditorEvent.Delete) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                    OutlinedButton(onClick = { onEvent(PlanEditorEvent.Delete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_room")) {
                         Icon(Icons.Rounded.Delete, contentDescription = null)
                         Text(stringResource(R.string.plan_delete_room), modifier = Modifier.padding(start = 8.dp))
                     }
@@ -589,10 +593,10 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
             style = MaterialTheme.typography.bodyMedium,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_door")) {
                 Text(stringResource(R.string.plan_add_door))
             }
-            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW)) }, modifier = Modifier.heightIn(min = 48.dp)) {
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_window")) {
                 Text(stringResource(R.string.plan_add_window))
             }
         }
@@ -607,9 +611,9 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
                     inches = opening.widthIn,
                     onInchesChange = { w -> if (w != null) onEvent(PlanEditorEvent.SetOpeningWidth(w)) },
                     system = state.system,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).testTag("hm_plan_opening_width"),
                 )
-                OutlinedButton(onClick = { onEvent(PlanEditorEvent.DeleteOpening) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                OutlinedButton(onClick = { onEvent(PlanEditorEvent.DeleteOpening) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_opening")) {
                     Icon(Icons.Rounded.Delete, contentDescription = null)
                     Text(
                         stringResource(if (opening.kind == OpeningKind.DOOR) R.string.plan_delete_door else R.string.plan_delete_window),

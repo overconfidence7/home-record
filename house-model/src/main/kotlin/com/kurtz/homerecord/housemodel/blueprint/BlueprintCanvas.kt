@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
@@ -102,6 +104,7 @@ fun LayerToggleRow(layers: LayerSet, onToggle: (BlueprintLayer) -> Unit, modifie
             FilterChip(
                 selected = layer in layers,
                 onClick = { onToggle(layer) },
+                modifier = Modifier.testTag("${LocalTagPrefix.current}_layer_${layer.wire}"),
                 label = { Text(blueprintLayerLabel(layer)) },
                 colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
                     selectedContainerColor = tint.copy(alpha = 0.22f),

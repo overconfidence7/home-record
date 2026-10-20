@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
@@ -54,7 +55,7 @@ fun FloorsScreen(
         onBack = onBack,
         floatingActionButton = {
             if (!state.loading && state.floors.isNotEmpty()) {
-                FloatingActionButton(onClick = { onEvent(FloorsEvent.AddClicked) }) {
+                FloatingActionButton(onClick = { onEvent(FloorsEvent.AddClicked) }, modifier = Modifier.testTag("hm_floors_fab")) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.floors_add))
                 }
             }
@@ -123,9 +124,10 @@ private fun FloorRow(floor: FloorSummary, canMoveUp: Boolean, canMoveDown: Boole
         supporting = supporting,
         leading = { Icon(Icons.Rounded.Layers, contentDescription = null) },
         onClick = { onEvent(FloorsEvent.EditClicked(floor)) },
+        modifier = Modifier.testTag("row_${floor.id}"),
         trailing = {
             Column {
-                IconButton(onClick = { menu = true }) {
+                IconButton(onClick = { menu = true }, modifier = Modifier.testTag("hm_floors_menu_${floor.id}")) {
                     Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.floor_more, floor.name))
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {

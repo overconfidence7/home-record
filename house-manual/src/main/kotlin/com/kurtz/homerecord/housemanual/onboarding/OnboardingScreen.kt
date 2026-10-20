@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
@@ -80,6 +81,7 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
             label = stringResource(R.string.home_name),
             value = state.name,
             onValueChange = { onEvent(OnboardingEvent.NameChanged(it)) },
+            modifier = Modifier.testTag("hm_onboarding_name"),
             required = true,
             helper = stringResource(R.string.home_name_helper),
             error = if (state.showErrors && state.name.isBlank()) stringResource(R.string.field_required) else null,
@@ -88,6 +90,7 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
             label = stringResource(R.string.home_address),
             value = state.address,
             onValueChange = { onEvent(OnboardingEvent.AddressChanged(it)) },
+            modifier = Modifier.testTag("hm_onboarding_address"),
             imeAction = ImeAction.Done,
         )
         Column {
@@ -99,7 +102,7 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
                 trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, contentDescription = null) },
                 isError = state.showErrors && state.type == null,
                 supportingText = if (state.showErrors && state.type == null) { { Text(stringResource(R.string.field_required)) } } else null,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.DropdownList) { pickingType = true },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_onboarding_type").clickable(role = Role.DropdownList) { pickingType = true },
                 enabled = false,
                 colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -116,6 +119,7 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
                 FilterChip(
                     selected = option == state.foundation,
                     onClick = { onEvent(OnboardingEvent.FoundationChanged(option)) },
+                    modifier = Modifier.testTag("hm_onboarding_foundation_${option.name.lowercase()}"),
                     label = { Text(foundationLabel(option)) },
                 )
             }
@@ -124,12 +128,12 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
             headlineContent = { Text(stringResource(R.string.attached_garage)) },
             supportingContent = { Text(stringResource(R.string.attached_garage_helper)) },
             trailingContent = { Switch(checked = state.attachedGarage, onCheckedChange = null) },
-            modifier = Modifier.clickable(role = Role.Switch) { onEvent(OnboardingEvent.GarageChanged(!state.attachedGarage)) },
+            modifier = Modifier.testTag("hm_onboarding_garage").clickable(role = Role.Switch) { onEvent(OnboardingEvent.GarageChanged(!state.attachedGarage)) },
         )
-        Button(onClick = { onEvent(OnboardingEvent.DrawPlan) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+        Button(onClick = { onEvent(OnboardingEvent.DrawPlan) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_onboarding_draw")) {
             Text(stringResource(R.string.draw_floor_plan))
         }
-        TextButton(onClick = { onEvent(OnboardingEvent.Skip) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+        TextButton(onClick = { onEvent(OnboardingEvent.Skip) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_onboarding_skip")) {
             Text(stringResource(R.string.skip_for_now))
         }
     }

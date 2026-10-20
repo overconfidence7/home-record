@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.company.CompanyRole
@@ -51,11 +52,13 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 headline = stringResource(R.string.more_team),
                 leading = { Icon(Icons.Rounded.Groups, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenTeam) },
+                modifier = Modifier.testTag("fl_more_team"),
             )
             RecordListItem(
                 headline = stringResource(R.string.more_company),
                 leading = { Icon(Icons.Rounded.Business, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenCompany) },
+                modifier = Modifier.testTag("fl_more_company"),
             )
         }
         RecordListItem(
@@ -63,6 +66,7 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             leading = { Icon(Icons.Rounded.Logout, contentDescription = null) },
             trailing = null,
             onClick = { confirmSignOut = true },
+            modifier = Modifier.testTag("fl_more_sign_out"),
         )
     }
     if (confirmSignOut) {
@@ -71,7 +75,7 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             title = { Text(stringResource(R.string.sign_out_title)) },
             text = { Text(stringResource(R.string.sign_out_body)) },
             confirmButton = {
-                TextButton(onClick = { confirmSignOut = false; onEvent(MoreEvent.SignOut) }) { Text(stringResource(R.string.more_sign_out)) }
+                TextButton(onClick = { confirmSignOut = false; onEvent(MoreEvent.SignOut) }, modifier = Modifier.testTag("fl_more_sign_out_confirm")) { Text(stringResource(R.string.more_sign_out)) }
             },
             dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text(stringResource(R.string.cancel)) } },
         )

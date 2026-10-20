@@ -33,6 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -78,6 +79,7 @@ fun HouseScreen(
                         FilterChip(
                             selected = floor.id == state.floorId,
                             onClick = { onEvent(HouseEvent.SelectFloor(floor.id)) },
+                            modifier = Modifier.testTag("hm_house_floor_${floor.id}"),
                             label = { Text(floor.name) },
                         )
                     }
@@ -116,11 +118,11 @@ fun HouseScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    OutlinedButton(onClick = onEditPlan, modifier = Modifier.weight(1f)) {
+                    OutlinedButton(onClick = onEditPlan, modifier = Modifier.weight(1f).testTag("hm_house_edit_plan")) {
                         Icon(Icons.Rounded.Edit, contentDescription = null)
                         Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp))
                     }
-                    OutlinedButton(onClick = onOpenFloors, modifier = Modifier.weight(1f)) {
+                    OutlinedButton(onClick = onOpenFloors, modifier = Modifier.weight(1f).testTag("hm_house_floors")) {
                         Icon(Icons.Rounded.Layers, contentDescription = null)
                         Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp))
                     }

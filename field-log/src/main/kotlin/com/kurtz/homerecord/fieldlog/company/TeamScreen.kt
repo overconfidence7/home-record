@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -96,6 +97,7 @@ private fun TeamList(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShareIn
                 leading = { Icon(Icons.Rounded.Person, contentDescription = null) },
                 trailing = null,
                 onClick = if (editable) ({ onEvent(TeamEvent.OpenActions(member)) }) else null,
+                modifier = Modifier.testTag("row_${member.userId}"),
             )
         }
     }
@@ -128,7 +130,7 @@ private fun InviteCard(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShare
                 )
                 Button(
                     onClick = { onShareInvite(code, state.inviteLink.orEmpty()) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_team_share"),
                 ) {
                     Icon(Icons.Rounded.Share, contentDescription = null)
                     Text(stringResource(R.string.team_invite_share), modifier = Modifier.padding(start = 8.dp))
@@ -137,7 +139,7 @@ private fun InviteCard(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShare
             OutlinedButton(
                 onClick = { onEvent(TeamEvent.NewCode) },
                 enabled = !state.busy,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_team_new_code"),
             ) { Text(stringResource(R.string.team_invite_new)) }
         }
     }
@@ -169,7 +171,7 @@ private fun TeamDialogs(state: TeamUiState, onEvent: (TeamEvent) -> Unit) {
             onDismissRequest = { onEvent(TeamEvent.CancelRemove) },
             title = { Text(stringResource(R.string.team_remove_title, member.displayName)) },
             text = { Text(stringResource(R.string.team_remove_body)) },
-            confirmButton = { TextButton(onClick = { onEvent(TeamEvent.ConfirmRemove) }) { Text(stringResource(R.string.team_remove_confirm)) } },
+            confirmButton = { TextButton(onClick = { onEvent(TeamEvent.ConfirmRemove) }, modifier = Modifier.testTag("fl_team_remove_confirm")) { Text(stringResource(R.string.team_remove_confirm)) } },
             dismissButton = { TextButton(onClick = { onEvent(TeamEvent.CancelRemove) }) { Text(stringResource(R.string.cancel)) } },
         )
     }

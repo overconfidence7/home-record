@@ -15,6 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,12 +34,14 @@ fun SignInScreen(state: SignInUiState, onEvent: (SignInEvent) -> Unit, modifier:
         Text(stringResource(R.string.sign_in_title), style = MaterialTheme.typography.headlineMedium)
         Text(stringResource(R.string.sign_in_intro), style = MaterialTheme.typography.bodyLarge)
         val error = state.error?.let { errorText(it) }
+        val tag = LocalTagPrefix.current
         when (state.step) {
             SignInStep.Email -> {
                 LabeledField(
                     label = stringResource(R.string.sign_in_email),
                     value = state.email,
                     onValueChange = { onEvent(SignInEvent.EmailChanged(it)) },
+                    modifier = Modifier.testTag("${tag}_sign_in_email"),
                     error = error,
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done,
@@ -45,12 +49,12 @@ fun SignInScreen(state: SignInUiState, onEvent: (SignInEvent) -> Unit, modifier:
                 Button(
                     onClick = { onEvent(SignInEvent.SendCode) },
                     enabled = state.emailValid && !state.busy,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${tag}_sign_in_send"),
                 ) { ButtonLabel(stringResource(R.string.sign_in_send_code), state.busy) }
                 OutlinedButton(
                     onClick = { onEvent(SignInEvent.GoogleSignIn) },
                     enabled = !state.busy,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${tag}_sign_in_google"),
                 ) { Text(stringResource(R.string.sign_in_google)) }
             }
             SignInStep.Code -> {
@@ -59,6 +63,7 @@ fun SignInScreen(state: SignInUiState, onEvent: (SignInEvent) -> Unit, modifier:
                     label = stringResource(R.string.sign_in_code),
                     value = state.code,
                     onValueChange = { onEvent(SignInEvent.CodeChanged(it)) },
+                    modifier = Modifier.testTag("${tag}_sign_in_code"),
                     helper = stringResource(R.string.sign_in_code_helper),
                     error = error,
                     keyboardType = KeyboardType.NumberPassword,
@@ -67,11 +72,11 @@ fun SignInScreen(state: SignInUiState, onEvent: (SignInEvent) -> Unit, modifier:
                 Button(
                     onClick = { onEvent(SignInEvent.VerifyCode) },
                     enabled = state.codeValid && !state.busy,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${tag}_sign_in_verify"),
                 ) { ButtonLabel(stringResource(R.string.sign_in_verify), state.busy) }
                 TextButton(
                     onClick = { onEvent(SignInEvent.ChangeEmail) },
-                    modifier = Modifier.heightIn(min = 48.dp),
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("${tag}_sign_in_change_email"),
                 ) { Text(stringResource(R.string.sign_in_change_email)) }
             }
         }
