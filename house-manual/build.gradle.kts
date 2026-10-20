@@ -15,6 +15,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionName = "0.1.0"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
         buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
@@ -62,6 +63,10 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.compose.ui.test.junit4)
     screenshotTestImplementation(libs.compose.ui.tooling)
     screenshotTestImplementation(libs.screenshot.validation.api)
 }
