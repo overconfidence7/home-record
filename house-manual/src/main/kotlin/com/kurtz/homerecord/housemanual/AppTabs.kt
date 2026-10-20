@@ -3,10 +3,23 @@ package com.kurtz.homerecord.housemanual
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import com.kurtz.homerecord.core.auth.AuthRepository
+import com.kurtz.homerecord.core.data.HomeEntity
+import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.housemanual.house.FloorsRoute
+import com.kurtz.homerecord.housemanual.house.HouseRoot
+import com.kurtz.homerecord.housemanual.house.OnboardingRoute
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
@@ -26,15 +39,38 @@ private val tabDefs = listOf(
         tab("more", R.string.tab_more, Icons.Outlined.MoreHoriz, Icons.Rounded.MoreHoriz),
 )
 
+/** No home yet shows onboarding; once one exists the tabs take over (AC-C1, AC-H1). */
 @Composable
-fun HouseManualApp(auth: AuthRepository) {
-    val tabs = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
+fun HouseManualApp(container: AppContainer) {
+    var home by remember { mutableStateOf<HomeEntity?>(null) }
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(container) {
+        container.homes.observeHome().collect { home = it; loaded = true }
+    }
+    val current = home
+    when {
+        !loaded -> Scaffold { LoadingState(Modifier.padding(it)) }
+        current == null -> OnboardingRoute(container.homes)
+        else -> HouseManualTabs(container, current)
+    }
+}
+
+@Composable
+private fun HouseManualTabs(container: AppContainer, home: HomeEntity) {
+    val tabs = tabDefs.map {
+        AppTab(it.id, stringResource(it.label), it.icon, it.selected, if (it.id == "house") HouseKey else PlaceholderKey(it.id))
+    }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     HomeRecordApp(tabs = tabs, entries = { nav ->
+        entry<HouseKey> {
+            val floors by remember(home.id) { container.homes.observeFloors(home.id) }.collectAsState(initial = emptyList())
+            HouseRoot(home, floors.size, onOpenFloors = { nav.push(FloorsKey) })
+        }
+        entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             if (key.depth == 0 && key.title == "more") {
-                AccountRoute(auth)
+                AccountRoute(container.auth)
             } else if (key.depth == 0) {
                 PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
             } else {

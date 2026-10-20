@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HomeRecordTheme(Brand.HouseManual) {
-                HouseManualApp(container.auth)
+                HouseManualApp(container)
             }
         }
     }

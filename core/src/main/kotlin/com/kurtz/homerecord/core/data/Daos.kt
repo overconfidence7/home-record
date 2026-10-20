@@ -29,7 +29,10 @@ interface RoomDao {
     @Query("SELECT * FROM room WHERE floorId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<RoomEntity>>
     @Query("SELECT * FROM room WHERE floorId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<RoomEntity>
     @Query("UPDATE room SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT floorId, COUNT(*) AS rooms FROM room WHERE deletedAt IS NULL GROUP BY floorId") fun observeCounts(): Flow<List<FloorRoomCount>>
 }
+
+data class FloorRoomCount(val floorId: String, val rooms: Int)
 
 @Dao
 interface WallDao {

@@ -7,12 +7,18 @@ import com.kurtz.homerecord.core.auth.CredentialManagerGoogleSource
 import com.kurtz.homerecord.core.auth.EncryptedTokenStore
 import com.kurtz.homerecord.core.auth.RetrofitAuthApi
 import com.kurtz.homerecord.core.auth.SessionInterceptor
+import androidx.room.Room
+import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.housemodel.HomeRepository
 import okhttp3.OkHttpClient
 
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
 class AppContainer(app: Application) {
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
     @Volatile var activityContext: Context? = null
+
+    private val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
+    val homes = HomeRepository(db)
 
     private val tokens = EncryptedTokenStore(app)
     private val authApi = RetrofitAuthApi.create(BuildConfig.API_BASE_URL)
