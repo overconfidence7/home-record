@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +24,7 @@ import com.kurtz.homerecord.housemodel.HouseType
 
 /** HM-House tab root for now: the home's summary and a way into the floors. The plan and blueprint land here with T013 and T015. */
 @Composable
-fun HouseRoot(home: HomeEntity, floorCount: Int, onOpenFloors: () -> Unit, modifier: Modifier = Modifier) {
+fun HouseRoot(home: HomeEntity, floorCount: Int, onOpenFloors: () -> Unit, modifier: Modifier = Modifier, onOpenPlan: () -> Unit = {}) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
             Text(home.name, style = MaterialTheme.typography.headlineMedium)
@@ -37,6 +38,12 @@ fun HouseRoot(home: HomeEntity, floorCount: Int, onOpenFloors: () -> Unit, modif
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        RecordListItem(
+            headline = stringResource(R.string.plan_row),
+            supporting = stringResource(R.string.plan_row_supporting),
+            leading = { Icon(Icons.Rounded.GridView, contentDescription = null) },
+            onClick = onOpenPlan,
+        )
         RecordListItem(
             headline = stringResource(R.string.floors_row),
             supporting = stringResource(R.string.floors_row_count, floorCount),

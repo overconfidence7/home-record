@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.housemanual.plan.PlanEditorRoute
 import com.kurtz.homerecord.housemanual.house.FloorsRoute
 import com.kurtz.homerecord.housemanual.house.HouseRoot
 import com.kurtz.homerecord.housemanual.house.OnboardingRoute
@@ -64,8 +65,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity) {
     HomeRecordApp(tabs = tabs, entries = { nav ->
         entry<HouseKey> {
             val floors by remember(home.id) { container.homes.observeFloors(home.id) }.collectAsState(initial = emptyList())
-            HouseRoot(home, floors.size, onOpenFloors = { nav.push(FloorsKey) })
+            HouseRoot(home, floors.size, onOpenFloors = { nav.push(FloorsKey) }, onOpenPlan = { nav.push(PlanKey) })
         }
+        entry<PlanKey> { PlanEditorRoute(container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) }) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title

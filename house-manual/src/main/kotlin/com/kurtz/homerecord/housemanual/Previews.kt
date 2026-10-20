@@ -15,7 +15,11 @@ import com.kurtz.homerecord.housemanual.onboarding.OnboardingScreen
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingUiState
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.Foundation
+import com.kurtz.homerecord.housemanual.plan.PlanEditorScreen
+import com.kurtz.homerecord.housemanual.plan.PlanEditorUiState
 import com.kurtz.homerecord.housemodel.HouseType
+import com.kurtz.homerecord.housemodel.UnplacedRoom
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
 @Preview(name = "Light", showBackground = true)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
@@ -85,3 +89,64 @@ fun FloorsEditDialogPreview() = Frame {
 @ThemePreviews
 @Composable
 fun HouseRootPreview() = Frame { HouseRoot(home, floorCount = 3, onOpenFloors = {}) }
+
+private val planRooms = listOf(
+    PlanRoom.rectangle("r1", "Kitchen", "KITCHEN", 0, 0, 168, 144),
+    PlanRoom.rectangle("r2", "Living room", "LIVING_ROOM", 168, 0, 240, 192),
+    PlanRoom.rectangle("r3", "Dining room", "DINING_ROOM", 0, 144, 168, 120),
+    PlanRoom.rectangle("r4", "Half bath", "BATHROOM", 168, 192, 72, 72),
+)
+
+private fun planState(vararg changes: PlanEditorUiState.() -> PlanEditorUiState): PlanEditorUiState =
+    changes.fold(
+        PlanEditorUiState(
+            loading = false,
+            floors = floors,
+            floorId = "f2",
+            rooms = planRooms,
+            zoom = 0.8f,
+            panX = 24f,
+            panY = 24f,
+            canUndo = true,
+        ),
+    ) { acc, f -> acc.f() }
+
+@ThemePreviews
+@Composable
+fun PlanEditorPreview() = Frame { PlanEditorScreen(planState(), {}, {}, "Maple St") }
+
+@ThemePreviews
+@Composable
+fun PlanEditorSelectedPreview() = Frame {
+    PlanEditorScreen(planState({ copy(selectedId = "r1", canRedo = true) }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorOverlapPreview() = Frame {
+    val overlapping = planRooms + PlanRoom.rectangle("r5", "Pantry", "CLOSET", 120, 100, 96, 60)
+    PlanEditorScreen(planState({ copy(rooms = overlapping, flaggedIds = setOf("r1", "r5"), selectedId = "r5") }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorUnplacedPreview() = Frame {
+    PlanEditorScreen(
+        planState({ copy(rooms = emptyList(), unplaced = listOf(UnplacedRoom("g1", "Garage", "GARAGE")), canUndo = false) }),
+        {}, {}, "Maple St",
+    )
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorEmptyPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = emptyList(), canUndo = false, zoom = 1f, panX = 0f, panY = 0f) }), {}, {}, "Maple St")
+}
+
+@ThemePreviews
+@Composable
+fun PlanEditorLoadingPreview() = Frame { PlanEditorScreen(PlanEditorUiState(), {}, {}, "Maple St") }
+
+@ThemePreviews
+@Composable
+fun PlanEditorNoFloorsPreview() = Frame { PlanEditorScreen(PlanEditorUiState(loading = false), {}, {}, "Maple St") }

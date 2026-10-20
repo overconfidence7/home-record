@@ -4,10 +4,17 @@ import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.housemodel.plan.PlanCodec
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.core.data.RoomEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+
+/** A room that exists but has no shape on the plan yet. */
+data class UnplacedRoom(val id: String, val name: String, val kind: String)
+
+data class FloorPlan(val placed: List<PlanRoom>, val unplaced: List<UnplacedRoom>)
 
 /** A floor with the number of rooms on it, for the floor list (AC-C3). */
 data class FloorSummary(val id: String, val name: String, val ceilingHeightIn: Int, val halfLevel: Boolean, val roomCount: Int)
@@ -127,6 +134,49 @@ class HomeRepository(
                 db.floorDao().upsert(f.copy(sortOrder = index, updatedAt = at))
                 onChange("floor", f.id)
             }
+        }
+    }
+
+
+    /** Rooms on [floorId] split into those with a shape and those still waiting to be placed (AC-C6, AC-F48). */
+    fun observePlan(floorId: String): Flow<FloorPlan> = db.roomDao().observeFor(floorId).map { rows -> toFloorPlan(rows) }
+
+    suspend fun loadPlan(floorId: String): FloorPlan = toFloorPlan(db.roomDao().listFor(floorId))
+
+    private fun toFloorPlan(rows: List<RoomEntity>): FloorPlan {
+        val placed = mutableListOf<PlanRoom>()
+        val unplaced = mutableListOf<UnplacedRoom>()
+        rows.forEach { row ->
+            val points = PlanCodec.decode(row.polygonJson)
+            if (points.isEmpty()) unplaced += UnplacedRoom(row.id, row.name, row.kind)
+            else placed += PlanRoom(row.id, row.name, row.kind, points)
+        }
+        return FloorPlan(placed, unplaced)
+    }
+
+    /**
+     * Saves the editor's rooms for [floorId]. Rooms that were shaped before and are missing now are soft deleted;
+     * rooms that never had a shape are left alone.
+     */
+    suspend fun savePlan(floorId: String, rooms: List<PlanRoom>) {
+        val at = now()
+        val existing = db.roomDao().listFor(floorId).associateBy { it.id }
+        val keep = rooms.map { it.id }.toSet()
+        existing.values.filter { it.id !in keep && PlanCodec.decode(it.polygonJson).isNotEmpty() }.forEach {
+            db.roomDao().softDelete(it.id, at)
+            onChange("room", it.id)
+        }
+        rooms.forEach { room ->
+            val json = PlanCodec.encode(room.points)
+            val row = existing[room.id]
+            if (row == null) {
+                db.roomDao().upsert(RoomEntity(id = room.id, floorId = floorId, name = room.name, kind = room.kind, polygonJson = json, createdAt = at, updatedAt = at))
+            } else if (row.name != room.name || row.kind != room.kind || row.polygonJson != json) {
+                db.roomDao().upsert(row.copy(name = room.name, kind = room.kind, polygonJson = json, updatedAt = at))
+            } else {
+                return@forEach
+            }
+            onChange("room", room.id)
         }
     }
 

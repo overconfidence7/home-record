@@ -47,3 +47,38 @@ fun FloorsEditDialogScreenshot() = FloorsEditDialogPreview()
 @ThemePreviews
 @Composable
 fun HouseRootScreenshot() = HouseRootPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorScreenshot() = PlanEditorPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorSelectedScreenshot() = PlanEditorSelectedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorOverlapScreenshot() = PlanEditorOverlapPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorUnplacedScreenshot() = PlanEditorUnplacedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorEmptyScreenshot() = PlanEditorEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorLoadingScreenshot() = PlanEditorLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorNoFloorsScreenshot() = PlanEditorNoFloorsPreview()

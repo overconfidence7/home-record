@@ -64,3 +64,6 @@ See BLOCKERS.md "Decisions to confirm".
 - Only punches are server-authoritative: an Owner/Office edit of an existing punch pins it; later Crew/Lead/Sub writes are refused and logged in `sync_conflicts`.
 
 - 2026-10-20 (T011): HomeRepository lives in :house-model (needs the template) and takes an onChange callback; sync wiring (T010a) stays open until the engine is wired into AppContainer. Skip for now creates one empty Main floor and ignores the template and garage. Draw your floor plan creates the templated floors and lands on Home until the editor exists (T013). Split-level and raised ranch halves sit at ±48 in; Garage goes on Main, or Lower when there is no Main. Restore from a backup and Sign in on onboarding wait for the backup task; Sign in stays on More.
+
+## 2026-10-20 Plan editor lives in :house-manual for now
+T013 puts the editor screen, ViewModel and canvas in `:house-manual` (`...housemanual.plan`). The editing rules are in `:house-model` (`PlanEditor`) and are shared. When FL-House (AC-F48) is built the canvas composable moves to a shared UI module. Room polygons are stored as JSON via `org.json` (no new dependency). Metric grid is 4 in (about 10 cm). Rooms with no polygon (the seeded Garage) show as "Place" chips rather than on the canvas. Room selection by TalkBack is not covered yet; tracked for S4.

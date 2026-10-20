@@ -29,7 +29,7 @@ The builder may append notes and new subtasks under a task (as `  - [ ] T012a: .
 
 - [x] T011: Home creation and house types: `HouseTypeTemplate` `[unit]`, HM-Onboarding (name, type, foundation, garage), floors seeded, floor management screen (acceptance: AC-C1, AC-C2, AC-C3)
 - [x] T012: Plan geometry in `:house-model`: `PlanModel` (rooms as polygons in inches), grid snapping, neighbor-edge snapping, `WallDeriver` `[unit]`, `PlanValidator` `[unit]`, undo/redo stack `[unit]` (acceptance: AC-C8, AC-C11, AC-C10 logic)
-- [ ] T013: Plan editor screen: Canvas rendering, pinch zoom and pan, floor switcher, Add room (rectangle, name, kind, typed W×L), drag to move, edge handles to resize, selection, delete, autosave on leave, saved-state across rotation (acceptance: AC-C5, AC-C6, AC-C10, AC-C12)
+- [x] T013: Plan editor screen: Canvas rendering, pinch zoom and pan, floor switcher, Add room (rectangle, name, kind, typed W×L), drag to move, edge handles to resize, selection, delete, autosave on leave, saved-state across rotation (acceptance: AC-C5, AC-C6, AC-C10, AC-C12)
 - [ ] T014: Polygon rooms: Edit shape mode (add corner on edge, drag, delete corner), L-shapes; doors, windows and stairs placement with floor link (acceptance: AC-C7, AC-C9)
 - [ ] T015: Blueprint view: clean plan renderer (walls, names, dimensions, doors, windows, stairs, north arrow), room tap → room page, long-press sheet, layer toggles persisted per home, light/dark/200% (acceptance: AC-C13, AC-C14, AC-C15)
 - [ ] R03: Review T011–T015; geometry edge cases (concave rooms, shared walls between a rectangle and a polygon, zero-length edges)

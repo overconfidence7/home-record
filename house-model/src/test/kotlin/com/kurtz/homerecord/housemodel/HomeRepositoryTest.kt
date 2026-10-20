@@ -5,6 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.housemodel.plan.PlanCodec
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.plan.Pt
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -98,5 +101,40 @@ class HomeRepositoryTest {
         assertThat(repo.observeFloors(id).first().map { it.name }).containsExactly("Basement", "Upper").inOrder()
         assertThat(db.roomDao().listFor(main.id)).isEmpty()
         assertThat(changes).contains("floor/${main.id}")
+    }
+
+    @Test fun savePlanRoundTripsAndSoftDeletesRemovedRooms() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val before = repo.loadPlan(main.id)
+        assertThat(before.placed).isEmpty()
+        assertThat(before.unplaced.map { it.name }).containsExactly("Garage")
+
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        val den = PlanRoom.rectangle("d1", "Den", "OFFICE", 144, 0, 120, 120)
+        repo.savePlan(main.id, listOf(kitchen, den))
+        assertThat(repo.loadPlan(main.id).placed).containsExactly(kitchen, den)
+        assertThat(repo.loadPlan(main.id).unplaced).hasSize(1)
+
+        repo.savePlan(main.id, listOf(kitchen))
+        assertThat(repo.loadPlan(main.id).placed).containsExactly(kitchen)
+        assertThat(changes).contains("room/d1")
+    }
+
+    @Test fun savePlanOnlyRecordsRowsThatChanged() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        repo.savePlan(main.id, listOf(kitchen))
+        changes.clear()
+        repo.savePlan(main.id, listOf(kitchen))
+        assertThat(changes).isEmpty()
+    }
+
+    @Test fun planCodecIgnoresDamagedJson() {
+        assertThat(PlanCodec.decode("not json")).isEmpty()
+        assertThat(PlanCodec.decode("[{\"x\":1,\"y\":2}]")).isEmpty()
+        val pts = listOf(Pt(0, 0), Pt(10, 0), Pt(10, 10))
+        assertThat(PlanCodec.decode(PlanCodec.encode(pts))).isEqualTo(pts)
     }
 }
