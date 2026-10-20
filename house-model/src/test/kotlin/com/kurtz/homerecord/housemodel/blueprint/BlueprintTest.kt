@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.housemodel.blueprint
 
+import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+
+
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
@@ -9,6 +12,7 @@ class BlueprintTest {
     private val kitchen = PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 120, 120)
     private val lShape = PlanRoom("l", "Living", "LIVING_ROOM", listOf(Pt(120, 0), Pt(300, 0), Pt(300, 60), Pt(200, 60), Pt(200, 180), Pt(120, 180)))
 
+    @AcceptanceCriterion("AC-C15")
     @Test fun layerSetRoundTrips() {
         val set = LayerSet().toggled(BlueprintLayer.PLUMBING).toggled(BlueprintLayer.ITEMS)
         assertThat(LayerSet.decode(set.encode())).isEqualTo(set)
@@ -34,6 +38,7 @@ class BlueprintTest {
         assertThat(BlueprintView.fit(emptyList(), 100f, 100f, 10f)).isEqualTo(BlueprintView(1f, 0f, 0f))
     }
 
+    @AcceptanceCriterion("AC-C14")
     @Test fun hitTestFindsRoomsAndRespectsConcaveNotch() {
         val rooms = listOf(kitchen, lShape)
         assertThat(RoomHitTester.roomAt(rooms, 60f, 60f)?.id).isEqualTo("k")

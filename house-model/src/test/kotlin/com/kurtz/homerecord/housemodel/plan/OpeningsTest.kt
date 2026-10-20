@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemodel.plan
 
+import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -12,6 +14,7 @@ class OpeningsTest {
 
     private fun editor() = PlanEditor(listOf(room))
 
+    @AcceptanceCriterion("AC-C9")
     @Test fun doorIsCenteredOnTheEdge() {
         val e = editor()
         e.addOpening("r1", "d1", 0, OpeningKind.DOOR)
@@ -110,6 +113,7 @@ class OpeningsTest {
         assertEquals(stair.points.map { Pt(it.x + 24, it.y + 12) }, moved.points)
     }
 
+    @AcceptanceCriterion("AC-C9")
     @Test fun stairsLinkAndDelete() {
         val e = editor()
         e.addStair("r1", "s1", null)

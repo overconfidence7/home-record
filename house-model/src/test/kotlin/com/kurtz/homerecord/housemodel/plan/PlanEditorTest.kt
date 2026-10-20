@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemodel.plan
 
+import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -7,6 +9,7 @@ class PlanEditorTest {
     private fun editor(vararg rooms: PlanRoom) = PlanEditor(rooms.toList())
     private fun rect(id: String, l: Int, t: Int, w: Int, h: Int) = PlanRoom.rectangle(id, id, "OTHER", l, t, w, h)
 
+    @AcceptanceCriterion("AC-C6")
     @Test fun addRoomIsTwelveByTwelveFeetCenteredOnViewportAndSnapped() {
         val e = editor()
         val room = e.addRoom("a", "Kitchen", RoomKind.KITCHEN, Pt(600, 400))
@@ -74,6 +77,7 @@ class PlanEditorTest {
         assertThat(e.rooms.single().name).isEqualTo("a")
     }
 
+    @AcceptanceCriterion("AC-C10")
     @Test fun holdsFiftyUndoSteps() {
         val e = editor(rect("a", 0, 0, 144, 144))
         repeat(60) { e.rename("a", "n$it") }
@@ -104,6 +108,7 @@ class PlanEditorTest {
         assertThat(e.rooms.single().points).hasSize(4)
     }
 
+    @AcceptanceCriterion("AC-C7")
     @Test fun dragCornerBuildsAnLShapeInOneUndoStep() {
         val e = editor(rect("a", 0, 0, 144, 144))
         e.addCorner("a", 1, Pt(144, 72)) // east edge midpoint becomes index 2

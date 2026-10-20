@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemodel
 
+import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -39,6 +41,7 @@ class HomeRepositoryTest {
     private suspend fun colonial(garage: Boolean = true) =
         repo.createHome(NewHome(" Maple St ", "  ", HouseType.COLONIAL, Foundation.BASEMENT, garage))
 
+    @AcceptanceCriterion("AC-C1")
     @Test fun createHomeSeedsFloorsFromTemplateAndTrimsName() = runTest {
         val id = colonial()
         val home = repo.observeHome().first()!!
@@ -75,6 +78,7 @@ class HomeRepositoryTest {
         assertThat(floors.single().roomCount).isEqualTo(0)
     }
 
+    @AcceptanceCriterion("AC-C3")
     @Test fun addFloorGoesOnTopAndUpdateWorks() = runTest {
         val id = colonial()
         val attic = repo.addFloor(id, " Attic ")
@@ -85,6 +89,7 @@ class HomeRepositoryTest {
         assertThat(db.floorDao().get(attic)!!.elevationIn).isGreaterThan(db.floorDao().listFor(id).first { it.name == "Upper" }.elevationIn)
     }
 
+    @AcceptanceCriterion("AC-C3")
     @Test fun moveFloorSwapsNeighboursAndStopsAtTheEnds() = runTest {
         val id = colonial()
         val upper = repo.observeFloors(id).first().single { it.name == "Upper" }
@@ -96,6 +101,7 @@ class HomeRepositoryTest {
         assertThat(repo.observeFloors(id).first().first().name).isEqualTo("Upper")
     }
 
+    @AcceptanceCriterion("AC-C3")
     @Test fun deleteFloorSoftDeletesItsRooms() = runTest {
         val id = colonial()
         val main = repo.observeFloors(id).first().single { it.name == "Main" }
