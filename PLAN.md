@@ -1,6 +1,6 @@
 # Build plan
 
-Ordered tasks, about one focused hour each. The builder ticks a task only when its acceptance criteria pass and `./gradlew assembleDebug testDebugUnitTest lintDebug` (and `npm test` in `backend/` for backend tasks) are green. After every five build tasks there is a review task (R) and after every milestone a visual review (V) that looks at the committed screenshot PNGs against `docs/ui-standards.md`. Format: `- [ ] T012: <what> (acceptance: AC-C5, AC-C6)`.
+Ordered tasks, about one focused hour each. The builder ticks a task only when its acceptance criteria pass and `./gradlew assembleDebug testDebugUnitTest lintDebug` (and `npm test` in `backend/` for backend tasks) are green. After every five build tasks there is a review task (R) and after every milestone a visual review (V) that looks at the committed screenshot PNGs against `docs/ui-standards.md`. Format: `- [x] T012: <what> (acceptance: AC-C5, AC-C6)`.
 
 The builder may append notes and new subtasks under a task (as `  - [ ] T012a: ...`) and never reorders or deletes tasks. Tasks the builder cannot do are marked `(blocked: see BLOCKERS)` and skipped.
 
