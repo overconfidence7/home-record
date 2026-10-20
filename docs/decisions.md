@@ -78,3 +78,5 @@ T013 puts the editor screen, ViewModel and canvas in `:house-manual` (`...housem
 
 ## 2026-10-20 — Blueprint lives in :house-model with Compose
 The blueprint renderer is shared by House Manual and Field Log (T019), so :house-model now applies the Compose plugin and exposes :core-ui as api. Layer toggles persist per home in SharedPreferences (PrefsLayerStore), not Room, since they are per-device view state and need no sync. Layer markers are drawn from a BlueprintMarker list; nothing feeds it until items and overlays exist (later tasks).
+
+2026-10-20 — Added `androidx.test:runner` (androidTest only) for the instrumented crawler; it ships with the approved androidx.test family. Catalog and QaActivity live in each app's `src/debug` so release builds carry neither. Dark mode and font scale for the crawler come from system settings (`cmd uimode`, `font_scale`), not from the activity.
