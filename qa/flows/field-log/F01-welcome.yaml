@@ -1,0 +1,56 @@
+# Walkthrough F1 (first half): fresh install shows sign-in, then the company welcome
+# (AC-F1 shell, AC-B1). Completing sign-in on the emulator needs the dev sign-in endpoint from
+# PLAN Q005; until it lands this flow checks the screens that exist and stops.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Sign in"
+- assertVisible: "Email"
+- assertVisible: "Continue with Google"
+- takeScreenshot: F01-sign-in
+# Focus guard: Field Log never shows House Manual concepts on its first screen
+- assertNotVisible: "Reminders"
+- assertNotVisible: "Set up your home"
+- tapOn: "Email"
+- inputText: "qa-owner@example.test"
+- hideKeyboard
+- tapOn: "Send code"
+# With wrangler dev running, the backend accepts the request and logs the code.
+- extendedWaitUntil:
+    visible: "Code"
+    timeout: 15000
+- takeScreenshot: F01-code-entry
+# Dev-only: fetch the code from the local backend (PLAN Q005 adds GET /dev/last-code).
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: "qa-owner@example.test"
+- runFlow:
+    when:
+      true: ${output.devCode != null && output.devCode != ''}
+    commands:
+      - tapOn: "Code"
+      - inputText: ${output.devCode}
+      - hideKeyboard
+      - tapOn: "Sign in"
+      - extendedWaitUntil:
+          visible: "Set up your company"
+          timeout: 15000
+      - takeScreenshot: F01-welcome
+      - tapOn: "Create"
+      - tapOn: "Company name"
+      - inputText: "QA Electric"
+      - hideKeyboard
+      - tapOn: "Trade"
+      - inputText: "Electrical"
+      - hideKeyboard
+      - tapOn: "Create company"
+      - extendedWaitUntil:
+          visible: "Today"
+          timeout: 15000
+      - assertVisible: "Jobs"
+      - assertVisible: "Clock"
+      - assertVisible: "Schedule"
+      - assertVisible: "More"
+      - takeScreenshot: F01-today-empty

@@ -1,6 +1,6 @@
 # QA review log
 
-Findings from the nightly tester (emulator) and the builder's own visual reviews. Each QA session is a heading `## QA <YYYY-MM-DD> (commit <sha>)` and starts with a Verdict line per app. Each finding is one bullet:
+Findings from three sources, all in the same bullet format: the automated suite (`## QA auto <date> (commit <sha>)`, four times a day, ids like `[auto:flow:house-manual:H02-draw-plan]`), the QA judge routine (`## QA judge <date> (commit <sha>)`, verdict, Product gap and UI findings, ids like `[judge:hm-items-cards]`), and the Antigravity nightly tester when it runs (`## QA <date> (commit <sha>)`). Plus the builder's own visual reviews. Each finding is one bullet:
 
 ```
 - [ ] [Critical|Major|Minor|Product gap|UI] <problem> - steps: <how to reproduce> - expected: <SPEC AC / ui-standards rule / PRODUCT.md step> - actual: <what happened> - screenshot: qa/screenshots/latest/<file>.png

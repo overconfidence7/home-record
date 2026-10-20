@@ -1,0 +1,294 @@
+name: QA suite
+
+# The automated test suite. Runs four times a day (and on demand) against the build
+# branch. It replaces the mechanical half of the nightly Antigravity run and never
+# needs Nate's PC. See qa/README.md for the layers and qa/scripts/ for what each
+# stage does. Results go to the qa-results branch (screenshots, logs, summary) and a
+# "## QA auto" entry in REVIEW.md on build, which the builder treats like any QA entry.
+
+on:
+  schedule:
+    # Eastern 01:20, 07:20, 13:20, 19:20 (UTC during EDT; shifts one hour under EST).
+    - cron: "20 5,11,17,23 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even if HEAD was already tested"
+        type: boolean
+        default: false
+      tablet:
+        description: "Also run the tablet crawl"
+        type: boolean
+        default: false
+
+concurrency:
+  group: qa-suite
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  ANDROID_HOME: ${{ github.workspace }}/.android-sdk
+  QA_API_LEVEL: "36"          # newest emulator image known to boot on the runner; bump when 37 does
+  QA_TARGET: "google_apis"
+  QA_ARCH: "x86_64"
+
+jobs:
+  prepare:
+    name: Build, JVM tests, coverage gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      skip: ${{ steps.probe.outputs.skip }}
+      sha: ${{ steps.probe.outputs.sha }}
+      has_backend: ${{ steps.probe.outputs.has_backend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build
+          fetch-depth: 0
+
+      - name: Decide whether there is anything to test
+        id: probe
+        run: |
+          sha=$(git rev-parse HEAD); short=$(git rev-parse --short HEAD)
+          echo "sha=$short" >> "$GITHUB_OUTPUT"
+          last=$(git show origin/qa-results:latest/sha 2>/dev/null || echo none)
+          skip=false
+          if [ ! -x gradlew ] || [ ! -f settings.gradle.kts ]; then skip=true; echo "No Gradle project yet."; fi
+          if [ "$last" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "true" ]; then skip=true; echo "HEAD $short already tested."; fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+          [ -f backend/package.json ] && echo "has_backend=true" >> "$GITHUB_OUTPUT" || echo "has_backend=false" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v5
+        if: steps.probe.outputs.skip != 'true'
+        with: { distribution: temurin, java-version: "21" }
+
+      - name: Cache Android SDK
+        if: steps.probe.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: .android-sdk
+          key: android-sdk-qa-v1-${{ hashFiles('scripts/setup-android.sh') }}
+
+      - name: Cache Gradle
+        if: steps.probe.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository/org/robolectric
+          key: gradle-qa-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts') }}
+          restore-keys: gradle-qa-
+
+      - name: Install Android SDK
+        if: steps.probe.outputs.skip != 'true'
+        run: |
+          bash scripts/setup-android.sh
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --install "build-tools;35.0.0" >/dev/null 2>&1 < /dev/null || true
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "api.baseUrl=http://10.0.2.2:8787" >> local.properties
+
+      - name: JVM checks (unit, lint, screenshots)
+        if: steps.probe.outputs.skip != 'true'
+        run: |
+          mkdir -p qa-out/jvm
+          set +e
+          ./gradlew --no-daemon --console=plain testDebugUnitTest lintDebug validateDebugScreenshotTest --continue > qa-out/jvm/gradle.log 2>&1
+          echo $? > qa-out/jvm/exit-code
+          set -e
+          find . -path '*/build/test-results/testDebugUnitTest/*.xml' -exec cp {} qa-out/jvm/ \; 2>/dev/null || true
+          find . -path '*/build/reports/lint-results-debug.xml' -exec sh -c 'cp "$1" "qa-out/jvm/lint-$(echo "$1" | cut -d/ -f2).xml"' _ {} \; 2>/dev/null || true
+          find . -path '*/build/reports/screenshotTest/*' -name '*.html' -exec sh -c 'cp "$1" "qa-out/jvm/screenshot-$(echo "$1" | cut -d/ -f2).html"' _ {} \; 2>/dev/null || true
+          tail -n 40 qa-out/jvm/gradle.log
+
+      - name: Backend tests
+        if: steps.probe.outputs.skip != 'true' && steps.probe.outputs.has_backend == 'true'
+        run: |
+          mkdir -p qa-out/backend
+          cd backend && npm ci --no-audit --no-fund > /dev/null 2>&1
+          set +e; npm test -- --reporter=junit --outputFile=../qa-out/backend/junit.xml > ../qa-out/backend/npm-test.log 2>&1; echo $? > ../qa-out/backend/exit-code; set -e
+          tail -n 20 ../qa-out/backend/npm-test.log
+
+      - name: Coverage gate (every AC of a ticked task has a test or flow)
+        if: steps.probe.outputs.skip != 'true'
+        run: python3 qa/scripts/coverage-check.py --plan PLAN.md --spec SPEC.md --out qa-out/jvm/coverage.json || true
+
+      - name: Build APKs for the device jobs
+        if: steps.probe.outputs.skip != 'true'
+        run: |
+          mkdir -p qa-out/apk
+          set +e
+          ./gradlew --no-daemon --console=plain :house-manual:assembleDebug :field-log:assembleDebug \
+            :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
+            :house-manual:assembleRelease :field-log:assembleRelease --continue > qa-out/apk/gradle.log 2>&1
+          echo $? > qa-out/apk/exit-code
+          set -e
+          for app in house-manual field-log; do
+            cp $app/build/outputs/apk/debug/$app-debug.apk qa-out/apk/ 2>/dev/null || echo "no debug apk for $app"
+            cp $app/build/outputs/apk/androidTest/debug/$app-debug-androidTest.apk qa-out/apk/ 2>/dev/null || echo "no androidTest apk for $app (crawler not built yet)"
+            rel=$(ls $app/build/outputs/apk/release/$app-release*.apk 2>/dev/null | head -n 1)
+            [ -n "$rel" ] && cp "$rel" qa-out/apk/$app-release.apk || echo "no release apk for $app"
+          done
+          ls -la qa-out/apk
+
+      - uses: actions/upload-artifact@v4
+        if: steps.probe.outputs.skip != 'true'
+        with: { name: qa-prepare, path: qa-out, retention-days: 14 }
+
+  device:
+    name: Device suite (${{ matrix.app }})
+    needs: prepare
+    if: needs.prepare.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [house-manual, field-log]
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: build }
+      - uses: actions/download-artifact@v4
+        with: { name: qa-prepare, path: qa-out }
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: "21" }
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        if: needs.prepare.outputs.has_backend == 'true'
+        with: { node-version: "22" }
+      - name: Start the backend locally (wrangler dev)
+        if: needs.prepare.outputs.has_backend == 'true'
+        run: |
+          cd backend && npm ci --no-audit --no-fund > /dev/null 2>&1
+          (npx wrangler dev --port 8787 --local > ../qa-out/wrangler-${{ matrix.app }}.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done || echo "backend did not answer; device tests that need it will report it"
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.QA_API_LEVEL }}-${{ env.QA_TARGET }}-${{ env.QA_ARCH }}-pixel7-v1
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.QA_API_LEVEL }}
+          target: ${{ env.QA_TARGET }}
+          arch: ${{ env.QA_ARCH }}
+          profile: pixel_7
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
+          disable-animations: false
+          script: echo "AVD created"
+      - name: Run the device suite
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.QA_API_LEVEL }}
+          target: ${{ env.QA_TARGET }}
+          arch: ${{ env.QA_ARCH }}
+          profile: pixel_7
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
+          disable-animations: true
+          script: bash qa/scripts/device-suite.sh ${{ matrix.app }} qa-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-device-${{ matrix.app }}
+          path: qa-out/device/${{ matrix.app }}
+          retention-days: 14
+
+  handoff:
+    name: Handoff between the apps
+    needs: [prepare, device]
+    if: needs.prepare.outputs.skip != 'true' && always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: build }
+      - uses: actions/download-artifact@v4
+        with: { name: qa-prepare, path: qa-out }
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: "21" }
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        if: needs.prepare.outputs.has_backend == 'true'
+        with: { node-version: "22" }
+      - name: Start the backend locally (wrangler dev)
+        if: needs.prepare.outputs.has_backend == 'true'
+        run: |
+          cd backend && npm ci --no-audit --no-fund > /dev/null 2>&1
+          (npx wrangler dev --port 8787 --local > ../qa-out/wrangler-handoff.log 2>&1 &)
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done || true
+      - name: AVD cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.QA_API_LEVEL }}-${{ env.QA_TARGET }}-${{ env.QA_ARCH }}-pixel7-v1
+      - name: Run the handoff suite
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.QA_API_LEVEL }}
+          target: ${{ env.QA_TARGET }}
+          arch: ${{ env.QA_ARCH }}
+          profile: pixel_7
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back emulated
+          disable-animations: true
+          script: bash qa/scripts/device-suite.sh handoff qa-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: qa-device-handoff, path: qa-out/device/handoff, retention-days: 14 }
+
+  report:
+    name: Publish results and REVIEW.md entry
+    needs: [prepare, device, handoff]
+    if: needs.prepare.outputs.skip != 'true' && always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: build, fetch-depth: 0 }
+      - uses: actions/download-artifact@v4
+        with: { path: qa-in }
+      - name: Summarize
+        run: |
+          python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.sha }}" --review REVIEW.md --out qa-publish
+          cat qa-publish/summary.md
+      - name: Publish to the qa-results branch
+        run: bash qa/scripts/publish-results.sh qa-publish "${{ needs.prepare.outputs.sha }}"
+      - name: Record the run in REVIEW.md and qa/last-tested.txt
+        run: |
+          git config user.name "homerecord-qa"
+          git config user.email "qa@homerecord.invalid"
+          for attempt in 1 2 3 4; do
+            git fetch origin build && git reset --hard origin/build
+            python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.sha }}" --review REVIEW.md --out qa-publish --apply-review
+            git rev-parse "${{ needs.prepare.outputs.sha }}" > qa/last-tested.txt
+            git add REVIEW.md qa/last-tested.txt
+            git commit -q -m "QA auto $(date -u +%Y-%m-%d\ %H:%M) UTC (commit ${{ needs.prepare.outputs.sha }})" || { echo "nothing to record"; break; }
+            git push origin HEAD:build && break
+            echo "push rejected, retrying ($attempt)"; sleep 10
+          done

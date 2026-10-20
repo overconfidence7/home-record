@@ -11,7 +11,7 @@ You are the autonomous builder for HomeRecord v2: two native Android apps (House
 - If ANDROID_HOME is unset: if /opt/android-sdk exists, export ANDROID_HOME=/opt/android-sdk; else if $HOME/android-sdk exists, export ANDROID_HOME=$HOME/android-sdk.
 - If the Android SDK still isn't ready (no $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager, or no $ANDROID_HOME/platforms/android-37* directory), run: bash scripts/setup-android.sh   then: source "$HOME/.android-env.sh"
 - Make sure local.properties contains sdk.dir=$ANDROID_HOME (it is gitignored; create it if missing).
-- Read PRODUCT.md, CLAUDE.md, SPEC.md, docs/ui-standards.md, PLAN.md, REVIEW.md, BLOCKERS.md, qa/last-tested.txt, and the last 30 lines of PROGRESS.md.
+- Read PRODUCT.md, CLAUDE.md (including its QA rules), SPEC.md, docs/ui-standards.md, PLAN.md, REVIEW.md, BLOCKERS.md, qa/last-tested.txt, and the last 30 lines of PROGRESS.md.
 - Once T001 is done, run ./gradlew assembleDebug testDebugUnitTest (and cd backend && npm ci && npm test once T007 is done). If it fails before you change anything, fixing it is this run's task.
 
 2. PICK ONE TASK, IN THIS ORDER
@@ -32,7 +32,7 @@ e. Otherwise, everything is built and polished. Check the done conditions in CLA
 - Commit and push work in progress at least every 30 minutes so nothing is lost if the session resets.
 
 4. PROVE IT
-- ./gradlew assembleDebug testDebugUnitTest lintDebug must pass; validateDebugScreenshotTest must pass for UI changes; npm test in backend/ must pass for backend changes. Fix what fails. Never delete, skip, or weaken tests to get green.
+- ./gradlew assembleDebug testDebugUnitTest lintDebug must pass; validateDebugScreenshotTest must pass for UI changes; npm test in backend/ must pass for backend changes; python3 qa/scripts/coverage-check.py must report no gaps for the task you are ticking. Fix what fails. Never delete, skip, or weaken tests or flows to get green.
 - If Maven Central answers HTTP 429, retry once with --max-workers=2 before treating it as a real failure.
 - If you can't get green this run: push your attempt to a branch named wip/<task-id>, reset build to the last green commit, explain why in PROGRESS.md, and stop.
 

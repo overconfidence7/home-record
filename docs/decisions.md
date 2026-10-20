@@ -32,6 +32,14 @@ Dated log of library, architecture, pricing and scope choices, with the reason. 
 - **Screenshot tests with the Compose Preview Screenshot Testing plugin**, reference PNGs committed. Reason: the cloud builder has no emulator; committed PNGs let the builder look at its own UI and let Nate and QA review screens without installing.
 - **Monorepo**: Android modules and `backend/` in one repo. Reason: one plan, one builder, one QA; API changes land with the client changes that need them.
 
+## 2026-10-20 — Automated QA suite in the cloud
+
+- **Testing moves off Nate's PC.** A GitHub Actions workflow (`qa.yml`) runs the mechanical suite four times a day on KVM emulators: JVM checks, a coverage gate, a device suite per app (Maestro flows, instrumented acceptance tests and screen crawler, dark/200%/landscape tour, cold start, jank, monkey, release launch, logcat scan), a handoff suite, results on the `qa-results` branch and a `## QA auto` entry in REVIEW.md. A Claude Code routine (`docs/qa-judge-prompt.md`) reads the results and screenshots and writes the product verdict. Antigravity stays as the exploratory layer when it has usage. Reason: the nightly run was skipped for lack of Antigravity usage; the suite had to be detached from the PC without losing the product-judgment half.
+- **One suite per app, plus a handoff suite.** Separate jobs, flow folders, instrumented packages and walkthrough tables, with focus guards that assert the other app's concepts do not leak. Reason: Nate wants the apps to stay distinct even though they share modules.
+- **Coverage gate.** Every AC a ticked task claims must be referenced by a test or flow (`qa/scripts/coverage-check.py`), otherwise a Major is filed. Reason: this is how the suite follows the builder automatically; the builder's own tests are the suite.
+- **Maestro for end-to-end flows**, instrumented Compose tests for acceptance criteria and the crawler, `testTagsAsResourceId` for stable targets. Reason: flows read like the walkthrough and are cheap for the builder and the judge to write; instrumented tests give accessibility checks and screenshots per screen.
+- **Cost**: ~35–55 billed Actions minutes per run on a private repo; four runs a day exceeds the free 2,000 minutes a month. Nate decides between paying, two runs a day, or a public repo. The account's $0 spending limit means runs stop rather than bill.
+
 ## Open questions
 
 See BLOCKERS.md "Decisions to confirm".

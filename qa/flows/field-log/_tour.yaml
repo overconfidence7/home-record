@@ -1,0 +1,30 @@
+# Helper, not a walkthrough step: visit every root tab and screenshot it under the variant the
+# device suite sets (light, dark, font200, landscape). Field Log needs a signed-in company for
+# its tabs; when the app is still on the sign-in screen the tour screenshots that and stops.
+appId: com.kurtz.homerecord.fieldlog
+env:
+  QA_VARIANT: light
+---
+- launchApp
+- takeScreenshot: tour-${QA_VARIANT}-launch
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      - tapOn: "Today"
+      - takeScreenshot: tour-${QA_VARIANT}-today
+      - tapOn: "Jobs"
+      - takeScreenshot: tour-${QA_VARIANT}-jobs
+      - tapOn: "Clock"
+      - takeScreenshot: tour-${QA_VARIANT}-clock
+      - tapOn: "Schedule"
+      - takeScreenshot: tour-${QA_VARIANT}-schedule
+      - tapOn: "More"
+      - takeScreenshot: tour-${QA_VARIANT}-more
+      - tapOn: "Team"
+      - takeScreenshot: tour-${QA_VARIANT}-team
+      - tapOn: "Back"
+      - tapOn: "Company"
+      - takeScreenshot: tour-${QA_VARIANT}-company
+      - tapOn: "Back"
+      - tapOn: "Today"

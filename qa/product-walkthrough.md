@@ -6,7 +6,7 @@ The nightly tester performs this after the acceptance-criteria checks, from the 
 - **Clunky**: possible but hard to find, slow, ugly or confusing. Becomes a `[Product gap] Minor` or `Major` finding.
 - **Blocked**: cannot be done, or the feature does not exist yet. Becomes `[Product gap] Major` if PLAN.md has already ticked the task that should deliver it, otherwise it is listed under "Not built yet" (not a finding) so Nate can see progress.
 
-Record the result as a table in REVIEW.md under the night's heading, one row per step, with a screenshot name for every Clunky or Blocked step. Always take a screenshot of every screen you reach and save it to `qa/screenshots/latest/<app>-<screen>.png`, even when it passes, so Nate can review the UI without installing.
+Each step has a Maestro flow in `qa/flows/<app>/` named with the zero-padded step id (`H02-draw-plan.yaml` for H2, `F04-clock-in.yaml` for F4); the automated suite runs those and the QA judge scores the table from their results and the screenshots. Antigravity performs the steps by hand when it runs. Record the result as a table in REVIEW.md under the night's heading, one row per step, with a screenshot name for every Clunky or Blocked step. Always take a screenshot of every screen you reach and save it to `qa/screenshots/latest/<app>-<screen>.png`, even when it passes, so Nate can review the UI without installing.
 
 ## UI audit (both apps, every night)
 

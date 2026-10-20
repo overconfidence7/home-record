@@ -1,0 +1,31 @@
+# Helper, not a walkthrough step: visit every root tab and the first level below it, taking a
+# screenshot of each. The device suite runs it under dark mode, 200% font and landscape with
+# QA_VARIANT set, so the screenshots are named per variant (AC-U8, AC-U9, ui rules 24-33).
+# It never clears state, so it sees whatever the previous flows left behind.
+appId: com.kurtz.homerecord.housemanual
+env:
+  QA_VARIANT: light
+---
+- launchApp
+- runFlow:
+    when:
+      visible: "Set up your home"
+    commands:
+      - tapOn: "Skip for now"
+- tapOn: "Home"
+- takeScreenshot: tour-${QA_VARIANT}-home
+- tapOn: "House"
+- takeScreenshot: tour-${QA_VARIANT}-house
+- tapOn: "Floors"
+- takeScreenshot: tour-${QA_VARIANT}-floors
+- tapOn: "Back"
+- tapOn: "Edit plan"
+- takeScreenshot: tour-${QA_VARIANT}-plan-editor
+- tapOn: "Back"
+- tapOn: "Items"
+- takeScreenshot: tour-${QA_VARIANT}-items
+- tapOn: "Reminders"
+- takeScreenshot: tour-${QA_VARIANT}-reminders
+- tapOn: "More"
+- takeScreenshot: tour-${QA_VARIANT}-more
+- tapOn: "Home"

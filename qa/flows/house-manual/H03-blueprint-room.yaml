@@ -1,0 +1,30 @@
+# Walkthrough H3: the House tab shows a blueprint; tapping a room opens it; long press shows
+# Rename / Delete (AC-C13, AC-C14). Builds on H02.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: H02-draw-plan.yaml
+- tapOn: "House"
+- assertVisible: "Tap a room to open it. Press and hold for more."
+- tapOn: "Kitchen"
+- takeScreenshot: H03-room-kitchen
+# Room page is a non-root screen: it has the back arrow and names the room (AC-U2, ui rule 7)
+- assertVisible: "Back"
+- assertVisible: "Kitchen"
+- tapOn: "Back"
+- longPressOn: "Kitchen"
+- assertVisible: "Rename"
+- assertVisible: "Delete"
+- takeScreenshot: H03-room-long-press
+- back
+# Floors screen: add a floor, see it listed (AC-C3)
+- tapOn: "Floors"
+- assertVisible: "Add floor"
+- tapOn: "Add floor"
+- tapOn: "Floor name"
+- eraseText: 20
+- inputText: "Attic"
+- hideKeyboard
+- tapOn: "Save"
+- assertVisible: "Attic"
+- takeScreenshot: H03-floors
+- tapOn: "Back"

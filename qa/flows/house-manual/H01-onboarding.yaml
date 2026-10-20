@@ -1,0 +1,27 @@
+# Walkthrough H1: fresh install reaches Home in at most four screens (AC-H1, AC-C1).
+# Covers: onboarding fields, house type and foundation pickers, Skip for now, bottom tabs.
+appId: com.kurtz.homerecord.housemanual
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Set up your home"
+- takeScreenshot: H01-onboarding
+- tapOn: "Home name"
+- inputText: "Maple St"
+- hideKeyboard
+- tapOn: "Choose a style"
+- assertVisible: "Two-story"
+- tapOn: "Two-story"
+- tapOn: "Basement"
+- takeScreenshot: H01-onboarding-filled
+- tapOn: "Skip for now"
+# Root of the app: the five tabs from SPEC 5.1 (AC-U1)
+- assertVisible: "Home"
+- assertVisible: "House"
+- assertVisible: "Items"
+- assertVisible: "Reminders"
+- assertVisible: "More"
+- takeScreenshot: H01-home-after-onboarding
+# Focus guard: House Manual never shows Field Log concepts
+- assertNotVisible: "Clock"
+- assertNotVisible: "Jobs"

@@ -1,0 +1,45 @@
+# Walkthrough H2: draw rooms on the plan (AC-C5, AC-C6, AC-C10, AC-C12 basics).
+# Builds on H01 (runs it first so the home exists), then adds two rooms, undoes one, rotates.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: H01-onboarding.yaml
+- tapOn: "House"
+- takeScreenshot: H02-house-tab
+- tapOn: "Edit plan"
+- assertVisible: "Floor plan"
+- takeScreenshot: H02-plan-empty
+- tapOn: "Add room"
+- assertVisible: "Room name"
+- tapOn: "Room name"
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn: "Width"
+- eraseText: 10
+- inputText: "14"
+- hideKeyboard
+- tapOn: "Length"
+- eraseText: 10
+- inputText: "12"
+- hideKeyboard
+- tapOn: "Done"
+- takeScreenshot: H02-plan-one-room
+- tapOn: "Add room"
+- tapOn: "Room name"
+- eraseText: 20
+- inputText: "Living room"
+- hideKeyboard
+- tapOn: "Done"
+- takeScreenshot: H02-plan-two-rooms
+# Undo removes the last room, redo brings it back (AC-C10)
+- tapOn: "Undo"
+- tapOn: "Redo"
+# Leaving the editor autosaves; the blueprint shows both rooms (AC-C13, AC-H4)
+- tapOn: "Back"
+- assertVisible: "Kitchen"
+- assertVisible: "Living room"
+- takeScreenshot: H02-blueprint-after-edit
+# Back arrow and system back both work; no dead end (AC-U2)
+- tapOn: "Edit plan"
+- back
+- assertVisible: "Edit plan"

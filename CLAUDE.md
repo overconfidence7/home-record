@@ -19,10 +19,16 @@ You are building HomeRecord v2: two native Android apps (House Manual, Field Log
 | docs/voice.md | Wording rules for every user-facing string. | Nate |
 | docs/billing.md | RevenueCat project, entitlements, key handling. | Nate |
 | qa/product-walkthrough.md | The scripted walkthrough QA performs nightly; builder runs it too at T078/T079. | Nate |
-| qa/nightly-qa-prompt.md | The prompt the nightly tester runs. Reference for what QA will check. | Nate |
+| qa/README.md | How the apps are tested: the layers, the two per-app suites, the builder's test obligations. | Nate |
+| qa/flows/<app>/ | Maestro flows, one per walkthrough step (`H02-…`, `F04-…`), plus `_tour.yaml`; `qa/flows/handoff/` for the cross-app flows. | Builder adds and extends |
+| qa/scripts/ | The automated suite: device-suite.sh, coverage-check.py, summarize.py, publish-results.sh. | Nate; builder may fix bugs |
+| qa/fixtures/ | Test images and PDF the flows use. | Builder (Q005) |
+| .github/workflows/qa.yml | The automated QA suite, 4×/day: JVM checks, coverage gate, device suite per app, handoff, results to the `qa-results` branch and a `## QA auto` entry in REVIEW.md. | Builder fixes it when it breaks |
+| docs/qa-judge-prompt.md | The prompt of the QA judge routine that reads the suite's results and writes `## QA judge` entries. | Nate |
+| qa/nightly-qa-prompt.md | The prompt the Antigravity nightly tester runs (exploratory, when Nate's PC has usage). | Nate |
 | docs/builder-prompt.md | The prompt the hourly builder routine runs (this is you). | Nate |
-| qa/last-tested.txt | Commit SHA last tested by QA, or `none`. | QA |
-| qa/screenshots/latest/ | QA's screenshots of every screen from the last run. | QA |
+| qa/last-tested.txt | Commit SHA last tested by the automated suite, or `none`. | QA suite |
+| `qa-results` branch | Screenshots, logs and summaries of the last suite run (`latest/`) and the last 60 summaries (`history/`). Rewritten every run; never base work on it. | QA suite |
 | .github/workflows/testing-apks.yml | Builds and publishes testing APKs on every push to `build`. | Builder fixes it when it breaks |
 | scripts/setup-android.sh | Fresh-container SDK setup. | Nate; builder may fix bugs |
 | backend/ | Cloudflare Worker, migrations, tests. | Builder |
@@ -71,6 +77,9 @@ Zip uses `java.util.zip`. Crypto uses `javax.crypto`. Perspective warp uses `and
 - Tests: `./gradlew testDebugUnitTest`
 - Lint: `./gradlew lintDebug`
 - Screenshots: `./gradlew updateDebugScreenshotTest` (writes reference PNGs; commit them), `./gradlew validateDebugScreenshotTest` (CI)
+- Instrumented tests (need an emulator): `./gradlew :house-manual:connectedDebugAndroidTest`; the cloud suite runs them with `am instrument`
+- Flows: `maestro test qa/flows/house-manual/H01-onboarding.yaml` (install Maestro with `curl -fsSL https://get.maestro.mobile.dev | bash`)
+- Coverage gate: `python3 qa/scripts/coverage-check.py` (lists ticked tasks whose ACs have no test or flow)
 - Backend: `cd backend && npm ci && npm test`; local server `npx wrangler dev`
 - Setup on a fresh container: `bash scripts/setup-android.sh` then `source "$HOME/.android-env.sh"`
 - Maven Central through the cloud proxy is unreliable (429 and false 404). `settings.gradle.kts` lists Google's Maven Central mirror (`maven-central.storage-download.googleapis.com`) before `mavenCentral()`, and the root build points Robolectric's downloader at the mirror. Keep both. If a build still fails with 429/404, wait 60 s, retry once with `--max-workers=1`, then push to `wip/` and stop.
@@ -93,12 +102,24 @@ Run the tests before every commit. A task is done only when its acceptance crite
 - Commit per task: `T034: FL-Clock with GPS punch and far-from-job reason`. Keep commits small; never force-push `build`.
 - Keep `lintDebug` free of errors; note recurring warnings in REVIEW.md.
 
+## QA rules (what every task owes the test suite)
+
+The automated suite (`qa/README.md`) runs four times a day and files findings in REVIEW.md as `## QA auto` entries; the QA judge routine adds `## QA judge` entries with Product gap and UI findings. Both count as QA. To keep the suite honest, every task you tick must leave these behind:
+
+1. Every `[unit]` AC it claims has a named JVM test that mentions the id (`// AC-C8` in the test or `@AcceptanceCriterion("AC-C8")`). Backend ACs: a vitest file mentioning the id.
+2. Every other AC it claims is referenced by an instrumented test in `src/androidTest` or a Maestro flow in `qa/flows/<app>/`. `qa/scripts/coverage-check.py` enforces this; a ticked task with gaps becomes a Major finding.
+3. Every new or changed screen has a `ScreenCatalog` entry (realistic fake state, used by the crawler and the previews) and stable `testTag`s on every interactive element, named `<app>_<screen>_<element>` (`hm_items_fab`, `fl_clock_in`). The app roots set `Modifier.semantics { testTagsAsResourceId = true }` so Maestro can target ids.
+4. A task that touches a walkthrough step adds or extends the flow named for that step (zero-padded: `H02-draw-plan.yaml`, `F04-clock-in.yaml`). Flows run against a fresh install plus the debug seed scenario; keep them deterministic (no sleeps, use `extendedWaitUntil`).
+5. A task that needs data to be testable grows the debug seed (`<pkg>.qa.SEED` receiver, Q005) and, for Field Log, the dev sign-in path (`/dev/last-code` on the local backend).
+6. A failing flow is fixed by fixing the app unless the judge tagged it `[judge: flow error]`; then fix the flow.
+7. Never delete or weaken a test or flow to get the suite green.
+
 ## Definition of done
 
 The builder creates `DONE` only when all of these hold at the same commit:
 
 1. Every task in PLAN.md is ticked (or marked deferred with a reason) and every item in REVIEW.md is fixed, including "Product gap" items.
-2. `qa/last-tested.txt` equals the current `build` HEAD, the newest QA entry in REVIEW.md ends with `New issues: 0` and `Product gaps: 0`, and both walkthroughs in `qa/product-walkthrough.md` are recorded as complete with no blocked steps.
+2. `qa/last-tested.txt` equals the current `build` HEAD, the newest `## QA auto` entry in REVIEW.md is for that HEAD and ends with `New issues: 0`, the newest `## QA judge` entry is for that HEAD and ends with `New issues: 0. Product gaps: 0.`, and the judge's walkthrough tables for both apps show every step Pass with no Blocked or Not built yet.
 3. Every item on the ship-ready checklist has been done at least once since the last code change that could affect it.
 
 When `DONE` is created the run also builds release APKs for both apps, lists their paths and SHA-256 in `DONE` with install instructions and known limits, makes its final reply the same summary starting with `SHIP READY: HomeRecord <sha>`, and, if a Gmail connector is available, emails it to nkurtz@gmail.com with subject `SHIP READY: HomeRecord`. Later runs that find `DONE` reply `Build complete` and stop.
@@ -120,8 +141,8 @@ Until all three hold, a run with no plan task and no open finding does one ship-
 
 ## Workflow per run
 
-1. Read PROGRESS.md (last lines), PLAN.md (next unchecked task), REVIEW.md (open findings: fix Critical, Major and Product gap before new tasks), BLOCKERS.md.
-2. Do the task. Write the tests. Run build, tests, lint, screenshots (for UI changes), backend tests (for backend changes).
+1. Read PROGRESS.md (last lines), PLAN.md (next unchecked task), REVIEW.md (open findings from `## QA auto`, `## QA judge` and `## QA` entries alike: fix Critical, Major and Product gap before new tasks; `[auto:coverage:…]` items are fixed by tagging or adding tests and flows, not by code changes), BLOCKERS.md.
+2. Do the task. Write the tests and flows the QA rules require. Run build, tests, lint, screenshots (for UI changes), backend tests (for backend changes), and `python3 qa/scripts/coverage-check.py` before ticking the task.
 3. Tick the task in PLAN.md, append one line to PROGRESS.md (date/time ET, task, what changed, test counts, one line telling QA what to check), add decisions to docs/decisions.md, commit, push `build`.
 4. If something needs Nate, add it to BLOCKERS.md and move to the next task that does not depend on it.
 5. End every run with something that builds, passes tests and launches.
