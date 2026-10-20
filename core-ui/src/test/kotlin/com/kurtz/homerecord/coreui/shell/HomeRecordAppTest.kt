@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
@@ -48,6 +49,15 @@ class HomeRecordAppTest {
         rule.onAllNodesWithText("Detail a").onFirst().assertIsDisplayed()
         rule.onNodeWithContentDescription("Back").performClick()
         rule.onNodeWithText("Open a detail screen").assertIsDisplayed()
+    }
+
+    // AC-U12
+    @Test fun tabsAndBackArrowCarryTestTags() {
+        setApp()
+        rule.onNodeWithTag("app_tab_a").assertIsDisplayed()
+        rule.onNodeWithTag("app_tab_b").assertIsDisplayed()
+        rule.onNodeWithText("Open a detail screen").performClick()
+        rule.onNodeWithTag("app_back").assertIsDisplayed()
     }
 
     @Test fun tabKeepsItsOwnStackAndReselectPopsToRoot() {

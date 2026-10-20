@@ -5,6 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 
@@ -50,7 +56,11 @@ class MainActivity : ComponentActivity() {
         handleJoinLink(intent)
         setContent {
             HomeRecordTheme(Brand.FieldLog) {
-                FieldLogApp(container)
+                CompositionLocalProvider(LocalTagPrefix provides "fl") {
+                    Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                        FieldLogApp(container)
+                    }
+                }
             }
         }
     }

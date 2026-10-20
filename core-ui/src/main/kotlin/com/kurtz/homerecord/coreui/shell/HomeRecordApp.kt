@@ -8,11 +8,13 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -21,6 +23,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+
+/** App tag prefix for test tags (`hm`, `fl`); apps provide it at their root. */
+val LocalTagPrefix = compositionLocalOf { "app" }
 
 /** Navigation handle given to screens inside the current tab's back stack. */
 interface ShellNav {
@@ -56,6 +61,7 @@ fun HomeRecordApp(
     // standard wants a rail on any width >= 600 dp.
     val wideEnough = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val tagPrefix = LocalTagPrefix.current
     NavigationSuiteScaffold(
         modifier = modifier,
         layoutType = if (wideEnough) NavigationSuiteType.NavigationRail else NavigationSuiteType.NavigationBar,
@@ -75,6 +81,7 @@ fun HomeRecordApp(
                         Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
                     },
                     label = { Text(tab.label) },
+                    modifier = Modifier.testTag("${tagPrefix}_tab_${tab.id}"),
                 )
             }
         },
