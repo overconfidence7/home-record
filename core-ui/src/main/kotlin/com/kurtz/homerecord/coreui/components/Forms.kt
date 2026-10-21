@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -243,6 +244,7 @@ fun <T> EnumPicker(
                 selected = option == selected,
                 onClick = { onSelect(option) },
                 shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                modifier = Modifier.heightIn(min = 48.dp),
             ) { Text(labelOf(option)) }
         }
     }

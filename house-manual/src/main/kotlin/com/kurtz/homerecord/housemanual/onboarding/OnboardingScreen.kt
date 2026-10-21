@@ -119,7 +119,7 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
                 FilterChip(
                     selected = option == state.foundation,
                     onClick = { onEvent(OnboardingEvent.FoundationChanged(option)) },
-                    modifier = Modifier.testTag("hm_onboarding_foundation_${option.name.lowercase()}"),
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("hm_onboarding_foundation_${option.name.lowercase()}"),
                     label = { Text(foundationLabel(option)) },
                 )
             }
