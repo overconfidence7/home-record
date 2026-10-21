@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -33,7 +34,7 @@ data class TodayUiState(
 /** FL-Today. Jobs, the clock card and tasks arrive with later tasks; until then it explains what to do first (AC-F1). */
 @Composable
 fun TodayScreen(state: TodayUiState, onInviteCrew: () -> Unit, modifier: Modifier = Modifier, onSyncNow: () -> Unit = {}) {
-    Column(modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize().statusBarsPadding()) {
         SyncStatusChip(state.syncPhase, state.pendingChanges, onSyncNow, Modifier.padding(horizontal = 16.dp))
         TodayBody(state, onInviteCrew, Modifier.weight(1f))
     }

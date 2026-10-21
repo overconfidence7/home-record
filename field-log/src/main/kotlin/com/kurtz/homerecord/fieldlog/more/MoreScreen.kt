@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog.more
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -39,7 +40,7 @@ sealed interface MoreEvent {
 @Composable
 fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier) {
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
-    Column(modifier.verticalScroll(rememberScrollState())) {
+    Column(modifier.statusBarsPadding().verticalScroll(rememberScrollState())) {
         Text(state.companyName, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp))
         Text(
             roleLabel(state.role),
