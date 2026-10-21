@@ -84,3 +84,6 @@ The blueprint renderer is shared by House Manual and Field Log (T019), so :house
 
 ## 2026-10-21 — Token store opened off the main thread
 Cold start was 4–5 s; `EncryptedSharedPreferences`/MasterKey creation ran on the main thread inside `AuthRepository`'s constructor. `AuthState.Restoring` now covers the gap; containers build `AuthRepository(restoreNow = false)` and call `restore()` on `Dispatchers.IO`. Tests and tools keep the synchronous default.
+
+## 2026-10-21 — Dev sign-in code storage
+`/dev/last-code` needs the plaintext code, but `email_codes` only stores a hash. In dev only, `/auth/email/start` also writes the code to KV (`devcode:<email>`, 10 min TTL). Production never writes it, and `/dev/*` returns 404 unless `ENVIRONMENT=dev`.

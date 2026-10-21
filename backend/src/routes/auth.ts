@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { issueToken } from "../session";
 import { CODE_MINUTES, checkCode, generateCode, hashCode, normalizeEmail, sendCode } from "../auth/emailCode";
+import { devCodeKey } from "./dev";
 import { verifyGoogleIdToken } from "../auth/google";
 
 export const auth = new Hono<AppEnv>();
@@ -35,6 +36,7 @@ auth.post("/email/start", async (c) => {
   )
     .bind(email, await hashCode(email, code), Date.now() + CODE_MINUTES * 60_000)
     .run();
+  if (c.env.ENVIRONMENT === "dev") await c.env.CACHE.put(devCodeKey(email), code, { expirationTtl: CODE_MINUTES * 60 });
   if (!(await sendCode(c.env, email, code))) return c.json({ error: "send_failed" }, 502);
   return c.json({ ok: true });
 });

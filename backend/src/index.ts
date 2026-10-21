@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { AppEnv } from "./env";
 import { auth } from "./routes/auth";
+import { dev } from "./routes/dev";
 import { company } from "./routes/company";
 import { me } from "./routes/me";
 import { sync } from "./routes/sync";
@@ -10,6 +11,8 @@ const app = new Hono<AppEnv>();
 
 app.get("/health", (c) => c.json({ ok: true, environment: c.env.ENVIRONMENT }));
 app.route("/auth", auth);
+app.use("/dev/*", async (c, next) => (c.env.ENVIRONMENT === "dev" ? next() : c.json({ error: "not_found" }, 404)));
+app.route("/dev", dev);
 app.route("/me", me);
 app.route("/", company);
 app.route("/", tenants);
