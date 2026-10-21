@@ -143,9 +143,12 @@ done
 # ------------------------------------------------------------------ flows
 run_flow() { # file label [variant]
   local f="$1" label="$2" variant="${3:-light}" rc
-  ( cd "$OUT/maestro" && timeout 600 maestro test -e QA_VARIANT="$variant" -e QA_BACKEND="http://127.0.0.1:8787" --format junit --output "$label.xml" "$OLDPWD/$f" > "$label.log" 2>&1 ); rc=$?
-  # Maestro drops failure screenshots next to the cwd; keep them with a stable name
-  for s in "$OUT"/maestro/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/flow-$label-$(basename "$s")"; done
+  ( cd "$OUT/maestro" && timeout 600 maestro test -e QA_VARIANT="$variant" -e QA_BACKEND="http://127.0.0.1:8787" --format junit --output "$label.xml" --test-output-dir "$OUT/maestro/out-$label" "$OLDPWD/$f" > "$label.log" 2>&1 ); rc=$?
+  # Current Maestro writes takeScreenshot and failure captures into --test-output-dir, older ones into the cwd;
+  # collect both and keep them with a stable name
+  # tour shots keep their own tour-<variant>-<screen> names; failure captures of other flows get a flow- prefix
+  local prefix="flow-$label-"; case "$label" in tour-*) prefix="" ;; esac
+  for s in "$OUT"/maestro/*.png "$OUT/maestro/out-$label"/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/$prefix$(basename "$s")"; done
   return $rc
 }
 FLOWDIR="qa/flows/$APP"
@@ -171,8 +174,6 @@ if [ -f "$FLOWDIR/_tour.yaml" ]; then
     if run_flow "$FLOWDIR/_tour.yaml" "tour-$v" "$v"; then record "variant:$v" pass "tour ok"; else record "variant:$v" fail "tour failed under $v"; fi
   done
   adb shell settings put system user_rotation 0; adb shell settings put system font_scale 1.0; adb shell cmd uimode night no
-  # tour screenshots are written by the flow into cwd ($OUT/maestro); move them by variant
-  for s in "$OUT"/maestro/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/"; done
 else
   record variants skip "no _tour.yaml for $APP"
 fi
