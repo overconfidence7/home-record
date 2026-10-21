@@ -160,3 +160,41 @@ Automated suite run at 2026-10-20 21:23 UTC. Full output (screenshots, logs, Mae
 - [ ] [Critical] device suite produced no results for house-manual [auto:device:house-manual:no-results] - steps: automated, see qa-results branch latest/ for commit 7823ec2 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
 
 Tested: 0 device stages, 230 unit tests, 51 backend tests, coverage 49/49 ACs. Passed: 0. New issues: 3. Critical: 3. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-10-21 (commit 7823ec2)
+
+Judged the results the suite published for 7823ec2 (run 39493986015, the first scheduled run). `build` HEAD is four commits ahead (a823b55 auto entry, 1e73f82 diagnosis, a6fea0c and 0522771 Q003 parts 2-3); the suite has not tested HEAD. Second run in a row with no screenshots: all three emulator jobs died in "Create AVD snapshot" / "Run the handoff suite" with the same `FATAL | Not enough space to create userdata partition. Available: 6232.53 MB at /home/runner/.android/avd/test.avd, need 7372.80 MB` as cbf81fa, because a scheduled run uses the workflow file on `main`, and `main` was still at 42bfb58 (no `disk-size`) when the device jobs started; the in-run sync job copied the fixed qa.yml to `main` (3f2878b) only after they had been scheduled. The builder's diagnosis in 1e73f82 is right. The UI audit (rules 1-36), the committed-PNG comparison and the walkthrough scoring could not be done; `results.json` has `stages: []` and `latest/` holds only JVM, lint, backend, screenshot-report and coverage output. The next scheduled slot (23:20 UTC) had not fired by 00:50 UTC on 2026-10-21; GitHub runs schedules late under load (run 2 fired 3 h 20 min after its 17:20 slot), so that is an observation, not a finding, until the next judge run.
+
+Verdict: House Manual: still unseen on a device after two suite runs; T011-T015 (onboarding, plan editor, blueprint) exist only as unit tests, 230 green JVM tests and reference PNGs the builder drew for itself. The biggest gap is unchanged: the QA pipeline has never booted an emulator, so nothing ticked is verified against PRODUCT.md, and the builder spent this cycle writing instrumented tests (Q003) that have also never run. / Field Log: same; sign-in, company and team (T008-T009) have 51 backend tests and no on-device check, F1 has never been attempted. If Nate installed either build tonight he would be the first person to see it run.
+
+- [ ] [Major] `qa/last-tested.txt` was advanced to 7823ec2 by a run with zero device stages, so the repo now claims a sha was tested that nobody tested [judge:qa-last-tested-false] - steps: `git log --oneline -2 -- qa/last-tested.txt` (a823b55 "QA auto 2026-10-20 21:23 UTC (commit 7823ec2)") against `git show origin/qa-results:latest/results.json` (`"stages": []`) - expected: definition of done item 2 keys on `qa/last-tested.txt`; the builder's own fix (qa.yml line 293, `if [ -f qa-publish/tested-ok ]`) is meant to leave it alone when any device job produced nothing - actual: the run executed the stale qa.yml on `main` (42bfb58 line 289 writes the sha unconditionally), so the gate was bypassed while summarize.py (checked out from `build`) correctly filed the three Critical findings. Fix: reset `qa/last-tested.txt` to `none` in the next builder commit (no sha has ever had device results); the first real run overwrites it. Keep the summarize.py/qa.yml gate as is. - screenshot: none
+- [ ] [Minor] Any qa.yml fix on `build` costs one wasted 6-hour cycle: the schedule trigger reads the workflow file on `main`, and the "Keep qa.yml on main in step with build" job runs inside the same run, after the device jobs were already laid out from the stale file [judge:qa-yml-main-lag] - steps: compare run 39493986015 (head_branch main, head_sha 42bfb58, no `disk-size`) with 3f2878b on `main` committed at 20:57 UTC by that same run - expected: a qa.yml fix pushed to `build` takes effect at the next scheduled run (CLAUDE.md: "Builder fixes it when it breaks") - actual: it takes effect one run later; the fix for [judge:qa-emulator-disk] was on `build` at 12:5x UTC and the 20:40 UTC run still failed on it. Fix options for the builder (workflow only, no app code): (a) when a commit changes `.github/workflows/qa.yml`, also push that one file to `main` in the same run (CLAUDE.md forbids the judge, not the builder, from touching main); or (b) make the scheduled workflow on `main` a trampoline whose only step is `gh workflow run qa.yml --ref build` so the real suite always runs `build`'s file. - screenshot: none
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Blocked (untested) | T011 ticked; flow H01-onboarding.yaml never ran (no emulator, second run) | none |
+| H2 | Blocked (untested) | T012-T014b ticked; flows H02 and H02b never ran; 5-minute, 10-room, one-L-shape target never attempted on a device | none |
+| H3 | Blocked (untested) | T015 ticked; flow H03 (with the layer-toggle step) never ran | none |
+
+Not built yet: H4-H19.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Blocked (untested) | T008a-c, T009 ticked; flow F01 never ran; `/dev/last-code` (Q005) still unbuilt so H15/F01 sign-in will fail at code lookup even once the emulator boots | none |
+| F2 | Blocked (untested) | T009 ticked; flow F02-invite-join.yaml now exists, never ran | none |
+
+Not built yet: F3-F18.
+
+"Blocked (untested)" is not scored as a Product gap; these become Product gap findings only if they fail once the emulator boots.
+
+Focus check: nothing to check on screen this run; the two apps still declare separate tab sets in their catalogs (HM: Home/House/Items/Reminders/More; FL: Today/Jobs/Clock/Schedule/More). Re-check on screenshots next run.
+
+Auto entry review: the three `[auto:device:*:no-results]` Critical findings are real and not flow errors; they stay open until a run publishes `stages` for all three jobs. Nothing in the app needs changing for them; the fix (disk-size 3072M) is already on both branches, so the next scheduled run is the test of it. Open items from the previous judge entry ([judge:qa-emulator-disk], [judge:qa-silent-device-failure]) are marked fixed by the builder; the fixes are in the file but unproven until a run executes them.
+
+Coverage note: the auto entry reports 49/49 claimed ACs covered across 20 ticked tasks (0 gaps); nothing to list.
+
+Judged: 0 screenshots, 5 walkthrough steps. New issues: 2. Product gaps: 0.
