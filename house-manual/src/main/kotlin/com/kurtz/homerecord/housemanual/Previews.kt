@@ -236,7 +236,7 @@ fun HouseNoFloorsPreview() = Frame { houseScreen(HouseUiState(loading = false, h
 
 @ThemePreviews
 @Composable
-fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0]), {}) }
+fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St"), {}) }
 
 @ThemePreviews
 @Composable

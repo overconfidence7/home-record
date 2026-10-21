@@ -154,6 +154,14 @@ class HomeRepository(
         return loadPlan(row.floorId).placed.firstOrNull { it.id == roomId }
     }
 
+    /** Where a room lives, for the room page subtitle: its floor id and name plus the home name. */
+    suspend fun roomLocation(roomId: String): RoomLocation? {
+        val row = db.roomDao().get(roomId) ?: return null
+        val floor = db.floorDao().get(row.floorId) ?: return null
+        val home = db.homeDao().get(floor.homeId) ?: return null
+        return RoomLocation(floor.id, floor.name, home.name)
+    }
+
     suspend fun loadPlan(floorId: String): FloorPlan = toFloorPlan(db.roomDao().listFor(floorId))
 
     private suspend fun toFloorPlan(rows: List<RoomEntity>): FloorPlan {
@@ -277,3 +285,5 @@ class HomeRepository(
         const val DEFAULT_CEILING_IN = 96
     }
 }
+
+data class RoomLocation(val floorId: String, val floorName: String, val homeName: String)
