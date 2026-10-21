@@ -104,7 +104,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             if (key.depth == 0 && key.title == "more") {
-                AccountRoute(container.auth)
+                Scaffold { AccountRoute(container.auth, Modifier.padding(it)) }
             } else if (key.depth == 0) {
                 PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
             } else {
