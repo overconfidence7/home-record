@@ -15,11 +15,16 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
     val canUndo get() = history.canUndo
     val canRedo get() = history.canRedo
 
-    /** Adds a [widthIn] x [lengthIn] rectangle centered on [center], snapped to the grid. */
+    /** Adds a [widthIn] x [lengthIn] rectangle centered on [center], snapped to the grid and moved right of any room it would overlap. */
     fun addRoom(id: String, name: String, kind: RoomKind, center: Pt, widthIn: Int = DEFAULT_SIDE_IN, lengthIn: Int = DEFAULT_SIDE_IN): PlanRoom {
         val left = snapper.snap(center.x - widthIn / 2)
         val top = snapper.snap(center.y - lengthIn / 2)
-        val room = PlanRoom.rectangle(id, name, kind.name, left, top, widthIn, lengthIn)
+        var room = PlanRoom.rectangle(id, name, kind.name, left, top, widthIn, lengthIn)
+        // A new room goes next to the rooms it would cover, so the plan never starts with a stack of rooms.
+        repeat(rooms.size) {
+            val blocker = rooms.firstOrNull { PlanValidator().overlaps(room, it) } ?: return@repeat
+            room = PlanRoom.rectangle(id, name, kind.name, snapper.snap(blocker.maxX), top, widthIn, lengthIn)
+        }
         history.push(rooms + room)
         return room
     }

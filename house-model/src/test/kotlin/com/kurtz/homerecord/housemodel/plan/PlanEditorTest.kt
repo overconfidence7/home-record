@@ -10,6 +10,14 @@ class PlanEditorTest {
     private fun rect(id: String, l: Int, t: Int, w: Int, h: Int) = PlanRoom.rectangle(id, id, "OTHER", l, t, w, h)
 
     @AcceptanceCriterion("AC-C6")
+    @Test fun secondRoomAddedAtTheSameSpotLandsBesideTheFirst() {
+        val e = PlanEditor(emptyList())
+        val a = e.addRoom("a", "Kitchen", RoomKind.KITCHEN, Pt(600, 400))
+        val b = e.addRoom("b", "Living room", RoomKind.OTHER, Pt(600, 400))
+        assertThat(PlanValidator().overlaps(a, b)).isFalse()
+        assertThat(b.minX).isAtLeast(a.maxX)
+    }
+
     @Test fun addRoomIsTwelveByTwelveFeetCenteredOnViewportAndSnapped() {
         val e = editor()
         val room = e.addRoom("a", "Kitchen", RoomKind.KITCHEN, Pt(600, 400))
