@@ -33,7 +33,7 @@ class AppContainer(app: Application) {
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
     @Volatile var activityContext: Context? = null
 
-    private val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
+    internal val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val tokens = EncryptedTokenStore(app)

@@ -89,3 +89,6 @@ Cold start was 4–5 s; `EncryptedSharedPreferences`/MasterKey creation ran on t
 `/dev/last-code` needs the plaintext code, but `email_codes` only stores a hash. In dev only, `/auth/email/start` also writes the code to KV (`devcode:<email>`, 10 min TTL). Production never writes it, and `/dev/*` returns 404 unless `ENVIRONMENT=dev`.
 
 - 2026-10-21: Onboarding 'Skip for now' seeds the house type's floors (no rooms, no Garage room) instead of a single Main floor. PRODUCT.md step 1 says the type seeds floors; SPEC's single-Main wording contradicted it. Recorded in BLOCKERS.md for Nate to confirm.
+
+## 2026-10-21 — Debug seed receivers
+House Manual seeds through `HomeRepository` (same code path as the app) after `clearAllTables`; Field Log has no local data, so its seed drives the dev backend (`/dev/seed`, `/dev/last-code`) and signs in as the seeded owner. Receivers live in the debug source set only. `AppContainer.db` became `internal` so the debug receiver can reach it.
