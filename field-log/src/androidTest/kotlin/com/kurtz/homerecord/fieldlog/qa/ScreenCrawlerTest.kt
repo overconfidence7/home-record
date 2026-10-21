@@ -52,8 +52,8 @@ class ScreenCrawlerTest {
                 compose.waitForIdle()
                 if (entry.nonRoot) compose.onNodeWithTag("fl_back").assertIsDisplayed()
                 val tooSmall = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().filter { n ->
-                    n.size.width < 48 * inst.targetContext.resources.displayMetrics.density - 1 ||
-                        n.size.height < 48 * inst.targetContext.resources.displayMetrics.density - 1
+                    n.touchBoundsInRoot.width < 48 * inst.targetContext.resources.displayMetrics.density - 1 ||
+                        n.touchBoundsInRoot.height < 48 * inst.targetContext.resources.displayMetrics.density - 1
                 }
                 assertTrue("${entry.id}: ${tooSmall.size} clickable nodes under 48 dp", tooSmall.isEmpty())
                 shoot(entry.id, "light")

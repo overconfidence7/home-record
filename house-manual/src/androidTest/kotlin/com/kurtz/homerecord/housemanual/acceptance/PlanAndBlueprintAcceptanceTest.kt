@@ -8,6 +8,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -146,7 +148,10 @@ class PlanAndBlueprintAcceptanceTest {
     @Test fun everyLayerHasAToggleChip() {
         val events = mutableListOf<HouseEvent>()
         house(houseState, events)
-        BlueprintLayer.entries.forEach { rule.onNodeWithTag("hm_layer_${it.wire}").assertExists() }
+        BlueprintLayer.entries.forEach {
+            rule.onNodeWithTag("hm_layers").performScrollToNode(hasTestTag("hm_layer_${it.wire}"))
+            rule.onNodeWithTag("hm_layer_${it.wire}").assertExists()
+        }
         rule.onNodeWithTag("hm_layer_${BlueprintLayer.PLUMBING.wire}").performClick()
         assertThat(events).contains(HouseEvent.ToggleLayer(BlueprintLayer.PLUMBING))
     }

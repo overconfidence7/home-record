@@ -95,7 +95,7 @@ fun blueprintLayerLabel(layer: BlueprintLayer): String = stringResource(
 fun LayerToggleRow(layers: LayerSet, onToggle: (BlueprintLayer) -> Unit, modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
     LazyRow(
-        modifier,
+        modifier.testTag("${LocalTagPrefix.current}_layers"),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
