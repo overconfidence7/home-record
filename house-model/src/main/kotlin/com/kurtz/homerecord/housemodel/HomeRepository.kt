@@ -33,7 +33,7 @@ data class NewHome(
     val type: HouseType,
     val foundation: Foundation,
     val attachedGarage: Boolean,
-    /** False for "Skip for now": a single empty Main floor instead of the house type's floors. */
+    /** False for "Skip for now": the house type's floors, but no seeded rooms (PRODUCT.md step 1). */
     val seedFromTemplate: Boolean = true,
 )
 
@@ -58,11 +58,8 @@ class HomeRepository(
     /** Creates the home, its seeded floors and, with an attached garage, a Garage room on the right floor. */
     suspend fun createHome(new: NewHome): String {
         val at = now()
-        val template = if (new.seedFromTemplate) {
-            HouseTypeTemplate.forHome(new.type, new.foundation, new.attachedGarage)
-        } else {
-            HouseTemplate(listOf(FloorTemplate("Main", 0)), garageFloorIndex = null)
-        }
+        val seeded = HouseTypeTemplate.forHome(new.type, new.foundation, new.attachedGarage)
+        val template = if (new.seedFromTemplate) seeded else seeded.copy(garageFloorIndex = null)
         val homeId = Ids.newId()
         db.homeDao().upsert(
             HomeEntity(

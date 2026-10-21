@@ -71,11 +71,11 @@ class HomeRepositoryTest {
         assertThat(changes.count { it.startsWith("room/") }).isEqualTo(1)
     }
 
-    @Test fun skipForNowCreatesOneEmptyMainFloor() = runTest {
+    @Test fun skipForNowKeepsTheTypesFloorsButSeedsNoRooms() = runTest {
         val id = repo.createHome(NewHome("Maple St", null, HouseType.COLONIAL, Foundation.BASEMENT, attachedGarage = true, seedFromTemplate = false))
         val floors = repo.observeFloors(id).first()
-        assertThat(floors.map { it.name }).containsExactly("Main")
-        assertThat(floors.single().roomCount).isEqualTo(0)
+        assertThat(floors.map { it.name }).containsExactly("Basement", "Main", "Upper").inOrder()
+        assertThat(floors.sumOf { it.roomCount }).isEqualTo(0)
     }
 
     @AcceptanceCriterion("AC-C3")

@@ -64,13 +64,13 @@ class HomeViewModelsTest {
         assertThat(repo.observeFloors(home.id).first { it.size == 2 }.map { it.name }).containsExactly("Main", "Upper").inOrder()
     }
 
-    @Test fun skipCreatesSingleMainFloor() = runTest {
+    @Test fun skipKeepsTheTypesFloors() = runTest {
         val vm = OnboardingViewModel(repo)
         vm.onEvent(OnboardingEvent.NameChanged("Cabin"))
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.TWO_STORY))
         vm.onEvent(OnboardingEvent.Skip)
         val home = repo.observeHome().first { it != null }!!
-        assertThat(repo.observeFloors(home.id).first { it.isNotEmpty() }.map { it.name }).containsExactly("Main")
+        assertThat(repo.observeFloors(home.id).first { it.isNotEmpty() }.map { it.name }).containsExactly("Basement", "Main", "Upper").inOrder()
     }
 
     @Test fun answersSurviveProcessDeathThroughSavedState() {
