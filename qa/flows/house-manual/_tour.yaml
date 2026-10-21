@@ -7,11 +7,13 @@ env:
   QA_VARIANT: light
 ---
 - launchApp
+- extendedWaitUntil:
+    visible: "Set up your home|Home"
+    timeout: 20000
 - runFlow:
     when:
       visible: "Set up your home"
-    commands:
-      - tapOn: "Skip for now"
+    file: _onboard.yaml
 - tapOn: "Home"
 - takeScreenshot: tour-${QA_VARIANT}-home
 - tapOn: "House"

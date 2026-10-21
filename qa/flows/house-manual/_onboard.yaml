@@ -1,0 +1,19 @@
+# Helper, not a walkthrough step: fill the onboarding form (name, style, foundation) and Skip, so
+# a flow that is not about onboarding reaches the five tabs. Skip needs a name and a style.
+appId: com.kurtz.homerecord.housemanual
+---
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
+- tapOn:
+    id: "hm_onboarding_name"
+- inputText: "Maple St"
+- hideKeyboard
+- tapOn:
+    id: "hm_onboarding_type"
+- tapOn: "Two-story"
+- tapOn:
+    id: "hm_onboarding_skip"
+- extendedWaitUntil:
+    visible: "More"
+    timeout: 20000

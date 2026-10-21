@@ -7,7 +7,7 @@ env:
 ---
 - launchApp:
     clearState: true
-- tapOn: "Skip for now"
+- runFlow: _onboard.yaml
 - tapOn: "More"
 - assertVisible: "Sign in"
 - tapOn:

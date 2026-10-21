@@ -4,17 +4,26 @@ appId: com.kurtz.homerecord.housemanual
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Set up your home"
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
 - takeScreenshot: H01-onboarding
-- tapOn: "Home name"
+- tapOn:
+    id: "hm_onboarding_name"
 - inputText: "Maple St"
 - hideKeyboard
-- tapOn: "Choose a style"
+- tapOn:
+    id: "hm_onboarding_type"
 - assertVisible: "Two-story"
 - tapOn: "Two-story"
-- tapOn: "Basement"
+- tapOn:
+    id: "hm_onboarding_foundation_basement"
 - takeScreenshot: H01-onboarding-filled
-- tapOn: "Skip for now"
+- tapOn:
+    id: "hm_onboarding_skip"
+- extendedWaitUntil:
+    visible: "More"
+    timeout: 20000
 # Root of the app: the five tabs from SPEC 5.1 (AC-U1)
 - assertVisible: "Home"
 - assertVisible: "House"
