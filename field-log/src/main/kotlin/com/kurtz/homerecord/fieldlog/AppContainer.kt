@@ -51,22 +51,26 @@ class AppContainer(app: Application) {
     private val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    val syncEngine = SyncEngine(
+    val syncEngine by lazy {
+        SyncEngine(
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
         RoomRowStore(db),
         db.outboxDao(),
         db.syncStateDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
-    )
+        )
+    }
 
-    val syncCoordinator = SyncCoordinator(
+    val syncCoordinator by lazy {
+        SyncCoordinator(
         scope,
         { tenant -> syncEngine.sync(tenant) },
         auth.state.map { it is AuthState.SignedIn },
         company.state.map { s -> (s as? CompanyState.Active)?.let { TenantRef(TenantKind.Company, it.membership.companyId) } },
         AndroidConnectivityMonitor(app),
-    )
+        )
+    }
 
     /** Repositories call this after each write to a synced row; it queues the row and asks for a sync. */
     suspend fun recordChange(entity: String, id: String) {
@@ -77,8 +81,10 @@ class AppContainer(app: Application) {
 
     init {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
-        scope.launch(Dispatchers.IO) { auth.restore() }
-        syncCoordinator.start()
+        scope.launch(Dispatchers.IO) {
+            auth.restore()
+            syncCoordinator.start()
+        }
     }
 
     /** Invite code from a tapped join link, held until the person has signed in and reaches FL-Welcome. */
