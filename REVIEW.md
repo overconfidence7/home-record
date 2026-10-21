@@ -236,3 +236,67 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, ho
 Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:house-manual (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff); house-manual seed:house-manual (no debug seed receiver yet (PLAN Q005))
 
 Tested: 57 device stages, 230 unit tests, 51 backend tests, coverage 49/49 ACs. Passed: 24. New issues: 27. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA 2026-10-21 (commit 8bcf07f)
+
+- **Verdict (House Manual)**: The onboarding flow, floor plan grid editor, and blueprint viewer are solidly functional on device—drawing rooms, editing shapes with corner handles, and toggling utility layers all work smoothly in dark and light modes. The single biggest gap is that the core homeowner features—items, equipment inventory, data plate OCR, and warranty tracking—are completely unbuilt placeholders.
+- **Verdict (Field Log)**: The authentication gate, team management with invite code generation/rotation, company settings, and role-gated Today empty states are fully wired and functional on screen. The single biggest gap is that actual contractor job execution—jobs list, time clock punches, photo logs, and daily logs—remains unbuilt scaffolding.
+
+### Findings
+
+- [ ] [Critical] Espresso crashes during test idle synchronization on Android API 37: `java.lang.NoSuchMethodException: android.hardware.input.InputManager.getInstance []` - steps: Run `./gradlew connectedDebugAndroidTest` on `qa_pixel` (API 37) - expected: All instrumented tests run and pass on device - actual: All tests in both apps fail during initialization inside `androidx.test.espresso.base.InputManagerEventInjectionStrategy.initialize` because reflection on `InputManager.getInstance` was deprecated/removed in API 36/37 - screenshot: qa/screenshots/latest/fl-launch.png
+- [ ] [Major] `backend/wrangler.toml` hardcodes `ENVIRONMENT = "production"`, causing dev sign-in email-code flow to fail with 502 Bad Gateway - steps: Start backend with `cd backend && npx wrangler dev` without `.dev.vars`, then submit email on Field Log or House Manual Sign-in screen - expected: In dev mode without a Resend key, the code is logged to console and the endpoint returns `{"ok":true}` (AC-B1) - actual: `backend/src/auth/emailCode.ts` checks `if (!env.RESEND_API_KEY) return env.ENVIRONMENT !== "production"`; because `wrangler.toml` defines `ENVIRONMENT = "production"`, `sendCode` returns `false` and `/auth/email/start` returns 502 `send_failed` - screenshot: qa/screenshots/latest/fl-signin-typed.png
+- [ ] [Minor] `RetrofitAuthApi` silently swallows `IOException` without logging to logcat, leaving no debugging trace when network calls fail - steps: Trigger any network error or backend failure while attempting sign-in - expected: Network exceptions or HTTP errors are logged to logcat with tag or stack trace for developer/QA visibility - actual: Catch blocks in `RetrofitAuthApi.kt` convert `IOException` directly to `AuthResult.Offline` without any logging, making connection issues hard to diagnose from device logs - screenshot: qa/screenshots/latest/fl-signin.png
+
+### Product walkthrough
+
+#### House Manual
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Maple St setup, Two-story house style picker, Basement foundation chip, attached garage toggle switch all function smoothly | qa/screenshots/latest/hm-onboarding.png |
+| H2 | Pass | Grid canvas room placement (Garage), corner drag shape editing, dimensions (12' x 12'), add stairs, deselect | qa/screenshots/latest/hm-plan-editor.png |
+| H3 | Pass | Blueprint view with north arrow, bold wall outlines, outer dimension labels, floor switcher (Upper/Main/Basement), utility layer chips (Plumbing, Items, Electrical, HVAC, Low-voltage, Gas, Drain & vent), room tap navigates to Room page, room long-press opens edit bottom sheet | qa/screenshots/latest/hm-house-blueprint.png |
+| H4 | Blocked | Not built yet (T021–T026 open) | qa/screenshots/latest/hm-items.png |
+| H5 | Blocked | Not built yet (T021 open) | qa/screenshots/latest/hm-items.png |
+| H6 | Blocked | Not built yet (T027 open); Items tab shows placeholder | qa/screenshots/latest/hm-items.png |
+| H7 | Blocked | Not built yet (T027 open) | qa/screenshots/latest/hm-items.png |
+| H8 | Blocked | Not built yet (T026 open) | qa/screenshots/latest/hm-items.png |
+| H9 | Blocked | Not built yet (T048 open) | qa/screenshots/latest/hm-house.png |
+| H10 | Blocked | Not built yet (T049–T051 open) | qa/screenshots/latest/hm-house.png |
+| H11 | Blocked | Not built yet (T052–T053 open) | qa/screenshots/latest/hm-house.png |
+| H12 | Blocked | Not built yet (T066–T067 open) | qa/screenshots/latest/hm-more.png |
+| H13 | Blocked | Not built yet (T070–T071 open) | qa/screenshots/latest/hm-home.png |
+| H14 | Blocked | Not built yet (T072 open); Reminders tab shows placeholder | qa/screenshots/latest/hm-reminders.png |
+| H15 | Blocked | Not built yet (T073/T077 open); More tab shows Sign in screen | qa/screenshots/latest/hm-more.png |
+| H16 | Blocked | Not built yet (T074 open) | qa/screenshots/latest/hm-more.png |
+| H17 | Blocked | Not built yet (T008c/T075 open) | qa/screenshots/latest/hm-more.png |
+| H18 | Blocked | Not built yet (T063 open) | qa/screenshots/latest/hm-more.png |
+| H19 | Blocked | Not built yet (T032 open) | qa/screenshots/latest/hm-items.png |
+
+#### Field Log
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign-in gate, email code entry UI, company welcome setup ("Kurtz Electric", trade, phone), join error handling, and Today empty state ("Invite crew") verified | qa/screenshots/latest/fl-welcome.png |
+| F2 | Pass | Team screen displays member list with roles (Owner, Office, Lead, Crew) and hourly rates, invite code generation/display ("K7M2 QX9R"), share invite link, rotate code button, role-gated More tab (Crew has no Team or Company options) | qa/screenshots/latest/fl-team.png |
+| F3 | Blocked | Not built yet (T018 open) | qa/screenshots/latest/fl-launch.png |
+| F4 | Blocked | Not built yet (T034–T035 open) | qa/screenshots/latest/fl-launch.png |
+| F5 | Blocked | Not built yet (T034 open) | qa/screenshots/latest/fl-launch.png |
+| F6 | Blocked | Not built yet (T036–T037 open) | qa/screenshots/latest/fl-launch.png |
+| F7 | Blocked | Not built yet (T041–T042 open) | qa/screenshots/latest/fl-launch.png |
+| F8 | Blocked | Not built yet (T039–T040 open) | qa/screenshots/latest/fl-launch.png |
+| F9 | Blocked | Not built yet (T043/T045 open) | qa/screenshots/latest/fl-launch.png |
+| F10 | Blocked | Not built yet (T019/T054/T062/T063 open) | qa/screenshots/latest/fl-launch.png |
+| F11 | Blocked | Not built yet (T044 open) | qa/screenshots/latest/fl-launch.png |
+| F12 | Blocked | Not built yet (T056–T058 open) | qa/screenshots/latest/fl-launch.png |
+| F13 | Blocked | Not built yet (T059 open) | qa/screenshots/latest/fl-launch.png |
+| F14 | Blocked | Not built yet (T060 open) | qa/screenshots/latest/fl-launch.png |
+| F15 | Blocked | Not built yet (T037/T061 open) | qa/screenshots/latest/fl-launch.png |
+| F16 | Blocked | Not built yet (T010/T046 open) | qa/screenshots/latest/fl-launch.png |
+| F17 | Blocked | Not built yet (T064 open) | qa/screenshots/latest/fl-launch.png |
+| F18 | Blocked | Not built yet (T065 open) | qa/screenshots/latest/fl-launch.png |
+
+Not built yet: H4, H5, H6, H7, H8, H9, H10, H11, H12, H13, H14, H15, H16, H17, H18, H19, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18.
+
+Tested: AC-C1, AC-C2, AC-C4, AC-C7, AC-C8, AC-C9, AC-C11, AC-C12, AC-C14, AC-C15, AC-C29, AC-B1, AC-B2, AC-B60, AC-F1, AC-F2, AC-F3, AC-F4, AC-U1..AC-U12. Passed: 25. New issues: 3. Product gaps: 0. Walkthrough: HM 3/3, FL 2/2.
