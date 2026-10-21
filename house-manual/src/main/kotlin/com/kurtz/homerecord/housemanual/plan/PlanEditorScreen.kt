@@ -36,7 +36,9 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -487,8 +489,28 @@ private fun DrawScope.drawPlan(
 }
 
 @Composable
+private fun ConfirmDeleteDialog(title: String, body: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(body) },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.house_room_delete)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+}
+
+@Composable
 private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEditorEvent) -> Unit) {
     var pickingKind by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable(room.id) { mutableStateOf(false) }
+    if (confirmDelete) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.house_room_delete_title, room.name.ifBlank { stringResource(R.string.plan_unnamed_room) }),
+            body = stringResource(R.string.house_room_delete_body),
+            onConfirm = { confirmDelete = false; onEvent(PlanEditorEvent.Delete) },
+            onDismiss = { confirmDelete = false },
+        )
+    }
     val focus = remember { FocusRequester() }
     LaunchedEffect(room.id, state.focusName) { if (state.focusName) focus.requestFocus() }
     BoxWithConstraints {
@@ -565,7 +587,7 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                             Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
-                    OutlinedButton(onClick = { onEvent(PlanEditorEvent.Delete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_room")) {
+                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_room")) {
                         Icon(Icons.Rounded.Delete, contentDescription = null)
                         Text(stringResource(R.string.plan_delete_room), modifier = Modifier.padding(start = 8.dp))
                     }
@@ -629,6 +651,15 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
 @Composable
 private fun StairRow(state: PlanEditorUiState, stair: PlanStair, onEvent: (PlanEditorEvent) -> Unit) {
     var picking by rememberSaveable(stair.id) { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable(stair.id) { mutableStateOf(false) }
+    if (confirmDelete) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.plan_delete_stairs_title),
+            body = stringResource(R.string.plan_delete_stairs_body),
+            onConfirm = { confirmDelete = false; onEvent(PlanEditorEvent.DeleteStair(stair.id)) },
+            onDismiss = { confirmDelete = false },
+        )
+    }
     val target = state.floors.firstOrNull { it.id == stair.toFloorId }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
@@ -636,7 +667,7 @@ private fun StairRow(state: PlanEditorUiState, stair: PlanStair, onEvent: (PlanE
                 if (target != null) stringResource(R.string.plan_stairs_to, target.name) else stringResource(R.string.plan_stairs_unlinked),
             )
         }
-        IconButton(onClick = { onEvent(PlanEditorEvent.DeleteStair(stair.id)) }, modifier = Modifier.size(48.dp)) {
+        IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp)) {
             Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_stairs))
         }
     }

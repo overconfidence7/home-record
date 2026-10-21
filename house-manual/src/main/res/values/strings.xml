@@ -104,6 +104,8 @@
     <string name="plan_done">Done</string>
     <string name="plan_edit_shape">Edit shape</string>
     <string name="plan_edit_shape_hint">Drag a corner to move it. Tap an edge to add a corner. Tap a corner to remove it.</string>
+    <string name="plan_delete_stairs_title">Delete these stairs?</string>
+    <string name="plan_delete_stairs_body">The stairs come off this room and the link to the other floor goes with them.</string>
     <string name="plan_delete_room">Delete room</string>
     <string name="plan_wall_hint">Tap a wall to add a door or window. Stairs go in the room.</string>
     <string name="plan_wall_selected">Wall, %1$s long</string>

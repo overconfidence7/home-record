@@ -80,6 +80,16 @@ class PlanAndBlueprintAcceptanceTest {
         }
     }
 
+    @AcceptanceCriterion("AC-U6")
+    @Test fun deletingARoomAsksFirst() {
+        val events = mutableListOf<PlanEditorEvent>()
+        editor(base.copy(selectedId = kitchen.id), events)
+        rule.onNodeWithTag("hm_plan_delete_room").performClick()
+        assertThat(events).doesNotContain(PlanEditorEvent.Delete)
+        rule.onNodeWithText("Delete").performClick()
+        assertThat(events).contains(PlanEditorEvent.Delete)
+    }
+
     @AcceptanceCriterion("AC-C7")
     @Test fun editShapeIsOfferedForTheSelectedRoom() {
         val events = mutableListOf<PlanEditorEvent>()
