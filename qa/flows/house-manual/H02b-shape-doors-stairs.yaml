@@ -3,7 +3,8 @@ appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: H02-draw-plan.yaml
 - tapOn: "House"
-- tapOn: "Edit plan"
+- tapOn:
+    id: "hm_house_edit_plan"
 - tapOn: "Kitchen"
 # Edit shape: the hint explains the gestures (AC-C7)
 - tapOn: "Edit shape"

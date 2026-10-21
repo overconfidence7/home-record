@@ -5,10 +5,15 @@ appId: com.kurtz.homerecord.housemanual
 - runFlow: H01-onboarding.yaml
 - tapOn: "House"
 - takeScreenshot: H02-house-tab
-- tapOn: "Edit plan"
-- assertVisible: "Floor plan"
+- tapOn:
+    id: "hm_house_edit_plan"
+- extendedWaitUntil:
+    visible:
+      id: "hm_plan_add_room"
+    timeout: 15000
 - takeScreenshot: H02-plan-empty
-- tapOn: "Add room"
+- tapOn:
+    id: "hm_plan_add_room"
 - assertVisible: "Room name"
 - tapOn: "Room name"
 - eraseText: 20
@@ -24,7 +29,8 @@ appId: com.kurtz.homerecord.housemanual
 - hideKeyboard
 - tapOn: "Done"
 - takeScreenshot: H02-plan-one-room
-- tapOn: "Add room"
+- tapOn:
+    id: "hm_plan_add_room"
 - tapOn: "Room name"
 - eraseText: 20
 - inputText: "Living room"
@@ -40,6 +46,7 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Living room"
 - takeScreenshot: H02-blueprint-after-edit
 # Back arrow and system back both work; no dead end (AC-U2)
-- tapOn: "Edit plan"
+- tapOn:
+    id: "hm_house_edit_plan"
 - back
 - assertVisible: "Edit plan"
