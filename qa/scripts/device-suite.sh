@@ -59,6 +59,9 @@ LOGCAT_PID=$!
 
 # ---------------------------------------------------------------- install
 for a in $APPS; do
+  # a leftover build signed with another key (release stage, cached AVD) would fail the install
+  adb uninstall "$(pkg_of "$a")" >/dev/null 2>&1 || true
+  adb uninstall "$(pkg_of "$a").test" >/dev/null 2>&1 || true
   if [ -f "$APK/$a-debug.apk" ]; then
     if adb install -r -g "$APK/$a-debug.apk" > "$OUT/logs/install-$a.txt" 2>&1; then record "install:$a" pass "debug apk"; else record "install:$a" fail "$(tail -n 2 "$OUT/logs/install-$a.txt" | tr '\n' ' ')"; fi
   else
