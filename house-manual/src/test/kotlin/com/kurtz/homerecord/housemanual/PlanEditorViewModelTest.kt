@@ -195,6 +195,7 @@ class PlanEditorViewModelTest {
         assertThat(savedPlan(vm) { it.unplaced.isEmpty() }.unplaced).isEmpty()
     }
 
+    // AC-C12
     @Test fun floorSelectionViewAndSelectionSurviveARecreatedViewModel() = test {
         val handle = SavedStateHandle()
         val first = vm(handle)

@@ -5,12 +5,14 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
+import com.kurtz.homerecord.housemanual.house.HouseDialog
 import com.kurtz.homerecord.housemanual.house.HouseEvent
 import com.kurtz.homerecord.housemanual.house.HouseScreen
 import com.kurtz.homerecord.housemanual.house.HouseUiState
@@ -127,5 +129,15 @@ class PlanAndBlueprintAcceptanceTest {
         BlueprintLayer.entries.forEach { rule.onNodeWithTag("hm_layer_${it.wire}").assertExists() }
         rule.onNodeWithTag("hm_layer_${BlueprintLayer.PLUMBING.wire}").performClick()
         assertThat(events).contains(HouseEvent.ToggleLayer(BlueprintLayer.PLUMBING))
+    }
+
+    @AcceptanceCriterion("AC-C14")
+    @Test fun longPressSheetOffersRenameEditShapeAndDelete() {
+        val events = mutableListOf<HouseEvent>()
+        house(houseState.copy(dialog = HouseDialog.Menu(kitchen)), events)
+        rule.onNodeWithText("Edit shape").assertIsDisplayed()
+        rule.onNodeWithText("Delete").assertIsDisplayed()
+        rule.onNodeWithText("Rename").performClick()
+        assertThat(events).contains(HouseEvent.StartRename(kitchen))
     }
 }
