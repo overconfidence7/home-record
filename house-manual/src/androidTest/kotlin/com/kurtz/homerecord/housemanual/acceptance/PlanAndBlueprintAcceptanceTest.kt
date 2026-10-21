@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.acceptance
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 import com.kurtz.homerecord.housemanual.house.HouseDialog
@@ -64,9 +66,15 @@ class PlanAndBlueprintAcceptanceTest {
     @AcceptanceCriterion("AC-C6")
     @Test fun addRoomThenNameKindAndSizeFieldsAppearForTheSelection() {
         val events = mutableListOf<PlanEditorEvent>()
-        editor(base.copy(selectedId = kitchen.id, focusName = true), events)
+        editor(base, events)
         rule.onNodeWithTag("hm_plan_add_room").performClick()
         assertThat(events.filterIsInstance<PlanEditorEvent.AddRoom>()).hasSize(1)
+    }
+
+    @AcceptanceCriterion("AC-C6")
+    @Test fun nameKindAndSizeFieldsAppearForTheSelection() {
+        val events = mutableListOf<PlanEditorEvent>()
+        editor(base.copy(selectedId = kitchen.id, focusName = true), events)
         listOf("hm_plan_room_name", "hm_plan_room_kind", "hm_plan_room_width", "hm_plan_room_length").forEach {
             rule.onNodeWithTag(it).assertExists()
         }
@@ -99,8 +107,10 @@ class PlanAndBlueprintAcceptanceTest {
     }
 
     private fun house(state: HouseUiState, events: MutableList<HouseEvent>, onEdit: () -> Unit = {}) = rule.setContent {
-        HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
-            HouseScreen(state, onEvent = { events += it }, onOpenRoom = {}, onEditPlan = onEdit, onEditShape = {}, onOpenFloors = {})
+        CompositionLocalProvider(LocalTagPrefix provides "hm") {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                HouseScreen(state, onEvent = { events += it }, onOpenRoom = {}, onEditPlan = onEdit, onEditShape = {}, onOpenFloors = {})
+            }
         }
     }
 

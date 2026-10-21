@@ -208,7 +208,7 @@ class PlanEditorViewModelTest {
         savedPlan(first) { it.placed.size == 1 }
 
         val second = vm(handle)
-        val s = second.state.value
+        val s = withTimeout(10_000) { second.state.first { it.rooms.isNotEmpty() } }
         assertThat(s.floorId).isEqualTo(upper.id)
         assertThat(s.selectedId).isEqualTo(selected)
         assertThat(s.zoom).isEqualTo(2f)
