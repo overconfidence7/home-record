@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 
 @PreviewTest
@@ -103,6 +104,11 @@ fun PlanEditorNoFloorsScreenshot() = PlanEditorNoFloorsPreview()
 @ThemePreviews
 @Composable
 fun HouseBlueprintScreenshot() = HouseBlueprintPreview()
+
+@PreviewTest
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun HouseBlueprintLandscapeScreenshot() = HouseBlueprintLandscapePreview()
 
 @PreviewTest
 @ThemePreviews

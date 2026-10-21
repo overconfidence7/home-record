@@ -212,6 +212,10 @@ private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}
 @Composable
 fun HouseBlueprintPreview() = Frame { houseScreen(houseState()) }
 
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun HouseBlueprintLandscapePreview() = Frame { houseScreen(houseState()) }
+
 @ThemePreviews
 @Composable
 fun HouseLayersPreview() = Frame {
