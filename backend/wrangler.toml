@@ -20,4 +20,5 @@ binding = "CACHE"
 id = "00000000000000000000000000000000"
 
 [vars]
-ENVIRONMENT = "production"
+# Local default. Production deploys must pass: wrangler deploy --var ENVIRONMENT:production
+ENVIRONMENT = "dev"
