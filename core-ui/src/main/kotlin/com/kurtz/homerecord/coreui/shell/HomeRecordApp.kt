@@ -51,9 +51,15 @@ fun HomeRecordApp(
     tabs: List<AppTab>,
     entries: EntryProviderScope<NavKey>.(nav: ShellNav) -> Unit,
     modifier: Modifier = Modifier,
+    startTabId: String? = null,
+    startKeys: List<NavKey> = emptyList(),
 ) {
-    var selectedId by rememberSaveable { mutableStateOf(tabs.first().id) }
-    val stacks = tabs.associate { it.id to rememberNavBackStack(it.root) }
+    var selectedId by rememberSaveable { mutableStateOf(startTabId ?: tabs.first().id) }
+    // startKeys are pushed on the start tab's stack only when it is first created; restored stacks win.
+    val stacks = tabs.associate {
+        val keys = if (it.id == startTabId) listOf(it.root) + startKeys else listOf(it.root)
+        it.id to rememberNavBackStack(*keys.toTypedArray())
+    }
     val selected = tabs.firstOrNull { it.id == selectedId } ?: tabs.first()
     val stack = stacks.getValue(selected.id)
 

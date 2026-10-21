@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual.house
 
 import androidx.compose.runtime.Composable
+import com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.createSavedStateHandle
@@ -14,11 +15,20 @@ import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
 @Composable
-fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier) {
+fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawPlan: () -> Unit = {}) {
     val vm = viewModel<OnboardingViewModel>(
         factory = viewModelFactory { initializer { OnboardingViewModel(repo, createSavedStateHandle()) } },
     )
-    OnboardingScreen(vm.state.collectAsState().value, vm::onEvent, modifier)
+    val state = vm.state.collectAsState().value
+    OnboardingScreen(
+        state,
+        { event ->
+            // Only a valid form creates the home, so only then should the editor open.
+            if (event == OnboardingEvent.DrawPlan && state.name.isNotBlank() && state.type != null) onDrawPlan()
+            vm.onEvent(event)
+        },
+        modifier,
+    )
 }
 
 @Composable

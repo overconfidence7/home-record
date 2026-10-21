@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,20 +55,26 @@ fun HouseManualApp(container: AppContainer) {
         container.homes.observeHome().collect { home = it; loaded = true }
     }
     val current = home
+    // Set by "Draw your floor plan" so the new home opens straight on the plan editor, House tab.
+    var openEditor by rememberSaveable { mutableStateOf(false) }
     when {
         !loaded -> Scaffold { LoadingState(Modifier.padding(it)) }
-        current == null -> OnboardingRoute(container.homes)
-        else -> HouseManualTabs(container, current)
+        current == null -> OnboardingRoute(container.homes, onDrawPlan = { openEditor = true })
+        else -> HouseManualTabs(container, current, openEditor)
     }
 }
 
 @Composable
-private fun HouseManualTabs(container: AppContainer, home: HomeEntity) {
+private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEditor: Boolean = false) {
     val tabs = tabDefs.map {
         AppTab(it.id, stringResource(it.label), it.icon, it.selected, if (it.id == "house") HouseKey else PlaceholderKey(it.id))
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
-    HomeRecordApp(tabs = tabs, entries = { nav ->
+    HomeRecordApp(
+        tabs = tabs,
+        startTabId = if (openEditor) "house" else null,
+        startKeys = if (openEditor) listOf(PlanKey()) else emptyList(),
+        entries = { nav ->
         entry<HouseKey> {
             val summary = stringResource(
                 R.string.house_summary,
