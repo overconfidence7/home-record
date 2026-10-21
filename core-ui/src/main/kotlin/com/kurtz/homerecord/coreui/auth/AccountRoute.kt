@@ -20,12 +20,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kurtz.homerecord.core.auth.AuthRepository
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.coreui.R
+import com.kurtz.homerecord.coreui.components.LoadingState
 
 /** Sign-in when signed out, account summary with sign out when signed in. */
 @Composable
 fun AccountRoute(repo: AuthRepository, modifier: Modifier = Modifier) {
     val auth = repo.state.collectAsState().value
-    if (auth is AuthState.SignedIn) {
+    if (auth is AuthState.Restoring) {
+        LoadingState(modifier)
+    } else if (auth is AuthState.SignedIn) {
         Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(stringResource(R.string.account_signed_in), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.account_sign_out_note), style = MaterialTheme.typography.bodyMedium)

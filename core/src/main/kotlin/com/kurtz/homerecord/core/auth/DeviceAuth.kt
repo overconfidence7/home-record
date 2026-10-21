@@ -12,13 +12,15 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 /** Session token in EncryptedSharedPreferences (AC-B1). */
 class EncryptedTokenStore(context: Context) : TokenStore {
-    private val prefs = EncryptedSharedPreferences.create(
-        context,
-        "session",
-        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+    private val prefs by lazy {
+        EncryptedSharedPreferences.create(
+            context,
+            "session",
+            MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
+    }
 
     override fun read(): String? = prefs.getString(KEY, null)
     override fun write(token: String) = prefs.edit().putString(KEY, token).apply()

@@ -32,6 +32,22 @@ class AuthRepositoryTest {
         assertThat(repo().state.value).isEqualTo(AuthState.SignedOut)
     }
 
+    @Test fun deferredRestoreReadsTokenOnlyWhenAsked() {
+        store.token = "saved"
+        val r = AuthRepository(api, store, google, restoreNow = false)
+        assertThat(r.state.value).isEqualTo(AuthState.Restoring)
+        r.restore()
+        assertThat(r.state.value).isEqualTo(AuthState.SignedIn("saved"))
+    }
+
+    @Test fun signOutDuringRestoreIsNotOverwritten() {
+        store.token = "saved"
+        val r = AuthRepository(api, store, google, restoreNow = false)
+        r.signOut()
+        r.restore()
+        assertThat(r.state.value).isEqualTo(AuthState.SignedOut)
+    }
+
     @Test fun signInPersistsAcrossRestart() = runTest {
         assertThat(repo().verifyEmailCode(" a@b.com ", " 123456 ")).isEqualTo(AuthResult.Success)
         assertThat(store.token).isEqualTo("tok-1")

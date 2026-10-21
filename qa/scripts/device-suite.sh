@@ -82,7 +82,11 @@ record permissions pass "granted where declared"
 # -------------------------------------------------------------- fixtures
 if ls qa/fixtures/*.jpg qa/fixtures/*.pdf >/dev/null 2>&1; then
   adb shell mkdir -p /sdcard/Download/qa-fixtures >/dev/null 2>&1
-  adb push qa/fixtures/. /sdcard/Download/qa-fixtures/ >/dev/null 2>&1 && record fixtures pass "pushed to /sdcard/Download/qa-fixtures" || record fixtures warn "adb push failed"
+  fx_ok=1
+  for f in qa/fixtures/*.jpg qa/fixtures/*.pdf; do
+    adb push "$f" /sdcard/Download/qa-fixtures/ >/dev/null 2>&1 || { fx_ok=0; echo "fixture push failed: $f" >&2; }
+  done
+  [ "$fx_ok" = 1 ] && record fixtures pass "pushed to /sdcard/Download/qa-fixtures" || record fixtures warn "adb push failed"
   adb shell "am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/qa-fixtures" >/dev/null 2>&1 || true
 else
   record fixtures skip "no fixture files yet (qa/fixtures/README.md, PLAN Q005)"

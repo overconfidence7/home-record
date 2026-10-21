@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 sealed interface AuthState {
+    /** The token store is still being read off the main thread (cold start). */
+    data object Restoring : AuthState
     data object SignedOut : AuthState
     data class SignedIn(val token: String) : AuthState
 }
@@ -44,9 +46,17 @@ class AuthRepository(
     private val api: AuthApi,
     private val store: TokenStore,
     private val google: GoogleCredentialSource,
+    restoreNow: Boolean = true,
 ) {
-    private val _state = MutableStateFlow(store.read()?.let { AuthState.SignedIn(it) } ?: AuthState.SignedOut)
+    private val _state = MutableStateFlow<AuthState>(if (restoreNow) stored() else AuthState.Restoring)
     val state: StateFlow<AuthState> = _state.asStateFlow()
+
+    private fun stored(): AuthState = store.read()?.let { AuthState.SignedIn(it) } ?: AuthState.SignedOut
+
+    /** Reads the stored token; call off the main thread when built with restoreNow = false. */
+    fun restore() {
+        _state.compareAndSet(AuthState.Restoring, stored())
+    }
 
     suspend fun requestEmailCode(email: String): AuthResult = api.startEmailCode(email.trim())
 

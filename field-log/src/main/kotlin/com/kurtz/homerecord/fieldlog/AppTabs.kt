@@ -56,6 +56,7 @@ fun FieldLogApp(container: AppContainer) {
     LaunchedEffect(signedIn) { if (signedIn) container.company.refresh() }
     val state = company
     when {
+        auth is AuthState.Restoring -> Scaffold { LoadingState(Modifier.padding(it)) }
         !signedIn -> Scaffold { AccountRoute(container.auth, Modifier.padding(it)) }
         state is CompanyState.Active -> {
             LaunchedEffect(Unit) { container.pendingJoinCode.value = null }
