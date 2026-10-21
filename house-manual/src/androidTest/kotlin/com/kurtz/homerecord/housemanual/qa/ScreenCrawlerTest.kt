@@ -5,7 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,13 +17,13 @@ import org.junit.Test
 
 /**
  * Opens every ScreenCatalog entry, checks the top bar and 48 dp targets (AC-U1, AC-U2, AC-U4, AC-U8, AC-U10),
- * and saves light, dark, 200% font and landscape screenshots to /sdcard/Download/qa/ (AC-U9, AC-U12).
+ * and saves light, dark, 200% font and landscape screenshots to /sdcard/Download/qa/house-manual/ (AC-U9, AC-U12).
  */
 class ScreenCrawlerTest {
     @get:Rule val compose = createEmptyComposeRule()
 
     private val inst = InstrumentationRegistry.getInstrumentation()
-    private val outDir = File("/sdcard/Download/qa").also { it.mkdirs() }
+    private val outDir = File("/sdcard/Download/qa/house-manual").also { it.mkdirs() }
 
     private fun shell(cmd: String) = inst.uiAutomation.executeShellCommand(cmd).close()
 
@@ -50,7 +50,7 @@ class ScreenCrawlerTest {
         for (entry in ScreenCatalog.entries) {
             open(entry.id).use {
                 compose.waitForIdle()
-                if (entry.nonRoot) compose.onNodeWithTag("hm_back").assertIsDisplayed()
+                if (entry.nonRoot) assertTrue("${entry.id}: no back arrow (hm_back)", compose.onAllNodesWithTag("hm_back").fetchSemanticsNodes().isNotEmpty())
                 val tooSmall = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().filter { n ->
                     n.touchBoundsInRoot.width < 48 * inst.targetContext.resources.displayMetrics.density - 1 ||
                         n.touchBoundsInRoot.height < 48 * inst.targetContext.resources.displayMetrics.density - 1

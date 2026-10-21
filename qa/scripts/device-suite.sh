@@ -126,8 +126,9 @@ done
 for a in $APPS; do
   p=$(pkg_of "$a")
   if adb shell pm list packages 2>/dev/null | grep -q "^package:$p.test$"; then
+    adb shell "rm -rf /sdcard/Download/qa/$a; mkdir -p /sdcard/Download/qa/$a" >/dev/null 2>&1 || true
     adb shell am instrument -w -r -e package "$p" "$p.test/androidx.test.runner.AndroidJUnitRunner" > "$OUT/instrumented/$a.txt" 2>&1
-    adb pull /sdcard/Download/qa "$OUT/crawler/$a" >/dev/null 2>&1 || true
+    adb pull "/sdcard/Download/qa/$a" "$OUT/crawler/$a" >/dev/null 2>&1 || true
     if grep -q "^INSTRUMENTATION_RESULT: stream=" "$OUT/instrumented/$a.txt" || grep -q "OK (" "$OUT/instrumented/$a.txt"; then
       fails=$(grep -c "INSTRUMENTATION_STATUS_CODE: -2" "$OUT/instrumented/$a.txt" || true)
       total=$(grep -c "INSTRUMENTATION_STATUS: test=" "$OUT/instrumented/$a.txt" || true)

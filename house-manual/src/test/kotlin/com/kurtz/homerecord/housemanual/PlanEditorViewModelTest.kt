@@ -182,6 +182,9 @@ class PlanEditorViewModelTest {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(620, 410)))
+        val second = vm.state.value.rooms.last()
+        vm.onEvent(PlanEditorEvent.DragMove(second.id, -60, 0))
+        vm.onEvent(PlanEditorEvent.DragEnd)
         assertThat(vm.state.value.flaggedIds).hasSize(2)
         assertThat(savedPlan(vm) { it.placed.size == 2 }.placed).hasSize(2)
     }
