@@ -30,7 +30,7 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn: "Floors"
 - assertVisible: "Add floor"
 - tapOn: "Add floor"
-- tapOn: "Floor name"
+- tapOn: "Floor name.*"
 - eraseText: 20
 - inputText: "Attic"
 - hideKeyboard
