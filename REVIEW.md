@@ -568,3 +568,79 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, ho
 Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 57 device stages, 240 unit tests, 54 backend tests, coverage 73/73 ACs. Passed: 33. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA 2026-10-22 (commit 4734e70)
+
+- **Verdict (House Manual)**: The onboarding, plan editor, and blueprint viewer are responsive and well-designed on device; rooms are now properly exposed as accessibility targets and the blueprint expands across the full viewport in landscape mode. The single biggest gap is that the core homeowner inventory and maintenance workflow—adding appliances, data plate scanning, warranties, and reminders—remains unbuilt scaffolding.
+- **Verdict (Field Log)**: Authentication, team management with invite code generation, and company settings are in place, and instrumented tests on API 37 now run without Espresso reflection crashes. The single biggest gap is that contractor daily execution—jobs, time clock punches, photo logs, and daily logs—is completely unbuilt, while backend session token issuance in local dev still fails with HTTP 500 unless an explicit JWT secret is passed.
+
+### Verified fixes since last run
+
+- [x] [Critical] Espresso crashes during test idle synchronization on Android API 37 (`java.lang.NoSuchMethodException: android.hardware.input.InputManager.getInstance []`): fixed by pinning `espresso-core:3.7.0` in both androidTest configurations. All 19 tests in `:house-manual:connectedDebugAndroidTest` pass on `qa_pixel` (API 37).
+- [x] [Major] `backend/wrangler.toml` hardcodes `ENVIRONMENT = "production"`, causing dev sign-in email-code flow to fail with 502 Bad Gateway: fixed (`ENVIRONMENT = "dev"`).
+- [x] [Major UI] `hm-blueprint-room-semantics`: Blueprint rooms are now accessible semantics button nodes with content description, dimension state description, and click actions.
+- [x] [UI rule 6] `hm-blueprint-landscape-tiny`: House tab in landscape now displays header, floor chips, layers, and action buttons in a 320 dp column beside a full-height, full-width (1560x1006 px) blueprint canvas.
+- [x] [Product gap] `hm-default-floor-basement`: Default floor opens on the entrance floor (Main) rather than the basement.
+- [x] [Product gap] `hm-skip-drops-floors`: "Skip for now" in House Manual onboarding preserves the floors implied by the chosen house type (e.g. Basement, Main, Upper).
+- [x] [Major UI] `hm-room-page-parent`: Room screen displays the parent floor and home in subtitle (`Main floor · Maple St`) and empty state `Nothing in this room yet`.
+- [x] [Minor] `fl-form-close-no-tag`: `FormScaffold` Close and Save buttons are tagged with `<prefix>_close` and `<prefix>_save`, and crawlers accept either `_back` or `_close`.
+
+### Findings
+
+- [ ] [Major] backend: `/auth/email/verify` fails with HTTP 500 (`DataError: Imported HMAC key length (0)...`) under `wrangler dev` because `JWT_SECRET` is not configured in `wrangler.toml` or `.dev.vars` - steps: Start backend with `cd backend && npx wrangler dev`, submit email on Sign in screen, fetch code from `/dev/last-code`, submit code to `/auth/email/verify` - expected: AC-B1: endpoint verifies valid code and returns a signed session JWT token - actual: `env.JWT_SECRET` is undefined, `jose` throws `DataError: Imported HMAC key length (0) must be a non-zero value...`, returning HTTP 500 `{"error":"server_error"}` - screenshot: qa/screenshots/latest/fl-signin-typed.png
+- [ ] [Major] Field Log: debug `SeedReceiver` fails to seed scenario `regression` on device, returning `result=0` after a 10-second broadcast timeout (PLAN Q005 ticked prematurely) - steps: Run `adb shell am broadcast -a com.kurtz.homerecord.fieldlog.qa.SEED -p com.kurtz.homerecord.fieldlog --es scenario regression` - expected: AC-B2, AC-F53, PLAN Q005: `SeedReceiver` calls `/dev/seed`, signs in as `owner@qa.test` via dev auth, and completes with `result=1` - actual: ActivityManager logs broadcast timeout (`took 10017ms`) and returns `result=0`; `SeedReceiver` coroutine fails or hangs during network/keystore calls without logging an error - screenshot: qa/screenshots/latest/fl-welcome.png
+- [ ] [UI] Major: Field Log `ScreenCrawlerTest` fails on `company-form` with "2 clickable nodes under 48 dp" because clickable items at the bottom of the scroll container have clipped touch bounds - steps: Run `./gradlew :field-log:connectedDebugAndroidTest` on `qa_pixel` emulator - expected: docs/ui-standards.md rule 30, AC-U12: `ScreenCrawlerTest` verifies all catalog screens meet minimum touch target standards - actual: `ScreenCrawlerTest.everyCatalogScreenOpensAndMeetsTheBasics` fails with `AssertionError: company-form: 2 clickable nodes under 48 dp` because `touchBoundsInRoot` for elements clipped by the scroll viewport edge is smaller than 48 dp - screenshot: qa/screenshots/latest/fl-company.png
+- [ ] [UI] Major: Field Log `WelcomeScreen` lacks `statusBarsPadding`, rendering "Set up your company" directly under the status bar - steps: Open Field Log welcome screen (fresh install or `qa.OPEN_SCREEN` with `welcome-create` / `welcome-join`) - expected: docs/ui-standards.md rule 6 and rule 28: edge-to-edge layout with insets from Scaffold; nothing interactive or title text under status bar (starts below 132 px) - actual: "Set up your company" header starts at Y=63 px, placing the top 69 px directly beneath the 132 px status bar - screenshot: qa/screenshots/latest/fl-welcome.png
+
+### Product walkthrough
+
+#### House Manual
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Maple St setup, Two-story house style picker, Basement foundation chip, attached garage toggle switch all function smoothly; "Skip for now" retains 3 floors and "Draw your floor plan" navigates directly to the plan editor | qa/screenshots/latest/hm-onboarding.png |
+| H2 | Pass | Grid canvas room placement, corner drag shape editing, dimensions (12' x 12'), add stairs, deselect; new rooms land beside existing rooms rather than stacking | qa/screenshots/latest/hm-plan-editor.png |
+| H3 | Pass | Blueprint view with north arrow, bold wall outlines, outer dimension labels, floor switcher (Upper/Main/Basement), utility layer chips; rooms are semantic accessibility nodes; landscape uses full height (1560x1006 px) | qa/screenshots/latest/hm-house-blueprint.png |
+| H4 | Blocked | Not built yet (T021–T026 open) | qa/screenshots/latest/hm-items.png |
+| H5 | Blocked | Not built yet (T021 open) | qa/screenshots/latest/hm-items.png |
+| H6 | Blocked | Not built yet (T027 open); Items tab shows placeholder | qa/screenshots/latest/hm-items.png |
+| H7 | Blocked | Not built yet (T027 open) | qa/screenshots/latest/hm-items.png |
+| H8 | Blocked | Not built yet (T026 open) | qa/screenshots/latest/hm-items.png |
+| H9 | Blocked | Not built yet (T048 open) | qa/screenshots/latest/hm-house.png |
+| H10 | Blocked | Not built yet (T049–T051 open) | qa/screenshots/latest/hm-house.png |
+| H11 | Blocked | Not built yet (T052–T053 open) | qa/screenshots/latest/hm-house.png |
+| H12 | Blocked | Not built yet (T066–T067 open) | qa/screenshots/latest/hm-more.png |
+| H13 | Blocked | Not built yet (T070–T071 open) | qa/screenshots/latest/hm-home.png |
+| H14 | Blocked | Not built yet (T072 open); Reminders tab shows placeholder | qa/screenshots/latest/hm-reminders.png |
+| H15 | Blocked | Not built yet (T073/T077 open); More tab shows Sign in screen | qa/screenshots/latest/hm-more.png |
+| H16 | Blocked | Not built yet (T074 open) | qa/screenshots/latest/hm-more.png |
+| H17 | Blocked | Not built yet (T008c/T075 open) | qa/screenshots/latest/hm-more.png |
+| H18 | Blocked | Not built yet (T063 open) | qa/screenshots/latest/hm-more.png |
+| H19 | Blocked | Not built yet (T032 open) | qa/screenshots/latest/hm-items.png |
+
+#### Field Log
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign-in gate, email code entry UI, company welcome setup ("Kurtz Electric", trade, phone), join error handling, and Today empty state verified | qa/screenshots/latest/fl-welcome.png |
+| F2 | Pass | Team screen displays member list with roles (Owner, Office, Lead, Crew) and hourly rates, invite code generation/display ("K7M2 QX9R"), share invite link, rotate code button, role-gated More tab | qa/screenshots/latest/fl-team.png |
+| F3 | Blocked | Not built yet (T018 open) | qa/screenshots/latest/fl-launch.png |
+| F4 | Blocked | Not built yet (T034–T035 open) | qa/screenshots/latest/fl-launch.png |
+| F5 | Blocked | Not built yet (T034 open) | qa/screenshots/latest/fl-launch.png |
+| F6 | Blocked | Not built yet (T036–T037 open) | qa/screenshots/latest/fl-launch.png |
+| F7 | Blocked | Not built yet (T041–T042 open) | qa/screenshots/latest/fl-launch.png |
+| F8 | Blocked | Not built yet (T039–T040 open) | qa/screenshots/latest/fl-launch.png |
+| F9 | Blocked | Not built yet (T043/T045 open) | qa/screenshots/latest/fl-launch.png |
+| F10 | Blocked | Not built yet (T019/T054/T062/T063 open) | qa/screenshots/latest/fl-launch.png |
+| F11 | Blocked | Not built yet (T044 open) | qa/screenshots/latest/fl-launch.png |
+| F12 | Blocked | Not built yet (T056–T058 open) | qa/screenshots/latest/fl-launch.png |
+| F13 | Blocked | Not built yet (T059 open) | qa/screenshots/latest/fl-launch.png |
+| F14 | Blocked | Not built yet (T060 open) | qa/screenshots/latest/fl-launch.png |
+| F15 | Blocked | Not built yet (T037/T061 open) | qa/screenshots/latest/fl-launch.png |
+| F16 | Blocked | Not built yet (T010/T046 open) | qa/screenshots/latest/fl-launch.png |
+| F17 | Blocked | Not built yet (T064 open) | qa/screenshots/latest/fl-launch.png |
+| F18 | Blocked | Not built yet (T065 open) | qa/screenshots/latest/fl-launch.png |
+
+Not built yet: H4, H5, H6, H7, H8, H9, H10, H11, H12, H13, H14, H15, H16, H17, H18, H19, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18.
+
+Tested: AC-C1, AC-C2, AC-C3, AC-C5, AC-C6, AC-C7, AC-C8, AC-C9, AC-C10, AC-C11, AC-C12, AC-C13, AC-C14, AC-C15, AC-C29, AC-B1, AC-B2, AC-B3, AC-B60, AC-F1, AC-F2, AC-F3, AC-F4, AC-F53, AC-U1..AC-U12. Passed: 32. New issues: 4. Product gaps: 0. Walkthrough: HM 3/3, FL 2/2.
