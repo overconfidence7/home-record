@@ -173,5 +173,5 @@ fun JobEditPreview() = Frame {
         startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
         rooms = listOf("Kitchen", "Basement", "Garage"),
     )
-    JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = "")), {}, {})
+    JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = ""), savedAddress = draft.address, lat = 39.76, lng = -84.19), {}, {})
 }

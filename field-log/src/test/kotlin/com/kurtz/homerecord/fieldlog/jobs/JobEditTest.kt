@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// AC-F5, AC-F48: a new job with client and address saves offline and is queued for sync; coordinates resolve later.
+// AC-F5, AC-F48 (map link): a new job with client and address saves offline and is queued for sync; coordinates resolve later.
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -109,6 +109,21 @@ class JobEditTest {
         moved.onEvent(JobEditEvent.Address("2 Oak"))
         moved.save()
         assertThat(db.jobDao().get(id)?.lat).isNull()
+    }
+
+    @Test fun mapLinkShowsOnlyWhileTheAddressMatchesTheResolvedOne() = runTest {
+        val first = vm()
+        first.onEvent(JobEditEvent.Name("Deck"))
+        first.onEvent(JobEditEvent.Address("1 Elm"))
+        first.save()
+        assertThat(first.state.value.mapPoint).isNull()
+        val id = db.jobDao().listFor("c1").single().id
+        db.jobDao().upsert(db.jobDao().get(id)!!.copy(lat = 39.7, lng = -84.2))
+
+        val again = vm(id)
+        assertThat(again.state.value.mapPoint).isEqualTo(39.7 to -84.2)
+        again.onEvent(JobEditEvent.Address("2 Oak"))
+        assertThat(again.state.value.mapPoint).isNull()
     }
 
     @Test fun unsavedTextSurvivesProcessDeath() = runTest {

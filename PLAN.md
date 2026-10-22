@@ -58,7 +58,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T018c1: FL-JobEdit form (name, client by name reused case-insensitively, address, dates, budget hours, notes) with New job FAB on FL-Jobs; saves offline and queues job+client for sync (AC-F5); tapping a row opens the form until the Overview shell exists
   - [x] T018c2a: rooms chips on FL-JobEdit; rooms become unplaced rooms (empty polygon) on a home created for the job, job.homeId set (AC-F5, AC-F48)
   - [x] T018c2b1: address geocode: `Geocoder` interface + `AndroidGeocoder` in :core, `JobGeocoder` resolves pending jobs after save and when the network returns, queues the job (AC-F5)
-  - [ ] T018c2b2: map thumbnail link, crew, phases, office emails (AC-F5); sync of home/floor/room rows created for a job (they need a home tenant on the backend; see docs/decisions.md 2026-10-22)
+  - [x] T018c2b2a: Open in Maps link on FL-JobEdit once the address has resolved (AC-F5)
+  - [ ] T018c2b2: crew, phases, office emails (AC-F5); sync of home/floor/room rows created for a job (they need a home tenant on the backend; see docs/decisions.md 2026-10-22)
   - [ ] T018c3: FL-Job tab shell and Overview (AC-F7), sync of job rows
   - [ ] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)

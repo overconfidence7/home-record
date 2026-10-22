@@ -28,7 +28,16 @@ data class JobEditUiState(
     val initial: JobDraft = JobDraft(),
     val saving: Boolean = false,
     val saved: Boolean = false,
+    val savedAddress: String = "",
+    val lat: Double? = null,
+    val lng: Double? = null,
 ) {
+    /** Coordinates for the map link; only while the address still matches the one that was resolved (AC-F5). */
+    val mapPoint: Pair<Double, Double>? get() {
+        val la = lat ?: return null
+        val ln = lng ?: return null
+        return if (draft.address.trim() == savedAddress) la to ln else null
+    }
     val dirty: Boolean get() = draft != initial
     val canSave: Boolean get() = !loading && !saving && draft.canSave && dirty
 }
@@ -71,7 +80,10 @@ class JobEditViewModel(
             val roomNames = existing?.homeId?.let { jobRooms(it).map { r -> r.name } }.orEmpty()
             val initial = existing?.let { JobDraft.from(it, clientName, roomNames) } ?: JobDraft()
             val draft = saved.get<String>(DRAFT)?.let(::decode) ?: initial
-            _state.value = JobEditUiState(loading = false, isNew = existing == null, draft = draft, initial = initial)
+            _state.value = JobEditUiState(
+                loading = false, isNew = existing == null, draft = draft, initial = initial,
+                savedAddress = existing?.address.orEmpty().trim(), lat = existing?.lat, lng = existing?.lng,
+            )
         }
     }
 

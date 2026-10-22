@@ -1,5 +1,9 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
@@ -45,6 +49,16 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
         LabeledField(stringResource(R.string.job_name), d.name, { onEvent(JobEditEvent.Name(it)) }, Modifier.testTag("fl_jobedit_name"), required = true)
         LabeledField(stringResource(R.string.job_client), d.clientName, { onEvent(JobEditEvent.Client(it)) }, Modifier.testTag("fl_jobedit_client"))
         LabeledField(stringResource(R.string.job_address), d.address, { onEvent(JobEditEvent.Address(it)) }, Modifier.testTag("fl_jobedit_address"), helper = stringResource(R.string.job_address_helper))
+        state.mapPoint?.let { (lat, lng) ->
+            val context = LocalContext.current
+            OutlinedButton(
+                onClick = {
+                    val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(d.name.ifBlank { d.address })})")
+                    try { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) } catch (_: ActivityNotFoundException) { }
+                },
+                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_jobedit_map"),
+            ) { Text(stringResource(R.string.job_map_link)) }
+        }
         DateField(stringResource(R.string.job_start), d.startDate, { onEvent(JobEditEvent.Start(it)) }, Modifier.testTag("fl_jobedit_start"))
         DateField(stringResource(R.string.job_end), d.endDate, { onEvent(JobEditEvent.End(it)) }, Modifier.testTag("fl_jobedit_end"))
         if (d.datesInvalid) Text(stringResource(R.string.job_dates_error), color = androidx.compose.material3.MaterialTheme.colorScheme.error)
