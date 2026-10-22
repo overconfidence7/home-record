@@ -7,15 +7,22 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
+import com.kurtz.homerecord.housemodel.pdf.PdfFloor
 import com.kurtz.homerecord.housemodel.plan.PlanEditor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** Writes the blueprint PDF and returns a shareable content URI, or null when it could not be written. */
+fun interface BlueprintExporter {
+    suspend fun export(homeName: String, floors: List<PdfFloor>): String?
+}
 
 /** HM-House: the blueprint of one floor with layer toggles and the room long-press menu (AC-C13, AC-C14, AC-C15). */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -27,6 +34,7 @@ class HouseViewModel(
     homeName: String,
     summary: String,
     system: UnitSystem = UnitSystem.IMPERIAL,
+    private val exporter: BlueprintExporter = BlueprintExporter { _, _ -> null },
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], layers = layerStore.read(homeId), system = system),
@@ -71,6 +79,19 @@ class HouseViewModel(
             is HouseEvent.StartDelete -> _state.update { it.copy(dialog = HouseDialog.ConfirmDelete(event.room)) }
             is HouseEvent.Rename -> edit { it.rename(event.roomId, event.name.trim()) }
             is HouseEvent.ConfirmDelete -> edit { it.delete(event.roomId) }
+            HouseEvent.ExportPdf -> export()
+            HouseEvent.ExportHandled -> _state.update { it.copy(shareUri = null, exportFailed = false) }
+        }
+    }
+
+    /** One page per floor, bottom floor first (AC-C16). */
+    private fun export() {
+        if (_state.value.exporting) return
+        _state.update { it.copy(exporting = true) }
+        viewModelScope.launch {
+            val floors = repo.observeFloors(homeId).first().map { PdfFloor(it.name, repo.loadPlan(it.id).placed) }
+            val uri = exporter.export(_state.value.homeName, floors)
+            _state.update { it.copy(exporting = false, shareUri = uri, exportFailed = uri == null) }
         }
     }
 

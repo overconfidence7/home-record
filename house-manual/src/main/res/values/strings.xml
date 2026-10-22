@@ -62,6 +62,9 @@
     <string name="field_required">Required.</string>
     <string name="cancel">Cancel</string>
     <string name="save_floor">Save</string>
+    <string name="house_export_pdf">Export PDF</string>
+    <string name="house_export_share_title">Share blueprint</string>
+    <string name="house_export_failed">Couldn\'t make the PDF. Try again.</string>
     <string name="house_edit_plan">Edit plan</string>
     <string name="house_blueprint_hint">Tap a room to open it. Press and hold for more.</string>
     <string name="house_floor_empty_title">No rooms on this floor</string>

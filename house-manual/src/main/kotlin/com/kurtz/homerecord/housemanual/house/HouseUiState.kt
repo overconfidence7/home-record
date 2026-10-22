@@ -24,6 +24,10 @@ data class HouseUiState(
     val layers: LayerSet = LayerSet(),
     val system: UnitSystem = UnitSystem.IMPERIAL,
     val dialog: HouseDialog? = null,
+    val exporting: Boolean = false,
+    /** Content URI of the finished PDF, waiting for the route to open the share sheet. */
+    val shareUri: String? = null,
+    val exportFailed: Boolean = false,
 )
 
 sealed interface HouseEvent {
@@ -35,4 +39,6 @@ sealed interface HouseEvent {
     data class Rename(val roomId: String, val name: String) : HouseEvent
     data class StartDelete(val room: PlanRoom) : HouseEvent
     data class ConfirmDelete(val roomId: String) : HouseEvent
+    data object ExportPdf : HouseEvent
+    data object ExportHandled : HouseEvent
 }

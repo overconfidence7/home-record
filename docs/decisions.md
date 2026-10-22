@@ -92,3 +92,6 @@ Cold start was 4–5 s; `EncryptedSharedPreferences`/MasterKey creation ran on t
 
 ## 2026-10-21 — Debug seed receivers
 House Manual seeds through `HomeRepository` (same code path as the app) after `clearAllTables`; Field Log has no local data, so its seed drives the dev backend (`/dev/seed`, `/dev/last-code`) and signs in as the seeded owner. Receivers live in the debug source set only. `AppContainer.db` became `internal` so the debug receiver can reach it.
+
+## 2026-10-22 — Blueprint PDF scale
+PDF pages use the largest standard drafting scale (1/2" = 1' down to 1/32" = 1') that fits Letter, so the printout is genuinely to scale; the scale bar is 1/2/5/10... feet. Exports go to cache/exports through a FileProvider.

@@ -77,6 +77,24 @@ class HouseViewModelTest {
         assertThat(state.rooms.map { it.name }).containsExactly("Kitchen", "Living")
     }
 
+    // AC-C16
+    @Test fun exportPdfPassesEveryFloorToTheExporterAndSurfacesTheUri() = test {
+        val (homeId, _) = setUpHome()
+        var seen: List<com.kurtz.homerecord.housemodel.pdf.PdfFloor> = emptyList()
+        val vm = HouseViewModel(
+            repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial",
+            exporter = com.kurtz.homerecord.housemanual.house.BlueprintExporter { _, floors -> seen = floors; "content://x/blueprint.pdf" },
+        )
+        vm.untilRooms(2)
+        vm.onEvent(HouseEvent.ExportPdf)
+        val state = withTimeout(10_000) { vm.state.first { it.shareUri != null } }
+        assertThat(state.shareUri).isEqualTo("content://x/blueprint.pdf")
+        assertThat(seen.size).isEqualTo(repo.observeFloors(homeId).first().size)
+        assertThat(seen.flatMap { it.rooms }.map { it.name }).containsExactly("Kitchen", "Living")
+        vm.onEvent(HouseEvent.ExportHandled)
+        assertThat(vm.state.value.shareUri).isNull()
+    }
+
     @Test fun layerTogglesPersistPerHome() = test {
         val (homeId, _) = setUpHome()
         val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")

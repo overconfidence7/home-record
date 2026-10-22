@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Polyline
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.AlertDialog
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -125,8 +127,17 @@ fun HouseScreen(
                 Icon(Icons.Rounded.Layers, contentDescription = null)
                 Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp))
             }
+            OutlinedButton(
+                onClick = { onEvent(HouseEvent.ExportPdf) },
+                enabled = state.rooms.isNotEmpty() && !state.exporting,
+                modifier = m.testTag("hm_house_export"),
+            ) {
+                Icon(Icons.Rounded.PictureAsPdf, contentDescription = null)
+                Text(stringResource(R.string.house_export_pdf), modifier = Modifier.padding(start = 8.dp))
+            }
         }
-        if (landscape) {
+        // Three buttons side by side break words at large text, so they stack then.
+        if (landscape || LocalDensity.current.fontScale > 1.3f) {
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 buttons(Modifier.fillMaxWidth())
             }
