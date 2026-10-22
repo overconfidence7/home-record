@@ -554,3 +554,17 @@ Auto entry review (0 new findings for ca2f492; 20 still open):
 Coverage note: the auto entry reports 68/68 claimed ACs covered across 22 ticked tasks (0 gaps); nothing to list.
 
 Judged: 156 screenshots (of 356 published: 108 House Manual crawler, 35 Field Log crawler, 13 tour, flow, failure and suite shots read directly; the 143 handoff crawler PNGs repeat the two app jobs' screens and the H02b/H03 shots repeat H02's), 5 walkthrough steps. New issues: 7. Product gaps: 1.
+
+## QA auto 2026-10-22 (commit 5125597)
+
+Automated suite run at 2026-10-22 02:14 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+No new automated findings.
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:instrumented:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:logcat:field-log:com.kurtz.homerecord.fieldlog], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:field-log], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:logcat:handoff:com.kurtz.homerecord.fieldlog], [auto:logcat:handoff:com.kurtz.homerecord.housemanual], [auto:coldstart:house-manual:house-manual], [auto:flow:house-manual:H02-draw-plan], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H03-blueprint-room], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual], [auto:logcat:house-manual:com.kurtz.homerecord.housemanual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, house-manual H01 Pass, house-manual H02 Fail, house-manual H02b Fail, house-manual H03 Fail, house-manual H15 Fail
+
+Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 57 device stages, 240 unit tests, 54 backend tests, coverage 73/73 ACs. Passed: 33. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
