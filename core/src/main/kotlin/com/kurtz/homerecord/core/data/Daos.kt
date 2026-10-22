@@ -300,6 +300,8 @@ interface AssignmentDao {
     @Query("SELECT * FROM assignment WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): AssignmentEntity?
     @Query("SELECT * FROM assignment WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<AssignmentEntity>>
     @Query("SELECT * FROM assignment WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<AssignmentEntity>
+    @Query("SELECT a.* FROM assignment a JOIN job j ON a.jobId = j.id WHERE j.companyId = :companyId AND j.deletedAt IS NULL AND a.deletedAt IS NULL")
+    fun observeForCompany(companyId: String): Flow<List<AssignmentEntity>>
     @Query("UPDATE assignment SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

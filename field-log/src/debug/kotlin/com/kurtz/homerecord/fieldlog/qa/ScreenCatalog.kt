@@ -16,6 +16,9 @@ object ScreenCatalog {
         QaScreen("company-form", nonRoot = true) { CompanyFormPreview() },
         QaScreen("today-admin", nonRoot = false) { TodayAdminPreview() },
         QaScreen("today-crew", nonRoot = false) { TodayCrewPreview() },
+        QaScreen("jobs-list", nonRoot = false) { JobsListPreview() },
+        QaScreen("jobs-empty", nonRoot = false) { JobsEmptyPreview() },
+        QaScreen("jobs-no-matches", nonRoot = false) { JobsNoMatchesPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )

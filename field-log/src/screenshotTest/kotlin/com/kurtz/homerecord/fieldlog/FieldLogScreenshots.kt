@@ -53,3 +53,18 @@ fun MoreOwnerScreenshot() = MoreOwnerPreview()
 @Composable
 fun MoreCrewScreenshot() = MoreCrewPreview()
 
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobsListScreenshot() = JobsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobsEmptyScreenshot() = JobsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobsNoMatchesScreenshot() = JobsNoMatchesPreview()

@@ -20,6 +20,12 @@ import com.kurtz.homerecord.fieldlog.company.TeamUiState
 import com.kurtz.homerecord.fieldlog.company.WelcomeMode
 import com.kurtz.homerecord.fieldlog.company.WelcomeScreen
 import com.kurtz.homerecord.fieldlog.company.WelcomeUiState
+import com.kurtz.homerecord.core.model.JobStatus
+import com.kurtz.homerecord.core.model.JobSummary
+import com.kurtz.homerecord.fieldlog.jobs.JobRow
+import com.kurtz.homerecord.fieldlog.jobs.JobRowGroups
+import com.kurtz.homerecord.fieldlog.jobs.JobsScreen
+import com.kurtz.homerecord.fieldlog.jobs.JobsUiState
 import com.kurtz.homerecord.fieldlog.more.MoreScreen
 import com.kurtz.homerecord.fieldlog.more.MoreUiState
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
@@ -127,3 +133,31 @@ fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", Compan
 @ThemePreviews
 @Composable
 fun MoreCrewPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew), {}) }
+
+private fun job(id: String, name: String, status: JobStatus, client: String?, address: String?, next: String? = null, start: String? = null) =
+    JobRow(JobSummary(id, name, status, startDate = start), client, address, next)
+
+private val sampleJobs = JobRowGroups(
+    active = listOf(
+        job("j1", "Panel upgrade 200A", JobStatus.ACTIVE, "Rivera family", "418 Maple St, Dayton", "2026-10-23"),
+        job("j2", "Kitchen remodel rough-in", JobStatus.ACTIVE, "Tom and Lena Park", "92 Birch Ln, Kettering", "2026-10-26"),
+        job("j3", "Garage subpanel", JobStatus.ACTIVE, null, null),
+    ),
+    upcoming = listOf(job("j4", "Basement finish", JobStatus.UPCOMING, "Okafor", "7 Elm Ct, Oakwood", null, "2026-11-09")),
+    done = listOf(job("j5", "EV charger install", JobStatus.DONE, "Priya Nair", "55 Lake Dr, Beavercreek")),
+    archived = emptyList(),
+)
+
+@ThemePreviews
+@Composable
+fun JobsListPreview() = Frame { JobsScreen(JobsUiState(loading = false, groups = sampleJobs, today = "2026-10-22"), {}) }
+
+@ThemePreviews
+@Composable
+fun JobsEmptyPreview() = Frame { JobsScreen(JobsUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun JobsNoMatchesPreview() = Frame {
+    JobsScreen(JobsUiState(loading = false, query = "garage door", noMatches = true), {})
+}

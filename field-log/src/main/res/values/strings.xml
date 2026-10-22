@@ -82,4 +82,14 @@
     <string name="company_distance_error">Enter a number from %1$d to %2$d.</string>
     <string name="company_photo_on_punch">Photo at clock in</string>
     <string name="company_photo_on_punch_helper">Asks for a quick photo with each punch. Off by default.</string>
+    <string name="jobs_title">Jobs</string>
+    <string name="jobs_empty_title">No jobs yet</string>
+    <string name="jobs_empty_body">Jobs you add show up here, grouped by Active, Upcoming and Done.</string>
+    <string name="jobs_search">Search jobs</string>
+    <string name="jobs_no_matches">No jobs match \"%1$s\".</string>
+    <string name="jobs_group_active">Active</string>
+    <string name="jobs_group_upcoming">Upcoming</string>
+    <string name="jobs_group_done">Done</string>
+    <string name="jobs_group_archived">Archived</string>
+    <string name="jobs_show_archived">Show archived</string>
 </resources>

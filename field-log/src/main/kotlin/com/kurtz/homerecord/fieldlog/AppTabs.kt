@@ -23,6 +23,7 @@ import com.kurtz.homerecord.fieldlog.company.CompanyRoute
 import com.kurtz.homerecord.fieldlog.company.TeamRoute
 import com.kurtz.homerecord.fieldlog.company.WelcomeRoute
 import com.kurtz.homerecord.fieldlog.company.failureText
+import com.kurtz.homerecord.fieldlog.jobs.JobsRoute
 import com.kurtz.homerecord.fieldlog.more.MoreEvent
 import com.kurtz.homerecord.fieldlog.more.MoreScreen
 import com.kurtz.homerecord.fieldlog.more.MoreUiState
@@ -102,6 +103,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                             MoreEvent.SignOut -> container.auth.signOut()
                         }
                     },
+                )
+                key.depth == 0 && key.title == "jobs" -> JobsRoute(
+                    membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(),
                 )
                 key.depth == 0 -> PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })

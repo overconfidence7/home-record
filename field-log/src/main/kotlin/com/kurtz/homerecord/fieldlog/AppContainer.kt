@@ -48,7 +48,7 @@ class AppContainer(app: Application) {
         auth.addSignOutListener(repo::clear)
     }
 
-    private val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
+    val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val syncEngine by lazy {
