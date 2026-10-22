@@ -93,6 +93,7 @@ fun HouseScreen(
                     body = stringResource(R.string.house_floor_empty_body),
                     actionLabel = stringResource(R.string.house_edit_plan),
                     onAction = onEditPlan,
+                    actionModifier = Modifier.testTag("hm_house_edit_plan"),
                 )
             } else {
                 BlueprintCanvas(
@@ -119,9 +120,12 @@ fun HouseScreen(
     val layerRow: @Composable () -> Unit = { LayerToggleRow(state.layers, { onEvent(HouseEvent.ToggleLayer(it)) }) }
     val actions: @Composable () -> Unit = {
         val buttons: @Composable (Modifier) -> Unit = { m ->
-            OutlinedButton(onClick = onEditPlan, modifier = m.testTag("hm_house_edit_plan")) {
-                Icon(Icons.Rounded.Edit, contentDescription = null)
-                Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp))
+            // An empty floor already offers Edit plan in its empty state; one primary action only.
+            if (state.rooms.isNotEmpty()) {
+                OutlinedButton(onClick = onEditPlan, modifier = m.testTag("hm_house_edit_plan")) {
+                    Icon(Icons.Rounded.Edit, contentDescription = null)
+                    Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp))
+                }
             }
             OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("hm_house_floors")) {
                 Icon(Icons.Rounded.Layers, contentDescription = null)

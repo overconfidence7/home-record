@@ -36,13 +36,14 @@ fun EmptyState(
     actionLabel: String,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    actionModifier: Modifier = Modifier,
 ) {
     CenteredColumn(modifier) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
         Text(headline, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(8.dp))
-        Button(onClick = onAction) { Text(actionLabel) }
+        Button(onClick = onAction, modifier = actionModifier) { Text(actionLabel) }
     }
 }
 
