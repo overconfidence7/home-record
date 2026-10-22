@@ -70,7 +70,7 @@ class HomeViewModelsTest {
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.TWO_STORY))
         vm.onEvent(OnboardingEvent.Skip)
         val home = repo.observeHome().first { it != null }!!
-        assertThat(repo.observeFloors(home.id).first { it.isNotEmpty() }.map { it.name }).containsExactly("Basement", "Main", "Upper").inOrder()
+        assertThat(repo.observeFloors(home.id).first { it.size == 3 }.map { it.name }).containsExactly("Basement", "Main", "Upper").inOrder()
     }
 
     @Test fun answersSurviveProcessDeathThroughSavedState() {

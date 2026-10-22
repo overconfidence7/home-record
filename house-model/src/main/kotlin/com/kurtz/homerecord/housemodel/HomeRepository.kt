@@ -14,6 +14,7 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.WallDeriver
 import com.kurtz.homerecord.core.data.RoomEntity
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -67,39 +68,42 @@ class HomeRepository(
         val seeded = HouseTypeTemplate.forHome(new.type, new.foundation, new.attachedGarage)
         val template = if (new.seedFromTemplate) seeded else seeded.copy(garageFloorIndex = null)
         val homeId = Ids.newId()
-        db.homeDao().upsert(
-            HomeEntity(
-                id = homeId,
-                name = new.name.trim(),
-                address = new.address?.trim()?.takeIf { it.isNotEmpty() },
-                houseType = new.type.name,
-                foundation = new.foundation.name,
-                attachedGarage = new.attachedGarage,
-                createdAt = at,
-                updatedAt = at,
-            ),
-        )
-        onChange("home", homeId)
-        template.floors.forEachIndexed { index, f ->
-            val floorId = Ids.newId()
-            db.floorDao().upsert(
-                FloorEntity(
-                    id = floorId,
-                    homeId = homeId,
-                    sortOrder = index,
-                    name = f.name,
-                    ceilingHeightIn = f.ceilingHeightIn,
-                    halfLevel = f.halfLevel,
-                    elevationIn = f.elevationIn,
+        // One transaction: observers see the home with all its floors or nothing.
+        db.withTransaction {
+            db.homeDao().upsert(
+                HomeEntity(
+                    id = homeId,
+                    name = new.name.trim(),
+                    address = new.address?.trim()?.takeIf { it.isNotEmpty() },
+                    houseType = new.type.name,
+                    foundation = new.foundation.name,
+                    attachedGarage = new.attachedGarage,
                     createdAt = at,
                     updatedAt = at,
                 ),
             )
-            onChange("floor", floorId)
-            if (index == template.garageFloorIndex) {
-                val roomId = Ids.newId()
-                db.roomDao().upsert(RoomEntity(id = roomId, floorId = floorId, name = "Garage", kind = "GARAGE", createdAt = at, updatedAt = at))
-                onChange("room", roomId)
+            onChange("home", homeId)
+            template.floors.forEachIndexed { index, f ->
+                val floorId = Ids.newId()
+                db.floorDao().upsert(
+                    FloorEntity(
+                        id = floorId,
+                        homeId = homeId,
+                        sortOrder = index,
+                        name = f.name,
+                        ceilingHeightIn = f.ceilingHeightIn,
+                        halfLevel = f.halfLevel,
+                        elevationIn = f.elevationIn,
+                        createdAt = at,
+                        updatedAt = at,
+                    ),
+                )
+                onChange("floor", floorId)
+                if (index == template.garageFloorIndex) {
+                    val roomId = Ids.newId()
+                    db.roomDao().upsert(RoomEntity(id = roomId, floorId = floorId, name = "Garage", kind = "GARAGE", createdAt = at, updatedAt = at))
+                    onChange("room", roomId)
+                }
             }
         }
         return homeId
