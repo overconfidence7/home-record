@@ -106,6 +106,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 )
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
                     membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(),
+                    onEditJob = { nav.push(JobEditKey(it)) },
                 )
                 key.depth == 0 -> PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
@@ -113,6 +114,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         }
         entry<TeamKey> {
             TeamRoute(container.companyApi, membership, container::inviteLink, onBack = nav::pop)
+        }
+        entry<JobEditKey> { key ->
+            com.kurtz.homerecord.fieldlog.jobs.JobEditRoute(
+                membership.companyId, key.jobId, container.db.jobDao(), container.db.clientDao(), container::recordChange, onClose = nav::pop,
+            )
         }
         entry<CompanyKey> {
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)

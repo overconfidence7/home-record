@@ -92,4 +92,17 @@
     <string name="jobs_group_done">Done</string>
     <string name="jobs_group_archived">Archived</string>
     <string name="jobs_show_archived">Show archived</string>
+    <string name="jobs_new">New job</string>
+    <string name="job_edit_new">New job</string>
+    <string name="job_edit_title">Edit job</string>
+    <string name="job_name">Job name</string>
+    <string name="job_client">Client</string>
+    <string name="job_address">Address</string>
+    <string name="job_address_helper">Used for the map link and the far-from-job check.</string>
+    <string name="job_start">Start date</string>
+    <string name="job_end">End date</string>
+    <string name="job_dates_error">The end date comes before the start date.</string>
+    <string name="job_budget">Budget hours</string>
+    <string name="job_budget_error">Enter whole hours, 0 to 100000.</string>
+    <string name="job_notes">Notes</string>
 </resources>

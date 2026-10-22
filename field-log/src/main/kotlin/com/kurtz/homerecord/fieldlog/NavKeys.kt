@@ -6,3 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable data object TeamKey : NavKey
 
 @Serializable data object CompanyKey : NavKey
+
+@Serializable data class JobEditKey(val jobId: String? = null) : NavKey

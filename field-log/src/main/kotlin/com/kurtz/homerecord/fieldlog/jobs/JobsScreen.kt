@@ -1,7 +1,11 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,7 +37,8 @@ import java.time.format.FormatStyle
 /** FL-Jobs. Jobs grouped Active / Upcoming / Done with client, address and next date (AC-F6). */
 @Composable
 fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxSize().statusBarsPadding()) {
+    Box(modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
         Text(
             stringResource(R.string.jobs_title),
             style = MaterialTheme.typography.headlineMedium,
@@ -44,6 +49,13 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
             state.groups.isEmpty && !state.noMatches && state.query.isBlank() -> JobsEmpty(Modifier.weight(1f))
             else -> JobsList(state, onEvent, Modifier.weight(1f))
         }
+    }
+    ExtendedFloatingActionButton(
+        onClick = { onEvent(JobsEvent.New) },
+        icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+        text = { Text(stringResource(R.string.jobs_new)) },
+        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_jobs_new"),
+    )
     }
 }
 
@@ -62,7 +74,7 @@ private fun JobsEmpty(modifier: Modifier) {
 
 @Composable
 private fun JobsList(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modifier) {
-    LazyColumn(modifier.testTag("fl_jobs_list")) {
+    LazyColumn(modifier.testTag("fl_jobs_list"), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 88.dp)) {
         item {
             OutlinedTextField(
                 value = state.query,

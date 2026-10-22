@@ -22,6 +22,9 @@ import com.kurtz.homerecord.fieldlog.company.WelcomeScreen
 import com.kurtz.homerecord.fieldlog.company.WelcomeUiState
 import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.JobSummary
+import com.kurtz.homerecord.fieldlog.jobs.JobDraft
+import com.kurtz.homerecord.fieldlog.jobs.JobEditScreen
+import com.kurtz.homerecord.fieldlog.jobs.JobEditUiState
 import com.kurtz.homerecord.fieldlog.jobs.JobRow
 import com.kurtz.homerecord.fieldlog.jobs.JobRowGroups
 import com.kurtz.homerecord.fieldlog.jobs.JobsScreen
@@ -160,4 +163,14 @@ fun JobsEmptyPreview() = Frame { JobsScreen(JobsUiState(loading = false), {}) }
 @Composable
 fun JobsNoMatchesPreview() = Frame {
     JobsScreen(JobsUiState(loading = false, query = "garage door", noMatches = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun JobEditPreview() = Frame {
+    val draft = JobDraft(
+        name = "Panel upgrade 200A", clientName = "Rivera family", address = "418 Maple St, Dayton",
+        startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
+    )
+    JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = "")), {}, {})
 }

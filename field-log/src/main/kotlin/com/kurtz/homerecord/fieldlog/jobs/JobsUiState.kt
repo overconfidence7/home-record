@@ -15,4 +15,5 @@ sealed interface JobsEvent {
     data class Query(val text: String) : JobsEvent
     data object ToggleArchived : JobsEvent
     data class Open(val jobId: String) : JobsEvent
+    data object New : JobsEvent
 }

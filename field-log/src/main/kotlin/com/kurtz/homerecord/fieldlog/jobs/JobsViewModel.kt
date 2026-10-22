@@ -48,7 +48,7 @@ class JobsViewModel(
         when (event) {
             is JobsEvent.Query -> saved[QUERY] = event.text
             JobsEvent.ToggleArchived -> saved[ARCHIVED] = !(saved.get<Boolean>(ARCHIVED) ?: false)
-            is JobsEvent.Open -> Unit // routed by JobsRoute once the job tabs exist
+            is JobsEvent.Open, JobsEvent.New -> Unit // routed by JobsRoute
         }
     }
 
