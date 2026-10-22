@@ -108,5 +108,9 @@
     <string name="job_rooms">Rooms</string>
     <string name="job_rooms_helper">Rooms you will work in. Place them on the plan later.</string>
     <string name="job_rooms_add">Add</string>
+    <string name="job_phases">Phases</string>
+    <string name="job_phases_helper">In order, like Demo, Rough-in, Finish.</string>
+    <string name="job_office_emails">Office emails</string>
+    <string name="job_office_emails_helper">Daily logs and reports for this job go here.</string>
     <string name="job_notes">Notes</string>
 </resources>

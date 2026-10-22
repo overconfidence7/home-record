@@ -1,6 +1,9 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
 import com.kurtz.homerecord.core.data.JobEntity
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 /** The JobEdit form as typed. Validation and mapping to [JobEntity] live here so they are unit tested (AC-F5). */
 data class JobDraft(
@@ -13,6 +16,10 @@ data class JobDraft(
     val notes: String = "",
     /** Room names to work on; they become unplaced rooms on the job's home (AC-F5, AC-F48). */
     val rooms: List<String> = emptyList(),
+    /** Ordered phase names, e.g. Demo, Rough-in, Finish (AC-F5). */
+    val phases: List<String> = emptyList(),
+    /** Office addresses that get the daily log and reports for this job (AC-F5). */
+    val officeEmails: List<String> = emptyList(),
 ) {
     val budgetHours: Int? get() = budgetHoursText.trim().toIntOrNull()?.takeIf { it in 0..MAX_BUDGET_HOURS }
     val budgetInvalid: Boolean get() = budgetHoursText.isNotBlank() && budgetHours == null
@@ -23,6 +30,20 @@ data class JobDraft(
     }
 
     fun withoutRoom(name: String) = copy(rooms = rooms.filterNot { it.equals(name, ignoreCase = true) })
+
+    fun withPhase(name: String): JobDraft {
+        val n = name.trim()
+        return if (n.isEmpty() || phases.any { it.equals(n, ignoreCase = true) }) this else copy(phases = phases + n)
+    }
+
+    fun withoutPhase(name: String) = copy(phases = phases.filterNot { it.equals(name, ignoreCase = true) })
+
+    fun withOfficeEmail(email: String): JobDraft {
+        val e = email.trim()
+        return if (!isEmail(e) || officeEmails.any { it.equals(e, ignoreCase = true) }) this else copy(officeEmails = officeEmails + e)
+    }
+
+    fun withoutOfficeEmail(email: String) = copy(officeEmails = officeEmails.filterNot { it.equals(email, ignoreCase = true) })
 
     val canSave: Boolean get() = name.isNotBlank() && !budgetInvalid && !datesInvalid
 
@@ -47,6 +68,8 @@ data class JobDraft(
             endDate = endDate,
             budgetHours = budgetHours,
             notes = notes.trim().ifBlank { null },
+            phasesJson = Json.encodeToString(phases),
+            officeEmailsJson = Json.encodeToString(officeEmails),
             updatedAt = now,
         )
 
@@ -62,6 +85,15 @@ data class JobDraft(
             budgetHoursText = job.budgetHours?.toString().orEmpty(),
             notes = job.notes.orEmpty(),
             rooms = rooms,
+            phases = decodeList(job.phasesJson),
+            officeEmails = decodeList(job.officeEmailsJson),
         )
+
+        fun isEmail(v: String) = v.length <= 254 && EMAIL.matches(v)
+
+        private val EMAIL = Regex("^[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+$")
+
+        private fun decodeList(raw: String): List<String> =
+            try { Json.decodeFromString<List<String>>(raw) } catch (_: SerializationException) { emptyList() }
     }
 }

@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// AC-F5, AC-F48 (map link): a new job with client and address saves offline and is queued for sync; coordinates resolve later.
+// AC-F5 (phases, office emails), AC-F48 (map link): a new job with client and address saves offline and is queued for sync; coordinates resolve later.
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -153,5 +153,40 @@ class JobEditTest {
         edit.save()
         assertThat(db.roomDao().listFor(floor.id).map { it.name }).containsExactly("Kitchen", "Garage")
         assertThat(db.jobDao().get(job.id)?.homeId).isEqualTo(job.homeId)
+    }
+
+    @Test fun phasesAndOfficeEmailsSaveAndReload() = runTest {
+        val vm = vm()
+        vm.onEvent(JobEditEvent.Name("Deck"))
+        vm.onEvent(JobEditEvent.AddPhase("Demo"))
+        vm.onEvent(JobEditEvent.AddPhase(" demo "))
+        vm.onEvent(JobEditEvent.AddPhase("Framing"))
+        vm.onEvent(JobEditEvent.AddOfficeEmail("office@qa.test"))
+        vm.onEvent(JobEditEvent.AddOfficeEmail("not an email"))
+        vm.onEvent(JobEditEvent.AddOfficeEmail("OFFICE@qa.test"))
+        assertThat(vm.state.value.draft.phases).containsExactly("Demo", "Framing").inOrder()
+        assertThat(vm.state.value.draft.officeEmails).containsExactly("office@qa.test")
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        assertThat(job.phasesJson).isEqualTo("[\"Demo\",\"Framing\"]")
+        assertThat(job.officeEmailsJson).isEqualTo("[\"office@qa.test\"]")
+
+        val edit = vm(job.id)
+        assertThat(edit.state.value.draft.phases).containsExactly("Demo", "Framing").inOrder()
+        edit.onEvent(JobEditEvent.RemovePhase("Demo"))
+        edit.onEvent(JobEditEvent.RemoveOfficeEmail("office@qa.test"))
+        edit.save()
+        assertThat(db.jobDao().get(job.id)?.phasesJson).isEqualTo("[\"Framing\"]")
+        assertThat(db.jobDao().get(job.id)?.officeEmailsJson).isEqualTo("[]")
+    }
+
+    @Test fun phasesAndEmailsSurviveProcessDeath() = runTest {
+        val handle = SavedStateHandle()
+        val first = vm(saved = handle)
+        first.onEvent(JobEditEvent.AddPhase("Rough-in"))
+        first.onEvent(JobEditEvent.AddOfficeEmail("a@b.co"))
+        val again = vm(saved = handle).state.value.draft
+        assertThat(again.phases).containsExactly("Rough-in")
+        assertThat(again.officeEmails).containsExactly("a@b.co")
     }
 }

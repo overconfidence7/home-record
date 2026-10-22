@@ -52,6 +52,10 @@ sealed interface JobEditEvent {
     data class Notes(val v: String) : JobEditEvent
     data class AddRoom(val v: String) : JobEditEvent
     data class RemoveRoom(val v: String) : JobEditEvent
+    data class AddPhase(val v: String) : JobEditEvent
+    data class RemovePhase(val v: String) : JobEditEvent
+    data class AddOfficeEmail(val v: String) : JobEditEvent
+    data class RemoveOfficeEmail(val v: String) : JobEditEvent
     data object Save : JobEditEvent
 }
 
@@ -98,6 +102,10 @@ class JobEditViewModel(
             is JobEditEvent.Notes -> edit { it.copy(notes = event.v) }
             is JobEditEvent.AddRoom -> edit { it.withRoom(event.v) }
             is JobEditEvent.RemoveRoom -> edit { it.withoutRoom(event.v) }
+            is JobEditEvent.AddPhase -> edit { it.withPhase(event.v) }
+            is JobEditEvent.RemovePhase -> edit { it.withoutPhase(event.v) }
+            is JobEditEvent.AddOfficeEmail -> edit { it.withOfficeEmail(event.v) }
+            is JobEditEvent.RemoveOfficeEmail -> edit { it.withoutOfficeEmail(event.v) }
             JobEditEvent.Save -> save()
         }
     }
@@ -161,14 +169,16 @@ class JobEditViewModel(
     }
 
     // Fields are joined with the unit separator; none of them can type it on a phone keyboard.
-    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP))
+    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP), d.phases.joinToString(ROOM_SEP), d.officeEmails.joinToString(ROOM_SEP))
         .joinToString(SEP)
 
     private fun decode(raw: String): JobDraft? {
         val p = raw.split(SEP)
-        if (p.size != 8) return null
-        return JobDraft(p[0], p[1], p[2], p[3].ifEmpty { null }, p[4].ifEmpty { null }, p[5], p[6], p[7].split(ROOM_SEP).filter { it.isNotEmpty() })
+        if (p.size != 10) return null
+        return JobDraft(p[0], p[1], p[2], p[3].ifEmpty { null }, p[4].ifEmpty { null }, p[5], p[6], p[7].items(), p[8].items(), p[9].items())
     }
+
+    private fun String.items(): List<String> = split(ROOM_SEP).filter { it.isNotEmpty() }
 
     private companion object {
         const val DRAFT = "draft"

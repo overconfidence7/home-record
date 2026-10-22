@@ -66,27 +66,48 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
             stringResource(R.string.job_budget), d.budgetHoursText, { onEvent(JobEditEvent.Budget(it)) }, Modifier.testTag("fl_jobedit_budget"),
             error = if (d.budgetInvalid) stringResource(R.string.job_budget_error) else null, keyboardType = KeyboardType.Number,
         )
-        var roomInput by rememberSaveable { mutableStateOf("") }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-            LabeledField(
-                stringResource(R.string.job_rooms), roomInput, { roomInput = it }, Modifier.weight(1f).testTag("fl_jobedit_room_input"),
-                helper = stringResource(R.string.job_rooms_helper),
-            )
-            OutlinedButton(
-                onClick = { onEvent(JobEditEvent.AddRoom(roomInput)); roomInput = "" },
-                enabled = roomInput.isNotBlank(),
-                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_jobedit_room_add"),
-            ) { Text(stringResource(R.string.job_rooms_add)) }
-        }
-        if (d.rooms.isNotEmpty()) {
-            LinkChipRow(
-                d.rooms.map { LinkChip(it, it) }, onOpen = {}, onRemove = { onEvent(JobEditEvent.RemoveRoom(it.id)) },
-                modifier = Modifier.testTag("fl_jobedit_rooms"),
-            )
-        }
+        ChipAdder(
+            label = stringResource(R.string.job_rooms), helper = stringResource(R.string.job_rooms_helper), tag = "fl_jobedit_room",
+            items = d.rooms, canAdd = { it.isNotBlank() }, onAdd = { onEvent(JobEditEvent.AddRoom(it)) }, onRemove = { onEvent(JobEditEvent.RemoveRoom(it)) },
+        )
+        ChipAdder(
+            label = stringResource(R.string.job_phases), helper = stringResource(R.string.job_phases_helper), tag = "fl_jobedit_phase",
+            items = d.phases, canAdd = { it.isNotBlank() }, onAdd = { onEvent(JobEditEvent.AddPhase(it)) }, onRemove = { onEvent(JobEditEvent.RemovePhase(it)) },
+        )
+        ChipAdder(
+            label = stringResource(R.string.job_office_emails), helper = stringResource(R.string.job_office_emails_helper), tag = "fl_jobedit_email",
+            items = d.officeEmails, canAdd = { JobDraft.isEmail(it.trim()) }, onAdd = { onEvent(JobEditEvent.AddOfficeEmail(it)) },
+            onRemove = { onEvent(JobEditEvent.RemoveOfficeEmail(it)) }, keyboardType = KeyboardType.Email,
+        )
         LabeledField(
             stringResource(R.string.job_notes), d.notes, { onEvent(JobEditEvent.Notes(it)) }, Modifier.testTag("fl_jobedit_notes"),
             imeAction = ImeAction.Default, singleLine = false,
         )
+    }
+}
+
+/** A text field with an Add button and removable chips below it; tags are `<tag>_input`, `<tag>_add` and `<tag>s`. */
+@Composable
+private fun ChipAdder(
+    label: String,
+    helper: String,
+    tag: String,
+    items: List<String>,
+    canAdd: (String) -> Boolean,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+) {
+    var input by rememberSaveable { mutableStateOf("") }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+        LabeledField(label, input, { input = it }, Modifier.weight(1f).testTag("${tag}_input"), helper = helper, keyboardType = keyboardType)
+        OutlinedButton(
+            onClick = { onAdd(input); input = "" },
+            enabled = canAdd(input),
+            modifier = Modifier.heightIn(min = 56.dp).testTag("${tag}_add"),
+        ) { Text(stringResource(R.string.job_rooms_add)) }
+    }
+    if (items.isNotEmpty()) {
+        LinkChipRow(items.map { LinkChip(it, it) }, onOpen = {}, onRemove = { onRemove(it.id) }, modifier = Modifier.testTag("${tag}s"))
     }
 }
