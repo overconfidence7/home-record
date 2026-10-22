@@ -25,6 +25,8 @@ npx wrangler dev
 | `FCM_SERVICE_ACCOUNT` | push delivery (T047) |
 | `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064) |
 
+For `npx wrangler dev`, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<any long string>`; without it `/auth/email/verify` answers 500. The QA workflow writes one itself.
+
 ## Tenancy
 
 Every row belongs to a company (Field Log) or a home (House Manual). `requireSession` loads the caller's memberships; tenant routes use `requireTenant()`, which answers 404 for any tenant the caller is not in, so other tenants are indistinguishable from missing ones.
