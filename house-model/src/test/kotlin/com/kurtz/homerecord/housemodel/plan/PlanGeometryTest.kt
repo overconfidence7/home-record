@@ -60,6 +60,23 @@ class WallDeriverTest {
         assertThat(walls[1].lengthIn).isEqualTo(150)
     }
 
+    @Test fun rectangleBesideLShapeSharesOnlyTheTouchingWalls() {
+        val l = PlanRoom("l", "l", "OTHER", listOf(Pt(0, 0), Pt(120, 0), Pt(120, 60), Pt(60, 60), Pt(60, 120), Pt(0, 120)))
+        val r = rect("r", 120, 0, 100, 60)
+        val walls = deriver.derive(listOf(l, r))
+        assertThat(walls.single { it.roomId == "l" && it.edgeIndex == 1 }.exterior).isFalse()
+        assertThat(walls.single { it.roomId == "r" && it.edgeIndex == 3 }.exterior).isFalse()
+        assertThat(walls.single { it.roomId == "l" && it.edgeIndex == 0 }.exterior).isTrue()
+        assertThat(walls.single { it.roomId == "r" && it.edgeIndex == 1 }.exterior).isTrue()
+    }
+
+    @Test fun zeroLengthEdgeIsNotLabelledAsAWallSide() {
+        val odd = PlanRoom("z", "z", "OTHER", listOf(Pt(0, 0), Pt(0, 0), Pt(100, 0), Pt(100, 100)))
+        val walls = deriver.derive(listOf(odd))
+        assertThat(walls[0].lengthIn).isEqualTo(0)
+        assertThat(walls[0].orientation).isEqualTo("D1")
+    }
+
     @Test fun lShapeHasSixWalls() {
         val l = PlanRoom("l", "l", "OTHER", listOf(Pt(0, 0), Pt(120, 0), Pt(120, 60), Pt(60, 60), Pt(60, 120), Pt(0, 120)))
         assertThat(deriver.derive(listOf(l))).hasSize(6)
@@ -95,6 +112,18 @@ class PlanValidatorTest {
         val inNotch = rect("n", 70, 70, 48, 48)
         assertThat(v.overlaps(l, inNotch)).isFalse()
         assertThat(v.overlaps(l, rect("m", 10, 70, 40, 40))).isTrue()
+    }
+
+    @Test fun roomOverlappingOneArmOfAConcaveShapeIsFlagged() {
+        val u = PlanRoom("u", "u", "OTHER", listOf(Pt(0, 0), Pt(180, 0), Pt(180, 120), Pt(120, 120), Pt(120, 60), Pt(60, 60), Pt(60, 120), Pt(0, 120)))
+        assertThat(v.overlaps(u, rect("arm", 130, 80, 40, 60))).isTrue()
+        assertThat(v.overlaps(u, rect("gap", 66, 66, 48, 48))).isFalse()
+        assertThat(v.overlaps(u, rect("below", 0, 120, 180, 60))).isFalse()
+    }
+
+    @Test fun bowTieOutlineIsNotSimple() {
+        val bow = PlanRoom("b", "b", "OTHER", listOf(Pt(0, 0), Pt(100, 100), Pt(100, 0), Pt(0, 100)))
+        assertThat(bow.isSimple()).isFalse()
     }
 
     @Test fun smallRoomsAreFlagged() {
