@@ -51,9 +51,14 @@ class ScreenCrawlerTest {
             open(entry.id).use {
                 compose.waitForIdle()
                 if (entry.nonRoot) assertTrue("${entry.id}: no back arrow (fl_back) or close (fl_close)", compose.onAllNodesWithTag("fl_back").fetchSemanticsNodes().isNotEmpty() || compose.onAllNodesWithTag("fl_close").fetchSemanticsNodes().isNotEmpty())
+                val min = 48 * inst.targetContext.resources.displayMetrics.density - 1
+                // A node cut by its scroll viewport reports a shrunken touch box; judge it by its full layout size.
                 val tooSmall = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().filter { n ->
-                    n.touchBoundsInRoot.width < 48 * inst.targetContext.resources.displayMetrics.density - 1 ||
-                        n.touchBoundsInRoot.height < 48 * inst.targetContext.resources.displayMetrics.density - 1
+                    val t = n.touchBoundsInRoot
+                    val clippedW = t.width < n.size.width - 1
+                    val clippedH = t.height < n.size.height - 1
+                    maxOf(t.width, if (clippedW) n.size.width.toFloat() else 0f) < min ||
+                        maxOf(t.height, if (clippedH) n.size.height.toFloat() else 0f) < min
                 }
                 assertTrue("${entry.id}: ${tooSmall.size} clickable nodes under 48 dp", tooSmall.isEmpty())
                 shoot(entry.id, "light")
