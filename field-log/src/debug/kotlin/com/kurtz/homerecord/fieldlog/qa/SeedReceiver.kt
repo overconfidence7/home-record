@@ -3,6 +3,7 @@ package com.kurtz.homerecord.fieldlog.qa
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.kurtz.homerecord.core.auth.AuthResult
 import com.kurtz.homerecord.fieldlog.BuildConfig
 import com.kurtz.homerecord.fieldlog.HomeRecordApplication
@@ -14,6 +15,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 /**
  * Debug-only: `adb shell am broadcast -a com.kurtz.homerecord.fieldlog.qa.SEED -p <pkg> --es scenario regression|reset`.
@@ -29,29 +31,36 @@ class SeedReceiver : BroadcastReceiver() {
             val ok = try {
                 when (scenario) {
                     "regression" -> {
-                        val client = OkHttpClient()
+                        val client = httpClient()
                         val base = BuildConfig.API_BASE_URL.trimEnd('/')
                         container.auth.signOut()
                         post(client, "$base/dev/seed", """{"scenario":"regression"}""")
                         val email = OWNER_EMAIL
                         container.auth.requestEmailCode(email)
                         val code = get(client, "$base/dev/last-code?email=$email").getString("code")
-                        container.auth.verifyEmailCode(email, code) == AuthResult.Success
+                        val result = container.auth.verifyEmailCode(email, code)
+                        if (result != AuthResult.Success) Log.e(TAG, "verify returned $result")
+                        result == AuthResult.Success
                     }
                     "reset" -> {
                         container.auth.signOut()
-                        post(OkHttpClient(), "${BuildConfig.API_BASE_URL.trimEnd('/')}/dev/reset", "{}")
+                        post(httpClient(), "${BuildConfig.API_BASE_URL.trimEnd('/')}/dev/reset", "{}")
                         true
                     }
                     else -> false
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "seed '$scenario' failed", e)
                 false
             }
             pending.setResult(if (ok) 1 else 0, scenario, null)
             pending.finish()
         }
     }
+
+    private fun httpClient() = OkHttpClient.Builder()
+        .callTimeout(4, TimeUnit.SECONDS)
+        .build()
 
     private fun post(client: OkHttpClient, url: String, json: String) {
         val req = Request.Builder().url(url).post(json.toRequestBody("application/json".toMediaType())).build()
@@ -66,5 +75,6 @@ class SeedReceiver : BroadcastReceiver() {
 
     private companion object {
         const val OWNER_EMAIL = "owner@qa.test"
+        const val TAG = "QaSeed"
     }
 }
