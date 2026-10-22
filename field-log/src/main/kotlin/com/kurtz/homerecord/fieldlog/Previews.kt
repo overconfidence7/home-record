@@ -171,6 +171,7 @@ fun JobEditPreview() = Frame {
     val draft = JobDraft(
         name = "Panel upgrade 200A", clientName = "Rivera family", address = "418 Maple St, Dayton",
         startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
+        rooms = listOf("Kitchen", "Basement", "Garage"),
     )
     JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = "")), {}, {})
 }

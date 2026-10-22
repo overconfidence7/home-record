@@ -104,5 +104,8 @@
     <string name="job_dates_error">The end date comes before the start date.</string>
     <string name="job_budget">Budget hours</string>
     <string name="job_budget_error">Enter whole hours, 0 to 100000.</string>
+    <string name="job_rooms">Rooms</string>
+    <string name="job_rooms_helper">Rooms you will work in. Place them on the plan later.</string>
+    <string name="job_rooms_add">Add</string>
     <string name="job_notes">Notes</string>
 </resources>

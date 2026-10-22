@@ -1,6 +1,18 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
+import com.kurtz.homerecord.coreui.components.LinkChip
+import com.kurtz.homerecord.coreui.components.LinkChipRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +27,7 @@ import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
 
-/** FL-JobEdit. Client, address, dates, budget hours and notes; rooms, crew and phases follow (T018d). */
+/** FL-JobEdit. Client, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
 @Composable
 fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClose: () -> Unit) {
     if (state.loading) {
@@ -40,6 +52,24 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
             stringResource(R.string.job_budget), d.budgetHoursText, { onEvent(JobEditEvent.Budget(it)) }, Modifier.testTag("fl_jobedit_budget"),
             error = if (d.budgetInvalid) stringResource(R.string.job_budget_error) else null, keyboardType = KeyboardType.Number,
         )
+        var roomInput by rememberSaveable { mutableStateOf("") }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+            LabeledField(
+                stringResource(R.string.job_rooms), roomInput, { roomInput = it }, Modifier.weight(1f).testTag("fl_jobedit_room_input"),
+                helper = stringResource(R.string.job_rooms_helper),
+            )
+            OutlinedButton(
+                onClick = { onEvent(JobEditEvent.AddRoom(roomInput)); roomInput = "" },
+                enabled = roomInput.isNotBlank(),
+                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_jobedit_room_add"),
+            ) { Text(stringResource(R.string.job_rooms_add)) }
+        }
+        if (d.rooms.isNotEmpty()) {
+            LinkChipRow(
+                d.rooms.map { LinkChip(it, it) }, onOpen = {}, onRemove = { onEvent(JobEditEvent.RemoveRoom(it.id)) },
+                modifier = Modifier.testTag("fl_jobedit_rooms"),
+            )
+        }
         LabeledField(
             stringResource(R.string.job_notes), d.notes, { onEvent(JobEditEvent.Notes(it)) }, Modifier.testTag("fl_jobedit_notes"),
             imeAction = ImeAction.Default, singleLine = false,

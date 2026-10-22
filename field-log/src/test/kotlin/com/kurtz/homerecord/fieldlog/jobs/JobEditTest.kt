@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// AC-F5: a new job with client and address saves offline and is queued for sync; coordinates resolve later.
+// AC-F5, AC-F48: a new job with client and address saves offline and is queued for sync; coordinates resolve later.
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -43,7 +43,7 @@ class JobEditTest {
 
     /** Room hops to its own executor, so wait for the form to finish loading, as the screen does. */
     private suspend fun vm(jobId: String? = null, saved: SavedStateHandle = SavedStateHandle()): JobEditViewModel {
-        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L })
+        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L })
         withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first { !it.loading } } }
         return vm
     }
@@ -115,5 +115,28 @@ class JobEditTest {
         val handle = SavedStateHandle()
         vm(saved = handle).onEvent(JobEditEvent.Name("Half typed"))
         assertThat(vm(saved = handle).state.value.draft.name).isEqualTo("Half typed")
+    }
+
+    @Test fun roomsBecomeUnplacedRoomsOnTheJobsHome() = runTest {
+        val vm = vm()
+        vm.onEvent(JobEditEvent.Name("Kitchen remodel"))
+        vm.onEvent(JobEditEvent.AddRoom("Kitchen"))
+        vm.onEvent(JobEditEvent.AddRoom("kitchen "))
+        vm.onEvent(JobEditEvent.AddRoom("Pantry"))
+        assertThat(vm.state.value.draft.rooms).containsExactly("Kitchen", "Pantry").inOrder()
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        val floor = db.floorDao().listFor(job.homeId!!).single()
+        val rooms = db.roomDao().listFor(floor.id)
+        assertThat(rooms.map { it.name }).containsExactly("Kitchen", "Pantry")
+        assertThat(rooms.map { it.polygonJson }.distinct()).containsExactly("[]")
+
+        val edit = vm(job.id)
+        assertThat(edit.state.value.draft.rooms).containsExactly("Kitchen", "Pantry")
+        edit.onEvent(JobEditEvent.RemoveRoom("Pantry"))
+        edit.onEvent(JobEditEvent.AddRoom("Garage"))
+        edit.save()
+        assertThat(db.roomDao().listFor(floor.id).map { it.name }).containsExactly("Kitchen", "Garage")
+        assertThat(db.jobDao().get(job.id)?.homeId).isEqualTo(job.homeId)
     }
 }

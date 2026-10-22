@@ -117,7 +117,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         }
         entry<JobEditKey> { key ->
             com.kurtz.homerecord.fieldlog.jobs.JobEditRoute(
-                membership.companyId, key.jobId, container.db.jobDao(), container.db.clientDao(), container::recordChange, onClose = nav::pop,
+                membership.companyId, key.jobId, container.db.jobDao(), container.db.clientDao(), container.db.homeDao(), container.db.floorDao(), container.db.roomDao(),
+                container::recordChange, onClose = nav::pop,
             )
         }
         entry<CompanyKey> {

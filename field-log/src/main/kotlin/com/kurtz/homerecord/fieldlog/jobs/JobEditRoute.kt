@@ -8,7 +8,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.data.ClientDao
+import com.kurtz.homerecord.core.data.FloorDao
+import com.kurtz.homerecord.core.data.HomeDao
 import com.kurtz.homerecord.core.data.JobDao
+import com.kurtz.homerecord.core.data.RoomDao
 
 @Composable
 fun JobEditRoute(
@@ -16,11 +19,14 @@ fun JobEditRoute(
     jobId: String?,
     jobs: JobDao,
     clients: ClientDao,
+    homes: HomeDao,
+    floors: FloorDao,
+    rooms: RoomDao,
     recordChange: suspend (String, String) -> Unit,
     onClose: () -> Unit,
 ) {
     val vm = viewModel<JobEditViewModel>(
-        factory = viewModelFactory { initializer { JobEditViewModel(companyId, jobId, jobs, clients, recordChange, createSavedStateHandle()) } },
+        factory = viewModelFactory { initializer { JobEditViewModel(companyId, jobId, jobs, clients, homes, floors, rooms, recordChange, createSavedStateHandle()) } },
     )
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.saved) { if (state.saved) onClose() }

@@ -56,7 +56,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T018a: `JobOrdering` + `JobSummary` in `:core` model with unit tests (AC-F6); jobs list, JobEdit, Overview and sync remain under T018
   - [x] T018b: FL-Jobs list on the Jobs tab (grouped Active/Upcoming/Done, search, show archived, next date, client and address), `JobListMapper` and `JobsViewModel` with tests (AC-F6); no New job button until JobEdit
   - [x] T018c1: FL-JobEdit form (name, client by name reused case-insensitively, address, dates, budget hours, notes) with New job FAB on FL-Jobs; saves offline and queues job+client for sync (AC-F5); tapping a row opens the form until the Overview shell exists
-  - [ ] T018c2: address geocode (on-device Geocoder, lat/lng, map link, retry when online), rooms chips, crew, phases, office emails (AC-F5)
+  - [x] T018c2a: rooms chips on FL-JobEdit; rooms become unplaced rooms (empty polygon) on a home created for the job, job.homeId set (AC-F5, AC-F48)
+  - [ ] T018c2b: address geocode (on-device Geocoder, lat/lng, map link, retry when online), crew, phases, office emails (AC-F5); sync of home/floor/room rows created for a job (backend entity support to confirm)
   - [ ] T018c3: FL-Job tab shell and Overview (AC-F7), sync of job rows
   - [ ] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
