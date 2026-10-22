@@ -73,3 +73,13 @@ fun JobsNoMatchesScreenshot() = JobsNoMatchesPreview()
 @ThemePreviews
 @Composable
 fun JobEditScreenshot() = JobEditPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobOverviewScreenshot() = JobOverviewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobOverviewEmptyScreenshot() = JobOverviewEmptyPreview()

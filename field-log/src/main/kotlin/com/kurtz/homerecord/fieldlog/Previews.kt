@@ -175,3 +175,25 @@ fun JobEditPreview() = Frame {
     )
     JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = ""), savedAddress = draft.address, lat = 39.76, lng = -84.19), {}, {})
 }
+
+private val sampleOverview = com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(
+    loading = false, name = "Panel upgrade 200A", clientName = "Rivera family", address = "418 Maple St, Dayton",
+    lat = 39.76, lng = -84.19, status = JobStatus.ACTIVE, startDate = "2026-10-23", endDate = "2026-10-30",
+    phases = listOf("Demo", "Rough-in", "Finish"), hoursThisWeek = 18.5, photoCount = 42, openTasks = 6,
+    nextDay = "2026-10-23", crew = listOf("Dana Ortiz", "Marcus Bell"), today = "2026-10-22",
+)
+
+@ThemePreviews
+@Composable
+fun JobOverviewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(sampleOverview, com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW, {}, {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun JobOverviewEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, name = "Garage subpanel"),
+        com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW, {}, {}, {},
+    )
+}

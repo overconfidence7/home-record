@@ -21,7 +21,7 @@ fun JobsRoute(companyId: String, jobs: JobDao, clients: ClientDao, assignments: 
         { event ->
             when (event) {
                 JobsEvent.New -> onEditJob(null)
-                is JobsEvent.Open -> onEditJob(event.jobId) // Overview tab shell replaces this (T018e)
+                is JobsEvent.Open -> onEditJob(event.jobId)
                 else -> vm.onEvent(event)
             }
         },

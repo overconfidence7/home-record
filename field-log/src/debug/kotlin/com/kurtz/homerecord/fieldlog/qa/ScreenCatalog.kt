@@ -20,6 +20,8 @@ object ScreenCatalog {
         QaScreen("jobs-empty", nonRoot = false) { JobsEmptyPreview() },
         QaScreen("jobs-no-matches", nonRoot = false) { JobsNoMatchesPreview() },
         QaScreen("job-edit", nonRoot = true) { JobEditPreview() },
+        QaScreen("job-overview", nonRoot = true) { JobOverviewPreview() },
+        QaScreen("job-overview-empty", nonRoot = true) { JobOverviewEmptyPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )
