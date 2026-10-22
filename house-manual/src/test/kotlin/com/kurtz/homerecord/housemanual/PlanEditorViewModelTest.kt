@@ -25,6 +25,9 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -41,6 +44,7 @@ class PlanEditorViewModelTest {
     private lateinit var db: HomeRecordDatabase
     private lateinit var repo: HomeRepository
     private var ids = 0
+    private val made = mutableListOf<PlanEditorViewModel>()
 
     /** Real time on purpose: Room answers on its own threads. */
     private fun test(block: suspend CoroutineScope.() -> Unit) = runBlocking { block() }
@@ -53,6 +57,13 @@ class PlanEditorViewModelTest {
     }
 
     @After fun tearDown() {
+        // A save still in flight when the database closes would throw into the next test class.
+        runBlocking {
+            made.forEach { vm ->
+                val job = vm.viewModelScope.coroutineContext[Job]
+                job?.cancelAndJoin()
+            }
+        }
         db.close()
         Dispatchers.resetMain()
     }
@@ -62,6 +73,7 @@ class PlanEditorViewModelTest {
             f.first()?.id ?: repo.createHome(NewHome("Maple St", null, HouseType.COLONIAL, Foundation.BASEMENT, true))
         }
         return PlanEditorViewModel(repo, homeId, handle, newId = { "room-${ids++}" }).also { vm ->
+            made += vm
             withTimeout(10_000) { vm.state.first { !it.loading } }
         }
     }
