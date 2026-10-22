@@ -9,6 +9,7 @@
     <string name="layer_drain_vent">Drain and vent</string>
     <string name="layers_group">Layers</string>
     <string name="blueprint_north">North</string>
+    <string name="blueprint_room_size">%1$s by %2$s</string>
     <plurals name="blueprint_description">
         <item quantity="one">Blueprint with %1$d room</item>
         <item quantity="other">Blueprint with %1$d rooms</item>

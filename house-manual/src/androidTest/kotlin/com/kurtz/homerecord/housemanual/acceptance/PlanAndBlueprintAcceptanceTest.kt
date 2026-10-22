@@ -7,6 +7,10 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performScrollToNode
@@ -164,5 +168,14 @@ class PlanAndBlueprintAcceptanceTest {
         rule.onNodeWithText("Delete").assertIsDisplayed()
         rule.onNodeWithText("Rename").performClick()
         assertThat(events).contains(HouseEvent.StartRename(kitchen))
+    }
+
+    @AcceptanceCriterion("AC-C14")
+    @Test fun roomsOnTheBlueprintAreAccessibleButtons() {
+        val events = mutableListOf<HouseEvent>()
+        house(houseState, events)
+        rule.onNodeWithContentDescription("Kitchen").assertHasClickAction().performSemanticsAction(SemanticsActions.OnClick)
+        rule.onNodeWithContentDescription("Kitchen").performSemanticsAction(SemanticsActions.OnLongClick)
+        assertThat(events).contains(HouseEvent.LongPressRoom(kitchen))
     }
 }

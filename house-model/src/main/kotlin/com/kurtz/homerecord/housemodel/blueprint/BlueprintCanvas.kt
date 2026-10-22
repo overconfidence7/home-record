@@ -4,6 +4,17 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.stateDescription
+import com.kurtz.homerecord.core.units.LengthParser
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -56,8 +67,12 @@ fun BlueprintCanvas(
     val longClick by rememberUpdatedState(onRoomLongClick)
     val description = pluralStringResource(R.plurals.blueprint_description, rooms.size, rooms.size)
     val marginPx = 40f * density
+    BoxWithConstraints(modifier) {
+    val widthPx = constraints.maxWidth.toFloat()
+    val heightPx = constraints.maxHeight.toFloat()
     Canvas(
-        modifier
+        Modifier
+            .fillMaxSize()
             .semantics { contentDescription = description }
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -74,6 +89,33 @@ fun BlueprintCanvas(
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
         drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, layers, markers)
+    }
+    // Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its bounds.
+    if (rooms.isNotEmpty() && widthPx > 0f && heightPx > 0f) {
+        val view = BlueprintView.fit(rooms, widthPx, heightPx, marginPx)
+        val toDp = { px: Float -> (px / density).dp }
+        rooms.forEach { room ->
+            val size = stringResource(
+                R.string.blueprint_room_size,
+                LengthParser.format(room.maxX - room.minX, system),
+                LengthParser.format(room.maxY - room.minY, system),
+            )
+            val left = view.x(room.minX)
+            val top = view.y(room.minY)
+            Box(
+                Modifier
+                    .offset(toDp(left), toDp(top))
+                    .size(toDp(view.x(room.maxX) - left), toDp(view.y(room.maxY) - top))
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = room.name
+                        stateDescription = size
+                        onClick { click(room); true }
+                        onLongClick { longClick(room); true }
+                    },
+            )
+        }
+    }
     }
 }
 
