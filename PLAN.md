@@ -53,6 +53,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T017: HM-House tab and HM-Room skeleton: floor chips, blueprint, Edit plan / 3D (placeholder) / Export actions; HM-Room with sections (Items, Walls, Photos, Overlays, Breakers, Shutoffs, Notes) as empty states; Add room FAB inside the editor (acceptance: AC-H4, AC-H10 shell)
   - [ ] T017a: 3D placeholder action on HM-House is deferred to the 3D task (a dead button would be a placeholder); HM-Room sections gain real lists as items, overlays, breakers and shutoffs land
 - [ ] T018: Field Log jobs with rooms: FL-Jobs list, FL-JobEdit (client, address with on-device Geocoder → lat/lng, rooms chips, dates, crew, phases, budget, office emails), FL-Job Overview tab and tab shell, `JobOrdering` `[unit]`, sync (acceptance: AC-F5, AC-F6, AC-F7)
+  - [x] T018a: `JobOrdering` + `JobSummary` in `:core` model with unit tests (AC-F6); jobs list, JobEdit, Overview and sync remain under T018
 - [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
 - [ ] R04: Review T016–T020
