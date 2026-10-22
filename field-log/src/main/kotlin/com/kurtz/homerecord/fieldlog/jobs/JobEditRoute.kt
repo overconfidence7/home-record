@@ -24,11 +24,12 @@ fun JobEditRoute(
     rooms: RoomDao,
     recordChange: suspend (String, String) -> Unit,
     onClose: () -> Unit,
+    onSaved: () -> Unit = {},
 ) {
     val vm = viewModel<JobEditViewModel>(
         factory = viewModelFactory { initializer { JobEditViewModel(companyId, jobId, jobs, clients, homes, floors, rooms, recordChange, createSavedStateHandle()) } },
     )
     val state = vm.state.collectAsState().value
-    LaunchedEffect(state.saved) { if (state.saved) onClose() }
+    LaunchedEffect(state.saved) { if (state.saved) { onSaved(); onClose() } }
     JobEditScreen(state, vm::onEvent, onClose)
 }

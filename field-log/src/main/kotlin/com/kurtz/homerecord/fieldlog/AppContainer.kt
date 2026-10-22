@@ -14,6 +14,8 @@ import androidx.room.Room
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.company.CompanyState
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.geo.AndroidGeocoder
+import com.kurtz.homerecord.fieldlog.jobs.JobGeocoder
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
 import com.kurtz.homerecord.core.sync.DeviceIdStore
 import com.kurtz.homerecord.core.sync.RetrofitSyncApi
@@ -26,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -79,11 +82,19 @@ class AppContainer(app: Application) {
         syncCoordinator.requestSync()
     }
 
+    val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
+
     init {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) {
             auth.restore()
             syncCoordinator.start()
+        }
+        // Addresses typed offline get coordinates once the network is back (AC-F5).
+        scope.launch(Dispatchers.IO) {
+            val connectivity = AndroidConnectivityMonitor(app)
+            combine(connectivity.online, company.state) { online, c -> (c as? CompanyState.Active)?.takeIf { online } }
+                .collect { active -> active?.let { jobGeocoder.resolvePending(it.membership.companyId) } }
         }
     }
 

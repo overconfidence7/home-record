@@ -95,3 +95,6 @@ House Manual seeds through `HomeRepository` (same code path as the app) after `c
 
 ## 2026-10-22 — Blueprint PDF scale
 PDF pages use the largest standard drafting scale (1/2" = 1' down to 1/32" = 1') that fits Letter, so the printout is genuinely to scale; the scale bar is 1/2/5/10... feet. Exports go to cache/exports through a FileProvider.
+
+## 2026-10-22 Job rooms' home rows are not synced yet
+Home, floor and room rows are home-tenant entities on the backend, but Field Log only holds a company tenant. T018c2a stores them locally; syncing them needs a decision on how a job's home gets a home tenant (create one per job, or sync under the company). Left open in T018c2b2 rather than pushing rows the backend would reject with 400 and block the outbox.
