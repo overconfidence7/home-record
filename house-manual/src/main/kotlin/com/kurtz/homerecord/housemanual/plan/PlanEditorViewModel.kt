@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.FloorSummary
+import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.plan.GridSnapper
 import com.kurtz.homerecord.housemodel.plan.PlanEditor
@@ -60,8 +61,7 @@ class PlanEditorViewModel(
             repo.observeFloors(homeId).collect { floors ->
                 val current = _state.value.floorId
                 val chosen = floors.firstOrNull { it.id == current }
-                    ?: floors.firstOrNull { it.roomCount > 0 }
-                    ?: floors.firstOrNull()
+                    ?: floors.defaultFloor()
                 _state.update { it.copy(floors = floors) }
                 if (chosen == null) {
                     _state.update { it.copy(loading = false, floorId = null) }

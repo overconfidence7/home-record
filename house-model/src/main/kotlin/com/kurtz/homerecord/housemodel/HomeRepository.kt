@@ -24,7 +24,13 @@ data class UnplacedRoom(val id: String, val name: String, val kind: String)
 data class FloorPlan(val placed: List<PlanRoom>, val unplaced: List<UnplacedRoom>)
 
 /** A floor with the number of rooms on it, for the floor list (AC-C3). */
-data class FloorSummary(val id: String, val name: String, val ceilingHeightIn: Int, val halfLevel: Boolean, val roomCount: Int)
+data class FloorSummary(val id: String, val name: String, val ceilingHeightIn: Int, val halfLevel: Boolean, val roomCount: Int, val elevationIn: Int = 0)
+
+/** The floor a screen opens on: the one with rooms, else the entrance level (lowest at or above grade), never the basement. */
+fun List<FloorSummary>.defaultFloor(): FloorSummary? =
+    firstOrNull { it.roomCount > 0 }
+        ?: filter { it.elevationIn >= 0 }.minByOrNull { it.elevationIn }
+        ?: firstOrNull()
 
 /** New-home answers from onboarding (AC-C1). */
 data class NewHome(
@@ -52,7 +58,7 @@ class HomeRepository(
     fun observeFloors(homeId: String): Flow<List<FloorSummary>> =
         combine(db.floorDao().observeFor(homeId), db.roomDao().observeCounts()) { floors, counts ->
             val byFloor = counts.associate { it.floorId to it.rooms }
-            floors.map { FloorSummary(it.id, it.name, it.ceilingHeightIn, it.halfLevel, byFloor[it.id] ?: 0) }
+            floors.map { FloorSummary(it.id, it.name, it.ceilingHeightIn, it.halfLevel, byFloor[it.id] ?: 0, it.elevationIn) }
         }
 
     /** Creates the home, its seeded floors and, with an attached garage, a Garage room on the right floor. */

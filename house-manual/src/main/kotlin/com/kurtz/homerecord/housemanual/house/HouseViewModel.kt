@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanEditor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,8 +40,7 @@ class HouseViewModel(
             repo.observeFloors(homeId).collect { floors ->
                 val current = _state.value.floorId
                 val chosen = floors.firstOrNull { it.id == current }
-                    ?: floors.firstOrNull { it.roomCount > 0 }
-                    ?: floors.firstOrNull()
+                    ?: floors.defaultFloor()
                 _state.update { it.copy(floors = floors, floorId = chosen?.id, loading = false) }
                 saved[FLOOR] = chosen?.id
                 floorIds.value = chosen?.id
