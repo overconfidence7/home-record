@@ -696,7 +696,7 @@ Judged: 231 screenshots (of 357 published: 108 House Manual crawler, 35 Field Lo
 
 Automated suite run at 2026-10-22 10:52 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
 
-- [ ] [Major] T016 is ticked but these acceptance criteria have no test or flow: AC-C16 [auto:coverage:T016] - steps: automated, see qa-results branch latest/ for commit f99c1a6 - expected: every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules) - actual: no reference found
+- [x] [Major] T016 is ticked but these acceptance criteria have no test or flow: AC-C16 [auto:coverage:T016] - steps: automated, see qa-results branch latest/ for commit f99c1a6 - expected: every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules) - actual: no reference found
 
 Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:logcat:field-log:com.kurtz.homerecord.fieldlog], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H03-blueprint-room], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual], [auto:logcat:house-manual:com.kurtz.homerecord.housemanual]
 

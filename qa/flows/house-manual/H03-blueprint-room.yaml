@@ -10,6 +10,9 @@ appId: com.kurtz.homerecord.housemanual
 # Room page is a non-root screen: it has the back arrow and names the room (AC-U2, ui rule 7)
 - assertVisible: "Back"
 - assertVisible: "Kitchen"
+# Room page sections are present as the T017 shell of AC-H10 (items list arrives with T021+)
+- assertVisible:
+    id: "hm_room_items"
 - tapOn: "Back"
 - longPressOn: "Kitchen"
 - assertVisible: "Rename"
@@ -35,3 +38,10 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Attic"
 - takeScreenshot: H03-floors
 - tapOn: "Back"
+# Export PDF is offered on the House tab; the share sheet itself is not driven (AC-C16)
+- tapOn: "House"
+- scrollUntilVisible:
+    element:
+      id: "hm_house_export"
+- assertVisible:
+    id: "hm_house_export"

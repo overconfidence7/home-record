@@ -1,18 +1,8 @@
 {
- "ticked_tasks": 24,
- "acs_claimed": 74,
- "acs_missing": 1,
+ "ticked_tasks": 25,
+ "acs_claimed": 76,
+ "acs_missing": 0,
  "unit_test_files": 41,
  "device_test_files": 19,
- "tasks": [
-  {
-   "task": "T016",
-   "acs": [
-    "AC-C16"
-   ],
-   "missing": [
-    "AC-C16"
-   ]
-  }
- ]
+ "tasks": []
 }
