@@ -691,3 +691,17 @@ Auto entry review (0 new findings for 5125597; 20 still open):
 Coverage note: the auto entry reports 73/73 claimed ACs covered across 23 ticked tasks (0 gaps); nothing to list.
 
 Judged: 231 screenshots (of 357 published: 108 House Manual crawler, 35 Field Log crawler, 34 handoff crawler that differ from the app jobs' copies, 24 tour, 21 flow and failure, 9 suite shots read directly; the other 112 handoff crawler PNGs are pixel-identical to the app jobs' and the 14 H02b/H03 takeScreenshot files repeat H02's), 5 walkthrough steps. New issues: 4. Product gaps: 0.
+
+## QA auto 2026-10-22 (commit f99c1a6)
+
+Automated suite run at 2026-10-22 10:52 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] T016 is ticked but these acceptance criteria have no test or flow: AC-C16 [auto:coverage:T016] - steps: automated, see qa-results branch latest/ for commit f99c1a6 - expected: every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules) - actual: no reference found
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:logcat:field-log:com.kurtz.homerecord.fieldlog], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H03-blueprint-room], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual], [auto:logcat:house-manual:com.kurtz.homerecord.housemanual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Fail, house-manual H15 Fail
+
+Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 57 device stages, 250 unit tests, 54 backend tests, coverage 73/74 ACs. Passed: 38. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
