@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -69,12 +70,12 @@ fun FormScaffold(
             TopAppBar(
                 title = { Text(title, maxLines = 1) },
                 navigationIcon = {
-                    IconButton(onClick = requestClose) {
+                    IconButton(onClick = requestClose, modifier = Modifier.testTag("${LocalTagPrefix.current}_close")) {
                         Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.close))
                     }
                 },
                 actions = {
-                    TextButton(onClick = onSave, enabled = saveEnabled) { Text(stringResource(R.string.save)) }
+                    TextButton(onClick = onSave, enabled = saveEnabled, modifier = Modifier.testTag("${LocalTagPrefix.current}_save")) { Text(stringResource(R.string.save)) }
                 },
             )
         },

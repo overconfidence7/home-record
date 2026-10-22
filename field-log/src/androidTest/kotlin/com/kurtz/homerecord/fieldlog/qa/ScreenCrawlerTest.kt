@@ -50,7 +50,7 @@ class ScreenCrawlerTest {
         for (entry in ScreenCatalog.entries) {
             open(entry.id).use {
                 compose.waitForIdle()
-                if (entry.nonRoot) assertTrue("${entry.id}: no back arrow (fl_back)", compose.onAllNodesWithTag("fl_back").fetchSemanticsNodes().isNotEmpty())
+                if (entry.nonRoot) assertTrue("${entry.id}: no back arrow (fl_back) or close (fl_close)", compose.onAllNodesWithTag("fl_back").fetchSemanticsNodes().isNotEmpty() || compose.onAllNodesWithTag("fl_close").fetchSemanticsNodes().isNotEmpty())
                 val tooSmall = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().filter { n ->
                     n.touchBoundsInRoot.width < 48 * inst.targetContext.resources.displayMetrics.density - 1 ||
                         n.touchBoundsInRoot.height < 48 * inst.targetContext.resources.displayMetrics.density - 1
