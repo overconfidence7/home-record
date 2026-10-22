@@ -705,3 +705,17 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, ho
 Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 57 device stages, 250 unit tests, 54 backend tests, coverage 73/74 ACs. Passed: 38. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-22 (commit c6113d1)
+
+Automated suite run at 2026-10-22 16:28 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Unit test com.kurtz.homerecord.housemanual.HouseViewModelTest.layerTogglesPersistPerHome fails [auto:unit:com.kurtz.homerecord.housemanual.HouseViewModelTest.layerTogglesPersistPerHome] - steps: automated, see qa-results branch latest/ for commit c6113d1 - expected: test passes (CLAUDE.md: never weaken tests) - actual: java.lang.IllegalStateException: Dispatchers.Main is used concurrently with setting it
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:logcat:field-log:com.kurtz.homerecord.fieldlog], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:logcat:handoff:com.kurtz.homerecord.fieldlog], [auto:logcat:handoff:com.kurtz.homerecord.housemanual], [auto:coldstart:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H03-blueprint-room], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual], [auto:logcat:house-manual:com.kurtz.homerecord.housemanual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Fail, house-manual H15 Fail
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 57 device stages, 265 unit tests, 54 backend tests, coverage 76/76 ACs. Passed: 38. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
