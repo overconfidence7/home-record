@@ -28,6 +28,7 @@ class WallDeriver(private val sharedToleranceIn: Int = 4) {
                 val b = room.points[(i + 1) % n]
                 val length = hypot((b.x - a.x).toDouble(), (b.y - a.y).toDouble()).roundToInt()
                 val orientation = when {
+                    a == b -> "D${++diagonal}"
                     a.y == b.y -> {
                         // Screen coordinates (y down): positive area means the interior is to the right of travel.
                         val dirX = if (b.x > a.x) 1 else -1
