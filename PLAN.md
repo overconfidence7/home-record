@@ -82,6 +82,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T022: Data plate OCR: ML Kit text recognition (bundled), recognized lines sheet, tap-to-assign, `DataPlateParser` `[unit]`, works offline (acceptance: AC-C31)
   - [x] T022a: `DataPlateParser` in :core model (labelled model/serial, next-line values, whole-word brand match) with DataPlateParserTest 4 (AC-C31)
   - [x] T022b: ML Kit bundled text recognition behind a `TextRecognizer` interface in :core, recognized-lines sheet with tap-to-assign on HM-ItemEdit (Scan data plate), camera/gallery, offline (AC-C31)
+- [x] T023a (partial T023): `SerialAgeDecoder` `[unit]` in :core model with per-brand tests (AC-C32)
 - [ ] T023: `SerialAgeDecoder` `[unit]` for the brands in AC-C32 with documented rules and tests per brand; "manufactured on" fill with override (acceptance: AC-C32)
 - [ ] T024: Warranty record and status: `Warranty` entity, `WarrantyStatus` `[unit]` (expired / expiring 60 days / active / unknown), `WarrantyStatusLine` component, item page warranty section with Registered toggle and source link (acceptance: AC-C33)
 - [ ] T025: Backend warranty lookup: `POST /lookup/warranty` with Claude API web search (allowed domains, max 3 searches, structured JSON), KV cache by normalized make+model `[unit]`, per-account rate limit, cost log; vitest with a recorded response (acceptance: AC-B10)

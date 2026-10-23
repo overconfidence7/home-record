@@ -29,6 +29,12 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_photo_data_plate"
 - assertVisible:
     id: "hm_item_photo_item"
+# AC-C31: the data plate button offers camera and gallery (the on-device scan sheet follows the photo; OCR itself is covered by DataPlateParserTest and ItemEditViewModelTest)
+- tapOn:
+    id: "hm_item_photo_data_plate"
+- assertVisible: "Take photo"
+- assertVisible: "Choose from gallery"
+- pressKey: back
 - tapOn:
     id: "hm_save"
 # AC-C35: default consumables and reminders for the subtype are seeded on save (asserted in ItemRepositoryTest; Reminders tab arrives with T031)
