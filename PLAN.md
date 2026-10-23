@@ -90,6 +90,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T025: Backend warranty lookup: `POST /lookup/warranty` with Claude API web search (allowed domains, max 3 searches, structured JSON), KV cache by normalized make+model `[unit]`, per-account rate limit, cost log; vitest with a recorded response (acceptance: AC-B10)
 - [x] R05: Review T021–T025
 - [ ] T026: Warranty lookup in the app: automatic on first save when online, "Look up warranty" and "Look up again", confirm/edit/discard sheet, offline queue with badge, stored once (acceptance: AC-C34, AC-H5)
+  - [x] T026a: `WarrantyLookupApi` (Retrofit, years→months) in :core and `WarrantyLookupRepository` in :house-model (lookup once, force for Look up again, offline PENDING queue, runPending → REVIEW rows as the badge, confirm/edit/discard, ends-on from in-service date) with tests (AC-C34)
+  - [ ] T026b: confirm/edit/discard sheet, Look up warranty / Look up again buttons, auto attempt on first save, badge and runPending on reconnect; needs the item page from T027 (AC-C34, AC-H5)
 - [ ] T027: HM-Items tab: grouped by category with counts, by-room toggle, filter chips (category, room, warranty status), search, FAB; HM-Item detail screen with hero photo and all sections; overflow Move/Duplicate/Delete (acceptance: AC-H6, AC-H7 chips shell)
 - [ ] T028: Consumables, service history, contacts: consumables editor and search, service record form, HM-Contacts with tap-to-call/email and links to items (acceptance: AC-C35, AC-C36, AC-C39)
 - [ ] T029: Documents: `Document` entity, HM-Documents folders, upload from Files and camera scan (ML Kit document scanner), in-app PDF/image viewer with pinch zoom, attach to home/room/item, share (acceptance: AC-C37)

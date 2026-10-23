@@ -94,6 +94,7 @@ interface WarrantyDao {
     @Query("SELECT * FROM warranty WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): WarrantyEntity?
     @Query("SELECT * FROM warranty WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<WarrantyEntity>>
     @Query("SELECT * FROM warranty WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<WarrantyEntity>
+    @Query("SELECT * FROM warranty WHERE confidence = 'PENDING' AND deletedAt IS NULL ORDER BY createdAt") suspend fun listPending(): List<WarrantyEntity>
     @Query("UPDATE warranty SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 
