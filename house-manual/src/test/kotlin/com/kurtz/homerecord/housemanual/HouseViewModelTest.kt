@@ -18,7 +18,10 @@ import com.kurtz.homerecord.housemodel.blueprint.LayerSet
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -57,9 +60,18 @@ class HouseViewModelTest {
     }
 
     @After fun tearDown() {
+        // A write still in flight when the database closes would throw into the next test class.
+        runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
     }
+
+    private val created = mutableListOf<HouseViewModel>()
+
+    private fun house(
+        repo: HomeRepository, homeId: String, store: LayerStore, handle: SavedStateHandle, name: String, type: String,
+        exporter: com.kurtz.homerecord.housemodel.ui.BlueprintExporter = com.kurtz.homerecord.housemodel.ui.BlueprintExporter { _, _ -> null },
+    ) = HouseViewModel(repo, homeId, store, handle, name, type, exporter = exporter).also { created += it }
 
     private suspend fun setUpHome(): Pair<String, String> {
         val homeId = repo.createHome(NewHome("Maple St", null, HouseType.COLONIAL, Foundation.BASEMENT, false))
@@ -72,7 +84,7 @@ class HouseViewModelTest {
 
     @Test fun showsTheFloorsRooms() = test {
         val (homeId, _) = setUpHome()
-        val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
         val state = vm.untilRooms(2)
         assertThat(state.rooms.map { it.name }).containsExactly("Kitchen", "Living")
     }
@@ -81,7 +93,7 @@ class HouseViewModelTest {
     @Test fun exportPdfPassesEveryFloorToTheExporterAndSurfacesTheUri() = test {
         val (homeId, _) = setUpHome()
         var seen: List<com.kurtz.homerecord.housemodel.pdf.PdfFloor> = emptyList()
-        val vm = HouseViewModel(
+        val vm = house(
             repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial",
             exporter = com.kurtz.homerecord.housemodel.ui.BlueprintExporter { _, floors -> seen = floors; "content://x/blueprint.pdf" },
         )
@@ -97,16 +109,16 @@ class HouseViewModelTest {
 
     @Test fun layerTogglesPersistPerHome() = test {
         val (homeId, _) = setUpHome()
-        val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
         vm.onEvent(HouseEvent.ToggleLayer(BlueprintLayer.PLUMBING))
         assertThat(store.read(homeId)).isEqualTo(LayerSet(setOf(BlueprintLayer.PLUMBING)))
-        val again = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        val again = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
         assertThat(again.state.value.layers).isEqualTo(LayerSet(setOf(BlueprintLayer.PLUMBING)))
     }
 
     @Test fun renameFromTheLongPressMenuSavesTheRoom() = test {
         val (homeId, floorId) = setUpHome()
-        val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
         val room = vm.untilRooms(2).rooms.first { it.id == "k" }
         vm.onEvent(HouseEvent.LongPressRoom(room))
         assertThat(vm.state.value.dialog).isEqualTo(HouseDialog.Menu(room))
@@ -119,7 +131,7 @@ class HouseViewModelTest {
 
     @Test fun deleteRemovesOnlyThatRoom() = test {
         val (homeId, floorId) = setUpHome()
-        val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
         val room = vm.untilRooms(2).rooms.first { it.id == "l" }
         vm.onEvent(HouseEvent.StartDelete(room))
         vm.onEvent(HouseEvent.ConfirmDelete("l"))

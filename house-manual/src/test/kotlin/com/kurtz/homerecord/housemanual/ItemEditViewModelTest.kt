@@ -15,7 +15,11 @@ import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.ui.ItemEditEvent
 import com.kurtz.homerecord.housemodel.ui.ItemEditViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.flow.first
@@ -47,16 +51,23 @@ class ItemEditViewModelTest {
     }
 
     @After fun tearDown() {
-        Dispatchers.resetMain()
+        // A save still in flight when the database closes would throw into the next test class.
+        runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
+        Dispatchers.resetMain()
     }
+
+    private val created = mutableListOf<ItemEditViewModel>()
+
+    private fun made(items: ItemRepository, homes: HomeRepository, homeId: String, itemId: String?, handle: SavedStateHandle) =
+        ItemEditViewModel(items, homes, homeId, itemId, handle).also { created += it }
 
     private suspend fun home() = homes.createHome(NewHome("Maple St", null, HouseType.TWO_STORY, Foundation.BASEMENT, true)).also { homeId = it }
 
     @AcceptanceCriterion("AC-C30")
     @Test fun saveNeedsTypeRoomAndNameThenStoresTheItem() = runTest {
         home()
-        val vm = ItemEditViewModel(items, homes, homeId, null, SavedStateHandle())
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.Save)
         assertThat(vm.state.value.showErrors).isTrue()
@@ -75,7 +86,7 @@ class ItemEditViewModelTest {
     @AcceptanceCriterion("AC-C30")
     @Test fun roomPickerListsEveryRoomOfTheHome() = runTest {
         home()
-        val vm = ItemEditViewModel(items, homes, homeId, null, SavedStateHandle())
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         assertThat(vm.state.value.rooms.map { it.name }).contains("Garage")
     }
@@ -84,11 +95,11 @@ class ItemEditViewModelTest {
     @Test fun draftSurvivesProcessDeath() = runTest {
         home()
         val handle = SavedStateHandle()
-        val vm = ItemEditViewModel(items, homes, homeId, null, handle)
+        val vm = made(items, homes, homeId, null, handle)
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.PickSubtype("dishwasher"))
         vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(make = "Bosch")))
-        val revived = ItemEditViewModel(items, homes, homeId, null, SavedStateHandle(mapOf("draft" to handle.get<ArrayList<String>>("draft"))))
+        val revived = made(items, homes, homeId, null, SavedStateHandle(mapOf("draft" to handle.get<ArrayList<String>>("draft"))))
         revived.state.first { !it.loading }
         assertThat(revived.state.value.draft.make).isEqualTo("Bosch")
         assertThat(revived.state.value.draft.subtypeId).isEqualTo("dishwasher")
@@ -98,11 +109,11 @@ class ItemEditViewModelTest {
     @Test fun editingAnItemLoadsItsDraftAndMissingItemsAreReported() = runTest {
         home()
         val id = items.save(homeId, com.kurtz.homerecord.housemodel.items.ItemDraft(subtypeId = "range", roomId = PseudoRooms.EXTERIOR, name = "Range"))!!
-        val vm = ItemEditViewModel(items, homes, homeId, id, SavedStateHandle())
+        val vm = made(items, homes, homeId, id, SavedStateHandle())
         vm.state.first { !it.loading }
         assertThat(vm.state.value.draft.name).isEqualTo("Range")
         assertThat(vm.state.value.dirty).isFalse()
-        val gone = ItemEditViewModel(items, homes, homeId, "nope", SavedStateHandle())
+        val gone = made(items, homes, homeId, "nope", SavedStateHandle())
         gone.state.first { !it.loading }
         assertThat(gone.state.value.missing).isTrue()
     }
