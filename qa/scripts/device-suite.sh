@@ -49,6 +49,7 @@ adb shell settings put global window_animation_scale 0 >/dev/null 2>&1 || true
 adb shell settings put global transition_animation_scale 0 >/dev/null 2>&1 || true
 adb shell settings put global animator_duration_scale 0 >/dev/null 2>&1 || true
 adb shell settings put system font_scale 1.0 >/dev/null 2>&1 || true
+adb shell settings put global hide_error_dialogs 1 >/dev/null 2>&1 || true  # emulator "System UI isn't responding" ANR dialogs covered the app and failed flows
 adb shell cmd uimode night no >/dev/null 2>&1 || true
 adb shell settings put system accelerometer_rotation 0 >/dev/null 2>&1 || true
 adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
