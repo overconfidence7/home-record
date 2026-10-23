@@ -747,3 +747,9 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, ho
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 57 device stages, 279 unit tests, 55 backend tests, coverage 76/76 ACs. Passed: 39. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## Builder visual review V1 (commit df32303)
+
+Opened committed PNGs for House blueprint (light), Plan editor (200% font), Room page (200% font) and Item edit new (dark); the rest of the M1 sets (Floors, Plan editor variants, Item edit, Jobs, Job overview/edit/house) were not individually opened this run. Rules checked: 1-12, 24-30, 32.
+- Pass: blueprint drawing with dimensions, doors, windows, stairs and north arrow; plan editor at 200% grows without clipping; room page cards scroll and use headings; item form fields labelled with (required) and readable in dark.
+- [ ] [UI] Minor: House tab action row wraps "Edit plan" and "Export PDF" onto two lines at normal font and the Floors button is shorter than its neighbours - expected: rule 24/25 consistent button row - actual: uneven heights, wrapped labels - screenshot: house-manual HouseBlueprintScreenshot_Light
