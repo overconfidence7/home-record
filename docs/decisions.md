@@ -113,3 +113,7 @@ Plan editor, House tab, Floors and their ViewModels/strings moved from :house-ma
 
 ## 2026-10-23 — SerialAgeDecoder rules (T023a)
 Brand serial formats are from commonly published manufacturer charts and are heuristics, not guarantees. Letter-code families (Bradford White, GE, Samsung) resolve to the latest cycle year not after today; year-digit families (Trane, York, Whirlpool, LG) resolve to the latest matching year; two-digit-year families fall back to 19xx when 20xx would be in the future. Week rules return the Monday-of-week offset from Jan 1; the decoded date is always shown with its rule and can be overridden. Nate to verify GE/Samsung/Bradford White letter tables against real labels.
+
+## 2026-10-23 — Warranty lookup backend (T025)
+- Calls the Anthropic Messages API directly with `fetch` (no SDK dependency), model `claude-sonnet-5-5`, `web_search_20250305` tool with `max_uses: 3` and an `allowed_domains` list of manufacturers and big retailers. "Structured output" is a JSON-only prompt validated with zod (bad fields degrade to null/low confidence).
+- Quota counts every request (cache hits included) in a KV day bucket per user; Pro means any membership whose company/home `entitlement = 'pro'`. Cost log is a D1 table `lookup_log`, only for upstream calls.

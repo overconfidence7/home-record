@@ -3,6 +3,7 @@ import type { AppEnv } from "./env";
 import { auth } from "./routes/auth";
 import { dev } from "./routes/dev";
 import { company } from "./routes/company";
+import { lookup } from "./routes/lookup";
 import { me } from "./routes/me";
 import { sync } from "./routes/sync";
 import { tenants } from "./routes/tenants";
@@ -17,6 +18,7 @@ app.route("/me", me);
 app.route("/", company);
 app.route("/", tenants);
 app.route("/", sync);
+app.route("/", lookup);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 app.onError((err, c) => {
