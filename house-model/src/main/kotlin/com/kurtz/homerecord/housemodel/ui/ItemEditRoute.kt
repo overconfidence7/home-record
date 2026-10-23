@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.kurtz.homerecord.core.media.MediaFiles
+import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.housemodel.items.PhotoKind
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,13 +26,14 @@ fun ItemEditRoute(
     items: ItemRepository,
     homes: HomeRepository,
     media: MediaFiles,
+    recognizer: TextRecognizer,
     homeId: String,
     itemId: String?,
     roomId: String?,
     onClose: () -> Unit,
 ) {
     val vm = viewModel<ItemEditViewModel>(
-        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, roomId) } },
+        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, roomId) } },
     )
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }

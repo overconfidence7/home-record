@@ -282,4 +282,16 @@ fun ItemEditTypeSheetPreview() = Frame { com.kurtz.homerecord.housemodel.ui.Subt
 
 @ThemePreviews
 @Composable
+fun ItemEditPlateSheetPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.PlateScanContent(
+        com.kurtz.homerecord.housemodel.ui.PlateScan(
+            lines = listOf("RHEEM", "MODEL NO: XG50T06EC36U1", "SERIAL NO: 1234567890", "50 GAL", "240 V AC"),
+            make = "Rheem", model = "XG50T06EC36U1", target = com.kurtz.homerecord.core.model.PlateField.SERIAL,
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
 fun ItemEditLoadingPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = true), {}, {}) }

@@ -4,7 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFiles
+import com.kurtz.homerecord.core.model.DataPlateParser
 import com.kurtz.homerecord.core.model.ItemCategory
+import com.kurtz.homerecord.core.model.PlateField
+import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.DraftPhoto
 import com.kurtz.homerecord.housemodel.items.ItemDraft
@@ -27,6 +30,7 @@ class ItemEditViewModel(
     private val itemId: String?,
     private val saved: SavedStateHandle,
     private val media: MediaFiles,
+    private val recognizer: TextRecognizer,
     initialRoomId: String? = null,
 ) : ViewModel() {
     private var original = ItemDraft(roomId = initialRoomId)
@@ -82,6 +86,25 @@ class ItemEditViewModel(
                 val draft = _state.value.draft
                 setDraft(draft.copy(photos = draft.photos.filterNot { it.path == event.path }))
             }
+            is ItemEditEvent.PlateTarget -> _state.update { s -> s.copy(plateScan = s.plateScan?.copy(target = event.field)) }
+            is ItemEditEvent.PlateAssign -> _state.update { s ->
+                val scan = s.plateScan ?: return@update s
+                val next = PlateField.entries.firstOrNull { it.ordinal > scan.target.ordinal } ?: scan.target
+                s.copy(plateScan = scan.with(scan.target, event.line).copy(target = next))
+            }
+            ItemEditEvent.PlateApply -> {
+                val scan = _state.value.plateScan ?: return
+                val draft = _state.value.draft
+                setDraft(
+                    draft.copy(
+                        make = scan.make.ifBlank { draft.make },
+                        model = scan.model.ifBlank { draft.model },
+                        serial = scan.serial.ifBlank { draft.serial },
+                    ),
+                )
+                _state.update { it.copy(plateScan = null) }
+            }
+            ItemEditEvent.PlateDismiss -> _state.update { it.copy(plateScan = null) }
             ItemEditEvent.Save -> save()
         }
     }
@@ -89,6 +112,25 @@ class ItemEditViewModel(
     private fun addPhoto(kind: PhotoKind, path: String) {
         val draft = _state.value.draft
         setDraft(draft.copy(photos = draft.photos + DraftPhoto(null, path, kind)))
+        if (kind == PhotoKind.DATA_PLATE) scan(path)
+    }
+
+    /** Reads the data plate on-device and opens the recognized-lines sheet with the parser's proposal. */
+    private fun scan(path: String) {
+        _state.update { it.copy(scanning = true) }
+        viewModelScope.launch {
+            val lines = recognizer.recognizeLines(path)
+            val proposal = DataPlateParser.parse(lines)
+            _state.update {
+                it.copy(
+                    scanning = false,
+                    plateScan = if (proposal.lines.isEmpty()) null else PlateScan(
+                        proposal.lines, proposal.make.orEmpty(), proposal.model.orEmpty(), proposal.serial.orEmpty(),
+                        target = PlateField.entries.firstOrNull { f -> proposal.valueFor(f) == null } ?: PlateField.MODEL,
+                    ),
+                )
+            }
+        }
     }
 
     private fun restore(): ItemDraft? {

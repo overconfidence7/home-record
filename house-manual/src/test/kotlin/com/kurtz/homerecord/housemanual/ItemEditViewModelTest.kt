@@ -63,9 +63,13 @@ class ItemEditViewModelTest {
 
     private val created = mutableListOf<ItemEditViewModel>()
     private val media = FakeMediaFiles()
+    private var plateLines = listOf("RHEEM", "MODEL NO: XG50T06EC36U1", "SERIAL NO: 1234567890", "50 GAL")
+    private val recognizer = object : com.kurtz.homerecord.core.ocr.TextRecognizer {
+        override suspend fun recognizeLines(path: String) = plateLines
+    }
 
     private fun made(items: ItemRepository, homes: HomeRepository, homeId: String, itemId: String?, handle: SavedStateHandle) =
-        ItemEditViewModel(items, homes, homeId, itemId, handle, media).also { created += it }
+        ItemEditViewModel(items, homes, homeId, itemId, handle, media, recognizer).also { created += it }
 
     private suspend fun home() = homes.createHome(NewHome("Maple St", null, HouseType.TWO_STORY, Foundation.BASEMENT, true)).also { homeId = it }
 
@@ -121,6 +125,43 @@ class ItemEditViewModelTest {
         val gone = made(items, homes, homeId, "nope", SavedStateHandle())
         gone.state.first { !it.loading }
         assertThat(gone.state.value.missing).isTrue()
+    }
+
+    @AcceptanceCriterion("AC-C31")
+    @Test fun dataPlatePhotoProposesValuesAndTapAssignsLines() = runTest {
+        home()
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        media.files += path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
+        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        assertThat(scan.make).isEqualTo("Rheem")
+        assertThat(scan.model).isEqualTo("XG50T06EC36U1")
+        assertThat(scan.lines).contains("50 GAL")
+
+        // Tap-to-assign: pick Serial, tap a line, then apply to the form.
+        vm.onEvent(ItemEditEvent.PlateTarget(com.kurtz.homerecord.core.model.PlateField.SERIAL))
+        vm.onEvent(ItemEditEvent.PlateAssign("1234567890"))
+        vm.onEvent(ItemEditEvent.PlateApply)
+        assertThat(vm.state.value.plateScan).isNull()
+        assertThat(vm.state.value.draft.make).isEqualTo("Rheem")
+        assertThat(vm.state.value.draft.serial).isEqualTo("1234567890")
+    }
+
+    @AcceptanceCriterion("AC-C31")
+    @Test fun unreadablePlateOpensNoSheet() = runTest {
+        home()
+        plateLines = emptyList()
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        media.files += path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
+        assertThat(vm.state.value.plateScan).isNull()
+        assertThat(vm.state.value.scanning).isFalse()
     }
 
     @AcceptanceCriterion("AC-C30")

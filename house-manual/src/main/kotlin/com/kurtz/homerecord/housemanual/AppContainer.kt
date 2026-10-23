@@ -11,6 +11,8 @@ import androidx.room.Room
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.core.media.MediaFiles
+import com.kurtz.homerecord.core.ocr.TextRecognizer
+import com.kurtz.homerecord.housemodel.ui.MlKitTextRecognizer
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles
 import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
@@ -83,6 +85,7 @@ class AppContainer(app: Application) {
     }
 
     val media: MediaFiles = AndroidMediaFiles(app)
+    val textRecognizer: TextRecognizer = MlKitTextRecognizer(app)
 
     val layers = PrefsLayerStore(app)
 

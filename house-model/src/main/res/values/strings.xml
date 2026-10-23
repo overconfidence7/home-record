@@ -158,6 +158,11 @@
     <string name="item_photos">Photos</string>
     <string name="item_photo_data_plate">Data plate</string>
     <string name="item_photo_item">Item</string>
+    <string name="item_plate_reading">Reading the data plate…</string>
+    <string name="item_plate_title">Fill in from the data plate</string>
+    <string name="item_plate_hint">Pick Make, Model or Serial, then tap the line that belongs there.</string>
+    <string name="item_plate_apply">Use these</string>
+    <string name="item_plate_skip">Not now</string>
     <string name="item_photo_take">Take photo</string>
     <string name="item_photo_choose">Choose from gallery</string>
     <string name="item_photo_remove">Remove %1$s photo</string>

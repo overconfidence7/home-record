@@ -10,6 +10,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.kurtz.homerecord.core.model.PlateField
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -124,7 +130,14 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             stringResource(R.string.item_notes), d.notes, { onEvent(ItemEditEvent.Change(d.copy(notes = it))) },
             Modifier.testTag("hm_item_notes"), singleLine = false,
         )
+        if (state.scanning) {
+            Text(stringResource(R.string.item_plate_reading), style = MaterialTheme.typography.bodyMedium)
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+        }
         PhotosSection(d.photos, onEvent)
+    }
+    state.plateScan?.let { scan ->
+        PlateScanSheet(scan, onEvent)
     }
     state.photoSheetFor?.let { kind ->
         OptionsSheet(
@@ -248,4 +261,62 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlateScanSheet(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
+    ModalBottomSheet(onDismissRequest = { onEvent(ItemEditEvent.PlateDismiss) }) { PlateScanContent(scan, onEvent) }
+}
+
+/** Recognized lines with tap-to-assign (AC-C31); separate from the sheet so previews can draw it. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PlateScanContent(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
+    LazyColumn(
+        Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("hm_item_plate_sheet"),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item { Text(stringResource(R.string.item_plate_title), style = MaterialTheme.typography.titleMedium) }
+        item { Text(stringResource(R.string.item_plate_hint), style = MaterialTheme.typography.bodyMedium) }
+        item {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PlateField.entries.forEach { field ->
+                    val name = stringResource(plateFieldLabel(field))
+                    val value = scan.valueFor(field)
+                    FilterChip(
+                        selected = scan.target == field,
+                        onClick = { onEvent(ItemEditEvent.PlateTarget(field)) },
+                        label = { Text(if (value.isBlank()) name else "$name: $value") },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_plate_${field.name.lowercase()}"),
+                    )
+                }
+            }
+        }
+        items(scan.lines, key = { it }) { line ->
+            ListItem(
+                headlineContent = { Text(line) },
+                modifier = Modifier.clickable { onEvent(ItemEditEvent.PlateAssign(line)) }.heightIn(min = 48.dp).testTag("hm_item_plate_line"),
+            )
+        }
+        item {
+            Button(
+                onClick = { onEvent(ItemEditEvent.PlateApply) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_item_plate_apply"),
+            ) { Text(stringResource(R.string.item_plate_apply)) }
+        }
+        item {
+            OutlinedButton(
+                onClick = { onEvent(ItemEditEvent.PlateDismiss) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_item_plate_skip"),
+            ) { Text(stringResource(R.string.item_plate_skip)) }
+        }
+    }
+}
+
+private fun plateFieldLabel(field: PlateField): Int = when (field) {
+    PlateField.MAKE -> R.string.item_make
+    PlateField.MODEL -> R.string.item_model
+    PlateField.SERIAL -> R.string.item_serial
 }

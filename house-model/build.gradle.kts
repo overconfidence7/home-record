@@ -24,6 +24,7 @@ dependencies {
     api(project(":core-ui"))
     implementation(platform(libs.compose.bom))
     implementation(libs.coil.compose)
+    implementation(libs.mlkit.text.recognition)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.robolectric)

@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.housemodel.RoomChoice
+import com.kurtz.homerecord.core.model.PlateField
 import com.kurtz.homerecord.core.media.CaptureTarget
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemField
@@ -12,6 +13,27 @@ enum class ItemPicker { SUBTYPE, ROOM }
 /** One request for the route to open the camera ([target] set) or the gallery; answered with PhotoCaptured or PhotoPicked. */
 data class PhotoLaunch(val kind: PhotoKind, val target: CaptureTarget?)
 
+/** The recognized-lines sheet (AC-C31): every line OCR found, the values proposed or assigned so far, and the field a tap fills. */
+data class PlateScan(
+    val lines: List<String>,
+    val make: String = "",
+    val model: String = "",
+    val serial: String = "",
+    val target: PlateField = PlateField.MODEL,
+) {
+    fun valueFor(field: PlateField): String = when (field) {
+        PlateField.MAKE -> make
+        PlateField.MODEL -> model
+        PlateField.SERIAL -> serial
+    }
+
+    fun with(field: PlateField, value: String): PlateScan = when (field) {
+        PlateField.MAKE -> copy(make = value)
+        PlateField.MODEL -> copy(model = value)
+        PlateField.SERIAL -> copy(serial = value)
+    }
+}
+
 data class ItemEditUiState(
     val loading: Boolean = true,
     val draft: ItemDraft = ItemDraft(),
@@ -22,6 +44,9 @@ data class ItemEditUiState(
     /** Photo kind whose "take or choose" sheet is open. */
     val photoSheetFor: PhotoKind? = null,
     val photoLaunch: PhotoLaunch? = null,
+    /** Set while a data-plate photo is being read. */
+    val scanning: Boolean = false,
+    val plateScan: PlateScan? = null,
     val saving: Boolean = false,
     /** Set once the item is stored; the route closes the form. */
     val savedItemId: String? = null,
@@ -45,5 +70,9 @@ sealed interface ItemEditEvent {
     data class PhotoCaptured(val kind: PhotoKind, val path: String) : ItemEditEvent
     data class PhotoPicked(val kind: PhotoKind, val uri: String) : ItemEditEvent
     data class RemovePhoto(val path: String) : ItemEditEvent
+    data class PlateTarget(val field: PlateField) : ItemEditEvent
+    data class PlateAssign(val line: String) : ItemEditEvent
+    data object PlateApply : ItemEditEvent
+    data object PlateDismiss : ItemEditEvent
     data object Save : ItemEditEvent
 }

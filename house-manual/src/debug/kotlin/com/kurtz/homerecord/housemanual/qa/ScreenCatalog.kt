@@ -39,6 +39,7 @@ object ScreenCatalog {
         QaScreen("item-edit-filled", nonRoot = true) { ItemEditFilledPreview() },
         QaScreen("item-edit-errors", nonRoot = true) { ItemEditErrorsPreview() },
         QaScreen("item-edit-type-sheet", nonRoot = true) { ItemEditTypeSheetPreview() },
+        QaScreen("item-edit-plate-sheet", nonRoot = true) { ItemEditPlateSheetPreview() },
         QaScreen("item-edit-loading", nonRoot = true) { ItemEditLoadingPreview() },
         QaScreen("room-missing", nonRoot = true) { RoomMissingPreview() },
     )
