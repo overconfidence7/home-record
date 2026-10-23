@@ -5,9 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
-import com.kurtz.homerecord.housemanual.house.FloorsDialog
-import com.kurtz.homerecord.housemanual.house.FloorsEvent
-import com.kurtz.homerecord.housemanual.house.FloorsViewModel
+import com.kurtz.homerecord.housemodel.ui.FloorsDialog
+import com.kurtz.homerecord.housemodel.ui.FloorsEvent
+import com.kurtz.homerecord.housemodel.ui.FloorsViewModel
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingViewModel
 import com.kurtz.homerecord.housemodel.Foundation

@@ -18,9 +18,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.coreui.components.LoadingState
-import com.kurtz.homerecord.housemanual.plan.PlanEditorRoute
-import com.kurtz.homerecord.housemanual.house.FloorsRoute
-import com.kurtz.homerecord.housemanual.house.HouseRoute
+import com.kurtz.homerecord.housemodel.ui.PlanEditorRoute
+import com.kurtz.homerecord.housemodel.ui.FloorsRoute
+import com.kurtz.homerecord.housemodel.ui.HouseRoute
 import com.kurtz.homerecord.housemanual.house.RoomRoute
 import com.kurtz.homerecord.housemanual.onboarding.foundationLabel
 import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel

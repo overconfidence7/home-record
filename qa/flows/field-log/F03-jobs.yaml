@@ -1,0 +1,57 @@
+# Walkthrough F3: create a job, see it on Overview, start its plan on the House tab (AC-F5, AC-F7, AC-F48).
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn: "Company name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn: "Trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Garage subpanel"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_client
+- inputText: "Rivera"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_address
+- inputText: "12 Oak St"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Garage subpanel"
+    timeout: 10000
+- tapOn: "Garage subpanel"
+- assertVisible: "Rivera"
+- takeScreenshot: F03-job-overview
+- tapOn:
+    id: fl_job_tab_house
+- extendedWaitUntil:
+    visible: "Start the plan"
+    timeout: 5000
+- takeScreenshot: F03-job-house-empty
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible: "Main"
+    timeout: 10000

@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.plan
+package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.FloorSummary

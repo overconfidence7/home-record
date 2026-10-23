@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.house
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +49,7 @@ import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.OptionsSheet
 import com.kurtz.homerecord.coreui.components.SheetOption
-import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintCanvas
 import com.kurtz.homerecord.housemodel.blueprint.LayerToggleRow
 import com.kurtz.homerecord.housemodel.plan.PlanRoom

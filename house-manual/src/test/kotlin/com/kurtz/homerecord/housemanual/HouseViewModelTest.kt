@@ -6,9 +6,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
-import com.kurtz.homerecord.housemanual.house.HouseDialog
-import com.kurtz.homerecord.housemanual.house.HouseEvent
-import com.kurtz.homerecord.housemanual.house.HouseViewModel
+import com.kurtz.homerecord.housemodel.ui.HouseDialog
+import com.kurtz.homerecord.housemodel.ui.HouseEvent
+import com.kurtz.homerecord.housemodel.ui.HouseViewModel
 import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.HouseType
@@ -83,7 +83,7 @@ class HouseViewModelTest {
         var seen: List<com.kurtz.homerecord.housemodel.pdf.PdfFloor> = emptyList()
         val vm = HouseViewModel(
             repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial",
-            exporter = com.kurtz.homerecord.housemanual.house.BlueprintExporter { _, floors -> seen = floors; "content://x/blueprint.pdf" },
+            exporter = com.kurtz.homerecord.housemodel.ui.BlueprintExporter { _, floors -> seen = floors; "content://x/blueprint.pdf" },
         )
         vm.untilRooms(2)
         vm.onEvent(HouseEvent.ExportPdf)

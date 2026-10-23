@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog
 
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.kurtz.homerecord.core.company.ApiFailure
@@ -197,5 +198,15 @@ fun JobOverviewEmptyPreview() = Frame {
     com.kurtz.homerecord.fieldlog.jobs.JobScreen(
         com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, name = "Garage subpanel"),
         com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW, {}, {}, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun JobHouseEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, name = "Garage subpanel", clientName = "Rivera"),
+        com.kurtz.homerecord.fieldlog.jobs.JobTab.HOUSE, {}, {}, {},
+        houseContent = { com.kurtz.homerecord.fieldlog.jobs.JobHouseEmpty(onStart = {}, modifier = androidx.compose.ui.Modifier.fillMaxSize()) },
     )
 }

@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.plan
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -86,7 +86,7 @@ import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.OptionsSheet
 import com.kurtz.homerecord.coreui.components.SheetOption
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
-import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
@@ -689,7 +689,7 @@ private fun commitSize(width: Int?, length: Int?, onEvent: (PlanEditorEvent) -> 
 }
 
 @Composable
-internal fun kindLabel(kind: RoomKind): String = stringResource(
+fun kindLabel(kind: RoomKind): String = stringResource(
     when (kind) {
         RoomKind.KITCHEN -> R.string.room_kind_kitchen
         RoomKind.LIVING_ROOM -> R.string.room_kind_living_room

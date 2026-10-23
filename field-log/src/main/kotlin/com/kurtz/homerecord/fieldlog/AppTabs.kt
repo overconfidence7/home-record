@@ -118,8 +118,23 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         entry<JobKey> { key ->
             com.kurtz.homerecord.fieldlog.jobs.JobRoute(
                 membership.companyId, key.jobId, container.db,
+                com.kurtz.homerecord.fieldlog.jobs.JobHouseDeps(
+                    container.homes, container.layers, container.jobHomes,
+                    onEditPlan = { homeId, title, floorId -> nav.push(JobPlanKey(homeId, title, floorId)) },
+                    onEditShape = { homeId, title, floorId, room -> nav.push(JobPlanKey(homeId, title, floorId, room.id, editShape = true)) },
+                    onOpenFloors = { homeId, title -> nav.push(JobFloorsKey(homeId, title)) },
+                ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
             )
+        }
+        entry<JobPlanKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.PlanEditorRoute(
+                container.homes, key.homeId, key.title, onBack = nav::pop, onOpenFloors = { nav.push(JobFloorsKey(key.homeId, key.title)) },
+                floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
+            )
+        }
+        entry<JobFloorsKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.FloorsRoute(container.homes, key.homeId, key.title, onBack = nav::pop)
         }
         entry<JobEditKey> { key ->
             com.kurtz.homerecord.fieldlog.jobs.JobEditRoute(

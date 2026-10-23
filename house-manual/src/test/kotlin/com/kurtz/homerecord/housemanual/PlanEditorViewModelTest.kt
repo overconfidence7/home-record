@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
-import com.kurtz.homerecord.housemanual.plan.PlanEditorEvent
-import com.kurtz.homerecord.housemanual.plan.PlanEditorViewModel
+import com.kurtz.homerecord.housemodel.ui.PlanEditorEvent
+import com.kurtz.homerecord.housemodel.ui.PlanEditorViewModel
 import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.HouseType
@@ -260,7 +260,7 @@ class PlanEditorViewModelTest {
     }
 
     @Test fun pinchKeepsThePointUnderTheFingersFixed() {
-        val s = com.kurtz.homerecord.housemanual.plan.PlanEditorUiState(zoom = 1f, panX = 10f, panY = 10f)
+        val s = com.kurtz.homerecord.housemodel.ui.PlanEditorUiState(zoom = 1f, panX = 10f, panY = 10f)
         val t = PlanEditorViewModel.zoomAround(s, 2f, 100f, 100f)
         assertThat(t.zoom).isEqualTo(2f)
         // World point under (100,100) is (90,90); after zoom it must still be at (100,100).

@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.plan
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState

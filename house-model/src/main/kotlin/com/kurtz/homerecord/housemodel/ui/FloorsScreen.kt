@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.house
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +37,7 @@ import com.kurtz.homerecord.coreui.components.LengthField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
-import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.FloorSummary
 
 /** HM-Floors: floors listed top floor first, with move, edit and delete in each row's menu (AC-C3). */

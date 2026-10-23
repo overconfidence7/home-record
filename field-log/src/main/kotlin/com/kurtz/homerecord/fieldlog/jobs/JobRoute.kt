@@ -1,18 +1,36 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.housemodel.blueprint.LayerStore
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.ui.HouseRoute
+import kotlinx.coroutines.launch
+
+/** What the House tab needs from the app: the shared house model and where to go for the editor and floors. */
+class JobHouseDeps(
+    val homes: HomeRepository,
+    val layers: LayerStore,
+    val provisioner: JobHomeProvisioner,
+    val onEditPlan: (homeId: String, title: String, floorId: String?) -> Unit,
+    val onEditShape: (homeId: String, title: String, floorId: String?, PlanRoom) -> Unit,
+    val onOpenFloors: (homeId: String, title: String) -> Unit,
+)
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, onEdit: () -> Unit, onBack: () -> Unit) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -26,6 +44,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, onEdit: (
     )
     var tab by rememberSaveable { mutableStateOf(JobTab.OVERVIEW) }
     val state by vm.state.collectAsState()
+    val scope = rememberCoroutineScope()
     JobScreen(
         state, tab, { tab = it },
         { event ->
@@ -35,5 +54,24 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, onEdit: (
             }
         },
         onBack,
+        houseContent = {
+            val homeId = state.homeId
+            if (homeId == null) {
+                JobHouseEmpty(onStart = { scope.launch { house.provisioner.ensure(jobId) } }, modifier = Modifier.fillMaxSize())
+            } else {
+                HouseRoute(
+                    repo = house.homes,
+                    layerStore = house.layers,
+                    homeId = homeId,
+                    homeName = state.name,
+                    summary = state.address.orEmpty(),
+                    onOpenRoom = {},
+                    onEditPlan = { house.onEditPlan(homeId, state.name, it) },
+                    onEditShape = { floorId, room -> house.onEditShape(homeId, state.name, floorId, room) },
+                    onOpenFloors = { house.onOpenFloors(homeId, state.name) },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        },
     )
 }

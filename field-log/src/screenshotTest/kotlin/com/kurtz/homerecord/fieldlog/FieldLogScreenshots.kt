@@ -83,3 +83,8 @@ fun JobOverviewScreenshot() = JobOverviewPreview()
 @ThemePreviews
 @Composable
 fun JobOverviewEmptyScreenshot() = JobOverviewEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobHouseEmptyScreenshot() = JobHouseEmptyPreview()

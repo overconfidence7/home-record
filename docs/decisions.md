@@ -101,3 +101,6 @@ Home, floor and room rows are home-tenant entities on the backend, but Field Log
 
 ## 2026-10-23 Job home rows sync under the company tenant
 Resolves the 2026-10-22 open question: a job's home, floor and room rows sync inside the company tenant (no per-job home tenant). The backend company entity list gains home, floor and room only; T019 adds walls, overlays and items as FL-House needs them. The handoff (AC-B40) copies the house model into the homeowner's home tenant.
+
+## 2026-10-23 — Shared house UI lives in :house-model
+Plan editor, House tab, Floors and their ViewModels/strings moved from :house-manual to :house-model (package `housemodel.ui`) so Field Log's job House tab reuses them unchanged (AC-F48). A job's home is created lazily (`JobHomeProvisioner`) when the House tab is first used or a room is typed on the job form.

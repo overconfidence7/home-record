@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import com.kurtz.homerecord.coreui.components.*
 import com.kurtz.homerecord.housemanual.house.*
+import com.kurtz.homerecord.housemodel.ui.*
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.coreui.theme.Brand

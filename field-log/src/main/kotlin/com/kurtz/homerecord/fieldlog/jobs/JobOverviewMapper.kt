@@ -48,6 +48,7 @@ object JobOverviewMapper {
             nextDay = JobOrdering.nextDay(summary, today),
             crew = crew.mapNotNull { names[it.memberId] }.distinct().sorted(),
             today = today,
+            homeId = job.homeId,
         )
     }
 }

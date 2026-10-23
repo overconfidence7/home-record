@@ -96,6 +96,12 @@ class AppContainer(app: Application) {
         }
     }
 
+    val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(db, onChange = ::recordChange) }
+
+    val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
+
+    val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange) }
+
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
 
     init {

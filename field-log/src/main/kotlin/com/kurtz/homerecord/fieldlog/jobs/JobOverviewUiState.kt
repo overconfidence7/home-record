@@ -24,6 +24,8 @@ data class JobOverviewUiState(
     val nextDay: String? = null,
     val crew: List<String> = emptyList(),
     val today: String = "",
+    /** The job's own house model; null until the first room or the House tab creates it (AC-F48). */
+    val homeId: String? = null,
 )
 
 sealed interface JobOverviewEvent {

@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.house
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

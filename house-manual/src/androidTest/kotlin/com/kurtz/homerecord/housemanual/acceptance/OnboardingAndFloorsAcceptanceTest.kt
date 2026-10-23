@@ -9,9 +9,9 @@ import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
-import com.kurtz.homerecord.housemanual.house.FloorsEvent
-import com.kurtz.homerecord.housemanual.house.FloorsScreen
-import com.kurtz.homerecord.housemanual.house.FloorsUiState
+import com.kurtz.homerecord.housemodel.ui.FloorsEvent
+import com.kurtz.homerecord.housemodel.ui.FloorsScreen
+import com.kurtz.homerecord.housemodel.ui.FloorsUiState
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingScreen
 import com.kurtz.homerecord.housemanual.onboarding.OnboardingUiState

@@ -26,7 +26,7 @@ private fun JobTab.label(): Int = when (this) {
     JobTab.CHANGES -> R.string.jobtab_changes
 }
 
-/** FL-Job: name and client in the bar, the eight tabs below. Only Overview is built so far. */
+/** FL-Job: name and client in the bar, the eight tabs below. Overview and House are built so far. */
 @Composable
 fun JobScreen(
     state: JobOverviewUiState,
@@ -34,6 +34,7 @@ fun JobScreen(
     onSelect: (JobTab) -> Unit,
     onEvent: (JobOverviewEvent) -> Unit,
     onBack: () -> Unit,
+    houseContent: @Composable () -> Unit = { SoonNote(JobTab.HOUSE) },
 ) {
     ScreenScaffold(title = state.name.ifBlank { stringResource(R.string.tab_jobs) }, subtitle = state.clientName, onBack = onBack) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -49,13 +50,20 @@ fun JobScreen(
             }
             if (selected == JobTab.OVERVIEW) {
                 JobOverviewScreen(state, onEvent)
+            } else if (selected == JobTab.HOUSE) {
+                houseContent()
             } else {
-                Text(
-                    stringResource(R.string.jobtab_soon, stringResource(selected.label())),
-                    Modifier.padding(24.dp).testTag("fl_job_tab_soon"),
-                    textAlign = TextAlign.Center,
-                )
+                SoonNote(selected)
             }
         }
     }
+}
+
+@Composable
+private fun SoonNote(tab: JobTab) {
+    Text(
+        stringResource(R.string.jobtab_soon, stringResource(tab.label())),
+        Modifier.padding(24.dp).testTag("fl_job_tab_soon"),
+        textAlign = TextAlign.Center,
+    )
 }
