@@ -62,7 +62,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T018c2b2a2: phases and office emails chips on FL-JobEdit, stored as JSON on the job (AC-F5)
   - [ ] T018c2b2: crew (needs members list), sync of home/floor/room rows created for a job (they need a home tenant on the backend; see docs/decisions.md 2026-10-22)
   - [x] T018c3a: FL-Job tab shell (eight tabs, only Overview built) and Overview (status, address, map link, dates, phases, hours this week from punches via `JobHours`, photos, open tasks, next day, crew; stats open their tab) (AC-F7)
-  - [ ] T018c3b: sync of job rows; crew picker on JobEdit; Photos, Log, Files, Tasks, Time, House, Changes tabs arrive with T019+ and later tasks
+  - [x] T018c3b1: crew picker on JobEdit (cached team list, job_crew rows queued for sync)
+  - [ ] T018c3b: sync of job rows (job and client already queued; verify against backend); Photos, Log, Files, Tasks, Time, House, Changes tabs arrive with T019+ and later tasks
   - [ ] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)

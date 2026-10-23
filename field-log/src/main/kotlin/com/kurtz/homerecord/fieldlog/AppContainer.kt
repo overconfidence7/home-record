@@ -82,6 +82,20 @@ class AppContainer(app: Application) {
         syncCoordinator.requestSync()
     }
 
+    /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */
+    suspend fun refreshMembers(companyId: String) {
+        val result = companyApi.members(companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok ?: return
+        val now = System.currentTimeMillis()
+        result.value.forEach { m ->
+            db.memberDao().upsert(
+                com.kurtz.homerecord.core.data.MemberEntity(
+                    id = m.userId, companyId = companyId, userId = m.userId, name = m.displayName, role = m.role.wire,
+                    rateCents = m.rateCents, createdAt = now, updatedAt = now,
+                ),
+            )
+        }
+    }
+
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
 
     init {

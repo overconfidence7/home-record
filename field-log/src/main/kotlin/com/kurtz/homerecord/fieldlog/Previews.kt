@@ -22,6 +22,7 @@ import com.kurtz.homerecord.fieldlog.company.WelcomeScreen
 import com.kurtz.homerecord.fieldlog.company.WelcomeUiState
 import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.JobSummary
+import com.kurtz.homerecord.fieldlog.jobs.CrewOption
 import com.kurtz.homerecord.fieldlog.jobs.JobDraft
 import com.kurtz.homerecord.fieldlog.jobs.JobEditScreen
 import com.kurtz.homerecord.fieldlog.jobs.JobEditUiState
@@ -171,9 +172,10 @@ fun JobEditPreview() = Frame {
     val draft = JobDraft(
         name = "Panel upgrade 200A", clientName = "Rivera family", address = "418 Maple St, Dayton",
         startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
-        rooms = listOf("Kitchen", "Basement", "Garage"),
+        rooms = listOf("Kitchen", "Basement", "Garage"), crew = listOf("m1"),
     )
-    JobEditScreen(JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft.copy(notes = ""), savedAddress = draft.address, lat = 39.76, lng = -84.19), {}, {})
+    val team = listOf(CrewOption("m1", "Dana Ortiz"), CrewOption("m2", "Marcus Bell"), CrewOption("m3", "Priya Raman"))
+    JobEditScreen(JobEditUiState(loading = false, members = team, isNew = false, draft = draft, initial = draft.copy(notes = ""), savedAddress = draft.address, lat = 39.76, lng = -84.19), {}, {})
 }
 
 private val sampleOverview = com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(

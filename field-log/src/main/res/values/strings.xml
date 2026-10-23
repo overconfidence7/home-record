@@ -108,6 +108,8 @@
     <string name="job_rooms">Rooms</string>
     <string name="job_rooms_helper">Rooms you will work in. Place them on the plan later.</string>
     <string name="job_rooms_add">Add</string>
+    <string name="job_crew">Crew</string>
+    <string name="job_crew_empty">Your team shows up here once you are online. Invite people from More &gt; Team.</string>
     <string name="job_phases">Phases</string>
     <string name="job_phases_helper">In order, like Demo, Rough-in, Finish.</string>
     <string name="job_office_emails">Office emails</string>

@@ -20,7 +20,12 @@ data class JobDraft(
     val phases: List<String> = emptyList(),
     /** Office addresses that get the daily log and reports for this job (AC-F5). */
     val officeEmails: List<String> = emptyList(),
+    /** Member ids assigned to the job (AC-F5). */
+    val crew: List<String> = emptyList(),
 ) {
+    fun withCrewToggled(memberId: String) = copy(crew = if (memberId in crew) crew - memberId else crew + memberId)
+
+
     val budgetHours: Int? get() = budgetHoursText.trim().toIntOrNull()?.takeIf { it in 0..MAX_BUDGET_HOURS }
     val budgetInvalid: Boolean get() = budgetHoursText.isNotBlank() && budgetHours == null
     val datesInvalid: Boolean get() = startDate != null && endDate != null && endDate < startDate
@@ -76,7 +81,7 @@ data class JobDraft(
     companion object {
         const val MAX_BUDGET_HOURS = 100_000
 
-        fun from(job: JobEntity, clientName: String?, rooms: List<String> = emptyList()) = JobDraft(
+        fun from(job: JobEntity, clientName: String?, rooms: List<String> = emptyList(), crew: List<String> = emptyList()) = JobDraft(
             name = job.name,
             clientName = clientName.orEmpty(),
             address = job.address.orEmpty(),
@@ -87,6 +92,7 @@ data class JobDraft(
             rooms = rooms,
             phases = decodeList(job.phasesJson),
             officeEmails = decodeList(job.officeEmailsJson),
+            crew = crew,
         )
 
         fun isEmail(v: String) = v.length <= 254 && EMAIL.matches(v)

@@ -9,7 +9,10 @@ import com.kurtz.homerecord.core.data.FloorDao
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeDao
 import com.kurtz.homerecord.core.data.HomeEntity
+import com.kurtz.homerecord.core.data.JobCrewDao
+import com.kurtz.homerecord.core.data.JobCrewEntity
 import com.kurtz.homerecord.core.data.JobDao
+import com.kurtz.homerecord.core.data.MemberDao
 import com.kurtz.homerecord.core.data.RoomDao
 import com.kurtz.homerecord.core.data.RoomEntity
 import com.kurtz.homerecord.core.data.Sources
@@ -21,6 +24,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
 
+/** A team member who can be put on the job. */
+data class CrewOption(val id: String, val name: String)
+
 data class JobEditUiState(
     val loading: Boolean = true,
     val isNew: Boolean = true,
@@ -31,6 +37,7 @@ data class JobEditUiState(
     val savedAddress: String = "",
     val lat: Double? = null,
     val lng: Double? = null,
+    val members: List<CrewOption> = emptyList(),
 ) {
     /** Coordinates for the map link; only while the address still matches the one that was resolved (AC-F5). */
     val mapPoint: Pair<Double, Double>? get() {
@@ -56,6 +63,7 @@ sealed interface JobEditEvent {
     data class RemovePhase(val v: String) : JobEditEvent
     data class AddOfficeEmail(val v: String) : JobEditEvent
     data class RemoveOfficeEmail(val v: String) : JobEditEvent
+    data class ToggleCrew(val memberId: String) : JobEditEvent
     data object Save : JobEditEvent
 }
 
@@ -68,6 +76,9 @@ class JobEditViewModel(
     private val homes: HomeDao,
     private val floors: FloorDao,
     private val rooms: RoomDao,
+    private val crew: JobCrewDao,
+    private val members: MemberDao,
+    private val refreshMembers: suspend () -> Unit,
     private val recordChange: suspend (entity: String, id: String) -> Unit,
     private val saved: SavedStateHandle,
     private val todayProvider: () -> String = { LocalDate.now().toString() },
@@ -82,12 +93,17 @@ class JobEditViewModel(
             val existing = jobId?.let { jobs.get(it) }
             val clientName = existing?.clientId?.let { clients.get(it)?.name }
             val roomNames = existing?.homeId?.let { jobRooms(it).map { r -> r.name } }.orEmpty()
-            val initial = existing?.let { JobDraft.from(it, clientName, roomNames) } ?: JobDraft()
+            val crewIds = jobId?.let { crew.listFor(it).map { c -> c.memberId } }.orEmpty()
+            val initial = existing?.let { JobDraft.from(it, clientName, roomNames, crewIds) } ?: JobDraft()
             val draft = saved.get<String>(DRAFT)?.let(::decode) ?: initial
             _state.value = JobEditUiState(
                 loading = false, isNew = existing == null, draft = draft, initial = initial,
                 savedAddress = existing?.address.orEmpty().trim(), lat = existing?.lat, lng = existing?.lng,
+                members = crewOptions(),
             )
+            // The team list is fetched when online; the cached one is already showing.
+            refreshMembers()
+            _state.update { it.copy(members = crewOptions()) }
         }
     }
 
@@ -106,9 +122,12 @@ class JobEditViewModel(
             is JobEditEvent.RemovePhase -> edit { it.withoutPhase(event.v) }
             is JobEditEvent.AddOfficeEmail -> edit { it.withOfficeEmail(event.v) }
             is JobEditEvent.RemoveOfficeEmail -> edit { it.withoutOfficeEmail(event.v) }
+            is JobEditEvent.ToggleCrew -> edit { it.withCrewToggled(event.memberId) }
             JobEditEvent.Save -> save()
         }
     }
+
+    private suspend fun crewOptions() = members.listFor(companyId).map { CrewOption(it.id, it.name) }.sortedBy { it.name.lowercase() }
 
     private fun edit(change: (JobDraft) -> JobDraft) {
         _state.update { it.copy(draft = change(it.draft)) }
@@ -137,7 +156,18 @@ class JobEditViewModel(
             val entity = s.draft.toEntity(before, id, companyId, clientId, todayProvider(), now, homeId)
             jobs.upsert(entity)
             recordChange("job", id)
+            syncCrew(id, s.draft.crew, now)
             _state.update { it.copy(saving = false, saved = true) }
+        }
+    }
+
+    private suspend fun syncCrew(id: String, wanted: List<String>, now: Long) {
+        val current = crew.listFor(id)
+        current.filter { it.memberId !in wanted }.forEach { crew.softDelete(it.id, now); recordChange("job_crew", it.id) }
+        wanted.filter { m -> current.none { it.memberId == m } }.forEach { m ->
+            val rowId = UUID.randomUUID().toString()
+            crew.upsert(JobCrewEntity(id = rowId, jobId = id, memberId = m, createdAt = now, updatedAt = now))
+            recordChange("job_crew", rowId)
         }
     }
 
@@ -169,13 +199,13 @@ class JobEditViewModel(
     }
 
     // Fields are joined with the unit separator; none of them can type it on a phone keyboard.
-    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP), d.phases.joinToString(ROOM_SEP), d.officeEmails.joinToString(ROOM_SEP))
+    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP), d.phases.joinToString(ROOM_SEP), d.officeEmails.joinToString(ROOM_SEP), d.crew.joinToString(ROOM_SEP))
         .joinToString(SEP)
 
     private fun decode(raw: String): JobDraft? {
         val p = raw.split(SEP)
-        if (p.size != 10) return null
-        return JobDraft(p[0], p[1], p[2], p[3].ifEmpty { null }, p[4].ifEmpty { null }, p[5], p[6], p[7].items(), p[8].items(), p[9].items())
+        if (p.size != 11) return null
+        return JobDraft(p[0], p[1], p[2], p[3].ifEmpty { null }, p[4].ifEmpty { null }, p[5], p[6], p[7].items(), p[8].items(), p[9].items(), p[10].items())
     }
 
     private fun String.items(): List<String> = split(ROOM_SEP).filter { it.isNotEmpty() }

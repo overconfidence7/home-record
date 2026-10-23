@@ -124,6 +124,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         entry<JobEditKey> { key ->
             com.kurtz.homerecord.fieldlog.jobs.JobEditRoute(
                 membership.companyId, key.jobId, container.db.jobDao(), container.db.clientDao(), container.db.homeDao(), container.db.floorDao(), container.db.roomDao(),
+                container.db.jobCrewDao(), container.db.memberDao(), { container.refreshMembers(membership.companyId) },
                 container::recordChange, onClose = nav::pop,
                 onSaved = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { container.jobGeocoder.resolvePending(membership.companyId) } },
             )

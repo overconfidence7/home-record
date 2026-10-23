@@ -42,8 +42,8 @@ class JobEditTest {
     }
 
     /** Room hops to its own executor, so wait for the form to finish loading, as the screen does. */
-    private suspend fun vm(jobId: String? = null, saved: SavedStateHandle = SavedStateHandle()): JobEditViewModel {
-        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L })
+    private suspend fun vm(jobId: String? = null, saved: SavedStateHandle = SavedStateHandle(), refresh: suspend () -> Unit = {}): JobEditViewModel {
+        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), db.jobCrewDao(), db.memberDao(), refresh, { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L })
         withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first { !it.loading } } }
         return vm
     }
@@ -188,5 +188,34 @@ class JobEditTest {
         val again = vm(saved = handle).state.value.draft
         assertThat(again.phases).containsExactly("Rough-in")
         assertThat(again.officeEmails).containsExactly("a@b.co")
+    }
+
+    // AC-F5: crew is picked from the team list (cached offline), saved as job_crew rows and queued for sync.
+    @Test fun crewIsPickedSavedAndQueued() = runTest {
+        val refreshed = mutableListOf<Boolean>()
+        db.memberDao().upsert(com.kurtz.homerecord.core.data.MemberEntity("u1", "c1", "u1", "Dana Ortiz", createdAt = 1, updatedAt = 1))
+        val vm = vm(refresh = {
+            refreshed += true
+            db.memberDao().upsert(com.kurtz.homerecord.core.data.MemberEntity("u2", "c1", "u2", "Marcus Bell", createdAt = 1, updatedAt = 1))
+        })
+        withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first { it.members.size == 2 } } }
+        assertThat(vm.state.value.members.map { it.name }).containsExactly("Dana Ortiz", "Marcus Bell").inOrder()
+        vm.onEvent(JobEditEvent.Name("Panel"))
+        vm.onEvent(JobEditEvent.ToggleCrew("u1"))
+        vm.onEvent(JobEditEvent.ToggleCrew("u2"))
+        vm.onEvent(JobEditEvent.ToggleCrew("u2"))
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        assertThat(db.jobCrewDao().listFor(job.id).map { it.memberId }).containsExactly("u1")
+        assertThat(changes.count { it.first == "job_crew" }).isEqualTo(1)
+
+        val edit = vm(job.id)
+        assertThat(edit.state.value.draft.crew).containsExactly("u1")
+        edit.onEvent(JobEditEvent.ToggleCrew("u1"))
+        edit.onEvent(JobEditEvent.ToggleCrew("u2"))
+        edit.save()
+        assertThat(db.jobCrewDao().listFor(job.id).map { it.memberId }).containsExactly("u2")
+        assertThat(changes.count { it.first == "job_crew" }).isEqualTo(3)
+        assertThat(refreshed).isNotEmpty()
     }
 }

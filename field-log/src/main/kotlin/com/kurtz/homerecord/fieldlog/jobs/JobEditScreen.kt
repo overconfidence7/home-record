@@ -70,6 +70,7 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
             label = stringResource(R.string.job_rooms), helper = stringResource(R.string.job_rooms_helper), tag = "fl_jobedit_room",
             items = d.rooms, canAdd = { it.isNotBlank() }, onAdd = { onEvent(JobEditEvent.AddRoom(it)) }, onRemove = { onEvent(JobEditEvent.RemoveRoom(it)) },
         )
+        CrewPicker(state.members, d.crew) { onEvent(JobEditEvent.ToggleCrew(it)) }
         ChipAdder(
             label = stringResource(R.string.job_phases), helper = stringResource(R.string.job_phases_helper), tag = "fl_jobedit_phase",
             items = d.phases, canAdd = { it.isNotBlank() }, onAdd = { onEvent(JobEditEvent.AddPhase(it)) }, onRemove = { onEvent(JobEditEvent.RemovePhase(it)) },
@@ -109,5 +110,25 @@ private fun ChipAdder(
     }
     if (items.isNotEmpty()) {
         LinkChipRow(items.map { LinkChip(it, it) }, onOpen = {}, onRemove = { onRemove(it.id) }, modifier = Modifier.testTag("${tag}s"))
+    }
+}
+
+/** Team members as selectable chips; empty until the team list has been fetched once. */
+@Composable
+private fun CrewPicker(options: List<CrewOption>, selected: List<String>, onToggle: (String) -> Unit) {
+    Text(stringResource(R.string.job_crew), style = androidx.compose.material3.MaterialTheme.typography.titleSmall)
+    if (options.isEmpty()) {
+        Text(stringResource(R.string.job_crew_empty), style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
+        return
+    }
+    androidx.compose.foundation.layout.FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("fl_jobedit_crew"),
+    ) {
+        options.forEach { o ->
+            androidx.compose.material3.FilterChip(
+                selected = o.id in selected, onClick = { onToggle(o.id) }, label = { Text(o.name) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("fl_jobedit_crew_${o.id}"),
+            )
+        }
     }
 }
