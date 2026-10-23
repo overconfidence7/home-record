@@ -753,3 +753,23 @@ Tested: 57 device stages, 279 unit tests, 55 backend tests, coverage 76/76 ACs. 
 Opened committed PNGs for House blueprint (light), Plan editor (200% font), Room page (200% font) and Item edit new (dark); the rest of the M1 sets (Floors, Plan editor variants, Item edit, Jobs, Job overview/edit/house) were not individually opened this run. Rules checked: 1-12, 24-30, 32.
 - Pass: blueprint drawing with dimensions, doors, windows, stairs and north arrow; plan editor at 200% grows without clipping; room page cards scroll and use headings; item form fields labelled with (required) and readable in dark.
 - [ ] [UI] Minor: House tab action row wraps "Edit plan" and "Export PDF" onto two lines at normal font and the Floors button is shorter than its neighbours - expected: rule 24/25 consistent button row - actual: uneven heights, wrapped labels - screenshot: house-manual HouseBlueprintScreenshot_Light
+
+## QA auto 2026-10-23 (commit a5a1373)
+
+Automated suite run at 2026-10-23 10:50 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F03-jobs fails on field-log [auto:flow:field-log:F03-jobs] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: walkthrough step F03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F03-jobs.log
+- [ ] [Major] Flow H01-onboarding fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H01-onboarding] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: walkthrough step H01 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H01-onboarding.log
+- [ ] [Major] Flow H03-blueprint-room fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H03-blueprint-room] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: walkthrough step H03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H03-blueprint-room.log
+- [ ] [Major] Flow H04-add-item fails on house-manual [auto:flow:house-manual:H04-add-item] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: walkthrough step H04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H04-add-item.log
+- [ ] [Major] Tour fails under dark on house-manual (regression of a fixed item) [auto:variant:house-manual:dark] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9) - actual: tour failed under dark
+- [ ] [Major] Tour fails under font200 on house-manual (regression of a fixed item) [auto:variant:house-manual:font200] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9) - actual: tour failed under font200
+- [ ] [Major] Tour fails under landscape on house-manual (regression of a fixed item) [auto:variant:house-manual:landscape] - steps: automated, see qa-results branch latest/ for commit a5a1373 - expected: every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9) - actual: tour failed under landscape
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:logcat:field-log:com.kurtz.homerecord.fieldlog], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:logcat:handoff:com.kurtz.homerecord.fieldlog], [auto:logcat:handoff:com.kurtz.homerecord.housemanual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02-draw-plan], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual], [auto:logcat:house-manual:com.kurtz.homerecord.housemanual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, field-log F03 Fail, house-manual H01 Fail, house-manual H02 Fail, house-manual H02b Fail, house-manual H03 Fail, house-manual H04 Fail, house-manual H15 Fail
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 59 device stages, 296 unit tests, 56 backend tests, coverage 80/80 ACs. Passed: 31. New issues: 7. Critical: 0. Product gaps: n/a (judge entry follows).
