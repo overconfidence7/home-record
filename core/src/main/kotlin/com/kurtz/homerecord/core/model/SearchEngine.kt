@@ -33,8 +33,9 @@ object SearchEngine {
             var best = 0
             fields.forEachIndexed { index, field ->
                 val weight = (fields.size - index).coerceAtLeast(1)
-                val s = tokenScore(field, token) * 10 + weight
-                if (tokenScore(field, token) > 0 && s > best) best = s
+                val match = tokenScore(field, token)
+                val s = match * 10 + weight
+                if (match > 0 && s > best) best = s
             }
             if (best == 0) return null
             total += best

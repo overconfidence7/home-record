@@ -70,7 +70,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
   - [x] T020a: `SearchEngine` in :core model (ranked prefix/word/substring, all tokens required) with SearchEngineTest (AC-C38)
   - [ ] T020b: HM-Home search bar and results list, building SearchDocuments from rooms/items/breakers etc. (blocked on HM-Home screen, still a placeholder tab; AC-H3)
-- [ ] R04: Review T016–T020
+- [x] R04: Review T016–T020 (T020b still blocked on T030; reviewed what exists)
 - [ ] V1: Visual review of M1 screenshots
 
 ## M2 Items and warranty (House Manual usable)
