@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.model.DataPlateParser
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.PlateField
+import com.kurtz.homerecord.core.model.SerialAgeDecoder
 import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.DraftPhoto
@@ -36,7 +37,7 @@ class ItemEditViewModel(
     private var original = ItemDraft(roomId = initialRoomId)
 
     private val _state = MutableStateFlow(
-        ItemEditUiState(draft = restore() ?: original),
+        ItemEditUiState(draft = restore() ?: original, decodedRule = saved.get<String>(DECODED)),
     )
     val state: StateFlow<ItemEditUiState> = _state.asStateFlow()
 
@@ -58,7 +59,7 @@ class ItemEditViewModel(
 
     fun onEvent(event: ItemEditEvent) {
         when (event) {
-            is ItemEditEvent.Change -> setDraft(event.draft)
+            is ItemEditEvent.Change -> change(event.draft)
             is ItemEditEvent.PickSubtype -> {
                 val draft = _state.value.draft
                 val subtype = ItemCategory.subtype(event.subtypeId)
@@ -95,7 +96,7 @@ class ItemEditViewModel(
             ItemEditEvent.PlateApply -> {
                 val scan = _state.value.plateScan ?: return
                 val draft = _state.value.draft
-                setDraft(
+                change(
                     draft.copy(
                         make = scan.make.ifBlank { draft.make },
                         model = scan.model.ifBlank { draft.model },
@@ -139,6 +140,32 @@ class ItemEditViewModel(
         return base.copy(photos = photos)
     }
 
+    /**
+     * Applies a form edit. When make or serial changes and the manufacture date is blank or was itself decoded, it is
+     * (re)filled from the serial; typing or picking a date by hand makes it the homeowner's and stops the decoding (AC-C32).
+     */
+    private fun change(draft: ItemDraft) {
+        val old = _state.value.draft
+        val rule = _state.value.decodedRule
+        var next = draft
+        var nextRule = rule
+        if (draft.manufacturedOn != old.manufacturedOn) {
+            nextRule = null
+        } else if ((draft.make != old.make || draft.serial != old.serial) && (old.manufacturedOn.isBlank() || rule != null)) {
+            val decoded = SerialAgeDecoder.decode(draft.make, draft.serial)
+            if (decoded != null) {
+                next = draft.copy(manufacturedOn = decoded.date)
+                nextRule = decoded.rule
+            } else if (rule != null) {
+                next = draft.copy(manufacturedOn = "")
+                nextRule = null
+            }
+        }
+        saved[DECODED] = nextRule
+        _state.update { it.copy(decodedRule = nextRule) }
+        setDraft(next)
+    }
+
     private fun setDraft(draft: ItemDraft) {
         saved[KEY] = encode(draft)
         saved[PHOTOS] = ArrayList(draft.photos.map(::encodePhoto))
@@ -162,6 +189,7 @@ class ItemEditViewModel(
     private companion object {
         const val KEY = "draft"
         const val PHOTOS = "photos"
+        const val DECODED = "decoded"
 
         fun encodePhoto(p: DraftPhoto) = "${p.id.orEmpty()}|${p.kind.name}|${p.path}"
 

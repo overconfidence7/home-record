@@ -108,6 +108,12 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             stringResource(R.string.item_manufactured), d.manufacturedOn.ifBlank { null },
             { onEvent(ItemEditEvent.Change(d.copy(manufacturedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_manufactured"),
         )
+        state.decodedRule?.let {
+            Text(
+                stringResource(R.string.item_manufactured_decoded, it), Modifier.testTag("hm_item_manufactured_note"),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         DateField(
             stringResource(R.string.item_purchased), d.purchasedOn.ifBlank { null },
             { onEvent(ItemEditEvent.Change(d.copy(purchasedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_purchased"),

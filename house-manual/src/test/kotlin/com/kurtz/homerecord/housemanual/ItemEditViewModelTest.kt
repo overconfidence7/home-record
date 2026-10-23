@@ -150,6 +150,26 @@ class ItemEditViewModelTest {
         assertThat(vm.state.value.draft.serial).isEqualTo("1234567890")
     }
 
+    @AcceptanceCriterion("AC-C32")
+    @Test fun serialFillsManufacturedOnWithANoteAndTheHomeownerCanOverride() = runTest {
+        home()
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(make = "Rheem", serial = "0415123456")))
+        assertThat(vm.state.value.draft.manufacturedOn).isEqualTo("2015-04-01")
+        assertThat(vm.state.value.decodedRule).contains("Rheem")
+
+        // A corrected serial re-decodes while the date is still the decoded one.
+        vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(serial = "0618123456")))
+        assertThat(vm.state.value.draft.manufacturedOn).isEqualTo("2018-06-01")
+
+        // A hand-picked date wins and the note goes away; later serial edits leave it alone.
+        vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(manufacturedOn = "2016-01-15")))
+        assertThat(vm.state.value.decodedRule).isNull()
+        vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(serial = "0415123456")))
+        assertThat(vm.state.value.draft.manufacturedOn).isEqualTo("2016-01-15")
+    }
+
     @AcceptanceCriterion("AC-C31")
     @Test fun unreadablePlateOpensNoSheet() = runTest {
         home()

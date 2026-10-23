@@ -47,6 +47,8 @@ data class ItemEditUiState(
     /** Set while a data-plate photo is being read. */
     val scanning: Boolean = false,
     val plateScan: PlateScan? = null,
+    /** Rule that filled "manufactured on" from the serial; null once the homeowner sets the date. */
+    val decodedRule: String? = null,
     val saving: Boolean = false,
     /** Set once the item is stored; the route closes the form. */
     val savedItemId: String? = null,

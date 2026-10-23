@@ -148,6 +148,7 @@
     <string name="item_model">Model</string>
     <string name="item_serial">Serial number</string>
     <string name="item_manufactured">Manufactured on</string>
+    <string name="item_manufactured_decoded">Decoded from serial (%1$s). Change the date to override.</string>
     <string name="item_purchased">Purchased on</string>
     <string name="item_in_service">In service on</string>
     <string name="item_price">Price</string>
