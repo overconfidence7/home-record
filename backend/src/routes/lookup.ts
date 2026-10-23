@@ -39,7 +39,9 @@ lookup.post("/lookup/warranty", async (c) => {
   const key = warrantyCacheKey(parsed.data.make, parsed.data.model);
   const hit = await c.env.CACHE.get(key);
   if (hit) {
-    const cached = resultSchema.safeParse(JSON.parse(hit));
+    let raw: unknown = null;
+    try { raw = JSON.parse(hit); } catch { /* corrupt entry: fall through to a fresh lookup */ }
+    const cached = resultSchema.safeParse(raw);
     if (cached.success) return c.json({ ...cached.data, cached: true });
   }
   if (!c.env.CLAUDE_API_KEY) return c.json({ error: "unavailable" }, 503);

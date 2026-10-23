@@ -55,6 +55,14 @@ describe("AC-B10 POST /lookup/warranty", () => {
     expect((await post(token, { make: "Rheem" })).status).toBe(400);
   });
 
+  it("treats a corrupt cache entry as a miss", async () => { // AC-B10
+    const token = await seedUser("lu9", "lu9@example.com");
+    await env.CACHE.put(warrantyCacheKey("Corrupt", "C1"), "{not json");
+    const res = await post(token, { make: "Corrupt", model: "C1" });
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { cached: boolean }).cached).toBe(false);
+  });
+
   it("returns terms, restricts domains and searches, then serves repeats from the cache", async () => {
     const token = await seedUser("lu1", "lu1@example.com");
     const first = await post(token, { make: "Rheem", model: "XG50T06", category: "Water heater" });

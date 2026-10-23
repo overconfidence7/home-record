@@ -88,7 +88,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T024a: `WarrantyStatus` (Unknown/Active/Expiring 60 days/Expired, ends-on from in-service date + longest term) in :core model with WarrantyStatusTest 6 (AC-C33); `WarrantyStatusLine` component in :core-ui with previews and screenshots
   - [ ] T024b: item page warranty section (terms, Registered toggle, source link) arrives with HM-Item in T027 (AC-C33)
 - [x] T025: Backend warranty lookup: `POST /lookup/warranty` with Claude API web search (allowed domains, max 3 searches, structured JSON), KV cache by normalized make+model `[unit]`, per-account rate limit, cost log; vitest with a recorded response (acceptance: AC-B10)
-- [ ] R05: Review T021–T025
+- [x] R05: Review T021–T025
 - [ ] T026: Warranty lookup in the app: automatic on first save when online, "Look up warranty" and "Look up again", confirm/edit/discard sheet, offline queue with badge, stored once (acceptance: AC-C34, AC-H5)
 - [ ] T027: HM-Items tab: grouped by category with counts, by-room toggle, filter chips (category, room, warranty status), search, FAB; HM-Item detail screen with hero photo and all sections; overflow Move/Duplicate/Delete (acceptance: AC-H6, AC-H7 chips shell)
 - [ ] T028: Consumables, service history, contacts: consumables editor and search, service record form, HM-Contacts with tap-to-call/email and links to items (acceptance: AC-C35, AC-C36, AC-C39)

@@ -223,6 +223,20 @@ class ItemEditViewModelTest {
         edit.state.first { it.savedItemId != null }
         assertThat(db.photoDao().listForItem(id)).hasSize(1)
     }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test
+    fun removingAnUnsavedPhotoDeletesItsFile() = runTest {
+        home()
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/9"))
+        val path = vm.state.value.draft.photos.single().path
+        assertThat(media.files).contains(path)
+        vm.onEvent(ItemEditEvent.RemovePhoto(path))
+        assertThat(media.files).doesNotContain(path)
+        assertThat(vm.state.value.draft.photos).isEmpty()
+    }
 }
 
 private class FakeMediaFiles : MediaFiles {

@@ -85,6 +85,7 @@ class ItemEditViewModel(
             is ItemEditEvent.PhotoPicked -> viewModelScope.launch { media.import(event.uri)?.let { addPhoto(event.kind, it) } }
             is ItemEditEvent.RemovePhoto -> {
                 val draft = _state.value.draft
+                draft.photos.firstOrNull { it.path == event.path && it.id == null }?.let { media.discard(it.path) }
                 setDraft(draft.copy(photos = draft.photos.filterNot { it.path == event.path }))
             }
             is ItemEditEvent.PlateTarget -> _state.update { s -> s.copy(plateScan = s.plateScan?.copy(target = event.field)) }
