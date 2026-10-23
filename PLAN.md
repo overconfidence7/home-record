@@ -76,6 +76,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 ## M2 Items and warranty (House Manual usable)
 
 - [ ] T021: Item model and HM-ItemEdit form: category/subtype picker (grouped sheet with icons), room, name, make/model/serial, dates, price, vendor, notes, photos (data plate, item), `FormScaffold`; save creates default reminders and consumables from the subtype (acceptance: AC-C30, AC-C35 defaults)
+  - [x] T021a: `ItemDraft` validation and `ItemRepository` (save, edit, soft delete, pseudo-rooms Exterior/Whole house, default consumables and reminders from the subtype) in :house-model, ItemRepositoryTest 6 (AC-C30, AC-C35)
+  - [ ] T021b: HM-ItemEdit screen: grouped subtype picker with icons, room picker, fields, date pickers, photos; ScreenCatalog entry, previews, screenshot test, flow (AC-C30)
 - [ ] T022: Data plate OCR: ML Kit text recognition (bundled), recognized lines sheet, tap-to-assign, `DataPlateParser` `[unit]`, works offline (acceptance: AC-C31)
 - [ ] T023: `SerialAgeDecoder` `[unit]` for the brands in AC-C32 with documented rules and tests per brand; "manufactured on" fill with override (acceptance: AC-C32)
 - [ ] T024: Warranty record and status: `Warranty` entity, `WarrantyStatus` `[unit]` (expired / expiring 60 days / active / unknown), `WarrantyStatusLine` component, item page warranty section with Registered toggle and source link (acceptance: AC-C33)
