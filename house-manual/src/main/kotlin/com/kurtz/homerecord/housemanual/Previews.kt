@@ -23,6 +23,8 @@ import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
 import com.kurtz.homerecord.housemodel.RoomChoice
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.core.model.WarrantyStatus
+import com.kurtz.homerecord.housemanual.items.ItemDetailScreen
+import com.kurtz.homerecord.housemanual.items.ItemDetailUiState
 import com.kurtz.homerecord.housemanual.items.ItemsScreen
 import com.kurtz.homerecord.housemanual.items.ItemsUiState
 import com.kurtz.homerecord.housemanual.items.RoomOption
@@ -340,3 +342,42 @@ fun ItemEditPlateSheetPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ItemEditLoadingPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = true), {}, {}) }
+
+private val furnaceEntity = com.kurtz.homerecord.core.data.ItemEntity(
+    id = "i1", homeId = "h1", roomId = "r2", category = "HEATING_COOLING", subtype = "furnace", name = "Basement furnace",
+    make = "Carrier", model = "59TP6A060S17", serial = "3416A12345", manufacturedOn = "2016-04-18", purchasedOn = "2016-09-02",
+    inServiceOn = "2016-09-20", priceCents = 485_000, vendor = "Harlan Heating", manualUrl = "https://example.com/manual.pdf",
+    notes = "Filter is 16x25x1. Pilot light was replaced with an igniter in 2021.", createdAt = 1, updatedAt = 1,
+)
+
+private val furnaceWarranty = com.kurtz.homerecord.core.data.WarrantyEntity(
+    id = "w1", itemId = "i1", partsMonths = 120, laborMonths = 12, endsOn = "2026-09-20", registered = true,
+    sourceUrl = "https://example.com/carrier-warranty", lookedUpAt = 1_760_000_000_000, summary = "10-year limited parts when registered within 90 days.",
+    createdAt = 1, updatedAt = 1,
+)
+
+private fun furnaceDetail(withWarranty: Boolean = true) = com.kurtz.homerecord.housemodel.items.ItemDetail(
+    item = furnaceEntity, categoryLabel = "Heating and cooling", subtypeLabel = "Furnace", roomName = "Utility room",
+    warranty = furnaceWarranty.takeIf { withWarranty },
+    status = if (withWarranty) WarrantyStatus.Expired("2026-09-20") else WarrantyStatus.Unknown, photos = emptyList(),
+)
+
+@ThemePreviews
+@Composable
+fun ItemDetailPreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail()), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemDetailNoWarrantyPreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false)), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemDetailDeletePreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(), confirmDelete = true), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemDetailMissingPreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemDetailLoadingPreview() = Frame { ItemDetailScreen(ItemDetailUiState(), {}) }

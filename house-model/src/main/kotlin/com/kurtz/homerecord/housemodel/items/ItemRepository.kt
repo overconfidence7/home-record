@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.ItemEntity
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
 import com.kurtz.homerecord.core.data.PhotoEntity
+import com.kurtz.homerecord.core.data.WarrantyEntity
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import kotlinx.coroutines.flow.Flow
@@ -74,6 +75,17 @@ internal fun parsePriceCents(raw: String): Long? {
     return whole.toLong() * 100 + frac.padEnd(2, '0').toLong()
 }
 
+/** Everything the item page shows; [warranty] is null until one is looked up or entered (AC-H7). */
+data class ItemDetail(
+    val item: ItemEntity,
+    val categoryLabel: String,
+    val subtypeLabel: String,
+    val roomName: String,
+    val warranty: WarrantyEntity?,
+    val status: WarrantyStatus,
+    val photos: List<PhotoEntity>,
+)
+
 /**
  * Items for a home. Creating one seeds the consumables and reminders its subtype calls for (AC-C30, AC-C35).
  * [onChange] is called with the entity name and id after every write so the sync outbox can pick it up.
@@ -103,6 +115,37 @@ class ItemRepository(
                 )
             }
         }
+
+    /** The item page; emits null when the item is gone. */
+    fun observeDetail(id: String, homeId: String, pseudoNames: Map<String, String>): Flow<ItemDetail?> =
+        combine(
+            db.itemDao().observeOne(id), db.roomDao().observeForHome(homeId),
+            db.warrantyDao().observeFor(id), db.photoDao().observeForItem(id),
+        ) { item, rooms, warranties, photos ->
+            item ?: return@combine null
+            val warranty = warranties.firstOrNull()
+            val subtype = ItemCategory.subtype(item.subtype)
+            val cat = runCatching { ItemCategory.valueOf(item.category) }.getOrNull()
+            ItemDetail(
+                item = item, categoryLabel = cat?.label ?: item.category, subtypeLabel = subtype?.label ?: item.subtype,
+                roomName = item.roomId?.let { rid -> rooms.firstOrNull { it.id == rid }?.name ?: pseudoNames[rid] }.orEmpty(),
+                warranty = warranty, status = WarrantyStatus.of(warranty?.endsOn, today().toString()), photos = photos,
+            )
+        }
+
+    /** Copies the item's details under "[name] [copySuffix]"; photos stay with the original. Returns the new id. */
+    suspend fun duplicate(id: String, copySuffix: String): String? {
+        val item = get(id) ?: return null
+        val draft = draftFor(id)?.copy(id = null, photos = emptyList()) ?: return null
+        return save(item.homeId, draft.copy(name = "${draft.name} $copySuffix"))
+    }
+
+    /** The Registered toggle on the warranty section (AC-C33). No-op when the item has no warranty row. */
+    suspend fun setRegistered(itemId: String, registered: Boolean) {
+        val w = db.warrantyDao().listFor(itemId).firstOrNull() ?: return
+        db.warrantyDao().upsert(w.copy(registered = registered, updatedAt = now()))
+        onChange("warranty", w.id)
+    }
 
     suspend fun draftFor(id: String): ItemDraft? = get(id)?.let {
         ItemDraft(

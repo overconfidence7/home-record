@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -79,5 +80,42 @@ class ItemRepositoryTest {
     @Test fun invalidDraftSavesNothing() = runTest {
         assertThat(repo.save("h1", ItemDraft())).isNull()
         assertThat(changes).isEmpty()
+    }
+
+    @AcceptanceCriterion("AC-H7")
+    @Test fun detailCombinesItemRoomWarrantyAndPhotos() = runTest {
+        val id = repo.save("h1", furnace().copy(manufacturedOn = "2016-04-18"))!!
+        db.warrantyDao().upsert(
+            com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, endsOn = "2026-12-01", createdAt = 1, updatedAt = 1),
+        )
+        val d = repo.observeDetail(id, "h1", mapOf(PseudoRooms.WHOLE_HOUSE to "Whole house")).first()!!
+        assertThat(d.roomName).isEqualTo("Whole house")
+        assertThat(d.categoryLabel).isEqualTo("Heating and cooling")
+        assertThat(d.subtypeLabel).isEqualTo("Furnace")
+        assertThat(d.status).isInstanceOf(com.kurtz.homerecord.core.model.WarrantyStatus.Expiring::class.java)
+        repo.delete(id)
+        assertThat(repo.observeDetail(id, "h1", emptyMap()).first()).isNull()
+    }
+
+    @AcceptanceCriterion("AC-H7")
+    @Test fun duplicateCopiesDetailsWithoutPhotos() = runTest {
+        val id = repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM))))!!
+        val copy = repo.duplicate(id, "(copy)")!!
+        assertThat(copy).isNotEqualTo(id)
+        assertThat(repo.get(copy)!!.name).isEqualTo("Basement furnace (copy)")
+        assertThat(repo.get(copy)!!.priceCents).isEqualTo(129_950L)
+        assertThat(db.photoDao().listForItem(copy)).isEmpty()
+        assertThat(db.photoDao().listForItem(id)).hasSize(1)
+    }
+
+    @AcceptanceCriterion("AC-C33")
+    @Test fun registeredToggleUpdatesWarrantyAndQueuesSync() = runTest {
+        val id = repo.save("h1", furnace())!!
+        repo.setRegistered(id, true) // no warranty yet: nothing to do
+        assertThat(changes).doesNotContain("warranty/w1")
+        db.warrantyDao().upsert(com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, createdAt = 1, updatedAt = 1))
+        repo.setRegistered(id, true)
+        assertThat(db.warrantyDao().get("w1")!!.registered).isTrue()
+        assertThat(changes).contains("warranty/w1")
     }
 }

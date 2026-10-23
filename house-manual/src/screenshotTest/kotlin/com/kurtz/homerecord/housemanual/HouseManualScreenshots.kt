@@ -199,3 +199,28 @@ fun ItemEditPlateSheetScreenshot() = ItemEditPlateSheetPreview()
 @ThemePreviews
 @Composable
 fun ItemEditLoadingScreenshot() = ItemEditLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailScreenshot() = ItemDetailPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailNoWarrantyScreenshot() = ItemDetailNoWarrantyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailDeleteScreenshot() = ItemDetailDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailMissingScreenshot() = ItemDetailMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailLoadingScreenshot() = ItemDetailLoadingPreview()

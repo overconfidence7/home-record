@@ -13,4 +13,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object ItemsKey : NavKey
 
+@Serializable data class ItemDetailKey(val itemId: String) : NavKey
 @Serializable data class ItemEditKey(val itemId: String? = null, val roomId: String? = null) : NavKey

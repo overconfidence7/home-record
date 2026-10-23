@@ -57,3 +57,14 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_items_group_category"
 - assertVisible: "Heating and cooling.*"
+# AC-H7: a row opens the item page with details, warranty section and the overflow menu
+- tapOn: "Furnace.*"
+- assertVisible:
+    id: "hm_item_detail_status"
+- assertVisible:
+    id: "hm_item_detail_edit"
+- tapOn:
+    id: "hm_item_detail_more"
+- assertVisible: "Duplicate"
+- assertVisible: "Delete"
+- pressKey: back

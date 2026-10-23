@@ -84,6 +84,7 @@ interface OverlayDao {
 interface ItemDao {
     @Upsert suspend fun upsert(row: ItemEntity)
     @Query("SELECT * FROM item WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): ItemEntity?
+    @Query("SELECT * FROM item WHERE id = :id AND deletedAt IS NULL") fun observeOne(id: String): Flow<ItemEntity?>
     @Query("SELECT * FROM item WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ItemEntity>>
     @Query("SELECT * FROM item WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ItemEntity>
     @Query("UPDATE item SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
@@ -133,6 +134,7 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): PhotoEntity?
     @Query("SELECT * FROM photo WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<PhotoEntity>>
     @Query("SELECT * FROM photo WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<PhotoEntity>
+    @Query("SELECT * FROM photo WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") fun observeForItem(itemId: String): Flow<List<PhotoEntity>>
     @Query("SELECT * FROM photo WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listForItem(itemId: String): List<PhotoEntity>
     @Query("SELECT COUNT(*) FROM photo WHERE jobId = :jobId AND deletedAt IS NULL") fun observeCountForJob(jobId: String): Flow<Int>
     @Query("UPDATE photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
