@@ -23,6 +23,7 @@ dependencies {
     api(project(":core"))
     api(project(":core-ui"))
     implementation(platform(libs.compose.bom))
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.robolectric)

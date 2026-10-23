@@ -108,3 +108,5 @@ Plan editor, House tab, Floors and their ViewModels/strings moved from :house-ma
 2026-10-23 — Pseudo-rooms (Exterior, Whole house) are stored as reserved item.roomId values `pseudo:exterior` / `pseudo:whole_house` (no FK on roomId), so AC-C30 'room required' holds without fake room rows on the plan.
 
 2026-10-23: ItemEdit stores its draft in SavedStateHandle as a flat string list (ItemDraft is not parcelable and house-model has no serialization plugin). Blank item name is prefilled with the chosen subtype label. Items tab root is a minimal empty state with Add item until T027 builds the list.
+
+- 2026-10-23: Item photos use the platform TakePicture and PickVisualMedia contracts (no CameraX yet; CameraX is for Field Log capture, T039) and are copied into filesDir/media through a `MediaFiles` interface in :core. Coil 3 (approved) shows thumbnails in :house-model.

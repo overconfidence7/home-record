@@ -103,7 +103,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         }
         entry<ItemsKey> { ItemsRootScreen(onAdd = { nav.push(ItemEditKey()) }) }
         entry<ItemEditKey> { key ->
-            ItemEditRoute(container.items, container.homes, home.id, key.itemId, key.roomId, onClose = nav::pop)
+            ItemEditRoute(container.items, container.homes, container.media, home.id, key.itemId, key.roomId, onClose = nav::pop)
         }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }

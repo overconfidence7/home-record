@@ -1,6 +1,24 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
+import coil3.compose.AsyncImage
+import com.kurtz.homerecord.housemodel.items.DraftPhoto
+import com.kurtz.homerecord.housemodel.items.PhotoKind
+import java.io.File
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -37,7 +55,7 @@ import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.items.ItemField
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 
-/** HM-ItemEdit: category and subtype first, then room and the details (AC-C30). Photos and data plate scan arrive in T021c, T022. */
+/** HM-ItemEdit: category and subtype first, then room, details and photos (AC-C30). Data plate scan arrives in T022. */
 @Composable
 fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onClose: () -> Unit) {
     if (state.loading || state.missing) {
@@ -106,6 +124,18 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             stringResource(R.string.item_notes), d.notes, { onEvent(ItemEditEvent.Change(d.copy(notes = it))) },
             Modifier.testTag("hm_item_notes"), singleLine = false,
         )
+        PhotosSection(d.photos, onEvent)
+    }
+    state.photoSheetFor?.let { kind ->
+        OptionsSheet(
+            title = stringResource(if (kind == PhotoKind.DATA_PLATE) R.string.item_photo_data_plate else R.string.item_photo_item),
+            options = listOf(
+                SheetOption("take", stringResource(R.string.item_photo_take)),
+                SheetOption("choose", stringResource(R.string.item_photo_choose)),
+            ),
+            onDismiss = { onEvent(ItemEditEvent.ClosePhotoSheet) },
+            onPick = { onEvent(if (it.id == "take") ItemEditEvent.TakePhoto(kind) else ItemEditEvent.ChoosePhoto(kind)) },
+        )
     }
     when (state.picker) {
         ItemPicker.SUBTYPE -> SubtypeSheet(d.subtypeId, { onEvent(ItemEditEvent.ClosePicker) }) { onEvent(ItemEditEvent.PickSubtype(it)) }
@@ -116,6 +146,40 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             onPick = { onEvent(ItemEditEvent.PickRoom(it.id)) },
         )
         null -> Unit
+    }
+}
+
+@Composable
+private fun PhotosSection(photos: List<DraftPhoto>, onEvent: (ItemEditEvent) -> Unit) {
+    Text(stringResource(R.string.item_photos), style = MaterialTheme.typography.titleSmall)
+    if (photos.isNotEmpty()) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(photos, key = { it.path }) { photo ->
+                val label = stringResource(if (photo.kind == PhotoKind.DATA_PLATE) R.string.item_photo_data_plate else R.string.item_photo_item)
+                Box(Modifier.size(96.dp)) {
+                    AsyncImage(
+                        model = File(photo.path), contentDescription = label, contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(MaterialTheme.shapes.medium),
+                    )
+                    IconButton(
+                        onClick = { onEvent(ItemEditEvent.RemovePhoto(photo.path)) },
+                        modifier = Modifier.align(Alignment.TopEnd).testTag("hm_item_photo_remove"),
+                    ) {
+                        Icon(Icons.Rounded.Close, stringResource(R.string.item_photo_remove, label))
+                    }
+                }
+            }
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = { onEvent(ItemEditEvent.OpenPhotoSheet(PhotoKind.DATA_PLATE)) },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_item_photo_data_plate"),
+        ) { Text(stringResource(R.string.item_photo_data_plate), textAlign = TextAlign.Center) }
+        OutlinedButton(
+            onClick = { onEvent(ItemEditEvent.OpenPhotoSheet(PhotoKind.ITEM)) },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_item_photo_item"),
+        ) { Text(stringResource(R.string.item_photo_item), textAlign = TextAlign.Center) }
     }
 }
 

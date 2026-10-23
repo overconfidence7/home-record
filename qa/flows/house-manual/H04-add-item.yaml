@@ -23,6 +23,12 @@ appId: com.kurtz.homerecord.housemanual
 - inputText: "Carrier"
 - hideKeyboard
 - takeScreenshot: H04-item-form
+# AC-C30: photo buttons (data plate, item) sit at the end of the form
+- scrollUntilVisible:
+    element:
+      id: "hm_item_photo_data_plate"
+- assertVisible:
+    id: "hm_item_photo_item"
 - tapOn:
     id: "hm_save"
 # The form closes back to the Items tab

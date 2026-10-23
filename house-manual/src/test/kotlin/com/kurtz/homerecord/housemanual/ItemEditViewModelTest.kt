@@ -6,7 +6,11 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.media.CaptureTarget
+import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+import com.kurtz.homerecord.housemodel.items.PhotoKind
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HouseType
@@ -58,9 +62,10 @@ class ItemEditViewModelTest {
     }
 
     private val created = mutableListOf<ItemEditViewModel>()
+    private val media = FakeMediaFiles()
 
     private fun made(items: ItemRepository, homes: HomeRepository, homeId: String, itemId: String?, handle: SavedStateHandle) =
-        ItemEditViewModel(items, homes, homeId, itemId, handle).also { created += it }
+        ItemEditViewModel(items, homes, homeId, itemId, handle, media).also { created += it }
 
     private suspend fun home() = homes.createHome(NewHome("Maple St", null, HouseType.TWO_STORY, Foundation.BASEMENT, true)).also { homeId = it }
 
@@ -117,4 +122,53 @@ class ItemEditViewModelTest {
         gone.state.first { !it.loading }
         assertThat(gone.state.value.missing).isTrue()
     }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun photosAreAddedRemovedAndStoredWithTheItem() = runTest {
+        home()
+        val handle = SavedStateHandle()
+        val vm = made(items, homes, homeId, null, handle)
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.PickSubtype("furnace"))
+        vm.onEvent(ItemEditEvent.PickRoom(PseudoRooms.WHOLE_HOUSE))
+
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val launch = vm.state.value.photoLaunch!!
+        assertThat(launch.target).isNotNull()
+        vm.onEvent(ItemEditEvent.PhotoLaunchHandled)
+        assertThat(vm.state.value.photoLaunch).isNull()
+        media.files += launch.target!!.path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, launch.target!!.path))
+        // A cancelled camera leaves no file, so no photo is added.
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.ITEM, "/media/none.jpg"))
+        vm.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/1"))
+        vm.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://broken"))
+        assertThat(vm.state.value.draft.photos.map { it.kind }).containsExactly(PhotoKind.DATA_PLATE, PhotoKind.ITEM).inOrder()
+
+        // The photos ride along with the draft through process death.
+        val revived = made(items, homes, homeId, null, SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        revived.state.first { !it.loading }
+        assertThat(revived.state.value.draft.photos).hasSize(2)
+
+        vm.onEvent(ItemEditEvent.Save)
+        val id = vm.state.first { it.savedItemId != null }.savedItemId!!
+        assertThat(db.photoDao().listForItem(id).map { PhotoKind.fromTagsJson(it.tagsJson) })
+            .containsExactly(PhotoKind.DATA_PLATE, PhotoKind.ITEM)
+
+        val edit = made(items, homes, homeId, id, SavedStateHandle())
+        edit.state.first { !it.loading }
+        edit.onEvent(ItemEditEvent.RemovePhoto(edit.state.value.draft.photos.first().path))
+        edit.onEvent(ItemEditEvent.Save)
+        edit.state.first { it.savedItemId != null }
+        assertThat(db.photoDao().listForItem(id)).hasSize(1)
+    }
+}
+
+private class FakeMediaFiles : MediaFiles {
+    val files = mutableSetOf<String>()
+    private var n = 0
+    override fun newCaptureTarget() = CaptureTarget("content://capture/${++n}", "/media/capture-$n.jpg")
+    override suspend fun import(uri: String): String? = if (uri.contains("broken")) null else "/media/imported-${++n}.jpg".also { files += it }
+    override fun exists(path: String) = path in files
+    override fun discard(path: String) { files -= path }
 }

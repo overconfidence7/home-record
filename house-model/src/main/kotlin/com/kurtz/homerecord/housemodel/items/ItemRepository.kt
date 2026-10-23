@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.ItemEntity
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.model.ItemCategory
 import java.time.LocalDate
 
@@ -15,6 +16,17 @@ object PseudoRooms {
     const val WHOLE_HOUSE = "pseudo:whole_house"
     fun isPseudo(roomId: String?) = roomId == EXTERIOR || roomId == WHOLE_HOUSE
 }
+
+enum class PhotoKind(val tag: String) {
+    DATA_PLATE("data-plate"), ITEM("item");
+
+    companion object {
+        fun fromTagsJson(json: String) = entries.firstOrNull { "\"${it.tag}\"" in json } ?: ITEM
+    }
+}
+
+/** A photo on the form; [id] is null until it is saved. */
+data class DraftPhoto(val id: String?, val path: String, val kind: PhotoKind)
 
 /** What the ItemEdit form holds. [id] is null for a new item. */
 data class ItemDraft(
@@ -32,6 +44,7 @@ data class ItemDraft(
     val vendor: String = "",
     val manualUrl: String = "",
     val notes: String = "",
+    val photos: List<DraftPhoto> = emptyList(),
 ) {
     /** Price in cents, or null when blank or not a number. */
     val priceCents: Long? get() = parsePriceCents(price)
@@ -77,6 +90,7 @@ class ItemRepository(
             purchasedOn = it.purchasedOn.orEmpty(), inServiceOn = it.inServiceOn.orEmpty(),
             price = it.priceCents?.let { c -> "${c / 100}.${(c % 100).toString().padStart(2, '0')}" }.orEmpty(),
             vendor = it.vendor.orEmpty(), manualUrl = it.manualUrl.orEmpty(), notes = it.notes.orEmpty(),
+            photos = db.photoDao().listForItem(id).map { p -> DraftPhoto(p.id, p.path, PhotoKind.fromTagsJson(p.tagsJson)) },
         )
     }
 
@@ -102,8 +116,27 @@ class ItemRepository(
             )
             onChange("item", id)
             if (existing == null) seedDefaults(homeId, id, subtype, at)
+            savePhotos(homeId, id, draft, at)
         }
         return id
+    }
+
+    private suspend fun savePhotos(homeId: String, itemId: String, draft: ItemDraft, at: Long) {
+        val kept = draft.photos.mapNotNull { it.id }.toSet()
+        db.photoDao().listForItem(itemId).filter { it.id !in kept }.forEach {
+            db.photoDao().softDelete(it.id, at)
+            onChange("photo", it.id)
+        }
+        draft.photos.filter { it.id == null }.forEach {
+            val pid = Ids.newId()
+            db.photoDao().upsert(
+                PhotoEntity(
+                    id = pid, homeId = homeId, roomId = draft.roomId?.takeUnless(PseudoRooms::isPseudo), itemId = itemId,
+                    path = it.path, takenAt = at, tagsJson = "[\"${it.kind.tag}\"]", createdAt = at, updatedAt = at,
+                ),
+            )
+            onChange("photo", pid)
+        }
     }
 
     private suspend fun seedDefaults(homeId: String, itemId: String, subtype: com.kurtz.homerecord.core.model.ItemSubtype, at: Long) {

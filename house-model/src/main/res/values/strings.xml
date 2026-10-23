@@ -155,4 +155,10 @@
     <string name="item_vendor">Bought from</string>
     <string name="item_manual_url">Manual link</string>
     <string name="item_notes">Notes</string>
+    <string name="item_photos">Photos</string>
+    <string name="item_photo_data_plate">Data plate</string>
+    <string name="item_photo_item">Item</string>
+    <string name="item_photo_take">Take photo</string>
+    <string name="item_photo_choose">Choose from gallery</string>
+    <string name="item_photo_remove">Remove %1$s photo</string>
 </resources>

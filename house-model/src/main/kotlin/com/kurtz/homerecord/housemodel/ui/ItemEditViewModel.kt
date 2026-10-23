@@ -3,10 +3,13 @@ package com.kurtz.homerecord.housemodel.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.housemodel.items.DraftPhoto
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.items.PhotoKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,12 +26,13 @@ class ItemEditViewModel(
     private val homeId: String,
     private val itemId: String?,
     private val saved: SavedStateHandle,
+    private val media: MediaFiles,
     initialRoomId: String? = null,
 ) : ViewModel() {
     private var original = ItemDraft(roomId = initialRoomId)
 
     private val _state = MutableStateFlow(
-        ItemEditUiState(draft = saved.get<ArrayList<String>>(KEY)?.let(::decode) ?: original),
+        ItemEditUiState(draft = restore() ?: original),
     )
     val state: StateFlow<ItemEditUiState> = _state.asStateFlow()
 
@@ -65,12 +69,37 @@ class ItemEditViewModel(
             }
             is ItemEditEvent.OpenPicker -> _state.update { it.copy(picker = event.picker) }
             ItemEditEvent.ClosePicker -> _state.update { it.copy(picker = null) }
+            is ItemEditEvent.OpenPhotoSheet -> _state.update { it.copy(photoSheetFor = event.kind) }
+            ItemEditEvent.ClosePhotoSheet -> _state.update { it.copy(photoSheetFor = null) }
+            is ItemEditEvent.TakePhoto ->
+                _state.update { it.copy(photoSheetFor = null, photoLaunch = PhotoLaunch(event.kind, media.newCaptureTarget())) }
+            is ItemEditEvent.ChoosePhoto ->
+                _state.update { it.copy(photoSheetFor = null, photoLaunch = PhotoLaunch(event.kind, null)) }
+            ItemEditEvent.PhotoLaunchHandled -> _state.update { it.copy(photoLaunch = null) }
+            is ItemEditEvent.PhotoCaptured -> if (media.exists(event.path)) addPhoto(event.kind, event.path)
+            is ItemEditEvent.PhotoPicked -> viewModelScope.launch { media.import(event.uri)?.let { addPhoto(event.kind, it) } }
+            is ItemEditEvent.RemovePhoto -> {
+                val draft = _state.value.draft
+                setDraft(draft.copy(photos = draft.photos.filterNot { it.path == event.path }))
+            }
             ItemEditEvent.Save -> save()
         }
     }
 
+    private fun addPhoto(kind: PhotoKind, path: String) {
+        val draft = _state.value.draft
+        setDraft(draft.copy(photos = draft.photos + DraftPhoto(null, path, kind)))
+    }
+
+    private fun restore(): ItemDraft? {
+        val base = saved.get<ArrayList<String>>(KEY)?.let(::decode) ?: return null
+        val photos = saved.get<ArrayList<String>>(PHOTOS).orEmpty().mapNotNull(::decodePhoto)
+        return base.copy(photos = photos)
+    }
+
     private fun setDraft(draft: ItemDraft) {
         saved[KEY] = encode(draft)
+        saved[PHOTOS] = ArrayList(draft.photos.map(::encodePhoto))
         _state.update { it.copy(draft = draft, dirty = draft != original) }
     }
 
@@ -90,6 +119,15 @@ class ItemEditViewModel(
 
     private companion object {
         const val KEY = "draft"
+        const val PHOTOS = "photos"
+
+        fun encodePhoto(p: DraftPhoto) = "${p.id.orEmpty()}|${p.kind.name}|${p.path}"
+
+        fun decodePhoto(v: String): DraftPhoto? {
+            val parts = v.split('|', limit = 3)
+            val kind = PhotoKind.entries.firstOrNull { it.name == parts.getOrNull(1) } ?: return null
+            return DraftPhoto(parts[0].ifEmpty { null }, parts[2], kind)
+        }
 
         fun encode(d: ItemDraft) = arrayListOf(
             d.id.orEmpty(), d.subtypeId.orEmpty(), d.roomId.orEmpty(), d.name, d.make, d.model, d.serial,

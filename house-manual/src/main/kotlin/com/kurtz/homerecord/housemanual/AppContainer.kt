@@ -10,7 +10,9 @@ import com.kurtz.homerecord.core.auth.SessionInterceptor
 import androidx.room.Room
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles
 import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
@@ -79,6 +81,8 @@ class AppContainer(app: Application) {
             syncCoordinator.requestSync()
         }
     }
+
+    val media: MediaFiles = AndroidMediaFiles(app)
 
     val layers = PrefsLayerStore(app)
 
