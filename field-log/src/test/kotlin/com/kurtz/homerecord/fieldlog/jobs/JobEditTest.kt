@@ -145,6 +145,8 @@ class JobEditTest {
         val rooms = db.roomDao().listFor(floor.id)
         assertThat(rooms.map { it.name }).containsExactly("Kitchen", "Pantry")
         assertThat(rooms.map { it.polygonJson }.distinct()).containsExactly("[]")
+        // AC-F5: the job's home, floor and rooms are queued for sync
+        assertThat(changes.map { it.first }.filter { it != "job" && it != "client" }).containsExactly("home", "floor", "room", "room").inOrder()
 
         val edit = vm(job.id)
         assertThat(edit.state.value.draft.rooms).containsExactly("Kitchen", "Pantry")
@@ -153,6 +155,7 @@ class JobEditTest {
         edit.save()
         assertThat(db.roomDao().listFor(floor.id).map { it.name }).containsExactly("Kitchen", "Garage")
         assertThat(db.jobDao().get(job.id)?.homeId).isEqualTo(job.homeId)
+        assertThat(changes.count { it.first == "room" }).isEqualTo(2 + 2)
     }
 
     @Test fun phasesAndOfficeEmailsSaveAndReload() = runTest {

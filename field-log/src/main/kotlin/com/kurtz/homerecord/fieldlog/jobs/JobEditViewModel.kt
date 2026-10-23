@@ -182,18 +182,21 @@ class JobEditViewModel(
         var homeId = existing?.homeId
         val current = homeId?.let { jobRooms(it) }.orEmpty()
         val wanted = draft.rooms
-        current.filter { r -> wanted.none { it.equals(r.name, ignoreCase = true) } }.forEach { rooms.softDelete(it.id, now) }
+        current.filter { r -> wanted.none { it.equals(r.name, ignoreCase = true) } }.forEach { rooms.softDelete(it.id, now); recordChange("room", it.id) }
         val toAdd = wanted.filter { n -> current.none { it.name.equals(n, ignoreCase = true) } }
         if (toAdd.isEmpty()) return homeId
         if (homeId == null) {
             homeId = UUID.randomUUID().toString()
             homes.upsert(HomeEntity(id = homeId, name = draft.name.trim(), address = draft.address.trim().ifBlank { null }, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
+            recordChange("home", homeId)
         }
         val floor = floors.listFor(homeId).firstOrNull() ?: FloorEntity(
             id = UUID.randomUUID().toString(), homeId = homeId, sortOrder = 0, name = "Main", createdAt = now, updatedAt = now, source = Sources.FIELD_LOG,
-        ).also { floors.upsert(it) }
+        ).also { floors.upsert(it); recordChange("floor", it.id) }
         toAdd.forEach { n ->
-            rooms.upsert(RoomEntity(id = UUID.randomUUID().toString(), floorId = floor.id, name = n, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
+            val roomId = UUID.randomUUID().toString()
+            rooms.upsert(RoomEntity(id = roomId, floorId = floor.id, name = n, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
+            recordChange("room", roomId)
         }
         return homeId
     }

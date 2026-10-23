@@ -119,4 +119,18 @@ describe("AC-F5 job rows sync", () => {
     expect(JSON.stringify(pulled)).toContain("Kitchen remodel");
     expect(JSON.stringify(pulled)).toContain("12 Elm St");
   });
+
+  it("accepts a job's home, floor and room rows under the company tenant", async () => {
+    // AC-F5, AC-F48
+    const owner = await seedUser("s-o10", "s-o10@x.com");
+    await seedCompany("s-c10", "Co", "s-o10");
+    const res = await push(owner, "s-c10", "dev-a", [
+      op(1, "h1", { name: "Elm St", createdAt: 5, updatedAt: 10 }, 10, "home"),
+      op(2, "f1", { homeId: "h1", name: "Main", sortOrder: 0, createdAt: 5, updatedAt: 10 }, 10, "floor"),
+      op(3, "r1", { floorId: "f1", name: "Kitchen", createdAt: 5, updatedAt: 10 }, 10, "room"),
+    ]);
+    expect(res.status).toBe(200);
+    const rows = (await pull(owner, "s-c10")).rows;
+    expect(rows.map((r: any) => r.entity).sort()).toEqual(["floor", "home", "room"]);
+  });
 });

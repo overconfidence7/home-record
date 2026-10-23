@@ -14,7 +14,13 @@ const HOME_ENTITIES = [
   "home", "floor", "room", "wall", "wall_photo", "opening", "stair", "overlay", "item", "warranty", "consumable",
   "service_record", "document", "photo", "contact", "maintenance_task", "panel", "breaker", "breaker_link",
 ];
-const ENTITIES: Record<TenantKind, Set<string>> = { company: new Set(COMPANY_ENTITIES), home: new Set(HOME_ENTITIES) };
+// A job's house model (AC-F48) syncs inside the company tenant; the handoff copies it to a home tenant (AC-B40).
+// Only the rows FL-JobEdit writes so far; T019 adds walls, overlays and items as FL-House needs them.
+const JOB_HOME_ENTITIES = ["home", "floor", "room"];
+const ENTITIES: Record<TenantKind, Set<string>> = {
+  company: new Set([...COMPANY_ENTITIES, ...JOB_HOME_ENTITIES]),
+  home: new Set(HOME_ENTITIES),
+};
 const AUTHORITATIVE_ROLES = new Set(["owner", "office"]);
 const PAGE = 500;
 

@@ -52,7 +52,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T016: Blueprint PDF export (one page per floor, to scale, scale bar, home name) through the share sheet (acceptance: AC-C16)
 - [x] T017: HM-House tab and HM-Room skeleton: floor chips, blueprint, Edit plan / 3D (placeholder) / Export actions; HM-Room with sections (Items, Walls, Photos, Overlays, Breakers, Shutoffs, Notes) as empty states; Add room FAB inside the editor (acceptance: AC-H4, AC-H10 shell)
   - [ ] T017a: 3D placeholder action on HM-House is deferred to the 3D task (a dead button would be a placeholder); HM-Room sections gain real lists as items, overlays, breakers and shutoffs land
-- [ ] T018: Field Log jobs with rooms: FL-Jobs list, FL-JobEdit (client, address with on-device Geocoder → lat/lng, rooms chips, dates, crew, phases, budget, office emails), FL-Job Overview tab and tab shell, `JobOrdering` `[unit]`, sync (acceptance: AC-F5, AC-F6, AC-F7)
+- [x] T018: Field Log jobs with rooms: FL-Jobs list, FL-JobEdit (client, address with on-device Geocoder → lat/lng, rooms chips, dates, crew, phases, budget, office emails), FL-Job Overview tab and tab shell, `JobOrdering` `[unit]`, sync (acceptance: AC-F5, AC-F6, AC-F7)
   - [x] T018a: `JobOrdering` + `JobSummary` in `:core` model with unit tests (AC-F6); jobs list, JobEdit, Overview and sync remain under T018
   - [x] T018b: FL-Jobs list on the Jobs tab (grouped Active/Upcoming/Done, search, show archived, next date, client and address), `JobListMapper` and `JobsViewModel` with tests (AC-F6); no New job button until JobEdit
   - [x] T018c1: FL-JobEdit form (name, client by name reused case-insensitively, address, dates, budget hours, notes) with New job FAB on FL-Jobs; saves offline and queues job+client for sync (AC-F5); tapping a row opens the form until the Overview shell exists
@@ -60,11 +60,11 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T018c2b1: address geocode: `Geocoder` interface + `AndroidGeocoder` in :core, `JobGeocoder` resolves pending jobs after save and when the network returns, queues the job (AC-F5)
   - [x] T018c2b2a: Open in Maps link on FL-JobEdit once the address has resolved (AC-F5)
   - [x] T018c2b2a2: phases and office emails chips on FL-JobEdit, stored as JSON on the job (AC-F5)
-  - [ ] T018c2b2: crew (needs members list), sync of home/floor/room rows created for a job (they need a home tenant on the backend; see docs/decisions.md 2026-10-22)
+  - [x] T018c2b2: crew done in T018c3b1; home/floor/room rows created for a job now sync under the company tenant (backend accepts them, JobEdit queues them)
   - [x] T018c3a: FL-Job tab shell (eight tabs, only Overview built) and Overview (status, address, map link, dates, phases, hours this week from punches via `JobHours`, photos, open tasks, next day, crew; stats open their tab) (AC-F7)
   - [x] T018c3b1: crew picker on JobEdit (cached team list, job_crew rows queued for sync)
   - [x] T018c3b: sync of job rows verified against backend (backend test AC-F5); Photos, Log, Files, Tasks, Time, House, Changes tabs arrive with T019+ and later tasks
-  - [ ] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
+  - [x] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [ ] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
 - [ ] R04: Review T016–T020

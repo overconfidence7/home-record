@@ -98,3 +98,6 @@ PDF pages use the largest standard drafting scale (1/2" = 1' down to 1/32" = 1')
 
 ## 2026-10-22 Job rooms' home rows are not synced yet
 Home, floor and room rows are home-tenant entities on the backend, but Field Log only holds a company tenant. T018c2a stores them locally; syncing them needs a decision on how a job's home gets a home tenant (create one per job, or sync under the company). Left open in T018c2b2 rather than pushing rows the backend would reject with 400 and block the outbox.
+
+## 2026-10-23 Job home rows sync under the company tenant
+Resolves the 2026-10-22 open question: a job's home, floor and room rows sync inside the company tenant (no per-job home tenant). The backend company entity list gains home, floor and room only; T019 adds walls, overlays and items as FL-House needs them. The handoff (AC-B40) copies the house model into the homeowner's home tenant.
