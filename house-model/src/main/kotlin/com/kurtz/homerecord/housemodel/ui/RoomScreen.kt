@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.house
+package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,9 +34,8 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
-import com.kurtz.homerecord.housemanual.R
+import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.HomeRepository
-import com.kurtz.homerecord.housemodel.ui.kindLabel
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 
@@ -54,7 +53,7 @@ fun RoomScreen(state: RoomUiState, onBack: () -> Unit) {
     val subtitle = listOfNotNull(state.floorName, state.homeName).joinToString(" · ").ifBlank { null }
     ScreenScaffold(
         title = if (state.loading || state.room != null) {
-            state.room?.name?.ifBlank { null } ?: stringResource(com.kurtz.homerecord.housemodel.R.string.plan_unnamed_room)
+            state.room?.name?.ifBlank { null } ?: stringResource(R.string.plan_unnamed_room)
         } else {
             stringResource(R.string.room_screen_title)
         },

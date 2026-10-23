@@ -25,6 +25,7 @@ class JobHouseDeps(
     val layers: LayerStore,
     val provisioner: JobHomeProvisioner,
     val onEditPlan: (homeId: String, title: String, floorId: String?) -> Unit,
+    val onOpenRoom: (roomId: String) -> Unit,
     val onEditShape: (homeId: String, title: String, floorId: String?, PlanRoom) -> Unit,
     val onOpenFloors: (homeId: String, title: String) -> Unit,
 )
@@ -65,7 +66,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     homeId = homeId,
                     homeName = state.name,
                     summary = state.address.orEmpty(),
-                    onOpenRoom = {},
+                    onOpenRoom = { house.onOpenRoom(it.id) },
                     onEditPlan = { house.onEditPlan(homeId, state.name, it) },
                     onEditShape = { floorId, room -> house.onEditShape(homeId, state.name, floorId, room) },
                     onOpenFloors = { house.onOpenFloors(homeId, state.name) },

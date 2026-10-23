@@ -17,8 +17,8 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.ui.HouseDialog
 import com.kurtz.homerecord.housemodel.ui.HouseScreen
 import com.kurtz.homerecord.housemodel.ui.HouseUiState
-import com.kurtz.homerecord.housemanual.house.RoomScreen
-import com.kurtz.homerecord.housemanual.house.RoomUiState
+import com.kurtz.homerecord.housemodel.ui.RoomScreen
+import com.kurtz.homerecord.housemodel.ui.RoomUiState
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
 import com.kurtz.homerecord.housemodel.blueprint.LayerSet
 import com.kurtz.homerecord.housemodel.ui.PlanEditorScreen

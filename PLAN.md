@@ -66,7 +66,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T018c3b: sync of job rows verified against backend (backend test AC-F5); Photos, Log, Files, Tasks, Time, House, Changes tabs arrive with T019+ and later tasks
   - [x] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [x] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
-  - [ ] T019a: HM-Room page shared with FL-House (tapping a room on the job plan does nothing yet; RoomScreen still lives in :house-manual)
+  - [x] T019a: HM-Room page shared with FL-House (RoomScreen/RoomRoute and room strings moved to :house-model; tapping a room on the job plan opens it)
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
 - [ ] R04: Review T016–T020
 - [ ] V1: Visual review of M1 screenshots

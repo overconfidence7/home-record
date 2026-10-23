@@ -21,7 +21,7 @@ import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.housemodel.ui.PlanEditorRoute
 import com.kurtz.homerecord.housemodel.ui.FloorsRoute
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
-import com.kurtz.homerecord.housemanual.house.RoomRoute
+import com.kurtz.homerecord.housemodel.ui.RoomRoute
 import com.kurtz.homerecord.housemanual.onboarding.foundationLabel
 import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel
 import com.kurtz.homerecord.housemodel.Foundation

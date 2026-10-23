@@ -14,3 +14,5 @@ import kotlinx.serialization.Serializable
 @Serializable data class JobPlanKey(val homeId: String, val title: String, val floorId: String? = null, val roomId: String? = null, val editShape: Boolean = false) : NavKey
 
 @Serializable data class JobFloorsKey(val homeId: String, val title: String) : NavKey
+
+@Serializable data class JobRoomKey(val roomId: String) : NavKey
