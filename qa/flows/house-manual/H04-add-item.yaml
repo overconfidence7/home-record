@@ -31,6 +31,7 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_photo_item"
 - tapOn:
     id: "hm_save"
+# AC-C35: default consumables and reminders for the subtype are seeded on save (asserted in ItemRepositoryTest; Reminders tab arrives with T031)
 # The form closes back to the Items tab
 - assertNotVisible:
     id: "hm_save"

@@ -1,19 +1,8 @@
 {
  "ticked_tasks": 28,
  "acs_claimed": 82,
- "acs_missing": 1,
+ "acs_missing": 0,
  "unit_test_files": 51,
  "device_test_files": 21,
- "tasks": [
-  {
-   "task": "T021",
-   "acs": [
-    "AC-C30",
-    "AC-C35"
-   ],
-   "missing": [
-    "AC-C35"
-   ]
-  }
- ]
+ "tasks": []
 }
