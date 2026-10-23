@@ -236,9 +236,12 @@ sleep 1; kill $LOGCAT_PID >/dev/null 2>&1 || true
 for p in $PKGS; do
   crashes=$(grep -c "FATAL EXCEPTION" "$OUT/logs/logcat.txt" || true)
   anrs=$(grep -c "ANR in $p" "$OUT/logs/logcat.txt" || true)
-  strict=$(grep -c "StrictMode policy violation" "$OUT/logs/logcat.txt" || true)
+  # StrictMode lines from other processes (Google app, Messages) are not ours: keep only this package's pids.
+  pids=$(sed -n "s/.*Start proc \([0-9][0-9]*\):$p[\/:].*/\1/p" "$OUT/logs/logcat.txt" | sort -u | tr '\n' ' ')
+  awk -v pids=" $pids" '$3 != "" && index(pids, " " $3 " ") && /StrictMode policy violation/' "$OUT/logs/logcat.txt" > "$OUT/logs/strictmode-$p.txt" 2>/dev/null || true
+  strict=$(wc -l < "$OUT/logs/strictmode-$p.txt" | tr -d ' ')
   grep -n -A 12 "FATAL EXCEPTION" "$OUT/logs/logcat.txt" > "$OUT/logs/crashes.txt" 2>/dev/null || true
-  grep -n -A 6 "StrictMode policy violation" "$OUT/logs/logcat.txt" > "$OUT/logs/strictmode.txt" 2>/dev/null || true
+  cat "$OUT/logs/strictmode-$p.txt" >> "$OUT/logs/strictmode.txt" 2>/dev/null || true
   details="$crashes crashes, $anrs ANRs, $strict StrictMode violations"
   if [ "$crashes" != "0" ] || [ "$anrs" != "0" ]; then record "logcat:$p" fail "$details"; elif [ "$strict" != "0" ]; then record "logcat:$p" warn "$details"; else record "logcat:$p" pass "$details"; fi
 done
