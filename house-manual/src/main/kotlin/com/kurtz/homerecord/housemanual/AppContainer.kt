@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.auth.SessionInterceptor
 import androidx.room.Room
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
@@ -65,6 +66,14 @@ class AppContainer(app: Application) {
     /** Every write goes to the outbox against the device's home, signed in or not; the coordinator sends it. */
     val homes = HomeRepository(db) { entity, id ->
         val homeId = if (entity == "home") id else db.homeDao().observeAll().first().firstOrNull()?.id
+        if (homeId != null) {
+            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
+            syncCoordinator.requestSync()
+        }
+    }
+
+    val items = ItemRepository(db) { entity, id ->
+        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
         if (homeId != null) {
             syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
             syncCoordinator.requestSync()

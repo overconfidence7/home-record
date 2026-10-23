@@ -22,6 +22,8 @@ import com.kurtz.homerecord.housemodel.ui.PlanEditorRoute
 import com.kurtz.homerecord.housemodel.ui.FloorsRoute
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
 import com.kurtz.homerecord.housemodel.ui.RoomRoute
+import com.kurtz.homerecord.housemodel.ui.ItemEditRoute
+import com.kurtz.homerecord.housemanual.items.ItemsRootScreen
 import com.kurtz.homerecord.housemanual.onboarding.foundationLabel
 import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel
 import com.kurtz.homerecord.housemodel.Foundation
@@ -67,7 +69,7 @@ fun HouseManualApp(container: AppContainer) {
 @Composable
 private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEditor: Boolean = false) {
     val tabs = tabDefs.map {
-        AppTab(it.id, stringResource(it.label), it.icon, it.selected, if (it.id == "house") HouseKey else PlaceholderKey(it.id))
+        AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "house" -> HouseKey; "items" -> ItemsKey; else -> PlaceholderKey(it.id) })
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     HomeRecordApp(
@@ -98,6 +100,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) },
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
             )
+        }
+        entry<ItemsKey> { ItemsRootScreen(onAdd = { nav.push(ItemEditKey()) }) }
+        entry<ItemEditKey> { key ->
+            ItemEditRoute(container.items, container.homes, home.id, key.itemId, key.roomId, onClose = nav::pop)
         }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }

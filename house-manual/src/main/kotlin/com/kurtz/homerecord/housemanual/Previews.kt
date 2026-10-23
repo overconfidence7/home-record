@@ -18,6 +18,11 @@ import com.kurtz.homerecord.housemodel.ui.HouseDialog
 import com.kurtz.homerecord.housemodel.ui.HouseScreen
 import com.kurtz.homerecord.housemodel.ui.HouseUiState
 import com.kurtz.homerecord.housemodel.ui.RoomScreen
+import com.kurtz.homerecord.housemodel.ui.ItemEditScreen
+import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
+import com.kurtz.homerecord.housemodel.RoomChoice
+import com.kurtz.homerecord.housemodel.items.ItemDraft
+import com.kurtz.homerecord.housemanual.items.ItemsRootScreen
 import com.kurtz.homerecord.housemodel.ui.RoomUiState
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
 import com.kurtz.homerecord.housemodel.blueprint.LayerSet
@@ -245,3 +250,36 @@ fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = h
 @ThemePreviews
 @Composable
 fun RoomMissingPreview() = Frame { RoomScreen(RoomUiState(loading = false), {}) }
+
+private val itemRooms = listOf(RoomChoice("r1", "Kitchen", "Main"), RoomChoice("r2", "Utility room", "Basement"), RoomChoice("r3", "Primary bedroom", "Upper"))
+
+private val furnaceDraft = ItemDraft(
+    subtypeId = "furnace", roomId = "r2", name = "Basement furnace", make = "Carrier", model = "59TP6A060S17",
+    serial = "3416A12345", manufacturedOn = "2016-04-18", purchasedOn = "2016-09-02", price = "4850.00", vendor = "Harlan Heating",
+)
+
+@ThemePreviews
+@Composable
+fun ItemsEmptyPreview() = Frame { ItemsRootScreen({}) }
+
+@ThemePreviews
+@Composable
+fun ItemEditNewPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = false, rooms = itemRooms), {}, {}) }
+
+@ThemePreviews
+@Composable
+fun ItemEditFilledPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = false, rooms = itemRooms, draft = furnaceDraft.copy(id = "i1"), dirty = true), {}, {}) }
+
+@ThemePreviews
+@Composable
+fun ItemEditErrorsPreview() = Frame {
+    ItemEditScreen(ItemEditUiState(loading = false, rooms = itemRooms, draft = ItemDraft(price = "abc"), showErrors = true, dirty = true), {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun ItemEditTypeSheetPreview() = Frame { com.kurtz.homerecord.housemodel.ui.SubtypeList("furnace", {}) }
+
+@ThemePreviews
+@Composable
+fun ItemEditLoadingPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = true), {}, {}) }

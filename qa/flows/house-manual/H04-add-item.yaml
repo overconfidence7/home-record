@@ -1,0 +1,32 @@
+# Walkthrough H4: add a furnace from the Items tab (AC-C30). Needs a home, so it starts from the onboarding helper.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn: "Items"
+- assertVisible: "No items yet"
+- tapOn:
+    id: "hm_items_add"
+- assertVisible: "Add item"
+# Save with nothing filled shows what is missing instead of closing
+- tapOn:
+    id: "hm_save"
+- assertVisible: "Choose what kind of item this is."
+- tapOn:
+    id: "hm_item_type"
+- tapOn:
+    id: "hm_item_type_furnace"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Whole house"
+- tapOn:
+    id: "hm_item_make"
+- inputText: "Carrier"
+- hideKeyboard
+- takeScreenshot: H04-item-form
+- tapOn:
+    id: "hm_save"
+# The form closes back to the Items tab
+- assertNotVisible:
+    id: "hm_save"
+- assertVisible:
+    id: "hm_items_fab"

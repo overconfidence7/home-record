@@ -274,6 +274,12 @@ class HomeRepository(
         }
     }
 
+    /** Every room of the home, bottom floor first, for pickers. */
+    suspend fun roomChoices(homeId: String): List<RoomChoice> =
+        db.floorDao().listFor(homeId).flatMap { floor ->
+            db.roomDao().listFor(floor.id).map { RoomChoice(it.id, it.name, floor.name) }
+        }
+
     suspend fun roomCount(floorId: String): Int = db.roomDao().listFor(floorId).size
 
     /** Soft deletes the floor and its rooms. */
@@ -292,5 +298,8 @@ class HomeRepository(
         const val DEFAULT_CEILING_IN = 96
     }
 }
+
+/** A room as the item form's room picker lists it. */
+data class RoomChoice(val id: String, val name: String, val floorName: String)
 
 data class RoomLocation(val floorId: String, val floorName: String, val homeName: String)

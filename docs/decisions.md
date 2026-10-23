@@ -106,3 +106,5 @@ Resolves the 2026-10-22 open question: a job's home, floor and room rows sync in
 Plan editor, House tab, Floors and their ViewModels/strings moved from :house-manual to :house-model (package `housemodel.ui`) so Field Log's job House tab reuses them unchanged (AC-F48). A job's home is created lazily (`JobHomeProvisioner`) when the House tab is first used or a room is typed on the job form.
 
 2026-10-23 — Pseudo-rooms (Exterior, Whole house) are stored as reserved item.roomId values `pseudo:exterior` / `pseudo:whole_house` (no FK on roomId), so AC-C30 'room required' holds without fake room rows on the plan.
+
+2026-10-23: ItemEdit stores its draft in SavedStateHandle as a flat string list (ItemDraft is not parcelable and house-model has no serialization plugin). Blank item name is prefilled with the chosen subtype label. Items tab root is a minimal empty state with Add item until T027 builds the list.

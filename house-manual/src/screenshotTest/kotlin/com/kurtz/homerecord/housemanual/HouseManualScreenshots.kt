@@ -139,3 +139,33 @@ fun RoomPageScreenshot() = RoomPagePreview()
 @ThemePreviews
 @Composable
 fun RoomMissingScreenshot() = RoomMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsEmptyScreenshot() = ItemsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemEditNewScreenshot() = ItemEditNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemEditFilledScreenshot() = ItemEditFilledPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemEditErrorsScreenshot() = ItemEditErrorsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemEditTypeSheetScreenshot() = ItemEditTypeSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemEditLoadingScreenshot() = ItemEditLoadingPreview()

@@ -40,4 +40,7 @@
     <string name="field_required">Required.</string>
     <string name="plan_row">Floor plan</string>
     <string name="plan_row_supporting">Draw and edit rooms floor by floor</string>
+    <string name="items_empty_title">No items yet</string>
+    <string name="items_empty_body">Add the furnace, the water heater, the dishwasher. Anything with a model number and a warranty.</string>
+    <string name="items_add">Add item</string>
 </resources>

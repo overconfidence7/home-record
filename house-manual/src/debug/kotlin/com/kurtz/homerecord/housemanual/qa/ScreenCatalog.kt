@@ -34,6 +34,12 @@ object ScreenCatalog {
         QaScreen("house-loading", nonRoot = false) { HouseLoadingPreview() },
         QaScreen("house-no-floors", nonRoot = false) { HouseNoFloorsPreview() },
         QaScreen("room-page", nonRoot = true) { RoomPagePreview() },
+        QaScreen("items-empty", nonRoot = false) { ItemsEmptyPreview() },
+        QaScreen("item-edit-new", nonRoot = true) { ItemEditNewPreview() },
+        QaScreen("item-edit-filled", nonRoot = true) { ItemEditFilledPreview() },
+        QaScreen("item-edit-errors", nonRoot = true) { ItemEditErrorsPreview() },
+        QaScreen("item-edit-type-sheet", nonRoot = true) { ItemEditTypeSheetPreview() },
+        QaScreen("item-edit-loading", nonRoot = true) { ItemEditLoadingPreview() },
         QaScreen("room-missing", nonRoot = true) { RoomMissingPreview() },
     )
 

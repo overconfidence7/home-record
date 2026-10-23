@@ -1,0 +1,187 @@
+package com.kurtz.homerecord.housemodel.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.items
+import com.kurtz.homerecord.core.model.ItemCategory
+import com.kurtz.homerecord.coreui.components.DateField
+import com.kurtz.homerecord.coreui.components.FormScaffold
+import com.kurtz.homerecord.coreui.components.LabeledField
+import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.OptionsSheet
+import com.kurtz.homerecord.coreui.components.SheetOption
+import com.kurtz.homerecord.coreui.shell.ScreenScaffold
+import com.kurtz.homerecord.housemodel.R
+import com.kurtz.homerecord.housemodel.items.ItemField
+import com.kurtz.homerecord.housemodel.items.PseudoRooms
+
+/** HM-ItemEdit: category and subtype first, then room and the details (AC-C30). Photos and data plate scan arrive in T021c, T022. */
+@Composable
+fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onClose: () -> Unit) {
+    if (state.loading || state.missing) {
+        ScreenScaffold(title = stringResource(R.string.item_edit_title_edit), onBack = onClose) { padding ->
+            if (state.loading) LoadingState(Modifier.padding(padding))
+            else Text(stringResource(R.string.item_missing), Modifier.padding(padding).padding(16.dp))
+        }
+        return
+    }
+    val d = state.draft
+    val errors = state.errors
+    val subtype = d.subtypeId?.let(ItemCategory::subtype)
+    val roomName = d.roomId?.let { id -> roomLabel(id, state) }
+    FormScaffold(
+        title = stringResource(if (state.isNew) R.string.item_edit_title_new else R.string.item_edit_title_edit),
+        dirty = state.dirty,
+        saveEnabled = !state.saving,
+        onClose = onClose,
+        onSave = { onEvent(ItemEditEvent.Save) },
+    ) {
+        PickerField(
+            label = stringResource(R.string.item_type),
+            value = subtype?.let { "${it.category.label}, ${it.label}" }.orEmpty(),
+            error = if (ItemField.SUBTYPE in errors) stringResource(R.string.item_type_error) else null,
+            tag = "hm_item_type",
+            onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.SUBTYPE)) },
+        )
+        PickerField(
+            label = stringResource(R.string.item_room),
+            value = roomName.orEmpty(),
+            error = if (ItemField.ROOM in errors) stringResource(R.string.item_room_error) else null,
+            tag = "hm_item_room",
+            onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.ROOM)) },
+        )
+        LabeledField(
+            stringResource(R.string.item_name), d.name, { onEvent(ItemEditEvent.Change(d.copy(name = it))) },
+            Modifier.testTag("hm_item_name"), required = true,
+            error = if (ItemField.NAME in errors) stringResource(R.string.item_name_error) else null,
+        )
+        LabeledField(stringResource(R.string.item_make), d.make, { onEvent(ItemEditEvent.Change(d.copy(make = it))) }, Modifier.testTag("hm_item_make"))
+        LabeledField(stringResource(R.string.item_model), d.model, { onEvent(ItemEditEvent.Change(d.copy(model = it))) }, Modifier.testTag("hm_item_model"))
+        LabeledField(stringResource(R.string.item_serial), d.serial, { onEvent(ItemEditEvent.Change(d.copy(serial = it))) }, Modifier.testTag("hm_item_serial"))
+        DateField(
+            stringResource(R.string.item_manufactured), d.manufacturedOn.ifBlank { null },
+            { onEvent(ItemEditEvent.Change(d.copy(manufacturedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_manufactured"),
+        )
+        DateField(
+            stringResource(R.string.item_purchased), d.purchasedOn.ifBlank { null },
+            { onEvent(ItemEditEvent.Change(d.copy(purchasedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_purchased"),
+        )
+        DateField(
+            stringResource(R.string.item_in_service), d.inServiceOn.ifBlank { null },
+            { onEvent(ItemEditEvent.Change(d.copy(inServiceOn = it.orEmpty()))) }, Modifier.testTag("hm_item_in_service"),
+        )
+        LabeledField(
+            stringResource(R.string.item_price), d.price, { onEvent(ItemEditEvent.Change(d.copy(price = it))) },
+            Modifier.testTag("hm_item_price"), keyboardType = KeyboardType.Decimal,
+            error = if (ItemField.PRICE in errors) stringResource(R.string.item_price_error) else null,
+        )
+        LabeledField(stringResource(R.string.item_vendor), d.vendor, { onEvent(ItemEditEvent.Change(d.copy(vendor = it))) }, Modifier.testTag("hm_item_vendor"))
+        LabeledField(
+            stringResource(R.string.item_manual_url), d.manualUrl, { onEvent(ItemEditEvent.Change(d.copy(manualUrl = it))) },
+            Modifier.testTag("hm_item_manual_url"), keyboardType = KeyboardType.Uri,
+        )
+        LabeledField(
+            stringResource(R.string.item_notes), d.notes, { onEvent(ItemEditEvent.Change(d.copy(notes = it))) },
+            Modifier.testTag("hm_item_notes"), singleLine = false,
+        )
+    }
+    when (state.picker) {
+        ItemPicker.SUBTYPE -> SubtypeSheet(d.subtypeId, { onEvent(ItemEditEvent.ClosePicker) }) { onEvent(ItemEditEvent.PickSubtype(it)) }
+        ItemPicker.ROOM -> OptionsSheet(
+            title = stringResource(R.string.item_room),
+            options = roomOptions(state),
+            onDismiss = { onEvent(ItemEditEvent.ClosePicker) },
+            onPick = { onEvent(ItemEditEvent.PickRoom(it.id)) },
+        )
+        null -> Unit
+    }
+}
+
+@Composable
+private fun roomLabel(id: String, state: ItemEditUiState): String = when (id) {
+    PseudoRooms.EXTERIOR -> stringResource(R.string.item_room_exterior)
+    PseudoRooms.WHOLE_HOUSE -> stringResource(R.string.item_room_whole_house)
+    else -> state.rooms.firstOrNull { it.id == id }?.let { stringResource(R.string.item_room_on_floor, it.name, it.floorName) }.orEmpty()
+}
+
+@Composable
+private fun roomOptions(state: ItemEditUiState): List<SheetOption> =
+    state.rooms.map { SheetOption(it.id, stringResource(R.string.item_room_on_floor, it.name, it.floorName)) } +
+        SheetOption(PseudoRooms.EXTERIOR, stringResource(R.string.item_room_exterior)) +
+        SheetOption(PseudoRooms.WHOLE_HOUSE, stringResource(R.string.item_room_whole_house))
+
+/** Read-only field that opens a sheet; the whole field is the touch target. */
+@Composable
+private fun PickerField(label: String, value: String, error: String?, tag: String, onClick: () -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {},
+        enabled = false,
+        modifier = Modifier.fillMaxWidth().testTag(tag).clickable(role = Role.Button, onClick = onClick),
+        label = { Text(stringResource(com.kurtz.homerecord.coreui.R.string.required_label, label)) },
+        trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, contentDescription = null) },
+        supportingText = error?.let { { Text(it) } },
+        isError = error != null,
+        colors = OutlinedTextFieldDefaults.colors(
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledBorderColor = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+            disabledLabelColor = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledSupportingTextColor = MaterialTheme.colorScheme.error,
+        ),
+    )
+}
+
+/** Subtypes grouped under their category, each category with its icon. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SubtypeSheet(selectedId: String?, onDismiss: () -> Unit, onPick: (String) -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) { SubtypeList(selectedId, onPick) }
+}
+
+/** The sheet's content, separate so previews can draw it (a modal sheet does not render in screenshot tests). */
+@Composable
+fun SubtypeList(selectedId: String?, onPick: (String) -> Unit) {
+    run {
+        LazyColumn(Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("hm_item_type_sheet")) {
+            ItemCategory.entries.forEach { category ->
+                val subtypes = ItemCategory.all().filter { it.category == category }
+                item(key = "h_${category.name}") {
+                    ListItem(
+                        headlineContent = { Text(category.label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) },
+                        leadingContent = { Icon(itemIcon(category.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                    )
+                }
+                items(subtypes, key = { it.id }) { subtype ->
+                    ListItem(
+                        headlineContent = { Text(subtype.label) },
+                        trailingContent = if (subtype.id == selectedId) { { Text(stringResource(R.string.item_type_selected)) } } else null,
+                        modifier = Modifier.clickable { onPick(subtype.id) }.padding(start = 40.dp).testTag("hm_item_type_${subtype.id}"),
+                    )
+                }
+            }
+        }
+    }
+}
