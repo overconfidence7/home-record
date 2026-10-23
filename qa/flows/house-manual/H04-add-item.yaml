@@ -43,3 +43,17 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_save"
 - assertVisible:
     id: "hm_items_fab"
+# AC-H6: the saved item shows in the grouped list; switching to by-room and filtering by warranty status work
+- assertVisible: "Furnace.*"
+- tapOn:
+    id: "hm_items_group_room"
+- assertVisible: "Whole house.*"
+- tapOn:
+    id: "hm_items_filter_warranty_expired"
+- assertVisible: "No items match"
+- tapOn:
+    id: "hm_items_clear"
+- assertVisible: "Whole house.*"
+- tapOn:
+    id: "hm_items_group_category"
+- assertVisible: "Heating and cooling.*"

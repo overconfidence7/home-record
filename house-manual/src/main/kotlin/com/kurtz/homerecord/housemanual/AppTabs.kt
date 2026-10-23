@@ -23,7 +23,7 @@ import com.kurtz.homerecord.housemodel.ui.FloorsRoute
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
 import com.kurtz.homerecord.housemodel.ui.RoomRoute
 import com.kurtz.homerecord.housemodel.ui.ItemEditRoute
-import com.kurtz.homerecord.housemanual.items.ItemsRootScreen
+import com.kurtz.homerecord.housemanual.items.ItemsRoute
 import com.kurtz.homerecord.housemanual.onboarding.foundationLabel
 import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel
 import com.kurtz.homerecord.housemodel.Foundation
@@ -101,7 +101,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
             )
         }
-        entry<ItemsKey> { ItemsRootScreen(onAdd = { nav.push(ItemEditKey()) }) }
+        entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { nav.push(ItemEditKey()) }, onOpen = { nav.push(ItemEditKey(itemId = it)) }) }
         entry<ItemEditKey> { key ->
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop)
         }

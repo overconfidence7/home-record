@@ -22,7 +22,15 @@ import com.kurtz.homerecord.housemodel.ui.ItemEditScreen
 import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
 import com.kurtz.homerecord.housemodel.RoomChoice
 import com.kurtz.homerecord.housemodel.items.ItemDraft
-import com.kurtz.homerecord.housemanual.items.ItemsRootScreen
+import com.kurtz.homerecord.core.model.WarrantyStatus
+import com.kurtz.homerecord.housemanual.items.ItemsScreen
+import com.kurtz.homerecord.housemanual.items.ItemsUiState
+import com.kurtz.homerecord.housemanual.items.RoomOption
+import com.kurtz.homerecord.housemodel.items.ItemFilter
+import com.kurtz.homerecord.housemodel.items.ItemGrouping
+import com.kurtz.homerecord.housemodel.items.ItemListBuilder
+import com.kurtz.homerecord.housemodel.items.ItemRow
+import com.kurtz.homerecord.housemodel.items.WarrantyFilter
 import com.kurtz.homerecord.housemodel.ui.RoomUiState
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
 import com.kurtz.homerecord.housemodel.blueprint.LayerSet
@@ -260,7 +268,44 @@ private val furnaceDraft = ItemDraft(
 
 @ThemePreviews
 @Composable
-fun ItemsEmptyPreview() = Frame { ItemsRootScreen({}) }
+fun ItemsEmptyPreview() = Frame { ItemsScreen(ItemsUiState(loading = false), {}) }
+
+private fun itemRow(id: String, name: String, make: String?, model: String?, cat: String, sub: String, room: String, w: WarrantyStatus) =
+    ItemRow(id, name, make, model, cat, ItemListBuilder.categoryOrder(cat), sub, "r-$room", room, w)
+
+private val sampleItems = listOf(
+    itemRow("i1", "Basement furnace", "Carrier", "59TP6A060S17", "Heating and cooling", "furnace", "Basement", WarrantyStatus.Expired("2026-04-18")),
+    itemRow("i2", "Water heater", "Rheem", "XE50T10HD50U1", "Water", "water_heater", "Basement", WarrantyStatus.Expiring("2026-12-02", 40)),
+    itemRow("i3", "Dishwasher", "Bosch", "SHPM65Z55N", "Appliances", "dishwasher", "Kitchen", WarrantyStatus.Active("2028-03-14")),
+    itemRow("i4", "Refrigerator", "Whirlpool", null, "Appliances", "refrigerator", "Kitchen", WarrantyStatus.Unknown),
+)
+
+private fun itemsState(grouping: ItemGrouping = ItemGrouping.CATEGORY, filter: ItemFilter = ItemFilter()) = ItemsUiState(
+    loading = false, totalCount = sampleItems.size, grouping = grouping, filter = filter,
+    groups = ItemListBuilder.build(sampleItems, grouping, filter),
+    categoryOptions = sampleItems.map { it.categoryLabel }.distinct(),
+    roomOptions = listOf(RoomOption("r-Basement", "Basement"), RoomOption("r-Kitchen", "Kitchen")),
+)
+
+@ThemePreviews
+@Composable
+fun ItemsByCategoryPreview() = Frame { ItemsScreen(itemsState(), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemsByRoomPreview() = Frame { ItemsScreen(itemsState(ItemGrouping.ROOM), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemsFilteredPreview() = Frame { ItemsScreen(itemsState(filter = ItemFilter(warranty = WarrantyFilter.EXPIRED)), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemsNoMatchPreview() = Frame { ItemsScreen(itemsState(filter = ItemFilter(query = "zzz")), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemsLoadingPreview() = Frame { ItemsScreen(ItemsUiState(), {}) }
 
 @ThemePreviews
 @Composable

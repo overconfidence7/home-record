@@ -8,6 +8,9 @@ import com.kurtz.homerecord.core.data.ItemEntity
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
 import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.model.ItemCategory
+import com.kurtz.homerecord.core.model.WarrantyStatus
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
 /** "Exterior" and "Whole house" stand in for a room (AC-C30); their ids are reserved and never collide with UUIDs. */
@@ -82,6 +85,24 @@ class ItemRepository(
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun get(id: String): ItemEntity? = db.itemDao().get(id)
+
+    /** Every live item of the home as list rows; warranty status is as of today. [pseudoNames] labels Exterior and Whole house. */
+    fun observeRows(homeId: String, pseudoNames: Map<String, String>): Flow<List<ItemRow>> =
+        combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId), db.warrantyDao().observeAll()) { items, rooms, warranties ->
+            val roomNames = rooms.associate { it.id to it.name }
+            val endsOn = warranties.associate { it.itemId to it.endsOn }
+            val todayIso = today().toString()
+            items.map { i ->
+                val cat = runCatching { ItemCategory.valueOf(i.category) }.getOrNull()
+                val label = cat?.label ?: i.category
+                ItemRow(
+                    id = i.id, name = i.name, make = i.make, model = i.model, categoryLabel = label,
+                    categoryOrder = ItemListBuilder.categoryOrder(label), subtypeId = i.subtype, roomId = i.roomId,
+                    roomName = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }.orEmpty(),
+                    warranty = WarrantyStatus.of(endsOn[i.id], todayIso),
+                )
+            }
+        }
 
     suspend fun draftFor(id: String): ItemDraft? = get(id)?.let {
         ItemDraft(

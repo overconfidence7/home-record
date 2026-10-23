@@ -148,6 +148,31 @@ fun ItemsEmptyScreenshot() = ItemsEmptyPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemsByCategoryScreenshot() = ItemsByCategoryPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsByRoomScreenshot() = ItemsByRoomPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsFilteredScreenshot() = ItemsFilteredPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsNoMatchScreenshot() = ItemsNoMatchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsLoadingScreenshot() = ItemsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemEditNewScreenshot() = ItemEditNewPreview()
 
 @PreviewTest

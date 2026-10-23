@@ -29,6 +29,7 @@ interface RoomDao {
     @Query("SELECT * FROM room WHERE floorId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<RoomEntity>>
     @Query("SELECT * FROM room WHERE floorId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<RoomEntity>
     @Query("UPDATE room SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT room.* FROM room JOIN floor ON room.floorId = floor.id WHERE floor.homeId = :homeId AND room.deletedAt IS NULL AND floor.deletedAt IS NULL ORDER BY room.createdAt") fun observeForHome(homeId: String): Flow<List<RoomEntity>>
     @Query("SELECT floorId, COUNT(*) AS rooms FROM room WHERE deletedAt IS NULL GROUP BY floorId") fun observeCounts(): Flow<List<FloorRoomCount>>
 }
 
@@ -94,6 +95,7 @@ interface WarrantyDao {
     @Query("SELECT * FROM warranty WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): WarrantyEntity?
     @Query("SELECT * FROM warranty WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<WarrantyEntity>>
     @Query("SELECT * FROM warranty WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<WarrantyEntity>
+    @Query("SELECT * FROM warranty WHERE deletedAt IS NULL ORDER BY createdAt") fun observeAll(): Flow<List<WarrantyEntity>>
     @Query("SELECT * FROM warranty WHERE confidence = 'PENDING' AND deletedAt IS NULL ORDER BY createdAt") suspend fun listPending(): List<WarrantyEntity>
     @Query("UPDATE warranty SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
