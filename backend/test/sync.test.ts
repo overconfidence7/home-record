@@ -97,3 +97,26 @@ describe("AC-B20 push and pull", () => {
     expect((await push(owner, "s-c5", "d", [{ ...op(1, "x", {}, 1), entityId: "y" }])).status).toBe(400);
   });
 });
+
+describe("AC-F5 job rows sync", () => {
+  it("round-trips a client, a job and its crew with the app's field names", async () => {
+    const owner = await seedUser("s-o9", "s-o9@x.com");
+    await seedCompany("s-c9", "Co", "s-o9");
+    const job = {
+      companyId: "s-c9", homeId: null, clientId: "cl1", name: "Kitchen remodel", address: "12 Elm St", lat: 40.1, lng: -75.2,
+      status: "ACTIVE", phasesJson: '["Demo","Frame"]', startDate: "2026-10-20", endDate: null, budgetHours: 120,
+      officeEmailsJson: '["office@x.com"]', notes: null, createdAt: 5, updatedAt: 10, deletedAt: null, source: "FIELD_LOG",
+    };
+    const res = await push(owner, "s-c9", "dev-a", [
+      op(1, "cl1", { companyId: "s-c9", name: "Pat Smith", createdAt: 5, updatedAt: 10 }, 10, "client"),
+      op(2, "j1", job, 10, "job"),
+      op(3, "jc1", { jobId: "j1", memberId: "m1", createdAt: 5, updatedAt: 10, deletedAt: null }, 10, "job_crew"),
+    ]);
+    expect(res.status).toBe(200);
+    const rows = (await pull(owner, "s-c9")).rows;
+    expect(rows.map((r: any) => r.entity).sort()).toEqual(["client", "job", "job_crew"]);
+    const pulled = rows.find((r: any) => r.entity === "job");
+    expect(JSON.stringify(pulled)).toContain("Kitchen remodel");
+    expect(JSON.stringify(pulled)).toContain("12 Elm St");
+  });
+});
