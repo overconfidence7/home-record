@@ -68,6 +68,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
   - [x] T019a: HM-Room page shared with FL-House (RoomScreen/RoomRoute and room strings moved to :house-model; tapping a room on the job plan opens it)
 - [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
+  - [x] T020a: `SearchEngine` in :core model (ranked prefix/word/substring, all tokens required) with SearchEngineTest (AC-C38)
+  - [ ] T020b: HM-Home search bar and results list, building SearchDocuments from rooms/items/breakers etc. (blocked on HM-Home screen, still a placeholder tab; AC-H3)
 - [ ] R04: Review T016–T020
 - [ ] V1: Visual review of M1 screenshots
 
