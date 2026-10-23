@@ -773,3 +773,17 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 59 device stages, 296 unit tests, 56 backend tests, coverage 80/80 ACs. Passed: 31. New issues: 7. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-23 (commit e704a00)
+
+Automated suite run at 2026-10-23 16:36 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] T022 is ticked but these acceptance criteria have no test or flow: AC-C31 [auto:coverage:T022] - steps: automated, see qa-results branch latest/ for commit e704a00 - expected: every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules) - actual: no reference found
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:flow:field-log:F03-jobs], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, field-log F03 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H15 Fail
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 59 device stages, 303 unit tests, 56 backend tests, coverage 82/83 ACs. Passed: 41. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
