@@ -50,4 +50,8 @@
         <item quantity="one">Offline · %d change waiting</item>
         <item quantity="other">Offline · %d changes waiting</item>
     </plurals>
+    <string name="warranty_unknown">Warranty unknown</string>
+    <string name="warranty_active">Warranty until %1$s</string>
+    <string name="warranty_expiring">Expires %1$s</string>
+    <string name="warranty_expired">Warranty expired %1$s</string>
 </resources>
