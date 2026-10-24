@@ -90,7 +90,7 @@ class ContactsViewModelTest {
         vm.onEvent(ContactsEvent.SaveForm)
         val id = vm.await { it.rows.isNotEmpty() }.rows.single().contact.id
         vm.onEvent(ContactsEvent.AskDelete(id))
-        assertThat(vm.state.value.confirmDeleteId).isEqualTo(id)
+        assertThat(vm.await { it.confirmDeleteId == id }.confirmDeleteId).isEqualTo(id)
         vm.onEvent(ContactsEvent.ConfirmDelete)
         vm.await { it.rows.isEmpty() && it.confirmDeleteId == null }
     }

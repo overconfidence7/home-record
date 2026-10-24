@@ -1,0 +1,13 @@
+# Documents from the More tab (AC-C37). The system file picker is not driven here; JVM tests cover the add path.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn: "More"
+- tapOn:
+    id: "hm_more_documents"
+- assertVisible: "No documents yet"
+- assertVisible:
+    id: "hm_documents_add"
+- assertVisible:
+    id: "hm_documents_fab"
+- takeScreenshot: H06-documents

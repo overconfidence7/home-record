@@ -274,3 +274,28 @@ fun ContactsLoadingScreenshot() = ContactsLoadingPreview()
 @ThemePreviews
 @Composable
 fun ContactFormScreenshot() = ContactFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsListScreenshot() = DocumentsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsEmptyScreenshot() = DocumentsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsLoadingScreenshot() = DocumentsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsUnsupportedScreenshot() = DocumentsUnsupportedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentFormScreenshot() = DocumentFormPreview()

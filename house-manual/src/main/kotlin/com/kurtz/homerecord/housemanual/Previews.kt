@@ -25,6 +25,11 @@ import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.housemanual.contacts.ContactFormContent
+import com.kurtz.homerecord.housemanual.documents.DocumentFormContent
+import com.kurtz.homerecord.housemanual.documents.DocumentForm
+import com.kurtz.homerecord.housemanual.documents.DocumentsScreen
+import com.kurtz.homerecord.housemanual.documents.DocumentsUiState
+import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.housemanual.contacts.ContactsScreen
 import com.kurtz.homerecord.housemanual.contacts.ContactsUiState
 import com.kurtz.homerecord.housemodel.upkeep.ContactDraft
@@ -471,4 +476,40 @@ fun ContactsLoadingPreview() = Frame { ContactsScreen(ContactsUiState(), {}) }
 @Composable
 fun ContactFormPreview() = Frame {
     ContactFormContent(ContactDraft(name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlan"), true, {})
+}
+
+private val sampleDocuments = listOf(
+    com.kurtz.homerecord.housemodel.documents.DocumentFolder(
+        "Appliances",
+        listOf(
+            DocumentEntity(id = "d1", homeId = "h1", folder = "Appliances", name = "Furnace manual.pdf", path = "p1", mime = "application/pdf", size = 2_411_520, createdAt = 2, updatedAt = 2),
+            DocumentEntity(id = "d2", homeId = "h1", folder = "Appliances", name = "Water heater receipt.jpg", path = "p2", mime = "image/jpeg", size = 318_000, createdAt = 1, updatedAt = 1),
+        ),
+    ),
+    com.kurtz.homerecord.housemodel.documents.DocumentFolder(
+        "Permits",
+        listOf(DocumentEntity(id = "d3", homeId = "h1", folder = "Permits", name = "Deck permit 2024.pdf", path = "p3", mime = "application/pdf", size = 96_000, createdAt = 3, updatedAt = 3)),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun DocumentsListPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false, folders = sampleDocuments), {}) }
+
+@ThemePreviews
+@Composable
+fun DocumentsEmptyPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun DocumentsLoadingPreview() = Frame { DocumentsScreen(DocumentsUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun DocumentsUnsupportedPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false, folders = sampleDocuments, unsupportedNotice = true), {}) }
+
+@ThemePreviews
+@Composable
+fun DocumentFormPreview() = Frame {
+    DocumentFormContent(DocumentForm("d1", "Furnace manual.pdf", "Appliances"), false, {})
 }

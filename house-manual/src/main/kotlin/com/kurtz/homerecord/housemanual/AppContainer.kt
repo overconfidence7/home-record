@@ -18,6 +18,8 @@ import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.core.warranty.RetrofitWarrantyLookupApi
 import com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles
+import com.kurtz.homerecord.housemodel.ui.AndroidDocumentFiles
+import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
@@ -106,6 +108,14 @@ class AppContainer(app: Application) {
     /** The automatic warranty attempt after an item is first saved (AC-C34); runs past the form closing. */
     fun autoLookupWarranty(itemId: String) {
         scope.launch { warrantyLookup.autoLookup(itemId) }
+    }
+
+    val documents = DocumentRepository(db, AndroidDocumentFiles(app)) { entity, id ->
+        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
+        if (homeId != null) {
+            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
+            syncCoordinator.requestSync()
+        }
     }
 
     val media: MediaFiles = AndroidMediaFiles(app)

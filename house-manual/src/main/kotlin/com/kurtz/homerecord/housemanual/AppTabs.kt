@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
+import com.kurtz.homerecord.housemanual.documents.DocumentsRoute
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -122,6 +123,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
+        entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop) }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
@@ -134,6 +136,12 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                             supportingContent = { Text(stringResource(R.string.more_contacts_supporting)) },
                             leadingContent = { Icon(Icons.Outlined.Contacts, contentDescription = null) },
                             modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(ContactsKey) }.testTag("hm_more_contacts"),
+                        )
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.more_documents)) },
+                            supportingContent = { Text(stringResource(R.string.more_documents_supporting)) },
+                            leadingContent = { Icon(Icons.Outlined.Description, contentDescription = null) },
+                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(DocumentsKey) }.testTag("hm_more_documents"),
                         )
                         AccountRoute(container.auth, Modifier.weight(1f))
                     }
