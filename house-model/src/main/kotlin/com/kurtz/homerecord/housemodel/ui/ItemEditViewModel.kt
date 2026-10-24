@@ -33,6 +33,7 @@ class ItemEditViewModel(
     private val media: MediaFiles,
     private val recognizer: TextRecognizer,
     initialRoomId: String? = null,
+    private val afterCreate: (String) -> Unit = {},
 ) : ViewModel() {
     private var original = ItemDraft(roomId = initialRoomId)
 
@@ -183,6 +184,7 @@ class ItemEditViewModel(
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
             val id = items.save(homeId, current.draft)
+            if (id != null && current.draft.id == null) afterCreate(id)
             _state.update { it.copy(saving = false, savedItemId = id, dirty = false) }
         }
     }

@@ -53,6 +53,22 @@ class WarrantyLookupRepository(
         }
     }
 
+    /**
+     * The automatic attempt after an item is first saved (AC-C34): found terms wait on the item as a `REVIEW_*` row
+     * (the badge) instead of opening a sheet, offline queues. Returns true when terms are waiting for review.
+     */
+    suspend fun autoLookup(itemId: String): Boolean {
+        val item = db.itemDao().get(itemId) ?: return false
+        return when (val outcome = lookup(itemId)) {
+            is LookupOutcome.Found -> {
+                val row = current(itemId) ?: blank(itemId)
+                write(row.copy(confidence = "REVIEW_${outcome.terms.confidence}"), outcome.terms, item.inServiceOn)
+                true
+            }
+            else -> false
+        }
+    }
+
     /** Runs every queued lookup; results wait on the item as `REVIEW_*` rows. Returns the item ids that now have terms to review. */
     suspend fun runPending(): List<String> {
         val ready = mutableListOf<String>()

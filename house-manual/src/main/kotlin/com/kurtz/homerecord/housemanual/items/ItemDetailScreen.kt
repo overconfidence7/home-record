@@ -9,6 +9,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.KeyboardType
+import com.kurtz.homerecord.core.warranty.WarrantyTerms
+import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -61,6 +74,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 /** Item page (AC-H7): hero photo, status line, details, warranty, photos and notes with Edit and an overflow menu. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
     val detail = state.detail
@@ -94,12 +108,17 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 Hero(detail)
                 WarrantyStatusLine(detail.status, Modifier.testTag("hm_item_detail_status"))
                 DetailsCard(detail, onEvent)
-                WarrantyCard(detail, onEvent)
+                WarrantyCard(detail, state, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
                 detail.item.notes?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Text(notes, style = MaterialTheme.typography.bodyLarge) }
                 }
             }
+        }
+    }
+    state.review?.let { terms ->
+        ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.DiscardTerms) }) {
+            WarrantyReviewContent(terms, onEvent)
         }
     }
     if (state.confirmDelete && detail != null) {
@@ -203,11 +222,31 @@ private fun DetailsCard(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) 
 }
 
 @Composable
-private fun WarrantyCard(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
+private fun WarrantyCard(detail: ItemDetail, state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     val w = detail.warranty
+    val awaiting = w?.confidence?.startsWith(WarrantyLookupRepository.REVIEW) == true
+    val queued = w?.confidence == WarrantyLookupRepository.PENDING
     Section(stringResource(R.string.item_detail_warranty)) {
-        if (w == null) {
-            Text(stringResource(R.string.item_detail_warranty_none), style = MaterialTheme.typography.bodyLarge)
+        if (awaiting) {
+            Text(stringResource(R.string.item_detail_warranty_review_badge), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_item_detail_review_badge"))
+            Button(onClick = { onEvent(ItemDetailEvent.OpenReview) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review")) {
+                Text(stringResource(R.string.item_detail_warranty_review))
+            }
+            return@Section
+        }
+        if (w == null || queued) {
+            Text(
+                stringResource(if (queued || state.lookupNote == LookupNote.Queued) R.string.item_detail_warranty_queued else R.string.item_detail_warranty_none),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            state.lookupNote?.takeIf { it != LookupNote.Queued }?.let {
+                Text(
+                    stringResource(if (it == LookupNote.NeedsMakeModel) R.string.item_detail_warranty_needs_model else R.string.item_detail_warranty_failed),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("hm_item_detail_lookup_note"),
+                )
+            }
+            if (!queued) LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup, "hm_item_detail_lookup") { onEvent(ItemDetailEvent.LookUp(again = false)) }
             return@Section
         }
         w.partsMonths?.let { Text(stringResource(R.string.item_detail_warranty_parts, months(it)), style = MaterialTheme.typography.bodyLarge) }
@@ -227,6 +266,14 @@ private fun WarrantyCard(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit)
                 modifier = Modifier.testTag("hm_item_detail_warranty_source"),
             )
         }
+        state.lookupNote?.takeIf { it != LookupNote.Queued }?.let {
+            Text(
+                stringResource(if (it == LookupNote.NeedsMakeModel) R.string.item_detail_warranty_needs_model else R.string.item_detail_warranty_failed),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.testTag("hm_item_detail_lookup_note"),
+            )
+        }
+        LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup_again, "hm_item_detail_lookup_again") { onEvent(ItemDetailEvent.LookUp(again = true)) }
         val registeredLabel = stringResource(R.string.item_detail_warranty_registered)
         Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(registeredLabel, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
@@ -234,6 +281,63 @@ private fun WarrantyCard(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit)
                 checked = w.registered, onCheckedChange = { onEvent(ItemDetailEvent.SetRegistered(it)) },
                 modifier = Modifier.semantics { role = Role.Switch }.testTag("hm_item_detail_registered"),
             )
+        }
+    }
+}
+
+@Composable
+private fun LookupButton(busy: Boolean, label: Int, tag: String, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp).testTag(tag)) {
+        if (busy) {
+            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.item_detail_warranty_looking))
+        } else {
+            Text(stringResource(label))
+        }
+    }
+}
+
+/** Terms from the lookup with the source link: the user edits the months, confirms or discards (AC-C34). */
+@Composable
+fun WarrantyReviewContent(terms: WarrantyTerms, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
+    var parts by remember(terms) { mutableStateOf(terms.partsMonths?.toString().orEmpty()) }
+    var labor by remember(terms) { mutableStateOf(terms.laborMonths?.toString().orEmpty()) }
+    Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(R.string.item_detail_warranty_review_title), style = MaterialTheme.typography.titleLarge)
+        if (terms.summary.isNotBlank()) Text(terms.summary, style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            parts, { parts = it.filter(Char::isDigit).take(3) }, singleLine = true,
+            label = { Text(stringResource(R.string.item_detail_warranty_parts_months)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth().testTag("hm_item_detail_review_parts"),
+        )
+        OutlinedTextField(
+            labor, { labor = it.filter(Char::isDigit).take(3) }, singleLine = true,
+            label = { Text(stringResource(R.string.item_detail_warranty_labor_months)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth().testTag("hm_item_detail_review_labor"),
+        )
+        terms.specialTerms.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+        Text(
+            stringResource(R.string.item_detail_warranty_confidence, terms.confidence.lowercase()),
+            style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        terms.sourceUrl?.let {
+            AssistChip(
+                onClick = { onEvent(ItemDetailEvent.OpenLink(it)) },
+                label = { Text(stringResource(R.string.item_detail_warranty_source)) },
+                modifier = Modifier.testTag("hm_item_detail_review_source"),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { onEvent(ItemDetailEvent.ConfirmTerms(parts.toIntOrNull(), labor.toIntOrNull())) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review_save"),
+            ) { Text(stringResource(R.string.item_detail_warranty_save)) }
+            TextButton(onClick = { onEvent(ItemDetailEvent.DiscardTerms) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review_discard")) {
+                Text(stringResource(R.string.item_detail_warranty_discard))
+            }
         }
     }
 }

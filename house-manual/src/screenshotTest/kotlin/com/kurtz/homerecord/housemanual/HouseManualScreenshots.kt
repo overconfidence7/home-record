@@ -224,3 +224,18 @@ fun ItemDetailMissingScreenshot() = ItemDetailMissingPreview()
 @ThemePreviews
 @Composable
 fun ItemDetailLoadingScreenshot() = ItemDetailLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailLookupNoteScreenshot() = ItemDetailLookupNotePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailReviewBadgeScreenshot() = ItemDetailReviewBadgePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailReviewSheetScreenshot() = ItemDetailReviewSheetPreview()

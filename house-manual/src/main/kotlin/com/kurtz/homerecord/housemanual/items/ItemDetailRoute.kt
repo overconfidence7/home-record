@@ -11,11 +11,13 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 
 @Composable
 fun ItemDetailRoute(
     repo: ItemRepository,
+    lookup: WarrantyLookupRepository,
     homeId: String,
     itemId: String,
     onBack: () -> Unit,
@@ -32,7 +34,7 @@ fun ItemDetailRoute(
         key = itemId,
         factory = viewModelFactory {
             initializer {
-                ItemDetailViewModel(repo, itemId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy)
+                ItemDetailViewModel(repo, lookup, itemId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy)
             }
         },
     )

@@ -105,12 +105,12 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { nav.push(ItemEditKey()) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(
-                container.items, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
+                container.items, container.warrantyLookup, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
                 onOpenCopy = { nav.pop(); nav.push(ItemDetailKey(it)) },
             )
         }
         entry<ItemEditKey> { key ->
-            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop)
+            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }

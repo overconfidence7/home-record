@@ -381,3 +381,28 @@ fun ItemDetailMissingPreview() = Frame { ItemDetailScreen(ItemDetailUiState(load
 @ThemePreviews
 @Composable
 fun ItemDetailLoadingPreview() = Frame { ItemDetailScreen(ItemDetailUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemDetailLookupNotePreview() = Frame {
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), lookupNote = com.kurtz.homerecord.housemanual.items.LookupNote.Failed), {})
+}
+
+@ThemePreviews
+@Composable
+fun ItemDetailReviewBadgePreview() = Frame {
+    val awaiting = furnaceDetail().copy(warranty = furnaceWarranty.copy(confidence = "REVIEW_HIGH"))
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = awaiting), {})
+}
+
+@ThemePreviews
+@Composable
+fun ItemDetailReviewSheetPreview() = Frame {
+    com.kurtz.homerecord.housemanual.items.WarrantyReviewContent(
+        com.kurtz.homerecord.core.warranty.WarrantyTerms(
+            partsMonths = 120, laborMonths = 12, specialTerms = listOf("Heat exchanger: lifetime to the original owner"),
+            sourceUrl = "https://example.com/carrier-warranty", confidence = "HIGH", summary = "10-year limited parts when registered within 90 days.",
+        ),
+        {},
+    )
+}

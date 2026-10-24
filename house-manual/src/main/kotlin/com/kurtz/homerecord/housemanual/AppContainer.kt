@@ -14,6 +14,8 @@ import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.housemodel.ui.MlKitTextRecognizer
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
+import com.kurtz.homerecord.core.warranty.RetrofitWarrantyLookupApi
 import com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles
 import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
@@ -84,6 +86,19 @@ class AppContainer(app: Application) {
         }
     }
 
+    val warrantyLookup = WarrantyLookupRepository(db, RetrofitWarrantyLookupApi.create(BuildConfig.API_BASE_URL, http)) { entity, id ->
+        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
+        if (homeId != null) {
+            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
+            syncCoordinator.requestSync()
+        }
+    }
+
+    /** The automatic warranty attempt after an item is first saved (AC-C34); runs past the form closing. */
+    fun autoLookupWarranty(itemId: String) {
+        scope.launch { warrantyLookup.autoLookup(itemId) }
+    }
+
     val media: MediaFiles = AndroidMediaFiles(app)
     val textRecognizer: TextRecognizer = MlKitTextRecognizer(app)
 
@@ -93,6 +108,8 @@ class AppContainer(app: Application) {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }
         syncCoordinator.start()
+        // Queued warranty lookups run when connectivity returns (AC-C34).
+        scope.launch { AndroidConnectivityMonitor(app).online.collect { if (it) warrantyLookup.runPending() } }
     }
 }
 

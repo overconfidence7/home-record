@@ -31,9 +31,10 @@ fun ItemEditRoute(
     itemId: String?,
     roomId: String?,
     onClose: () -> Unit,
+    afterCreate: (String) -> Unit = {},
 ) {
     val vm = viewModel<ItemEditViewModel>(
-        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, roomId) } },
+        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, roomId, afterCreate) } },
     )
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }

@@ -68,3 +68,9 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Duplicate"
 - assertVisible: "Delete"
 - pressKey: back
+# AC-C34: a warranty section without terms offers the lookup (the seed furnace has a make and model)
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_lookup"
+- assertVisible:
+    id: "hm_item_detail_lookup"
