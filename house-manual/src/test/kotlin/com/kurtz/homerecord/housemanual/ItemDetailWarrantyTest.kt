@@ -17,6 +17,9 @@ import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
+import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
+import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
+import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import java.time.LocalDate
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +70,7 @@ class ItemDetailWarrantyTest {
     private suspend fun heater(model: String = "XG50T06"): String =
         items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Water heater", make = "Rheem", model = model, inServiceOn = "2024-01-15")).orEmpty()
 
-    private fun vm(id: String) = ItemDetailViewModel(items, lookup, id, items.observeDetail(id, "h1", emptyMap()), "copy").also {
+    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), id, items.observeDetail(id, "h1", emptyMap()), "copy").also {
         vms += it
         it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
     }
@@ -123,5 +126,29 @@ class ItemDetailWarrantyTest {
         val vm = vm(id)
         assertThat(vm.await { it.detail?.warranty != null }.review).isNull()
         assertThat(vm.state.value.detail?.warranty?.confidence).isEqualTo("REVIEW_HIGH")
+    }
+
+    @AcceptanceCriterion("AC-C35")
+    @Test fun upkeepFormsSaveConsumableAndServiceNewestFirst() = runTest {
+        // AC-C35, AC-C36
+        val id = heater()
+        val vm = vm(id)
+        vm.onEvent(ItemDetailEvent.OpenConsumable(null))
+        vm.onEvent(ItemDetailEvent.SaveConsumable)
+        assertThat(vm.await { it.showFormErrors }.consumableForm).isNotNull()
+        vm.onEvent(ItemDetailEvent.ChangeConsumable(ConsumableDraft(spec = "16x25x1 MERV 8", quantity = "2")))
+        vm.onEvent(ItemDetailEvent.SaveConsumable)
+        assertThat(vm.await { it.consumableForm == null && it.consumables.any { c -> c.spec == "16x25x1 MERV 8" } }.consumables).isNotEmpty()
+
+        vm.onEvent(ItemDetailEvent.OpenService(null))
+        vm.onEvent(ItemDetailEvent.ChangeService(ServiceDraft(date = "2025-01-10", description = "Flushed tank")))
+        vm.onEvent(ItemDetailEvent.SaveService)
+        vm.await { it.serviceForm == null && it.service.size == 1 }
+        vm.onEvent(ItemDetailEvent.OpenService(null))
+        vm.onEvent(ItemDetailEvent.ChangeService(ServiceDraft(date = "2026-02-01", description = "New anode rod", cost = "89.50")))
+        vm.onEvent(ItemDetailEvent.SaveService)
+        val rows = vm.await { it.serviceForm == null && it.service.size == 2 }.service
+        assertThat(rows.map { it.description }).containsExactly("New anode rod", "Flushed tank").inOrder()
+        assertThat(rows.first().costCents).isEqualTo(8950L)
     }
 }

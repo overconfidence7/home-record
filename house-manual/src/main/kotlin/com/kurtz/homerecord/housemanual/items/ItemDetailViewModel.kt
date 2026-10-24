@@ -3,11 +3,15 @@ package com.kurtz.homerecord.housemanual.items
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.housemodel.items.ItemDetail
 import com.kurtz.homerecord.housemodel.items.LookupOutcome
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
+import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
+import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +25,7 @@ import kotlinx.coroutines.launch
 class ItemDetailViewModel(
     private val repo: ItemRepository,
     private val lookup: WarrantyLookupRepository,
+    private val upkeep: UpkeepRepository,
     private val itemId: String,
     detail: Flow<ItemDetail?>,
     private val copySuffix: String,
@@ -34,8 +39,17 @@ class ItemDetailViewModel(
 
     private data class LookupUi(val busy: Boolean = false, val note: LookupNote? = null, val review: WarrantyTerms? = null)
 
-    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState) { d, c, l ->
-        ItemDetailUiState(loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review)
+    private val forms = MutableStateFlow(FormsUi())
+
+    private data class FormsUi(val consumable: ConsumableDraft? = null, val service: ServiceDraft? = null, val showErrors: Boolean = false)
+
+    private val upkeepRows = combine(upkeep.observeConsumables(itemId), upkeep.observeService(itemId)) { c, s -> c to s }
+
+    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepRows, forms) { d, c, l, u, f ->
+        ItemDetailUiState(
+            loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
+            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
@@ -63,6 +77,33 @@ class ItemDetailViewModel(
                 lookup.discard(itemId)
                 lookupState.value = LookupUi()
             }
+            is ItemDetailEvent.OpenConsumable -> viewModelScope.launch {
+                val row = e.id?.let { id -> state.value.consumables.firstOrNull { it.id == id } }
+                val draft = row?.let {
+                    ConsumableDraft(it.id, runCatching { ConsumableKind.valueOf(it.kind) }.getOrDefault(ConsumableKind.OTHER), it.spec, it.quantity.toString(), it.reorderUrl.orEmpty())
+                } ?: ConsumableDraft()
+                forms.value = FormsUi(consumable = draft)
+            }
+            is ItemDetailEvent.ChangeConsumable -> forms.update { it.copy(consumable = e.draft) }
+            ItemDetailEvent.SaveConsumable -> viewModelScope.launch {
+                val draft = forms.value.consumable ?: return@launch
+                if (upkeep.saveConsumable(itemId, draft) == null) forms.update { it.copy(showErrors = true) } else forms.value = FormsUi()
+            }
+            is ItemDetailEvent.DeleteConsumable -> viewModelScope.launch { upkeep.deleteConsumable(e.id); forms.value = FormsUi() }
+            is ItemDetailEvent.OpenService -> {
+                val row = e.id?.let { id -> state.value.service.firstOrNull { it.id == id } }
+                val draft = row?.let {
+                    ServiceDraft(it.id, it.date, it.contactId, it.description, it.costCents?.let { c -> "%d.%02d".format(c / 100, c % 100) }.orEmpty())
+                } ?: ServiceDraft()
+                forms.value = FormsUi(service = draft)
+            }
+            is ItemDetailEvent.ChangeService -> forms.update { it.copy(service = e.draft) }
+            ItemDetailEvent.SaveService -> viewModelScope.launch {
+                val draft = forms.value.service ?: return@launch
+                if (upkeep.saveService(itemId, draft) == null) forms.update { it.copy(showErrors = true) } else forms.value = FormsUi()
+            }
+            is ItemDetailEvent.DeleteService -> viewModelScope.launch { upkeep.deleteService(e.id); forms.value = FormsUi() }
+            ItemDetailEvent.CloseForm -> forms.value = FormsUi()
             ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink -> Unit // navigation is the route's job
         }
     }

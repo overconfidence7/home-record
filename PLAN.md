@@ -98,7 +98,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] T027c: item page Move to room, Consumables, Reminders, Service history, Documents, Links (Breaker, Shutoff, Overlays) sections, Share; arrive with T028/T029/T031 and the breaker work (AC-H7)
 - [ ] T028: Consumables, service history, contacts: consumables editor and search, service record form, HM-Contacts with tap-to-call/email and links to items (acceptance: AC-C35, AC-C36, AC-C39)
   - [x] T028a: `UpkeepRepository` in :house-model (consumable, service record and contact drafts with validation, save/edit/delete, service newest first, contacts with serviced items, delete unlinks records) (AC-C35, AC-C36, AC-C39)
-  - [ ] T028b: consumables editor on the item page (kind, spec, quantity, reorder link) and service history section with the service record form (AC-C35, AC-C36)
+  - [x] T028b: consumables editor on the item page (kind, spec, quantity, reorder link) and service history section with the service record form (AC-C35, AC-C36)
   - [ ] T028c: HM-Contacts screen (More tab) with tap-to-call and email, contact form, items serviced list, contact picker on the service form (AC-C39)
 - [ ] T029: Documents: `Document` entity, HM-Documents folders, upload from Files and camera scan (ML Kit document scanner), in-app PDF/image viewer with pinch zoom, attach to home/room/item, share (acceptance: AC-C37)
 - [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)

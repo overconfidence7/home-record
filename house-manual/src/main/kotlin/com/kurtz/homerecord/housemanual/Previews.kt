@@ -406,3 +406,35 @@ fun ItemDetailReviewSheetPreview() = Frame {
         {},
     )
 }
+
+private val furnaceConsumables = listOf(
+    com.kurtz.homerecord.core.data.ConsumableEntity("c1", "i1", "FILTER", "16x25x1 MERV 8", 2, "https://example.com/filters", 1, 1),
+    com.kurtz.homerecord.core.data.ConsumableEntity("c2", "i1", "BATTERY", "9V thermostat battery", 1, null, 1, 1),
+)
+
+private val furnaceService = listOf(
+    com.kurtz.homerecord.core.data.ServiceRecordEntity("s1", "i1", "2026-03-14", null, "Annual tune-up and igniter check", 14_900, 1, 1),
+    com.kurtz.homerecord.core.data.ServiceRecordEntity("s2", "i1", "2024-11-02", null, "Replaced inducer motor", 62_500, 1, 1),
+)
+
+@ThemePreviews
+@Composable
+fun ItemDetailUpkeepPreview() = Frame {
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService), {})
+}
+
+@ThemePreviews
+@Composable
+fun ItemDetailConsumableFormPreview() = Frame {
+    com.kurtz.homerecord.housemanual.items.ConsumableFormContent(
+        com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft(id = "c1", spec = "", quantity = "2", reorderUrl = "https://example.com/filters"), true, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ItemDetailServiceFormPreview() = Frame {
+    com.kurtz.homerecord.housemanual.items.ServiceFormContent(
+        com.kurtz.homerecord.housemodel.upkeep.ServiceDraft(date = "2026-03-14", description = "Annual tune-up and igniter check", cost = "149.00"), false, {},
+    )
+}

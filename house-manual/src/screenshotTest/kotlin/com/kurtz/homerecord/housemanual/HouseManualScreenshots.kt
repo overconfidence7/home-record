@@ -239,3 +239,18 @@ fun ItemDetailReviewBadgeScreenshot() = ItemDetailReviewBadgePreview()
 @ThemePreviews
 @Composable
 fun ItemDetailReviewSheetScreenshot() = ItemDetailReviewSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailUpkeepScreenshot() = ItemDetailUpkeepPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailConsumableFormScreenshot() = ItemDetailConsumableFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailServiceFormScreenshot() = ItemDetailServiceFormPreview()

@@ -109,6 +109,8 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantyStatusLine(detail.status, Modifier.testTag("hm_item_detail_status"))
                 DetailsCard(detail, onEvent)
                 WarrantyCard(detail, state, onEvent)
+                ConsumablesCard(state.consumables, onEvent)
+                ServiceCard(state.service, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
                 detail.item.notes?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Text(notes, style = MaterialTheme.typography.bodyLarge) }
@@ -121,6 +123,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
             WarrantyReviewContent(terms, onEvent)
         }
     }
+    UpkeepFormSheet(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
             onDismissRequest = { onEvent(ItemDetailEvent.CancelDelete) },

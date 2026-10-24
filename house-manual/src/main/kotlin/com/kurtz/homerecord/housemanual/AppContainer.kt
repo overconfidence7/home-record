@@ -14,6 +14,7 @@ import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.ocr.TextRecognizer
 import com.kurtz.homerecord.housemodel.ui.MlKitTextRecognizer
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.core.warranty.RetrofitWarrantyLookupApi
 import com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles
@@ -79,6 +80,14 @@ class AppContainer(app: Application) {
     }
 
     val items = ItemRepository(db) { entity, id ->
+        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
+        if (homeId != null) {
+            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
+            syncCoordinator.requestSync()
+        }
+    }
+
+    val upkeep = UpkeepRepository(db) { entity, id ->
         val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
         if (homeId != null) {
             syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)

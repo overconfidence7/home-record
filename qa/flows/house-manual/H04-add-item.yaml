@@ -74,3 +74,16 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_detail_lookup"
 - assertVisible:
     id: "hm_item_detail_lookup"
+# AC-C35, AC-C36: consumables and service history sections on the item page
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_consumable_add"
+- assertVisible:
+    id: "hm_item_detail_consumable_add"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_service_add"
+- tapOn:
+    id: "hm_item_detail_service_add"
+- assertVisible:
+    id: "hm_item_detail_service_description"
