@@ -83,6 +83,10 @@ jobs:
           key: gradle-qa-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties', '**/*.gradle.kts') }}
           restore-keys: gradle-qa-
 
+      - name: Free runner disk
+        if: steps.probe.outputs.skip != 'true'
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc /usr/local/share/boost 2>/dev/null || true
+
       - name: Install Android SDK
         if: steps.probe.outputs.skip != 'true'
         run: |
@@ -124,7 +128,17 @@ jobs:
           ./gradlew --no-daemon --console=plain :house-manual:assembleDebug :field-log:assembleDebug \
             :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
             :house-manual:assembleRelease :field-log:assembleRelease --continue > qa-out/apk/gradle.log 2>&1
-          echo $? > qa-out/apk/exit-code
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            # packageDebug has failed once on a shared runner (disk or parallel packaging); free space and retry serially
+            df -h . >> qa-out/apk/gradle.log 2>&1
+            rm -rf build/reports ./*/build/reports ./*/build/intermediates/lint* 2>/dev/null
+            ./gradlew --no-daemon --console=plain --max-workers=1 :house-manual:assembleDebug :field-log:assembleDebug \
+              :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
+              :house-manual:assembleRelease :field-log:assembleRelease --continue >> qa-out/apk/gradle.log 2>&1
+            rc=$?
+          fi
+          echo $rc > qa-out/apk/exit-code
           set -e
           for app in house-manual field-log; do
             cp $app/build/outputs/apk/debug/$app-debug.apk qa-out/apk/ 2>/dev/null || echo "no debug apk for $app"

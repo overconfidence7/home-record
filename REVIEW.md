@@ -855,7 +855,7 @@ Opened committed PNGs for Home (dark), Items by room (light), Item detail recall
 
 Automated suite run at 2026-10-24 20:27 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
 
-- [ ] [Critical] APK build failed (assembleDebug / assembleDebugAndroidTest / assembleRelease) [auto:apk:build] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: both apps build - actual: see qa-results apk/gradle.log
+- [x] [Critical] APK build failed (assembleDebug / assembleDebugAndroidTest / assembleRelease) [auto:apk:build] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: both apps build - actual: see qa-results apk/gradle.log - fixed: qa.yml frees runner disk and retries the APK build serially (field-log builds locally)
 - [ ] [Critical] field-log: install failed (regression of a fixed item) [auto:install:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: APK installs on the emulator - actual: adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_INVALID_APK: Scanning Failed.: Package /data/app/vmdl1550871531.tmp/base.apk code is missing]  
 - [ ] [Critical] field-log: install failed (regression of a fixed item) [auto:install:handoff:field-log] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: APK installs on the emulator - actual: adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_INVALID_APK: Scanning Failed.: Package /data/app/vmdl1370483801.tmp/base.apk code is missing]  
 
