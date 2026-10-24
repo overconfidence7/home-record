@@ -4,7 +4,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -112,12 +121,23 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ItemEditKey> { key ->
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
+        entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             if (key.depth == 0 && key.title == "more") {
-                Scaffold { AccountRoute(container.auth, Modifier.padding(it)) }
+                Scaffold {
+                    Column(Modifier.padding(it)) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.more_contacts)) },
+                            supportingContent = { Text(stringResource(R.string.more_contacts_supporting)) },
+                            leadingContent = { Icon(Icons.Outlined.Contacts, contentDescription = null) },
+                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(ContactsKey) }.testTag("hm_more_contacts"),
+                        )
+                        AccountRoute(container.auth, Modifier.weight(1f))
+                    }
+                }
             } else if (key.depth == 0) {
                 PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
             } else {

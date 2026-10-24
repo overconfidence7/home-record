@@ -138,4 +138,29 @@
     <string name="item_detail_service_description_error">Say what was done.</string>
     <string name="item_detail_service_cost">Cost</string>
     <string name="item_detail_service_cost_error">Enter the cost as a number, like 125.00.</string>
+    <string name="more_contacts">Contacts</string>
+    <string name="more_contacts_supporting">Plumber, electrician, HVAC and who serviced what</string>
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_add">Add contact</string>
+    <string name="contacts_empty_title">No contacts yet</string>
+    <string name="contacts_empty_body">Save the plumber, the electrician and the HVAC company so the number is there when something breaks.</string>
+    <string name="contacts_serviced">Serviced %1$s (%2$s)</string>
+    <plurals name="contacts_visits">
+        <item quantity="one">%d visit</item>
+        <item quantity="other">%d visits</item>
+    </plurals>
+    <string name="contacts_email">Email</string>
+    <string name="contacts_form_new">New contact</string>
+    <string name="contacts_form_edit">Edit contact</string>
+    <string name="contacts_name">Name</string>
+    <string name="contacts_company">Company</string>
+    <string name="contacts_trade">Trade</string>
+    <string name="contacts_phone">Phone</string>
+    <string name="contacts_email_field">Email address</string>
+    <string name="contacts_email_error">Enter an email like name@example.com.</string>
+    <string name="contacts_notes">Notes</string>
+    <string name="contacts_save">Save</string>
+    <string name="contacts_delete">Delete</string>
+    <string name="contacts_delete_title">Delete %1$s?</string>
+    <string name="contacts_delete_body">Service records that name this contact stay, without the link.</string>
 </resources>

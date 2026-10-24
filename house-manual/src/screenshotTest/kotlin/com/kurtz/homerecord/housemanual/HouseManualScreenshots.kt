@@ -254,3 +254,23 @@ fun ItemDetailConsumableFormScreenshot() = ItemDetailConsumableFormPreview()
 @ThemePreviews
 @Composable
 fun ItemDetailServiceFormScreenshot() = ItemDetailServiceFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ContactsListScreenshot() = ContactsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ContactsEmptyScreenshot() = ContactsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ContactsLoadingScreenshot() = ContactsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ContactFormScreenshot() = ContactFormPreview()

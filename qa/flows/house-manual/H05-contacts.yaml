@@ -1,0 +1,21 @@
+# Contacts from the More tab (AC-C39). Needs a home, so it starts from the onboarding helper.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn: "More"
+- tapOn:
+    id: "hm_more_contacts"
+- assertVisible: "No contacts yet"
+- tapOn:
+    id: "hm_contacts_add"
+- tapOn:
+    id: "hm_contacts_save"
+- assertVisible: "Required."
+- tapOn:
+    id: "hm_contacts_name"
+- inputText: "Maria Soto"
+- hideKeyboard
+- tapOn:
+    id: "hm_contacts_save"
+- assertVisible: "Maria Soto"
+- takeScreenshot: H05-contacts

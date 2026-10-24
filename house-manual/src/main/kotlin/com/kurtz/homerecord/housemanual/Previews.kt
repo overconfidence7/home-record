@@ -23,6 +23,11 @@ import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
 import com.kurtz.homerecord.housemodel.RoomChoice
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.core.model.WarrantyStatus
+import com.kurtz.homerecord.core.data.ContactEntity
+import com.kurtz.homerecord.housemanual.contacts.ContactFormContent
+import com.kurtz.homerecord.housemanual.contacts.ContactsScreen
+import com.kurtz.homerecord.housemanual.contacts.ContactsUiState
+import com.kurtz.homerecord.housemodel.upkeep.ContactDraft
 import com.kurtz.homerecord.housemanual.items.ItemDetailScreen
 import com.kurtz.homerecord.housemanual.items.ItemDetailUiState
 import com.kurtz.homerecord.housemanual.items.ItemsScreen
@@ -437,4 +442,32 @@ fun ItemDetailServiceFormPreview() = Frame {
     com.kurtz.homerecord.housemanual.items.ServiceFormContent(
         com.kurtz.homerecord.housemodel.upkeep.ServiceDraft(date = "2026-03-14", description = "Annual tune-up and igniter check", cost = "149.00"), false, {},
     )
+}
+
+private val sampleContacts = listOf(
+    com.kurtz.homerecord.housemodel.upkeep.ContactRow(
+        ContactEntity(id = "c1", homeId = "h1", name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlanheating.example", notes = "Annual tune-up in September.", createdAt = 1, updatedAt = 1),
+        2, listOf("i1"), listOf("Basement furnace"),
+    ),
+    com.kurtz.homerecord.housemodel.upkeep.ContactRow(
+        ContactEntity(id = "c2", homeId = "h1", name = "Maria Soto", trade = "Plumber", phone = "555-0177", createdAt = 1, updatedAt = 1), 0, emptyList(), emptyList(),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun ContactsListPreview() = Frame { ContactsScreen(ContactsUiState(loading = false, rows = sampleContacts), {}) }
+
+@ThemePreviews
+@Composable
+fun ContactsEmptyPreview() = Frame { ContactsScreen(ContactsUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun ContactsLoadingPreview() = Frame { ContactsScreen(ContactsUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun ContactFormPreview() = Frame {
+    ContactFormContent(ContactDraft(name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlan"), true, {})
 }

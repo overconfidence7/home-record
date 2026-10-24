@@ -64,7 +64,7 @@ data class ContactDraft(
 }
 
 /** A contact with the items it has serviced, for the Contacts screen (AC-C39). */
-data class ContactRow(val contact: ContactEntity, val serviceCount: Int, val itemIds: List<String>)
+data class ContactRow(val contact: ContactEntity, val serviceCount: Int, val itemIds: List<String>, val itemNames: List<String> = emptyList())
 
 /** Consumables, service history and contacts. [onChange] feeds the sync outbox after every write. */
 class UpkeepRepository(
@@ -125,7 +125,8 @@ class UpkeepRepository(
             val live = items.map { it.id }.toSet()
             contacts.sortedBy { it.name.lowercase() }.map { c ->
                 val mine = records.filter { it.contactId == c.id && it.itemId in live }
-                ContactRow(c, mine.size, mine.map { it.itemId }.distinct())
+                val ids = mine.map { it.itemId }.distinct()
+                ContactRow(c, mine.size, ids, ids.mapNotNull { id -> items.firstOrNull { it.id == id }?.name })
             }
         }
 

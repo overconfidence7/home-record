@@ -83,6 +83,7 @@ class UpkeepRepositoryTest {
         assertThat(zed.contact.phone).isEqualTo("555-0100")
         assertThat(zed.serviceCount).isEqualTo(1)
         assertThat(zed.itemIds).containsExactly("i1")
+        assertThat(zed.itemNames).containsExactly("Furnace")
 
         repo.deleteContact(cid)
         assertThat(repo.observeContacts("h1").first().map { it.contact.name }).containsExactly("alpha HVAC")

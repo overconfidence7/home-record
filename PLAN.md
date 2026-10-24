@@ -100,6 +100,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T028a: `UpkeepRepository` in :house-model (consumable, service record and contact drafts with validation, save/edit/delete, service newest first, contacts with serviced items, delete unlinks records) (AC-C35, AC-C36, AC-C39)
   - [x] T028b: consumables editor on the item page (kind, spec, quantity, reorder link) and service history section with the service record form (AC-C35, AC-C36)
   - [ ] T028c: HM-Contacts screen (More tab) with tap-to-call and email, contact form, items serviced list, contact picker on the service form (AC-C39)
+    - [x] T028c1: Contacts screen from the More tab (cards with call/email, form sheet, items serviced, delete with confirm)
+    - [ ] T028c2: contact picker on the service form (AC-C39)
 - [ ] T029: Documents: `Document` entity, HM-Documents folders, upload from Files and camera scan (ML Kit document scanner), in-app PDF/image viewer with pinch zoom, attach to home/room/item, share (acceptance: AC-C37)
 - [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
 - [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
