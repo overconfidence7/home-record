@@ -99,6 +99,10 @@ class PunchRepository(
         ShiftBuilder.build(db.punchDao().listFor(companyId).filter { it.memberId == memberId }.map(::toShiftPunch), now())
             .lastOrNull { it.endAt == null }
 
+    /** The member's most recent punch, or null before the first. */
+    suspend fun lastPunch(companyId: String, memberId: String): PunchEntity? =
+        db.punchDao().listFor(companyId).filter { it.memberId == memberId }.maxByOrNull { it.at }
+
     private suspend fun rebuildShifts(companyId: String, memberId: String) {
         val stamp = now()
         val shifts = ShiftBuilder.build(db.punchDao().listFor(companyId).filter { it.memberId == memberId }.map(::toShiftPunch), stamp)

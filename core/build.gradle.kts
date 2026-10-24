@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
+    implementation(libs.play.services.location)
     implementation(libs.googleid)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)

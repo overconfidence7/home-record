@@ -85,6 +85,8 @@ class AppContainer(app: Application) {
 
     val punches by lazy { PunchRepository(db, onChange = ::recordChange) }
 
+    val clock by lazy { com.kurtz.homerecord.core.punch.ClockController(punches, com.kurtz.homerecord.core.location.FusedLocationProvider(app)) }
+
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */
     suspend fun refreshMembers(companyId: String) {
         val result = companyApi.members(companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok ?: return

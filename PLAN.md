@@ -129,6 +129,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T033a: pure rules in :core model: `PunchDistance`, `ShiftBuilder`/`Shift`, `ShiftFlags`, `TimesheetMath` with tests (AC-F9, AC-F12, AC-F13)
   - [x] T033b: `PunchRepository` (save punch offline with outbox row, derive and cache shifts, edit with audit) and sync of punches (AC-F8, AC-F52)
 - [ ] T034: FL-Clock screen: Clock in with job picker, GPS fix (FusedLocationProvider, while-in-use, 5 s cap), far-from-job reason sheet, Break / Switch / Clock out, elapsed ticker, permission explanation and no-GPS path, "My timesheet" week view (acceptance: AC-F8, AC-F10, AC-F18)
+  - [x] T034a: `LocationProvider` (Fused, 5 s cap) in :core and `ClockController` (clock in, break, switch, out, far reason, no-location and require-GPS paths) with tests (AC-F8, AC-F10, AC-F18)
+  - [ ] T034b: FL-Clock screen on the Clock tab (job picker, permission explanation, far-from-job sheet, GPS-required Settings prompt, elapsed ticker, My timesheet week view) with ScreenCatalog, screenshots, F04 flow
 - [ ] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
 - [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
 - [ ] T037: Time exports and reports: shift CSV, QuickBooks-ready CSV, `HoursReport` `[unit]`, FL-Reports hours by job/person (acceptance: AC-F15, AC-F46)
