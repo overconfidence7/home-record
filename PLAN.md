@@ -84,7 +84,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T022b: ML Kit bundled text recognition behind a `TextRecognizer` interface in :core, recognized-lines sheet with tap-to-assign on HM-ItemEdit (Scan data plate), camera/gallery, offline (AC-C31)
 - [x] T023a (partial T023): `SerialAgeDecoder` `[unit]` in :core model with per-brand tests (AC-C32)
 - [x] T023: `SerialAgeDecoder` `[unit]` for the brands in AC-C32 with documented rules and tests per brand; "manufactured on" fill with override (acceptance: AC-C32)
-- [ ] T024: Warranty record and status: `Warranty` entity, `WarrantyStatus` `[unit]` (expired / expiring 60 days / active / unknown), `WarrantyStatusLine` component, item page warranty section with Registered toggle and source link (acceptance: AC-C33)
+- [x] T024: Warranty record and status: `Warranty` entity, `WarrantyStatus` `[unit]` (expired / expiring 60 days / active / unknown), `WarrantyStatusLine` component, item page warranty section with Registered toggle and source link (acceptance: AC-C33)
   - [x] T024a: `WarrantyStatus` (Unknown/Active/Expiring 60 days/Expired, ends-on from in-service date + longest term) in :core model with WarrantyStatusTest 6 (AC-C33); `WarrantyStatusLine` component in :core-ui with previews and screenshots
   - [x] T024b: item page warranty section (terms, Registered toggle, source link) arrives with HM-Item in T027 (AC-C33)
 - [x] T025: Backend warranty lookup: `POST /lookup/warranty` with Claude API web search (allowed domains, max 3 searches, structured JSON), KV cache by normalized make+model `[unit]`, per-account rate limit, cost log; vitest with a recorded response (acceptance: AC-B10)
@@ -113,7 +113,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T030c: HM-Home search bar and results (items by model/serial/consumable spec, rooms, contacts, documents; breakers/overlays join when built) (AC-H3)
   - [x] T030b: HM-Home screen: quick actions, Emergency card, Needs attention (one line when empty), Recent; Photograph a wall shows a note until M4 (AC-H1, AC-H2)
   - [ ] T030c: Home search bar and results (= T020b), reminder rows opening the reminder once the Reminders tab exists (AC-H3)
-- [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
+- [x] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
 - [ ] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)
 - [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
 - [ ] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5
