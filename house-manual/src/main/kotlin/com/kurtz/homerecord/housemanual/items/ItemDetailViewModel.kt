@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
+import com.kurtz.homerecord.housemodel.documents.DocumentRepository
+import com.kurtz.homerecord.housemodel.documents.DocumentScope
 import com.kurtz.homerecord.housemodel.items.ItemDetail
 import com.kurtz.homerecord.housemodel.items.LookupOutcome
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
@@ -27,8 +29,9 @@ class ItemDetailViewModel(
     private val repo: ItemRepository,
     private val lookup: WarrantyLookupRepository,
     private val upkeep: UpkeepRepository,
+    private val documents: DocumentRepository,
     private val itemId: String,
-    homeId: String,
+    private val homeId: String,
     detail: Flow<ItemDetail?>,
     private val copySuffix: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
@@ -51,11 +54,24 @@ class ItemDetailViewModel(
 
     private val upkeepAndContacts = combine(upkeepRows, contactRows) { u, c -> u to c }
 
-    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepAndContacts, forms) { d, c, l, uc, f ->
+    private val documentUi = MutableStateFlow(DocumentUi(showAttach = saved[ATTACH] ?: false))
+
+    private data class DocumentUi(val showAttach: Boolean = false, val notice: Boolean = false)
+
+    private val documentRows = combine(documents.observeFolders(homeId), documentUi) { folders, ui ->
+        val all = folders.flatMap { it.documents }
+        Triple(all.filter { it.itemId == itemId }.sortedByDescending { it.createdAt }, all.filter { it.itemId != itemId }, ui)
+    }
+
+    private val upkeepContactsDocs = combine(upkeepAndContacts, documentRows) { uc, docs -> uc to docs }
+
+    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepContactsDocs, forms) { d, c, l, ucd, f ->
+        val (uc, docs) = ucd
         val (u, contacts) = uc
         ItemDetailUiState(
             loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
             consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors, contacts = contacts,
+            documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
@@ -111,7 +127,19 @@ class ItemDetailViewModel(
             }
             is ItemDetailEvent.DeleteService -> viewModelScope.launch { upkeep.deleteService(e.id); forms.value = FormsUi() }
             ItemDetailEvent.CloseForm -> forms.value = FormsUi()
-            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink -> Unit // navigation is the route's job
+            is ItemDetailEvent.DocumentPicked -> viewModelScope.launch {
+                val id = documents.add(homeId, DocumentScope.Item(itemId), e.uri)
+                documentUi.update { it.copy(notice = id == null) }
+            }
+            ItemDetailEvent.DocumentScanFailed -> documentUi.update { it.copy(notice = true) }
+            ItemDetailEvent.DismissDocumentNotice -> documentUi.update { it.copy(notice = false) }
+            ItemDetailEvent.ShowAttach -> setAttach(true)
+            ItemDetailEvent.HideAttach -> setAttach(false)
+            is ItemDetailEvent.AttachDocument -> viewModelScope.launch {
+                documents.attach(e.id, DocumentScope.Item(itemId))
+                setAttach(false)
+            }
+            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument -> Unit // navigation is the route's job
         }
     }
 
@@ -134,5 +162,13 @@ class ItemDetailViewModel(
         saved[CONFIRM] = v
     }
 
-    private companion object { const val CONFIRM = "confirmDelete" }
+    private fun setAttach(v: Boolean) {
+        documentUi.update { it.copy(showAttach = v) }
+        saved[ATTACH] = v
+    }
+
+    private companion object {
+        const val CONFIRM = "confirmDelete"
+        const val ATTACH = "showAttach"
+    }
 }

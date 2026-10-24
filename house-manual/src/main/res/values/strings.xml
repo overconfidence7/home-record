@@ -130,6 +130,13 @@
     <string name="consumable_kind_other">Other</string>
     <string name="item_detail_service">Service history</string>
     <string name="item_detail_service_empty">No service visits recorded. Add one after the next repair or tune-up.</string>
+    <string name="item_detail_documents">Documents</string>
+    <string name="item_detail_documents_empty">No manuals or receipts attached yet. Add the ones for this item so they are one tap away.</string>
+    <string name="item_detail_document_add">Add from Files</string>
+    <string name="item_detail_document_scan">Scan a document</string>
+    <string name="item_detail_document_attach">Attach existing</string>
+    <string name="item_detail_attach_title">Attach a document</string>
+    <string name="item_detail_attach_empty">Every document is already attached here, or none have been added yet.</string>
     <string name="item_detail_service_add">Add service visit</string>
     <string name="item_detail_service_edit_title">Edit service visit</string>
     <string name="item_detail_service_date">Date</string>

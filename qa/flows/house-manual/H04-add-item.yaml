@@ -87,3 +87,11 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_detail_service_add"
 - assertVisible:
     id: "hm_item_detail_service_description"
+# AC-C37: the item page offers documents from Files, the scanner, or the home's existing files
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_document_add"
+- assertVisible:
+    id: "hm_item_detail_document_scan"
+- assertVisible:
+    id: "hm_item_detail_document_attach"

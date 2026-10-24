@@ -111,6 +111,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantyCard(detail, state, onEvent)
                 ConsumablesCard(state.consumables, onEvent)
                 ServiceCard(state.service, state.contacts, onEvent)
+                DocumentsCard(state, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
                 detail.item.notes?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Text(notes, style = MaterialTheme.typography.bodyLarge) }
@@ -124,6 +125,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
         }
     }
     UpkeepFormSheet(state, onEvent)
+    AttachDocumentSheet(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
             onDismissRequest = { onEvent(ItemDetailEvent.CancelDelete) },

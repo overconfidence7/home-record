@@ -116,7 +116,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { nav.push(ItemEditKey()) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(
-                container.items, container.warrantyLookup, container.upkeep, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
+                container.items, container.warrantyLookup, container.upkeep, container.documents, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
+                onOpenDocument = { nav.push(DocumentViewerKey(it)) },
                 onOpenCopy = { nav.pop(); nav.push(ItemDetailKey(it)) },
             )
         }

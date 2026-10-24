@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.items
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.ContactEntity
+import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.housemodel.items.ItemDetail
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
@@ -21,6 +22,13 @@ data class ItemDetailUiState(
     val service: List<ServiceRecordEntity> = emptyList(),
     /** The home's contacts, for the service form picker (AC-C39). */
     val contacts: List<ContactEntity> = emptyList(),
+    /** Documents attached to this item, newest first (AC-C37). */
+    val documents: List<DocumentEntity> = emptyList(),
+    /** The home's other documents that can be attached to this item (AC-C37). */
+    val attachable: List<DocumentEntity> = emptyList(),
+    val showAttach: Boolean = false,
+    /** Set when a picked or scanned file was not a PDF or photo. */
+    val documentNotice: Boolean = false,
     val consumableForm: ConsumableDraft? = null,
     val serviceForm: ServiceDraft? = null,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */
@@ -53,5 +61,14 @@ sealed interface ItemDetailEvent {
     data class DeleteService(val id: String) : ItemDetailEvent
     /** Closes whichever upkeep form is open without saving. */
     data object CloseForm : ItemDetailEvent
+    data object UploadDocument : ItemDetailEvent
+    data object ScanDocument : ItemDetailEvent
+    data class DocumentPicked(val uri: String) : ItemDetailEvent
+    data object DocumentScanFailed : ItemDetailEvent
+    data object DismissDocumentNotice : ItemDetailEvent
+    data class OpenDocument(val id: String) : ItemDetailEvent
+    data object ShowAttach : ItemDetailEvent
+    data object HideAttach : ItemDetailEvent
+    data class AttachDocument(val id: String) : ItemDetailEvent
     data object Back : ItemDetailEvent
 }

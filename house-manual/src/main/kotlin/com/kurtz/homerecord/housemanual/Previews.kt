@@ -431,7 +431,12 @@ private val furnaceService = listOf(
 @ThemePreviews
 @Composable
 fun ItemDetailUpkeepPreview() = Frame {
-    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService, contacts = sampleContacts.map { it.contact }), {})
+    ItemDetailScreen(
+        ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService, contacts = sampleContacts.map { it.contact },
+            documents = listOf(DocumentEntity(id = "d1", homeId = "h1", itemId = "i1", folder = "Appliances", name = "Furnace manual.pdf", path = "p1", mime = "application/pdf", size = 2_411_520, createdAt = 2, updatedAt = 2)),
+        ),
+        {},
+    )
 }
 
 @ThemePreviews

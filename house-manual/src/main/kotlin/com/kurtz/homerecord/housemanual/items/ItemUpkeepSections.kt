@@ -252,3 +252,65 @@ private fun kindLabel(kind: String): String = stringResource(
 
 private fun shortDate(iso: String): String =
     runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(iso)
+
+/** Documents attached to the item (AC-C37): open in the viewer, add from Files or the scanner, or attach one already in the home. */
+@Composable
+fun DocumentsCard(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.item_detail_documents), style = MaterialTheme.typography.titleMedium)
+            if (state.documents.isEmpty()) {
+                Text(stringResource(R.string.item_detail_documents_empty), style = MaterialTheme.typography.bodyLarge)
+            } else {
+                state.documents.forEach { doc ->
+                    TextButton(
+                        onClick = { onEvent(ItemDetailEvent.OpenDocument(doc.id)) },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_item_detail_document_row"),
+                    ) {
+                        Text(doc.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+            if (state.documentNotice) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.documents_unsupported), Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = { onEvent(ItemDetailEvent.DismissDocumentNotice) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        Text(stringResource(R.string.documents_dismiss))
+                    }
+                }
+            }
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { onEvent(ItemDetailEvent.UploadDocument) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_document_add")) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Text(stringResource(R.string.item_detail_document_add), Modifier.padding(start = 8.dp))
+                }
+                OutlinedButton(onClick = { onEvent(ItemDetailEvent.ScanDocument) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_document_scan")) {
+                    Text(stringResource(R.string.item_detail_document_scan))
+                }
+                OutlinedButton(onClick = { onEvent(ItemDetailEvent.ShowAttach) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_document_attach")) {
+                    Text(stringResource(R.string.item_detail_document_attach))
+                }
+            }
+        }
+    }
+}
+
+/** Bottom sheet listing the home's other documents; tapping one attaches it to this item. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AttachDocumentSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    if (!state.showAttach) return
+    ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.HideAttach) }) {
+        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.item_detail_attach_title), style = MaterialTheme.typography.titleLarge)
+            if (state.attachable.isEmpty()) Text(stringResource(R.string.item_detail_attach_empty), style = MaterialTheme.typography.bodyLarge)
+            state.attachable.forEach { doc ->
+                TextButton(
+                    onClick = { onEvent(ItemDetailEvent.AttachDocument(doc.id)) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_item_detail_attach_row"),
+                ) { Text(doc.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge) }
+            }
+        }
+    }
+}

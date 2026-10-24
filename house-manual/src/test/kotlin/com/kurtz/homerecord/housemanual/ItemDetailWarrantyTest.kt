@@ -48,6 +48,7 @@ class ItemDetailWarrantyTest {
     private lateinit var db: HomeRecordDatabase
     private lateinit var items: ItemRepository
     private lateinit var lookup: WarrantyLookupRepository
+    private lateinit var docs: com.kurtz.homerecord.housemodel.documents.DocumentRepository
     private var result: ApiResult<WarrantyTerms> = ApiResult.Ok(WarrantyTerms(partsMonths = 72, laborMonths = 12, confidence = "HIGH", sourceUrl = "https://rheem.com/w"))
     private val vms = mutableListOf<ItemDetailViewModel>()
 
@@ -56,6 +57,15 @@ class ItemDetailWarrantyTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
         items = ItemRepository(db, today = { LocalDate.of(2026, 10, 24) })
+        docs = com.kurtz.homerecord.housemodel.documents.DocumentRepository(
+            db,
+            object : com.kurtz.homerecord.core.media.DocumentFiles {
+                override suspend fun import(uri: String) =
+                    if (uri == "u/manual.pdf") com.kurtz.homerecord.core.media.StoredDocument("documents/a.pdf", "Water heater manual.pdf", "application/pdf", 2048)
+                    else if (uri == "u/notes.txt") com.kurtz.homerecord.core.media.StoredDocument("documents/c.txt", "notes.txt", "text/plain", 10) else null
+                override fun discard(path: String) = Unit
+            },
+        )
         lookup = WarrantyLookupRepository(db, object : WarrantyLookupApi {
             override suspend fun lookup(make: String, model: String, category: String?, serial: String?) = result
         })
@@ -70,7 +80,7 @@ class ItemDetailWarrantyTest {
     private suspend fun heater(model: String = "XG50T06"): String =
         items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Water heater", make = "Rheem", model = model, inServiceOn = "2024-01-15")).orEmpty()
 
-    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy").also {
+    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy").also {
         vms += it
         it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
     }
@@ -162,5 +172,20 @@ class ItemDetailWarrantyTest {
         vm.onEvent(ItemDetailEvent.ChangeService(ServiceDraft(date = "2026-02-01", contactId = cid, description = "Tune-up")))
         vm.onEvent(ItemDetailEvent.SaveService)
         assertThat(vm.await { it.serviceForm == null && it.service.size == 1 }.service.first().contactId).isEqualTo(cid)
+    }
+
+    @AcceptanceCriterion("AC-C37")
+    @Test fun documentsAddAttachAndRejectUnsupportedFiles() = runTest {
+        val vm = vm(heater())
+        vm.onEvent(ItemDetailEvent.DocumentPicked("u/manual.pdf"))
+        assertThat(vm.await { it.documents.size == 1 }.documents.single().name).isEqualTo("Water heater manual.pdf")
+        vm.onEvent(ItemDetailEvent.DocumentPicked("u/notes.txt"))
+        assertThat(vm.await { it.documentNotice }.documents).hasSize(1)
+        vm.onEvent(ItemDetailEvent.DismissDocumentNotice)
+        val homeDoc = docs.add("h1", com.kurtz.homerecord.housemodel.documents.DocumentScope.Home, "u/manual.pdf").orEmpty()
+        vm.onEvent(ItemDetailEvent.ShowAttach)
+        assertThat(vm.await { it.showAttach && it.attachable.any { d -> d.id == homeDoc } }.documents).hasSize(1)
+        vm.onEvent(ItemDetailEvent.AttachDocument(homeDoc))
+        assertThat(vm.await { !it.showAttach && it.documents.size == 2 }.attachable).isEmpty()
     }
 }
