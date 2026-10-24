@@ -115,6 +115,8 @@ interface ServiceRecordDao {
     @Upsert suspend fun upsert(row: ServiceRecordEntity)
     @Query("SELECT * FROM service_record WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): ServiceRecordEntity?
     @Query("SELECT * FROM service_record WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ServiceRecordEntity>>
+    @Query("SELECT * FROM service_record WHERE deletedAt IS NULL ORDER BY createdAt") fun observeAll(): Flow<List<ServiceRecordEntity>>
+    @Query("SELECT * FROM service_record WHERE contactId = :contactId AND deletedAt IS NULL") suspend fun listForContact(contactId: String): List<ServiceRecordEntity>
     @Query("SELECT * FROM service_record WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ServiceRecordEntity>
     @Query("UPDATE service_record SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
