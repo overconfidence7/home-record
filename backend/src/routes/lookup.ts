@@ -4,9 +4,12 @@ import { requireSession } from "../tenancy";
 import {
   CACHE_DAYS, FREE_DAILY_LIMIT, PRO_DAILY_LIMIT, askClaude, requestSchema, resultSchema, warrantyCacheKey,
 } from "../lookup/warranty";
+import { dataPlateRequestSchema, readDataPlate } from "../lookup/dataplate";
+import { RECALL_CACHE_SECONDS, fetchRecalls, recallQuerySchema, recallsCacheKey } from "../lookup/recalls";
 
 export const lookup = new Hono<AppEnv>();
 lookup.use("/lookup/*", requireSession);
+lookup.use("/recalls", requireSession);
 
 async function dailyLimit(db: D1Database, userId: string): Promise<number> {
   const pro = await db
@@ -55,4 +58,38 @@ lookup.post("/lookup/warranty", async (c) => {
     .bind(crypto.randomUUID(), userId, key, found.usage.inputTokens, found.usage.outputTokens, found.usage.searches, Date.now())
     .run();
   return c.json({ ...found.result, cached: false });
+});
+
+/** AC-B11: shares the warranty rate-limit bucket; the image is never stored. */
+lookup.post("/lookup/dataplate", async (c) => {
+  const parsed = dataPlateRequestSchema.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return c.json({ error: "bad_request" }, 400);
+  const userId = c.get("session").userId;
+  if (!(await takeQuota(c.env, userId))) return c.json({ error: "rate_limited" }, 429);
+  if (!c.env.CLAUDE_API_KEY) return c.json({ error: "unavailable" }, 503);
+  const found = await readDataPlate(c.env.CLAUDE_API_KEY, parsed.data);
+  if (!found) return c.json({ error: "lookup_failed" }, 502);
+  await c.env.DB.prepare(
+    "INSERT INTO lookup_log (id, user_id, kind, cache_key, input_tokens, output_tokens, searches, created_at) VALUES (?, ?, 'dataplate', '', ?, ?, 0, ?)",
+  )
+    .bind(crypto.randomUUID(), userId, found.usage.inputTokens, found.usage.outputTokens, Date.now())
+    .run();
+  return c.json(found.result);
+});
+
+/** AC-B12: CPSC recalls proxy, cached 24 h per make+model. Free, so it takes no quota. */
+lookup.get("/recalls", async (c) => {
+  const parsed = recallQuerySchema.safeParse({ make: c.req.query("make"), model: c.req.query("model") });
+  if (!parsed.success) return c.json({ error: "bad_request" }, 400);
+  const key = recallsCacheKey(parsed.data.make, parsed.data.model);
+  const hit = await c.env.CACHE.get(key);
+  if (hit) {
+    try {
+      return c.json({ recalls: JSON.parse(hit), cached: true });
+    } catch { /* corrupt entry: refetch */ }
+  }
+  const recalls = await fetchRecalls(parsed.data.make, parsed.data.model);
+  if (!recalls) return c.json({ error: "lookup_failed" }, 502);
+  await c.env.CACHE.put(key, JSON.stringify(recalls), { expirationTtl: RECALL_CACHE_SECONDS });
+  return c.json({ recalls, cached: false });
 });

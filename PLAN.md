@@ -115,6 +115,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] T030c: Home search bar and results (= T020b), reminder rows opening the reminder once the Reminders tab exists (AC-H3)
 - [x] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
 - [ ] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)
+  - [x] T031a: backend `POST /lookup/dataplate` (Claude vision, shared quota, cost log) and `GET /recalls` (CPSC proxy, 24 h KV cache, model matches first) with vitest (AC-B11, AC-B12)
+  - [ ] T031b: app side: data-plate scan falls back to `/lookup/dataplate` when OCR finds no model; item page "Check recalls" button and result list (AC-B11, AC-B12)
 - [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
 - [ ] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5
 
