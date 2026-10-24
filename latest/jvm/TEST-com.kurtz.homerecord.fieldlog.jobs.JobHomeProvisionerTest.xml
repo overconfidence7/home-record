@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisionerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:58.869Z" hostname="runnervmtai0g" time="0.183">
+  <properties/>
+  <testcase name="aMissingJobGivesNull" classname="com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisionerTest" time="0.059"/>
+  <testcase name="createsTheHomeWithAMainFloorAndLinksTheJob" classname="com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisionerTest" time="0.056"/>
+  <testcase name="anExistingHomeIsReturnedUntouched" classname="com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisionerTest" time="0.062"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

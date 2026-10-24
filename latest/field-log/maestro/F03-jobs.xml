@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="35.124" timestamp="2026-10-24T09:53:10">
+    <testcase id="F03-jobs" name="F03-jobs" classname="F03-jobs" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F03-jobs.yaml" time="35.107" timestamp="2026-10-24T09:53:10" status="ERROR">
+      <failure>Assertion is false: "Set up your company" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

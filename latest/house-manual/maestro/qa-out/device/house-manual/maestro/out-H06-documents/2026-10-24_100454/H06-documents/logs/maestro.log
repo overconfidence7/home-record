@@ -1,0 +1,15 @@
+10:05:01.716 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+10:05:01.719 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+10:05:01.719 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+10:05:01.720 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+10:05:01.720 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run _onboard.yaml RUNNING
+10:05:01.721 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+10:05:01.721 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+10:05:01.721 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Set up your home" is visible RUNNING
+10:05:21.977 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+10:05:21.978 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+10:05:22.297 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Set up your home" is visible FAILED
+10:05:22.298 [ERROR] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandFailed: Assertion is false: "Set up your home" is visible
+10:05:22.298 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+10:05:22.299 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+10:05:22.479 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run _onboard.yaml FAILED

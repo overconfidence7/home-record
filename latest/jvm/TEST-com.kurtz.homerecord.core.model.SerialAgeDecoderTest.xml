@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:14.164Z" hostname="runnervmtai0g" time="0.009">
+  <properties/>
+  <testcase name="boschReadsFdNumber" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.006"/>
+  <testcase name="rheemAndRuudReadMonthYear" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.001"/>
+  <testcase name="whirlpoolFamilyReadsYearDigitAndWeek" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="samsungReadsCharacters8And9" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="lgReadsYearDigitAndMonth" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="bradfordWhiteReadsYearAndMonthLetters" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="traneFamilyReadsYearWeekLetter" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="yorkReadsMonthLetterAndYearDigit" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="goodmanAndAmanaReadYearMonth" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.001"/>
+  <testcase name="geReadsMonthAndYearLetters" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="resultNamesTheRule" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="unknownBrandOrBadSerialGivesNothing" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="lennoxReadsYearWeek" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="aoSmithAndStateReadYearWeek" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.0"/>
+  <testcase name="carrierFamilyReadsWeekYear" classname="com.kurtz.homerecord.core.model.SerialAgeDecoderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

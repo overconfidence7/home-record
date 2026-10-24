@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:31.609Z" hostname="runnervmtai0g" time="0.532">
+  <properties/>
+  <testcase name="registeredToggleUpdatesWarrantyAndQueuesSync" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.094"/>
+  <testcase name="newItemSeedsConsumablesAndRemindersFromSubtype" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.05"/>
+  <testcase name="draftNeedsSubtypeRoomAndName" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.046"/>
+  <testcase name="editingKeepsDefaultsAndCreatedAt" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.091"/>
+  <testcase name="priceParsesToCents" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.022"/>
+  <testcase name="detailCombinesItemRoomWarrantyAndPhotos" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.062"/>
+  <testcase name="invalidDraftSavesNothing" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.023"/>
+  <testcase name="duplicateCopiesDetailsWithoutPhotos" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.075"/>
+  <testcase name="saveTrimsAndRoundTripsThroughDraft" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

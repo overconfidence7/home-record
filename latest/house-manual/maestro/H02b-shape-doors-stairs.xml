@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="106.864" timestamp="2026-10-24T09:59:49">
+    <testcase id="H02b-shape-doors-stairs" name="H02b-shape-doors-stairs" classname="H02b-shape-doors-stairs" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H02b-shape-doors-stairs.yaml" time="106.822" timestamp="2026-10-24T09:59:50" status="ERROR">
+      <failure>Element not found: Text matching regex: Kitchen</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

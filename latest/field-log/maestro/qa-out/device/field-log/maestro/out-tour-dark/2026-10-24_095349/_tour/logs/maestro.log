@@ -1,0 +1,17 @@
+09:53:55.444 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+09:53:55.451 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+09:53:55.451 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+09:53:55.451 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+09:53:55.452 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+09:53:55.452 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+09:53:55.452 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.kurtz.homerecord.fieldlog" RUNNING
+09:53:55.559 [ INFO] maestro.Maestro.launchApp$lambda$5: Launching app com.kurtz.homerecord.fieldlog
+09:53:55.559 [ INFO] maestro.Maestro.launchApp$lambda$5: Stopping com.kurtz.homerecord.fieldlog app during launch
+09:53:55.760 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.kurtz.homerecord.fieldlog" COMPLETED
+09:53:55.761 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot tour-${QA_VARIANT}-launch RUNNING
+09:53:56.619 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+09:53:56.621 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+09:53:57.233 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot tour-${QA_VARIANT}-launch COMPLETED
+09:53:57.234 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run flow when "Today" is visible RUNNING
+09:54:02.900 [ INFO] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandSkipped: null
+09:54:02.901 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run flow when "Today" is visible SKIPPED

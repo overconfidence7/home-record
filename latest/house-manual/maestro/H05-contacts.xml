@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="21.652" timestamp="2026-10-24T10:04:31">
+    <testcase id="H05-contacts" name="H05-contacts" classname="H05-contacts" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H05-contacts.yaml" time="21.634" timestamp="2026-10-24T10:04:31" status="ERROR">
+      <failure>Assertion is false: "Set up your home" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

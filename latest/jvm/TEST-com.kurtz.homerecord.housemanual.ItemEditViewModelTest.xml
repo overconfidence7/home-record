@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:53.720Z" hostname="runnervmtai0g" time="1.011">
+  <properties/>
+  <testcase name="unreadablePlateOpensNoSheet" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.157"/>
+  <testcase name="draftSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.115"/>
+  <testcase name="editingAnItemLoadsItsDraftAndMissingItemsAreReported" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.127"/>
+  <testcase name="dataPlatePhotoProposesValuesAndTapAssignsLines" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.128"/>
+  <testcase name="roomPickerListsEveryRoomOfTheHome" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.092"/>
+  <testcase name="removingAnUnsavedPhotoDeletesItsFile" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.11"/>
+  <testcase name="serialFillsManufacturedOnWithANoteAndTheHomeownerCanOverride" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.084"/>
+  <testcase name="photosAreAddedRemovedAndStoredWithTheItem" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.114"/>
+  <testcase name="saveNeedsTypeRoomAndNameThenStoresTheItem" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.06"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

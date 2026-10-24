@@ -1,0 +1,87 @@
+[
+ {
+  "stage": "install:field-log",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:field-log",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "coldstart:field-log",
+  "status": "fail",
+  "details": "median 3559 ms over 1500 ms (AC-U11)"
+ },
+ {
+  "stage": "seed:field-log",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:field-log",
+  "status": "pass",
+  "details": "2 tests"
+ },
+ {
+  "stage": "flow:F01-welcome",
+  "status": "fail",
+  "details": "see maestro/F01-welcome.log"
+ },
+ {
+  "stage": "flow:F02-invite-join",
+  "status": "fail",
+  "details": "see maestro/F02-invite-join.log"
+ },
+ {
+  "stage": "flow:F03-jobs",
+  "status": "fail",
+  "details": "see maestro/F03-jobs.log"
+ },
+ {
+  "stage": "variant:dark",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:font200",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:landscape",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "jank:field-log",
+  "status": "fail",
+  "details": "85% janky frames of 7 (AC-U11)"
+ },
+ {
+  "stage": "monkey:field-log",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "release:field-log",
+  "status": "pass",
+  "details": "R8 build launches (1404 ms)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.fieldlog",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

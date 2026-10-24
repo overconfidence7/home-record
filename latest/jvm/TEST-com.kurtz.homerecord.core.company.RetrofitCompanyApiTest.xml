@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:38:58.840Z" hostname="runnervmtai0g" time="0.229">
+  <properties/>
+  <testcase name="membersMapRolesAndRates" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.036"/>
+  <testcase name="updateProfileSendsSettingsWireNames" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.035"/>
+  <testcase name="meKeepsOnlyCompanyMemberships" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.02"/>
+  <testcase name="networkFailureIsOffline" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.017"/>
+  <testcase name="createSendsTrimmedFieldsAndOmitsBlanks" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.014"/>
+  <testcase name="statusCodesMap" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.051"/>
+  <testcase name="badCodeMapsToInvalidCode" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.01"/>
+  <testcase name="profileReadsSettingsWithDefaults" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.017"/>
+  <testcase name="setRoleAndRateUsePatchOnTheMember" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

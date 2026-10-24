@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:50.037Z" hostname="runnervmtai0g" time="0.671">
+  <properties/>
+  <testcase name="renameAndMoveToFolderThenDelete" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.202"/>
+  <testcase name="openFormSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.174"/>
+  <testcase name="pickedPdfIsListedAndOtherTypesShowNotice" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.134"/>
+  <testcase name="failedScanShowsNoticeAndScannedPdfIsListed" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.138"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

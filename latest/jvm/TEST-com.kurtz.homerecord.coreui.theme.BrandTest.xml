@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.theme.BrandTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:21.526Z" hostname="runnervmtai0g" time="0.01">
+  <properties/>
+  <testcase name="lightAndDarkDiffer" classname="com.kurtz.homerecord.coreui.theme.BrandTest" time="0.01"/>
+  <testcase name="brandsHaveDistinctPrimaries" classname="com.kurtz.homerecord.coreui.theme.BrandTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

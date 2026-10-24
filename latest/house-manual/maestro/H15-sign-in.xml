@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="63.651" timestamp="2026-10-24T10:05:31">
+    <testcase id="H15-sign-in" name="H15-sign-in" classname="H15-sign-in" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H15-sign-in.yaml" time="63.628" timestamp="2026-10-24T10:05:31" status="ERROR">
+      <failure>Element not found: Text matching regex: Sign out</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="35.743" timestamp="2026-10-24T09:52:27">
+    <testcase id="F02-invite-join" name="F02-invite-join" classname="F02-invite-join" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F02-invite-join.yaml" time="35.72" timestamp="2026-10-24T09:52:27" status="ERROR">
+      <failure>Assertion is false: "Set up your company" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.4.1">
+
+    <issue
+        id="ConfigurationScreenWidthHeight"
+        severity="Warning"
+        message="Using Configuration.screenHeightDp instead of LocalWindowInfo.current.containerSize"
+        category="Correctness"
+        priority="3"
+        summary="Using Configuration.screenWidthDp/screenHeightDp instead of LocalWindowInfo.current.containerSize"
+        explanation="Configuration.screenWidthDp and Configuration.screenHeightDp have different insets behaviour depending on target SDK version, and are rounded to the nearest Dp. This means that using these values in composition to size a layout can result in issues, as these values do not accurately represent the actual available window size. Instead it is recommended to use WindowInfo.containerSize which accurately represents the window size."
+        errorLine1="    val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }"
+        errorLine2="                                                                        ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/HouseScreen.kt"
+            line="68"
+            column="73"/>
+    </issue>
+
+    <issue
+        id="ConfigurationScreenWidthHeight"
+        severity="Warning"
+        message="Using Configuration.screenWidthDp instead of LocalWindowInfo.current.containerSize"
+        category="Correctness"
+        priority="3"
+        summary="Using Configuration.screenWidthDp/screenHeightDp instead of LocalWindowInfo.current.containerSize"
+        explanation="Configuration.screenWidthDp and Configuration.screenHeightDp have different insets behaviour depending on target SDK version, and are rounded to the nearest Dp. This means that using these values in composition to size a layout can result in issues, as these values do not accurately represent the actual available window size. Instead it is recommended to use WindowInfo.containerSize which accurately represents the window size."
+        errorLine1="    val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/HouseScreen.kt"
+            line="68"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;rooms&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;floor_rooms&quot;>%1$d rooms&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/res/values/strings.xml"
+            line="26"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;rooms&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;floor_delete_body_many&quot;>The %1$d rooms on this floor are removed too.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/res/values/strings.xml"
+            line="38"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var canvasWidthDp by remember { mutableStateOf(0f) }"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/PlanEditorScreen.kt"
+            line="120"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        severity="Hint"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        category="Performance"
+        priority="3"
+        summary="`State&lt;T>` will autobox values assigned to this state. Use a specialized state type instead."
+        explanation="Calling `mutableStateOf&lt;T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+        errorLine1="    var canvasHeightDp by remember { mutableStateOf(0f) }"
+        errorLine2="                                     ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/PlanEditorScreen.kt"
+            line="121"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val parsed = Uri.parse(uri)"
+        errorLine2="                     ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/AndroidDocumentFiles.kt"
+            line="19"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            val input = context.contentResolver.openInputStream(Uri.parse(uri)) ?: return@withContext null"
+        errorLine2="                                                                ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/AndroidMediaFiles.kt"
+            line="25"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                putExtra(Intent.EXTRA_STREAM, Uri.parse(uri))"
+        errorLine2="                                              ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/HouseRoutes.kt"
+            line="54"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            camera.launch(Uri.parse(target.uri))"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditRoute.kt"
+            line="56"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        prefs.edit().putString(homeId, layers.encode()).apply()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/blueprint/PrefsLayerStore.kt"
+            line="11"
+            column="9"/>
+    </issue>
+
+</issues>

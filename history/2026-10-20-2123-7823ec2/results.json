@@ -1,0 +1,53 @@
+{
+ "sha": "7823ec2",
+ "at": "2026-10-20 21:23 UTC",
+ "stats": {
+  "unitTests": 230,
+  "unitFailures": 0,
+  "coverage": {
+   "acs_claimed": 49,
+   "acs_missing": 0,
+   "ticked_tasks": 20
+  },
+  "backendTests": 51,
+  "backendFailures": 0
+ },
+ "stages": [],
+ "findings": [
+  {
+   "id": "auto:device:field-log:no-results",
+   "severity": "Critical",
+   "text": "device suite produced no results for field-log",
+   "expected": "a device job that produces no results is a finding, and the run does not count as tested",
+   "actual": "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:device:handoff:no-results",
+   "severity": "Critical",
+   "text": "device suite produced no results for handoff",
+   "expected": "a device job that produces no results is a finding, and the run does not count as tested",
+   "actual": "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:device:house-manual:no-results",
+   "severity": "Critical",
+   "text": "device suite produced no results for house-manual",
+   "expected": "a device job that produces no results is a finding, and the run does not count as tested",
+   "actual": "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run",
+   "screenshot": "",
+   "app": "house-manual"
+  }
+ ],
+ "new": [
+  "auto:device:field-log:no-results",
+  "auto:device:handoff:no-results",
+  "auto:device:house-manual:no-results"
+ ],
+ "stillOpen": [],
+ "skipped": [],
+ "walkthrough": {}
+}

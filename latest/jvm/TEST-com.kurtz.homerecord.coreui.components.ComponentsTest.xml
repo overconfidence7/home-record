@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.components.ComponentsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:01.812Z" hostname="runnervmtai0g" time="16.967">
+  <properties/>
+  <testcase name="discardPromptAppearsWhenDirty" classname="com.kurtz.homerecord.coreui.components.ComponentsTest" time="12.238"/>
+  <testcase name="emptyStateActionFires" classname="com.kurtz.homerecord.coreui.components.ComponentsTest" time="0.329"/>
+  <testcase name="cleanFormClosesImmediately" classname="com.kurtz.homerecord.coreui.components.ComponentsTest" time="0.136"/>
+  <testcase name="errorStateRetryFires" classname="com.kurtz.homerecord.coreui.components.ComponentsTest" time="0.214"/>
+  <testcase name="linkChipOpens" classname="com.kurtz.homerecord.coreui.components.ComponentsTest" time="0.156"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

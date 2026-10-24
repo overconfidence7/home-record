@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="64" failures="0" errors="0" time="1.269">
+    <testsuite name="test/api.test.ts" timestamp="2026-10-24T09:42:13.228Z" hostname="runnervmtai0g" tests="14" failures="0" errors="0" skipped="0" time="0.061">
+        <testcase classname="test/api.test.ts" name="AC-B1 session tokens &gt; round-trips a user id" time="0.002">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B1 session tokens &gt; rejects a token signed with another secret" time="0.001">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B1 session tokens &gt; rejects a tampered token" time="0">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B1 session tokens &gt; expires after 30 days" time="0.001">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B1 session tokens &gt; rejects garbage" time="0">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="/health &gt; answers without auth" time="0.003">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="/me &gt; 401 without a token" time="0.001">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="/me &gt; 401 for a valid token whose user does not exist" time="0.001">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="/me &gt; returns memberships and entitlement fields, and refreshes the token" time="0.008">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B2 tenancy &gt; members read their own tenant" time="0.008">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B2 tenancy &gt; another tenant and a nonexistent tenant look identical (404, no detail)" time="0.01">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B2 tenancy &gt; a company id is not reachable as a home" time="0.004">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="AC-B2 tenancy &gt; 401 without a token" time="0">
+        </testcase>
+        <testcase classname="test/api.test.ts" name="unknown routes &gt; 404 json" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/auth.test.ts" timestamp="2026-10-24T09:42:13.232Z" hostname="runnervmtai0g" tests="11" failures="0" errors="0" skipped="0" time="0.424">
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; start stores a hashed code and dev mode accepts it" time="0.01">
+            <system-out>
+[dev] sign-in code for dev@example.com: 351458
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; verify signs in, creates the user once, and returns a valid token" time="0.013">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; a code works once" time="0.008">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; rejects a wrong code and locks after five" time="0.013">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; rejects an expired code" time="0.002">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 email code &gt; rejects malformed input" time="0.001">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 Google ID token &gt; accepts a valid token" time="0.033">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 Google ID token &gt; rejects another audience" time="0.08">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 Google ID token &gt; rejects an expired token" time="0.081">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 Google ID token &gt; rejects an unverified email and a token signed by another key" time="0.163">
+        </testcase>
+        <testcase classname="test/auth.test.ts" name="AC-B1 Google ID token &gt; the route refuses a bad token" time="0.001">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/company.test.ts" timestamp="2026-10-24T09:42:13.235Z" hostname="runnervmtai0g" tests="17" failures="0" errors="0" skipped="0" time="0.332">
+        <testcase classname="test/company.test.ts" name="AC-F1 create company &gt; makes the creator Owner with a 14-day trial" time="0.017">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F1 create company &gt; rejects a blank name" time="0.004">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; generates 8-character codes from an unambiguous alphabet" time="0.001">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; gives a stable code until rotated, and rotation kills the old one" time="0.028">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; joins as Crew (lowercase and dashes tolerated) and shows up in the member list" time="0.017">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; joining twice keeps the existing role" time="0.022">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; an unknown code is a 404 invalid_code" time="0.005">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F2 invite and join &gt; Owner changes a role and removes the member" time="0.028">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F3 / AC-B3 role gates &gt; Crew gets 404 on team, invite, profile and every admin write" time="0.03">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F3 / AC-B3 role gates &gt; Lead is also kept out of admin screens" time="0.018">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F3 / AC-B3 role gates &gt; Office manages crew but cannot touch Owner, other Office, rates or grant elevated roles" time="0.067">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F3 / AC-B3 role gates &gt; only the Owner sees and sets rates; the Owner&apos;s role cannot be changed" time="0.033">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="AC-F3 / AC-B3 role gates &gt; another company&apos;s admin cannot see this company at all" time="0.017">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="FL-Company profile &gt; returns defaults and merges setting updates" time="0.018">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="FL-Company profile &gt; rejects an out-of-range punch distance" time="0.008">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="invite landing page &gt; shows the normalized code and an app link without auth" time="0.001">
+        </testcase>
+        <testcase classname="test/company.test.ts" name="invite landing page &gt; 404s on a malformed code (no HTML injection)" time="0">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/dev.test.ts" timestamp="2026-10-24T09:42:13.238Z" hostname="runnervmtai0g" tests="3" failures="0" errors="0" skipped="0" time="0.064">
+        <testcase classname="test/dev.test.ts" name="AC-B2 dev routes &gt; last-code returns the code just issued" time="0.026">
+            <system-out>
+[dev] sign-in code for qa@example.com: 165715
+
+            </system-out>
+        </testcase>
+        <testcase classname="test/dev.test.ts" name="AC-B2 dev routes &gt; seed creates QA Electric with an owner and a crew member, reset clears it" time="0.016">
+        </testcase>
+        <testcase classname="test/dev.test.ts" name="AC-B2 dev routes &gt; is absent unless ENVIRONMENT=dev" time="0.002">
+            <system-out>
+[dev] sign-in code for p@example.com: 879461
+
+            </system-out>
+        </testcase>
+    </testsuite>
+    <testsuite name="test/lookup.test.ts" timestamp="2026-10-24T09:42:13.238Z" hostname="runnervmtai0g" tests="8" failures="0" errors="0" skipped="0" time="0.193">
+        <testcase classname="test/lookup.test.ts" name="AC-B10 normalization &gt; shares one cache key across spelling variants" time="0.002">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 normalization &gt; parses fenced JSON and rejects prose" time="0.002">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; requires a session" time="0.004">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; rejects a missing model" time="0.008">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; treats a corrupt cache entry as a miss" time="0.018">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; returns terms, restricts domains and searches, then serves repeats from the cache" time="0.017">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; answers 502 when upstream fails and does not cache" time="0.007">
+        </testcase>
+        <testcase classname="test/lookup.test.ts" name="AC-B10 POST /lookup/warranty &gt; limits a free account to 20 lookups a day" time="0.115">
+        </testcase>
+    </testsuite>
+    <testsuite name="test/sync.test.ts" timestamp="2026-10-24T09:42:13.239Z" hostname="runnervmtai0g" tests="11" failures="0" errors="0" skipped="0" time="0.195">
+        <testcase classname="test/sync.test.ts" name="AC-B20 merge rules (unit) &gt; last writer wins per field, not per row" time="0.002">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 merge rules (unit) &gt; an older write to a field is dropped and logged" time="0.001">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 merge rules (unit) &gt; unions *Json lists by id and by value" time="0">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 merge rules (unit) &gt; an authoritative row rejects non-authoritative writes" time="0">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 push and pull &gt; assigns increasing serverSeq and returns changes since a cursor" time="0.034">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 push and pull &gt; is idempotent on retry by (deviceId, outboxId)" time="0.02">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 push and pull &gt; merges two devices editing different fields of one row" time="0.026">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 push and pull &gt; crew cannot overwrite a punch the Owner edited" time="0.031">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-B20 push and pull &gt; 404s for another tenant and 400s for an unknown entity or mismatched id" time="0.013">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-F5 job rows sync &gt; round-trips a client, a job and its crew with the app&apos;s field names" time="0.025">
+        </testcase>
+        <testcase classname="test/sync.test.ts" name="AC-F5 job rows sync &gt; accepts a job&apos;s home, floor and room rows under the company tenant" time="0.023">
+        </testcase>
+    </testsuite>
+</testsuites>

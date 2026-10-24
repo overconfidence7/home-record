@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.SyncEngineTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:14.380Z" hostname="runnervmtai0g" time="1.665">
+  <properties/>
+  <testcase name="pushedChangeAppearsOnTheOtherDevice" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.445"/>
+  <testcase name="jsonListsUnionOnPull" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.064"/>
+  <testcase name="unsentLocalEditNewerThanServerSurvivesAPull" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.206"/>
+  <testcase name="editsToDifferentFieldsOnTwoDevicesBothSurvive" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.228"/>
+  <testcase name="pullKeepsALocalEditNewerThanTheServerValue" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.032"/>
+  <testcase name="softDeletePropagates" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.225"/>
+  <testcase name="offlineChangesWaitThenSyncOnceWithoutDuplicates" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.216"/>
+  <testcase name="sameFieldEditedOnTwoDevicesLatestWriteWins" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.222"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

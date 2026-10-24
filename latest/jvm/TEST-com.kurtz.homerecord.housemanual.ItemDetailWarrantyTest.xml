@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:52.476Z" hostname="runnervmtai0g" time="1.221">
+  <properties/>
+  <testcase name="autoLookupLeavesFoundTermsAsABadgeWithoutASheet" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.293"/>
+  <testcase name="upkeepFormsSaveConsumableAndServiceNewestFirst" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.228"/>
+  <testcase name="offlineQueuesThenRunPendingLeavesTermsForReview" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.228"/>
+  <testcase name="serviceFormOffersContactsAndSavesTheChosenOne" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.109"/>
+  <testcase name="lookUpShowsTermsThenEditedConfirmStoresThemAsManual" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.131"/>
+  <testcase name="discardStoresNothingAndMissingModelExplainsWhy" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.186"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

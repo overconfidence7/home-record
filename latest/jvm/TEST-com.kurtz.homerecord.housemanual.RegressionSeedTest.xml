@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.RegressionSeedTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:56.585Z" hostname="runnervmtai0g" time="0.483">
+  <properties/>
+  <testcase name="regressionSeedBuildsThreeFloorsWithTwelveRooms" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.232"/>
+  <testcase name="seedingTwiceReplacesTheHomeAndResetEmptiesIt" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.242"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

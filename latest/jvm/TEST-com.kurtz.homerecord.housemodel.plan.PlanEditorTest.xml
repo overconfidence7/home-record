@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:38.557Z" hostname="runnervmtai0g" time="0.024">
+  <properties/>
+  <testcase name="dragCornerBuildsAnLShapeInOneUndoStep" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.001"/>
+  <testcase name="renameKindDeleteAreUndoable" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.001"/>
+  <testcase name="dragMoveSnapsAndCommitsOneUndoStep" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="addCornerOnEdgeInsertsSnappedPointAndMakesAnLShapePossible" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.007"/>
+  <testcase name="dragEdgeResizesAndRefusesTooSmall" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="secondRoomAddedAtTheSameSpotLandsBesideTheFirst" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.001"/>
+  <testcase name="addRoomIsTwelveByTwelveFeetCenteredOnViewportAndSnapped" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="dragMoveSnapsOntoNeighborWall" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="holdsFiftyUndoSteps" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.002"/>
+  <testcase name="addCornerNearAnExistingCornerIsIgnored" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="setSizeKeepsTopLeftAndIgnoresPolygons" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="placeReplacesRoomWithSameId" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="deleteCornerKeepsAtLeastThree" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <testcase name="dragCornerAcrossTheOutlineIsRejected" classname="com.kurtz.homerecord.housemodel.plan.PlanEditorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

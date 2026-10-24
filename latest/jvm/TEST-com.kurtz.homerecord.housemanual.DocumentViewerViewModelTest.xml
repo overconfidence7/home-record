@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:49.701Z" hostname="runnervmtai0g" time="0.331">
+  <properties/>
+  <testcase name="missingFileOrRecordShowsMissingState" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.189"/>
+  <testcase name="opensStoredDocumentAsPages" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,112 @@
+[
+ {
+  "stage": "install:house-manual",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:house-manual",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "coldstart:house-manual",
+  "status": "fail",
+  "details": "median 4126 ms over 1500 ms (AC-U11)"
+ },
+ {
+  "stage": "seed:house-manual",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:house-manual",
+  "status": "fail",
+  "details": "1 failing of 20"
+ },
+ {
+  "stage": "flow:H01-onboarding",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02-draw-plan",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02b-shape-doors-stairs",
+  "status": "fail",
+  "details": "see maestro/H02b-shape-doors-stairs.log"
+ },
+ {
+  "stage": "flow:H03-blueprint-room",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H04-add-item",
+  "status": "fail",
+  "details": "see maestro/H04-add-item.log"
+ },
+ {
+  "stage": "flow:H05-contacts",
+  "status": "fail",
+  "details": "see maestro/H05-contacts.log"
+ },
+ {
+  "stage": "flow:H06-documents",
+  "status": "fail",
+  "details": "see maestro/H06-documents.log"
+ },
+ {
+  "stage": "flow:H15-sign-in",
+  "status": "fail",
+  "details": "see maestro/H15-sign-in.log"
+ },
+ {
+  "stage": "variant:dark",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:font200",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:landscape",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "jank:house-manual",
+  "status": "fail",
+  "details": "100% janky frames of 4 (AC-U11)"
+ },
+ {
+  "stage": "monkey:house-manual",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "release:house-manual",
+  "status": "pass",
+  "details": "R8 build launches (1852 ms)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.housemanual",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

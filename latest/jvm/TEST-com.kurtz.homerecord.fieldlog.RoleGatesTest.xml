@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.RoleGatesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:40.014Z" hostname="runnervmtai0g" time="16.781">
+  <properties/>
+  <testcase name="todayEmptyStateForOwnerOffersInvite" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="13.009"/>
+  <testcase name="officeSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.256"/>
+  <testcase name="crewDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.35"/>
+  <testcase name="signOutAsksFirst" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="1.025"/>
+  <testcase name="todayEmptyStateForCrewHasNoInviteButton" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.271"/>
+  <testcase name="leadDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.168"/>
+  <testcase name="ownerSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.255"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

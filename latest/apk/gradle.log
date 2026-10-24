@@ -1,0 +1,524 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core:preBuild UP-TO-DATE
+> Task :house-model:preBuild UP-TO-DATE
+> Task :house-manual:preBuild UP-TO-DATE
+> Task :house-manual:preDebugBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :house-model:preDebugBuild UP-TO-DATE
+> Task :house-manual:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :house-manual:generateDebugBuildConfig UP-TO-DATE
+> Task :core-ui:generateDebugResources UP-TO-DATE
+> Task :core:generateDebugResources UP-TO-DATE
+> Task :house-model:processDebugNavigationResources UP-TO-DATE
+> Task :house-model:generateDebugResources UP-TO-DATE
+> Task :house-manual:generateDebugResources UP-TO-DATE
+> Task :house-manual:javaPreCompileDebug UP-TO-DATE
+> Task :house-manual:generateDebugAssets UP-TO-DATE
+> Task :core:packageDebugResources UP-TO-DATE
+> Task :house-model:packageDebugResources UP-TO-DATE
+> Task :core-ui:packageDebugResources UP-TO-DATE
+> Task :core:processDebugNavigationResources UP-TO-DATE
+> Task :core-ui:processDebugNavigationResources UP-TO-DATE
+> Task :house-model:parseDebugLocalResources UP-TO-DATE
+> Task :core-ui:parseDebugLocalResources UP-TO-DATE
+> Task :core:parseDebugLocalResources UP-TO-DATE
+> Task :house-model:generateDebugRFile UP-TO-DATE
+> Task :core-ui:generateDebugRFile UP-TO-DATE
+> Task :core-ui:javaPreCompileDebug UP-TO-DATE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :house-model:javaPreCompileDebug UP-TO-DATE
+> Task :house-model:generateDebugAssets UP-TO-DATE
+> Task :core:generateDebugRFile UP-TO-DATE
+> Task :core-ui:mergeDebugAssets UP-TO-DATE
+> Task :house-model:mergeDebugAssets UP-TO-DATE
+> Task :core-ui:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-model:writeDebugAarMetadata UP-TO-DATE
+> Task :core-ui:compileDebugLibraryResources UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata UP-TO-DATE
+> Task :house-model:extractDeepLinksDebug UP-TO-DATE
+> Task :core-ui:extractDeepLinksDebug UP-TO-DATE
+> Task :core-ui:processDebugManifest UP-TO-DATE
+> Task :house-model:processDebugManifest UP-TO-DATE
+> Task :house-model:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-model:compileDebugLibraryResources UP-TO-DATE
+> Task :house-model:mergeDebugJniLibFolders
+> Task :core-ui:mergeDebugJniLibFolders
+> Task :core-ui:mergeDebugNativeLibs NO-SOURCE
+> Task :house-model:mergeDebugNativeLibs NO-SOURCE
+> Task :core-ui:copyDebugJniLibsProjectOnly
+> Task :field-log:preBuild UP-TO-DATE
+> Task :field-log:preDebugBuild UP-TO-DATE
+> Task :field-log:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :field-log:generateDebugBuildConfig UP-TO-DATE
+> Task :field-log:generateDebugResources UP-TO-DATE
+> Task :field-log:packageDebugResources UP-TO-DATE
+> Task :house-model:copyDebugJniLibsProjectOnly
+> Task :core-ui:preReleaseBuild UP-TO-DATE
+> Task :core-ui:mergeReleaseJniLibFolders
+> Task :core-ui:mergeReleaseNativeLibs NO-SOURCE
+> Task :core-ui:copyReleaseJniLibsProjectOnly
+> Task :house-model:preReleaseBuild UP-TO-DATE
+> Task :house-model:mergeReleaseJniLibFolders
+> Task :house-model:mergeReleaseNativeLibs NO-SOURCE
+> Task :house-model:copyReleaseJniLibsProjectOnly
+> Task :core:kspDebugKotlin UP-TO-DATE
+> Task :core-ui:generateReleaseResources FROM-CACHE
+> Task :core:compileDebugKotlin UP-TO-DATE
+> Task :core:javaPreCompileDebug UP-TO-DATE
+> Task :core:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:packageReleaseResources
+> Task :core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:mergeDebugAssets UP-TO-DATE
+> Task :core-ui:processReleaseNavigationResources FROM-CACHE
+> Task :core:processDebugJavaRes UP-TO-DATE
+> Task :core:bundleLibRuntimeToDirDebug
+> Task :core-ui:compileDebugKotlin UP-TO-DATE
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :field-log:processDebugNavigationResources UP-TO-DATE
+> Task :core-ui:processDebugJavaRes UP-TO-DATE
+> Task :core-ui:bundleLibRuntimeToDirDebug
+> Task :house-model:compileDebugKotlin UP-TO-DATE
+> Task :house-model:compileDebugJavaWithJavac NO-SOURCE
+> Task :house-model:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :house-model:processDebugJavaRes UP-TO-DATE
+> Task :house-model:bundleLibRuntimeToDirDebug
+> Task :house-manual:generateDebugGlobalSynthetics
+> Task :house-manual:packageDebugResources UP-TO-DATE
+> Task :house-manual:processDebugNavigationResources UP-TO-DATE
+> Task :house-manual:parseDebugLocalResources UP-TO-DATE
+> Task :house-manual:generateDebugRFile UP-TO-DATE
+> Task :house-manual:compileDebugKotlin UP-TO-DATE
+> Task :house-manual:compileDebugJavaWithJavac UP-TO-DATE
+> Task :house-manual:mergeDebugAssets UP-TO-DATE
+> Task :house-manual:compressDebugAssets
+> Task :house-manual:processDebugJavaRes UP-TO-DATE
+> Task :house-manual:mergeDebugJavaResource
+> Task :core:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:compileDebugLibraryResources UP-TO-DATE
+> Task :core:writeDebugAarMetadata UP-TO-DATE
+> Task :core:extractDeepLinksDebug UP-TO-DATE
+> Task :core:processDebugManifest UP-TO-DATE
+> Task :core:mergeDebugJniLibFolders
+> Task :core:mergeDebugNativeLibs NO-SOURCE
+> Task :core:copyDebugJniLibsProjectOnly
+> Task :house-manual:desugarDebugFileDependencies
+> Task :house-manual:checkDebugDuplicateClasses
+> Task :field-log:parseDebugLocalResources UP-TO-DATE
+> Task :field-log:generateDebugRFile UP-TO-DATE
+> Task :house-manual:checkDebugAarMetadata UP-TO-DATE
+> Task :field-log:compileDebugKotlin UP-TO-DATE
+> Task :field-log:javaPreCompileDebug UP-TO-DATE
+> Task :field-log:compileDebugJavaWithJavac UP-TO-DATE
+> Task :field-log:generateDebugAssets UP-TO-DATE
+> Task :field-log:mergeDebugAssets UP-TO-DATE
+> Task :field-log:compressDebugAssets FROM-CACHE
+> Task :field-log:generateDebugGlobalSynthetics FROM-CACHE
+> Task :field-log:processDebugJavaRes UP-TO-DATE
+> Task :field-log:mergeDebugJavaResource
+> Task :field-log:desugarDebugFileDependencies FROM-CACHE
+> Task :core:preReleaseBuild UP-TO-DATE
+> Task :field-log:checkDebugAarMetadata UP-TO-DATE
+> Task :field-log:mapDebugSourceSetPaths UP-TO-DATE
+> Task :field-log:compileDebugNavigationResources UP-TO-DATE
+> Task :field-log:mergeDebugResources UP-TO-DATE
+> Task :field-log:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :field-log:extractDeepLinksDebug UP-TO-DATE
+> Task :field-log:processDebugMainManifest UP-TO-DATE
+> Task :core:mergeReleaseJniLibFolders
+> Task :core:mergeReleaseNativeLibs NO-SOURCE
+> Task :field-log:processDebugManifest UP-TO-DATE
+> Task :field-log:processDebugManifestForPackage UP-TO-DATE
+> Task :core:copyReleaseJniLibsProjectOnly
+> Task :core:generateReleaseResources FROM-CACHE
+> Task :core:packageReleaseResources
+> Task :core:processReleaseNavigationResources FROM-CACHE
+> Task :core:parseReleaseLocalResources FROM-CACHE
+> Task :core:generateReleaseRFile FROM-CACHE
+> Task :core:kspReleaseKotlin FROM-CACHE
+> Task :field-log:processDebugResources UP-TO-DATE
+> Task :field-log:checkDebugDuplicateClasses
+> Task :core:javaPreCompileRelease FROM-CACHE
+> Task :core-ui:parseReleaseLocalResources FROM-CACHE
+> Task :core-ui:generateReleaseRFile FROM-CACHE
+> Task :core-ui:javaPreCompileRelease FROM-CACHE
+> Task :house-model:generateReleaseResources FROM-CACHE
+> Task :house-model:packageReleaseResources
+> Task :house-model:processReleaseNavigationResources FROM-CACHE
+> Task :house-model:parseReleaseLocalResources FROM-CACHE
+> Task :house-model:generateReleaseRFile FROM-CACHE
+> Task :house-model:javaPreCompileRelease FROM-CACHE
+> Task :core:mapReleaseSourceSetPaths
+> Task :house-manual:mergeExtDexDebug
+> Task :core:compileReleaseKotlin
+> Task :field-log:dexBuilderDebug
+> Task :core:compileReleaseLibraryResources
+> Task :core-ui:mapReleaseSourceSetPaths
+
+> Task :core:compileReleaseKotlin
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:16:9 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:13 'class MasterKey : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:23 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:53 'class MasterKey : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:63 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:20:13 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:20:40 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:21:13 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:21:40 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+
+> Task :core:compileReleaseJavaWithJavac NO-SOURCE
+> Task :core-ui:compileReleaseLibraryResources
+> Task :core:bundleLibCompileToJarRelease
+> Task :core:bundleLibRuntimeToDirRelease
+> Task :core:writeReleaseAarMetadata
+> Task :core-ui:writeReleaseAarMetadata
+> Task :house-model:writeReleaseAarMetadata
+> Task :core:extractDeepLinksRelease FROM-CACHE
+> Task :core:processReleaseManifest FROM-CACHE
+> Task :core-ui:extractDeepLinksRelease FROM-CACHE
+> Task :core-ui:processReleaseManifest FROM-CACHE
+> Task :house-model:extractDeepLinksRelease FROM-CACHE
+> Task :house-model:processReleaseManifest FROM-CACHE
+> Task :house-model:mapReleaseSourceSetPaths
+> Task :house-model:compileReleaseLibraryResources
+> Task :core:prepareReleaseArtProfile
+> Task :core-ui:prepareReleaseArtProfile
+> Task :house-model:prepareReleaseArtProfile
+> Task :core:bundleLibRuntimeToJarRelease
+> Task :core:generateReleaseAssets UP-TO-DATE
+> Task :core:mergeReleaseAssets
+> Task :core-ui:generateReleaseAssets UP-TO-DATE
+> Task :core-ui:mergeReleaseAssets
+> Task :house-model:generateReleaseAssets UP-TO-DATE
+> Task :house-model:mergeReleaseAssets
+> Task :core:extractProguardFiles UP-TO-DATE
+> Task :core:generateReleaseLintVitalModel
+
+> Task :core-ui:compileReleaseKotlin
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/RecordListItem.kt:32:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/Sheets.kt:49:65 'fun rememberModalBottomSheetState(skipPartiallyExpanded: Boolean = ..., confirmValueChange: (SheetValue) -> Boolean = ...): SheetState' is deprecated. Use rememberBottomSheetState with Hidden initial value.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/Sheets.kt:95:17 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/WarrantyStatusLine.kt:35:59 'val Icons.Rounded.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.HelpOutline.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/shell/HomeRecordApp.kt:68:22 'fun currentWindowAdaptiveInfo(supportLargeAndXLargeWidth: Boolean = ...): WindowAdaptiveInfo' is deprecated. Please use V2 version of this function to support L and XL width size classes.
+
+> Task :core-ui:compileReleaseJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibCompileToJarRelease
+
+> Task :house-model:compileReleaseKotlin
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:255:21 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:261:21 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:304:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/RoomScreen.kt:111:40 'val Icons.Rounded.StickyNote2: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.StickyNote2.
+
+> Task :house-model:compileReleaseJavaWithJavac NO-SOURCE
+> Task :house-model:bundleLibRuntimeToDirRelease
+> Task :core-ui:bundleLibRuntimeToDirRelease
+> Task :house-model:bundleLibCompileToJarRelease
+> Task :house-model:bundleLibRuntimeToJarRelease
+> Task :core-ui:bundleLibRuntimeToJarRelease
+> Task :core:prepareLintJarForPublish UP-TO-DATE
+> Task :core:processReleaseJavaRes
+> Task :core:createFullJarRelease
+> Task :core:generateReleaseLintModel
+> Task :core-ui:extractProguardFiles UP-TO-DATE
+> Task :core-ui:generateReleaseLintVitalModel
+> Task :field-log:mergeExtDexDebug
+> Task :core:lintVitalAnalyzeRelease
+> Task :core:checkReleaseAarMetadata
+> Task :house-manual:mergeLibDexDebug
+> Task :house-manual:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-manual:compileDebugNavigationResources UP-TO-DATE
+> Task :house-manual:mergeDebugResources UP-TO-DATE
+> Task :house-manual:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :house-manual:extractDeepLinksDebug UP-TO-DATE
+> Task :house-manual:processDebugMainManifest UP-TO-DATE
+> Task :house-manual:processDebugManifest UP-TO-DATE
+> Task :house-manual:processDebugManifestForPackage UP-TO-DATE
+> Task :house-manual:processDebugResources UP-TO-DATE
+> Task :field-log:mergeLibDexDebug FROM-CACHE
+> Task :field-log:mergeProjectDexDebug
+> Task :field-log:mergeDebugJniLibFolders
+> Task :house-manual:dexBuilderDebug
+> Task :field-log:mergeDebugNativeLibs
+> Task :house-manual:mergeDebugJniLibFolders
+> Task :house-manual:mergeProjectDexDebug
+> Task :house-manual:mergeDebugNativeLibs
+
+> Task :field-log:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libmlkit_google_ocr_pipeline.so. Run with --info option to learn more.
+
+> Task :house-manual:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libmlkit_google_ocr_pipeline.so. Run with --info option to learn more.
+
+> Task :house-manual:validateSigningDebug
+> Task :field-log:validateSigningDebug
+> Task :field-log:writeDebugAppMetadata
+> Task :house-manual:writeDebugAppMetadata
+> Task :field-log:writeDebugSigningConfigVersions
+> Task :house-manual:writeDebugSigningConfigVersions
+> Task :house-manual:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :house-manual:preDebugAndroidTestBuild SKIPPED
+> Task :field-log:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :field-log:preDebugAndroidTestBuild SKIPPED
+> Task :field-log:mergeDebugAndroidTestManifest
+> Task :house-manual:mergeDebugAndroidTestManifest
+> Task :field-log:processDebugAndroidTestManifest
+> Task :house-manual:processDebugAndroidTestManifest
+> Task :house-manual:generateDebugAndroidTestBuildConfig
+> Task :field-log:generateDebugAndroidTestBuildConfig
+> Task :house-manual:generateDebugAndroidTestResources FROM-CACHE
+> Task :field-log:generateDebugAndroidTestResources FROM-CACHE
+> Task :field-log:packageDebugAndroidTestResources
+> Task :house-manual:packageDebugAndroidTestResources
+> Task :field-log:processDebugAndroidTestNavigationResources FROM-CACHE
+> Task :house-manual:processDebugAndroidTestNavigationResources FROM-CACHE
+> Task :field-log:parseDebugAndroidTestLocalResources FROM-CACHE
+> Task :house-manual:parseDebugAndroidTestLocalResources FROM-CACHE
+> Task :field-log:generateDebugAndroidTestRFile
+> Task :house-manual:generateDebugAndroidTestRFile
+> Task :house-manual:javaPreCompileDebugAndroidTest FROM-CACHE
+
+> Task :field-log:compileDebugAndroidTestKotlin
+w: file:///home/runner/work/home-record/home-record/field-log/src/androidTest/kotlin/com/kurtz/homerecord/fieldlog/qa/ScreenCrawlerTest.kt:23:29 'fun createEmptyComposeRule(effectContext: CoroutineContext = ...): ComposeTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createEmptyComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :house-manual:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :house-manual:mergeDebugAndroidTestAssets
+> Task :house-manual:compressDebugAndroidTestAssets
+> Task :house-manual:generateDebugAndroidTestGlobalSynthetics FROM-CACHE
+> Task :house-manual:checkDebugAndroidTestDuplicateClasses
+> Task :house-manual:desugarDebugAndroidTestFileDependencies FROM-CACHE
+
+> Task :house-manual:compileDebugAndroidTestKotlin
+w: file:///home/runner/work/home-record/home-record/house-manual/src/androidTest/kotlin/com/kurtz/homerecord/housemanual/acceptance/OnboardingAndFloorsAcceptanceTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/androidTest/kotlin/com/kurtz/homerecord/housemanual/acceptance/PlanAndBlueprintAcceptanceTest.kt:41:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/androidTest/kotlin/com/kurtz/homerecord/housemanual/qa/ScreenCrawlerTest.kt:23:29 'fun createEmptyComposeRule(effectContext: CoroutineContext = ...): ComposeTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createEmptyComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/androidTest/kotlin/com/kurtz/homerecord/housemanual/rules/ListAndFormRulesTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :field-log:javaPreCompileDebugAndroidTest FROM-CACHE
+> Task :field-log:compileDebugAndroidTestJavaWithJavac
+> Task :field-log:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :field-log:mergeDebugAndroidTestAssets
+> Task :field-log:compressDebugAndroidTestAssets FROM-CACHE
+> Task :field-log:generateDebugAndroidTestGlobalSynthetics FROM-CACHE
+> Task :field-log:processDebugAndroidTestJavaRes
+> Task :field-log:mergeDebugAndroidTestJavaResource
+> Task :field-log:checkDebugAndroidTestDuplicateClasses
+> Task :field-log:desugarDebugAndroidTestFileDependencies FROM-CACHE
+> Task :field-log:mergeExtDexDebugAndroidTest
+> Task :field-log:mergeLibDexDebugAndroidTest
+> Task :field-log:checkDebugAndroidTestAarMetadata
+> Task :field-log:mapDebugAndroidTestSourceSetPaths
+> Task :field-log:compileDebugAndroidTestNavigationResources FROM-CACHE
+> Task :field-log:mergeDebugAndroidTestResources
+> Task :field-log:mergeDebugAndroidTestJniLibFolders
+> Task :field-log:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :field-log:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :field-log:validateSigningDebugAndroidTest
+> Task :field-log:writeDebugAndroidTestSigningConfigVersions
+> Task :core:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:extractReleaseAnnotations FROM-CACHE
+> Task :core:mergeReleaseGeneratedProguardFiles
+> Task :core:mergeReleaseConsumerProguardFiles
+> Task :core:mergeReleaseJavaResource
+> Task :core:syncReleaseLibJars
+> Task :field-log:processDebugAndroidTestResources
+> Task :house-manual:mergeExtDexDebugAndroidTest
+> Task :core:bundleReleaseLocalLintAar
+> Task :core:writeReleaseLintModelMetadata
+> Task :field-log:packageDebug
+> Task :field-log:createDebugApkListingFileRedirect
+> Task :field-log:assembleDebug
+> Task :field-log:dexBuilderDebugAndroidTest
+> Task :field-log:mergeProjectDexDebugAndroidTest
+> Task :field-log:packageDebugAndroidTest
+> Task :field-log:createDebugAndroidTestApkListingFileRedirect
+> Task :field-log:assembleDebugAndroidTest
+> Task :core-ui:prepareLintJarForPublish UP-TO-DATE
+> Task :house-manual:compileDebugAndroidTestJavaWithJavac
+> Task :core-ui:processReleaseJavaRes
+> Task :core-ui:createFullJarRelease
+> Task :house-model:processReleaseJavaRes
+> Task :house-model:createFullJarRelease
+> Task :house-model:extractProguardFiles UP-TO-DATE
+> Task :house-model:prepareLintJarForPublish UP-TO-DATE
+> Task :core-ui:generateReleaseLintModel
+> Task :core-ui:checkReleaseAarMetadata
+> Task :house-model:checkReleaseAarMetadata
+> Task :house-manual:packageDebug
+> Task :core-ui:extractDeepLinksForAarRelease FROM-CACHE
+> Task :house-manual:createDebugApkListingFileRedirect
+> Task :house-manual:assembleDebug
+> Task :house-manual:processDebugAndroidTestJavaRes
+> Task :core-ui:extractReleaseAnnotations
+> Task :core-ui:mergeReleaseGeneratedProguardFiles
+> Task :core-ui:mergeReleaseConsumerProguardFiles
+> Task :house-manual:mergeLibDexDebugAndroidTest FROM-CACHE
+> Task :house-manual:checkDebugAndroidTestAarMetadata
+> Task :house-manual:mapDebugAndroidTestSourceSetPaths
+> Task :house-manual:compileDebugAndroidTestNavigationResources FROM-CACHE
+> Task :house-model:generateReleaseLintModel
+> Task :house-model:extractDeepLinksForAarRelease FROM-CACHE
+> Task :house-model:extractReleaseAnnotations FROM-CACHE
+> Task :house-model:mergeReleaseGeneratedProguardFiles
+> Task :house-model:mergeReleaseConsumerProguardFiles
+> Task :house-manual:mergeDebugAndroidTestJavaResource
+> Task :core-ui:mergeReleaseJavaResource
+> Task :house-model:mergeReleaseJavaResource
+> Task :core-ui:syncReleaseLibJars
+> Task :core-ui:bundleReleaseLocalLintAar
+> Task :core-ui:writeReleaseLintModelMetadata
+> Task :house-manual:mergeDebugAndroidTestJniLibFolders
+> Task :house-manual:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :house-manual:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :house-manual:validateSigningDebugAndroidTest
+> Task :house-manual:writeDebugAndroidTestSigningConfigVersions
+> Task :house-manual:preReleaseBuild UP-TO-DATE
+> Task :house-manual:mergeReleaseJniLibFolders
+> Task :house-model:syncReleaseLibJars
+> Task :house-model:bundleReleaseLocalLintAar
+> Task :house-manual:mergeDebugAndroidTestResources
+> Task :house-manual:mergeReleaseNativeLibs
+> Task :house-manual:processDebugAndroidTestResources
+> Task :house-manual:dexBuilderDebugAndroidTest
+
+> Task :house-manual:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libmlkit_google_ocr_pipeline.so. Run with --info option to learn more.
+
+> Task :house-manual:mergeProjectDexDebugAndroidTest
+> Task :house-manual:extractReleaseNativeSymbolTables
+> Task :house-manual:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :house-manual:checkReleaseDuplicateClasses
+> Task :house-manual:generateReleaseBuildConfig
+> Task :house-manual:generateReleaseResources FROM-CACHE
+> Task :house-manual:packageReleaseResources
+> Task :house-manual:packageDebugAndroidTest
+> Task :house-model:writeReleaseLintModelMetadata
+> Task :house-manual:createDebugAndroidTestApkListingFileRedirect
+> Task :house-manual:assembleDebugAndroidTest
+> Task :house-manual:processReleaseNavigationResources FROM-CACHE
+> Task :house-manual:parseReleaseLocalResources FROM-CACHE
+> Task :house-manual:generateReleaseRFile FROM-CACHE
+> Task :house-model:generateReleaseLintVitalModel
+> Task :field-log:preReleaseBuild UP-TO-DATE
+> Task :field-log:mergeReleaseJniLibFolders
+> Task :field-log:mergeReleaseNativeLibs
+> Task :house-manual:javaPreCompileRelease FROM-CACHE
+> Task :house-manual:checkReleaseAarMetadata
+> Task :house-manual:mapReleaseSourceSetPaths
+> Task :house-manual:compileReleaseNavigationResources FROM-CACHE
+> Task :house-manual:mergeReleaseResources
+> Task :house-manual:createReleaseCompatibleScreenManifests
+> Task :house-manual:extractDeepLinksRelease FROM-CACHE
+> Task :house-manual:processReleaseMainManifest
+> Task :house-manual:processReleaseManifest
+> Task :house-manual:processReleaseManifestForPackage
+> Task :house-manual:processReleaseResources
+> Task :house-manual:desugarReleaseFileDependencies
+> Task :house-manual:mergeReleaseStartupProfile
+> Task :core-ui:lintVitalAnalyzeRelease
+
+> Task :house-manual:compileReleaseKotlin
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/AppTabs.kt:136:25 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/AppTabs.kt:142:25 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/documents/DocumentViewerScreen.kt:80:21 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/onboarding/OnboardingScreen.kt:127:9 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+
+> Task :house-model:lintVitalAnalyzeRelease
+> Task :field-log:checkReleaseDuplicateClasses
+> Task :field-log:generateReleaseBuildConfig
+> Task :field-log:generateReleaseResources FROM-CACHE
+> Task :field-log:packageReleaseResources
+> Task :field-log:processReleaseNavigationResources FROM-CACHE
+> Task :field-log:parseReleaseLocalResources FROM-CACHE
+> Task :field-log:generateReleaseRFile FROM-CACHE
+> Task :field-log:javaPreCompileRelease FROM-CACHE
+
+> Task :field-log:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libmlkit_google_ocr_pipeline.so. Run with --info option to learn more.
+
+> Task :field-log:extractReleaseNativeSymbolTables FROM-CACHE
+> Task :field-log:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :field-log:mapReleaseSourceSetPaths
+> Task :field-log:compileReleaseNavigationResources FROM-CACHE
+> Task :field-log:checkReleaseAarMetadata
+> Task :field-log:createReleaseCompatibleScreenManifests
+> Task :field-log:extractDeepLinksRelease FROM-CACHE
+> Task :field-log:processReleaseMainManifest
+> Task :field-log:processReleaseManifest
+> Task :field-log:processReleaseManifestForPackage
+> Task :field-log:desugarReleaseFileDependencies FROM-CACHE
+> Task :field-log:mergeReleaseStartupProfile
+> Task :house-manual:mergeExtDexRelease
+> Task :field-log:mergeReleaseResources
+
+> Task :field-log:compileReleaseKotlin
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/more/MoreScreen.kt:67:44 'val Icons.Rounded.Logout: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.Logout.
+
+> Task :field-log:compileReleaseJavaWithJavac
+> Task :house-manual:compileReleaseJavaWithJavac
+> Task :field-log:processReleaseResources
+> Task :house-manual:dexBuilderRelease
+> Task :house-manual:mergeReleaseArtProfile
+> Task :field-log:dexBuilderRelease
+> Task :field-log:mergeReleaseArtProfile
+> Task :house-manual:generateReleaseAssets UP-TO-DATE
+> Task :house-manual:mergeReleaseGlobalSynthetics
+> Task :field-log:mergeReleaseGlobalSynthetics FROM-CACHE
+> Task :field-log:generateReleaseAssets UP-TO-DATE
+> Task :field-log:mergeReleaseAssets
+> Task :house-manual:mergeReleaseAssets
+> Task :house-manual:compressReleaseAssets
+> Task :field-log:compressReleaseAssets
+> Task :house-manual:extractReleaseVersionControlInfo
+> Task :field-log:extractReleaseVersionControlInfo
+> Task :house-manual:extractProguardFiles UP-TO-DATE
+> Task :field-log:extractProguardFiles UP-TO-DATE
+> Task :house-manual:generateReleaseLintVitalReportModel
+> Task :field-log:generateReleaseLintVitalReportModel
+> Task :field-log:mergeExtDexRelease
+> Task :field-log:lintVitalAnalyzeRelease
+> Task :house-manual:processReleaseJavaRes
+> Task :house-manual:lintVitalAnalyzeRelease
+> Task :house-manual:mergeReleaseJavaResource
+> Task :house-manual:lintVitalReportRelease
+> Task :house-manual:lintVitalRelease
+> Task :house-manual:collectReleaseDependencies
+> Task :house-manual:sdkReleaseDependencyData
+> Task :house-manual:writeReleaseAppMetadata
+> Task :field-log:lintVitalReportRelease
+> Task :field-log:lintVitalRelease
+> Task :house-manual:optimizeReleaseResources
+> Task :house-manual:writeReleaseSigningConfigVersions
+> Task :field-log:processReleaseJavaRes
+> Task :field-log:optimizeReleaseResources
+> Task :field-log:collectReleaseDependencies
+> Task :field-log:sdkReleaseDependencyData
+> Task :field-log:writeReleaseAppMetadata
+> Task :field-log:writeReleaseSigningConfigVersions
+> Task :field-log:mergeReleaseJavaResource
+> Task :house-manual:mergeDexRelease
+> Task :field-log:mergeDexRelease
+> Task :house-manual:compileReleaseArtProfile
+> Task :field-log:compileReleaseArtProfile
+> Task :house-manual:packageRelease
+> Task :house-manual:createReleaseApkListingFileRedirect
+> Task :house-manual:assembleRelease
+> Task :field-log:packageRelease
+> Task :field-log:createReleaseApkListingFileRedirect
+> Task :field-log:assembleRelease
+
+[Incubating] Problems report is available at: file:///home/runner/work/home-record/home-record/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 50s
+401 actionable tasks: 239 executed, 64 from cache, 98 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html

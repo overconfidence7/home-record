@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.4.1">
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/WelcomeViewModel.kt"
+            line="18"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/WelcomeViewModel.kt"
+            line="18"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="ExportedReceiver"
+        severity="Warning"
+        message="Exported receiver does not require permission"
+        category="Security"
+        priority="5"
+        summary="Receiver does not require permission"
+        explanation="Exported receivers (receivers which either set `exported=true` or contain an intent-filter and do not specify `exported=false`) should define a permission that an entity must have in order to launch the receiver or bind to it. Without this, any application can use this receiver."
+        url="https://goo.gle/ExportedReceiver"
+        urls="https://goo.gle/ExportedReceiver"
+        errorLine1="        &lt;receiver android:name=&quot;com.kurtz.homerecord.fieldlog.qa.SeedReceiver&quot; android:exported=&quot;true&quot;>"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/debug/AndroidManifest.xml"
+            line="10"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="DataExtractionRules"
+        severity="Warning"
+        message="The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+        category="Security"
+        priority="3"
+        summary="Missing data extraction rules"
+        explanation="Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.&#xA;&#xA;In Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you&apos;ll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+        url="https://developer.android.com/about/versions/12/backup-restore#xml-changes"
+        urls="https://developer.android.com/about/versions/12/backup-restore#xml-changes,https://goo.gle/DataExtractionRules"
+        errorLine1="        android:allowBackup=&quot;false&quot;"
+        errorLine2="                             ~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/AndroidManifest.xml"
+            line="6"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.job_ov_status` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;job_ov_status&quot;>Status&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="141"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    val uri = Uri.parse(&quot;geo:$lat,$lng?q=$lat,$lng(${Uri.encode(d.name.ifBlank { d.address })})&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobEditScreen.kt"
+            line="56"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    val uri = Uri.parse(&quot;geo:$lat,$lng?q=$lat,$lng(${Uri.encode(state.name)})&quot;)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobOverviewScreen.kt"
+            line="77"
+            column="31"/>
+    </issue>
+
+</issues>

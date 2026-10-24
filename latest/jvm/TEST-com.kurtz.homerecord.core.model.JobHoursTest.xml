@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.JobHoursTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-24T09:39:14.120Z" hostname="runnervmtai0g" time="0.001">
+  <properties/>
+  <testcase name="inToOutCounts" classname="com.kurtz.homerecord.core.model.JobHoursTest" time="0.001"/>
+  <testcase name="switchSplitsHoursBetweenJobs" classname="com.kurtz.homerecord.core.model.JobHoursTest" time="0.0"/>
+  <testcase name="clipsToTheWindow" classname="com.kurtz.homerecord.core.model.JobHoursTest" time="0.0"/>
+  <testcase name="breakIsNotCountedAndResumeIs" classname="com.kurtz.homerecord.core.model.JobHoursTest" time="0.0"/>
+  <testcase name="openSpanRunsToNowAndPeopleAdd" classname="com.kurtz.homerecord.core.model.JobHoursTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

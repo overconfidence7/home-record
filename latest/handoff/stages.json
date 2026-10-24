@@ -1,0 +1,112 @@
+[
+ {
+  "stage": "install:field-log",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:field-log",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "install:house-manual",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:house-manual",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "coldstart:field-log",
+  "status": "fail",
+  "details": "median 4137 ms over 1500 ms (AC-U11)"
+ },
+ {
+  "stage": "coldstart:house-manual",
+  "status": "fail",
+  "details": "median 1696 ms over 1500 ms (AC-U11)"
+ },
+ {
+  "stage": "seed:field-log",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "seed:house-manual",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:field-log",
+  "status": "pass",
+  "details": "2 tests"
+ },
+ {
+  "stage": "instrumented:house-manual",
+  "status": "fail",
+  "details": "1 failing of 20"
+ },
+ {
+  "stage": "flows",
+  "status": "skip",
+  "details": "no flows in qa/flows/handoff yet (PLAN Q004)"
+ },
+ {
+  "stage": "variants",
+  "status": "skip",
+  "details": "no _tour.yaml for handoff"
+ },
+ {
+  "stage": "jank:field-log",
+  "status": "fail",
+  "details": "100% janky frames of 2 (AC-U11)"
+ },
+ {
+  "stage": "jank:house-manual",
+  "status": "fail",
+  "details": "100% janky frames of 4 (AC-U11)"
+ },
+ {
+  "stage": "monkey:field-log",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "monkey:house-manual",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "release:field-log",
+  "status": "pass",
+  "details": "R8 build launches (2286 ms)"
+ },
+ {
+  "stage": "release:house-manual",
+  "status": "pass",
+  "details": "R8 build launches (2154 ms)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.fieldlog",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.housemanual",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]
