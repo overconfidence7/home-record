@@ -1,7 +1,10 @@
 # Helper, not a walkthrough step: fill the onboarding form (name, style, foundation) and Skip, so
-# a flow that is not about onboarding reaches the five tabs. Skip needs a name and a style.
+# a flow that is not about onboarding reaches the five tabs. Starts from a cleared app so a previous
+# flow's home does not skip the form. Skip needs a name and a style.
 appId: com.kurtz.homerecord.housemanual
 ---
+- launchApp:
+    clearState: true
 - extendedWaitUntil:
     visible: "Set up your home"
     timeout: 20000
