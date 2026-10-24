@@ -109,6 +109,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantyStatusLine(detail.status, Modifier.testTag("hm_item_detail_status"))
                 DetailsCard(detail, onEvent)
                 WarrantyCard(detail, state, onEvent)
+                RecallsCard(state.recalls, onEvent)
                 ConsumablesCard(state.consumables, onEvent)
                 ServiceCard(state.service, state.contacts, onEvent)
                 DocumentsCard(state, onEvent)
@@ -366,3 +367,56 @@ private fun months(n: Int) = stringResource(R.string.item_detail_warranty_months
 
 private fun displayDate(iso: String): String =
     runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(iso)
+
+/** "Check recalls" against the CPSC feed (AC-B12). A recall that doesn't name the model is shown lower and never read as "safe". */
+@Composable
+private fun RecallsCard(recalls: RecallUi, onEvent: (ItemDetailEvent) -> Unit) {
+    Section(stringResource(R.string.item_detail_recalls)) {
+        val busy = recalls == RecallUi.Busy
+        OutlinedButton(
+            onClick = { onEvent(ItemDetailEvent.CheckRecalls) }, enabled = !busy,
+            modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_recalls"),
+        ) {
+            if (busy) {
+                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.item_detail_recalls_checking))
+            } else {
+                Text(stringResource(R.string.item_detail_recalls_check))
+            }
+        }
+        val note = when (recalls) {
+            RecallUi.NeedsMake -> R.string.item_detail_recalls_needs_make
+            RecallUi.Offline -> R.string.item_detail_recalls_offline
+            RecallUi.Failed -> R.string.item_detail_recalls_failed
+            is RecallUi.Done -> if (recalls.recalls.isEmpty()) R.string.item_detail_recalls_none else null
+            else -> null
+        }
+        note?.let {
+            val isError = recalls != RecallUi.Done(emptyList())
+            Text(
+                stringResource(it), style = MaterialTheme.typography.bodyMedium,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("hm_item_detail_recalls_note"),
+            )
+        }
+        if (recalls is RecallUi.Done) recalls.recalls.forEach { r ->
+            Column(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("hm_item_detail_recall_row"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(r.title, style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(if (r.modelMatch) R.string.item_detail_recall_matches else R.string.item_detail_recall_same_maker),
+                    style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                r.hazard?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                r.remedy?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                r.url?.let {
+                    AssistChip(
+                        onClick = { onEvent(ItemDetailEvent.OpenLink(it)) },
+                        label = { Text(stringResource(R.string.item_detail_recall_open)) },
+                        modifier = Modifier.testTag("hm_item_detail_recall_link"),
+                    )
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.core.lookup.RecallInfo
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.ContactEntity
@@ -29,11 +30,22 @@ data class ItemDetailUiState(
     val showAttach: Boolean = false,
     /** Set when a picked or scanned file was not a PDF or photo. */
     val documentNotice: Boolean = false,
+    val recalls: RecallUi = RecallUi.Idle,
     val consumableForm: ConsumableDraft? = null,
     val serviceForm: ServiceDraft? = null,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */
     val showFormErrors: Boolean = false,
 )
+
+/** The "Check recalls" result (AC-B12). */
+sealed interface RecallUi {
+    data object Idle : RecallUi
+    data object Busy : RecallUi
+    data object NeedsMake : RecallUi
+    data object Offline : RecallUi
+    data object Failed : RecallUi
+    data class Done(val recalls: List<RecallInfo>) : RecallUi
+}
 
 enum class LookupNote { NeedsMakeModel, Failed, Queued }
 
@@ -46,6 +58,7 @@ sealed interface ItemDetailEvent {
     /** "Look up warranty" ([again] false) or "Look up again" ([again] true). */
     data class LookUp(val again: Boolean) : ItemDetailEvent
     data object OpenReview : ItemDetailEvent
+    data object CheckRecalls : ItemDetailEvent
     data class ConfirmTerms(val partsMonths: Int?, val laborMonths: Int?) : ItemDetailEvent
     data object DiscardTerms : ItemDetailEvent
     data class SetRegistered(val registered: Boolean) : ItemDetailEvent

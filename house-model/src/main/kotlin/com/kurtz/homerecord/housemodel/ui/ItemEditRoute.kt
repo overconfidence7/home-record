@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.ocr.TextRecognizer
+import com.kurtz.homerecord.core.lookup.DataPlateVisionApi
 import com.kurtz.homerecord.housemodel.items.PhotoKind
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +28,7 @@ fun ItemEditRoute(
     homes: HomeRepository,
     media: MediaFiles,
     recognizer: TextRecognizer,
+    vision: DataPlateVisionApi?,
     homeId: String,
     itemId: String?,
     roomId: String?,
@@ -34,7 +36,7 @@ fun ItemEditRoute(
     afterCreate: (String) -> Unit = {},
 ) {
     val vm = viewModel<ItemEditViewModel>(
-        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, roomId, afterCreate) } },
+        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, vision, roomId, afterCreate) } },
     )
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }

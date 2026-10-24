@@ -99,6 +99,9 @@ class AppContainer(app: Application) {
         }
     }
 
+    /** Data plate vision fallback (AC-B11) and recalls (AC-B12). */
+    val lookupApi = com.kurtz.homerecord.core.lookup.RetrofitLookupApi.create(BuildConfig.API_BASE_URL, http, com.kurtz.homerecord.core.lookup.PlateImageEncoder::encode)
+
     val warrantyLookup = WarrantyLookupRepository(db, RetrofitWarrantyLookupApi.create(BuildConfig.API_BASE_URL, http)) { entity, id ->
         val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
         if (homeId != null) {

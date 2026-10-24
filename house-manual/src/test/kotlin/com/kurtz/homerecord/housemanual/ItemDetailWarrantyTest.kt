@@ -12,6 +12,7 @@ import com.kurtz.homerecord.core.warranty.WarrantyLookupApi
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.housemanual.items.ItemDetailEvent
 import com.kurtz.homerecord.housemanual.items.ItemDetailViewModel
+import com.kurtz.homerecord.housemanual.items.RecallUi
 import com.kurtz.homerecord.housemanual.items.LookupNote
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemRepository
@@ -80,7 +81,12 @@ class ItemDetailWarrantyTest {
     private suspend fun heater(model: String = "XG50T06"): String =
         items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Water heater", make = "Rheem", model = model, inServiceOn = "2024-01-15")).orEmpty()
 
-    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy").also {
+    private var recallResult: ApiResult<List<com.kurtz.homerecord.core.lookup.RecallInfo>> = ApiResult.Ok(emptyList())
+    private val recallApi = object : com.kurtz.homerecord.core.lookup.RecallApi {
+        override suspend fun check(make: String, model: String?) = recallResult
+    }
+
+    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", recallApi = recallApi).also {
         vms += it
         it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
     }
@@ -187,5 +193,22 @@ class ItemDetailWarrantyTest {
         assertThat(vm.await { it.showAttach && it.attachable.any { d -> d.id == homeDoc } }.documents).hasSize(1)
         vm.onEvent(ItemDetailEvent.AttachDocument(homeDoc))
         assertThat(vm.await { !it.showAttach && it.documents.size == 2 }.attachable).isEmpty()
+    }
+
+    @AcceptanceCriterion("AC-B12")
+    @Test fun checkRecallsShowsMatchesNoneOfflineAndNeedsMake() = runTest {
+        val vm = vm(heater())
+        recallResult = ApiResult.Ok(listOf(com.kurtz.homerecord.core.lookup.RecallInfo("24-100", "Rheem water heaters", "2024-03-01", "Fire", null, null, true)))
+        vm.onEvent(ItemDetailEvent.CheckRecalls)
+        val done = vm.await { it.recalls is RecallUi.Done }.recalls as RecallUi.Done
+        assertThat(done.recalls.single().modelMatch).isTrue()
+
+        recallResult = ApiResult.Err(ApiFailure.Offline)
+        vm.onEvent(ItemDetailEvent.CheckRecalls)
+        assertThat(vm.await { it.recalls == RecallUi.Offline }.recalls).isEqualTo(RecallUi.Offline)
+
+        val bare = vm(items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Heater")).orEmpty())
+        bare.onEvent(ItemDetailEvent.CheckRecalls)
+        assertThat(bare.await { it.recalls == RecallUi.NeedsMake }.recalls).isEqualTo(RecallUi.NeedsMake)
     }
 }

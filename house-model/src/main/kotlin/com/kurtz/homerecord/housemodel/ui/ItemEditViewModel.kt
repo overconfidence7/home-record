@@ -9,6 +9,8 @@ import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.PlateField
 import com.kurtz.homerecord.core.model.SerialAgeDecoder
 import com.kurtz.homerecord.core.ocr.TextRecognizer
+import com.kurtz.homerecord.core.company.ApiResult
+import com.kurtz.homerecord.core.lookup.DataPlateVisionApi
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.DraftPhoto
 import com.kurtz.homerecord.housemodel.items.ItemDraft
@@ -32,6 +34,7 @@ class ItemEditViewModel(
     private val saved: SavedStateHandle,
     private val media: MediaFiles,
     private val recognizer: TextRecognizer,
+    private val vision: DataPlateVisionApi? = null,
     initialRoomId: String? = null,
     private val afterCreate: (String) -> Unit = {},
 ) : ViewModel() {
@@ -124,6 +127,24 @@ class ItemEditViewModel(
         viewModelScope.launch {
             val lines = recognizer.recognizeLines(path)
             val proposal = DataPlateParser.parse(lines)
+            if (proposal.model == null) {
+                // AC-B11: on-device OCR found no model, so ask the server to read the photo; offline or failed keeps the OCR result.
+                val read = (vision?.read(path) as? ApiResult.Ok)?.value
+                val found = listOfNotNull(read?.make, read?.model, read?.serial)
+                val readModel = read?.model
+                if (read != null && readModel != null) {
+                    _state.update {
+                        it.copy(
+                            scanning = false,
+                            plateScan = PlateScan(
+                                (found + proposal.lines).distinct(), read.make ?: proposal.make.orEmpty(), readModel, read.serial ?: proposal.serial.orEmpty(),
+                                target = PlateField.entries.firstOrNull { f -> f != PlateField.MODEL && (if (f == PlateField.MAKE) read.make ?: proposal.make else read.serial ?: proposal.serial) == null } ?: PlateField.MODEL,
+                            ),
+                        )
+                    }
+                    return@launch
+                }
+            }
             _state.update {
                 it.copy(
                     scanning = false,

@@ -436,6 +436,23 @@ private val furnaceService = listOf(
 
 @ThemePreviews
 @Composable
+fun ItemDetailRecallsPreview() = Frame {
+    ItemDetailScreen(
+        ItemDetailUiState(
+            loading = false, detail = furnaceDetail(),
+            recalls = com.kurtz.homerecord.housemanual.items.RecallUi.Done(
+                listOf(
+                    com.kurtz.homerecord.core.lookup.RecallInfo("24-118", "Carrier gas furnaces recalled for overheating", "2024-03-14", "The heat exchanger can crack and leak carbon monoxide.", "Stop using the furnace and call Carrier for a free repair.", "https://www.cpsc.gov/Recalls/2024/example", true),
+                    com.kurtz.homerecord.core.lookup.RecallInfo("19-042", "Carrier thermostats recalled", "2019-01-10", "The wiring can overheat.", null, null, false),
+                ),
+            ),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
 fun ItemDetailUpkeepPreview() = Frame {
     ItemDetailScreen(
         ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService, contacts = sampleContacts.map { it.contact },

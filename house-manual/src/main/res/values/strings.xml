@@ -88,6 +88,16 @@
     <string name="item_detail_warranty_months">%1$d months</string>
     <string name="item_detail_warranty_looked_up">Looked up %1$s</string>
     <string name="item_detail_warranty_source">Open source page</string>
+    <string name="item_detail_recalls">Recalls</string>
+    <string name="item_detail_recalls_check">Check recalls</string>
+    <string name="item_detail_recalls_checking">Checking…</string>
+    <string name="item_detail_recalls_none">No recalls found for this maker.</string>
+    <string name="item_detail_recalls_needs_make">Add the maker first, then check again.</string>
+    <string name="item_detail_recalls_offline">You are offline. Check again when you have a connection.</string>
+    <string name="item_detail_recalls_failed">Could not check recalls just now. Try again in a bit.</string>
+    <string name="item_detail_recall_matches">Names this model</string>
+    <string name="item_detail_recall_same_maker">Same maker, other models. Check the model on the notice.</string>
+    <string name="item_detail_recall_open">Open the notice</string>
     <string name="item_detail_warranty_lookup">Look up warranty</string>
     <string name="item_detail_warranty_lookup_again">Look up again</string>
     <string name="item_detail_warranty_looking">Looking up…</string>

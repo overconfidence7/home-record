@@ -61,6 +61,7 @@ object ScreenCatalog {
         QaScreen("item-detail-no-warranty", nonRoot = true) { ItemDetailNoWarrantyPreview() },
         QaScreen("item-detail-lookup-failed", nonRoot = true) { ItemDetailLookupNotePreview() },
         QaScreen("item-detail-upkeep", nonRoot = true) { ItemDetailUpkeepPreview() },
+        QaScreen("item-detail-recalls", nonRoot = true) { ItemDetailRecallsPreview() },
         QaScreen("item-detail-consumable-form", nonRoot = true) { ItemDetailConsumableFormPreview() },
         QaScreen("item-detail-service-form", nonRoot = true) { ItemDetailServiceFormPreview() },
         QaScreen("item-detail-review-badge", nonRoot = true) { ItemDetailReviewBadgePreview() },

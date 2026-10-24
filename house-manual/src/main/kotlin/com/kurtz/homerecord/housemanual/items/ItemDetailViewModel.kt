@@ -3,6 +3,9 @@ package com.kurtz.homerecord.housemanual.items
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.company.ApiResult
+import com.kurtz.homerecord.core.lookup.RecallApi
 import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
@@ -37,12 +40,15 @@ class ItemDetailViewModel(
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val onClose: () -> Unit = {},
     private val onOpenCopy: (String) -> Unit = {},
+    private val recallApi: RecallApi? = null,
 ) : ViewModel() {
     private val confirmDelete = MutableStateFlow(saved[CONFIRM] ?: false)
 
     private val lookupState = MutableStateFlow(LookupUi())
 
     private data class LookupUi(val busy: Boolean = false, val note: LookupNote? = null, val review: WarrantyTerms? = null)
+
+    private val recallState = MutableStateFlow<RecallUi>(RecallUi.Idle)
 
     private val forms = MutableStateFlow(FormsUi())
 
@@ -63,15 +69,15 @@ class ItemDetailViewModel(
         Triple(all.filter { it.itemId == itemId }.sortedByDescending { it.createdAt }, all.filter { it.itemId != itemId }, ui)
     }
 
-    private val upkeepContactsDocs = combine(upkeepAndContacts, documentRows) { uc, docs -> uc to docs }
+    private val upkeepContactsDocs = combine(upkeepAndContacts, documentRows, recallState) { uc, docs, r -> Triple(uc, docs, r) }
 
     val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepContactsDocs, forms) { d, c, l, ucd, f ->
-        val (uc, docs) = ucd
+        val (uc, docs, r) = ucd
         val (u, contacts) = uc
         ItemDetailUiState(
             loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
             consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors, contacts = contacts,
-            documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice,
+            documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice, recalls = r,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
@@ -87,6 +93,7 @@ class ItemDetailViewModel(
             ItemDetailEvent.Duplicate -> viewModelScope.launch { repo.duplicate(itemId, copySuffix)?.let(onOpenCopy) }
             is ItemDetailEvent.SetRegistered -> viewModelScope.launch { repo.setRegistered(itemId, e.registered) }
             is ItemDetailEvent.LookUp -> lookUp(e.again)
+            ItemDetailEvent.CheckRecalls -> checkRecalls()
             ItemDetailEvent.OpenReview -> viewModelScope.launch {
                 lookup.reviewTerms(itemId)?.let { t -> lookupState.update { it.copy(review = t) } }
             }
@@ -140,6 +147,24 @@ class ItemDetailViewModel(
                 setAttach(false)
             }
             ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument -> Unit // navigation is the route's job
+        }
+    }
+
+    private fun checkRecalls() {
+        if (recallState.value == RecallUi.Busy) return
+        viewModelScope.launch {
+            val item = repo.get(itemId) ?: return@launch
+            val make = item.make?.trim().orEmpty()
+            if (make.isEmpty()) {
+                recallState.value = RecallUi.NeedsMake
+                return@launch
+            }
+            recallState.value = RecallUi.Busy
+            recallState.value = when (val r = recallApi?.check(make, item.model)) {
+                is ApiResult.Ok -> RecallUi.Done(r.value)
+                is ApiResult.Err -> if (r.failure == ApiFailure.Offline) RecallUi.Offline else RecallUi.Failed
+                null -> RecallUi.Failed
+            }
         }
     }
 

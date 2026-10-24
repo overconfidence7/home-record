@@ -74,6 +74,12 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_detail_lookup"
 - assertVisible:
     id: "hm_item_detail_lookup"
+# AC-B12: the item page offers a recalls check
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_recalls"
+- assertVisible:
+    id: "hm_item_detail_recalls"
 # AC-C35, AC-C36: consumables and service history sections on the item page
 - scrollUntilVisible:
     element:

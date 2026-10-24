@@ -68,8 +68,14 @@ class ItemEditViewModelTest {
         override suspend fun recognizeLines(path: String) = plateLines
     }
 
+    private var visionResult: com.kurtz.homerecord.core.company.ApiResult<com.kurtz.homerecord.core.lookup.PlateReading> =
+        com.kurtz.homerecord.core.company.ApiResult.Err(com.kurtz.homerecord.core.company.ApiFailure.Offline)
+    private val vision = object : com.kurtz.homerecord.core.lookup.DataPlateVisionApi {
+        override suspend fun read(path: String) = visionResult
+    }
+
     private fun made(items: ItemRepository, homes: HomeRepository, homeId: String, itemId: String?, handle: SavedStateHandle) =
-        ItemEditViewModel(items, homes, homeId, itemId, handle, media, recognizer).also { created += it }
+        ItemEditViewModel(items, homes, homeId, itemId, handle, media, recognizer, vision).also { created += it }
 
     private suspend fun home() = homes.createHome(NewHome("Maple St", null, HouseType.TWO_STORY, Foundation.BASEMENT, true)).also { homeId = it }
 
@@ -168,6 +174,38 @@ class ItemEditViewModelTest {
         assertThat(vm.state.value.decodedRule).isNull()
         vm.onEvent(ItemEditEvent.Change(vm.state.value.draft.copy(serial = "0415123456")))
         assertThat(vm.state.value.draft.manufacturedOn).isEqualTo("2016-01-15")
+    }
+
+    @AcceptanceCriterion("AC-B11")
+    @Test fun noModelFromOcrFallsBackToServerVision() = runTest {
+        home()
+        plateLines = listOf("50 GAL")
+        visionResult = com.kurtz.homerecord.core.company.ApiResult.Ok(com.kurtz.homerecord.core.lookup.PlateReading("Rheem", "XG50T06", null, null))
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        media.files += path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
+        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        assertThat(scan.make).isEqualTo("Rheem")
+        assertThat(scan.model).isEqualTo("XG50T06")
+        assertThat(scan.target).isEqualTo(com.kurtz.homerecord.core.model.PlateField.SERIAL)
+    }
+
+    @AcceptanceCriterion("AC-B11")
+    @Test fun offlineVisionKeepsTheOcrResultAndSkipsWhenOcrFoundTheModel() = runTest {
+        home()
+        plateLines = listOf("50 GAL")
+        val vm = made(items, homes, homeId, null, SavedStateHandle())
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        media.files += path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
+        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        assertThat(scan.model).isEmpty()
+        assertThat(scan.lines).containsExactly("50 GAL")
     }
 
     @AcceptanceCriterion("AC-C31")

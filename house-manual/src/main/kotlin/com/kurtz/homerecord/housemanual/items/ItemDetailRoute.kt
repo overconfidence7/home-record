@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.core.lookup.RecallApi
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemanual.documents.rememberDocumentScanner
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
@@ -31,6 +32,7 @@ fun ItemDetailRoute(
     onEdit: () -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenCopy: (String) -> Unit,
+    recalls: RecallApi? = null,
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -42,7 +44,7 @@ fun ItemDetailRoute(
         key = itemId,
         factory = viewModelFactory {
             initializer {
-                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy)
+                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy, recalls)
             }
         },
     )
