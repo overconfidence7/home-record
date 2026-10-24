@@ -6,7 +6,11 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -29,6 +33,7 @@ import org.robolectric.annotation.Config
 class JobEditTest {
     private lateinit var db: HomeRecordDatabase
     private val changes = mutableListOf<Pair<String, String>>()
+    private val created = mutableListOf<JobEditViewModel>()
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -37,13 +42,15 @@ class JobEditTest {
     }
 
     @After fun tearDown() {
+        // A load or save still in flight when the database closes would throw into the next test class.
+        runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
     }
 
     /** Room hops to its own executor, so wait for the form to finish loading, as the screen does. */
     private suspend fun vm(jobId: String? = null, saved: SavedStateHandle = SavedStateHandle(), refresh: suspend () -> Unit = {}): JobEditViewModel {
-        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), db.jobCrewDao(), db.memberDao(), refresh, { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L })
+        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), db.jobCrewDao(), db.memberDao(), refresh, { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L }).also { created += it }
         withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first { !it.loading } } }
         return vm
     }
