@@ -106,6 +106,7 @@ interface ConsumableDao {
     @Upsert suspend fun upsert(row: ConsumableEntity)
     @Query("SELECT * FROM consumable WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): ConsumableEntity?
     @Query("SELECT * FROM consumable WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ConsumableEntity>>
+    @Query("SELECT consumable.* FROM consumable JOIN item ON consumable.itemId = item.id WHERE item.homeId = :homeId AND item.deletedAt IS NULL AND consumable.deletedAt IS NULL ORDER BY consumable.createdAt") fun observeForHome(homeId: String): Flow<List<ConsumableEntity>>
     @Query("SELECT * FROM consumable WHERE itemId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ConsumableEntity>
     @Query("UPDATE consumable SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }

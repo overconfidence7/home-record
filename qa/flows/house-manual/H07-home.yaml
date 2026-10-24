@@ -1,4 +1,4 @@
-# Walkthrough: HM-Home on a fresh home (AC-H1, AC-H2): the three quick actions, the emergency card and the one-line attention state.
+# Walkthrough: HM-Home on a fresh home (AC-H1, AC-H2, AC-H3): the three quick actions, the emergency card and the one-line attention state.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
@@ -12,6 +12,15 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_home_emergency"
 - assertVisible:
     id: "hm_home_attention_none"
+- tapOn:
+    id: "hm_home_search"
+- inputText: "zzzz"
+- assertVisible:
+    id: "hm_home_search_none"
+- tapOn:
+    id: "hm_home_search_clear"
+- assertVisible:
+    id: "hm_home_add_item"
 - tapOn:
     id: "hm_home_add_item"
 - assertVisible: "Add item"

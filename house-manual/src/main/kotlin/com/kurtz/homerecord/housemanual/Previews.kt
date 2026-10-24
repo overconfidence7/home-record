@@ -38,6 +38,8 @@ import com.kurtz.homerecord.housemanual.items.ItemDetailScreen
 import com.kurtz.homerecord.housemanual.items.ItemDetailUiState
 import com.kurtz.homerecord.housemanual.home.HomeScreen
 import com.kurtz.homerecord.housemanual.home.HomeUiState
+import com.kurtz.homerecord.housemanual.home.SearchResultRow
+import com.kurtz.homerecord.core.model.SearchKind
 import com.kurtz.homerecord.housemodel.home.AttentionKind
 import com.kurtz.homerecord.housemodel.home.AttentionRow
 import com.kurtz.homerecord.housemanual.items.ItemsScreen
@@ -584,6 +586,26 @@ fun HomeFullPreview() = Frame {
 fun HomeQuietPreview() = Frame {
     HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, shutoffCount = 1, recent = homeRecent), {})
 }
+
+@ThemePreviews
+@Composable
+fun HomeSearchPreview() = Frame {
+    HomeScreen(
+        HomeUiState(
+            loading = false, homeName = "Maple St", itemCount = 4, query = "garage",
+            results = listOf(
+                SearchResultRow(SearchKind.ROOM, "r1", "Garage", null),
+                SearchResultRow(SearchKind.ITEM, "i1", "Garage freezer", "Frigidaire FFFH17F4QW"),
+                SearchResultRow(SearchKind.DOCUMENT, "d1", "Garage door opener manual", "Manuals"),
+            ),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun HomeSearchNonePreview() = Frame { HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, query = "zzz"), {}) }
 
 @ThemePreviews
 @Composable

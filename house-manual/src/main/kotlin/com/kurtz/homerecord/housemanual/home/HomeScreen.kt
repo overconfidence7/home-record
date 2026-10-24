@@ -12,9 +12,19 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.MeetingRoom
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PowerOff
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import com.kurtz.homerecord.core.model.SearchKind
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +59,11 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(state.homeName, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.testTag("hm_home_title"))
+            SearchBar(state.query) { onEvent(HomeEvent.QueryChanged(it)) }
+            if (state.searching) {
+                SearchResults(state, onEvent)
+                return@Column
+            }
             QuickActions(state, onEvent)
             if (state.wallNoteShown) {
                 Text(stringResource(R.string.home_wall_soon), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("hm_home_wall_note"))
@@ -142,4 +157,55 @@ private fun AttentionItem(row: AttentionRow, onEvent: (HomeEvent) -> Unit) {
         onClick = row.itemId?.let { id -> { onEvent(HomeEvent.OpenItem(id)) } },
         modifier = Modifier.testTag("hm_home_attention_${row.id}"),
     )
+}
+
+@Composable
+private fun SearchBar(query: String, onChange: (String) -> Unit) {
+    val clear = stringResource(R.string.home_search_clear)
+    OutlinedTextField(
+        value = query,
+        onValueChange = onChange,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_home_search"),
+        placeholder = { Text(stringResource(R.string.home_search_hint)) },
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+        trailingIcon = if (query.isEmpty()) null else {
+            { IconButton(onClick = { onChange("") }, modifier = Modifier.testTag("hm_home_search_clear")) { Icon(Icons.Rounded.Close, contentDescription = clear) } }
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+    )
+}
+
+@Composable
+private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
+    if (state.results.isEmpty()) {
+        Text(stringResource(R.string.home_search_none, state.query.trim()), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_home_search_none"))
+        return
+    }
+    Column {
+        state.results.forEach { r ->
+            RecordListItem(
+                headline = r.title,
+                supporting = listOfNotNull(stringResource(kindLabel(r.kind)), r.subtitle).joinToString(" · "),
+                leading = { Icon(kindIcon(r.kind), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                onClick = { onEvent(HomeEvent.OpenResult(r.kind, r.id)) },
+                modifier = Modifier.testTag("hm_home_result_${r.id}"),
+            )
+        }
+    }
+}
+
+private fun kindLabel(kind: SearchKind): Int = when (kind) {
+    SearchKind.ITEM -> R.string.search_kind_item
+    SearchKind.ROOM -> R.string.search_kind_room
+    SearchKind.DOCUMENT -> R.string.search_kind_document
+    SearchKind.CONTACT -> R.string.search_kind_contact
+    SearchKind.OVERLAY, SearchKind.SHUTOFF, SearchKind.BREAKER -> R.string.search_kind_item
+}
+
+private fun kindIcon(kind: SearchKind): ImageVector = when (kind) {
+    SearchKind.ROOM -> Icons.Rounded.MeetingRoom
+    SearchKind.DOCUMENT -> Icons.Rounded.Description
+    SearchKind.CONTACT -> Icons.Rounded.Person
+    else -> Icons.Rounded.Inventory2
 }

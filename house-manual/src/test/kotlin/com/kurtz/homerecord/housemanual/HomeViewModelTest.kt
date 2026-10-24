@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.housemanual
 
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.model.SearchDocument
+import com.kurtz.homerecord.core.model.SearchKind
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.home.HomeEvent
 import com.kurtz.homerecord.housemanual.home.HomeViewModel
@@ -38,6 +40,26 @@ class HomeViewModelTest {
         assertThat(vm.state.value.wallNoteShown).isFalse()
         vm.onEvent(HomeEvent.PhotographWall)
         assertThat(vm.state.value.wallNoteShown).isTrue()
+        job.cancel()
+    }
+
+    @Test @AcceptanceCriterion("AC-H3")
+    fun queryFiltersTheIndexAndClearingItEmptiesResults() {
+        val docs = listOf(
+            SearchDocument(SearchKind.ITEM, "i1", "Furnace", "Carrier", listOf("Furnace", "59TP6A")),
+            SearchDocument(SearchKind.ROOM, "r1", "Garage"),
+        )
+        val vm = HomeViewModel(MutableStateFlow(HomeSummary(0, emptyList(), emptyList(), 0)), "Maple St", MutableStateFlow(docs))
+        val job = vm.state.onEach { }.launchIn(CoroutineScope(Dispatchers.Main))
+        assertThat(vm.state.value.results).isEmpty()
+        vm.onEvent(HomeEvent.QueryChanged("59tp6a"))
+        assertThat(vm.state.value.searching).isTrue()
+        assertThat(vm.state.value.results.map { it.id }).containsExactly("i1")
+        vm.onEvent(HomeEvent.QueryChanged("garage"))
+        assertThat(vm.state.value.results.map { it.kind }).containsExactly(SearchKind.ROOM)
+        vm.onEvent(HomeEvent.QueryChanged(""))
+        assertThat(vm.state.value.searching).isFalse()
+        assertThat(vm.state.value.results).isEmpty()
         job.cancel()
     }
 }

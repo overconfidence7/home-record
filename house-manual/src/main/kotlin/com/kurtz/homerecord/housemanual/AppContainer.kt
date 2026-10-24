@@ -89,6 +89,8 @@ class AppContainer(app: Application) {
         }
     }
 
+    val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db)
+
     val upkeep = UpkeepRepository(db) { entity, id ->
         val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
         if (homeId != null) {

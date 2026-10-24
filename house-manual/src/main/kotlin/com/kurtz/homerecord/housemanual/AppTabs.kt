@@ -91,7 +91,11 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         startKeys = if (openEditor) listOf(PlanKey()) else emptyList(),
         entries = { nav ->
         entry<HomeKey> {
-            HomeRoute(container.items, home.id, home.name, onAddItem = { nav.push(ItemEditKey()) }, onOpenItem = { nav.push(ItemDetailKey(it)) })
+            HomeRoute(
+                container.items, container.search, home.id, home.name,
+                onAddItem = { nav.push(ItemEditKey()) }, onOpenItem = { nav.push(ItemDetailKey(it)) },
+                onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
+            )
         }
         entry<HouseKey> {
             val summary = stringResource(

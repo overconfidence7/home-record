@@ -213,4 +213,11 @@
     <string name="home_attention_overdue">Reminder overdue since %1$s</string>
     <string name="home_attention_missing">Add the make and model</string>
     <string name="home_recent">Recent</string>
+    <string name="home_search_hint">Search model, filter size, breaker, room</string>
+    <string name="home_search_clear">Clear search</string>
+    <string name="home_search_none">Nothing matches \"%1$s\".</string>
+    <string name="search_kind_item">Item</string>
+    <string name="search_kind_room">Room</string>
+    <string name="search_kind_document">Document</string>
+    <string name="search_kind_contact">Contact</string>
 </resources>

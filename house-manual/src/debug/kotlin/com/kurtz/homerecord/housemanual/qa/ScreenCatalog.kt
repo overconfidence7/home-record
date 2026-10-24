@@ -47,6 +47,8 @@ object ScreenCatalog {
         QaScreen("document-viewer-missing", nonRoot = true) { DocumentViewerMissingPreview() },
         QaScreen("home-empty", nonRoot = false) { HomeEmptyPreview() },
         QaScreen("home-full", nonRoot = false) { HomeFullPreview() },
+        QaScreen("home-search", nonRoot = false) { HomeSearchPreview() },
+        QaScreen("home-search-none", nonRoot = false) { HomeSearchNonePreview() },
         QaScreen("home-quiet", nonRoot = false) { HomeQuietPreview() },
         QaScreen("home-loading", nonRoot = false) { HomeLoadingPreview() },
         QaScreen("items-empty", nonRoot = false) { ItemsEmptyPreview() },

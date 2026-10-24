@@ -328,4 +328,14 @@ fun HomeQuietScreenshot() = HomeQuietPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun HomeSearchScreenshot() = HomeSearchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeSearchNoneScreenshot() = HomeSearchNonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun HomeLoadingScreenshot() = HomeLoadingPreview()

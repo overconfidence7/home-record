@@ -67,9 +67,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] (old) T018c: FL-JobEdit form (client, address geocode, rooms chips, dates, crew, phases, budget, notes) with New job FAB on FL-Jobs, then FL-Job tab shell and Overview (AC-F5, AC-F7), then sync of job rows
 - [x] T019: FL-House tab: the same plan editor and blueprint bound to the job's home; unplaced rooms from FL-JobEdit shown in a tray to drag onto the plan (acceptance: AC-F48)
   - [x] T019a: HM-Room page shared with FL-House (RoomScreen/RoomRoute and room strings moved to :house-model; tapping a room on the job plan opens it)
-- [ ] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
+- [x] T020: Search engine `[unit]` (rooms, items, overlays, breakers, documents, contacts, consumable specs) and the HM-Home search bar with results list (acceptance: AC-C38, AC-H3 rooms part)
   - [x] T020a: `SearchEngine` in :core model (ranked prefix/word/substring, all tokens required) with SearchEngineTest (AC-C38)
-  - [ ] T020b: HM-Home search bar and results list, building SearchDocuments from rooms/items/breakers etc. (blocked on HM-Home screen, still a placeholder tab; AC-H3)
+  - [x] T020b: HM-Home search bar and results list, building SearchDocuments from rooms/items/breakers etc. (blocked on HM-Home screen, still a placeholder tab; AC-H3)
 - [x] R04: Review T016–T020 (T020b still blocked on T030; reviewed what exists)
 - [x] V1: Visual review of M1 screenshots (sampled; one Minor logged)
 
@@ -108,8 +108,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T029b2: camera scan into Documents with the ML Kit document scanner (AC-C37)
   - [x] T029c: in-app PDF/image viewer with pinch zoom and share (AC-C37)
   - [x] T029d: item page Documents section: list, attach existing, add from Files/scan, open in viewer (AC-C37)
-- [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
+- [x] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
   - [x] T030a: `HomeSummaryBuilder` `[unit]` (overdue reminders, warranties expiring in 60 days, items missing make/model, shutoff count, recent items) and `ItemRepository.observeHomeSummary` (AC-H2)
+  - [x] T030c: HM-Home search bar and results (items by model/serial/consumable spec, rooms, contacts, documents; breakers/overlays join when built) (AC-H3)
   - [x] T030b: HM-Home screen: quick actions, Emergency card, Needs attention (one line when empty), Recent; Photograph a wall shows a note until M4 (AC-H1, AC-H2)
   - [ ] T030c: Home search bar and results (= T020b), reminder rows opening the reminder once the Reminders tab exists (AC-H3)
 - [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
