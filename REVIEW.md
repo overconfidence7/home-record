@@ -850,3 +850,19 @@ Tested: 62 device stages, 374 unit tests, 64 backend tests, coverage 96/97 ACs. 
 Opened committed PNGs for Home (dark), Items by room (light), Item detail recalls (200% font), Contacts list (light), Paywall (dark), Documents list (dark); the other M2 sets were not individually opened. No emulator available in this container, so the PRODUCT.md steps 1-5 walk was done from screens only (see R06). Rules checked: 1-12, 24-30, 32.
 - Pass: headings and section headers, 48 dp+ buttons, theme colors in dark, warranty status uses icon plus text (not color alone), 200% font grows the item page and wraps the warranty line without clipping, filter chip row scrolls horizontally, one primary action per screen.
 - No new findings; no code changed.
+
+## QA auto 2026-10-24 (commit efef134)
+
+Automated suite run at 2026-10-24 20:27 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Critical] APK build failed (assembleDebug / assembleDebugAndroidTest / assembleRelease) [auto:apk:build] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: both apps build - actual: see qa-results apk/gradle.log
+- [ ] [Critical] field-log: install failed (regression of a fixed item) [auto:install:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: APK installs on the emulator - actual: adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_INVALID_APK: Scanning Failed.: Package /data/app/vmdl1550871531.tmp/base.apk code is missing]  
+- [ ] [Critical] field-log: install failed (regression of a fixed item) [auto:install:handoff:field-log] - steps: automated, see qa-results branch latest/ for commit efef134 - expected: APK installs on the emulator - actual: adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_INVALID_APK: Scanning Failed.: Package /data/app/vmdl1370483801.tmp/base.apk code is missing]  
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:instrumented:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:flow:field-log:F03-jobs], [auto:variant:field-log:dark], [auto:variant:field-log:font200], [auto:variant:field-log:landscape], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:field-log], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H05-contacts], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, field-log F03 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Fail, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Fail, house-manual H18 Pass
+
+Not built yet or skipped: field-log seed:field-log (no debug seed receiver yet (PLAN Q005)); field-log jank:field-log (gfxinfo reported no frames); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff); handoff jank:field-log (gfxinfo reported no frames)
+
+Tested: 63 device stages, 393 unit tests, 73 backend tests, coverage 99/99 ACs. Passed: 35. New issues: 3. Critical: 3. Product gaps: n/a (judge entry follows).
