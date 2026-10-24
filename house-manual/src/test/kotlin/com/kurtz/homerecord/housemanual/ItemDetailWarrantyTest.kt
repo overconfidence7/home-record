@@ -70,7 +70,7 @@ class ItemDetailWarrantyTest {
     private suspend fun heater(model: String = "XG50T06"): String =
         items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Water heater", make = "Rheem", model = model, inServiceOn = "2024-01-15")).orEmpty()
 
-    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), id, items.observeDetail(id, "h1", emptyMap()), "copy").also {
+    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy").also {
         vms += it
         it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
     }
@@ -150,5 +150,17 @@ class ItemDetailWarrantyTest {
         val rows = vm.await { it.serviceForm == null && it.service.size == 2 }.service
         assertThat(rows.map { it.description }).containsExactly("New anode rod", "Flushed tank").inOrder()
         assertThat(rows.first().costCents).isEqualTo(8950L)
+    }
+
+    @AcceptanceCriterion("AC-C39")
+    @Test fun serviceFormOffersContactsAndSavesTheChosenOne() = runTest {
+        val id = heater()
+        val cid = UpkeepRepository(db).saveContact("h1", com.kurtz.homerecord.housemodel.upkeep.ContactDraft(name = "Dale Harlan", trade = "HVAC")).orEmpty()
+        val vm = vm(id)
+        vm.onEvent(ItemDetailEvent.OpenService(null))
+        assertThat(vm.await { it.contacts.isNotEmpty() }.contacts.map { it.name }).containsExactly("Dale Harlan")
+        vm.onEvent(ItemDetailEvent.ChangeService(ServiceDraft(date = "2026-02-01", contactId = cid, description = "Tune-up")))
+        vm.onEvent(ItemDetailEvent.SaveService)
+        assertThat(vm.await { it.serviceForm == null && it.service.size == 1 }.service.first().contactId).isEqualTo(cid)
     }
 }

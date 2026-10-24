@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ class ItemDetailViewModel(
     private val lookup: WarrantyLookupRepository,
     private val upkeep: UpkeepRepository,
     private val itemId: String,
+    homeId: String,
     detail: Flow<ItemDetail?>,
     private val copySuffix: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
@@ -45,10 +47,15 @@ class ItemDetailViewModel(
 
     private val upkeepRows = combine(upkeep.observeConsumables(itemId), upkeep.observeService(itemId)) { c, s -> c to s }
 
-    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepRows, forms) { d, c, l, u, f ->
+    private val contactRows = upkeep.observeContacts(homeId).map { rows -> rows.map { it.contact } }
+
+    private val upkeepAndContacts = combine(upkeepRows, contactRows) { u, c -> u to c }
+
+    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepAndContacts, forms) { d, c, l, uc, f ->
+        val (u, contacts) = uc
         ItemDetailUiState(
             loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
-            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors,
+            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors, contacts = contacts,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 

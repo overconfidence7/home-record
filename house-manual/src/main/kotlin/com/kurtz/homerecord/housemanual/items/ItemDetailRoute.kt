@@ -36,7 +36,7 @@ fun ItemDetailRoute(
         key = itemId,
         factory = viewModelFactory {
             initializer {
-                ItemDetailViewModel(repo, lookup, upkeep, itemId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy)
+                ItemDetailViewModel(repo, lookup, upkeep, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy)
             }
         },
     )

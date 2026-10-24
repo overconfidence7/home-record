@@ -418,14 +418,14 @@ private val furnaceConsumables = listOf(
 )
 
 private val furnaceService = listOf(
-    com.kurtz.homerecord.core.data.ServiceRecordEntity("s1", "i1", "2026-03-14", null, "Annual tune-up and igniter check", 14_900, 1, 1),
+    com.kurtz.homerecord.core.data.ServiceRecordEntity("s1", "i1", "2026-03-14", "c1", "Annual tune-up and igniter check", 14_900, 1, 1),
     com.kurtz.homerecord.core.data.ServiceRecordEntity("s2", "i1", "2024-11-02", null, "Replaced inducer motor", 62_500, 1, 1),
 )
 
 @ThemePreviews
 @Composable
 fun ItemDetailUpkeepPreview() = Frame {
-    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService), {})
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService, contacts = sampleContacts.map { it.contact }), {})
 }
 
 @ThemePreviews
@@ -440,7 +440,8 @@ fun ItemDetailConsumableFormPreview() = Frame {
 @Composable
 fun ItemDetailServiceFormPreview() = Frame {
     com.kurtz.homerecord.housemanual.items.ServiceFormContent(
-        com.kurtz.homerecord.housemodel.upkeep.ServiceDraft(date = "2026-03-14", description = "Annual tune-up and igniter check", cost = "149.00"), false, {},
+        com.kurtz.homerecord.housemodel.upkeep.ServiceDraft(date = "2026-03-14", contactId = "c1", description = "Annual tune-up and igniter check", cost = "149.00"),
+        sampleContacts.map { it.contact }, false, {},
     )
 }
 

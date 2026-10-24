@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.data.ConsumableEntity
+import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.coreui.components.DateField
@@ -82,7 +83,7 @@ fun ConsumablesCard(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> 
 
 /** Service history on the item page, newest first (AC-C36). */
 @Composable
-fun ServiceCard(rows: List<ServiceRecordEntity>, onEvent: (ItemDetailEvent) -> Unit) {
+fun ServiceCard(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, onEvent: (ItemDetailEvent) -> Unit) {
     UpkeepCard(
         title = stringResource(R.string.item_detail_service),
         addLabel = stringResource(R.string.item_detail_service_add),
@@ -97,7 +98,7 @@ fun ServiceCard(rows: List<ServiceRecordEntity>, onEvent: (ItemDetailEvent) -> U
                     Text(r.description, style = MaterialTheme.typography.bodyLarge)
                     val cost = r.costCents?.let { NumberFormat.getCurrencyInstance(Locale.US).format(it / 100.0) }
                     Text(
-                        listOfNotNull(shortDate(r.date), cost).joinToString(", "),
+                        listOfNotNull(shortDate(r.date), cost, contacts.firstOrNull { it.id == r.contactId }?.name).joinToString(", "),
                         style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -140,7 +141,7 @@ fun UpkeepFormSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit
     if (c == null && s == null) return
     ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.CloseForm) }) {
         if (c != null) ConsumableFormContent(c, state.showFormErrors, onEvent)
-        if (s != null) ServiceFormContent(s, state.showFormErrors, onEvent)
+        if (s != null) ServiceFormContent(s, state.contacts, state.showFormErrors, onEvent)
     }
 }
 
@@ -182,8 +183,9 @@ fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: 
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ServiceFormContent(draft: ServiceDraft, showErrors: Boolean, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
+fun ServiceFormContent(draft: ServiceDraft, contacts: List<ContactEntity>, showErrors: Boolean, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
     val errors = if (showErrors) draft.errors() else emptySet()
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(if (draft.id == null) R.string.item_detail_service_add else R.string.item_detail_service_edit_title), style = MaterialTheme.typography.titleLarge)
@@ -199,6 +201,21 @@ fun ServiceFormContent(draft: ServiceDraft, showErrors: Boolean, onEvent: (ItemD
             error = if (ServiceField.DESCRIPTION in errors) stringResource(R.string.item_detail_service_description_error) else null,
             modifier = Modifier.testTag("hm_item_detail_service_description"),
         )
+        if (contacts.isNotEmpty()) {
+            Text(stringResource(R.string.item_detail_service_contact), style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = draft.contactId == null, onClick = { onEvent(ItemDetailEvent.ChangeService(draft.copy(contactId = null))) },
+                    label = { Text(stringResource(R.string.item_detail_service_contact_none)) }, modifier = Modifier.testTag("hm_item_detail_service_contact_none"),
+                )
+                contacts.forEach { c ->
+                    FilterChip(
+                        selected = draft.contactId == c.id, onClick = { onEvent(ItemDetailEvent.ChangeService(draft.copy(contactId = c.id))) },
+                        label = { Text(c.name) }, modifier = Modifier.testTag("hm_item_detail_service_contact_chip"),
+                    )
+                }
+            }
+        }
         LabeledField(
             label = stringResource(R.string.item_detail_service_cost), value = draft.cost,
             onValueChange = { onEvent(ItemDetailEvent.ChangeService(draft.copy(cost = it))) }, keyboardType = KeyboardType.Decimal,

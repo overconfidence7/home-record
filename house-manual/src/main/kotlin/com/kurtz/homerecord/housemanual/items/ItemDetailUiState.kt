@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemanual.items
 
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.core.data.ConsumableEntity
+import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.housemodel.items.ItemDetail
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
@@ -18,6 +19,8 @@ data class ItemDetailUiState(
     val consumables: List<ConsumableEntity> = emptyList(),
     /** Newest first (AC-C36). */
     val service: List<ServiceRecordEntity> = emptyList(),
+    /** The home's contacts, for the service form picker (AC-C39). */
+    val contacts: List<ContactEntity> = emptyList(),
     val consumableForm: ConsumableDraft? = null,
     val serviceForm: ServiceDraft? = null,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */

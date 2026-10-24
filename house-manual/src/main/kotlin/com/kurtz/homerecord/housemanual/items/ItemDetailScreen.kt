@@ -110,7 +110,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 DetailsCard(detail, onEvent)
                 WarrantyCard(detail, state, onEvent)
                 ConsumablesCard(state.consumables, onEvent)
-                ServiceCard(state.service, onEvent)
+                ServiceCard(state.service, state.contacts, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
                 detail.item.notes?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Text(notes, style = MaterialTheme.typography.bodyLarge) }
