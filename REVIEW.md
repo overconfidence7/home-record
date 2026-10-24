@@ -801,3 +801,17 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 59 device stages, 326 unit tests, 64 backend tests, coverage 85/85 ACs. Passed: 41. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-24 (commit 4a6b39c)
+
+Automated suite run at 2026-10-24 02:33 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+No new automated findings.
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:flow:field-log:F03-jobs], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, field-log F03 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H15 Fail
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 59 device stages, 351 unit tests, 64 backend tests, coverage 87/87 ACs. Passed: 41. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
