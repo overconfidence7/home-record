@@ -1,0 +1,11 @@
+# Pro paywall from the More tab (AC-H18). Plans need the Test Store key; without it the Retry state shows.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn: "More"
+- tapOn:
+    id: "hm_more_pro"
+- assertVisible: "Restore purchases"
+- assertVisible:
+    id: "hm_paywall_reason"
+- takeScreenshot: H18-paywall

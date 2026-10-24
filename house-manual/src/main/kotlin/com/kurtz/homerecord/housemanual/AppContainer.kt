@@ -128,10 +128,16 @@ class AppContainer(app: Application) {
 
     val layers = PrefsLayerStore(app)
 
+    /** Pro state (AC-H18); without a RevenueCat key everyone stays on the free tier. */
+    val billing: com.kurtz.homerecord.core.billing.ProBilling =
+        if (BuildConfig.REVENUECAT_API_KEY.isEmpty()) com.kurtz.homerecord.core.billing.UnavailableBilling
+        else com.kurtz.homerecord.housemanual.billing.RevenueCatBilling(app, BuildConfig.REVENUECAT_API_KEY) { activityContext }
+
     init {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }
         syncCoordinator.start()
+        (billing as? com.kurtz.homerecord.housemanual.billing.RevenueCatBilling)?.let { rc -> scope.launch { rc.refresh() } }
         // Queued warranty lookups run when connectivity returns (AC-C34).
         scope.launch { AndroidConnectivityMonitor(app).online.collect { if (it) warrantyLookup.runPending() } }
     }

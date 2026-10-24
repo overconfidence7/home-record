@@ -627,3 +627,28 @@ fun HomeSearchNonePreview() = Frame { HomeScreen(HomeUiState(loading = false, ho
 @ThemePreviews
 @Composable
 fun HomeLoadingPreview() = Frame { HomeScreen(HomeUiState(), {}) }
+
+private val samplePlans = listOf(
+    com.kurtz.homerecord.core.billing.ProPlan("pro_annual", com.kurtz.homerecord.core.billing.ProPlanKind.Annual, "$19.99 / year"),
+    com.kurtz.homerecord.core.billing.ProPlan("pro_lifetime", com.kurtz.homerecord.core.billing.ProPlanKind.Lifetime, "$49.99"),
+)
+
+@ThemePreviews
+@Composable
+fun PaywallItemsPreview() = Frame {
+    com.kurtz.homerecord.housemanual.paywall.PaywallScreen(
+        com.kurtz.homerecord.housemanual.paywall.PaywallUiState(
+            feature = com.kurtz.homerecord.core.billing.LimitedFeature.SixteenthItem, loading = false, plans = samplePlans,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun PaywallFailedPreview() = Frame {
+    com.kurtz.homerecord.housemanual.paywall.PaywallScreen(com.kurtz.homerecord.housemanual.paywall.PaywallUiState(loading = false, loadFailed = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun PaywallLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.paywall.PaywallScreen(com.kurtz.homerecord.housemanual.paywall.PaywallUiState(), {}) }

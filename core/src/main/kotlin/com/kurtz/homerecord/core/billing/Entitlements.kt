@@ -46,3 +46,38 @@ object LimitGate {
         blockedBy(entitlements.isPro.value, feature, current)
 }
 
+
+/** One plan on the paywall; [price] is the store's own formatted price, never hardcoded. */
+data class ProPlan(val id: String, val kind: ProPlanKind, val price: String)
+
+enum class ProPlanKind { Annual, Lifetime }
+
+/** What the paywall needs from the store: the plans, buying one, and restoring. */
+interface ProBilling : Entitlements {
+    suspend fun plans(): Result<List<ProPlan>>
+    suspend fun purchase(planId: String): Result<Unit>
+    suspend fun restore(): Result<Unit>
+}
+
+/** No billing key in this build: the paywall shows its Retry state and the free tier stays. */
+object UnavailableBilling : ProBilling {
+    override val isPro: StateFlow<Boolean> = MutableStateFlow(false)
+    override suspend fun plans(): Result<List<ProPlan>> = Result.failure(IllegalStateException("No billing key"))
+    override suspend fun purchase(planId: String): Result<Unit> = Result.failure(IllegalStateException("No billing key"))
+    override suspend fun restore(): Result<Unit> = Result.failure(IllegalStateException("No billing key"))
+}
+
+/** Test and preview billing: plans are fixed, a purchase or restore flips Pro like the Test Store does. */
+class FakeProBilling(
+    var offered: Result<List<ProPlan>> = Result.success(
+        listOf(ProPlan("pro_annual", ProPlanKind.Annual, "$19.99 / year"), ProPlan("pro_lifetime", ProPlanKind.Lifetime, "$49.99")),
+    ),
+    var purchaseResult: Result<Unit> = Result.success(Unit),
+    private val restoreFindsPro: Boolean = true,
+) : ProBilling {
+    private val state = MutableStateFlow(false)
+    override val isPro: StateFlow<Boolean> = state
+    override suspend fun plans() = offered
+    override suspend fun purchase(planId: String): Result<Unit> = purchaseResult.onSuccess { state.value = true }
+    override suspend fun restore(): Result<Unit> = if (restoreFindsPro) { state.value = true; Result.success(Unit) } else Result.failure(NoSuchElementException("Nothing to restore"))
+}

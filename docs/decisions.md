@@ -117,3 +117,6 @@ Brand serial formats are from commonly published manufacturer charts and are heu
 ## 2026-10-23 — Warranty lookup backend (T025)
 - Calls the Anthropic Messages API directly with `fetch` (no SDK dependency), model `claude-sonnet-5-5`, `web_search_20250305` tool with `max_uses: 3` and an `allowed_domains` list of manufacturers and big retailers. "Structured output" is a JSON-only prompt validated with zod (bad fields degrade to null/low confidence).
 - Quota counts every request (cache hits included) in a KV day bucket per user; Pro means any membership whose company/home `entitlement = 'pro'`. Cost log is a D1 table `lookup_log`, only for upstream calls.
+
+## 2026-10-24 Paywall and billing seam
+RevenueCat is wrapped in `ProBilling` (extends `Entitlements`) in :core so ViewModels and tests use a fake; only `RevenueCatBilling` in :house-manual touches the SDK. Plans are mapped from the `default` offering by package type (annual, lifetime) and show the store's formatted price, never a hardcoded one. The free-limit check for items runs at the Add item entry points (Home and Items), counting live items at tap time.

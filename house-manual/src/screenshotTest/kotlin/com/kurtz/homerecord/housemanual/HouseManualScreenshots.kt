@@ -344,3 +344,18 @@ fun HomeSearchNoneScreenshot() = HomeSearchNonePreview()
 @ThemePreviews
 @Composable
 fun HomeLoadingScreenshot() = HomeLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PaywallItemsScreenshot() = PaywallItemsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PaywallFailedScreenshot() = PaywallFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PaywallLoadingScreenshot() = PaywallLoadingPreview()

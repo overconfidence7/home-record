@@ -20,6 +20,11 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
         buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
     }
+    buildTypes {
+        // Keys per docs/billing.md; blank means the free tier with a Retry paywall.
+        debug { buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.testApiKey", "REVENUECAT_TEST_API_KEY").ifEmpty { revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY") }}\"") }
+        release { buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"") }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -40,6 +45,9 @@ fun localProp(key: String, default: String): String {
     return p.getProperty(key, default)
 }
 
+fun revenueCatKey(prop: String, env: String): String =
+    localProp(prop, "").ifEmpty { System.getenv(env).orEmpty() }
+
 fun apiBaseUrl(): String {
     val f = rootProject.file("local.properties")
     val p = Properties()
@@ -53,6 +61,7 @@ dependencies {
     implementation(project(":house-model"))
     implementation(libs.coil.compose)
     implementation(libs.mlkit.document.scanner)
+    implementation(libs.purchases)
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
     implementation(libs.navigation3.runtime)

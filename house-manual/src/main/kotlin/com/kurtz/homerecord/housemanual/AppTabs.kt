@@ -14,6 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
+import com.kurtz.homerecord.housemanual.paywall.PaywallRoute
+import com.kurtz.homerecord.core.billing.LimitGate
+import com.kurtz.homerecord.core.billing.LimitedFeature
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerRoute
 import com.kurtz.homerecord.housemanual.documents.DocumentsRoute
 import androidx.compose.runtime.Composable
@@ -85,6 +91,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; else -> PlaceholderKey(it.id) })
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
+    val scope = rememberCoroutineScope()
     HomeRecordApp(
         tabs = tabs,
         startTabId = if (openEditor) "house" else null,
@@ -93,7 +100,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<HomeKey> {
             HomeRoute(
                 container.items, container.search, home.id, home.name,
-                onAddItem = { nav.push(ItemEditKey()) }, onOpenItem = { nav.push(ItemDetailKey(it)) },
+                onAddItem = { addItem(scope, container, home.id, nav) }, onOpenItem = { nav.push(ItemDetailKey(it)) },
                 onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
             )
         }
@@ -121,7 +128,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
             )
         }
-        entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { nav.push(ItemEditKey()) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
+        entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(
                 container.items, container.warrantyLookup, container.upkeep, container.documents, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
@@ -133,6 +140,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ItemEditKey> { key ->
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
+        entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
@@ -143,6 +151,12 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             if (key.depth == 0 && key.title == "more") {
                 Scaffold {
                     Column(Modifier.padding(it)) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.more_pro)) },
+                            supportingContent = { Text(stringResource(R.string.more_pro_supporting)) },
+                            leadingContent = { Icon(Icons.Outlined.WorkspacePremium, contentDescription = null) },
+                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(PaywallKey()) }.testTag("hm_more_pro"),
+                        )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.more_contacts)) },
                             supportingContent = { Text(stringResource(R.string.more_contacts_supporting)) },
@@ -165,4 +179,13 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             }
         }
     })
+}
+
+/** The 16th free item opens HM-Paywall instead of the form (AC-H18); Pro adds without a limit. */
+private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav) {
+    scope.launch {
+        val count = container.db.itemDao().observeFor(homeId).first().size
+        if (LimitGate.blocked(container.billing, LimitedFeature.SixteenthItem, count)) nav.push(PaywallKey(LimitedFeature.SixteenthItem))
+        else nav.push(ItemEditKey())
+    }
 }

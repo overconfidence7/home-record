@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual
 
 import androidx.navigation3.runtime.NavKey
+import com.kurtz.homerecord.core.billing.LimitedFeature
 import kotlinx.serialization.Serializable
 
 @Serializable data object HomeKey : NavKey
@@ -21,3 +22,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey
+@Serializable data class PaywallKey(val feature: LimitedFeature? = null) : NavKey
