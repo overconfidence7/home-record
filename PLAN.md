@@ -121,7 +121,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T032a: `Entitlements` interface (Unavailable/Fake), `LimitGate` `[unit]` (1 home, 15 items, 1 panel, no sync) in :core billing (AC-H18)
   - [x] T032b1: RevenueCat `purchases` behind `ProBilling`/`Entitlements`, key via BuildConfig per docs/billing.md, HM-Paywall with prices, Restore and Retry, More > House Manual Pro, gate on the 16th item (AC-H18)
   - [ ] T032b2: gates on the second panel (with the breaker work) and on Sign in / cloud sync (AC-H18)
-- [ ] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5
+- [x] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5 (sampled; no emulator in this container)
 
 ## M3 Field Log core (Field Log usable)
 

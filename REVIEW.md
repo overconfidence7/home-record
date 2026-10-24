@@ -844,3 +844,9 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 62 device stages, 374 unit tests, 64 backend tests, coverage 96/97 ACs. Passed: 43. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## Builder visual review V2 (commit 666dbd9)
+
+Opened committed PNGs for Home (dark), Items by room (light), Item detail recalls (200% font), Contacts list (light), Paywall (dark), Documents list (dark); the other M2 sets were not individually opened. No emulator available in this container, so the PRODUCT.md steps 1-5 walk was done from screens only (see R06). Rules checked: 1-12, 24-30, 32.
+- Pass: headings and section headers, 48 dp+ buttons, theme colors in dark, warranty status uses icon plus text (not color alone), 200% font grows the item page and wraps the warranty line without clipping, filter chip row scrolls horizontally, one primary action per screen.
+- No new findings; no code changed.
