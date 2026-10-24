@@ -18,6 +18,8 @@ data class DocumentsUiState(
 sealed interface DocumentsEvent {
     data object Back : DocumentsEvent
     data object Upload : DocumentsEvent
+    data object Scan : DocumentsEvent
+    data object ScanFailed : DocumentsEvent
     data class Picked(val uri: String) : DocumentsEvent
     data object DismissNotice : DocumentsEvent
     data class OpenForm(val id: String) : DocumentsEvent

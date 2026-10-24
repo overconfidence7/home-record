@@ -146,10 +146,11 @@
     <string name="more_documents_supporting">Manuals, receipts, permits and warranties</string>
     <string name="documents_title">Documents</string>
     <string name="documents_add">Add document</string>
+    <string name="documents_scan">Scan a document</string>
     <string name="documents_empty_title">No documents yet</string>
     <string name="documents_empty_body">Add the manuals, receipts and permits you would hate to lose. PDFs and photos both work.</string>
     <string name="documents_unfiled">Not in a folder</string>
-    <string name="documents_unsupported">That file is not a PDF or a photo, so it was not added.</string>
+    <string name="documents_unsupported">That file could not be added. Only PDFs and photos work.</string>
     <string name="documents_dismiss">Dismiss</string>
     <string name="documents_form_title">Edit document</string>
     <string name="documents_name">Name</string>

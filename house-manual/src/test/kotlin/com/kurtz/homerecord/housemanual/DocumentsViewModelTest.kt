@@ -80,6 +80,15 @@ class DocumentsViewModelTest {
     }
 
     @AcceptanceCriterion("AC-C37")
+    @Test fun failedScanShowsNoticeAndScannedPdfIsListed() {
+        val vm = vm()
+        vm.onEvent(DocumentsEvent.ScanFailed)
+        vm.await { it.unsupportedNotice }
+        vm.onEvent(DocumentsEvent.Picked("u/manual.pdf"))
+        vm.await { it.folders.isNotEmpty() && !it.unsupportedNotice }
+    }
+
+    @AcceptanceCriterion("AC-C37")
     @Test fun renameAndMoveToFolderThenDelete() {
         val vm = vm()
         vm.onEvent(DocumentsEvent.Picked("u/manual.pdf"))

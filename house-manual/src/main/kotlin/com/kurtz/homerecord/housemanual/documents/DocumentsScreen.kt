@@ -13,6 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DocumentScanner
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.PictureAsPdf
@@ -54,6 +58,14 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
         },
     ) { padding ->
         Column(Modifier.padding(padding)) {
+            OutlinedButton(
+                onClick = { onEvent(DocumentsEvent.Scan) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).heightIn(min = 48.dp).testTag("hm_documents_scan"),
+            ) {
+                Icon(Icons.Rounded.DocumentScanner, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.documents_scan))
+            }
             if (state.unsupportedNotice) {
                 Card(
                     Modifier.fillMaxWidth().padding(16.dp).testTag("hm_documents_notice"),

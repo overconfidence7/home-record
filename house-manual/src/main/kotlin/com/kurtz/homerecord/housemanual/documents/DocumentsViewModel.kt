@@ -57,7 +57,8 @@ class DocumentsViewModel(
                 ui.update { it.copy(confirmDeleteId = null) }
                 setForm(null, false)
             }
-            DocumentsEvent.Back, DocumentsEvent.Upload -> Unit // the route's job
+            DocumentsEvent.ScanFailed -> ui.update { it.copy(unsupported = true) }
+            DocumentsEvent.Back, DocumentsEvent.Upload, DocumentsEvent.Scan -> Unit // the route's job
         }
     }
 

@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":core-ui"))
     implementation(project(":house-model"))
     implementation(libs.coil.compose)
+    implementation(libs.mlkit.document.scanner)
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
     implementation(libs.navigation3.runtime)
