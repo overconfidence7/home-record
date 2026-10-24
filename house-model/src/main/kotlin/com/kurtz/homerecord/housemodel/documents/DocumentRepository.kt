@@ -35,6 +35,8 @@ class DocumentRepository(
                 .sortedBy { it.name.lowercase() }
         }
 
+    suspend fun find(id: String): DocumentEntity? = db.documentDao().get(id)
+
     /** Copies [uri] into storage and files it; null when it is not a readable PDF or image. */
     suspend fun add(homeId: String, scope: DocumentScope, uri: String, folder: String = "", name: String? = null): String? {
         val stored = files.import(uri) ?: return null

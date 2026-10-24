@@ -299,3 +299,13 @@ fun DocumentsUnsupportedScreenshot() = DocumentsUnsupportedPreview()
 @ThemePreviews
 @Composable
 fun DocumentFormScreenshot() = DocumentFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentViewerScreenshot() = DocumentViewerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentViewerMissingScreenshot() = DocumentViewerMissingPreview()

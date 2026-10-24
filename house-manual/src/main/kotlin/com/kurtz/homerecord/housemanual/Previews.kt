@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.coreui.theme.Brand
@@ -512,4 +513,41 @@ fun DocumentsUnsupportedPreview() = Frame { DocumentsScreen(DocumentsUiState(loa
 @Composable
 fun DocumentFormPreview() = Frame {
     DocumentFormContent(DocumentForm("d1", "Furnace manual.pdf", "Appliances"), false, {})
+}
+
+/** A two-page "manual" drawn with canvas so the viewer previews show real pages. */
+private object SamplePages : com.kurtz.homerecord.housemanual.documents.PageSource {
+    override val pageCount = 2
+    override suspend fun render(index: Int, widthPx: Int) = peek(index)
+    override fun peek(index: Int): androidx.compose.ui.graphics.ImageBitmap {
+        val bmp = android.graphics.Bitmap.createBitmap(600, 780, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(android.graphics.Color.WHITE)
+        val ink = android.graphics.Paint().apply { color = android.graphics.Color.DKGRAY; textSize = 34f; isAntiAlias = true }
+        canvas.drawText(if (index == 0) "Furnace owner's manual" else "Changing the filter", 40f, 80f, ink)
+        ink.textSize = 24f
+        listOf("Model GMVC96 · Serial 0415123456", "Replace the 16x25x1 filter every 3 months.", "Power off before opening the blower door.")
+            .forEachIndexed { i, line -> canvas.drawText(line, 40f, 140f + i * 40f, ink) }
+        return bmp.asImageBitmap()
+    }
+}
+
+@ThemePreviews
+@Composable
+fun DocumentViewerPreview() = Frame {
+    com.kurtz.homerecord.housemanual.documents.DocumentViewerScreen(
+        com.kurtz.homerecord.housemanual.documents.DocumentViewerUiState(
+            loading = false, name = "Furnace manual.pdf", path = "p1", mime = "application/pdf", pages = SamplePages,
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun DocumentViewerMissingPreview() = Frame {
+    com.kurtz.homerecord.housemanual.documents.DocumentViewerScreen(
+        com.kurtz.homerecord.housemanual.documents.DocumentViewerUiState(loading = false, name = "Deck permit 2024.pdf", missing = true),
+        {},
+    )
 }

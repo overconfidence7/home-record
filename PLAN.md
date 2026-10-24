@@ -106,7 +106,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T029a: `DocumentRepository` and `DocumentFiles` interface (add PDF/image, folders, rename, move, attach to home/room/item, delete) with tests (AC-C37)
   - [x] T029b: Android `DocumentFiles` impl, HM-Documents screen (folders, upload from Files, rename/move/delete), More entry
   - [x] T029b2: camera scan into Documents with the ML Kit document scanner (AC-C37)
-  - [ ] T029c: in-app PDF/image viewer with pinch zoom and share; item page Documents section (AC-C37)
+  - [x] T029c: in-app PDF/image viewer with pinch zoom and share (AC-C37)
+  - [ ] T029d: item page Documents section: list, attach existing, add from Files/scan, open in viewer (AC-C37)
 - [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
 - [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
 - [ ] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)

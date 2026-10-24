@@ -17,7 +17,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 
 @Composable
-fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit) {
+fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit, onOpen: (String) -> Unit) {
     val vm = viewModel<DocumentsViewModel>(
         factory = viewModelFactory { initializer { DocumentsViewModel(repo, homeId, createSavedStateHandle()) } },
     )
@@ -34,6 +34,7 @@ fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit)
     DocumentsScreen(vm.state.collectAsState().value, onEvent = {
         when (it) {
             DocumentsEvent.Back -> onBack()
+            is DocumentsEvent.Open -> onOpen(it.id)
             DocumentsEvent.Upload -> picker.launch(arrayOf("application/pdf", "image/*"))
             DocumentsEvent.Scan -> if (activity == null) {
                 vm.onEvent(DocumentsEvent.ScanFailed)

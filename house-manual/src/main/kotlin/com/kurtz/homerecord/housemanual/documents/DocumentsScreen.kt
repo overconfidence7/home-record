@@ -134,7 +134,7 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
 
 @Composable
 private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+    Card(onClick = { onEvent(DocumentsEvent.Open(doc.id)) }, modifier = Modifier.fillMaxWidth().testTag("hm_documents_row")) {
         Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null)
             Column(Modifier.weight(1f).padding(start = 12.dp)) {

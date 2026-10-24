@@ -22,6 +22,7 @@ sealed interface DocumentsEvent {
     data object ScanFailed : DocumentsEvent
     data class Picked(val uri: String) : DocumentsEvent
     data object DismissNotice : DocumentsEvent
+    data class Open(val id: String) : DocumentsEvent
     data class OpenForm(val id: String) : DocumentsEvent
     data class ChangeForm(val form: DocumentForm) : DocumentsEvent
     data object SaveForm : DocumentsEvent

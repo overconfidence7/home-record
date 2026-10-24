@@ -58,7 +58,7 @@ class DocumentsViewModel(
                 setForm(null, false)
             }
             DocumentsEvent.ScanFailed -> ui.update { it.copy(unsupported = true) }
-            DocumentsEvent.Back, DocumentsEvent.Upload, DocumentsEvent.Scan -> Unit // the route's job
+            is DocumentsEvent.Open, DocumentsEvent.Back, DocumentsEvent.Upload, DocumentsEvent.Scan -> Unit // the route's job
         }
     }
 

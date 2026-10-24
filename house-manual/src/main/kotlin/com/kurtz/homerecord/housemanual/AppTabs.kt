@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
+import com.kurtz.homerecord.housemanual.documents.DocumentViewerRoute
 import com.kurtz.homerecord.housemanual.documents.DocumentsRoute
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -123,7 +124,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
-        entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop) }
+        entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
+        entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
         entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->

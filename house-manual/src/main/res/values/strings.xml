@@ -144,6 +144,12 @@
     <string name="more_contacts_supporting">Plumber, electrician, HVAC and who serviced what</string>
     <string name="more_documents">Documents</string>
     <string name="more_documents_supporting">Manuals, receipts, permits and warranties</string>
+    <string name="document_viewer_back">Back to documents</string>
+    <string name="document_viewer_share">Share</string>
+    <string name="document_viewer_missing_title">This file can\'t be opened</string>
+    <string name="document_viewer_missing_body">It may have been removed from this phone. Go back and try another document.</string>
+    <string name="document_viewer_page">Page %1$d of %2$d</string>
+    <string name="document_viewer_open">Open %1$s</string>
     <string name="documents_title">Documents</string>
     <string name="documents_add">Add document</string>
     <string name="documents_scan">Scan a document</string>

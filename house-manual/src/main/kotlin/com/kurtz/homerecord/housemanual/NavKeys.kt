@@ -18,3 +18,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
+@Serializable data class DocumentViewerKey(val documentId: String) : NavKey

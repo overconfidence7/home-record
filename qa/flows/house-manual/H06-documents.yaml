@@ -1,4 +1,4 @@
-# Documents from the More tab (AC-C37): upload and camera scan buttons. The system file picker is not driven here; JVM tests cover the add path.
+# Documents from the More tab (AC-C37): upload and camera scan buttons; the viewer opens from a row (needs a seeded document, JVM tests cover it). The system file picker is not driven here; JVM tests cover the add path.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml

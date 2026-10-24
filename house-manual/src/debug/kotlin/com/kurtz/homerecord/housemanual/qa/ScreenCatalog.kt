@@ -43,6 +43,8 @@ object ScreenCatalog {
         QaScreen("documents-loading", nonRoot = true) { DocumentsLoadingPreview() },
         QaScreen("documents-unsupported", nonRoot = true) { DocumentsUnsupportedPreview() },
         QaScreen("document-form", nonRoot = true) { DocumentFormPreview() },
+        QaScreen("document-viewer", nonRoot = true) { DocumentViewerPreview() },
+        QaScreen("document-viewer-missing", nonRoot = true) { DocumentViewerMissingPreview() },
         QaScreen("items-empty", nonRoot = false) { ItemsEmptyPreview() },
         QaScreen("items-by-category", nonRoot = false) { ItemsByCategoryPreview() },
         QaScreen("items-by-room", nonRoot = false) { ItemsByRoomPreview() },
