@@ -125,9 +125,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 
 ## M3 Field Log core (Field Log usable)
 
-- [ ] T033: Time clock data and rules: `Punch`, `Shift` derivation `[unit]`, `PunchDistance` `[unit]`, `ShiftFlags` `[unit]`, `TimesheetMath` `[unit]` (OT rules, breaks, rounding), sync (acceptance: AC-F9, AC-F12, AC-F13)
+- [x] T033: Time clock data and rules: `Punch`, `Shift` derivation `[unit]`, `PunchDistance` `[unit]`, `ShiftFlags` `[unit]`, `TimesheetMath` `[unit]` (OT rules, breaks, rounding), sync (acceptance: AC-F9, AC-F12, AC-F13)
   - [x] T033a: pure rules in :core model: `PunchDistance`, `ShiftBuilder`/`Shift`, `ShiftFlags`, `TimesheetMath` with tests (AC-F9, AC-F12, AC-F13)
-  - [ ] T033b: `PunchRepository` (save punch offline with outbox row, derive and cache shifts, edit with audit) and sync of punches (AC-F8, AC-F52)
+  - [x] T033b: `PunchRepository` (save punch offline with outbox row, derive and cache shifts, edit with audit) and sync of punches (AC-F8, AC-F52)
 - [ ] T034: FL-Clock screen: Clock in with job picker, GPS fix (FusedLocationProvider, while-in-use, 5 s cap), far-from-job reason sheet, Break / Switch / Clock out, elapsed ticker, permission explanation and no-GPS path, "My timesheet" week view (acceptance: AC-F8, AC-F10, AC-F18)
 - [ ] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
 - [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)

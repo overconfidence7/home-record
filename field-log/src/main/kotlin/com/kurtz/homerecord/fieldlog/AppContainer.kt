@@ -15,6 +15,7 @@ import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.company.CompanyState
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.geo.AndroidGeocoder
+import com.kurtz.homerecord.core.punch.PunchRepository
 import com.kurtz.homerecord.fieldlog.jobs.JobGeocoder
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
 import com.kurtz.homerecord.core.sync.DeviceIdStore
@@ -81,6 +82,8 @@ class AppContainer(app: Application) {
         syncEngine.recordChange(tenant, entity, id)
         syncCoordinator.requestSync()
     }
+
+    val punches by lazy { PunchRepository(db, onChange = ::recordChange) }
 
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */
     suspend fun refreshMembers(companyId: String) {
