@@ -118,6 +118,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T031a: backend `POST /lookup/dataplate` (Claude vision, shared quota, cost log) and `GET /recalls` (CPSC proxy, 24 h KV cache, model matches first) with vitest (AC-B11, AC-B12)
   - [x] T031b: app side: data-plate scan falls back to `/lookup/dataplate` when OCR finds no model; item page "Check recalls" button and result list (AC-B11, AC-B12)
 - [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
+  - [x] T032a: `Entitlements` interface (Unavailable/Fake), `LimitGate` `[unit]` (1 home, 15 items, 1 panel, no sync) in :core billing (AC-H18)
+  - [ ] T032b: RevenueCat `purchases` behind `Entitlements`, key via BuildConfig per docs/billing.md, HM-Paywall with prices and Restore, gates on 16th item / second panel / Sign in, Test Store on debug (AC-H18)
 - [ ] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5
 
 ## M3 Field Log core (Field Log usable)
