@@ -15,6 +15,7 @@ data class ItemRow(
     val roomId: String?,
     val roomName: String,
     val warranty: WarrantyStatus,
+    val createdAt: Long = 0,
 )
 
 enum class WarrantyFilter { ACTIVE, EXPIRING, EXPIRED, UNKNOWN;

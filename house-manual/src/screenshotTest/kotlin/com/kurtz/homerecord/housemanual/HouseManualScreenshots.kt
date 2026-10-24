@@ -309,3 +309,23 @@ fun DocumentViewerScreenshot() = DocumentViewerPreview()
 @ThemePreviews
 @Composable
 fun DocumentViewerMissingScreenshot() = DocumentViewerMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeEmptyScreenshot() = HomeEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeFullScreenshot() = HomeFullPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeQuietScreenshot() = HomeQuietPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeLoadingScreenshot() = HomeLoadingPreview()

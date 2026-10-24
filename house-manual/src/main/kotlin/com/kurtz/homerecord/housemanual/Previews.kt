@@ -36,6 +36,10 @@ import com.kurtz.homerecord.housemanual.contacts.ContactsUiState
 import com.kurtz.homerecord.housemodel.upkeep.ContactDraft
 import com.kurtz.homerecord.housemanual.items.ItemDetailScreen
 import com.kurtz.homerecord.housemanual.items.ItemDetailUiState
+import com.kurtz.homerecord.housemanual.home.HomeScreen
+import com.kurtz.homerecord.housemanual.home.HomeUiState
+import com.kurtz.homerecord.housemodel.home.AttentionKind
+import com.kurtz.homerecord.housemodel.home.AttentionRow
 import com.kurtz.homerecord.housemanual.items.ItemsScreen
 import com.kurtz.homerecord.housemanual.items.ItemsUiState
 import com.kurtz.homerecord.housemanual.items.RoomOption
@@ -556,3 +560,31 @@ fun DocumentViewerMissingPreview() = Frame {
         {},
     )
 }
+
+private val homeRecent = sampleItems.take(3)
+
+private val homeAttention = listOf(
+    AttentionRow(AttentionKind.REMINDER_OVERDUE, "t1", "i1", "Replace furnace filter", "2026-10-01"),
+    AttentionRow(AttentionKind.WARRANTY_EXPIRING, "i2", "i2", "Water heater", "2026-12-02"),
+    AttentionRow(AttentionKind.MISSING_MAKE_MODEL, "i4", "i4", "Refrigerator", ""),
+)
+
+@ThemePreviews
+@Composable
+fun HomeEmptyPreview() = Frame { HomeScreen(HomeUiState(loading = false, homeName = "Maple St"), {}) }
+
+@ThemePreviews
+@Composable
+fun HomeFullPreview() = Frame {
+    HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, shutoffCount = 3, attention = homeAttention, recent = homeRecent), {})
+}
+
+@ThemePreviews
+@Composable
+fun HomeQuietPreview() = Frame {
+    HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, shutoffCount = 1, recent = homeRecent), {})
+}
+
+@ThemePreviews
+@Composable
+fun HomeLoadingPreview() = Frame { HomeScreen(HomeUiState(), {}) }

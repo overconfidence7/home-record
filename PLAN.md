@@ -109,6 +109,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T029c: in-app PDF/image viewer with pinch zoom and share (AC-C37)
   - [x] T029d: item page Documents section: list, attach existing, add from Files/scan, open in viewer (AC-C37)
 - [ ] T030: HM-Home: search bar, Emergency card (count), "Needs attention" rows, Recent items and photos, quick actions (Add item, Scan data plate, Photograph a wall → placeholder until M4) (acceptance: AC-H1, AC-H2, AC-H3)
+  - [x] T030a: `HomeSummaryBuilder` `[unit]` (overdue reminders, warranties expiring in 60 days, items missing make/model, shutoff count, recent items) and `ItemRepository.observeHomeSummary` (AC-H2)
+  - [x] T030b: HM-Home screen: quick actions, Emergency card, Needs attention (one line when empty), Recent; Photograph a wall shows a note until M4 (AC-H1, AC-H2)
+  - [ ] T030c: Home search bar and results (= T020b), reminder rows opening the reminder once the Reminders tab exists (AC-H3)
 - [ ] R06: Review T026–T030; run the House Manual walkthrough steps 1–5 of PRODUCT.md mentally against the screens and list gaps in BLOCKERS "Decisions to confirm"
 - [ ] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)
 - [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)

@@ -111,9 +111,15 @@ class ItemRepository(
                     id = i.id, name = i.name, make = i.make, model = i.model, categoryLabel = label,
                     categoryOrder = ItemListBuilder.categoryOrder(label), subtypeId = i.subtype, roomId = i.roomId,
                     roomName = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }.orEmpty(),
-                    warranty = WarrantyStatus.of(endsOn[i.id], todayIso),
+                    warranty = WarrantyStatus.of(endsOn[i.id], todayIso), createdAt = i.createdAt,
                 )
             }
+        }
+
+    /** HM-Home: attention rows, recent items and the shutoff count, as of today (AC-H2). */
+    fun observeHomeSummary(homeId: String, pseudoNames: Map<String, String>): Flow<com.kurtz.homerecord.housemodel.home.HomeSummary> =
+        combine(observeRows(homeId, pseudoNames), db.maintenanceTaskDao().observeFor(homeId)) { rows, tasks ->
+            com.kurtz.homerecord.housemodel.home.HomeSummaryBuilder.build(rows, tasks, today())
         }
 
     /** The item page; emits null when the item is gone. */
