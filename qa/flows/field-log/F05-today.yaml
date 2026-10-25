@@ -1,0 +1,61 @@
+# Walkthrough F5: Today shows the clock card, my jobs and the Owner on-site list; the card opens the Clock tab (AC-F16).
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn: "Company name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn: "Trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Garage subpanel"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Today"
+- extendedWaitUntil:
+    visible: "Not clocked in"
+    timeout: 10000
+- assertVisible:
+    id: fl_today_clock_card
+- assertVisible: "On site now"
+- assertVisible:
+    id: fl_today_on_site_empty
+- tapOn:
+    id: fl_today_clock_action
+- extendedWaitUntil:
+    visible: "My timesheet"
+    timeout: 10000
+- tapOn:
+    id: fl_clock_in
+- extendedWaitUntil:
+    visible: "Use your location to clock in?"
+    timeout: 10000
+- tapOn:
+    id: fl_clock_explain_skip
+- extendedWaitUntil:
+    visible: "Clocked in"
+    timeout: 15000
+- tapOn: "Today"
+- extendedWaitUntil:
+    id: fl_today_elapsed
+    timeout: 10000
+- assertVisible: "Garage subpanel"

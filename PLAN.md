@@ -132,6 +132,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T034a: `LocationProvider` (Fused, 5 s cap) in :core and `ClockController` (clock in, break, switch, out, far reason, no-location and require-GPS paths) with tests (AC-F8, AC-F10, AC-F18)
   - [x] T034b: FL-Clock screen on the Clock tab (job picker, permission explanation, far-from-job sheet, GPS-required Settings prompt, elapsed ticker, My timesheet week view) with ScreenCatalog, screenshots, F04 flow
 - [ ] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
+  - [x] T035a: `OnSiteBuilder` in :core (open shifts to "Who's on site" rows with clock-in pin) with tests (AC-F16)
+  - [x] T035b: FL-Today screen (clock status card opening the Clock tab, my jobs today, Owner/Office on-site list with map pin links), TodayMapper/ViewModel, ScreenCatalog, screenshots, F05 flow (AC-F16)
+  - [ ] T035c: capture FAB and recent photos (after T039/T040), my tasks due (after T044), Today refreshes team names (`refreshMembers`), clock widget 2x2 (AC-F17)
 - [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
 - [ ] T037: Time exports and reports: shift CSV, QuickBooks-ready CSV, `HoursReport` `[unit]`, FL-Reports hours by job/person (acceptance: AC-F15, AC-F46)
 - [ ] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)

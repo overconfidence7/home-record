@@ -41,6 +41,17 @@
 
     <string name="today_empty_title">No jobs yet at %1$s</string>
     <string name="today_empty_admin">Add a job or invite your crew. Anyone with your code can join from their own phone.</string>
+    <string name="today_jobs">My jobs today</string>
+    <string name="today_no_jobs">Nothing scheduled for you today.</string>
+    <string name="today_on_site">On site now</string>
+    <string name="today_on_site_empty">Nobody is clocked in.</string>
+    <string name="today_on_site_line">%1$s since %2$s</string>
+    <string name="today_on_site_break">On break from %1$s, in since %2$s</string>
+    <string name="today_unknown_member">Team member</string>
+    <string name="today_no_job">No job</string>
+    <string name="today_pin_description">Show where %1$s clocked in on the map</string>
+    <string name="today_since">Since %1$s, %2$s so far</string>
+    <string name="today_open_clock">Open clock</string>
     <string name="today_invite_crew">Invite crew</string>
     <string name="today_empty_crew">Nothing scheduled for you yet. Your boss adds you to a job and it shows up here.</string>
 

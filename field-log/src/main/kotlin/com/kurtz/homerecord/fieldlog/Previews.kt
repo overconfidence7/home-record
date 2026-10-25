@@ -131,6 +131,56 @@ fun TodayAdminPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", Com
 @Composable
 fun TodayCrewPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Crew), onInviteCrew = {}) }
 
+private const val TODAY_NOW = 1_761_400_000_000L
+
+private fun todayOnSite() = listOf(
+    com.kurtz.homerecord.core.model.OnSiteEntry("m1", "Maria Soto", "j1", "Kitchen Remodel", TODAY_NOW - 3 * 3600_000L, false, 40.0, -75.0),
+    com.kurtz.homerecord.core.model.OnSiteEntry("m2", "Dev Patel", "j2", "Deck Rebuild", TODAY_NOW - 90 * 60_000L, true, null, null),
+)
+
+private val todayJobs = listOf(
+    com.kurtz.homerecord.fieldlog.today.TodayJob("j1", "Kitchen Remodel", "412 Maple Ave"),
+    com.kurtz.homerecord.fieldlog.today.TodayJob("j2", "Deck Rebuild", "88 Orchard Ln"),
+)
+
+@ThemePreviews
+@Composable
+fun TodayAdminOnSitePreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Owner, hasJobs = true, jobs = todayJobs, onSite = todayOnSite(),
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(
+                com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", TODAY_NOW - 3 * 3600_000L), "Kitchen Remodel", TODAY_NOW,
+            ),
+        ),
+        onInviteCrew = {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TodayCrewOutPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Crew, hasJobs = true, jobs = todayJobs.take(1),
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
+        ),
+        onInviteCrew = {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TodayCrewNothingScheduledPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Crew, hasJobs = true,
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
+        ),
+        onInviteCrew = {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Owner), {}) }

@@ -88,11 +88,24 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 {
                     val phase by container.syncEngine.phase.collectAsState()
                     val pending by container.syncEngine.pendingCount.collectAsState(0)
-                    TodayScreen(
-                        TodayUiState(membership.companyName, membership.role, phase, pending),
-                        onInviteCrew = { nav.push(TeamKey) },
-                        onSyncNow = container.syncCoordinator::requestSync,
-                    )
+                    val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
+                    val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+                    if (memberId == null) {
+                        TodayScreen(
+                            TodayUiState(membership.companyName, membership.role, phase, pending),
+                            onInviteCrew = { nav.push(TeamKey) },
+                            onSyncNow = container.syncCoordinator::requestSync,
+                        )
+                    } else {
+                        com.kurtz.homerecord.fieldlog.today.TodayRoute(
+                            deps = { container.todayDeps(membership, memberId) },
+                            syncPhase = phase, pending = pending,
+                            onInviteCrew = { nav.push(TeamKey) },
+                            onSyncNow = container.syncCoordinator::requestSync,
+                            onOpenClock = { nav.selectTab("clock") },
+                            onOpenJob = { nav.push(JobKey(it)) },
+                        )
+                    }
                 }
                 key.depth == 0 && key.title == "more" -> MoreScreen(
                     MoreUiState(membership.companyName, membership.role),

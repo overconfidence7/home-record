@@ -46,6 +46,21 @@ fun TodayCrewScreenshot() = TodayCrewPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun TodayAdminOnSiteScreenshot() = TodayAdminOnSitePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TodayCrewOutScreenshot() = TodayCrewOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TodayCrewNothingScheduledScreenshot() = TodayCrewNothingScheduledPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun MoreOwnerScreenshot() = MoreOwnerPreview()
 
 @PreviewTest

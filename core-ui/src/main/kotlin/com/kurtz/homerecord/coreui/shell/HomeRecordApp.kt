@@ -31,6 +31,9 @@ val LocalTagPrefix = compositionLocalOf { "app" }
 interface ShellNav {
     fun push(key: NavKey)
     fun pop()
+
+    /** Switches to another bottom tab by its id; that tab keeps its own back stack. */
+    fun selectTab(id: String)
 }
 
 /** A bottom-bar destination. [root] is the key the tab's own back stack starts from. */
@@ -105,6 +108,7 @@ fun HomeRecordApp(
                     entries(object : ShellNav {
                         override fun push(key: NavKey) { stack.add(key) }
                         override fun pop() { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
+                        override fun selectTab(id: String) { if (tabs.any { it.id == id }) selectedId = id }
                     })
                 },
             )

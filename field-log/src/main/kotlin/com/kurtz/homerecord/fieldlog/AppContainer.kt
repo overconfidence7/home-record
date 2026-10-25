@@ -104,6 +104,16 @@ class AppContainer(app: Application) {
         )
     }
 
+    fun todayDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
+        com.kurtz.homerecord.fieldlog.today.TodayDeps(
+            memberId = memberId,
+            base = com.kurtz.homerecord.fieldlog.today.TodayUiState(membership.companyName, membership.role),
+            punches = db.punchDao().observeFor(membership.companyId),
+            members = db.memberDao().observeFor(membership.companyId),
+            jobs = db.jobDao().observeFor(membership.companyId),
+            assignments = db.assignmentDao().observeForCompany(membership.companyId),
+        )
+
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */
     suspend fun refreshMembers(companyId: String) {
         val result = companyApi.members(companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok ?: return
