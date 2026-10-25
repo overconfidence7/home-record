@@ -6,7 +6,7 @@ appId: com.kurtz.homerecord.fieldlog
 - runFlow:
     file: _sign-in.yaml
     env:
-      EMAIL: "qa-owner@example.test"
+      EMAIL: "qa-owner-f03@example.test"
 - extendedWaitUntil:
     visible: "Set up your company"
     timeout: 15000
