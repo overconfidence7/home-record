@@ -354,3 +354,84 @@ fun ClockCrewPreview() = Frame {
         ), {},
     )
 }
+
+private val TS_MONDAY = java.time.LocalDate.of(2026, 10, 19)
+private val TS_ZONE = java.time.ZoneId.of("America/Los_Angeles")
+private fun tsAt(day: Int, h: Int, m: Int = 0) = TS_MONDAY.plusDays(day.toLong()).atTime(h, m).atZone(TS_ZONE).toInstant().toEpochMilli()
+private fun tsDays(vararg worked: Pair<Int, Long>, flags: Map<Int, Set<com.kurtz.homerecord.core.model.ShiftFlag>> = emptyMap()) =
+    (0..6).map { d -> com.kurtz.homerecord.fieldlog.clock.SheetDay(TS_MONDAY.plusDays(d.toLong()), worked.toMap()[d] ?: 0L, flags[d].orEmpty()) }
+
+private val tsEdit = com.kurtz.homerecord.core.punch.PunchEdit("o1", "Nate Kurtz", tsAt(3, 15, 10), "Forgot to clock in", tsAt(1, 8, 45), tsAt(1, 7, 30))
+
+private val tsPeople = listOf(
+    com.kurtz.homerecord.fieldlog.timesheets.PersonWeek(
+        "m1", "Dana Whitfield",
+        com.kurtz.homerecord.fieldlog.clock.WeekSheet(tsDays(0 to 8 * 3_600_000L, 1 to 8 * 3_600_000L, 2 to 9 * 3_600_000L), 25 * 3_600_000L, 0, 0),
+        emptySet(), approved = true,
+        punches = listOf(
+            com.kurtz.homerecord.fieldlog.timesheets.PunchRow("p1", "IN", tsAt(0, 7), "j1", "Garage subpanel", false),
+            com.kurtz.homerecord.fieldlog.timesheets.PunchRow("p2", "OUT", tsAt(0, 15), "j1", "Garage subpanel", false),
+        ),
+    ),
+    com.kurtz.homerecord.fieldlog.timesheets.PersonWeek(
+        "m3", "Marcus Ortiz",
+        com.kurtz.homerecord.fieldlog.clock.WeekSheet(
+            tsDays(0 to 8 * 3_600_000L, 1 to 10 * 3_600_000L, 2 to 8 * 3_600_000L, flags = mapOf(1 to setOf(com.kurtz.homerecord.core.model.ShiftFlag.Edited, com.kurtz.homerecord.core.model.ShiftFlag.NoBreak))),
+            26 * 3_600_000L, 0, 0,
+        ),
+        setOf(com.kurtz.homerecord.core.model.ShiftFlag.Edited, com.kurtz.homerecord.core.model.ShiftFlag.NoBreak), approved = false,
+        punches = listOf(
+            com.kurtz.homerecord.fieldlog.timesheets.PunchRow("p3", "IN", tsAt(1, 7, 30), "j2", "Ortiz kitchen remodel", false, listOf(tsEdit)),
+            com.kurtz.homerecord.fieldlog.timesheets.PunchRow("p4", "OUT", tsAt(1, 17, 30), "j2", "Ortiz kitchen remodel", true),
+        ),
+    ),
+    com.kurtz.homerecord.fieldlog.timesheets.PersonWeek(
+        "m2", "Sam Rivera",
+        com.kurtz.homerecord.fieldlog.clock.WeekSheet(tsDays(0 to 4 * 3_600_000L), 4 * 3_600_000L, 0, 0),
+        setOf(com.kurtz.homerecord.core.model.ShiftFlag.MissingClockOut), approved = false,
+        punches = listOf(com.kurtz.homerecord.fieldlog.timesheets.PunchRow("p5", "IN", tsAt(0, 8), "j1", "Garage subpanel", false)),
+    ),
+)
+
+private fun tsState(open: String? = "m3") = com.kurtz.homerecord.fieldlog.timesheets.TimesheetsUiState(
+    loading = false, weekStart = TS_MONDAY, people = tsPeople, expandedId = open, isCurrentWeek = true,
+)
+
+@ThemePreviews
+@Composable
+fun TimesheetsWeekPreview() = Frame { com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(tsState(), {}, {}, TS_ZONE) }
+
+@ThemePreviews
+@Composable
+fun TimesheetsCollapsedPreview() = Frame { com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(tsState(open = null), {}, {}, TS_ZONE) }
+
+@ThemePreviews
+@Composable
+fun TimesheetsEditPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(
+        tsState().copy(
+            edit = com.kurtz.homerecord.fieldlog.timesheets.PunchEditSheet(
+                "p3", "Marcus Ortiz", "IN", "Tue Oct 20", "7:30 AM", "j2",
+                listOf(com.kurtz.homerecord.fieldlog.timesheets.JobChoice("j1", "Garage subpanel"), com.kurtz.homerecord.fieldlog.timesheets.JobChoice("j2", "Ortiz kitchen remodel")),
+                error = com.kurtz.homerecord.fieldlog.timesheets.EditError.ReasonRequired, audit = listOf(tsEdit),
+            ),
+        ),
+        {}, {}, TS_ZONE,
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TimesheetsApproveAllPreview() = Frame { com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(tsState().copy(confirmApproveAll = true), {}, {}, TS_ZONE) }
+
+@ThemePreviews
+@Composable
+fun TimesheetsEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(
+        com.kurtz.homerecord.fieldlog.timesheets.TimesheetsUiState(loading = false, weekStart = TS_MONDAY.minusWeeks(1), isCurrentWeek = false), {}, {}, TS_ZONE,
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TimesheetsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(com.kurtz.homerecord.fieldlog.timesheets.TimesheetsUiState(), {}, {}, TS_ZONE) }

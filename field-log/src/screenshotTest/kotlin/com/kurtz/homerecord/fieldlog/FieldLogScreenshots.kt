@@ -155,3 +155,39 @@ fun ClockNoJobsScreenshot() = ClockNoJobsPreview()
 @ThemePreviews
 @Composable
 fun ClockLoadingScreenshot() = ClockLoadingPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsWeekScreenshot() = TimesheetsWeekPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsCollapsedScreenshot() = TimesheetsCollapsedPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsEditScreenshot() = TimesheetsEditPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsApproveAllScreenshot() = TimesheetsApproveAllPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsEmptyScreenshot() = TimesheetsEmptyPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TimesheetsLoadingScreenshot() = TimesheetsLoadingPreview()

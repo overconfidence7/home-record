@@ -112,6 +112,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onEvent = { event ->
                         when (event) {
                             MoreEvent.OpenTeam -> nav.push(TeamKey)
+                            MoreEvent.OpenTimesheets -> nav.push(TimesheetsKey)
                             MoreEvent.OpenCompany -> nav.push(CompanyKey)
                             MoreEvent.SignOut -> container.auth.signOut()
                         }
@@ -166,6 +167,12 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 container::recordChange, onClose = nav::pop,
                 onSaved = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { container.jobGeocoder.resolvePending(membership.companyId) } },
             )
+        }
+        entry<TimesheetsKey> {
+            val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
+            val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+            if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.auth.signOut() }, Modifier)
+            else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId) }, onBack = nav::pop)
         }
         entry<CompanyKey> {
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)

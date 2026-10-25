@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Business
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Logout
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ data class MoreUiState(val companyName: String, val role: CompanyRole)
 
 sealed interface MoreEvent {
     data object OpenTeam : MoreEvent
+    data object OpenTimesheets : MoreEvent
     data object OpenCompany : MoreEvent
     data object SignOut : MoreEvent
 }
@@ -54,6 +56,12 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Groups, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenTeam) },
                 modifier = Modifier.testTag("fl_more_team"),
+            )
+            RecordListItem(
+                headline = stringResource(R.string.more_timesheets),
+                leading = { Icon(Icons.Rounded.Schedule, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenTimesheets) },
+                modifier = Modifier.testTag("fl_more_timesheets"),
             )
             RecordListItem(
                 headline = stringResource(R.string.more_company),

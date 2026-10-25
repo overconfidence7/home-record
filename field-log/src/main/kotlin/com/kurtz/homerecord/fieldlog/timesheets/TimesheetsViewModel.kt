@@ -28,7 +28,7 @@ import java.time.temporal.TemporalAdjusters
 /** Everything Timesheets needs from outside, so tests can swap each piece. Owner and Office only (AC-F3). */
 class TimesheetsDeps(
     val callerId: String,
-    val callerName: String,
+    val callerName: suspend () -> String,
     val punchRepo: PunchRepository,
     val approvals: TimesheetApprovals,
     val members: Flow<List<MemberEntity>>,
@@ -131,7 +131,7 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
         val old = latestPunches.firstOrNull { it.id == sheet.punchId } ?: return
         val newAt = Instant.ofEpochMilli(old.at).atZone(d.zone).toLocalDate().atTime(time).atZone(d.zone).toInstant().toEpochMilli()
         viewModelScope.launch {
-            val ok = d.punchRepo.edit(sheet.punchId, d.callerId, d.callerName, newAt, sheet.jobId, sheet.reason)
+            val ok = d.punchRepo.edit(sheet.punchId, d.callerId, d.callerName(), newAt, sheet.jobId, sheet.reason)
             if (ok) _state.update { it.copy(edit = null) } else editSheet { it.copy(error = EditError.Locked) }
         }
     }

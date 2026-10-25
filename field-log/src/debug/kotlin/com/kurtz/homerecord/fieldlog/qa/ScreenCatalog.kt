@@ -35,6 +35,12 @@ object ScreenCatalog {
         QaScreen("clock-gps-required", nonRoot = false) { ClockGpsRequiredPreview() },
         QaScreen("clock-no-jobs", nonRoot = false) { ClockNoJobsPreview() },
         QaScreen("clock-loading", nonRoot = false) { ClockLoadingPreview() },
+        QaScreen("timesheets-week", nonRoot = true) { TimesheetsWeekPreview() },
+        QaScreen("timesheets-collapsed", nonRoot = true) { TimesheetsCollapsedPreview() },
+        QaScreen("timesheets-edit", nonRoot = true) { TimesheetsEditPreview() },
+        QaScreen("timesheets-approve-all", nonRoot = true) { TimesheetsApproveAllPreview() },
+        QaScreen("timesheets-empty", nonRoot = true) { TimesheetsEmptyPreview() },
+        QaScreen("timesheets-loading", nonRoot = true) { TimesheetsLoadingPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )

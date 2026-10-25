@@ -117,6 +117,21 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    fun timesheetsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
+        com.kurtz.homerecord.fieldlog.timesheets.TimesheetsDeps(
+            callerId = memberId,
+            callerName = { db.memberDao().get(memberId)?.name ?: membership.companyName },
+            punchRepo = punches, approvals = approvals,
+            members = db.memberDao().observeFor(membership.companyId),
+            punches = db.punchDao().observeFor(membership.companyId),
+            jobs = db.jobDao().observeFor(membership.companyId),
+            approvalRows = db.timesheetApprovalDao().observeAll(),
+            settings = {
+                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
+                    ?: com.kurtz.homerecord.core.company.CompanySettings()
+            },
+        )
+
     fun todayDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
         com.kurtz.homerecord.fieldlog.today.TodayDeps(
             memberId = memberId,

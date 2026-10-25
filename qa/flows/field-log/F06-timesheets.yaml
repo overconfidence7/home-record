@@ -1,0 +1,32 @@
+# Walkthrough F6: Owner opens Timesheets from More; an empty week says so and the week picker works (AC-F14).
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn: "Company name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn: "Trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+- tapOn: "More"
+- tapOn:
+    id: fl_more_timesheets
+- extendedWaitUntil:
+    id: fl_timesheets_empty
+    timeout: 10000
+- tapOn:
+    id: fl_timesheets_prev
+- assertVisible:
+    id: fl_timesheets_empty

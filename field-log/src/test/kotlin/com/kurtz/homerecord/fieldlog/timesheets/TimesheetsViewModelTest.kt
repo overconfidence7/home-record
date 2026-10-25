@@ -74,7 +74,7 @@ class TimesheetsViewModelTest {
 
     private suspend fun vm(): TimesheetsViewModel {
         val deps = TimesheetsDeps(
-            "o1", "Nate Kurtz", repo, TimesheetApprovals(db, { zone }, { now }),
+            "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
             db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
             db.timesheetApprovalDao().observeAll(), { CompanySettings() }, zone, { now },
         )
@@ -164,7 +164,7 @@ class TimesheetsViewModelTest {
     }
 
     private fun depsFor() = TimesheetsDeps(
-        "o1", "Nate Kurtz", repo, TimesheetApprovals(db, { zone }, { now }),
+        "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
         db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
         db.timesheetApprovalDao().observeAll(), { CompanySettings() }, zone, { now },
     )
