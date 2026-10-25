@@ -971,3 +971,17 @@ Auto entry review (1 new finding for b4e1db2, 18 still open):
 Coverage note: the auto entry reports 107/107 claimed ACs covered across 41 ticked tasks (0 gaps); nothing to list.
 
 Judged: 471 screenshots (of 860 published: 49 flow and tour shots, 245 House Manual crawler, 144 Field Log crawler, 21 handoff crawler copies used where the app job's shot was blank, 6 suite shots, 6 builder reference PNGs for comparison; the 11 repeated H01/H02 takeScreenshot copies and the other 368 handoff duplicates were not re-read), 15 walkthrough steps. New issues: 19. Product gaps: 3.
+
+## QA auto 2026-10-25 (commit 5619796)
+
+Automated suite run at 2026-10-25 15:54 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F07-reports fails on field-log [auto:flow:field-log:F07-reports] - steps: automated, see qa-results branch latest/ for commit 5619796 - expected: walkthrough step F07 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F07-reports.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F02-invite-join], [auto:flow:field-log:F03-jobs], [auto:flow:field-log:F04-clock-in], [auto:flow:field-log:F05-today], [auto:flow:field-log:F06-timesheets], [auto:variant:field-log:dark], [auto:variant:field-log:font200], [auto:variant:field-log:landscape], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H05-contacts], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, field-log F03 Fail, field-log F04 Fail, field-log F05 Fail, field-log F06 Fail, field-log F07 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Fail, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Fail, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 67 device stages, 500 unit tests, 73 backend tests, coverage 109/109 ACs. Passed: 42. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
