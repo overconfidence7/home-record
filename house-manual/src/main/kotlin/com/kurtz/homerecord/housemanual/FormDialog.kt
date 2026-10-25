@@ -23,7 +23,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
 /** A create/edit form with more than two fields: full screen with Close and Save in the top app bar (ui-standards rule 15). */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormScreenDialog(
     title: String,
@@ -36,25 +35,38 @@ fun FormScreenDialog(
         onDismissRequest = onClose,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    title = { Text(title) },
-                    navigationIcon = {
-                        IconButton(onClick = onClose, modifier = Modifier.testTag("hm_form_close")) {
-                            Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.form_close))
-                        }
-                    },
-                    actions = {
-                        TextButton(onClick = onSave, modifier = Modifier.heightIn(min = 48.dp).testTag(saveTag)) {
-                            Text(stringResource(R.string.form_save))
-                        }
-                    },
-                )
-            },
-        ) { padding ->
-            Column(Modifier.padding(padding).imePadding()) { content() }
-        }
+        FormScreenScaffold(title, saveTag, onClose, onSave, content)
+    }
+}
+
+/** The form's window content; previews and the QA catalog draw it without the dialog window. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FormScreenScaffold(
+    title: String,
+    saveTag: String,
+    onClose: () -> Unit,
+    onSave: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onClose, modifier = Modifier.testTag("hm_close")) {
+                        Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.form_close))
+                    }
+                },
+                actions = {
+                    TextButton(onClick = onSave, modifier = Modifier.heightIn(min = 48.dp).testTag(saveTag)) {
+                        Text(stringResource(R.string.form_save))
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        Column(Modifier.padding(padding).imePadding()) { content() }
     }
 }
