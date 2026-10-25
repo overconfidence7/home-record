@@ -28,7 +28,7 @@ class HomeViewModelTest {
     @After fun tearDown() = Dispatchers.resetMain()
 
     @Test @AcceptanceCriterion("AC-H2")
-    fun stateFollowsTheSummaryAndWallActionShowsItsNote() {
+    fun stateFollowsTheSummary() {
         val summary = MutableStateFlow(HomeSummary(0, emptyList(), emptyList(), 0))
         val vm = HomeViewModel(summary, "Maple St")
         val job = vm.state.onEach { }.launchIn(CoroutineScope(Dispatchers.Main))
@@ -37,9 +37,6 @@ class HomeViewModelTest {
         summary.value = HomeSummary(2, listOf(AttentionRow(AttentionKind.MISSING_MAKE_MODEL, "i", "i", "Fridge", "")), emptyList(), 1)
         assertThat(vm.state.value.shutoffCount).isEqualTo(2)
         assertThat(vm.state.value.attention).hasSize(1)
-        assertThat(vm.state.value.wallNoteShown).isFalse()
-        vm.onEvent(HomeEvent.PhotographWall)
-        assertThat(vm.state.value.wallNoteShown).isTrue()
         job.cancel()
     }
 

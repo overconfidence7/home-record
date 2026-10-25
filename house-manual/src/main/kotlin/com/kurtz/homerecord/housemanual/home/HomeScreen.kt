@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.MeetingRoom
@@ -65,10 +64,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
                 return@Column
             }
             QuickActions(state, onEvent)
-            if (state.wallNoteShown) {
-                Text(stringResource(R.string.home_wall_soon), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("hm_home_wall_note"))
-            }
-            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddItem) })
+            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddShutoff) })
             Section(stringResource(R.string.home_attention)) {
                 if (state.attention.isEmpty()) {
                     Text(stringResource(R.string.home_attention_none), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_home_attention_none"))
@@ -109,7 +105,6 @@ private fun QuickActions(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
         }
         ActionButton(Icons.Rounded.Add, R.string.home_action_add, "hm_home_add_item", filled = true) { onEvent(HomeEvent.AddItem) }
         ActionButton(Icons.Rounded.DocumentScanner, R.string.home_action_scan, "hm_home_scan_plate") { onEvent(HomeEvent.ScanDataPlate) }
-        ActionButton(Icons.Rounded.CameraAlt, R.string.home_action_wall, "hm_home_photo_wall") { onEvent(HomeEvent.PhotographWall) }
     }
 }
 

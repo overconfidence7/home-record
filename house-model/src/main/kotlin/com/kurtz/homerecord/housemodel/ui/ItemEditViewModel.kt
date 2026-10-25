@@ -37,8 +37,13 @@ class ItemEditViewModel(
     private val vision: DataPlateVisionApi? = null,
     initialRoomId: String? = null,
     private val afterCreate: (String) -> Unit = {},
+    initialSubtypeId: String? = null,
 ) : ViewModel() {
-    private var original = ItemDraft(roomId = initialRoomId)
+    private var original = ItemDraft(
+        roomId = initialRoomId,
+        subtypeId = initialSubtypeId ?: ItemDraft().subtypeId,
+        name = initialSubtypeId?.let { ItemCategory.subtype(it)?.label }.orEmpty(),
+    )
 
     private val _state = MutableStateFlow(
         ItemEditUiState(draft = restore() ?: original, decodedRule = saved.get<String>(DECODED)),

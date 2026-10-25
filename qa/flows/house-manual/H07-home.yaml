@@ -7,8 +7,6 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_home_scan_plate"
 - assertVisible:
-    id: "hm_home_photo_wall"
-- assertVisible:
     id: "hm_home_emergency"
 - assertVisible:
     id: "hm_home_attention_none"

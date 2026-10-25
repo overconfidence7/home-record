@@ -19,6 +19,8 @@ fun HomeRoute(
     homeId: String,
     homeName: String,
     onAddItem: () -> Unit,
+    onScanDataPlate: () -> Unit,
+    onAddShutoff: () -> Unit,
     onOpenItem: (String) -> Unit,
     onOpenRoom: (String) -> Unit,
     onOpenDocument: (String) -> Unit,
@@ -33,9 +35,11 @@ fun HomeRoute(
     )
     HomeScreen(vm.state.collectAsState().value, onEvent = {
         when (it) {
-            HomeEvent.AddItem, HomeEvent.ScanDataPlate -> onAddItem()
+            HomeEvent.AddItem -> onAddItem()
+            HomeEvent.ScanDataPlate -> onScanDataPlate()
+            HomeEvent.AddShutoff -> onAddShutoff()
             is HomeEvent.OpenItem -> onOpenItem(it.itemId)
-            HomeEvent.PhotographWall, is HomeEvent.QueryChanged -> vm.onEvent(it)
+            is HomeEvent.QueryChanged -> vm.onEvent(it)
             is HomeEvent.OpenResult -> when (it.kind) {
                 SearchKind.ITEM -> onOpenItem(it.id)
                 SearchKind.ROOM -> onOpenRoom(it.id)

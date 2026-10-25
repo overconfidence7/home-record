@@ -225,8 +225,6 @@
     <string name="home_empty_body">Start with one thing. Add an item, scan a data plate, or photograph a wall.</string>
     <string name="home_action_add">Add item</string>
     <string name="home_action_scan">Scan data plate</string>
-    <string name="home_action_wall">Photograph a wall</string>
-    <string name="home_wall_soon">Wall photos arrive with the room blueprint tools.</string>
     <string name="home_emergency">Emergency</string>
     <string name="home_emergency_none">No shutoffs recorded yet. Know where the water, gas and power shut off.</string>
     <string name="home_emergency_add">Add a shutoff</string>

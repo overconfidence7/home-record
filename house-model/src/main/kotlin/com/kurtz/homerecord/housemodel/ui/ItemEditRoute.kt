@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.ocr.TextRecognizer
@@ -32,13 +33,22 @@ fun ItemEditRoute(
     homeId: String,
     itemId: String?,
     roomId: String?,
+    subtypeId: String? = null,
+    scanPlate: Boolean = false,
     onClose: () -> Unit,
     afterCreate: (String) -> Unit = {},
 ) {
     val vm = viewModel<ItemEditViewModel>(
-        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, vision, roomId, afterCreate) } },
+        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, vision, roomId, afterCreate, subtypeId) } },
     )
     val state = vm.state.collectAsState().value
+    var scanOffered by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(scanPlate) {
+        if (scanPlate && !scanOffered) {
+            scanOffered = true
+            vm.onEvent(ItemEditEvent.OpenPhotoSheet(PhotoKind.DATA_PLATE))
+        }
+    }
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }
     var pending by remember { mutableStateOf<Pair<PhotoKind, String>?>(null) }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->

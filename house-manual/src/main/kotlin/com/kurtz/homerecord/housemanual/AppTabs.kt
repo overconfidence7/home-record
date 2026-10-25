@@ -100,7 +100,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<HomeKey> {
             HomeRoute(
                 container.items, container.search, home.id, home.name,
-                onAddItem = { addItem(scope, container, home.id, nav) }, onOpenItem = { nav.push(ItemDetailKey(it)) },
+                onAddItem = { addItem(scope, container, home.id, nav) },
+                onScanDataPlate = { addItem(scope, container, home.id, nav, scanPlate = true) },
+                onAddShutoff = { addItem(scope, container, home.id, nav, subtypeId = "water_main") }, onOpenItem = { nav.push(ItemDetailKey(it)) },
                 onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
             )
         }
@@ -138,7 +140,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             )
         }
         entry<ItemEditKey> { key ->
-            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
+            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
@@ -185,10 +187,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
 }
 
 /** The 16th free item opens HM-Paywall instead of the form (AC-H18); Pro adds without a limit. */
-private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null) {
+private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null, subtypeId: String? = null, scanPlate: Boolean = false) {
     scope.launch {
         val count = container.db.itemDao().observeFor(homeId).first().size
         if (LimitGate.blocked(container.billing, LimitedFeature.SixteenthItem, count)) nav.push(PaywallKey(LimitedFeature.SixteenthItem))
-        else nav.push(ItemEditKey(roomId = roomId))
+        else nav.push(ItemEditKey(roomId = roomId, subtypeId = subtypeId, scanPlate = scanPlate))
     }
 }

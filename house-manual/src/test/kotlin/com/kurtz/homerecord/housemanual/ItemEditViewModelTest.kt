@@ -98,6 +98,15 @@ class ItemEditViewModelTest {
         assertThat(items.get(id!!)?.subtype).isEqualTo("furnace")
     }
 
+    @AcceptanceCriterion("AC-H2")
+    @Test fun addShutoffOpensWithTheShutoffTypeChosen() = runTest {
+        home()
+        val vm = ItemEditViewModel(items, homes, homeId, null, SavedStateHandle(), media, recognizer, vision, initialSubtypeId = "water_main").also { created += it }
+        vm.state.first { !it.loading }
+        assertThat(vm.state.value.draft.subtypeId).isEqualTo("water_main")
+        assertThat(vm.state.value.draft.name).isEqualTo("Water main")
+    }
+
     @AcceptanceCriterion("AC-C30")
     @Test fun roomPickerListsEveryRoomOfTheHome() = runTest {
         home()
