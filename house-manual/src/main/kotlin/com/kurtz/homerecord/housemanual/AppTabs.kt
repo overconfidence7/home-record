@@ -144,7 +144,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
-        entry<RoomKey> { key -> RoomRoute(container.homes, key.roomId, onBack = nav::pop) }
+        entry<RoomKey> { key -> RoomRoute(
+            container.homes, container.items, home.id, key.roomId, onBack = nav::pop,
+            onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },
+        ) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
@@ -182,10 +185,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
 }
 
 /** The 16th free item opens HM-Paywall instead of the form (AC-H18); Pro adds without a limit. */
-private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav) {
+private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null) {
     scope.launch {
         val count = container.db.itemDao().observeFor(homeId).first().size
         if (LimitGate.blocked(container.billing, LimitedFeature.SixteenthItem, count)) nav.push(PaywallKey(LimitedFeature.SixteenthItem))
-        else nav.push(ItemEditKey())
+        else nav.push(ItemEditKey(roomId = roomId))
     }
 }

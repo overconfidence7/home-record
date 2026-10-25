@@ -18,6 +18,7 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.ui.HouseDialog
 import com.kurtz.homerecord.housemodel.ui.HouseScreen
 import com.kurtz.homerecord.housemodel.ui.HouseUiState
+import com.kurtz.homerecord.housemodel.ui.RoomItem
 import com.kurtz.homerecord.housemodel.ui.RoomScreen
 import com.kurtz.homerecord.housemodel.ui.ItemEditScreen
 import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
@@ -272,7 +273,7 @@ fun HouseNoFloorsPreview() = Frame { houseScreen(HouseUiState(loading = false, h
 
 @ThemePreviews
 @Composable
-fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St"), {}) }
+fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", items = listOf(RoomItem("i1", "Dishwasher", "Bosch SHPM88Z75N"), RoomItem("i2", "Range hood", "Broan"))), {}, onAddItem = {}) }
 
 @ThemePreviews
 @Composable

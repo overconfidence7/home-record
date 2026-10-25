@@ -115,6 +115,7 @@
     <string name="room_items_empty_title">Nothing in this room yet</string>
     <string name="room_items_empty_body">Items, outlets and photos for this room will show up here.</string>
     <string name="room_section_items">Items</string>
+    <string name="room_add_item">Add an item here</string>
     <string name="room_section_items_empty">Nothing here yet. Appliances, fixtures and furniture you add will list here.</string>
     <string name="room_section_walls">Walls</string>
     <string name="room_section_walls_empty">No wall details yet. Paint colors and finishes will list here.</string>

@@ -101,3 +101,8 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_detail_document_scan"
 - assertVisible:
     id: "hm_item_detail_document_attach"
+# AC-H10: the room page lists its items and offers Add item
+- tapOn: "House"
+- tapOn: "Kitchen"
+- assertVisible:
+    id: "hm_room_add_item"
