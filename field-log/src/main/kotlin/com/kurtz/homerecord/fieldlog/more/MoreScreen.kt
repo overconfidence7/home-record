@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Business
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Logout
@@ -34,6 +35,7 @@ data class MoreUiState(val companyName: String, val role: CompanyRole)
 sealed interface MoreEvent {
     data object OpenTeam : MoreEvent
     data object OpenTimesheets : MoreEvent
+    data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
     data object SignOut : MoreEvent
 }
@@ -62,6 +64,12 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Schedule, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenTimesheets) },
                 modifier = Modifier.testTag("fl_more_timesheets"),
+            )
+            RecordListItem(
+                headline = stringResource(R.string.more_reports),
+                leading = { Icon(Icons.Rounded.BarChart, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenReports) },
+                modifier = Modifier.testTag("fl_more_reports"),
             )
             RecordListItem(
                 headline = stringResource(R.string.more_company),

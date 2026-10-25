@@ -196,3 +196,27 @@ fun TimesheetsEmptyScreenshot() = TimesheetsEmptyPreview()
 @ThemePreviews
 @Composable
 fun TimesheetsLoadingScreenshot() = TimesheetsLoadingPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportsWeekScreenshot() = ReportsWeekPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportsSharedScreenshot() = ReportsSharedPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportsEmptyScreenshot() = ReportsEmptyPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportsLoadingScreenshot() = ReportsLoadingPreview()

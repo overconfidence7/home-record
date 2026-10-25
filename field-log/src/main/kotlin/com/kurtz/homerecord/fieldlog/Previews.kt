@@ -439,3 +439,44 @@ fun TimesheetsEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun TimesheetsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(com.kurtz.homerecord.fieldlog.timesheets.TimesheetsUiState(), {}, {}, TS_ZONE) }
+
+private fun hrs(h: Int, m: Int = 0) = (h * 60L + m) * 60_000L
+
+private val repState = com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
+    loading = false, range = com.kurtz.homerecord.fieldlog.reports.ReportRange.ThisWeek,
+    from = TS_MONDAY, to = TS_MONDAY.plusDays(6),
+    byPerson = listOf(
+        com.kurtz.homerecord.core.model.HoursLine("m1", "Dana Whitfield", hrs(25)),
+        com.kurtz.homerecord.core.model.HoursLine("m3", "Marcus Ortiz", hrs(44, 30), hrs(40), hrs(4, 30)),
+        com.kurtz.homerecord.core.model.HoursLine("m2", "Sam Rivera", hrs(4)),
+    ),
+    byJob = listOf(
+        com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(44, 30)),
+        com.kurtz.homerecord.core.model.HoursLine("j1", "Garage subpanel", hrs(29)),
+    ),
+    totalMillis = hrs(73, 30), regularMillis = hrs(69), overtimeMillis = hrs(4, 30),
+)
+
+@ThemePreviews
+@Composable
+fun ReportsWeekPreview() = Frame { com.kurtz.homerecord.fieldlog.reports.ReportsScreen(repState, {}, {}) }
+
+@ThemePreviews
+@Composable
+fun ReportsSharedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(repState.copy(notice = com.kurtz.homerecord.fieldlog.reports.ExportNotice.Shared), {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun ReportsEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(
+        com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
+            loading = false, range = com.kurtz.homerecord.fieldlog.reports.ReportRange.LastWeek, from = TS_MONDAY.minusWeeks(1), to = TS_MONDAY.minusDays(1),
+        ), {}, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ReportsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.reports.ReportsScreen(com.kurtz.homerecord.fieldlog.reports.ReportsUiState(), {}, {}) }

@@ -113,6 +113,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         when (event) {
                             MoreEvent.OpenTeam -> nav.push(TeamKey)
                             MoreEvent.OpenTimesheets -> nav.push(TimesheetsKey)
+                            MoreEvent.OpenReports -> nav.push(ReportsKey)
                             MoreEvent.OpenCompany -> nav.push(CompanyKey)
                             MoreEvent.SignOut -> container.auth.signOut()
                         }
@@ -173,6 +174,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
             if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.auth.signOut() }, Modifier)
             else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId) }, onBack = nav::pop)
+        }
+        entry<ReportsKey> {
+            com.kurtz.homerecord.fieldlog.reports.ReportsRoute({ container.reportsDeps(membership) }, onBack = nav::pop)
         }
         entry<CompanyKey> {
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)

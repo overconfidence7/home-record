@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object TimesheetsKey : NavKey
 
+@Serializable data object ReportsKey : NavKey
+
 @Serializable data class JobEditKey(val jobId: String? = null) : NavKey
 
 @Serializable data class JobKey(val jobId: String) : NavKey

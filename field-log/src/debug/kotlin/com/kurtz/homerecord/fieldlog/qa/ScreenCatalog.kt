@@ -42,6 +42,10 @@ object ScreenCatalog {
         QaScreen("timesheets-approve-all", nonRoot = true) { TimesheetsApproveAllPreview() },
         QaScreen("timesheets-empty", nonRoot = true) { TimesheetsEmptyPreview() },
         QaScreen("timesheets-loading", nonRoot = true) { TimesheetsLoadingPreview() },
+        QaScreen("reports-week", nonRoot = true) { ReportsWeekPreview() },
+        QaScreen("reports-shared", nonRoot = true) { ReportsSharedPreview() },
+        QaScreen("reports-empty", nonRoot = true) { ReportsEmptyPreview() },
+        QaScreen("reports-loading", nonRoot = true) { ReportsLoadingPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )

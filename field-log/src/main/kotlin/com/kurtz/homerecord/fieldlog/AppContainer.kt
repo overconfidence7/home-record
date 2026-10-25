@@ -118,6 +118,21 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    fun reportsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership): com.kurtz.homerecord.fieldlog.reports.ReportsDeps {
+        val sharer = com.kurtz.homerecord.fieldlog.reports.TimeExportSharer(app)
+        return com.kurtz.homerecord.fieldlog.reports.ReportsDeps(
+            members = db.memberDao().observeFor(membership.companyId),
+            punches = db.punchDao().observeFor(membership.companyId),
+            jobs = db.jobDao().observeFor(membership.companyId),
+            clients = db.clientDao().observeFor(membership.companyId),
+            settings = {
+                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
+                    ?: com.kurtz.homerecord.core.company.CompanySettings()
+            },
+            share = { sharer.share(sharer.write(it)) },
+        )
+    }
+
     fun timesheetsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
         com.kurtz.homerecord.fieldlog.timesheets.TimesheetsDeps(
             callerId = memberId,

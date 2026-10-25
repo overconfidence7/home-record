@@ -57,6 +57,24 @@
 
     <string name="more_team">Team</string>
     <string name="more_company">Company</string>
+    <string name="more_reports">Reports</string>
+    <string name="rep_title">Reports</string>
+    <string name="rep_range_this">This week</string>
+    <string name="rep_range_last">Last week</string>
+    <string name="rep_range_four">Last 4 weeks</string>
+    <string name="rep_dates">%1$s to %2$s</string>
+    <string name="rep_empty">No hours in these dates. Hours show here once the crew clocks in.</string>
+    <string name="rep_total">%1$s total</string>
+    <string name="rep_regular">%1$s regular</string>
+    <string name="rep_overtime">%1$s overtime</string>
+    <string name="rep_double">%1$s double time</string>
+    <string name="rep_by_person">By person</string>
+    <string name="rep_by_job">By job</string>
+    <string name="rep_export_shifts">Export shifts (CSV)</string>
+    <string name="rep_export_quickbooks">Export for QuickBooks (CSV)</string>
+    <string name="rep_notice_shared">File ready. Pick where to send it.</string>
+    <string name="rep_notice_failed">Couldn\'t share the file. Try again.</string>
+    <string name="rep_notice_empty">Nothing to export in these dates.</string>
     <string name="more_timesheets">Timesheets</string>
     <string name="ts_title">Timesheets</string>
     <string name="ts_prev_week">Previous week</string>
