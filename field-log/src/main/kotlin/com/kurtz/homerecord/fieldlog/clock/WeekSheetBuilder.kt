@@ -24,9 +24,10 @@ data class WeekSheet(
 
 /** "My timesheet": this week (Monday first) by day with totals and flags (FL-Clock, AC-F12, AC-F13). Pure. */
 object WeekSheetBuilder {
-    fun build(shifts: List<Shift>, rules: TimesheetRules, breakRule: Boolean, zone: ZoneId, now: Long): WeekSheet {
-        val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
-        val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    fun build(
+        shifts: List<Shift>, rules: TimesheetRules, breakRule: Boolean, zone: ZoneId, now: Long,
+        monday: LocalDate = Instant.ofEpochMilli(now).atZone(zone).toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+    ): WeekSheet {
         val from = monday.atStartOfDay(zone).toInstant().toEpochMilli()
         val to = monday.plusDays(7).atStartOfDay(zone).toInstant().toEpochMilli()
         val flagged = ShiftFlags.flags(shifts, breakRule, now)

@@ -256,6 +256,7 @@ interface TimesheetApprovalDao {
     @Query("SELECT * FROM timesheet_approval WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): TimesheetApprovalEntity?
     @Query("SELECT * FROM timesheet_approval WHERE memberId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<TimesheetApprovalEntity>>
     @Query("SELECT * FROM timesheet_approval WHERE memberId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<TimesheetApprovalEntity>
+    @Query("SELECT * FROM timesheet_approval WHERE deletedAt IS NULL ORDER BY createdAt") fun observeAll(): Flow<List<TimesheetApprovalEntity>>
     @Query("UPDATE timesheet_approval SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 
