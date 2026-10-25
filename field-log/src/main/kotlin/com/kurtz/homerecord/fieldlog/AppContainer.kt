@@ -112,6 +112,7 @@ class AppContainer(app: Application) {
             members = db.memberDao().observeFor(membership.companyId),
             jobs = db.jobDao().observeFor(membership.companyId),
             assignments = db.assignmentDao().observeForCompany(membership.companyId),
+            refreshMembers = { refreshMembers(membership.companyId) },
         )
 
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */

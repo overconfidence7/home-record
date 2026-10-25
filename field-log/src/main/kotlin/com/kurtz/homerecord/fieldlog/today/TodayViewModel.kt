@@ -24,6 +24,8 @@ class TodayDeps(
     val members: Flow<List<MemberEntity>>,
     val jobs: Flow<List<JobEntity>>,
     val assignments: Flow<List<AssignmentEntity>>,
+    /** Refreshes the cached team list so names are current; failures are ignored (offline keeps the cache). */
+    val refreshMembers: suspend () -> Unit = {},
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
     val ticks: Flow<Unit> = flow { while (true) { emit(Unit); kotlinx.coroutines.delay(30_000) } },
@@ -34,6 +36,7 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
     val state: StateFlow<TodayUiState> = _state.asStateFlow()
 
     init {
+        viewModelScope.launch { d.refreshMembers() }
         viewModelScope.launch {
             combine(d.punches, d.members, d.jobs, d.assignments, d.ticks) { p, m, j, a, _ -> arrayOf(p, m, j, a) }
                 .collect { rows ->
