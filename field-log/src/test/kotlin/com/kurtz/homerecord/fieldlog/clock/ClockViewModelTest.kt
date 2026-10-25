@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.company.CompanySettings
+import com.kurtz.homerecord.core.data.MemberEntity
+import com.kurtz.homerecord.core.punch.CrewClock
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.location.LocationProvider
@@ -39,7 +42,7 @@ private class FakeLocation(var permitted: Boolean = true, var fix: GeoFix? = Geo
     override suspend fun currentFix(timeoutMs: Long): GeoFix? = if (permitted) fix else null
 }
 
-// AC-F8 (clock in with job), AC-F9 (far reason), AC-F10 (break, switch, out), AC-F18 (explanation once, no-location and require-GPS paths)
+// AC-F11 (lead crew clock-in), AC-F8 (clock in with job), AC-F9 (far reason), AC-F10 (break, switch, out), AC-F18 (explanation once, no-location and require-GPS paths)
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -68,11 +71,12 @@ class ClockViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private suspend fun vm(): ClockViewModel {
+    private suspend fun vm(role: CompanyRole = CompanyRole.Crew): ClockViewModel {
         val punches = PunchRepository(db, { clock })
         val deps = ClockDeps(
             "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, { settings },
             { asked }, { asked = true }, now = { clock }, ticks = emptyFlow(),
+            role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"),
         )
         return ClockViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
     }
@@ -164,5 +168,49 @@ class ClockViewModelTest {
     @Test fun otherReasonNeedsText() {
         assertThat(FarReasonSheet(900, FarReasonSheet.OTHER, "  ").canSave).isFalse()
         assertThat(FarReasonSheet(900, FarReasonSheet.OTHER, " Dropping off a ladder ").reason).isEqualTo("Dropping off a ladder")
+    }
+
+    private suspend fun addMember(id: String, name: String) =
+        db.memberDao().upsert(MemberEntity(id = id, companyId = "c1", userId = id, name = name, createdAt = 1, updatedAt = 1))
+
+    // AC-F11: a lead ticks people, one tap punches each with clockedInBy; people already in are shown but not pickable
+    @Test fun leadClocksInSelectedCrewOnTheSelectedJob() = runBlocking<Unit> {
+        addMember("m1", "Lead"); addMember("m2", "Maria"); addMember("m3", "Dev")
+        val vm = vm(CompanyRole.Lead)
+        val s0 = await(vm) { it.crew.size == 2 }
+        assertThat(s0.canLeadCrew).isTrue()
+        assertThat(s0.crew.map { it.id }).containsExactly("m2", "m3")
+        vm.onEvent(ClockEvent.ToggleCrew("m2")); vm.onEvent(ClockEvent.ToggleCrew("m3"))
+        vm.onEvent(ClockEvent.SelectJob("j1"))
+        vm.onEvent(ClockEvent.ClockInCrew)
+        val s1 = await(vm) { it.crewNotice != null }
+        assertThat(s1.crewNotice?.punched).isEqualTo(2)
+        assertThat(s1.crewSelected).isEmpty()
+        val rows = db.punchDao().listFor("c1")
+        assertThat(rows.map { it.memberId }).containsExactly("m2", "m3")
+        assertThat(rows.map { it.clockedInBy }.toSet()).containsExactly("m1")
+        assertThat(rows.map { it.jobId }.toSet()).containsExactly("j1")
+        await(vm) { s -> s.crew.all { it.onClock } }
+        vm.onEvent(ClockEvent.ToggleCrew("m2"))
+        assertThat(vm.state.value.crewSelected).isEmpty()
+    }
+
+    @Test fun crewMembersGetNoCrewCard() = runBlocking<Unit> {
+        addMember("m2", "Maria")
+        assertThat(vm(CompanyRole.Crew).state.value.canLeadCrew).isFalse()
+    }
+
+    @Test fun crewFarFromJobAsksOnceThenPunchesAll() = runBlocking<Unit> {
+        addMember("m2", "Maria"); addMember("m3", "Dev")
+        location.fix = GeoFix(34.5, -118.0, 5f)
+        val vm = vm(CompanyRole.Owner)
+        await(vm) { it.crew.size == 2 }
+        vm.onEvent(ClockEvent.ToggleCrew("m2")); vm.onEvent(ClockEvent.ToggleCrew("m3"))
+        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockInCrew)
+        await(vm) { it.farReason != null }
+        assertThat(db.punchDao().listFor("c1")).isEmpty()
+        vm.onEvent(ClockEvent.PickReason("Supply house")); vm.onEvent(ClockEvent.SaveReason)
+        await(vm) { it.crewNotice != null }
+        assertThat(db.punchDao().listFor("c1").map { it.reason }).containsExactly("Supply house", "Supply house")
     }
 }

@@ -28,6 +28,7 @@ object ScreenCatalog {
         QaScreen("job-house-empty", nonRoot = true) { JobHouseEmptyPreview() },
         QaScreen("clock-out", nonRoot = false) { ClockOutPreview() },
         QaScreen("clock-working", nonRoot = false) { ClockWorkingPreview() },
+        QaScreen("clock-crew", nonRoot = false) { ClockCrewPreview() },
         QaScreen("clock-break", nonRoot = false) { ClockBreakPreview() },
         QaScreen("clock-far-reason", nonRoot = false) { ClockFarReasonPreview() },
         QaScreen("clock-explain", nonRoot = false) { ClockExplainPreview() },

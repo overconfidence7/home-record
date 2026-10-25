@@ -182,6 +182,18 @@
     <string name="clock_gps_permission">Your company needs a location with every punch. Allow location for Field Log in Settings, then clock in again.</string>
     <string name="clock_gps_signal">Your company needs a location with every punch, and the phone hasn\'t found one yet. Move somewhere with a clear view of the sky and try again.</string>
     <string name="clock_open_settings">Open Settings</string>
+    <string name="clock_crew_title">Clock in your crew</string>
+    <string name="clock_crew_empty">No one else is on the team yet.</string>
+    <string name="clock_crew_on_clock">On the clock</string>
+    <plurals name="clock_crew_in">
+        <item quantity="one">Clock in %d person</item>
+        <item quantity="other">Clock in %d people</item>
+    </plurals>
+    <plurals name="clock_crew_done">
+        <item quantity="one">%d person clocked in.</item>
+        <item quantity="other">%d people clocked in.</item>
+    </plurals>
+    <string name="clock_crew_done_skipped">%1$s Already on the clock: %2$s.</string>
     <string name="clock_timesheet">My timesheet</string>
     <string name="clock_total_regular">Regular</string>
     <string name="clock_total_overtime">Overtime</string>

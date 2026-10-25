@@ -13,9 +13,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -75,6 +78,7 @@ private fun ClockBody(state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifi
             )
         }
         item { Actions(state, onEvent) }
+        if (state.canLeadCrew && state.status !is ClockStatus.OnBreak) item { CrewCard(state, onEvent) }
         item { Timesheet(state) }
     }
 }
@@ -163,6 +167,45 @@ private fun Actions(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                     modifier = Modifier.fillMaxWidth().heightIn(min = ButtonHeight).testTag("fl_clock_out"),
                 ) { Text(stringResource(R.string.clock_out)) }
             }
+        }
+    }
+}
+
+/** Lead crew clock-in: tick the people, one tap punches them all with this phone's location (AC-F11). */
+@Composable
+private fun CrewCard(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
+    Card(Modifier.fillMaxWidth().testTag("fl_clock_crew")) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.clock_crew_title), style = MaterialTheme.typography.titleMedium)
+            state.crewNotice?.let { n ->
+                Row(Modifier.fillMaxWidth().testTag("fl_clock_crew_notice"), verticalAlignment = Alignment.CenterVertically) {
+                    val text = if (n.skippedNames.isEmpty()) pluralStringResource(R.plurals.clock_crew_done, n.punched, n.punched)
+                    else stringResource(R.string.clock_crew_done_skipped, pluralStringResource(R.plurals.clock_crew_done, n.punched, n.punched), n.skippedNames.joinToString(", "))
+                    Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    TextButton(onClick = { onEvent(ClockEvent.DismissCrewNotice) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.dismiss)) }
+                }
+            }
+            if (state.crew.isEmpty()) Text(stringResource(R.string.clock_crew_empty), style = MaterialTheme.typography.bodyMedium)
+            Column(Modifier.selectableGroup()) {
+                state.crew.forEach { p ->
+                    val checked = p.id in state.crewSelected
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                            .toggleable(checked, enabled = !p.onClock, role = Role.Checkbox, onValueChange = { onEvent(ClockEvent.ToggleCrew(p.id)) })
+                            .testTag("fl_clock_crew_${p.id}"),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(checked, onCheckedChange = null, enabled = !p.onClock)
+                        Text(p.name, Modifier.padding(start = 12.dp).weight(1f), style = MaterialTheme.typography.bodyLarge)
+                        if (p.onClock) Text(stringResource(R.string.clock_crew_on_clock), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+            Button(
+                onClick = { onEvent(ClockEvent.ClockInCrew) },
+                enabled = !state.gettingLocation && state.crewCount > 0 && (state.jobs.isEmpty() || state.selectedJobId != null),
+                modifier = Modifier.fillMaxWidth().heightIn(min = ButtonHeight).testTag("fl_clock_crew_in"),
+            ) { Text(if (state.gettingLocation) stringResource(R.string.clock_getting_location) else pluralStringResource(R.plurals.clock_crew_in, state.crewCount, state.crewCount)) }
         }
     }
 }

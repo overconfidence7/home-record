@@ -15,6 +15,12 @@ data class FarReasonSheet(val distanceFt: Int, val choice: String? = null, val o
     }
 }
 
+/** One teammate a lead can clock in; [onClock] people are shown but cannot be picked (AC-F11). */
+data class CrewPick(val id: String, val name: String, val onClock: Boolean = false)
+
+/** What the last crew clock-in did, for the confirmation line (AC-F11). */
+data class CrewNotice(val punched: Int, val skippedNames: List<String>)
+
 data class ClockUiState(
     val loading: Boolean = true,
     val status: ClockStatus = ClockStatus.Out,
@@ -33,7 +39,13 @@ data class ClockUiState(
     val gpsRequired: Boolean? = null,
     val savedWithoutLocation: Boolean = false,
     val sheet: WeekSheet? = null,
+    /** Leads (and Owner/Office) can clock in the crew from their own phone (AC-F11). */
+    val canLeadCrew: Boolean = false,
+    val crew: List<CrewPick> = emptyList(),
+    val crewSelected: Set<String> = emptySet(),
+    val crewNotice: CrewNotice? = null,
 ) {
+    val crewCount: Int get() = crewSelected.size
     val selectedJob: ClockJobOption? get() = jobs.firstOrNull { it.id == selectedJobId }
     val currentJob: ClockJobOption? get() = when (val s = status) {
         is ClockStatus.Working -> jobs.firstOrNull { it.id == s.jobId }
@@ -66,4 +78,7 @@ sealed interface ClockEvent {
     data object DismissGps : ClockEvent
     data object OpenSettings : ClockEvent
     data object DismissNotice : ClockEvent
+    data class ToggleCrew(val id: String) : ClockEvent
+    data object ClockInCrew : ClockEvent
+    data object DismissCrewNotice : ClockEvent
 }

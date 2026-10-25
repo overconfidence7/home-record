@@ -3,7 +3,11 @@ package com.kurtz.homerecord.fieldlog.clock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.company.CompanySettings
+import com.kurtz.homerecord.core.data.MemberEntity
+import com.kurtz.homerecord.core.punch.CrewClock
+import com.kurtz.homerecord.core.punch.CrewResult
 import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.location.LocationProvider
 import com.kurtz.homerecord.core.model.TimesheetRules
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -37,15 +42,25 @@ class ClockDeps(
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
     val ticks: Flow<Unit> = flow { while (true) { emit(Unit); kotlinx.coroutines.delay(1_000) } },
+    /** Lead crew clock-in (AC-F11); only leads, Owner and Office get it. */
+    val role: CompanyRole = CompanyRole.Crew,
+    val crewClock: CrewClock? = null,
+    val members: Flow<List<MemberEntity>> = emptyFlow(),
 )
 
 /** FL-Clock: clock in with job and GPS, break, switch, clock out, and this week's timesheet (AC-F8..F10, AC-F18). */
 class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHandle) : ViewModel() {
-    private val _state = MutableStateFlow(ClockUiState(selectedJobId = saved[JOB], note = saved[NOTE] ?: "", now = d.now()))
+    private val canLead = d.crewClock != null && (d.role == CompanyRole.Lead || d.role.isAdmin)
+    private val _state = MutableStateFlow(
+        ClockUiState(
+            selectedJobId = saved[JOB], note = saved[NOTE] ?: "", now = d.now(), canLeadCrew = canLead,
+            crewSelected = saved.get<List<String>>(CREW)?.toSet() ?: emptySet(),
+        ),
+    )
     val state: StateFlow<ClockUiState> = _state.asStateFlow()
 
     private var settings = CompanySettings()
-    private var pending: String? = saved[PENDING] // "in" or "switch" while the reason sheet is open
+    private var pending: String? = saved[PENDING] // "in", "switch" or "crew" while the reason sheet is open
 
     init {
         viewModelScope.launch { settings = d.settings() }
@@ -66,7 +81,23 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     }
                 }
         }
+        if (canLead) viewModelScope.launch {
+            combine(d.members, d.punches.observeShifts(d.companyId, d.memberId)) { members, _ -> members }.collect { refreshCrew(it) }
+        }
         viewModelScope.launch { d.ticks.collect { _state.update { it.copy(now = d.now()) } } }
+    }
+
+    private var lastMembers: List<MemberEntity> = emptyList()
+
+    private suspend fun refreshCrew(members: List<MemberEntity> = lastMembers) {
+        lastMembers = members
+        val picks = members.filter { it.id != d.memberId }
+            .map { CrewPick(it.id, it.name, onClock = d.controller.status(d.companyId, it.id) != ClockStatus.Out) }
+        _state.update { s ->
+            val keep = s.crewSelected.filter { id -> picks.any { it.id == id && !it.onClock } }.toSet()
+            saved[CREW] = keep.toList()
+            s.copy(crew = picks, crewSelected = keep)
+        }
     }
 
     private fun ctx() = ClockContext(d.companyId, d.memberId, settings)
@@ -108,6 +139,16 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
             ClockEvent.CancelReason -> { setPending(null); _state.update { it.copy(farReason = null) } }
             ClockEvent.DismissGps -> _state.update { it.copy(gpsRequired = null) }
             ClockEvent.OpenSettings -> Unit // handled by ClockRoute
+            is ClockEvent.ToggleCrew -> _state.update { s ->
+                if (s.crew.none { it.id == event.id && !it.onClock }) s
+                else {
+                    val next = if (event.id in s.crewSelected) s.crewSelected - event.id else s.crewSelected + event.id
+                    saved[CREW] = next.toList()
+                    s.copy(crewSelected = next)
+                }
+            }
+            ClockEvent.ClockInCrew -> run("crew")
+            ClockEvent.DismissCrewNotice -> _state.update { it.copy(crewNotice = null) }
             ClockEvent.DismissNotice -> _state.update { it.copy(savedWithoutLocation = false) }
         }
     }
@@ -119,12 +160,36 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     private fun run(kind: String, reason: String? = null) {
         val s = _state.value
         val job = jobFor(s.selectedJobId)
-        if (kind == "in" && s.selectedJobId == null && s.jobs.isNotEmpty()) return // a job is required when the company has any
+        if (kind != "switch" && s.selectedJobId == null && s.jobs.isNotEmpty()) return // a job is required when the company has any
+        if (kind == "crew") { runCrew(job, reason); return }
         act {
             when (kind) {
                 "switch" -> job?.let { d.controller.switchJob(ctx(), it, reason, note()) } ?: ClockResult.NotAllowed
                 else -> d.controller.clockIn(ctx(), job, reason, note())
             }.also { r -> if (r is ClockResult.NeedsReason) setPending(kind) else setPending(null) }
+        }
+    }
+
+    private fun runCrew(job: ClockJob?, reason: String?) {
+        val crew = d.crewClock ?: return
+        val ids = _state.value.crewSelected
+        viewModelScope.launch {
+            _state.update { it.copy(gettingLocation = true) }
+            val result = crew.clockInCrew(ctx(), d.memberId, ids, job, reason)
+            if (result is CrewResult.NeedsReason) setPending("crew") else setPending(null)
+            refreshCrew()
+            _state.update { s ->
+                val done = s.copy(gettingLocation = false)
+                when (result) {
+                    is CrewResult.Done -> done.copy(
+                        crewSelected = emptySet(),
+                        crewNotice = CrewNotice(result.punched.size, result.skipped.mapNotNull { id -> s.crew.firstOrNull { it.id == id }?.name }),
+                    ).also { saved[CREW] = emptyList<String>() }
+                    is CrewResult.NeedsReason -> done.copy(farReason = FarReasonSheet(result.distanceFt))
+                    is CrewResult.GpsRequired -> done.copy(gpsRequired = result.permissionMissing)
+                    CrewResult.NothingSelected -> done
+                }
+            }
         }
     }
 
@@ -153,5 +218,6 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         const val JOB = "job"
         const val NOTE = "note"
         const val PENDING = "pending"
+        const val CREW = "crew"
     }
 }

@@ -1,4 +1,4 @@
-# Walkthrough F4: clock in on a job, take a break, switch, clock out; the week shows on My timesheet (AC-F8, AC-F10, AC-F18).
+# Walkthrough F4: clock in on a job, take a break, switch, clock out; the week shows on My timesheet (AC-F8, AC-F10, AC-F11, AC-F18).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -66,3 +66,7 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Not clocked in"
     timeout: 10000
+# Owner and leads see the crew clock-in card on the Clock tab (AC-F11).
+- scrollUntilVisible:
+    element:
+      id: fl_clock_crew

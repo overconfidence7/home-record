@@ -119,6 +119,11 @@ fun ClockWorkingScreenshot() = ClockWorkingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ClockCrewScreenshot() = ClockCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ClockBreakScreenshot() = ClockBreakPreview()
 
 

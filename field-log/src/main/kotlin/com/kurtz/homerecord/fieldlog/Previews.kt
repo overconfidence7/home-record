@@ -337,3 +337,20 @@ fun ClockNoJobsPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ClockLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(com.kurtz.homerecord.fieldlog.clock.ClockUiState(), {}) }
+
+private val crewPicks = listOf(
+    com.kurtz.homerecord.fieldlog.clock.CrewPick("m2", "Maria Soto"),
+    com.kurtz.homerecord.fieldlog.clock.CrewPick("m3", "Dev Patel"),
+    com.kurtz.homerecord.fieldlog.clock.CrewPick("m4", "Luis Ortega", onClock = true),
+)
+
+@ThemePreviews
+@Composable
+fun ClockCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState().copy(
+            jobs = clockJobs.take(1), sheet = null, canLeadCrew = true, crew = crewPicks, crewSelected = setOf("m2", "m3"),
+            crewNotice = com.kurtz.homerecord.fieldlog.clock.CrewNotice(2, listOf("Luis Ortega")),
+        ), {},
+    )
+}

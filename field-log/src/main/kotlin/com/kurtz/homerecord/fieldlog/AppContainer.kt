@@ -111,6 +111,9 @@ class AppContainer(private val app: Application) {
             },
             permissionAsked = { prefs.getBoolean("location_asked", false) },
             markPermissionAsked = { prefs.edit().putBoolean("location_asked", true).apply() },
+            role = membership.role,
+            crewClock = com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, location), location),
+            members = db.memberDao().observeFor(membership.companyId),
         )
     }
 

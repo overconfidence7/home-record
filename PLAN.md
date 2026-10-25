@@ -139,7 +139,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
 - [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
   - [x] T036a: `CrewClock` (one fix, one IN punch per selected member with `clockedInBy`, skips people already in), `TimesheetApprovals` + `WeekKey`, edits refused in an approved week (AC-F11, AC-F14)
-  - [ ] T036b: crew clock-in UI for leads (multi-select on the Clock tab) with ScreenCatalog, screenshots, flow (AC-F11)
+  - [x] T036b: crew clock-in UI for leads (multi-select on the Clock tab) with ScreenCatalog, screenshots, flow (AC-F11)
   - [ ] T036c: FL-Timesheets screen (week per person with flags, punch edit sheet with required reason and audit list, Approve person / all, crew-side "Approved") with ScreenCatalog, screenshots, flow (AC-F14)
 - [ ] T037: Time exports and reports: shift CSV, QuickBooks-ready CSV, `HoursReport` `[unit]`, FL-Reports hours by job/person (acceptance: AC-F15, AC-F46)
 - [ ] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)
