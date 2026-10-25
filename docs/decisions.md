@@ -131,3 +131,6 @@ Glance (already in the approved list, 1.2.0 in the catalog) for the 2x2 widget. 
 - CSV cells starting with = + @ (or - before a non-digit) are prefixed with an apostrophe so spreadsheets do not run them as formulas.
 
 - 2026-10-25: Media presigning (T038a) is hand-rolled SigV4 over Web Crypto against R2's S3 endpoint because the Workers R2 binding cannot presign and the AWS SDK is not on the approved list. Needs R2 API token secrets (BLOCKERS: Needs Nate). Orphan = media_objects row older than 30 days whose key appears in no sync_rows payload.
+
+## 2026-10-25 — Media upload resume
+A presigned R2 PUT cannot continue part-way, so "resume" means the whole file is re-sent from the Room queue after a restart or network loss. Uploads are keyed by entity/entityId/filename so retries never duplicate; WorkManager (approved) drives the queue.
