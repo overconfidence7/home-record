@@ -117,6 +117,8 @@
     <string name="item_detail_photo">Photo of %1$s</string>
     <string name="item_detail_notes">Notes</string>
     <string name="item_detail_save">Save</string>
+    <string name="form_close">Close</string>
+    <string name="form_save">Save</string>
     <string name="item_detail_consumables">Consumables</string>
     <string name="item_detail_consumables_empty">No filters, bulbs or batteries listed yet. Add what this item uses so you can reorder it fast.</string>
     <string name="item_detail_consumable_add">Add consumable</string>

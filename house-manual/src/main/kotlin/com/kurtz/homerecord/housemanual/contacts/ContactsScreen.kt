@@ -17,14 +17,13 @@ import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import com.kurtz.homerecord.housemanual.FormScreenDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,7 +79,12 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
     }
     val form = state.form
     if (form != null) {
-        ModalBottomSheet(onDismissRequest = { onEvent(ContactsEvent.CloseForm) }) {
+        FormScreenDialog(
+            title = stringResource(if (form.id == null) R.string.contacts_form_new else R.string.contacts_form_edit),
+            saveTag = "hm_contacts_save",
+            onClose = { onEvent(ContactsEvent.CloseForm) },
+            onSave = { onEvent(ContactsEvent.SaveForm) },
+        ) {
             ContactFormContent(form, state.showFormErrors, onEvent)
         }
     }
@@ -147,7 +151,6 @@ fun ContactFormContent(draft: ContactDraft, showErrors: Boolean, onEvent: (Conta
     val errors = if (showErrors) draft.errors() else emptySet()
     fun change(d: ContactDraft) = onEvent(ContactsEvent.ChangeForm(d))
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(if (draft.id == null) R.string.contacts_form_new else R.string.contacts_form_edit), style = MaterialTheme.typography.titleLarge)
         LabeledField(
             stringResource(R.string.contacts_name), draft.name, { change(draft.copy(name = it)) }, Modifier.fillMaxWidth().testTag("hm_contacts_name"),
             required = true, error = if (ContactField.NAME in errors) stringResource(R.string.field_required) else null,
@@ -161,7 +164,6 @@ fun ContactFormContent(draft: ContactDraft, showErrors: Boolean, onEvent: (Conta
         )
         LabeledField(stringResource(R.string.contacts_notes), draft.notes, { change(draft.copy(notes = it)) }, Modifier.fillMaxWidth().testTag("hm_contacts_notes"), singleLine = false)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { onEvent(ContactsEvent.SaveForm) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_contacts_save")) { Text(stringResource(R.string.contacts_save)) }
             if (draft.id != null) {
                 TextButton(onClick = { onEvent(ContactsEvent.AskDelete(draft.id.orEmpty())) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_contacts_delete")) {
                     Text(stringResource(R.string.contacts_delete))

@@ -13,7 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
+import com.kurtz.homerecord.housemanual.FormScreenDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -139,7 +139,16 @@ fun UpkeepFormSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit
     val c = state.consumableForm
     val s = state.serviceForm
     if (c == null && s == null) return
-    ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.CloseForm) }) {
+    val title = stringResource(
+        if (c != null) (if (c.id == null) R.string.item_detail_consumable_add else R.string.item_detail_consumable_edit_title)
+        else (if (s?.id == null) R.string.item_detail_service_add else R.string.item_detail_service_edit_title),
+    )
+    FormScreenDialog(
+        title = title,
+        saveTag = if (c != null) "hm_item_detail_consumable_save" else "hm_item_detail_service_save",
+        onClose = { onEvent(ItemDetailEvent.CloseForm) },
+        onSave = { onEvent(if (c != null) ItemDetailEvent.SaveConsumable else ItemDetailEvent.SaveService) },
+    ) {
         if (c != null) ConsumableFormContent(c, state.showFormErrors, onEvent)
         if (s != null) ServiceFormContent(s, state.contacts, state.showFormErrors, onEvent)
     }
@@ -150,7 +159,6 @@ fun UpkeepFormSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit
 fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
     val errors = if (showErrors) draft.errors() else emptySet()
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(if (draft.id == null) R.string.item_detail_consumable_add else R.string.item_detail_consumable_edit_title), style = MaterialTheme.typography.titleLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ConsumableKind.entries.forEach { kind ->
                 FilterChip(
@@ -179,7 +187,7 @@ fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: 
             error = if (ConsumableField.URL in errors) stringResource(R.string.item_detail_consumable_url_error) else null,
             modifier = Modifier.testTag("hm_item_detail_consumable_url"),
         )
-        FormButtons(draft.id, onSave = { onEvent(ItemDetailEvent.SaveConsumable) }, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteConsumable(it)) } }, tag = "consumable")
+        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteConsumable(it)) } }, tag = "consumable")
     }
 }
 
@@ -188,7 +196,6 @@ fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: 
 fun ServiceFormContent(draft: ServiceDraft, contacts: List<ContactEntity>, showErrors: Boolean, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
     val errors = if (showErrors) draft.errors() else emptySet()
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(if (draft.id == null) R.string.item_detail_service_add else R.string.item_detail_service_edit_title), style = MaterialTheme.typography.titleLarge)
         DateField(
             label = stringResource(R.string.item_detail_service_date), isoDate = draft.date.ifEmpty { null },
             onDateChange = { onEvent(ItemDetailEvent.ChangeService(draft.copy(date = it.orEmpty()))) }, required = true,
@@ -222,14 +229,13 @@ fun ServiceFormContent(draft: ServiceDraft, contacts: List<ContactEntity>, showE
             error = if (ServiceField.COST in errors) stringResource(R.string.item_detail_service_cost_error) else null,
             modifier = Modifier.testTag("hm_item_detail_service_cost"),
         )
-        FormButtons(draft.id, onSave = { onEvent(ItemDetailEvent.SaveService) }, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteService(it)) } }, tag = "service")
+        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteService(it)) } }, tag = "service")
     }
 }
 
 @Composable
-private fun FormButtons(id: String?, onSave: () -> Unit, onDelete: () -> Unit, tag: String) {
+private fun FormButtons(id: String?, onDelete: () -> Unit, tag: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = onSave, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_${tag}_save")) { Text(stringResource(R.string.item_detail_save)) }
         if (id != null) {
             TextButton(onClick = onDelete, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_${tag}_delete")) { Text(stringResource(R.string.item_detail_delete)) }
         }
