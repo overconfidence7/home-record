@@ -356,3 +356,18 @@ interface SyncBaseDao {
     @Upsert suspend fun set(row: SyncBaseEntity)
     @Query("SELECT rowJson FROM sync_base WHERE `key` = :key") suspend fun get(key: String): String?
 }
+
+@Dao
+interface MediaUploadDao {
+    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE) suspend fun add(row: MediaUploadEntity): Long
+    @Query("SELECT * FROM media_upload WHERE id = :id") suspend fun get(id: String): MediaUploadEntity?
+    @Query("SELECT * FROM media_upload WHERE entity = :entity AND entityId = :entityId AND filename = :filename")
+    suspend fun find(entity: String, entityId: String, filename: String): MediaUploadEntity?
+    @Query("SELECT * FROM media_upload WHERE state IN ('queued', 'uploading') AND nextAttemptAt <= :now ORDER BY createdAt")
+    suspend fun due(now: Long): List<MediaUploadEntity>
+    @Query("SELECT COUNT(*) FROM media_upload WHERE state IN ('queued', 'uploading')") fun observePendingCount(): Flow<Int>
+    @Query("SELECT MIN(nextAttemptAt) FROM media_upload WHERE state = 'queued'") suspend fun nextAttemptAt(): Long?
+    @Query("UPDATE media_upload SET state = 'queued' WHERE state = 'uploading'") suspend fun requeueInterrupted()
+    @Upsert suspend fun save(row: MediaUploadEntity)
+    @Query("UPDATE media_upload SET state = 'queued', attempts = 0, nextAttemptAt = 0 WHERE state = 'failed'") suspend fun retryFailed()
+}

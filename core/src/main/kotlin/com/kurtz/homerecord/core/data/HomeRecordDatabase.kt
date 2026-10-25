@@ -43,6 +43,7 @@ import androidx.room.RoomDatabase
         OutboxEntity::class,
         SyncStateEntity::class,
         SyncBaseEntity::class,
+        MediaUploadEntity::class,
     ],
     version = 1,
     exportSchema = true,
@@ -86,6 +87,7 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun outboxDao(): OutboxDao
     abstract fun syncStateDao(): SyncStateDao
     abstract fun syncBaseDao(): SyncBaseDao
+    abstract fun mediaUploadDao(): MediaUploadDao
 
     companion object {
         const val NAME = "homerecord.db"

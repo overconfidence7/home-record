@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization)
     implementation(libs.security.crypto)
+    implementation(libs.work.runtime.ktx)
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.play.services.location)

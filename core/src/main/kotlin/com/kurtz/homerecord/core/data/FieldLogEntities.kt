@@ -296,3 +296,24 @@ data class SyncBaseEntity(
     @PrimaryKey val key: String,
     val rowJson: String,
 )
+
+/** One file waiting to go to R2 (AC-F54); survives process death, one row per entity/filename so a retry never uploads twice. */
+@Entity(tableName = "media_upload", indices = [Index("state"), Index(value = ["entity", "entityId", "filename"], unique = true)])
+data class MediaUploadEntity(
+    @PrimaryKey val id: String,
+    val tenantKind: String,
+    val tenantId: String,
+    val entity: String,
+    val entityId: String,
+    val filename: String,
+    val path: String,
+    val mime: String,
+    /** queued, uploading, done, failed. */
+    val state: String = "queued",
+    val attempts: Int = 0,
+    val nextAttemptAt: Long = 0,
+    val key: String? = null,
+    val putUrl: String? = null,
+    val putExpiresAt: Long = 0,
+    val createdAt: Long,
+)

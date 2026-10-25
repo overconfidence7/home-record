@@ -59,6 +59,22 @@ class AppContainer(private val app: Application) {
     val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    val mediaApi = com.kurtz.homerecord.core.media.RetrofitMediaTransferApi.create(BuildConfig.API_BASE_URL, http)
+    val mediaUploader by lazy { com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi) }
+    val mediaCache by lazy {
+        com.kurtz.homerecord.core.media.MediaCache(
+            java.io.File(app.cacheDir, "downloads"),
+            com.kurtz.homerecord.core.media.PrefsMediaCacheSettings(app.getSharedPreferences("media", Context.MODE_PRIVATE)),
+            mediaApi,
+        )
+    }
+
+    /** Queue a file for upload and ask WorkManager to run the queue once the network is up (AC-F54). */
+    suspend fun uploadMedia(tenant: TenantRef, entity: String, entityId: String, filename: String, path: String, mime: String) {
+        mediaUploader.enqueue(tenant, entity, entityId, filename, path, mime)
+        com.kurtz.homerecord.core.media.MediaUploadWorker.schedule(app)
+    }
+
     val syncEngine by lazy {
         SyncEngine(
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
@@ -182,6 +198,7 @@ class AppContainer(private val app: Application) {
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
 
     init {
+        com.kurtz.homerecord.core.media.MediaUploadWorker.provider = { mediaUploader }
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) {
             auth.restore()
