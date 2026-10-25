@@ -4,6 +4,7 @@ import { auth } from "./routes/auth";
 import { dev } from "./routes/dev";
 import { company } from "./routes/company";
 import { lookup } from "./routes/lookup";
+import { media, removeOrphanedMedia } from "./routes/media";
 import { me } from "./routes/me";
 import { sync } from "./routes/sync";
 import { tenants } from "./routes/tenants";
@@ -19,6 +20,7 @@ app.route("/", company);
 app.route("/", tenants);
 app.route("/", sync);
 app.route("/", lookup);
+app.route("/", media);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 app.onError((err, c) => {
@@ -26,4 +28,9 @@ app.onError((err, c) => {
   return c.json({ error: "server_error" }, 500);
 });
 
-export default app;
+// Keeps `app.request` for tests; the Workers runtime also calls `scheduled` for the cron trigger.
+export default Object.assign(app, {
+  scheduled: (_event: ScheduledEvent, env: AppEnv["Bindings"], ctx: ExecutionContext) => {
+    ctx.waitUntil(removeOrphanedMedia(env));
+  },
+});

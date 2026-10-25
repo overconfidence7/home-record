@@ -4,6 +4,8 @@
 
 (Things the builder cannot do without Nate: credentials, accounts, purchases, device-only checks.)
 
+- (T038a) Media uploads need an R2 API token: `wrangler secret put R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (and `R2_BUCKET` if not homerecord-media). Until set, POST /media/presign returns 503 unavailable.
+
 - Cloudflare: an API token with Workers, D1, R2 and KV permissions as the `CLOUDFLARE_API_TOKEN` environment variable in the "Android build" cloud environment, plus the account id as `CLOUDFLARE_ACCOUNT_ID`. Until then the builder tests the Worker locally (`npm test`, `wrangler dev`) and does not deploy. Needed from T007 for deploys, not for progress.
 - Backend secrets (set with `wrangler secret put` once the Worker exists; the builder lists the exact names in `backend/README.md`): `CLAUDE_API_KEY` (warranty lookup, T025), `RESEND_API_KEY` (email codes and handoff emails, T008), `GOOGLE_CLIENT_ID` (Sign in with Google, T008; create a Web client id and an Android client id with the debug and release SHA-1s in Google Cloud Console), `FCM_SERVICE_ACCOUNT` (push, T047; create a Firebase project used only for Cloud Messaging and download `google-services.json` into both app modules), `REVENUECAT_WEBHOOK_SECRET` (T064), `JWT_SECRET` (any long random string).
 - RevenueCat: Field Log needs its own RevenueCat app (package `com.kurtz.homerecord.fieldlog`), entitlements `fieldlog_solo` and `fieldlog_crew`, an offering with monthly packages for each, Test Store products, and the public SDK keys added to `docs/billing.md` and the cloud environment (`REVENUECAT_FL_API_KEY`, `REVENUECAT_FL_TEST_API_KEY`). House Manual keys from v1 stay valid (same package name).

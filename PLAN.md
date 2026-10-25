@@ -149,6 +149,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T037c: FL-Reports screen from More for Owner/Office (week range picker, hours by person and by job, Export shift CSV / QuickBooks CSV), ScreenCatalog, screenshots, flow (AC-F15, AC-F46)
 - [x] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)
 - [ ] T038: Media pipeline: `MediaStore`-free app-private storage, thumbnails, upload queue with presigned R2 PUT (backend `/media/presign`), retry/resume, download cache with cap and "Free up" (acceptance: AC-F54, AC-B21)
+  - [x] T038a: backend `POST /media/presign` (SigV4 presigned R2 PUT 10 min and GET 7 days, key tenant/entity/id/filename, secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY), `media_objects` table, daily cron removing unreferenced objects over 30 days (AC-B21)
+  - [ ] T038b: app side in :core: `MediaUploader` (queue in Room, presign, PUT with retry/backoff and resume, WorkManager), download cache with cap and Free up (AC-F54)
 - [ ] T039: FL-Capture: CameraX with lens limiter, 80 dp shutter, volume keys, job/room/phase chips, flash/flip, gallery import, Note and Voice (3 min, on-device transcription best effort), permission-denied states (acceptance: AC-F24, AC-F27, AC-F29)
 - [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
 - [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
