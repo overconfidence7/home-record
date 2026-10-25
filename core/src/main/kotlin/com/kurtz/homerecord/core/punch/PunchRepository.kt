@@ -49,6 +49,7 @@ class PunchRepository(
     private val db: HomeRecordDatabase,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    private val zone: () -> java.time.ZoneId = { java.time.ZoneId.systemDefault() },
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -71,11 +72,12 @@ class PunchRepository(
 
     /**
      * Changes a punch's time or job and appends an audit entry (AC-F14). Returns false when [reason] is blank
-     * or the punch is missing: an edit without a reason is never saved.
+     * or the punch is missing, and when the person's week is approved (AC-F14): such an edit is never saved.
      */
     suspend fun edit(punchId: String, editorId: String, editorName: String, newAt: Long, newJobId: String?, reason: String): Boolean {
         if (reason.isBlank()) return false
         val old = db.punchDao().get(punchId) ?: return false
+        if (isLocked(old.memberId, old.at) || isLocked(old.memberId, newAt)) return false
         val stamp = now()
         val entry = PunchEdit(editorId, editorName, stamp, reason.trim(), old.at, newAt, old.jobId, newJobId)
         val edits = json.decodeFromString<List<PunchEdit>>(old.editsJson) + entry
@@ -83,6 +85,11 @@ class PunchRepository(
         onChange("punch", punchId)
         rebuildShifts(old.companyId, old.memberId)
         return true
+    }
+
+    private suspend fun isLocked(memberId: String, at: Long): Boolean {
+        val week = WeekKey.of(at, zone())
+        return db.timesheetApprovalDao().listFor(memberId).any { it.weekStart == week }
     }
 
     fun auditOf(punch: PunchEntity): List<PunchEdit> = runCatching { json.decodeFromString<List<PunchEdit>>(punch.editsJson) }.getOrDefault(emptyList())

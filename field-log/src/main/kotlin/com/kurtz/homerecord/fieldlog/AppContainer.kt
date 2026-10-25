@@ -90,6 +90,11 @@ class AppContainer(private val app: Application) {
 
     val punches by lazy { PunchRepository(db, onChange = ::recordChange) }
 
+    val approvals by lazy { com.kurtz.homerecord.core.punch.TimesheetApprovals(db, onChange = ::recordChange) }
+    val crewClock by lazy {
+        val loc = com.kurtz.homerecord.core.location.FusedLocationProvider(app)
+        com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, loc), loc)
+    }
     val clock by lazy { com.kurtz.homerecord.core.punch.ClockController(punches, com.kurtz.homerecord.core.location.FusedLocationProvider(app)) }
 
     /** What FL-Clock needs; settings come from the company profile when this role can read it, else the defaults. */
