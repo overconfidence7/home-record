@@ -13,10 +13,12 @@ appId: com.kurtz.homerecord.fieldlog
     visible: "Set up your company"
     timeout: 15000
 - tapOn: "Create"
-- tapOn: "Company name"
+- tapOn:
+    id: "fl_welcome_name"
 - inputText: "QA Electric"
 - hideKeyboard
-- tapOn: "Trade"
+- tapOn:
+    id: "fl_welcome_trade"
 - inputText: "Electrical"
 - hideKeyboard
 - tapOn: "Create company"
