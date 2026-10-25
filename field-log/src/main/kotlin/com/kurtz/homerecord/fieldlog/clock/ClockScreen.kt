@@ -216,6 +216,10 @@ private fun Timesheet(state: ClockUiState) {
     val dayFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     Column(Modifier.fillMaxWidth().testTag("fl_clock_timesheet"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(stringResource(R.string.clock_timesheet), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+        if (state.weekApproved) Text(
+            stringResource(R.string.clock_week_approved), style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("fl_clock_week_approved"),
+        )
         sheet.days.forEach { day ->
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {

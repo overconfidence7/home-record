@@ -71,12 +71,12 @@ class ClockViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private suspend fun vm(role: CompanyRole = CompanyRole.Crew): ClockViewModel {
+    private suspend fun vm(role: CompanyRole = CompanyRole.Crew, approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())): ClockViewModel {
         val punches = PunchRepository(db, { clock })
         val deps = ClockDeps(
             "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, { settings },
             { asked }, { asked = true }, now = { clock }, ticks = emptyFlow(),
-            role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"),
+            role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"), approvals = approvals,
         )
         return ClockViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
     }
@@ -85,6 +85,14 @@ class ClockViewModelTest {
         withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first(test) } }
 
     private suspend fun kinds() = db.punchDao().listFor("c1").sortedBy { it.at }.map { it.kind }
+
+    // AC-F14: crew sees Approved once the week is approved
+    @Test fun showsApprovedWhenThisWeekIsApproved() = runBlocking<Unit> {
+        assertThat(vm().state.value.weekApproved).isFalse()
+        val week = com.kurtz.homerecord.core.punch.WeekKey.of(clock, java.time.ZoneId.systemDefault())
+        val row = com.kurtz.homerecord.core.data.TimesheetApprovalEntity("a1", "m1", week, "boss", 1, 1, 1)
+        assertThat(vm(approvals = kotlinx.coroutines.flow.flowOf(listOf(row))).state.value.weekApproved).isTrue()
+    }
 
     @Test fun listsActiveJobsAndClockInNeedsOne() = runBlocking<Unit> {
         val vm = vm()

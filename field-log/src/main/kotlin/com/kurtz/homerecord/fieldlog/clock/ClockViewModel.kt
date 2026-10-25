@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.company.CompanySettings
 import com.kurtz.homerecord.core.data.MemberEntity
+import com.kurtz.homerecord.core.data.TimesheetApprovalEntity
+import com.kurtz.homerecord.core.punch.WeekKey
 import com.kurtz.homerecord.core.punch.CrewClock
 import com.kurtz.homerecord.core.punch.CrewResult
 import com.kurtz.homerecord.core.data.JobDao
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.ZoneId
@@ -46,6 +49,8 @@ class ClockDeps(
     val role: CompanyRole = CompanyRole.Crew,
     val crewClock: CrewClock? = null,
     val members: Flow<List<MemberEntity>> = emptyFlow(),
+    /** This person's approved weeks, so the sheet can say Approved (AC-F14). */
+    val approvals: Flow<List<TimesheetApprovalEntity>> = flowOf(emptyList()),
 )
 
 /** FL-Clock: clock in with job and GPS, break, switch, clock out, and this week's timesheet (AC-F8..F10, AC-F18). */
@@ -65,8 +70,8 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     init {
         viewModelScope.launch { settings = d.settings() }
         viewModelScope.launch {
-            combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId)) { jobs, shifts -> jobs to shifts }
-                .collect { (jobs, shifts) ->
+            combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.approvals) { jobs, shifts, approved -> Triple(jobs, shifts, approved) }
+                .collect { (jobs, shifts, approved) ->
                     val options = jobs.filter { it.status == "ACTIVE" }
                         .map { ClockJobOption(it.id, it.name, it.address, it.lat, it.lng) }
                     val status = d.controller.status(d.companyId, d.memberId)
@@ -77,7 +82,8 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     val lastJob = shifts.lastOrNull()?.segments?.lastOrNull()?.jobId?.takeIf { id -> options.any { it.id == id } }
                     _state.update { s ->
                         val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: lastJob ?: options.singleOrNull()?.id
-                        s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, now = now)
+                        s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, now = now,
+                            weekApproved = approved.any { it.weekStart == WeekKey.of(now, d.zone) })
                     }
                 }
         }

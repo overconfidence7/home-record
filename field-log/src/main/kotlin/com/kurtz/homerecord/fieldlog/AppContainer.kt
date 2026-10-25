@@ -114,6 +114,7 @@ class AppContainer(private val app: Application) {
             role = membership.role,
             crewClock = com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, location), location),
             members = db.memberDao().observeFor(membership.companyId),
+            approvals = db.timesheetApprovalDao().observeFor(memberId),
         )
     }
 

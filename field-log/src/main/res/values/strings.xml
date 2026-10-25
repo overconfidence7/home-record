@@ -233,6 +233,7 @@
     <string name="clock_total_regular">Regular</string>
     <string name="clock_total_overtime">Overtime</string>
     <string name="clock_total_double">Double time</string>
+    <string name="clock_week_approved">Approved. This week is locked.</string>
     <string name="clock_total">Week total</string>
     <string name="flag_missing_out">No clock out</string>
     <string name="flag_far">Far from job</string>

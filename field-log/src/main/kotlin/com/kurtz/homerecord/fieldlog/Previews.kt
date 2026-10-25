@@ -294,6 +294,10 @@ fun ClockOutPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(
 
 @ThemePreviews
 @Composable
+fun ClockApprovedPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(weekApproved = true), {}) }
+
+@ThemePreviews
+@Composable
 fun ClockWorkingPreview() = Frame {
     com.kurtz.homerecord.fieldlog.clock.ClockScreen(
         clockState(com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", CLOCK_NOW - (3 * 3600 + 12 * 60 + 5) * 1000L)).copy(selectedJobId = "j2"), {},
