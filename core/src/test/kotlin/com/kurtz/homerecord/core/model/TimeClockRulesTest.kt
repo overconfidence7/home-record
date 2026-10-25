@@ -193,6 +193,24 @@ class TimesheetMathTest {
         assertEquals(10 * H, w.overtimeMillis)
     }
 
+    // R07 worked example: exactly 40 h with one 10 h day (four 7.5 h days after a 30 min break)
+    private fun fortyHourWeek() = (5..8).flatMap { day(it, 8, 16, breakMin = 30) } + day(9, 7, 17)
+
+    // AC-F13
+    @Test fun fortyHourWeekWithTenHourDayWeeklyOnlyHasNoOvertime() {
+        val w = week(fortyHourWeek(), TimesheetRules.from(OvertimeRule.Weekly40))
+        assertEquals(40 * H, w.regularMillis)
+        assertEquals(0, w.overtimeMillis)
+    }
+
+    // AC-F13
+    @Test fun fortyHourWeekWithTenHourDayCaliforniaHasTwoHoursOvertime() {
+        val w = week(fortyHourWeek(), TimesheetRules.from(OvertimeRule.Daily8Weekly40, californiaDoubleTime = true))
+        assertEquals(38 * H, w.regularMillis)
+        assertEquals(2 * H, w.overtimeMillis)
+        assertEquals(0, w.doubleMillis)
+    }
+
     // AC-F13
     @Test fun roundingIsOffByDefaultAndQuarterHourWhenOn() {
         val punches = listOf(p(PunchKind.IN, at(5, 8, 7)), p(PunchKind.OUT, at(5, 12, 0)))

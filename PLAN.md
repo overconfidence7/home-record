@@ -147,7 +147,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T037a: `HoursReport` (hours by person and job over whole Monday weeks, OT split per week) and `TimeExports` (shift CSV, QuickBooks-ready CSV, formula-safe cells) in :core with tests (AC-F15, AC-F46)
   - [x] T037b: export wiring: build shift rows (GPS in/out from punches) and QuickBooks job names, write CSV to cache, share through FileProvider (AC-F15)
   - [x] T037c: FL-Reports screen from More for Owner/Office (week range picker, hours by person and by job, Export shift CSV / QuickBooks CSV), ScreenCatalog, screenshots, flow (AC-F15, AC-F46)
-- [ ] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)
+- [x] R07: Review T033–T037; timesheet math against worked examples (40 h week with a 10 h day under weekly-only and California rules)
 - [ ] T038: Media pipeline: `MediaStore`-free app-private storage, thumbnails, upload queue with presigned R2 PUT (backend `/media/presign`), retry/resume, download cache with cap and "Free up" (acceptance: AC-F54, AC-B21)
 - [ ] T039: FL-Capture: CameraX with lens limiter, 80 dp shutter, volume keys, job/room/phase chips, flash/flip, gallery import, Note and Voice (3 min, on-device transcription best effort), permission-denied states (acceptance: AC-F24, AC-F27, AC-F29)
 - [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
