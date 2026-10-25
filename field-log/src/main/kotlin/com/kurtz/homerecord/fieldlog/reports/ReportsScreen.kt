@@ -65,7 +65,8 @@ fun ReportsScreen(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit, onBack
 private fun RangePicker(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit) {
     val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ReportRange.entries.forEach { r ->
                 FilterChip(
                     selected = state.range == r, onClick = { onEvent(ReportsEvent.SelectRange(r)) },
