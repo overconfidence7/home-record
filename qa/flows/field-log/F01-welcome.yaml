@@ -33,7 +33,8 @@ appId: com.kurtz.homerecord.fieldlog
       - tapOn: "Code"
       - inputText: ${output.devCode}
       - hideKeyboard
-      - tapOn: "Sign in"
+      - tapOn:
+          id: "fl_sign_in_verify"
       - extendedWaitUntil:
           visible: "Set up your company"
           timeout: 15000
