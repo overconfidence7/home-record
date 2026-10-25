@@ -123,3 +123,9 @@ RevenueCat is wrapped in `ProBilling` (extends `Entitlements`) in :core so ViewM
 
 ## 2026-10-25 Clock widget (T035c2)
 Glance (already in the approved list, 1.2.0 in the catalog) for the 2x2 widget. The button opens the app on the Clock tab rather than punching from the widget, because a punch can need a reason or a location permission prompt (AC-F9, AC-F18). The widget is static text (since time), no live ticker, so it never needs periodic updates; it is refreshed after each punch from AppContainer.recordChange. The last job worked is preselected by the Clock view model itself, so the same default applies from the tab.
+
+## 2026-10-25 — Time report and export rules (T037a)
+- Report ranges are whole Monday weeks so person totals equal FL-Timesheets (overtime is computed one week at a time). Job totals are job-segment time minus breaks, unrounded.
+- Shift CSV "OT hours" is the person-week's overtime plus double time, assigned to the latest shifts first, since overtime is a week/day property rather than a shift's.
+- QuickBooks CSV is one row per person, job and day (midnight-split), Service Item "Labor"; overtime is not split out because QuickBooks pay items are set up per employee.
+- CSV cells starting with = + @ (or - before a non-digit) are prefixed with an apostrophe so spreadsheets do not run them as formulas.
