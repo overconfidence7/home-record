@@ -58,6 +58,7 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 15000
 - tapOn: "Today"
 - extendedWaitUntil:
-    id: fl_today_elapsed
+    visible:
+      id: fl_today_elapsed
     timeout: 10000
 - assertVisible: "Garage subpanel"

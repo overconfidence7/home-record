@@ -26,7 +26,8 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_more_reports
 - extendedWaitUntil:
-    id: fl_reports_empty
+    visible:
+      id: fl_reports_empty
     timeout: 10000
 - tapOn:
     id: fl_reports_range_LastFourWeeks
