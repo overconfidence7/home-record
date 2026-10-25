@@ -137,7 +137,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T035c1: Today refreshes the cached team list on open (`TodayDeps.refreshMembers`)
   - [x] T035c2: clock widget 2x2 with Glance (AC-F17)
   - [ ] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
-- [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
+- [x] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
   - [x] T036a: `CrewClock` (one fix, one IN punch per selected member with `clockedInBy`, skips people already in), `TimesheetApprovals` + `WeekKey`, edits refused in an approved week (AC-F11, AC-F14)
   - [x] T036b: crew clock-in UI for leads (multi-select on the Clock tab) with ScreenCatalog, screenshots, flow (AC-F11)
   - [x] T036c1: Timesheets week builder, punch time parser and `TimesheetsViewModel` (week picker, edit with reason and audit, approve person/all) (AC-F14)
