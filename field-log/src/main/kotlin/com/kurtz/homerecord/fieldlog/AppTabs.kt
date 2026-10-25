@@ -95,6 +95,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                             TodayUiState(membership.companyName, membership.role, phase, pending),
                             onInviteCrew = { nav.push(TeamKey) },
                             onSyncNow = container.syncCoordinator::requestSync,
+                            onAddJob = { nav.push(JobEditKey(null)) },
                         )
                     } else {
                         com.kurtz.homerecord.fieldlog.today.TodayRoute(
@@ -104,6 +105,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                             onSyncNow = container.syncCoordinator::requestSync,
                             onOpenClock = { nav.selectTab("clock") },
                             onOpenJob = { nav.push(JobKey(it)) },
+                            onAddJob = { nav.push(JobEditKey(null)) },
                         )
                     }
                 }

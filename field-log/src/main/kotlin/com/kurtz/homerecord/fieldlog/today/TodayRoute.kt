@@ -18,9 +18,10 @@ fun TodayRoute(
     onSyncNow: () -> Unit,
     onOpenClock: () -> Unit,
     onOpenJob: (String) -> Unit,
+    onAddJob: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val vm = viewModel<TodayViewModel>(factory = viewModelFactory { initializer { TodayViewModel(deps()) } })
     LaunchedEffect(syncPhase, pending) { vm.setSync(syncPhase, pending) }
-    TodayScreen(vm.state.collectAsState().value, onInviteCrew, modifier, onSyncNow, onOpenClock, onOpenJob)
+    TodayScreen(vm.state.collectAsState().value, onInviteCrew, modifier, onSyncNow, onOpenClock, onOpenJob, onAddJob)
 }

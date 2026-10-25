@@ -79,6 +79,16 @@ class RoleGatesTest {
         assertThat(invited).isTrue()
     }
 
+    // AC-F1
+    @Test fun todayEmptyStateForOwnerOffersAddJob() {
+        var added = false
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), {}, onAddJob = { added = true }) }
+        }
+        rule.onNodeWithText("Add a job").performClick()
+        assertThat(added).isTrue()
+    }
+
     @Test fun todayEmptyStateForCrewHasNoInviteButton() {
         rule.setContent {
             HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Crew), {}) }

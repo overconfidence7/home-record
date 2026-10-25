@@ -52,6 +52,7 @@
     <string name="today_pin_description">Show where %1$s clocked in on the map</string>
     <string name="today_since">Since %1$s, %2$s so far</string>
     <string name="today_open_clock">Open clock</string>
+    <string name="today_add_job">Add a job</string>
     <string name="today_invite_crew">Invite crew</string>
     <string name="today_empty_crew">Nothing scheduled for you yet. Your boss adds you to a job and it shows up here.</string>
 

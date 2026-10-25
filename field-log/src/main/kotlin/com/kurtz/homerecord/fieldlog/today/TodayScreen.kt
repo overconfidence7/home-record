@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,11 +86,12 @@ fun TodayScreen(
     onSyncNow: () -> Unit = {},
     onOpenClock: () -> Unit = {},
     onOpenJob: (String) -> Unit = {},
+    onAddJob: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
         SyncStatusChip(state.syncPhase, state.pendingChanges, onSyncNow, Modifier.padding(horizontal = 16.dp))
         if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onOpenClock, onOpenJob, Modifier.weight(1f))
-        else TodayBody(state, onInviteCrew, Modifier.weight(1f))
+        else TodayBody(state, onInviteCrew, onAddJob, Modifier.weight(1f))
     }
 }
 
@@ -168,16 +170,22 @@ private fun elapsedText(ms: Long): String {
 }
 
 @Composable
-private fun TodayBody(state: TodayUiState, onInviteCrew: () -> Unit, modifier: Modifier) {
+private fun TodayBody(state: TodayUiState, onInviteCrew: () -> Unit, onAddJob: () -> Unit, modifier: Modifier) {
     if (state.role.isAdmin) {
-        EmptyState(
-            icon = Icons.Rounded.Work,
-            headline = stringResource(R.string.today_empty_title, state.companyName),
-            body = stringResource(R.string.today_empty_admin),
-            actionLabel = stringResource(R.string.today_invite_crew),
-            onAction = onInviteCrew,
-            modifier = modifier,
-        )
+        Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            EmptyState(
+                icon = Icons.Rounded.Work,
+                headline = stringResource(R.string.today_empty_title, state.companyName),
+                body = stringResource(R.string.today_empty_admin),
+                actionLabel = stringResource(R.string.today_add_job),
+                onAction = onAddJob,
+                modifier = Modifier.weight(1f),
+                actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_today_add_job"),
+            )
+            TextButton(onClick = onInviteCrew, Modifier.heightIn(min = 56.dp).padding(bottom = 16.dp).testTag("fl_today_invite_crew")) {
+                Text(stringResource(R.string.today_invite_crew))
+            }
+        }
     } else {
         Column(
             modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
