@@ -881,3 +881,17 @@ Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 65 device stages, 442 unit tests, 73 backend tests, coverage 105/105 ACs. Passed: 44. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-25 (commit b4e1db2)
+
+Automated suite run at 2026-10-25 10:59 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F06-timesheets fails on field-log [auto:flow:field-log:F06-timesheets] - steps: automated, see qa-results branch latest/ for commit b4e1db2 - expected: walkthrough step F06 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F06-timesheets.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F01-welcome], [auto:flow:field-log:F02-invite-join], [auto:flow:field-log:F03-jobs], [auto:flow:field-log:F04-clock-in], [auto:flow:field-log:F05-today], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H05-contacts], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Fail, field-log F02 Fail, field-log F03 Fail, field-log F04 Fail, field-log F05 Fail, field-log F06 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Fail, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Fail, house-manual H18 Pass
+
+Not built yet or skipped: field-log jank:field-log (gfxinfo reported no frames); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 66 device stages, 492 unit tests, 73 backend tests, coverage 107/107 ACs. Passed: 44. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
