@@ -106,6 +106,12 @@ class AppContainer(private val app: Application) {
 
     val punches by lazy { PunchRepository(db, onChange = ::recordChange) }
 
+    val jobPhotos by lazy {
+        com.kurtz.homerecord.core.photo.JobPhotos(
+            db, queueUpload = ::uploadMedia, companyId = { company.current?.companyId }, onChange = ::recordChange,
+        )
+    }
+
     val approvals by lazy { com.kurtz.homerecord.core.punch.TimesheetApprovals(db, onChange = ::recordChange) }
     val crewClock by lazy {
         val loc = com.kurtz.homerecord.core.location.FusedLocationProvider(app)
