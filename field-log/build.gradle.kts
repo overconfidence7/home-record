@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.navigation3.ui)
     implementation(libs.lifecycle.viewmodel.navigation3)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.truth)

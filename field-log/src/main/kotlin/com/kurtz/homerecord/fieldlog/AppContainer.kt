@@ -32,10 +32,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import androidx.glance.appwidget.updateAll
 import okhttp3.OkHttpClient
 
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
-class AppContainer(app: Application) {
+class AppContainer(private val app: Application) {
+    /** Tab ids asked for from outside the UI (the clock widget); held until the tabs are on screen. */
+    val tabRequests = kotlinx.coroutines.flow.MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
+
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
     @Volatile var activityContext: Context? = null
 
@@ -78,6 +82,7 @@ class AppContainer(app: Application) {
 
     /** Repositories call this after each write to a synced row; it queues the row and asks for a sync. */
     suspend fun recordChange(entity: String, id: String) {
+        if (entity == "punch") runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
         val tenant = company.current?.let { TenantRef(TenantKind.Company, it.companyId) } ?: return
         syncEngine.recordChange(tenant, entity, id)
         syncCoordinator.requestSync()

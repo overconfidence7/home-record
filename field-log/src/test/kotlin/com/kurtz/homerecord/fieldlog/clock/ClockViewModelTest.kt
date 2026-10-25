@@ -93,6 +93,16 @@ class ClockViewModelTest {
         assertThat(kinds()).containsExactly(PunchKind.IN)
     }
 
+    // AC-F17: the widget opens FL-Clock with the last job preselected
+    @Test fun preselectsTheLastJobWorked() = runBlocking<Unit> {
+        val first = vm()
+        first.onEvent(ClockEvent.SelectJob("j2")); first.onEvent(ClockEvent.ClockIn)
+        await(first) { it.status is ClockStatus.Working }
+        clock += 1000; first.onEvent(ClockEvent.ClockOut)
+        await(first) { it.status is ClockStatus.Out }
+        assertThat(vm().state.value.selectedJobId).isEqualTo("j2")
+    }
+
     @Test fun breakSwitchAndClockOut() = runBlocking<Unit> {
         val vm = vm()
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)

@@ -135,7 +135,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T035a: `OnSiteBuilder` in :core (open shifts to "Who's on site" rows with clock-in pin) with tests (AC-F16)
   - [x] T035b: FL-Today screen (clock status card opening the Clock tab, my jobs today, Owner/Office on-site list with map pin links), TodayMapper/ViewModel, ScreenCatalog, screenshots, F05 flow (AC-F16)
   - [x] T035c1: Today refreshes the cached team list on open (`TodayDeps.refreshMembers`)
-  - [ ] T035c2: clock widget 2x2 with Glance (AC-F17)
+  - [x] T035c2: clock widget 2x2 with Glance (AC-F17)
   - [ ] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
 - [ ] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
 - [ ] T037: Time exports and reports: shift CSV, QuickBooks-ready CSV, `HoursReport` `[unit]`, FL-Reports hours by job/person (acceptance: AC-F15, AC-F46)

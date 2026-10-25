@@ -8,6 +8,8 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,8 +58,13 @@ fun HomeRecordApp(
     modifier: Modifier = Modifier,
     startTabId: String? = null,
     startKeys: List<NavKey> = emptyList(),
+    tabRequests: Flow<String>? = null,
 ) {
     var selectedId by rememberSaveable { mutableStateOf(startTabId ?: tabs.first().id) }
+    // Outside entry points (a widget, a notification) ask for a tab here.
+    LaunchedEffect(tabRequests) {
+        tabRequests?.collect { id -> if (tabs.any { it.id == id }) selectedId = id }
+    }
     // startKeys are pushed on the start tab's stack only when it is first created; restored stacks win.
     val stacks = tabs.associate {
         val keys = if (it.id == startTabId) listOf(it.root) + startKeys else listOf(it.root)

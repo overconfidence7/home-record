@@ -193,4 +193,9 @@
     <string name="flag_overlap">Overlaps another shift</string>
     <string name="flag_edited">Edited</string>
     <string name="clock_no_account">Can\'t tell who you are. Retry signs you out so you can sign in again.</string>
+    <string name="widget_description">Clock status and a Clock in or Clock out button.</string>
+    <string name="widget_signed_out">Sign in to clock in</string>
+    <string name="widget_open">Open Field Log</string>
+    <string name="widget_since">Since %1$s</string>
+    <string name="widget_break_since">On break since %1$s</string>
 </resources>

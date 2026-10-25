@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
+import com.kurtz.homerecord.fieldlog.widget.ClockWidget
 
 class MainActivity : ComponentActivity() {
     private val container get() = (application as HomeRecordApplication).container
@@ -20,6 +21,12 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleJoinLink(intent)
+        handleWidget(intent)
+    }
+
+    /** The clock widget's button opens the Clock tab (AC-F17). */
+    private fun handleWidget(intent: Intent?) {
+        if (intent?.getBooleanExtra(ClockWidget.OPEN_CLOCK.name, false) == true) container.tabRequests.tryEmit("clock")
     }
 
     /** `fieldlog://join/<code>` from the invite page prefills the join form. */
@@ -54,6 +61,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleJoinLink(intent)
+        if (savedInstanceState == null) handleWidget(intent)
         setContent {
             HomeRecordTheme(Brand.FieldLog) {
                 CompositionLocalProvider(LocalTagPrefix provides "fl") {

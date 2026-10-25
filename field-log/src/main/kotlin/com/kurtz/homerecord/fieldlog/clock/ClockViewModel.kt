@@ -58,8 +58,10 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     val now = d.now()
                     val rules = TimesheetRules.from(settings.overtimeRule)
                     val sheet = WeekSheetBuilder.build(shifts, rules, settings.breakRule, d.zone, now)
+                    // The last job worked is preselected, so the widget's Clock in lands on it (AC-F17).
+                    val lastJob = shifts.lastOrNull()?.segments?.lastOrNull()?.jobId?.takeIf { id -> options.any { it.id == id } }
                     _state.update { s ->
-                        val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: options.singleOrNull()?.id
+                        val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: lastJob ?: options.singleOrNull()?.id
                         s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, now = now)
                     }
                 }

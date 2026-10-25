@@ -120,3 +120,6 @@ Brand serial formats are from commonly published manufacturer charts and are heu
 
 ## 2026-10-24 Paywall and billing seam
 RevenueCat is wrapped in `ProBilling` (extends `Entitlements`) in :core so ViewModels and tests use a fake; only `RevenueCatBilling` in :house-manual touches the SDK. Plans are mapped from the `default` offering by package type (annual, lifetime) and show the store's formatted price, never a hardcoded one. The free-limit check for items runs at the Add item entry points (Home and Items), counting live items at tap time.
+
+## 2026-10-25 Clock widget (T035c2)
+Glance (already in the approved list, 1.2.0 in the catalog) for the 2x2 widget. The button opens the app on the Clock tab rather than punching from the widget, because a punch can need a reason or a location permission prompt (AC-F9, AC-F18). The widget is static text (since time), no live ticker, so it never needs periodic updates; it is refreshed after each punch from AppContainer.recordChange. The last job worked is preselected by the Clock view model itself, so the same default applies from the tab.
