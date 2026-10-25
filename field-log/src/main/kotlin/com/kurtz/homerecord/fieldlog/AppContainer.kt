@@ -87,6 +87,23 @@ class AppContainer(app: Application) {
 
     val clock by lazy { com.kurtz.homerecord.core.punch.ClockController(punches, com.kurtz.homerecord.core.location.FusedLocationProvider(app)) }
 
+    /** What FL-Clock needs; settings come from the company profile when this role can read it, else the defaults. */
+    fun clockDeps(context: Context, membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String): com.kurtz.homerecord.fieldlog.clock.ClockDeps {
+        val prefs = context.getSharedPreferences("clock", Context.MODE_PRIVATE)
+        val location = com.kurtz.homerecord.core.location.FusedLocationProvider(context)
+        return com.kurtz.homerecord.fieldlog.clock.ClockDeps(
+            companyId = membership.companyId, memberId = memberId,
+            controller = com.kurtz.homerecord.core.punch.ClockController(punches, location), punches = punches,
+            jobs = db.jobDao(), location = location,
+            settings = {
+                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
+                    ?: com.kurtz.homerecord.core.company.CompanySettings()
+            },
+            permissionAsked = { prefs.getBoolean("location_asked", false) },
+            markPermissionAsked = { prefs.edit().putBoolean("location_asked", true).apply() },
+        )
+    }
+
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */
     suspend fun refreshMembers(companyId: String) {
         val result = companyApi.members(companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok ?: return

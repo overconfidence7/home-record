@@ -88,3 +88,50 @@ fun JobOverviewEmptyScreenshot() = JobOverviewEmptyPreview()
 @ThemePreviews
 @Composable
 fun JobHouseEmptyScreenshot() = JobHouseEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockOutScreenshot() = ClockOutPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockWorkingScreenshot() = ClockWorkingPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockBreakScreenshot() = ClockBreakPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockFarReasonScreenshot() = ClockFarReasonPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockExplainScreenshot() = ClockExplainPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockGpsRequiredScreenshot() = ClockGpsRequiredPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockNoJobsScreenshot() = ClockNoJobsPreview()
+
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockLoadingScreenshot() = ClockLoadingPreview()

@@ -210,3 +210,80 @@ fun JobHouseEmptyPreview() = Frame {
         houseContent = { com.kurtz.homerecord.fieldlog.jobs.JobHouseEmpty(onStart = {}, modifier = androidx.compose.ui.Modifier.fillMaxSize()) },
     )
 }
+
+private val clockJobs = listOf(
+    com.kurtz.homerecord.fieldlog.clock.ClockJobOption("j1", "Garage subpanel", "412 Alder St, Pasadena"),
+    com.kurtz.homerecord.fieldlog.clock.ClockJobOption("j2", "Ortiz kitchen remodel", "88 Maple Ave, Altadena"),
+)
+
+private val clockSheet = com.kurtz.homerecord.fieldlog.clock.WeekSheet(
+    days = listOf(
+        Triple(19, 8 * 60 + 15, emptySet<com.kurtz.homerecord.core.model.ShiftFlag>()),
+        Triple(20, 9 * 60 + 30, setOf(com.kurtz.homerecord.core.model.ShiftFlag.FarFromJob)),
+        Triple(21, 7 * 60 + 45, emptySet()),
+        Triple(22, 0, emptySet()),
+        Triple(23, 0, setOf(com.kurtz.homerecord.core.model.ShiftFlag.MissingClockOut, com.kurtz.homerecord.core.model.ShiftFlag.Edited)),
+        Triple(24, 0, emptySet()),
+        Triple(25, 0, emptySet()),
+    ).map { (d, min, flags) -> com.kurtz.homerecord.fieldlog.clock.SheetDay(java.time.LocalDate.of(2026, 10, d), min * 60_000L, flags) },
+    regularMillis = 24 * 3_600_000L + 30 * 60_000L,
+    overtimeMillis = 1 * 3_600_000L + 0,
+    doubleMillis = 0,
+)
+
+private const val CLOCK_NOW = 1_792_000_000_000L
+
+private fun clockState(status: com.kurtz.homerecord.core.punch.ClockStatus = com.kurtz.homerecord.core.punch.ClockStatus.Out) =
+    com.kurtz.homerecord.fieldlog.clock.ClockUiState(
+        loading = false, status = status, jobs = clockJobs, selectedJobId = "j1", now = CLOCK_NOW, sheet = clockSheet,
+    )
+
+@ThemePreviews
+@Composable
+fun ClockOutPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState(), {}) }
+
+@ThemePreviews
+@Composable
+fun ClockWorkingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState(com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", CLOCK_NOW - (3 * 3600 + 12 * 60 + 5) * 1000L)).copy(selectedJobId = "j2"), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClockBreakPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState(com.kurtz.homerecord.core.punch.ClockStatus.OnBreak("j1", CLOCK_NOW - 4 * 3600_000L, CLOCK_NOW - 600_000L)), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClockFarReasonPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState().copy(farReason = com.kurtz.homerecord.fieldlog.clock.FarReasonSheet(1840, com.kurtz.homerecord.fieldlog.clock.FarReasonSheet.OTHER, "Dropping off a ladder")), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClockExplainPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(explainLocation = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun ClockGpsRequiredPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(gpsRequired = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun ClockNoJobsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(jobs = emptyList(), selectedJobId = null, savedWithoutLocation = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun ClockLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(com.kurtz.homerecord.fieldlog.clock.ClockUiState(), {}) }

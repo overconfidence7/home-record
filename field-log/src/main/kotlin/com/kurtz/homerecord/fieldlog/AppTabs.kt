@@ -108,6 +108,12 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(),
                     onEditJob = { if (it == null) nav.push(JobEditKey(null)) else nav.push(JobKey(it)) },
                 )
+                key.depth == 0 && key.title == "clock" -> {
+                    val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
+                    val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+                    if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.auth.signOut() }, Modifier)
+                    else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) })
+                }
                 key.depth == 0 -> PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }

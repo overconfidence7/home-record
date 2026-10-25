@@ -1,0 +1,68 @@
+# Walkthrough F4: clock in on a job, take a break, switch, clock out; the week shows on My timesheet (AC-F8, AC-F10, AC-F18).
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn: "Company name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn: "Trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Garage subpanel"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Garage subpanel"
+    timeout: 10000
+- tapOn: "Clock"
+- extendedWaitUntil:
+    visible: "Not clocked in"
+    timeout: 10000
+- assertVisible: "My timesheet"
+- tapOn:
+    id: fl_clock_in
+# First clock in explains location before the system prompt (AC-F18); decline to take the no-location path.
+- extendedWaitUntil:
+    visible: "Use your location to clock in?"
+    timeout: 10000
+- tapOn:
+    id: fl_clock_explain_skip
+- extendedWaitUntil:
+    visible: "Clocked in"
+    timeout: 15000
+- assertVisible:
+    id: fl_clock_elapsed
+- tapOn:
+    id: fl_clock_break
+- extendedWaitUntil:
+    visible: "On break"
+    timeout: 10000
+- tapOn:
+    id: fl_clock_break_end
+- extendedWaitUntil:
+    visible: "Clocked in"
+    timeout: 10000
+- tapOn:
+    id: fl_clock_out
+- extendedWaitUntil:
+    visible: "Not clocked in"
+    timeout: 10000
