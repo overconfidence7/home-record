@@ -134,3 +134,6 @@ Glance (already in the approved list, 1.2.0 in the catalog) for the 2x2 widget. 
 
 ## 2026-10-25 — Media upload resume
 A presigned R2 PUT cannot continue part-way, so "resume" means the whole file is re-sent from the Room queue after a restart or network loss. Uploads are keyed by entity/entityId/filename so retries never duplicate; WorkManager (approved) drives the queue.
+
+## 2026-10-25 Job photos without a house
+A Field Log photo for a job with no linked home stores the job id in `photo.homeId` (the column is required). Reason: avoids a schema change; the id is stable and unique, and handoff replaces it with the real home id when a house is linked.
