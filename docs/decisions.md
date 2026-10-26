@@ -137,3 +137,6 @@ A presigned R2 PUT cannot continue part-way, so "resume" means the whole file is
 
 ## 2026-10-25 Job photos without a house
 A Field Log photo for a job with no linked home stores the job id in `photo.homeId` (the column is required). Reason: avoids a schema change; the id is stable and unique, and handoff replaces it with the real home id when a house is linked.
+
+## 2026-10-26 Voice memo transcripts
+Android's SpeechRecognizer listens to the microphone, not to a file, so a finished memo cannot be transcribed reliably on every device. T039c2 keeps memos without a transcript (`NoTranscriber`); the person can type one (AC-F27 is best effort). Revisit if on-device file transcription becomes available.

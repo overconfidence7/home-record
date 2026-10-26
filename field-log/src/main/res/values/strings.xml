@@ -279,7 +279,7 @@
     <string name="cap_note">Note</string>
     <string name="cap_voice">Voice</string>
     <string name="cap_voice_stop">Stop</string>
-    <string name="cap_recording">Recording %1$s</string>
+    <string name="cap_recording">Stop %1$s</string>
     <string name="cap_note_title">Add a note</string>
     <string name="cap_note_hint">What happened on site?</string>
     <string name="cap_note_save">Save note</string>

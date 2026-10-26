@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog.capture
 
 import android.content.Context
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.SystemClock
 import com.kurtz.homerecord.core.photo.JobNotes
 import com.kurtz.homerecord.core.photo.SpeechTranscriber
@@ -13,7 +14,8 @@ class AndroidVoiceRecorder(private val context: Context) : com.kurtz.homerecord.
 
     override fun start(path: String): Boolean {
         stop()
-        val next = MediaRecorder(context)
+        @Suppress("DEPRECATION")
+        val next = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context) else MediaRecorder()
         return runCatching {
             next.setAudioSource(MediaRecorder.AudioSource.MIC)
             next.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
