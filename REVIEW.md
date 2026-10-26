@@ -1280,3 +1280,17 @@ Auto entry review (1 new, 13 still open):
 Coverage note: the auto entry reports 114/114 claimed ACs covered across 44 ticked tasks (0 gaps); nothing to list.
 
 Judged: 27 screenshots opened (16 device shots covering every House Manual and Field Log flow that left one, both failure pairs, a tour shot per app in dark, 200% and landscape; 9 crawler shots of the screens new on this sha: photos-tab light and 200%, photos-empty, photo-detail, capture-ready 200%, capture-ghost, capture-note, capture-denied; 2 builder reference PNGs), the other 1011 PNGs (crawler variants of unchanged screens, 483 handoff duplicates) not opened; 18 walkthrough steps. New issues: 9. Product gaps: 0.
+
+## QA auto 2026-10-26 (commit 43f48d0)
+
+Automated suite run at 2026-10-26 18:27 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+No new automated findings.
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 68 device stages, 585 unit tests, 77 backend tests, coverage 114/114 ACs. Passed: 54. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
