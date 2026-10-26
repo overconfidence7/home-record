@@ -159,6 +159,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
   - [x] T040a: `PhotoGallery` (day groups, before/after pairs), `Annotation` marks + `AnnotationEditor` undo + JSON codec, annotated copy keeps the original in :core (AC-F25, AC-F26)
   - [x] T040b1: Photos tab on FL-Job: gallery by day, before/after pairs side by side, empty and loading states, ScreenCatalog, screenshots (AC-F24, AC-F25)
+  - [x] T040b2a: `PhotoEdits` in :core (caption, room/phase tags, Before mark, soft delete, all queued for sync) (AC-F25)
   - [ ] T040b2: FL-Photo screen (open a tile, caption, tags, share, delete) and ghost overlay on After in FL-Capture (AC-F25)
   - [ ] T040b3: annotate canvas (arrow, circle, rectangle, freehand, text, measure label, undo), saved as a copy, flow (AC-F26)
 - [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
