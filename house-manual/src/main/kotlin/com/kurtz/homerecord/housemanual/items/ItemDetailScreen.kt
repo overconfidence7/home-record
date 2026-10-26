@@ -223,7 +223,7 @@ private fun DetailsCard(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) 
             AssistChip(
                 onClick = { onEvent(ItemDetailEvent.OpenLink(url)) },
                 label = { Text(stringResource(R.string.item_detail_open_manual)) },
-                modifier = Modifier.testTag("hm_item_detail_manual"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_manual"),
             )
         }
     }
@@ -271,7 +271,7 @@ private fun WarrantyCard(detail: ItemDetail, state: ItemDetailUiState, onEvent: 
             AssistChip(
                 onClick = { onEvent(ItemDetailEvent.OpenLink(it)) },
                 label = { Text(stringResource(R.string.item_detail_warranty_source)) },
-                modifier = Modifier.testTag("hm_item_detail_warranty_source"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_warranty_source"),
             )
         }
         state.lookupNote?.takeIf { it != LookupNote.Queued }?.let {
@@ -335,7 +335,7 @@ fun WarrantyReviewContent(terms: WarrantyTerms, onEvent: (ItemDetailEvent) -> Un
             AssistChip(
                 onClick = { onEvent(ItemDetailEvent.OpenLink(it)) },
                 label = { Text(stringResource(R.string.item_detail_warranty_source)) },
-                modifier = Modifier.testTag("hm_item_detail_review_source"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review_source"),
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -415,7 +415,7 @@ private fun RecallsCard(recalls: RecallUi, onEvent: (ItemDetailEvent) -> Unit) {
                     AssistChip(
                         onClick = { onEvent(ItemDetailEvent.OpenLink(it)) },
                         label = { Text(stringResource(R.string.item_detail_recall_open)) },
-                        modifier = Modifier.testTag("hm_item_detail_recall_link"),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_recall_link"),
                     )
                 }
             }

@@ -71,7 +71,7 @@ fun ConsumablesCard(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> 
                 c.reorderUrl?.let { url ->
                     AssistChip(
                         onClick = { onEvent(ItemDetailEvent.OpenLink(url)) }, label = { Text(stringResource(R.string.item_detail_consumable_reorder)) },
-                        modifier = Modifier.testTag("hm_item_detail_consumable_reorder"),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_consumable_reorder"),
                     )
                 }
                 TextButton(onClick = { onEvent(ItemDetailEvent.OpenConsumable(c.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_consumable_edit")) {
