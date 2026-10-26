@@ -23,8 +23,10 @@ env:
       - takeScreenshot: tour-${QA_VARIANT}-more
       - tapOn: "Team"
       - takeScreenshot: tour-${QA_VARIANT}-team
-      - tapOn: "Back"
+      - tapOn:
+          id: "fl_back"
       - tapOn: "Company"
       - takeScreenshot: tour-${QA_VARIANT}-company
-      - tapOn: "Back"
+      - tapOn:
+          id: "fl_close"
       - tapOn: "Today"

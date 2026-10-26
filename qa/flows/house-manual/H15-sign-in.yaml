@@ -36,6 +36,5 @@ env:
 - takeScreenshot: H15-signed-in
 # Signing out keeps the local copy (AC-H15)
 - tapOn: "Sign out"
-- tapOn: "Sign out"
 - tapOn: "House"
 - takeScreenshot: H15-local-copy-kept
