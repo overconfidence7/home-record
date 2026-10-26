@@ -157,6 +157,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T039c1: `JobNotes`, `VoiceRecorder`, `SpeechTranscriber` in :core (typed notes, voice memos kept without transcript, editable transcript, 3 min cap constant) (AC-F27)
   - [x] T039c2: Android MediaRecorder + SpeechRecognizer implementations, RECORD_AUDIO permission, Note and Voice buttons and sheets on FL-Capture, AppContainer wiring (AC-F27)
 - [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
+  - [x] T040a: `PhotoGallery` (day groups, before/after pairs), `Annotation` marks + `AnnotationEditor` undo + JSON codec, annotated copy keeps the original in :core (AC-F25, AC-F26)
+  - [ ] T040b: Photos tab and FL-Photo screens (gallery, ghost overlay on After, annotate canvas, caption, share, delete) with ScreenCatalog, screenshots, flow (AC-F25, AC-F26)
 - [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
 - [ ] T042: PDF markup and document scanner: `MarkupCanvas` (pen, arrow, rectangle, text, highlight) → new version with author/time, version history; ML Kit document scanner to PDF into Files (acceptance: AC-F21, AC-F22)
 - [ ] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
