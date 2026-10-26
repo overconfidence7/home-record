@@ -13,6 +13,9 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Choose what kind of item this is."
 - tapOn:
     id: "hm_item_type"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_type_furnace"
 - tapOn:
     id: "hm_item_type_furnace"
 - tapOn:

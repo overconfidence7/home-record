@@ -127,7 +127,7 @@ private fun InviteCard(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShare
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = spoken },
+                    modifier = Modifier.fillMaxWidth().testTag("fl_team_code").semantics { contentDescription = spoken },
                 )
                 Button(
                     onClick = { onShareInvite(code, state.inviteLink.orEmpty()) },

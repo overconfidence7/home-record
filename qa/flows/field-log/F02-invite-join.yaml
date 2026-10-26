@@ -32,9 +32,10 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "Team"
 - assertVisible: "Invite code"
 - copyTextFrom:
-    text: "[A-Z0-9]{8}"
+    id: "fl_team_code"
 - takeScreenshot: F02-team-owner
-- tapOn: "Back"
+- tapOn:
+    id: "fl_back"
 # Sign-in survives a restart (AC-F4)
 - stopApp
 - launchApp

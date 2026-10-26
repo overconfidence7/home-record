@@ -36,7 +36,7 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_job_capture
 - tapOn:
-    text: "Don't allow"
+    text: "Don.t allow"
     optional: true
 - extendedWaitUntil:
     visible:
