@@ -15,12 +15,26 @@ interface RowStore {
     suspend fun write(entity: String, row: JsonObject)
 }
 
-/** [RowStore] over the Room database's tables; [entity] is the table name and is checked against the schema. */
+/**
+ * [RowStore] over the Room database's tables; [entity] is the table name and is checked against the schema.
+ * [write] keeps only the table's columns, so a row from a newer app version with extra fields still lands.
+ */
 class RoomRowStore(private val db: RoomDatabase) : RowStore {
     private val tables: Set<String> by lazy {
         val names = mutableSetOf<String>()
         db.openHelper.readableDatabase.query("SELECT name FROM sqlite_master WHERE type = 'table'").use {
             while (it.moveToNext()) names += it.getString(0)
+        }
+        names
+    }
+
+    private val columns = java.util.concurrent.ConcurrentHashMap<String, Set<String>>()
+
+    private fun columnsOf(entity: String): Set<String> = columns.getOrPut(entity) {
+        val names = mutableSetOf<String>()
+        db.openHelper.readableDatabase.query("PRAGMA table_info(`$entity`)").use {
+            val name = it.getColumnIndexOrThrow("name")
+            while (it.moveToNext()) names += it.getString(name)
         }
         names
     }
@@ -45,7 +59,9 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
     override suspend fun write(entity: String, row: JsonObject) {
         require(entity in tables) { "Unknown entity $entity" }
         val values = ContentValues()
+        val known = columnsOf(entity)
         for ((column, value) in row) {
+            if (column !in known) continue
             val p = value as? JsonPrimitive
             when {
                 p == null || p is JsonNull -> values.putNull(column)

@@ -15,8 +15,9 @@ const HOME_ENTITIES = [
   "service_record", "document", "photo", "contact", "maintenance_task", "panel", "breaker", "breaker_link",
 ];
 // A job's house model (AC-F48) syncs inside the company tenant; the handoff copies it to a home tenant (AC-B40).
-// Only the rows FL-JobEdit writes so far; T019 adds walls, overlays and items as FL-House needs them.
-const JOB_HOME_ENTITIES = ["home", "floor", "room"];
+// The rows Field Log writes for a job today: FL-JobEdit (home, floor, room), FL-House's plan editor (wall, opening,
+// stair) and job photos. Add overlays and items here when FL-House writes them.
+const JOB_HOME_ENTITIES = ["home", "floor", "room", "wall", "opening", "stair", "photo"];
 const ENTITIES: Record<TenantKind, Set<string>> = {
   company: new Set([...COMPANY_ENTITIES, ...JOB_HOME_ENTITIES]),
   home: new Set(HOME_ENTITIES),
@@ -52,17 +53,23 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const db = c.env.DB;
   const accepted: { outboxId: number; serverSeq: number }[] = [];
   const conflicts: { entity: string; entityId: string; field: string; reason: string }[] = [];
+  // A refused op is answered on its own and the rest of the batch still applies, so one bad row never blocks a phone.
+  const rejected: { outboxId: number; reason: "entity" | "payload" }[] = [];
   const authoritative = AUTHORITATIVE_ROLES.has(role);
 
   for (const op of ops) {
-    if (!ENTITIES[kind].has(op.entity)) return c.json({ error: "invalid", entity: op.entity }, 400);
+    if (!ENTITIES[kind].has(op.entity)) {
+      rejected.push({ outboxId: op.outboxId, reason: "entity" });
+      continue;
+    }
     let incoming: Row;
     try {
       const value = JSON.parse(op.payload);
       if (!value || typeof value !== "object" || Array.isArray(value) || value.id !== op.entityId) throw new Error("shape");
       incoming = value as Row;
     } catch {
-      return c.json({ error: "invalid", outboxId: op.outboxId }, 400);
+      rejected.push({ outboxId: op.outboxId, reason: "payload" });
+      continue;
     }
     const done = await db
       .prepare("SELECT server_seq FROM sync_applied WHERE tenant_kind = ? AND tenant_id = ? AND device_id = ? AND outbox_id = ?")
@@ -81,6 +88,7 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
       incoming,
       op.updatedAt,
       authoritative,
+      op.entity,
     );
     await db.prepare("INSERT OR IGNORE INTO sync_counters (tenant_kind, tenant_id, seq) VALUES (?, ?, 0)").bind(kind, tenantId).run();
     const counter = await db
@@ -116,7 +124,7 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
     for (const x of merged.conflicts) conflicts.push({ entity: op.entity, entityId: op.entityId, field: x.field, reason: x.reason });
     accepted.push({ outboxId: op.outboxId, serverSeq: seq });
   }
-  return c.json({ accepted, conflicts });
+  return c.json({ accepted, conflicts, rejected });
 });
 
 sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireTenant(), async (c) => {

@@ -346,6 +346,7 @@ interface OutboxDao {
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0 AND entity = :entity AND entityId = :entityId") suspend fun pendingCountFor(entity: String, entityId: String): Int
     @Query("UPDATE outbox SET sent = 1 WHERE seq IN (:seqs)") suspend fun markSent(seqs: List<Long>)
     @Query("UPDATE outbox SET sent = 1, serverSeq = :serverSeq WHERE seq = :seq") suspend fun markSent(seq: Long, serverSeq: Long)
+    @Query("SELECT COUNT(*) FROM outbox WHERE sent = 1 AND serverSeq = :refused") fun observeRefusedCount(refused: Long): kotlinx.coroutines.flow.Flow<Int>
 }
 
 @Dao

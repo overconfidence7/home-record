@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.sync
 
 import com.kurtz.homerecord.core.company.ApiResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -36,6 +37,7 @@ interface ConnectivityMonitor {
  * Decides when to sync (AC-F53): on sign-in or when the tenant appears, shortly after each local write
  * ([requestSync]), when the network returns, and every [intervalMs] while the app is in the foreground.
  * Nothing runs while signed out or without a tenant; local writes keep queuing in the outbox meanwhile.
+ * A pass that throws is dropped so the loop keeps running and the next trigger retries.
  */
 class SyncCoordinator(
     private val scope: CoroutineScope,
@@ -70,9 +72,19 @@ class SyncCoordinator(
         scope.launch {
             active.collectLatest { t ->
                 if (t == null) return@collectLatest
-                runner.sync(t)
-                merge(ticks, reconnects, writes).collect { runner.sync(t) }
+                runSafely(t)
+                merge(ticks, reconnects, writes).collect { runSafely(t) }
             }
+        }
+    }
+
+    private suspend fun runSafely(t: TenantRef) {
+        try {
+            runner.sync(t)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // The engine reports its own failures; this only keeps a bug in one pass from ending all syncing.
         }
     }
 }

@@ -20,14 +20,18 @@ class SyncCoordinatorTest {
         override val online: Flow<Boolean> = state
     }
 
-    private class Fixture(scope: TestScope) {
+    private class Fixture(scope: TestScope, private val failFirst: Boolean = false) {
         val signedIn = MutableStateFlow(false)
         val tenant = MutableStateFlow<TenantRef?>(null)
         val net = Net()
         val calls = mutableListOf<TenantRef>()
         val coordinator = SyncCoordinator(
             scope.backgroundScope,
-            { t -> calls += t; ApiResult.Ok(Unit) },
+            { t ->
+                calls += t
+                if (failFirst && calls.size == 1) throw IllegalStateException("bug in one pass")
+                ApiResult.Ok(Unit)
+            },
             signedIn,
             tenant,
             net,
@@ -110,5 +114,17 @@ class SyncCoordinatorTest {
         runCurrent()
         advanceTimeBy(120_000)
         assertThat(f.calls).hasSize(1)
+    }
+
+    // cr:sync-exceptions
+    @Test
+    fun `a pass that throws does not stop later syncs`() = runTest {
+        val f = Fixture(this, failFirst = true)
+        f.tenant.value = home
+        f.signedIn.value = true
+        runCurrent()
+        f.coordinator.requestSync()
+        advanceTimeBy(1_100)
+        assertThat(f.calls).hasSize(2)
     }
 }

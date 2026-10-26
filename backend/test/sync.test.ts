@@ -31,11 +31,24 @@ describe("AC-B20 merge rules (unit)", () => {
     expect(stale.row.title).toBe("New");
     expect(stale.conflicts).toEqual([{ field: "title", kept: "New", dropped: "Old", reason: "older" }]);
   });
-  it("unions *Json lists by id and by value", () => {
+  it("unions only the append-only lists: a punch's edit log, by id and by value", () => {
     expect(unionLists([{ id: "a" }, { id: "b" }], [{ id: "b" }, { id: "c" }])).toEqual([{ id: "a" }, { id: "b" }, { id: "c" }]);
-    const a = mergeRow(null, { id: "j", phasesJson: '["Demo","Frame"]' }, 10, false);
-    const b = mergeRow({ ...a, authoritative: false }, { id: "j", phasesJson: '["Frame","Paint"]' }, 5, false);
-    expect(JSON.parse(b.row.phasesJson as string)).toEqual(["Demo", "Frame", "Paint"]);
+    const a = mergeRow(null, { id: "p", editsJson: '[{"at":1,"by":"o"}]' }, 10, false, "punch");
+    const b = mergeRow({ ...a, authoritative: false }, { id: "p", editsJson: '[{"at":2,"by":"o"}]' }, 5, false, "punch");
+    expect(JSON.parse(b.row.editsJson as string)).toEqual([{ at: 1, by: "o" }, { at: 2, by: "o" }]);
+  });
+  it("a moved room keeps only its new corners and a removed phase stays removed (cr:sync-json-union)", () => {
+    const square = '[[0,0],[120,0],[120,120],[0,120]]';
+    const moved = '[[24,0],[144,0],[144,120],[24,120]]';
+    const first = mergeRow(null, { id: "r", polygonJson: square }, 10, false, "room");
+    const second = mergeRow({ ...first, authoritative: false }, { id: "r", polygonJson: moved }, 20, false, "room");
+    expect(second.row.polygonJson).toBe(moved);
+    const job = mergeRow(null, { id: "j", phasesJson: '["Demo","Frame","Paint"]' }, 10, false, "job");
+    const trimmed = mergeRow({ ...job, authoritative: false }, { id: "j", phasesJson: '["Demo","Paint"]' }, 20, false, "job");
+    expect(JSON.parse(trimmed.row.phasesJson as string)).toEqual(["Demo", "Paint"]);
+    const stale = mergeRow({ ...trimmed, authoritative: false }, { id: "j", phasesJson: '["Frame"]' }, 15, false, "job");
+    expect(JSON.parse(stale.row.phasesJson as string)).toEqual(["Demo", "Paint"]);
+    expect(stale.conflicts[0]).toMatchObject({ field: "phasesJson", reason: "older" });
   });
   it("an authoritative row rejects non-authoritative writes", () => {
     const first = mergeRow(null, { id: "p", at: 100 }, 10, true);
@@ -87,14 +100,27 @@ describe("AC-B20 push and pull", () => {
     expect(res.conflicts[0]).toMatchObject({ field: "at", reason: "authoritative" });
     expect((await pull(owner, "s-c4")).rows[0].row.at).toBe(900);
   });
-  it("404s for another tenant and 400s for an unknown entity or mismatched id", async () => {
+  it("404s for another tenant and refuses an unknown entity or mismatched id per op (cr:sync-poison-op)", async () => {
     const owner = await seedUser("s-o5", "s-o5@x.com");
     await seedCompany("s-c5", "Co", "s-o5");
     const other = await seedUser("s-o6", "s-o6@x.com");
     expect((await push(other, "s-c5", "d", [])).status).toBe(404);
     expect((await call("GET", "/companies/s-c5/sync/pull", other)).status).toBe(404);
-    expect((await push(owner, "s-c5", "d", [op(1, "x", {}, 1, "item")])).status).toBe(400);
-    expect((await push(owner, "s-c5", "d", [{ ...op(1, "x", {}, 1), entityId: "y" }])).status).toBe(400);
+    const res = await push(owner, "s-c5", "d", [
+      op(1, "x", {}, 1, "item"),
+      { ...op(2, "x", {}, 1), entityId: "y" },
+      { ...op(3, "z", {}, 1), payload: "not json" },
+      op(4, "t1", { title: "Still syncs" }, 1),
+    ]);
+    expect(res.status).toBe(200);
+    const body = await json(res);
+    expect(body.rejected).toEqual([
+      { outboxId: 1, reason: "entity" },
+      { outboxId: 2, reason: "payload" },
+      { outboxId: 3, reason: "payload" },
+    ]);
+    expect(body.accepted.map((a: any) => a.outboxId)).toEqual([4]);
+    expect((await pull(owner, "s-c5")).rows.map((r: any) => r.entityId)).toEqual(["t1"]);
   });
 });
 
@@ -132,5 +158,19 @@ describe("AC-F5 job rows sync", () => {
     expect(res.status).toBe(200);
     const rows = (await pull(owner, "s-c10")).rows;
     expect(rows.map((r: any) => r.entity).sort()).toEqual(["floor", "home", "room"]);
+  });
+
+  it("accepts the walls, doors, stairs and photos Field Log writes for a job (cr:sync-poison-op)", async () => {
+    // AC-F48
+    const owner = await seedUser("s-o11", "s-o11@x.com");
+    await seedCompany("s-c11", "Co", "s-o11");
+    const res = await json(await push(owner, "s-c11", "dev-a", [
+      op(1, "w1", { roomId: "r1", edgeIndex: 0, updatedAt: 10 }, 10, "wall"),
+      op(2, "o1", { roomId: "r1", kind: "DOOR", updatedAt: 10 }, 10, "opening"),
+      op(3, "s1", { floorId: "f1", updatedAt: 10 }, 10, "stair"),
+      op(4, "ph1", { jobId: "j1", room: "Kitchen", updatedAt: 10 }, 10, "photo"),
+    ]));
+    expect(res.rejected).toEqual([]);
+    expect(res.accepted).toHaveLength(4);
   });
 });

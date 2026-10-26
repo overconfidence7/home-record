@@ -30,8 +30,16 @@ data class Accepted(val outboxId: Long, val serverSeq: Long)
 @Serializable
 data class ConflictNote(val entity: String, val entityId: String, val field: String, val reason: String)
 
+/** An op the server refused on its own (unknown entity for the tenant, unreadable payload); the rest of the batch applied. */
 @Serializable
-data class PushResponse(val accepted: List<Accepted> = emptyList(), val conflicts: List<ConflictNote> = emptyList())
+data class Rejected(val outboxId: Long, val reason: String)
+
+@Serializable
+data class PushResponse(
+    val accepted: List<Accepted> = emptyList(),
+    val conflicts: List<ConflictNote> = emptyList(),
+    val rejected: List<Rejected> = emptyList(),
+)
 
 @Serializable
 data class PulledRow(

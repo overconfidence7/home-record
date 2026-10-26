@@ -10,18 +10,36 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * How a row pulled from the server lands on a device (AC-F53). The server row is already merged; this only
- * protects edits the device has not pushed yet: while the entity has pending outbox rows, a local scalar
- * stays if it was written after the server's time for that field, and `*Json` lists are unioned.
+ * protects edits the device has not pushed yet: while the entity has pending outbox rows, a field this device
+ * changed (it differs from [base], the row as the server last confirmed it) stays if it was written after the
+ * server's time for that field, and the append-only lists in [UNION_FIELDS] are
+ * unioned. Every other field, `*Json` lists such as polygons and phases included, takes one side whole.
+ * Local columns the server row does not carry (a newer app version's column) are kept.
  */
 object RowMerge {
-    fun applyPulled(local: JsonObject?, hasPending: Boolean, server: JsonObject, times: Map<String, Long>): JsonObject {
-        if (local == null || !hasPending) return server
+    /** Append-only lists merged as a union; must match `UNION_FIELDS` in backend/src/sync/merge.ts. */
+    val UNION_FIELDS: Map<String, Set<String>> = mapOf("punch" to setOf("editsJson"))
+
+    fun isUnionField(entity: String, field: String): Boolean = UNION_FIELDS[entity]?.contains(field) == true
+
+    fun applyPulled(
+        entity: String,
+        local: JsonObject?,
+        hasPending: Boolean,
+        server: JsonObject,
+        times: Map<String, Long>,
+        base: JsonObject? = null,
+    ): JsonObject {
+        if (local == null) return server
+        val out = LinkedHashMap<String, JsonElement>(local)
+        out.putAll(server)
+        if (!hasPending) return JsonObject(out)
         val localAt = local["updatedAt"]?.jsonPrimitive?.longOrNull ?: 0L
-        val out = LinkedHashMap<String, JsonElement>(server)
         for ((field, localValue) in local) {
             val serverValue = server[field] ?: continue
             if (field == "id" || localValue == serverValue) continue
-            val union = if (field.endsWith("Json")) unionLists(localValue, serverValue) else null
+            if (base != null && base[field] == localValue) continue
+            val union = if (isUnionField(entity, field)) unionLists(localValue, serverValue) else null
             out[field] = when {
                 union != null -> union
                 localAt > (times[field] ?: 0L) -> localValue

@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.RoomEntity
 import com.kurtz.homerecord.core.data.TaskEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -25,6 +26,10 @@ import org.robolectric.annotation.Config
 private class FakeServer : SyncApi {
     var online = true
     var pushCalls = 0
+    /** Entities this tenant refuses, as the Worker does for a row outside the tenant's list. */
+    var refused = emptySet<String>()
+    var throwOnPull: Exception? = null
+    val extraPulled = mutableListOf<PulledRow>()
     private var seq = 0L
     private val rows = LinkedHashMap<String, PulledRow>()
     private val applied = HashMap<Pair<String, Long>, Long>()
@@ -32,7 +37,8 @@ private class FakeServer : SyncApi {
     override suspend fun push(tenant: TenantRef, deviceId: String, ops: List<PushOp>): ApiResult<PushResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
         pushCalls++
-        val accepted = ops.map { op ->
+        val rejected = ops.filter { it.entity in refused }.map { Rejected(it.outboxId, "entity") }
+        val accepted = ops.filter { it.entity !in refused }.map { op ->
             val serverSeq = applied.getOrPut(deviceId to op.outboxId) {
                 val incoming = kotlinx.serialization.json.Json.parseToJsonElement(op.payload) as JsonObject
                 val key = "${op.entity}/${op.entityId}"
@@ -47,12 +53,13 @@ private class FakeServer : SyncApi {
             }
             Accepted(op.outboxId, serverSeq)
         }
-        return ApiResult.Ok(PushResponse(accepted))
+        return ApiResult.Ok(PushResponse(accepted, rejected = rejected))
     }
 
     override suspend fun pull(tenant: TenantRef, since: Long): ApiResult<PullResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
-        val out = rows.values.filter { it.serverSeq > since }.sortedBy { it.serverSeq }
+        throwOnPull?.let { throw it }
+        val out = (rows.values + extraPulled).filter { it.serverSeq > since }.sortedBy { it.serverSeq }
         return ApiResult.Ok(PullResponse(out, out.lastOrNull()?.serverSeq ?: since))
     }
 }
@@ -164,15 +171,120 @@ class SyncEngineTest {
     @Test fun pullKeepsALocalEditNewerThanTheServerValue() {
         val local = JsonObject(mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive("Mine"), "updatedAt" to JsonPrimitive(50)))
         val server = JsonObject(mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive("Theirs"), "updatedAt" to JsonPrimitive(20)))
-        val kept = RowMerge.applyPulled(local, hasPending = true, server = server, times = mapOf("title" to 20))
+        val kept = RowMerge.applyPulled("task", local, hasPending = true, server = server, times = mapOf("title" to 20))
         assertThat(kept["title"]).isEqualTo(JsonPrimitive("Mine"))
-        assertThat(RowMerge.applyPulled(local, hasPending = false, server = server, times = mapOf("title" to 20))["title"]).isEqualTo(JsonPrimitive("Theirs"))
-        assertThat(RowMerge.applyPulled(local, true, server, mapOf("title" to 90))["title"]).isEqualTo(JsonPrimitive("Theirs"))
+        assertThat(RowMerge.applyPulled("task", local, hasPending = false, server = server, times = mapOf("title" to 20))["title"]).isEqualTo(JsonPrimitive("Theirs"))
+        assertThat(RowMerge.applyPulled("task", local, true, server, mapOf("title" to 90))["title"]).isEqualTo(JsonPrimitive("Theirs"))
     }
 
-    @Test fun jsonListsUnionOnPull() {
-        fun row(phases: String) = JsonObject(mapOf("id" to JsonPrimitive("j"), "phasesJson" to JsonPrimitive(phases), "updatedAt" to JsonPrimitive(1)))
-        val merged = RowMerge.applyPulled(row("""["Demo","Frame"]"""), true, row("""["Frame","Paint"]"""), emptyMap())
-        assertThat(merged["phasesJson"]?.jsonPrimitive?.content).isEqualTo("""["Demo","Frame","Paint"]""")
+    private fun room(polygon: String, name: String, at: Long) =
+        RoomEntity(id = "r1", floorId = "f1", name = name, polygonJson = polygon, createdAt = 1, updatedAt = at)
+
+    private suspend fun saveRoom(db: HomeRecordDatabase, engine: SyncEngine, r: RoomEntity) {
+        db.roomDao().upsert(r)
+        engine.recordChange(tenant, "room", r.id)
+    }
+
+    // cr:sync-json-union
+    @Test fun movedRoomKeepsOnlyItsNewCornersOnTheOtherDevice() = runTest {
+        val square = """[{"x":0,"y":0},{"x":120,"y":0},{"x":120,"y":120},{"x":0,"y":120}]"""
+        val moved = """[{"x":24,"y":0},{"x":144,"y":0},{"x":144,"y":120},{"x":24,"y":120}]"""
+        saveRoom(dbA, a, room(square, "Kitchen", 10))
+        a.sync(tenant); b.sync(tenant)
+        saveRoom(dbA, a, room(moved, "Kitchen", 20))
+        a.sync(tenant)
+        // B renamed the room while A moved it and was offline for one pass; both edits land on both phones.
+        saveRoom(dbB, b, dbB.roomDao().get("r1")!!.copy(name = "Galley kitchen", updatedAt = 30))
+        server.online = false
+        b.sync(tenant)
+        server.online = true
+        b.sync(tenant); a.sync(tenant)
+        for (db in listOf(dbA, dbB)) {
+            val r = db.roomDao().get("r1")!!
+            assertThat(r.polygonJson).isEqualTo(moved)
+            assertThat(r.name).isEqualTo("Galley kitchen")
+        }
+    }
+
+    // cr:sync-json-union: a field this device did not change takes the server's value even while another field is pending
+    @Test fun pendingRowTakesServerValueForFieldsThisDeviceDidNotChange() {
+        fun row(polygon: String, name: String, at: Long) = JsonObject(
+            mapOf("id" to JsonPrimitive("r1"), "polygonJson" to JsonPrimitive(polygon), "name" to JsonPrimitive(name), "updatedAt" to JsonPrimitive(at)),
+        )
+        val base = row("[1]", "Kitchen", 10)
+        val local = row("[1]", "Galley", 50)
+        val server = row("[2]", "Kitchen", 20)
+        val merged = RowMerge.applyPulled("room", local, true, server, mapOf("polygonJson" to 20, "name" to 10), base)
+        assertThat(merged["polygonJson"]?.jsonPrimitive?.content).isEqualTo("[2]")
+        assertThat(merged["name"]?.jsonPrimitive?.content).isEqualTo("Galley")
+    }
+
+    // cr:sync-json-union: phases are last-writer-wins, so a removed phase stays removed
+    @Test fun removedPhaseDoesNotComeBackOnPull() {
+        fun row(phases: String, at: Long) = JsonObject(mapOf("id" to JsonPrimitive("j"), "phasesJson" to JsonPrimitive(phases), "updatedAt" to JsonPrimitive(at)))
+        val merged = RowMerge.applyPulled("job", row("""["Demo","Paint"]""", 50), true, row("""["Demo","Frame","Paint"]""", 20), mapOf("phasesJson" to 20))
+        assertThat(merged["phasesJson"]?.jsonPrimitive?.content).isEqualTo("""["Demo","Paint"]""")
+        val older = RowMerge.applyPulled("job", row("""["Demo","Paint"]""", 10), true, row("""["Demo","Frame"]""", 20), mapOf("phasesJson" to 20))
+        assertThat(older["phasesJson"]?.jsonPrimitive?.content).isEqualTo("""["Demo","Frame"]""")
+    }
+
+    @Test fun punchEditLogIsTheOnlyUnionedList() {
+        fun row(edits: String) = JsonObject(mapOf("id" to JsonPrimitive("p"), "editsJson" to JsonPrimitive(edits), "updatedAt" to JsonPrimitive(1)))
+        val merged = RowMerge.applyPulled("punch", row("""[{"at":1}]"""), true, row("""[{"at":2}]"""), emptyMap())
+        assertThat(merged["editsJson"]?.jsonPrimitive?.content).isEqualTo("""[{"at":1},{"at":2}]""")
+        assertThat(RowMerge.isUnionField("job", "phasesJson")).isFalse()
+        assertThat(RowMerge.isUnionField("room", "polygonJson")).isFalse()
+    }
+
+    // cr:sync-poison-op
+    @Test fun refusedOpIsSetAsideAndLaterChangesStillSync() = runTest {
+        server.refused = setOf("room")
+        saveRoom(dbA, a, room("[]", "Kitchen", 10))
+        save(dbA, a, task("After the refused row", 11))
+        val result = a.sync(tenant)
+        assertThat(result).isInstanceOf(ApiResult.Ok::class.java)
+        val conflicts = (result as ApiResult.Ok).value.conflicts
+        assertThat(conflicts.map { it.entity to it.reason }).containsExactly("room" to "refused:entity")
+        assertThat(a.pendingCount.first()).isEqualTo(0)
+        assertThat(a.refusedCount.first()).isEqualTo(1)
+        assertThat(a.phase.value).isEqualTo(SyncPhase.Idle)
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Next edit", updatedAt = 12))
+        a.sync(tenant); b.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Next edit")
+        assertThat(dbB.roomDao().get("r1")).isNull()
+    }
+
+    // cr:sync-exceptions
+    @Test fun anExceptionDuringSyncEndsAsFailedNotStuckSyncing() = runTest {
+        server.throwOnPull = IllegalStateException("bad response")
+        assertThat(a.sync(tenant)).isEqualTo(ApiResult.Err(ApiFailure.Failed))
+        assertThat(a.phase.value).isEqualTo(SyncPhase.Failed)
+        server.throwOnPull = null
+        assertThat(a.sync(tenant)).isInstanceOf(ApiResult.Ok::class.java)
+        assertThat(a.phase.value).isEqualTo(SyncPhase.Idle)
+    }
+
+    // cr:sync-exceptions: a newer server column is ignored and a row that cannot be stored is skipped and logged
+    @Test fun unknownColumnsAndUnstorableRowsDoNotBlockThePull() = runTest {
+        fun obj(vararg pairs: Pair<String, Any?>) = JsonObject(pairs.associate { (k, v) -> k to when (v) { null -> kotlinx.serialization.json.JsonNull; is Number -> JsonPrimitive(v); else -> JsonPrimitive(v.toString()) } })
+        server.extraPulled += PulledRow("task", "t9", obj("id" to "t9", "jobId" to "j1", "title" to "From a newer app", "done" to 0, "punch" to 0, "createdAt" to 1, "updatedAt" to 5, "source" to "FIELD_LOG", "futureColumn" to "x"), serverSeq = 101)
+        server.extraPulled += PulledRow("task", "t10", obj("id" to "t10", "title" to "No job id", "updatedAt" to 5), serverSeq = 102)
+        server.extraPulled += PulledRow("no_such_table", "x", obj("id" to "x"), serverSeq = 103)
+        server.extraPulled += PulledRow("task", "t11", obj("id" to "t11", "jobId" to "j1", "title" to "After the bad rows", "done" to 0, "punch" to 0, "createdAt" to 1, "updatedAt" to 6, "source" to "FIELD_LOG"), serverSeq = 104)
+        val result = a.sync(tenant)
+        assertThat(result).isInstanceOf(ApiResult.Ok::class.java)
+        assertThat((result as ApiResult.Ok).value.conflicts.map { it.entityId }).containsExactly("t10", "x")
+        assertThat(dbA.taskDao().get("t9")?.title).isEqualTo("From a newer app")
+        assertThat(dbA.taskDao().get("t11")?.title).isEqualTo("After the bad rows")
+        assertThat(a.phase.value).isEqualTo(SyncPhase.Idle)
+    }
+
+    // A local column the server row does not carry is kept
+    @Test fun pulledRowWithoutALocalColumnKeepsTheLocalValue() {
+        val local = JsonObject(mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive("Old"), "note" to JsonPrimitive("Local only"), "updatedAt" to JsonPrimitive(1)))
+        val server = JsonObject(mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive("New"), "updatedAt" to JsonPrimitive(2)))
+        val merged = RowMerge.applyPulled("task", local, false, server, emptyMap())
+        assertThat(merged["title"]?.jsonPrimitive?.content).isEqualTo("New")
+        assertThat(merged["note"]?.jsonPrimitive?.content).isEqualTo("Local only")
     }
 }

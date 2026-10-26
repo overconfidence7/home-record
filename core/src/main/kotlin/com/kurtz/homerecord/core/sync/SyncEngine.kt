@@ -22,7 +22,9 @@ import kotlinx.serialization.json.jsonPrimitive
  * Local-first sync (AC-F53, AC-B20). Every local write calls [recordChange], which appends the row to the
  * outbox. [sync] pushes pending rows in order, then pulls everything after the last `serverSeq` and applies it.
  * One sync runs at a time; a failed pass leaves the outbox untouched so the next one retries without duplicates
- * (the server dedupes by `(deviceId, outboxId)`).
+ * (the server dedupes by `(deviceId, outboxId)`). An op the server refuses on its own is set aside
+ * ([OutboxEntity.serverSeq] = [REFUSED]) and logged in the result, so it never blocks the changes behind it; a pulled
+ * row that cannot be stored is skipped and logged the same way. Any other error ends the pass as [SyncPhase.Failed].
  */
 class SyncEngine(
     private val api: SyncApi,
@@ -39,6 +41,9 @@ class SyncEngine(
 
     /** Count of changes waiting to be sent, for the Today chip (AC-F52). */
     val pendingCount: Flow<Int> = outbox.observePendingCount()
+
+    /** Count of changes the server refused and that will not be sent again. */
+    val refusedCount: Flow<Int> = outbox.observeRefusedCount(REFUSED)
 
     /**
      * Queue the current stored row of [entity]/[entityId] (soft deletes included) for the next push. The payload holds
@@ -62,9 +67,11 @@ class SyncEngine(
         )
     }
 
+    private suspend fun confirmedRow(key: String): JsonObject? =
+        base.get(key)?.let { runCatching { Json.parseToJsonElement(it) as? JsonObject }.getOrNull() }
+
     private suspend fun changedFields(entity: String, entityId: String, row: JsonObject): JsonObject {
-        val confirmed = base.get("$entity/$entityId")?.let { runCatching { Json.parseToJsonElement(it) as? JsonObject }.getOrNull() }
-            ?: return row
+        val confirmed = confirmedRow("$entity/$entityId") ?: return row
         return JsonObject(row.filter { (field, value) -> field == "id" || field == "updatedAt" || confirmed[field] != value })
     }
 
@@ -82,9 +89,14 @@ class SyncEngine(
                     is ApiResult.Err -> return@withLock fail(res.failure)
                     is ApiResult.Ok -> {
                         res.value.accepted.forEach { outbox.markSent(it.outboxId, it.serverSeq) }
+                        val bySeq = batch.associateBy { it.seq }
+                        res.value.rejected.forEach { r ->
+                            outbox.markSent(r.outboxId, REFUSED)
+                            bySeq[r.outboxId]?.let { conflicts += ConflictNote(it.entity, it.entityId, "", "refused:${r.reason}") }
+                        }
                         conflicts += res.value.conflicts
                         pushed += res.value.accepted.size
-                        if (res.value.accepted.size < batch.size) return@withLock fail(ApiFailure.Failed)
+                        if (res.value.accepted.size + res.value.rejected.size < batch.size) return@withLock fail(ApiFailure.Failed)
                     }
                 }
             }
@@ -94,7 +106,15 @@ class SyncEngine(
                     is ApiResult.Err -> return@withLock fail(res.failure)
                     is ApiResult.Ok -> res.value
                 }
-                page.rows.forEach { apply(it) }
+                for (row in page.rows) {
+                    try {
+                        apply(row)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        conflicts += ConflictNote(row.entity, row.entityId, "", "unstored:${e.javaClass.simpleName}")
+                    }
+                }
                 pulled += page.rows.size
                 if (page.serverSeq > since) state.set(SyncStateEntity(lastServerSeq = page.serverSeq))
             } while (page.more)
@@ -103,15 +123,19 @@ class SyncEngine(
         } catch (e: kotlinx.coroutines.CancellationException) {
             _phase.value = SyncPhase.Idle
             throw e
+        } catch (e: Exception) {
+            fail(ApiFailure.Failed)
         }
     }
 
     private suspend fun apply(pulledRow: PulledRow) {
         val local = store.read(pulledRow.entity, pulledRow.entityId)
         val pending = outbox.pendingCountFor(pulledRow.entity, pulledRow.entityId) > 0
-        val merged: JsonObject = RowMerge.applyPulled(local, pending, pulledRow.row, pulledRow.times)
+        val key = "${pulledRow.entity}/${pulledRow.entityId}"
+        val confirmed = if (pending) confirmedRow(key) else null
+        val merged: JsonObject = RowMerge.applyPulled(pulledRow.entity, local, pending, pulledRow.row, pulledRow.times, confirmed)
         if (merged != local) store.write(pulledRow.entity, merged)
-        base.set(SyncBaseEntity("${pulledRow.entity}/${pulledRow.entityId}", pulledRow.row.toString()))
+        base.set(SyncBaseEntity(key, pulledRow.row.toString()))
     }
 
     private fun fail(failure: ApiFailure): ApiResult<SyncResult> {
@@ -119,7 +143,10 @@ class SyncEngine(
         return ApiResult.Err(failure)
     }
 
-    private companion object {
-        const val BATCH = 200
+    companion object {
+        private const val BATCH = 200
+
+        /** `serverSeq` of an outbox row the server refused: marked sent so it stops blocking, kept for the log. */
+        const val REFUSED = -1L
     }
 }

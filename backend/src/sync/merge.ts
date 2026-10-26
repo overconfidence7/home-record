@@ -50,11 +50,28 @@ export function unionLists(existing: unknown[], incoming: unknown[]): unknown[] 
 }
 
 /**
- * Field-level merge (AC-F53). Scalars are last-writer-wins by the op's updatedAt, with ties going to the later push.
- * Fields named `*Json` that hold arrays are unioned. A row marked authoritative (a punch edited by Owner/Office)
+ * The only fields merged as a union (AC-F53). They are append-only logs, so nothing is ever removed from them.
+ * Every other field, `*Json` lists included (polygons, corners, lines, phases, tags), is last-writer-wins: a union
+ * there would mix old and new corners or bring back removed entries. Keep in sync with the app's `RowMerge`.
+ */
+export const UNION_FIELDS: Record<string, ReadonlySet<string>> = {
+  punch: new Set(["editsJson"]),
+};
+
+export const isUnionField = (entity: string, field: string) => UNION_FIELDS[entity]?.has(field) ?? false;
+
+/**
+ * Field-level merge (AC-F53). Fields are last-writer-wins by the op's updatedAt, with ties going to the later push;
+ * the append-only lists in [UNION_FIELDS] are unioned. A row marked authoritative (a punch edited by Owner/Office)
  * rejects every non-authoritative write and logs it.
  */
-export function mergeRow(existing: Stored | null, incoming: Row, at: number, incomingAuthoritative: boolean): Merged {
+export function mergeRow(
+  existing: Stored | null,
+  incoming: Row,
+  at: number,
+  incomingAuthoritative: boolean,
+  entity = "",
+): Merged {
   if (!existing) {
     const times: FieldTimes = {};
     for (const k of Object.keys(incoming)) times[k] = at;
@@ -71,9 +88,9 @@ export function mergeRow(existing: Stored | null, incoming: Row, at: number, inc
       continue;
     }
     const current = row[field];
-    const a = parseArray(current);
-    const b = parseArray(value);
-    if (field.endsWith("Json") && a && b) {
+    const a = isUnionField(entity, field) ? parseArray(current) : null;
+    const b = a ? parseArray(value) : null;
+    if (a && b) {
       const merged = unionLists(a, b);
       row[field] = typeof current === "string" ? JSON.stringify(merged) : merged;
       times[field] = Math.max(times[field] ?? 0, at);
