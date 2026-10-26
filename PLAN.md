@@ -165,6 +165,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T040b3a: `PhotoAnnotator` in :core (annotated copy saved beside the original, queued for sync and upload) and the Android `BitmapAnnotationRenderer` in field-log (AC-F26)
   - [x] T040b3: annotate canvas screen (arrow, circle, rectangle, freehand, text, measure label, undo, Save copy) opened from FL-Photo, ScreenCatalog, screenshots, flow (AC-F26)
 - [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
+  - [x] T041a: JobFiles in :core (folders incl. empty ones, add, rename, move, search by name, Available offline flag, soft delete) with JobFilesTest 5 (AC-F23)
+  - [ ] T041b: Files tab UI, upload with progress, PdfViewer, storage in Settings with Free up (AC-F19, AC-F20)
 - [ ] T042: PDF markup and document scanner: `MarkupCanvas` (pen, arrow, rectangle, text, highlight) → new version with author/time, version history; ML Kit document scanner to PDF into Files (acceptance: AC-F21, AC-F22)
 - [ ] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
 - [ ] T043: Daily log: `LogAssembler` `[unit]`, FL-Log sections (crew/hours, work done, photos, tasks, materials, delays, weather, visitors, safety, client notes), delay picker, backend `/weather` proxy (Open-Meteo) with cache, "No weather (offline)" (acceptance: AC-F30, AC-F31, AC-F32, AC-B32)
