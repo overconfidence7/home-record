@@ -1198,3 +1198,17 @@ Not built yet: F7, F9, F10, F11, F12, F13 (Schedule tab placeholder), F14, F16, 
 
 Tested: AC-C4, AC-C29, AC-B1..B5, AC-F1..F12, AC-U1..U12. Passed: 25. New issues: 3. Product gaps: 0. Walkthrough: HM 7/10, FL 9/9.
 
+
+## QA auto 2026-10-26 (commit f8c8842)
+
+Automated suite run at 2026-10-26 12:14 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F08-capture fails on field-log (regression of a fixed item) [auto:flow:field-log:F08-capture] - steps: automated, see qa-results branch latest/ for commit f8c8842 - expected: walkthrough step F08 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F08-capture.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, field-log F03 Pass, field-log F04 Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 68 device stages, 568 unit tests, 77 backend tests, coverage 114/114 ACs. Passed: 52. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
