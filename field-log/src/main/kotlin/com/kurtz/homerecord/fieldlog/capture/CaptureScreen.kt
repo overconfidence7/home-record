@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.photo.LensChoice
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
+import androidx.compose.ui.draw.alpha
 import com.kurtz.homerecord.fieldlog.R
 
 /**
@@ -92,6 +93,19 @@ fun CaptureScreen(
                 ) {
                     Box(Modifier.weight(1f).fillMaxWidth().background(Color.Black)) {
                         camera(Modifier.fillMaxSize())
+                        state.ghost?.takeIf { state.ghostOn }?.let {
+                            coil3.compose.AsyncImage(
+                                model = java.io.File(it.path), contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize().alpha(0.3f).testTag("fl_capture_ghost"),
+                            )
+                        }
+                        state.ghost?.let {
+                            FilterChip(
+                                selected = state.ghostOn, onClick = { onEvent(CaptureEvent.ToggleGhost) },
+                                label = { Text(stringResource(R.string.cap_ghost)) },
+                                modifier = Modifier.align(Alignment.TopStart).padding(8.dp).heightIn(min = 56.dp).testTag("fl_capture_ghost_toggle"),
+                            )
+                        }
                         Row(Modifier.align(Alignment.TopEnd).padding(8.dp)) {
                             IconButton(onClick = { onEvent(CaptureEvent.CycleFlash) }, Modifier.size(56.dp).testTag("fl_capture_flash")) {
                                 Icon(

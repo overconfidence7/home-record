@@ -37,6 +37,7 @@ object ScreenCatalog {
         QaScreen("clock-no-jobs", nonRoot = false) { ClockNoJobsPreview() },
         QaScreen("clock-loading", nonRoot = false) { ClockLoadingPreview() },
         QaScreen("capture-ready", nonRoot = true) { CaptureReadyPreview() },
+        QaScreen("capture-ghost", nonRoot = true) { CaptureGhostPreview() },
         QaScreen("capture-recording", nonRoot = true) { CaptureRecordingPreview() },
         QaScreen("capture-note", nonRoot = true) { CaptureNotePreview() },
         QaScreen("capture-denied", nonRoot = true) { CaptureDeniedPreview() },

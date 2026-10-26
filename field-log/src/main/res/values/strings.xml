@@ -286,6 +286,7 @@
     <string name="cap_flash_auto">Flash auto</string>
     <string name="cap_flash_on">Flash on</string>
     <string name="cap_flip">Switch camera</string>
+    <string name="cap_ghost">Line up with Before</string>
     <string name="cap_gallery">Add from gallery</string>
     <string name="cap_shutter">Take photo</string>
     <string name="cap_save_failed">Couldn\'t save the photo. Check free space and try again.</string>

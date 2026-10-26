@@ -520,6 +520,10 @@ fun CaptureLoadingPreview() = CaptureFrame(com.kurtz.homerecord.fieldlog.capture
 
 @ThemePreviews
 @Composable
+fun CaptureGhostPreview() = CaptureFrame(captureReady.copy(ghost = com.kurtz.homerecord.fieldlog.capture.GhostShot("b1", "/none/b1.jpg")))
+
+@ThemePreviews
+@Composable
 fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true, recordedSeconds = 74))
 
 @ThemePreviews

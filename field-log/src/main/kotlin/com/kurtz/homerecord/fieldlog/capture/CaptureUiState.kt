@@ -8,6 +8,9 @@ enum class FlashMode { Off, Auto, On }
 
 data class CaptureRoom(val id: String, val name: String)
 
+/** The Before shot drawn at 30% over the preview so the After lines up (AC-F25). */
+data class GhostShot(val photoId: String, val path: String)
+
 /** What a shot or import told the person; shown as one line over the shutter row. */
 enum class CaptureMessage { SaveFailed, JobGone, NoCamera, NoteSaved, MemoSaved, MemoFailed, MicDenied }
 
@@ -29,6 +32,8 @@ data class CaptureUiState(
     val noteText: String = "",
     val recording: Boolean = false,
     val recordedSeconds: Int = 0,
+    val ghost: GhostShot? = null,
+    val ghostOn: Boolean = true,
 )
 
 sealed interface CaptureEvent {
@@ -44,6 +49,7 @@ sealed interface CaptureEvent {
     data class Captured(val path: String) : CaptureEvent
     data object CaptureFailed : CaptureEvent
     data class Imported(val paths: List<String>) : CaptureEvent
+    data object ToggleGhost : CaptureEvent
     data object OpenNote : CaptureEvent
     data object CloseNote : CaptureEvent
     data class NoteText(val text: String) : CaptureEvent

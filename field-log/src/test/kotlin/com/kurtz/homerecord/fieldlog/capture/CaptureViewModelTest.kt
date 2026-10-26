@@ -94,6 +94,31 @@ class CaptureViewModelTest {
         assertThat(s.access).isEqualTo(CameraAccess.Granted)
     }
 
+    // AC-F25
+    @Test fun afterShotLinksToTheGhostedBefore() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.Captured("/media/before.jpg"))
+        val before = photosAfter(1).single()
+        db.photoDao().upsert(before.copy(stage = "Before"))
+        val ghost = withTimeout(10_000) { vm.state.first { it.ghost != null } }.ghost
+        assertThat(ghost?.photoId).isEqualTo(before.id)
+        vm.onEvent(CaptureEvent.Captured("/media/after.jpg"))
+        val after = photosAfter(2).first { it.path == "/media/after.jpg" }
+        assertThat(after.beforeOfPhotoId).isEqualTo(before.id)
+        assertThat(withTimeout(10_000) { vm.state.first { it.ghost == null } }.ghost).isNull()
+    }
+
+    // AC-F25
+    @Test fun ghostOffTakesAPlainShot() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.Captured("/media/before.jpg"))
+        db.photoDao().upsert(photosAfter(1).single().copy(stage = "Before"))
+        withTimeout(10_000) { vm.state.first { it.ghost != null } }
+        vm.onEvent(CaptureEvent.ToggleGhost)
+        vm.onEvent(CaptureEvent.Captured("/media/plain.jpg"))
+        assertThat(photosAfter(2).first { it.path == "/media/plain.jpg" }.beforeOfPhotoId).isNull()
+    }
+
     // AC-F24
     @Test fun shutterSavesPhotoWithJobRoomPhaseAndFix() = runBlocking<Unit> {
         val vm = vm().also { it.loaded() }

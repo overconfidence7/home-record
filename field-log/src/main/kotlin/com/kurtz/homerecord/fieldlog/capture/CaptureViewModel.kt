@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.data.RoomDao
 import com.kurtz.homerecord.core.location.LocationProvider
 import com.kurtz.homerecord.core.photo.CaptureTags
+import com.kurtz.homerecord.core.photo.GhostPicker
 import com.kurtz.homerecord.core.photo.JobNotes
 import com.kurtz.homerecord.core.photo.JobPhotos
 import com.kurtz.homerecord.core.photo.LensChoice
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -57,7 +59,12 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
     )
     val state: StateFlow<CaptureUiState> = _state.asStateFlow()
 
+    private var jobPhotos = emptyList<com.kurtz.homerecord.core.data.PhotoEntity>()
+
     init {
+        viewModelScope.launch {
+            d.photos.observeForJob(d.jobId).collect { list -> jobPhotos = list; refreshGhost() }
+        }
         viewModelScope.launch {
             val job = d.jobs.get(d.jobId)
             if (job == null) {
@@ -76,16 +83,22 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
         }
     }
 
+    private fun refreshGhost() {
+        val pick = GhostPicker.pick(jobPhotos, _state.value.roomId)
+        _state.update { it.copy(ghost = pick?.let { p -> GhostShot(p.id, p.path) }) }
+    }
+
     fun onEvent(event: CaptureEvent) {
         when (event) {
-            is CaptureEvent.SelectRoom -> { saved["room"] = event.id; _state.update { it.copy(roomId = event.id) }; remember() }
+            is CaptureEvent.SelectRoom -> { saved["room"] = event.id; _state.update { it.copy(roomId = event.id) }; remember(); refreshGhost() }
             is CaptureEvent.SelectPhase -> { saved["phase"] = event.phase; _state.update { it.copy(phase = event.phase) }; remember() }
             CaptureEvent.CycleFlash -> _state.update { it.copy(flash = FlashMode.entries[(it.flash.ordinal + 1) % FlashMode.entries.size]) }
             CaptureEvent.Flip -> { wantFront = !wantFront; applyLens() }
             is CaptureEvent.PermissionResult ->
                 _state.update { it.copy(access = if (event.granted) CameraAccess.Granted else CameraAccess.Denied) }
             is CaptureEvent.CameraInfo -> { hasBack = event.hasBack; hasFront = event.hasFront; applyLens() }
-            is CaptureEvent.Captured -> save(listOf(event.path))
+            is CaptureEvent.Captured -> save(listOf(event.path), pairWithGhost = true)
+            CaptureEvent.ToggleGhost -> _state.update { it.copy(ghostOn = !it.ghostOn) }
             is CaptureEvent.Imported -> save(event.paths)
             CaptureEvent.CaptureFailed -> _state.update { it.copy(message = CaptureMessage.SaveFailed) }
             CaptureEvent.DismissMessage -> _state.update { it.copy(message = null) }
@@ -164,7 +177,8 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
         }
     }
 
-    private fun save(paths: List<String>) {
+    private fun save(paths: List<String>, pairWithGhost: Boolean = false) {
+        val beforeOf = _state.value.takeIf { pairWithGhost && it.ghostOn }?.ghost?.photoId
         val tags = _state.value.let { CaptureTags(d.jobId, it.roomId, it.phase) }
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
@@ -172,7 +186,7 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             var ok = 0
             var gone = false
             paths.forEach { path ->
-                if (d.photos.save(path, tags, fix) == null) gone = true else ok++
+                if (d.photos.save(path, tags, fix, beforeOf) == null) gone = true else ok++
             }
             _state.update {
                 it.copy(

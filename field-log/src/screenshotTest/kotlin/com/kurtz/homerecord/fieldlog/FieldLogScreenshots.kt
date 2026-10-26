@@ -229,6 +229,11 @@ fun CaptureReadyScreenshot() = CaptureReadyPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CaptureGhostScreenshot() = CaptureGhostPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureDeniedScreenshot() = CaptureDeniedPreview()
 
 @PreviewTest
