@@ -131,7 +131,7 @@ class CaptureViewModelTest {
     @Test fun importedGalleryPhotosAreAllSaved() = runBlocking<Unit> {
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Imported(listOf("/media/1.jpg", "/media/2.jpg")))
-        assertThat(photosAfter(1)).hasSize(2)
+        assertThat(photosAfter(2)).hasSize(2)
         assertThat(withTimeout(10_000) { vm.state.first { it.savedCount >= 2 } }.savedCount).isEqualTo(2)
     }
 
