@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.company
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -168,6 +169,7 @@ private fun TeamDialogs(state: TeamUiState, onEvent: (TeamEvent) -> Unit) {
     }
     state.confirmRemove?.let { member ->
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(TeamEvent.CancelRemove) },
             title = { Text(stringResource(R.string.team_remove_title, member.displayName)) },
             text = { Text(stringResource(R.string.team_remove_body)) },
@@ -178,6 +180,7 @@ private fun TeamDialogs(state: TeamUiState, onEvent: (TeamEvent) -> Unit) {
     state.rateFor?.let { member ->
         var cents by rememberSaveable(member.userId) { mutableStateOf(member.rateCents) }
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(TeamEvent.DismissRate) },
             title = { Text(stringResource(R.string.team_rate_title, member.displayName)) },
             text = { MoneyField(label = stringResource(R.string.team_rate_label), cents = cents, onCentsChange = { cents = it }) },

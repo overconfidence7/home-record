@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.documents
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -110,13 +111,14 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
     }
     val form = state.form
     if (form != null) {
-        ModalBottomSheet(onDismissRequest = { onEvent(DocumentsEvent.CloseForm) }) {
+        ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(DocumentsEvent.CloseForm) }) {
             DocumentFormContent(form, state.showFormErrors, onEvent)
         }
     }
     state.confirmDeleteId?.let { id ->
         val name = state.folders.flatMap { it.documents }.firstOrNull { it.id == id }?.name.orEmpty()
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(DocumentsEvent.CancelDelete) },
             title = { Text(stringResource(R.string.documents_delete_title, name)) },
             text = { Text(stringResource(R.string.documents_delete_body)) },

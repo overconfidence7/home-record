@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -94,6 +95,7 @@ fun FloorsScreen(
             onEvent(FloorsEvent.ConfirmEdit(dialog.floor.id, name, ceiling))
         }
         is FloorsDialog.Delete -> AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(FloorsEvent.DismissDialog) },
             title = { Text(stringResource(R.string.floor_delete_title, dialog.floor.name)) },
             text = {
@@ -161,6 +163,7 @@ private fun FloorDialog(floor: FloorSummary?, system: UnitSystem, onDismiss: () 
     var name by rememberSaveable { mutableStateOf(floor?.name.orEmpty()) }
     var ceiling by rememberSaveable { mutableStateOf<Int?>(floor?.ceilingHeightIn ?: 96) }
     AlertDialog(
+        modifier = Modifier.windowTestTags(),
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (floor == null) R.string.floor_add_title else R.string.floor_edit_title)) },
         text = {

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.timesheets
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -202,6 +203,7 @@ private fun AuditLines(edits: List<com.kurtz.homerecord.core.punch.PunchEdit>, z
 private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
     if (state.confirmApproveAll) {
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(TimesheetsEvent.CancelApproveAll) },
             title = { Text(stringResource(R.string.ts_approve_all_title)) },
             text = { Text(stringResource(R.string.ts_approve_all_body)) },
@@ -211,6 +213,7 @@ private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEven
     }
     state.edit?.let { sheet ->
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(TimesheetsEvent.CancelEdit) },
             title = { Text(stringResource(R.string.ts_edit_title)) },
             text = {

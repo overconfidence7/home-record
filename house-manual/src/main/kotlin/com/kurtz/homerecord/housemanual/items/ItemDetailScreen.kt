@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -121,7 +122,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
         }
     }
     state.review?.let { terms ->
-        ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.DiscardTerms) }) {
+        ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ItemDetailEvent.DiscardTerms) }) {
             WarrantyReviewContent(terms, onEvent)
         }
     }
@@ -129,6 +130,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
     AttachDocumentSheet(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(ItemDetailEvent.CancelDelete) },
             title = { Text(stringResource(R.string.item_detail_delete_title, detail.item.name)) },
             text = { Text(stringResource(R.string.item_detail_delete_body)) },

@@ -46,7 +46,7 @@ fun QuickAddSheet(
     var text by rememberSaveable { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val submit = { if (text.isNotBlank()) onAdd(text.trim()) }
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
             Modifier.widthIn(max = 640.dp).padding(horizontal = 16.dp).navigationBarsPadding(),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
@@ -82,7 +82,7 @@ fun OptionsSheet(
     onDismiss: () -> Unit,
     onPick: (SheetOption) -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = onDismiss) {
         Column(Modifier.widthIn(max = 640.dp).navigationBarsPadding()) {
             if (title != null) {
                 Text(

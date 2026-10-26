@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -491,6 +492,7 @@ private fun DrawScope.drawPlan(
 @Composable
 private fun ConfirmDeleteDialog(title: String, body: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
+        modifier = Modifier.windowTestTags(),
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(body) },

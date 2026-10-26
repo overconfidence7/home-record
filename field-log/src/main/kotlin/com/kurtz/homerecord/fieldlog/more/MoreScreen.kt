@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.more
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -88,6 +89,7 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
     }
     if (confirmSignOut) {
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { confirmSignOut = false },
             title = { Text(stringResource(R.string.sign_out_title)) },
             text = { Text(stringResource(R.string.sign_out_body)) },

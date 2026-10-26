@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.clock
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -263,6 +264,7 @@ private fun flagLabel(f: ShiftFlag): Int = when (f) {
 private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
     if (state.explainLocation) {
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(ClockEvent.ExplainSkip) },
             title = { Text(stringResource(R.string.clock_explain_title)) },
             text = { Text(stringResource(R.string.clock_explain_body)) },
@@ -272,6 +274,7 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
     }
     state.farReason?.let { sheet ->
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(ClockEvent.CancelReason) },
             title = { Text(stringResource(R.string.clock_far_title)) },
             text = {
@@ -302,6 +305,7 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
     }
     state.gpsRequired?.let { permissionMissing ->
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(ClockEvent.DismissGps) },
             title = { Text(stringResource(R.string.clock_gps_title)) },
             text = { Text(stringResource(if (permissionMissing) R.string.clock_gps_permission else R.string.clock_gps_signal)) },

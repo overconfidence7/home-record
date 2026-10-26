@@ -224,7 +224,7 @@
     <string name="contacts_delete">Delete</string>
     <string name="contacts_delete_title">Delete %1$s?</string>
     <string name="contacts_delete_body">Service records that name this contact stay, without the link.</string>
-    <string name="home_empty_body">Start with one thing. Add an item, scan a data plate, or photograph a wall.</string>
+    <string name="home_empty_body">Start with one thing. Add an item or scan a data plate.</string>
     <string name="home_action_add">Add item</string>
     <string name="home_action_scan">Scan data plate</string>
     <string name="home_emergency">Emergency</string>

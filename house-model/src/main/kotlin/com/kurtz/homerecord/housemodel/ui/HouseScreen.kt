@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -219,6 +220,7 @@ private fun HouseDialogs(dialog: HouseDialog?, onEvent: (HouseEvent) -> Unit, on
         is HouseDialog.Rename -> {
             var name by rememberSaveable(dialog.room.id) { mutableStateOf(dialog.room.name) }
             AlertDialog(
+                modifier = Modifier.windowTestTags(),
                 onDismissRequest = { onEvent(HouseEvent.DismissDialog) },
                 title = { Text(stringResource(R.string.house_room_rename)) },
                 text = {
@@ -239,6 +241,7 @@ private fun HouseDialogs(dialog: HouseDialog?, onEvent: (HouseEvent) -> Unit, on
             )
         }
         is HouseDialog.ConfirmDelete -> AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(HouseEvent.DismissDialog) },
             title = { Text(stringResource(R.string.house_room_delete_title, dialog.room.name.ifBlank { stringResource(R.string.plan_unnamed_room) })) },
             text = { Text(stringResource(R.string.house_room_delete_body)) },

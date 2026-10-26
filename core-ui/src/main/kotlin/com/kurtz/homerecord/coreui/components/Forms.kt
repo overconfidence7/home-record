@@ -90,6 +90,7 @@ fun FormScaffold(
     }
     if (confirmDiscard) {
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.discard_title)) },
             text = { Text(stringResource(R.string.discard_body)) },
@@ -217,6 +218,7 @@ fun DateField(
         val initial = isoDate?.let { runCatching { LocalDate.parse(it).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli() }.getOrNull() }
         val state = rememberDatePickerState(initialSelectedDateMillis = initial)
         DatePickerDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { open = false },
             confirmButton = {
                 TextButton(onClick = {

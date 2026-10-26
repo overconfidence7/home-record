@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.contacts
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -91,6 +92,7 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
     state.confirmDeleteId?.let { id ->
         val name = state.rows.firstOrNull { it.contact.id == id }?.contact?.name.orEmpty()
         AlertDialog(
+            modifier = Modifier.windowTestTags(),
             onDismissRequest = { onEvent(ContactsEvent.CancelDelete) },
             title = { Text(stringResource(R.string.contacts_delete_title, name)) },
             text = { Text(stringResource(R.string.contacts_delete_body)) },

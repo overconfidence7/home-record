@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -241,7 +242,7 @@ private fun PickerField(label: String, value: String, error: String?, tag: Strin
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SubtypeSheet(selectedId: String?, onDismiss: () -> Unit, onPick: (String) -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss) { SubtypeList(selectedId, onPick) }
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = onDismiss) { SubtypeList(selectedId, onPick) }
 }
 
 /** The sheet's content, separate so previews can draw it (a modal sheet does not render in screenshot tests). */
@@ -272,7 +273,7 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PlateScanSheet(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
-    ModalBottomSheet(onDismissRequest = { onEvent(ItemEditEvent.PlateDismiss) }) { PlateScanContent(scan, onEvent) }
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ItemEditEvent.PlateDismiss) }) { PlateScanContent(scan, onEvent) }
 }
 
 /** Recognized lines with tap-to-assign (AC-C31); separate from the sheet so previews can draw it. */

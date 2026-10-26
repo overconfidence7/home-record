@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual
 
+import androidx.compose.foundation.layout.Box
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
@@ -35,7 +37,7 @@ fun FormScreenDialog(
         onDismissRequest = onClose,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        FormScreenScaffold(title, saveTag, onClose, onSave, content)
+        Box(Modifier.fillMaxSize().windowTestTags()) { FormScreenScaffold(title, saveTag, onClose, onSave, content) }
     }
 }
 

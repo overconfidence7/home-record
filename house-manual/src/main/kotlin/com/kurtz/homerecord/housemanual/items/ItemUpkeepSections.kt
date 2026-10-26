@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -307,7 +308,7 @@ fun DocumentsCard(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) 
 @Composable
 fun AttachDocumentSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     if (!state.showAttach) return
-    ModalBottomSheet(onDismissRequest = { onEvent(ItemDetailEvent.HideAttach) }) {
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ItemDetailEvent.HideAttach) }) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.item_detail_attach_title), style = MaterialTheme.typography.titleLarge)
             if (state.attachable.isEmpty()) Text(stringResource(R.string.item_detail_attach_empty), style = MaterialTheme.typography.bodyLarge)
