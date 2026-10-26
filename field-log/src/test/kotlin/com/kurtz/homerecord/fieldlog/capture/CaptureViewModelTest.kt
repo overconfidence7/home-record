@@ -16,7 +16,10 @@ import com.kurtz.homerecord.core.photo.JobNotes
 import com.kurtz.homerecord.core.photo.JobPhotos
 import com.kurtz.homerecord.core.photo.VoiceRecorder
 import com.kurtz.homerecord.core.photo.LensChoice
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -58,6 +61,8 @@ class CaptureViewModelTest {
     }
 
     @After fun tearDown() {
+        // The photo observer still collecting when the database closes would throw into the next test class.
+        runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
     }
@@ -70,6 +75,7 @@ class CaptureViewModelTest {
     }
 
     private val recorder = FakeRecorder()
+    private val created = mutableListOf<CaptureViewModel>()
 
     private fun vm(jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true): CaptureViewModel {
         val photos = JobPhotos(db, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L })
@@ -78,7 +84,7 @@ class CaptureViewModelTest {
             notes = JobNotes(db, { null }, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L }),
             recorder = recorder, newMemoPath = { "/media/memo.m4a" },
         )
-        return CaptureViewModel(deps, SavedStateHandle())
+        return CaptureViewModel(deps, SavedStateHandle()).also { created += it }
     }
 
     private suspend fun photosAfter(n: Int) = withTimeout(10_000) { db.photoDao().observeForJob("j1").first { it.size >= n } }

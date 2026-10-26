@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -28,6 +30,9 @@ class PhotoDetailDeps(
 class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
     private val _state = MutableStateFlow(PhotoDetailUiState())
     val state: StateFlow<PhotoDetailUiState> = _state.asStateFlow()
+
+    /** Edits land in the order they were made, so a quick room then phase tap cannot be overwritten by the older write. */
+    private val writes = Mutex()
 
     init {
         viewModelScope.launch { load() }
@@ -54,7 +59,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
     fun onEvent(event: PhotoDetailEvent) {
         when (event) {
             is PhotoDetailEvent.Caption -> _state.update { it.copy(caption = event.text) }
-            PhotoDetailEvent.SaveCaption -> viewModelScope.launch { d.edits.setCaption(d.photoId, _state.value.caption) }
+            PhotoDetailEvent.SaveCaption -> viewModelScope.launch { val text = _state.value.caption; writes.withLock { d.edits.setCaption(d.photoId, text) } }
             is PhotoDetailEvent.Room -> {
                 _state.update { it.copy(roomId = event.id) }
                 saveTags()
@@ -65,7 +70,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             }
             PhotoDetailEvent.MarkBefore -> {
                 _state.update { it.copy(phase = PhotoEdits.BEFORE, isBefore = true) }
-                viewModelScope.launch { d.edits.markBefore(d.photoId) }
+                viewModelScope.launch { writes.withLock { d.edits.markBefore(d.photoId) } }
             }
             PhotoDetailEvent.AskDelete -> _state.update { it.copy(confirmDelete = true) }
             PhotoDetailEvent.CancelDelete -> _state.update { it.copy(confirmDelete = false) }
@@ -78,6 +83,6 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
 
     private fun saveTags() {
         val s = _state.value
-        viewModelScope.launch { d.edits.setTags(d.photoId, s.roomId, s.phase) }
+        viewModelScope.launch { writes.withLock { d.edits.setTags(d.photoId, s.roomId, s.phase) } }
     }
 }
