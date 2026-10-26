@@ -23,8 +23,6 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Today"
     timeout: 15000
-- extendedWaitUntil:
-    visible: "Today"
 - tapOn: "Jobs"
 - tapOn:
     id: fl_jobs_new
