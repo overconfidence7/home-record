@@ -480,3 +480,40 @@ fun ReportsEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ReportsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.reports.ReportsScreen(com.kurtz.homerecord.fieldlog.reports.ReportsUiState(), {}, {}) }
+
+private val captureRooms = listOf(
+    com.kurtz.homerecord.fieldlog.capture.CaptureRoom("r1", "Kitchen"),
+    com.kurtz.homerecord.fieldlog.capture.CaptureRoom("r2", "Garage"),
+    com.kurtz.homerecord.fieldlog.capture.CaptureRoom("r3", "Main bath"),
+)
+
+private val captureReady = com.kurtz.homerecord.fieldlog.capture.CaptureUiState(
+    loading = false, jobName = "Ortiz kitchen rewire", rooms = captureRooms, phases = listOf("Rough-in", "Inspection", "Finish"),
+    roomId = "r1", phase = "Rough-in", canFlip = true, access = com.kurtz.homerecord.fieldlog.capture.CameraAccess.Granted, savedCount = 3,
+)
+
+@Composable
+private fun CaptureFrame(state: com.kurtz.homerecord.fieldlog.capture.CaptureUiState) = Frame {
+    com.kurtz.homerecord.fieldlog.capture.CaptureScreen(state, {}, {}, {}) { m ->
+        androidx.compose.foundation.layout.Box(m.androidx_background())
+    }
+}
+
+private fun androidx.compose.ui.Modifier.androidx_background() =
+    this.then(androidx.compose.ui.Modifier.fillMaxSize())
+
+@ThemePreviews
+@Composable
+fun CaptureReadyPreview() = CaptureFrame(captureReady)
+
+@ThemePreviews
+@Composable
+fun CaptureDeniedPreview() = CaptureFrame(captureReady.copy(access = com.kurtz.homerecord.fieldlog.capture.CameraAccess.Denied))
+
+@ThemePreviews
+@Composable
+fun CaptureNoCameraPreview() = CaptureFrame(captureReady.copy(lens = com.kurtz.homerecord.core.photo.LensChoice.None))
+
+@ThemePreviews
+@Composable
+fun CaptureLoadingPreview() = CaptureFrame(com.kurtz.homerecord.fieldlog.capture.CaptureUiState())

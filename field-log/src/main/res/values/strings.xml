@@ -265,4 +265,18 @@
     <string name="widget_open">Open Field Log</string>
     <string name="widget_since">Since %1$s</string>
     <string name="widget_break_since">On break since %1$s</string>
+    <string name="cap_title">Photo</string>
+    <string name="cap_flash_off">Flash off</string>
+    <string name="cap_flash_auto">Flash auto</string>
+    <string name="cap_flash_on">Flash on</string>
+    <string name="cap_flip">Switch camera</string>
+    <string name="cap_gallery">Add from gallery</string>
+    <string name="cap_shutter">Take photo</string>
+    <string name="cap_save_failed">Couldn\'t save the photo. Check free space and try again.</string>
+    <string name="cap_job_gone">This job is gone, so the photo wasn\'t saved.</string>
+    <string name="cap_no_camera">This device has no camera. You can still add photos from the gallery.</string>
+    <string name="cap_denied">Field Log uses the camera to take job photos. Without it you can still add photos from the gallery, notes and voice memos.</string>
+    <string name="cap_open_settings">Open Settings</string>
+    <string name="cap_from_gallery">Add from gallery</string>
+    <string name="job_take_photo">Take photo</string>
 </resources>

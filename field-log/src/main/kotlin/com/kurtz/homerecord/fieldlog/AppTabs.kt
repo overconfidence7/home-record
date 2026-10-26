@@ -149,7 +149,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenFloors = { homeId, title -> nav.push(JobFloorsKey(homeId, title)) },
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
+                onCapture = { nav.push(CaptureKey(key.jobId)) },
             )
+        }
+        entry<CaptureKey> { key ->
+            com.kurtz.homerecord.fieldlog.capture.CaptureRoute(key.jobId, { ctx -> container.captureDeps(ctx, key.jobId) }, onBack = nav::pop)
         }
         entry<JobPlanKey> { key ->
             com.kurtz.homerecord.housemodel.ui.PlanEditorRoute(

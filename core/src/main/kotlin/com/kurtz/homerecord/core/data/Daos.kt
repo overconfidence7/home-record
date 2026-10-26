@@ -30,6 +30,7 @@ interface RoomDao {
     @Query("SELECT * FROM room WHERE floorId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<RoomEntity>
     @Query("UPDATE room SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
     @Query("SELECT room.* FROM room JOIN floor ON room.floorId = floor.id WHERE floor.homeId = :homeId AND room.deletedAt IS NULL AND floor.deletedAt IS NULL ORDER BY room.createdAt") fun observeForHome(homeId: String): Flow<List<RoomEntity>>
+    @Query("SELECT room.* FROM room JOIN floor ON room.floorId = floor.id WHERE floor.homeId = :homeId AND room.deletedAt IS NULL AND floor.deletedAt IS NULL ORDER BY room.createdAt") suspend fun listForHome(homeId: String): List<RoomEntity>
     @Query("SELECT floorId, COUNT(*) AS rooms FROM room WHERE deletedAt IS NULL GROUP BY floorId") fun observeCounts(): Flow<List<FloorRoomCount>>
 }
 

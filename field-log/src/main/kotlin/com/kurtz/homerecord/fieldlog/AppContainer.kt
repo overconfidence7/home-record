@@ -112,6 +112,17 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    fun captureDeps(context: Context, jobId: String): com.kurtz.homerecord.fieldlog.capture.CaptureDeps {
+        val prefs = context.getSharedPreferences("capture", Context.MODE_PRIVATE)
+        return com.kurtz.homerecord.fieldlog.capture.CaptureDeps(
+            jobId = jobId, jobs = db.jobDao(), rooms = db.roomDao(), photos = jobPhotos,
+            location = com.kurtz.homerecord.core.location.FusedLocationProvider(context),
+            lastTags = { prefs.getString("room_$jobId", null) to prefs.getString("phase_$jobId", null) },
+            rememberTags = { room, phase -> prefs.edit().putString("room_$jobId", room).putString("phase_$jobId", phase).apply() },
+            hasCameraPermission = { context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED },
+        )
+    }
+
     val approvals by lazy { com.kurtz.homerecord.core.punch.TimesheetApprovals(db, onChange = ::recordChange) }
     val crewClock by lazy {
         val loc = com.kurtz.homerecord.core.location.FusedLocationProvider(app)

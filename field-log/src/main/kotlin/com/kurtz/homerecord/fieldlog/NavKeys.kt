@@ -20,3 +20,5 @@ import kotlinx.serialization.Serializable
 @Serializable data class JobFloorsKey(val homeId: String, val title: String) : NavKey
 
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
+
+@Serializable data class CaptureKey(val jobId: String) : NavKey

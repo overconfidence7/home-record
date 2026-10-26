@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,8 +36,18 @@ fun JobScreen(
     onEvent: (JobOverviewEvent) -> Unit,
     onBack: () -> Unit,
     houseContent: @Composable () -> Unit = { SoonNote(JobTab.HOUSE) },
+    onCapture: (() -> Unit)? = null,
 ) {
-    ScreenScaffold(title = state.name.ifBlank { stringResource(R.string.tab_jobs) }, subtitle = state.clientName, onBack = onBack) { padding ->
+    ScreenScaffold(
+        title = state.name.ifBlank { stringResource(R.string.tab_jobs) }, subtitle = state.clientName, onBack = onBack,
+        actions = {
+            if (onCapture != null) {
+                androidx.compose.material3.IconButton(onCapture, Modifier.testTag("fl_job_capture")) {
+                    androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Rounded.PhotoCamera, stringResource(R.string.job_take_photo))
+                }
+            }
+        },
+    ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             PrimaryScrollableTabRow(selectedTabIndex = selected.ordinal, edgePadding = 8.dp) {
                 JobTab.entries.forEach { tab ->

@@ -1,0 +1,185 @@
+package com.kurtz.homerecord.fieldlog.capture
+
+import android.view.KeyEvent as AndroidKeyEvent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cameraswitch
+import androidx.compose.material.icons.rounded.FlashAuto
+import androidx.compose.material.icons.rounded.FlashOff
+import androidx.compose.material.icons.rounded.FlashOn
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.core.photo.LensChoice
+import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.shell.ScreenScaffold
+import com.kurtz.homerecord.fieldlog.R
+
+/**
+ * FL-Capture: camera, room and phase chips, 80 dp shutter, flash, flip, gallery (AC-F24, AC-F29).
+ * [camera] draws the live preview; previews and tests pass a plain box.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CaptureScreen(
+    state: CaptureUiState,
+    onEvent: (CaptureEvent) -> Unit,
+    onBack: () -> Unit,
+    onPickGallery: () -> Unit,
+    camera: @Composable (Modifier) -> Unit,
+) {
+    ScreenScaffold(title = stringResource(R.string.cap_title), subtitle = state.jobName.ifBlank { null }, onBack = onBack) { padding ->
+        when {
+            state.loading -> LoadingState(Modifier.padding(padding))
+            state.access == CameraAccess.Denied || state.lens == LensChoice.None ->
+                NoCamera(state, onEvent, onPickGallery, Modifier.padding(padding))
+            else -> {
+                val focus = remember { FocusRequester() }
+                LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+                Column(
+                    Modifier.padding(padding).fillMaxSize()
+                        .focusRequester(focus).focusTarget()
+                        .onPreviewKeyEvent { e ->
+                            val volume = e.key.nativeKeyCode == AndroidKeyEvent.KEYCODE_VOLUME_UP || e.key.nativeKeyCode == AndroidKeyEvent.KEYCODE_VOLUME_DOWN
+                            if (volume && e.type == KeyEventType.KeyUp) onEvent(CaptureEvent.Shutter)
+                            volume
+                        },
+                ) {
+                    Box(Modifier.weight(1f).fillMaxWidth().background(Color.Black)) {
+                        camera(Modifier.fillMaxSize())
+                        Row(Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                            IconButton(onClick = { onEvent(CaptureEvent.CycleFlash) }, Modifier.size(56.dp).testTag("fl_capture_flash")) {
+                                Icon(
+                                    when (state.flash) { FlashMode.Off -> Icons.Rounded.FlashOff; FlashMode.Auto -> Icons.Rounded.FlashAuto; FlashMode.On -> Icons.Rounded.FlashOn },
+                                    stringResource(
+                                        when (state.flash) { FlashMode.Off -> R.string.cap_flash_off; FlashMode.Auto -> R.string.cap_flash_auto; FlashMode.On -> R.string.cap_flash_on },
+                                    ),
+                                    tint = Color.White,
+                                )
+                            }
+                            if (state.canFlip) {
+                                IconButton(onClick = { onEvent(CaptureEvent.Flip) }, Modifier.size(56.dp).testTag("fl_capture_flip")) {
+                                    Icon(Icons.Rounded.Cameraswitch, stringResource(R.string.cap_flip), tint = Color.White)
+                                }
+                            }
+                        }
+                    }
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (state.rooms.isNotEmpty()) {
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                state.rooms.forEach { r ->
+                                    FilterChip(
+                                        selected = state.roomId == r.id,
+                                        onClick = { onEvent(CaptureEvent.SelectRoom(if (state.roomId == r.id) null else r.id)) },
+                                        label = { Text(r.name) }, modifier = Modifier.testTag("fl_capture_room_${r.id}"),
+                                    )
+                                }
+                            }
+                        }
+                        if (state.phases.isNotEmpty()) {
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                state.phases.forEach { p ->
+                                    FilterChip(
+                                        selected = state.phase == p,
+                                        onClick = { onEvent(CaptureEvent.SelectPhase(if (state.phase == p) null else p)) },
+                                        label = { Text(p) }, modifier = Modifier.testTag("fl_capture_phase_$p"),
+                                    )
+                                }
+                            }
+                        }
+                        state.message?.let {
+                            Text(stringResource(messageText(it)), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("fl_capture_message"))
+                        }
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                            IconButton(onClick = onPickGallery, Modifier.size(56.dp).testTag("fl_capture_gallery")) {
+                                Icon(Icons.Rounded.PhotoLibrary, stringResource(R.string.cap_gallery))
+                            }
+                            Shutter(state.saving) { onEvent(CaptureEvent.Shutter) }
+                            Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+                                if (state.savedCount > 0) {
+                                    Text(
+                                        state.savedCount.toString(), style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.testTag("fl_capture_count"),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Shutter(busy: Boolean, onClick: () -> Unit) {
+    val ring = MaterialTheme.colorScheme.primary
+    val label = stringResource(R.string.cap_shutter)
+    IconButton(
+        onClick = onClick, enabled = !busy,
+        modifier = Modifier.size(80.dp).border(4.dp, ring, CircleShape).testTag("fl_capture_shutter").semantics { contentDescription = label },
+    ) {
+        Box(Modifier.size(60.dp).background(ring, CircleShape))
+    }
+}
+
+private fun messageText(m: CaptureMessage): Int = when (m) {
+    CaptureMessage.SaveFailed -> R.string.cap_save_failed
+    CaptureMessage.JobGone -> R.string.cap_job_gone
+    CaptureMessage.NoCamera -> R.string.cap_no_camera
+}
+
+/** AC-F29: say why, link to Settings, and still offer the gallery so the job can get photos. */
+@Composable
+private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onPickGallery: () -> Unit, modifier: Modifier) {
+    Column(modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
+        Text(
+            stringResource(if (state.access == CameraAccess.Denied) R.string.cap_denied else R.string.cap_no_camera),
+            style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("fl_capture_denied"),
+        )
+        if (state.access == CameraAccess.Denied) {
+            Button(onClick = { onEvent(CaptureEvent.OpenSettings) }, Modifier.fillMaxWidth().padding(0.dp).testTag("fl_capture_settings")) {
+                Text(stringResource(R.string.cap_open_settings))
+            }
+        }
+        OutlinedButton(onClick = onPickGallery, Modifier.fillMaxWidth().testTag("fl_capture_gallery")) {
+            Text(stringResource(R.string.cap_from_gallery))
+        }
+    }
+}

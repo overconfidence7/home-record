@@ -220,3 +220,23 @@ fun ReportsEmptyScreenshot() = ReportsEmptyPreview()
 @ThemePreviews
 @Composable
 fun ReportsLoadingScreenshot() = ReportsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureReadyScreenshot() = CaptureReadyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureDeniedScreenshot() = CaptureDeniedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureNoCameraScreenshot() = CaptureNoCameraPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureLoadingScreenshot() = CaptureLoadingPreview()
