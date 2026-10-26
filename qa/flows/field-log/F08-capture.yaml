@@ -35,6 +35,9 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "Garage subpanel"
 - tapOn:
     id: fl_job_capture
+- tapOn:
+    text: "Don't allow"
+    optional: true
 - extendedWaitUntil:
     visible:
       id: fl_capture_gallery

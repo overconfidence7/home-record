@@ -46,6 +46,9 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "Garage subpanel"
 - assertVisible: "Rivera"
 - takeScreenshot: F03-job-overview
+- swipe:
+    start: 85%, 15%
+    end: 10%, 15%
 - tapOn:
     id: fl_job_tab_house
 - extendedWaitUntil:
