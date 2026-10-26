@@ -100,4 +100,29 @@ class FileViewerViewModelTest {
         runBlocking { files.delete(id) }
         assertThat(viewer(id).loaded().problem).isEqualTo(FileViewerProblem.Missing)
     }
+
+    @Test fun fileNotOnPhoneDownloadsOnOpenThenShowsPages() {
+        val id = stored("permit.pdf", "application/pdf", exists = false)
+        val downloaded = File.createTempFile("download", ".pdf").apply { deleteOnExit() }
+        val vm = FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
+            files.setLocal(it, false, downloaded.absolutePath)
+            com.kurtz.homerecord.core.photo.OnPhone.Ready
+        }))
+        val s = vm.loaded()
+        assertThat(s.problem).isNull()
+        assertThat(s.pages?.pageCount).isEqualTo(3)
+    }
+
+    @Test fun downloadThatFailsShowsPromptAndRetryTriesAgain() {
+        val id = stored("permit.pdf", "application/pdf", exists = false)
+        var calls = 0
+        val vm = FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
+            calls++
+            com.kurtz.homerecord.core.photo.OnPhone.NoNetwork
+        }))
+        assertThat(vm.loaded().problem).isEqualTo(FileViewerProblem.NotOnPhone)
+        vm.onRetry()
+        runBlocking { withTimeout(5_000) { while (calls < 2) kotlinx.coroutines.delay(10) } }
+        assertThat(vm.loaded().problem).isEqualTo(FileViewerProblem.NotOnPhone)
+    }
 }

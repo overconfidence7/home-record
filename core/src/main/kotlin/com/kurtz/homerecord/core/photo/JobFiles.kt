@@ -49,6 +49,12 @@ class JobFiles(
     suspend fun setOffline(id: String, offline: Boolean, path: String? = null): Boolean =
         update(id) { it.copy(offline = offline, path = if (offline) path ?: it.path else null) }
 
+    /** Records where the bytes sit on this phone and whether they are kept offline; a null [path] means not on the phone. */
+    suspend fun setLocal(id: String, offline: Boolean, path: String?): Boolean = update(id) { it.copy(offline = offline, path = path) }
+
+    /** Remembers the R2 key once the upload finishes, so other phones (and this one after Free up) can download it. */
+    suspend fun setKey(id: String, r2Key: String): Boolean = update(id) { it.copy(r2Key = r2Key) }
+
     suspend fun delete(id: String): Boolean {
         if (db.jobFileDao().get(id) == null) return false
         db.jobFileDao().softDelete(id, now())

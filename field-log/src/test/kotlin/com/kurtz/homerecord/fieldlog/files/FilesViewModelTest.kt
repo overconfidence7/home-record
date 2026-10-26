@@ -112,4 +112,22 @@ class FilesViewModelTest {
         vm.onEvent(FilesEvent.Query(""))
         assertThat(current().results).isEmpty()
     }
+
+    @Test fun uploadStatusAndOfflineToggleReachTheRow() {
+        val status = kotlinx.coroutines.flow.MutableStateFlow(emptyMap<String, com.kurtz.homerecord.core.photo.UploadStatus>())
+        val toggled = mutableListOf<Pair<String, Boolean>>()
+        var result = com.kurtz.homerecord.core.photo.OnPhone.Ready
+        val files = JobFiles(db)
+        val vm2 = FilesViewModel(FilesDeps("j2", db.jobFileDao(), files, "m1", uploads = status, setOffline = { id, on -> toggled += id to on; result }))
+        runBlocking { files.add("j2", "", "plan.pdf", "/m/plan.pdf", "application/pdf", 10, "m1") }
+        val row = runBlocking { withTimeout(5_000) { vm2.state.first { it.files.isNotEmpty() } } }.files.single()
+        assertThat(row.upload).isEqualTo(com.kurtz.homerecord.core.photo.UploadStatus.None)
+        status.value = mapOf(row.id to com.kurtz.homerecord.core.photo.UploadStatus.Uploading)
+        assertThat(runBlocking { withTimeout(5_000) { vm2.state.first { it.files.firstOrNull()?.upload == com.kurtz.homerecord.core.photo.UploadStatus.Uploading } } }.files).hasSize(1)
+        vm2.onEvent(FilesEvent.ToggleOffline(row.id, false))
+        assertThat(toggled).containsExactly(row.id to false)
+        result = com.kurtz.homerecord.core.photo.OnPhone.NoNetwork
+        vm2.onEvent(FilesEvent.ToggleOffline(row.id, true))
+        assertThat(runBlocking { withTimeout(5_000) { vm2.state.first { it.notice != null } } }.notice).isEqualTo(FilesNotice.DownloadFailed)
+    }
 }

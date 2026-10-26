@@ -36,7 +36,7 @@ class MediaCache(
     fun sizeBytes(): Long = files().sumOf { it.length() }
 
     /** The cached copy of [key], downloading it from [getUrl] when missing; null when the download fails. */
-    suspend fun open(key: String, getUrl: () -> String?): File? {
+    suspend fun open(key: String, getUrl: suspend () -> String?): File? {
         val f = fileFor(key)
         if (f.exists()) {
             f.setLastModified(System.currentTimeMillis())

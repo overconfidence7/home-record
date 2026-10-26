@@ -6,7 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.JobFileDao
 import com.kurtz.homerecord.core.data.JobFileEntity
 import com.kurtz.homerecord.core.photo.JobFiles
+import com.kurtz.homerecord.core.photo.OnPhone
+import com.kurtz.homerecord.core.photo.UploadStatus
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,6 +28,10 @@ class FilesDeps(
     val author: String?,
     /** Queues the stored bytes for upload to R2 (AC-F19); a no-op when no company is signed in. */
     val queueUpload: suspend (JobFileEntity) -> Unit = {},
+    /** Upload progress per file id, from the media queue (AC-F19). */
+    val uploads: Flow<Map<String, UploadStatus>> = flowOf(emptyMap()),
+    /** Turns Available offline on or off, downloading the file when needed (AC-F20). */
+    val setOffline: suspend (id: String, on: Boolean) -> OnPhone = { _, _ -> OnPhone.Ready },
 )
 
 /** The job's Files tab: folders, search by name, add, rename, delete (AC-F19, AC-F23). */
@@ -33,7 +41,8 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
     private val dialog = MutableStateFlow<FilesDialog?>(null)
     private val notice = MutableStateFlow<FilesNotice?>(null)
 
-    val state: StateFlow<FilesUiState> = combine(d.dao.observeFor(d.jobId), folder, query, dialog, notice) { rows, f, q, dlg, note ->
+    val state: StateFlow<FilesUiState> = combine(combine(d.dao.observeFor(d.jobId), d.uploads) { r, u -> r to u }, folder, query, dialog, notice) { (rows, up), f, q, dlg, note ->
+        fun JobFileEntity.row() = FileRow(id, name, folder, mime, size, offline, up[id] ?: UploadStatus.None)
         val live = rows.filter { it.mime != JobFiles.FOLDER_MIME }
         val here = f.prefixOf()
         val subs = rows.map { it.folder }.filter { it.startsWith(here) && it != f }.map { it.removePrefix(here).substringBefore('/') }.distinct().sorted()
@@ -58,6 +67,9 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
             FilesEvent.Up -> setFolder(folder.value.substringBeforeLast('/', ""))
             is FilesEvent.Query -> { query.value = e.text; saved[QUERY] = e.text }
             is FilesEvent.OpenFile -> Unit
+            is FilesEvent.ToggleOffline -> viewModelScope.launch {
+                if (d.setOffline(e.id, e.on) != OnPhone.Ready) notice.value = FilesNotice.DownloadFailed
+            }
             is FilesEvent.AskRename -> viewModelScope.launch { d.dao.get(e.id)?.let { dialog.value = FilesDialog.Rename(it.id, it.name) } }
             is FilesEvent.Rename -> viewModelScope.launch { dialog.value = null; d.files.rename(e.id, e.name) }
             is FilesEvent.AskDelete -> viewModelScope.launch { d.dao.get(e.id)?.let { dialog.value = FilesDialog.Delete(it.id, it.name) } }
@@ -79,8 +91,6 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
     private fun setFolder(path: String) { folder.value = path; saved[FOLDER] = path }
 
     private fun String.prefixOf() = if (isEmpty()) "" else "$this/"
-    private fun JobFileEntity.row() = FileRow(id, name, folder, mime, size, offline)
-
     private companion object {
         const val FOLDER = "folder"
         const val QUERY = "query"

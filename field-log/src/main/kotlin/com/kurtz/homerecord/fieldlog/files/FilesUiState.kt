@@ -8,6 +8,7 @@ data class FileRow(
     val mime: String,
     val size: Long,
     val offline: Boolean,
+    val upload: com.kurtz.homerecord.core.photo.UploadStatus = com.kurtz.homerecord.core.photo.UploadStatus.None,
 )
 
 /** A pending rename or delete shown as a dialog. */
@@ -30,7 +31,7 @@ data class FilesUiState(
     val notice: FilesNotice? = null,
 )
 
-enum class FilesNotice { FolderExists, AddFailed }
+enum class FilesNotice { FolderExists, AddFailed, DownloadFailed }
 
 sealed interface FilesEvent {
     data object AddFile : FilesEvent
@@ -40,6 +41,7 @@ sealed interface FilesEvent {
     data object Up : FilesEvent
     data class Query(val text: String) : FilesEvent
     data class OpenFile(val id: String) : FilesEvent
+    data class ToggleOffline(val id: String, val on: Boolean) : FilesEvent
     data class AskRename(val id: String) : FilesEvent
     data class Rename(val id: String, val name: String) : FilesEvent
     data class AskDelete(val id: String) : FilesEvent

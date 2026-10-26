@@ -12,7 +12,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.CreateNewFolder
+import androidx.compose.material.icons.rounded.CloudDone
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Delete
+import com.kurtz.homerecord.core.photo.UploadStatus
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Folder
@@ -88,6 +91,12 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
                         leading = { Icon(f.icon(), null) },
                         trailing = {
                             Row {
+                                IconButton({ onEvent(FilesEvent.ToggleOffline(f.id, !f.offline)) }, Modifier.testTag("fl_files_offline_${f.id}")) {
+                                    Icon(
+                                        if (f.offline) Icons.Rounded.CloudDone else Icons.Rounded.CloudDownload,
+                                        stringResource(if (f.offline) R.string.files_offline_off else R.string.files_offline_on),
+                                    )
+                                }
                                 IconButton({ onEvent(FilesEvent.AskRename(f.id)) }, Modifier.testTag("fl_files_rename_${f.id}")) {
                                     Icon(Icons.Rounded.Edit, stringResource(R.string.files_rename))
                                 }
@@ -118,7 +127,7 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
     state.notice?.let { n ->
         AlertDialog(
             onDismissRequest = { onEvent(FilesEvent.DismissNotice) },
-            text = { Text(stringResource(if (n == FilesNotice.FolderExists) R.string.files_folder_exists else R.string.files_add_failed)) },
+            text = { Text(stringResource(when (n) { FilesNotice.FolderExists -> R.string.files_folder_exists; FilesNotice.AddFailed -> R.string.files_add_failed; FilesNotice.DownloadFailed -> R.string.files_download_failed })) },
             confirmButton = { TextButton({ onEvent(FilesEvent.DismissNotice) }, Modifier.heightIn(min = 48.dp).testTag("fl_files_notice_ok")) { Text(stringResource(R.string.files_ok)) } },
             modifier = Modifier.windowTestTags(),
         )
@@ -143,7 +152,13 @@ private fun supporting(f: FileRow, searching: Boolean): String {
     val size = sizeLabel(f.size)
     val where = if (searching) f.folder.ifEmpty { stringResource(R.string.files_top) } else null
     val offline = if (f.offline) stringResource(R.string.files_offline) else null
-    return listOfNotNull(where, size, offline).joinToString(" · ")
+    val upload = when (f.upload) {
+        UploadStatus.Waiting -> stringResource(R.string.files_upload_waiting)
+        UploadStatus.Uploading -> stringResource(R.string.files_upload_uploading)
+        UploadStatus.Failed -> stringResource(R.string.files_upload_failed)
+        else -> null
+    }
+    return listOfNotNull(where, size, offline, upload).joinToString(" · ")
 }
 
 internal fun sizeLabel(bytes: Long): String = when {

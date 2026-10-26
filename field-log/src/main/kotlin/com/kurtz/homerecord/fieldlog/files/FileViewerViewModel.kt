@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.coreui.pages.PageSource
 import com.kurtz.homerecord.coreui.pages.PageSources
 import com.kurtz.homerecord.core.data.JobFileDao
+import com.kurtz.homerecord.core.photo.OnPhone
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,8 @@ class FileViewerDeps(
     val dao: JobFileDao,
     /** Opens a stored PDF or photo as pages; tests pass a fake. */
     val openPages: (path: String, mime: String) -> PageSource? = PageSources::open,
+    /** Downloads the bytes when they are not on the phone (AC-F20); tests pass a fake. */
+    val ensureOnPhone: suspend (fileId: String) -> OnPhone = { OnPhone.Ready },
 )
 
 /** FL-File: a job file opened in the app, PDF pages or a photo with pinch zoom (AC-F19). */
@@ -29,8 +32,18 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
         viewModelScope.launch { load() }
     }
 
+    fun onRetry() {
+        _state.value = FileViewerUiState()
+        viewModelScope.launch { load() }
+    }
+
     private suspend fun load() {
-        val row = d.dao.get(d.fileId)
+        var row = d.dao.get(d.fileId)
+        if (row != null && row.path?.let { File(it).isFile } != true) {
+            // Not on the phone: fetch it now; a file never marked Available offline downloads on open.
+            d.ensureOnPhone(d.fileId)
+            row = d.dao.get(d.fileId)
+        }
         if (row == null) {
             _state.value = FileViewerUiState(loading = false, problem = FileViewerProblem.Missing)
             return

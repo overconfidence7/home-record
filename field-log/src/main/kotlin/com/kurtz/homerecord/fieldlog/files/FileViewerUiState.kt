@@ -25,5 +25,6 @@ data class FileViewerUiState(
 
 sealed interface FileViewerEvent {
     data object Share : FileViewerEvent
+    data object Retry : FileViewerEvent
     data object Back : FileViewerEvent
 }

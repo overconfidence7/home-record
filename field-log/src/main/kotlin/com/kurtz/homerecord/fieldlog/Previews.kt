@@ -184,7 +184,7 @@ fun TodayCrewNothingScheduledPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Owner), {}) }
+fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Owner, com.kurtz.homerecord.core.photo.FileStorage(24_500_000, 112_000_000)), {}) }
 
 @ThemePreviews
 @Composable
@@ -617,14 +617,14 @@ fun AnnotateTextPreview() = Frame {
     )
 }
 
-private fun fileRow(id: String, name: String, mime: String, size: Long, folder: String = "", offline: Boolean = false) =
-    com.kurtz.homerecord.fieldlog.files.FileRow(id, name, folder, mime, size, offline)
+private fun fileRow(id: String, name: String, mime: String, size: Long, folder: String = "", offline: Boolean = false, upload: com.kurtz.homerecord.core.photo.UploadStatus = com.kurtz.homerecord.core.photo.UploadStatus.None) =
+    com.kurtz.homerecord.fieldlog.files.FileRow(id, name, folder, mime, size, offline, upload)
 
 private val filesReady = com.kurtz.homerecord.fieldlog.files.FilesUiState(
     loading = false, folders = listOf("Permits", "Quotes"),
     files = listOf(
         fileRow("f1", "Ortiz first floor plan.pdf", "application/pdf", 18_400_000, offline = true),
-        fileRow("f2", "Panel schedule.pdf", "application/pdf", 640_000),
+        fileRow("f2", "Panel schedule.pdf", "application/pdf", 640_000, upload = com.kurtz.homerecord.core.photo.UploadStatus.Uploading),
         fileRow("f3", "Site notes.txt", "text/plain", 2_100),
     ),
 )

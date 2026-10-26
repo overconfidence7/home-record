@@ -19,6 +19,7 @@ fun FileViewerRoute(deps: FileViewerDeps, onBack: () -> Unit) {
     FileViewerScreen(state) { e ->
         when (e) {
             FileViewerEvent.Back -> onBack()
+            FileViewerEvent.Retry -> vm.onRetry()
             FileViewerEvent.Share -> shareFile(context, state.path, state.mime, state.name)
         }
     }

@@ -12,6 +12,10 @@ import androidx.compose.material.icons.rounded.Business
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.foundation.layout.heightIn
+import com.kurtz.homerecord.core.photo.FileStorage
+import com.kurtz.homerecord.fieldlog.files.sizeLabel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,13 +35,15 @@ import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.company.roleLabel
 
-data class MoreUiState(val companyName: String, val role: CompanyRole)
+/** [storage] is what job files hold on this phone (AC-F20); null while it is being counted. */
+data class MoreUiState(val companyName: String, val role: CompanyRole, val storage: FileStorage? = null)
 
 sealed interface MoreEvent {
     data object OpenTeam : MoreEvent
     data object OpenTimesheets : MoreEvent
     data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
+    data object FreeUp : MoreEvent
     data object SignOut : MoreEvent
 }
 
@@ -77,6 +83,19 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Business, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenCompany) },
                 modifier = Modifier.testTag("fl_more_company"),
+            )
+        }
+        state.storage?.let { s ->
+            RecordListItem(
+                headline = stringResource(R.string.more_storage),
+                supporting = stringResource(R.string.more_storage_detail, sizeLabel(s.totalBytes), sizeLabel(s.offlineBytes)),
+                leading = { Icon(Icons.Rounded.Storage, contentDescription = null) },
+                trailing = {
+                    TextButton({ onEvent(MoreEvent.FreeUp) }, Modifier.heightIn(min = 48.dp).testTag("fl_more_free_up"), enabled = s.cachedBytes > 0) {
+                        Text(stringResource(R.string.more_free_up))
+                    }
+                },
+                modifier = Modifier.testTag("fl_more_storage"),
             )
         }
         RecordListItem(

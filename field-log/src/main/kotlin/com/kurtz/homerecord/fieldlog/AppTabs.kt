@@ -11,6 +11,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.kurtz.homerecord.core.auth.AuthState
@@ -109,18 +114,27 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         )
                     }
                 }
-                key.depth == 0 && key.title == "more" -> MoreScreen(
-                    MoreUiState(membership.companyName, membership.role),
+                key.depth == 0 && key.title == "more" -> {
+                    var storage by remember { mutableStateOf<com.kurtz.homerecord.core.photo.FileStorage?>(null) }
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) { storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() } }
+                    MoreScreen(
+                    MoreUiState(membership.companyName, membership.role, storage),
                     onEvent = { event ->
                         when (event) {
                             MoreEvent.OpenTeam -> nav.push(TeamKey)
                             MoreEvent.OpenTimesheets -> nav.push(TimesheetsKey)
                             MoreEvent.OpenReports -> nav.push(ReportsKey)
                             MoreEvent.OpenCompany -> nav.push(CompanyKey)
+                            MoreEvent.FreeUp -> scope.launch {
+                                withContext(Dispatchers.IO) { container.jobFileTransfers.freeUp() }
+                                storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() }
+                            }
                             MoreEvent.SignOut -> container.auth.signOut()
                         }
                     },
-                )
+                    )
+                }
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
                     membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(),
                     onEditJob = { if (it == null) nav.push(JobEditKey(null)) else nav.push(JobKey(it)) },

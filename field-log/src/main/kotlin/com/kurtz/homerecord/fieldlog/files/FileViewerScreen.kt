@@ -87,13 +87,14 @@ private fun Problem(problem: FileViewerProblem, onEvent: (FileViewerEvent) -> Un
         FileViewerProblem.Missing -> Triple(Icons.Rounded.ErrorOutline, R.string.file_viewer_missing_title, R.string.file_viewer_missing_body)
     }
     val shareable = problem == FileViewerProblem.NoPreview
+    val retry = problem == FileViewerProblem.NotOnPhone
     EmptyState(
         icon = icon,
         headline = stringResource(headline),
         body = stringResource(body),
-        actionLabel = stringResource(if (shareable) R.string.file_viewer_share else R.string.file_viewer_back),
-        onAction = { onEvent(if (shareable) FileViewerEvent.Share else FileViewerEvent.Back) },
-        actionModifier = Modifier.testTag(if (shareable) "fl_file_share_action" else "fl_file_back"),
+        actionLabel = stringResource(if (shareable) R.string.file_viewer_share else if (retry) R.string.file_viewer_try_again else R.string.file_viewer_back),
+        onAction = { onEvent(if (shareable) FileViewerEvent.Share else if (retry) FileViewerEvent.Retry else FileViewerEvent.Back) },
+        actionModifier = Modifier.testTag(if (shareable) "fl_file_share_action" else if (retry) "fl_file_retry" else "fl_file_back"),
     )
 }
 

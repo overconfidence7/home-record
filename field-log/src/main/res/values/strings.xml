@@ -111,6 +111,9 @@
     <string name="punch_break_start">Break start</string>
     <string name="punch_break_end">Break end</string>
     <string name="punch_switch">Switched job</string>
+    <string name="more_storage">Storage on this phone</string>
+    <string name="more_storage_detail">%1$s used, %2$s kept offline</string>
+    <string name="more_free_up">Free up</string>
     <string name="more_sign_out">Sign out</string>
     <string name="sign_out_title">Sign out?</string>
     <string name="sign_out_body">Company details saved on this phone are cleared. Sign back in to load them again.</string>
@@ -201,7 +204,13 @@
     <string name="files_rename">Rename</string>
     <string name="files_delete">Delete</string>
     <string name="files_top">All files</string>
-    <string name="files_offline">Available offline</string>
+    <string name="files_offline">Offline</string>
+    <string name="files_offline_on">Make available offline</string>
+    <string name="files_offline_off">Remove from offline</string>
+    <string name="files_upload_waiting">Waiting to upload</string>
+    <string name="files_upload_uploading">Uploading</string>
+    <string name="files_upload_failed">Upload failed</string>
+    <string name="files_download_failed">Couldn\'t download that file. Connect to the internet and try again.</string>
     <string name="files_in_folder">Up from %1$s</string>
     <string name="files_empty">No files on this job yet. Add a plan, permit or quote and the crew can open it.</string>
     <string name="files_no_match">No file name matches %1$s.</string>
@@ -213,8 +222,9 @@
     <string name="file_viewer_back">Back to files</string>
     <string name="file_viewer_page">Page %1$d of %2$d</string>
     <string name="file_viewer_go_to_page">Go to page %1$d</string>
+    <string name="file_viewer_try_again">Try again</string>
     <string name="file_viewer_not_on_phone_title">Not on this phone yet</string>
-    <string name="file_viewer_not_on_phone_body">This file hasn\'t downloaded here. Connect to the internet and open it again.</string>
+    <string name="file_viewer_not_on_phone_body">This file hasn\'t downloaded here. Connect to the internet and try again.</string>
     <string name="file_viewer_no_preview_title">Can\'t show this kind of file</string>
     <string name="file_viewer_no_preview_body">Share it to open it in another app.</string>
     <string name="file_viewer_unreadable_title">Couldn\'t open this file</string>

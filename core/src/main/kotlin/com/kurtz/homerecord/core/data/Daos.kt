@@ -269,6 +269,7 @@ interface JobFileDao {
     @Query("SELECT * FROM job_file WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<JobFileEntity>>
     @Query("SELECT * FROM job_file WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<JobFileEntity>
     @Query("UPDATE job_file SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM job_file WHERE deletedAt IS NULL AND path IS NOT NULL") suspend fun withLocalPath(): List<JobFileEntity>
 }
 
 @Dao
@@ -363,6 +364,9 @@ interface SyncBaseDao {
 interface MediaUploadDao {
     @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE) suspend fun add(row: MediaUploadEntity): Long
     @Query("SELECT * FROM media_upload WHERE id = :id") suspend fun get(id: String): MediaUploadEntity?
+    @Query("SELECT * FROM media_upload WHERE entity = :entity") fun observeAllFor(entity: String): Flow<List<MediaUploadEntity>>
+    @Query("SELECT * FROM media_upload WHERE entity = :entity AND entityId = :entityId ORDER BY createdAt DESC LIMIT 1")
+    fun observeFor(entity: String, entityId: String): Flow<MediaUploadEntity?>
     @Query("SELECT * FROM media_upload WHERE entity = :entity AND entityId = :entityId AND filename = :filename")
     suspend fun find(entity: String, entityId: String, filename: String): MediaUploadEntity?
     @Query("SELECT * FROM media_upload WHERE state IN ('queued', 'uploading') AND nextAttemptAt <= :now ORDER BY createdAt")

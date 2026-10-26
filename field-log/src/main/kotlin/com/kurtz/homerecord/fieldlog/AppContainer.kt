@@ -60,7 +60,12 @@ class AppContainer(private val app: Application) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val mediaApi = com.kurtz.homerecord.core.media.RetrofitMediaTransferApi.create(BuildConfig.API_BASE_URL, http)
-    val mediaUploader by lazy { com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi) }
+    val mediaUploader by lazy {
+        com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi, onUploaded = { row, presigned ->
+            // Remember where the file lives in R2 so other phones, and this one after Free up, can download it (AC-F20).
+            if (row.entity == "job_file") jobFiles.setKey(row.entityId, presigned.key.ifEmpty { row.key.orEmpty() })
+        })
+    }
     val mediaCache by lazy {
         com.kurtz.homerecord.core.media.MediaCache(
             java.io.File(app.cacheDir, "downloads"),
@@ -130,6 +135,17 @@ class AppContainer(private val app: Application) {
 
     fun filesDeps(jobId: String, authorId: String?) = com.kurtz.homerecord.fieldlog.files.FilesDeps(
         jobId, db.jobFileDao(), jobFiles, authorId,
+        uploads = db.mediaUploadDao().observeAllFor("job_file").map { rows ->
+            rows.associate { r ->
+                r.entityId to when (r.state) {
+                    "uploading" -> com.kurtz.homerecord.core.photo.UploadStatus.Uploading
+                    "failed" -> com.kurtz.homerecord.core.photo.UploadStatus.Failed
+                    "done" -> com.kurtz.homerecord.core.photo.UploadStatus.Uploaded
+                    else -> com.kurtz.homerecord.core.photo.UploadStatus.Waiting
+                }
+            }
+        },
+        setOffline = jobFileTransfers::setAvailableOffline,
         queueUpload = { f ->
             val path = f.path
             company.current?.companyId?.let { c ->
@@ -138,7 +154,16 @@ class AppContainer(private val app: Application) {
         },
     )
 
-    fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(fileId, db.jobFileDao())
+    val jobFileTransfers by lazy {
+        com.kurtz.homerecord.core.photo.JobFileTransfers(
+            db, mediaApi, mediaCache, java.io.File(app.filesDir, "offline-files"),
+            tenant = { company.current?.companyId?.let { TenantRef(TenantKind.Company, it) } }, jobFiles = jobFiles,
+        )
+    }
+
+    fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(
+        fileId, db.jobFileDao(), ensureOnPhone = jobFileTransfers::ensureOnPhone,
+    )
 
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 
