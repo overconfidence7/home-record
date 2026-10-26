@@ -1,19 +1,8 @@
 {
  "ticked_tasks": 43,
  "acs_claimed": 111,
- "acs_missing": 1,
- "unit_test_files": 92,
- "device_test_files": 29,
- "tasks": [
-  {
-   "task": "T038",
-   "acs": [
-    "AC-B21",
-    "AC-F54"
-   ],
-   "missing": [
-    "AC-F54"
-   ]
-  }
- ]
+ "acs_missing": 0,
+ "unit_test_files": 93,
+ "device_test_files": 30,
+ "tasks": []
 }

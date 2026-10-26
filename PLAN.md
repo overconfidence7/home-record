@@ -153,7 +153,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T038b: app side in :core: `MediaUploader` (queue in Room, presign, PUT with retry/backoff and resume, WorkManager), download cache with cap and Free up (AC-F54)
 - [ ] T039: FL-Capture: CameraX with lens limiter, 80 dp shutter, volume keys, job/room/phase chips, flash/flip, gallery import, Note and Voice (3 min, on-device transcription best effort), permission-denied states (acceptance: AC-F24, AC-F27, AC-F29)
   - [x] T039a: `JobPhotos` in :core (photo saved with job, room, phase, time and fix, queued for sync and upload, after linked to its before), `LensLimiter`, `PhotoGrouping` by day (AC-F24, AC-F25, AC-F29)
-  - [ ] T039b: CameraX preview, 80 dp shutter, volume keys, chips, flash/flip, gallery import, permission-denied state (AC-F24, AC-F29)
+  - [x] T039b: CameraX preview, 80 dp shutter, volume keys, chips, flash/flip, gallery import, permission-denied state (AC-F24, AC-F29)
   - [ ] T039c: Note and Voice (3 min, transcription best effort) (AC-F27)
 - [ ] T040: Photos tab and FL-Photo: grouped by day, tags, before/after with ghost overlay, annotate (arrow, circle, rectangle, freehand, text, measure label) saved as a copy, caption, share, delete (acceptance: AC-F25, AC-F26)
 - [ ] T041: Files: `JobFile` with folders, upload from Files with progress, `PdfViewer` (PdfRenderer, thumbnails, zoom, first page < 2 s), Available offline, rename/move/search (acceptance: AC-F19, AC-F20, AC-F23)
