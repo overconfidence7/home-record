@@ -17,6 +17,7 @@ import com.kurtz.homerecord.core.photo.LensChoice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -67,9 +68,11 @@ class CaptureViewModelTest {
         return CaptureViewModel(deps, SavedStateHandle())
     }
 
+    private fun CaptureViewModel.loaded(): CaptureUiState = runBlocking { withTimeout(10_000) { state.first { !it.loading } } }
+
     // AC-F24
     @Test fun loadsRoomsAndPhasesForTheJob() {
-        val s = vm().state.value
+        val s = vm().loaded()
         assertThat(s.loading).isFalse()
         assertThat(s.rooms.map { it.name }).containsExactly("Kitchen", "Garage")
         assertThat(s.phases).containsExactly("Rough-in", "Finish").inOrder()
@@ -78,7 +81,7 @@ class CaptureViewModelTest {
 
     // AC-F24
     @Test fun shutterSavesPhotoWithJobRoomPhaseAndFix() = runBlocking<Unit> {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.SelectRoom("r1"))
         vm.onEvent(CaptureEvent.SelectPhase("Finish"))
         vm.onEvent(CaptureEvent.Captured("/media/a.jpg"))
@@ -92,7 +95,7 @@ class CaptureViewModelTest {
     // AC-F24
     @Test fun withoutLocationPermissionPhotoIsStillSaved() = runBlocking<Unit> {
         location.granted = false
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Captured("/media/b.jpg"))
         val row = db.photoDao().observeForJob("j1").first().single()
         assertThat(row.lat).isNull()
@@ -100,18 +103,18 @@ class CaptureViewModelTest {
 
     // AC-F24
     @Test fun chipsAreRememberedBetweenShots() {
-        val first = vm()
+        val first = vm().also { it.loaded() }
         first.onEvent(CaptureEvent.SelectRoom("r2"))
         first.onEvent(CaptureEvent.SelectPhase("Rough-in"))
         assertThat(remembered).isEqualTo("r2" to "Rough-in")
-        val second = vm(last = remembered)
+        val second = vm(last = remembered).also { it.loaded() }
         assertThat(second.state.value.roomId).isEqualTo("r2")
         assertThat(second.state.value.phase).isEqualTo("Rough-in")
     }
 
     // AC-F24
     @Test fun importedGalleryPhotosAreAllSaved() = runBlocking<Unit> {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Imported(listOf("/media/1.jpg", "/media/2.jpg")))
         assertThat(db.photoDao().observeForJob("j1").first()).hasSize(2)
         assertThat(vm.state.value.savedCount).isEqualTo(2)
@@ -119,7 +122,7 @@ class CaptureViewModelTest {
 
     // AC-F29
     @Test fun singleCameraDeviceHidesFlipAndUsesTheBackLens() {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.CameraInfo(hasBack = false, hasFront = true))
         assertThat(vm.state.value.lens).isEqualTo(LensChoice.Front)
         assertThat(vm.state.value.canFlip).isFalse()
@@ -129,7 +132,7 @@ class CaptureViewModelTest {
 
     // AC-F29
     @Test fun flipWorksWhenBothLensesExist() {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.CameraInfo(hasBack = true, hasFront = true))
         assertThat(vm.state.value.canFlip).isTrue()
         vm.onEvent(CaptureEvent.Flip)
@@ -138,7 +141,7 @@ class CaptureViewModelTest {
 
     // AC-F29
     @Test fun noCameraAtAllSaysSo() {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.CameraInfo(hasBack = false, hasFront = false))
         assertThat(vm.state.value.lens).isEqualTo(LensChoice.None)
         assertThat(vm.state.value.message).isEqualTo(CaptureMessage.NoCamera)
@@ -154,13 +157,14 @@ class CaptureViewModelTest {
 
     @Test fun missingJobReportsItAndSavesNothing() = runBlocking<Unit> {
         val vm = vm(jobId = "gone")
+        vm.loaded()
         assertThat(vm.state.value.message).isEqualTo(CaptureMessage.JobGone)
         vm.onEvent(CaptureEvent.Captured("/media/z.jpg"))
         assertThat(vm.state.value.savedCount).isEqualTo(0)
     }
 
     @Test fun flashCyclesOffAutoOn() {
-        val vm = vm()
+        val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.CycleFlash)
         assertThat(vm.state.value.flash).isEqualTo(FlashMode.Auto)
         vm.onEvent(CaptureEvent.CycleFlash)
