@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.fieldlog.photos
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,10 +58,10 @@ fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier:
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             row.forEach { cell ->
                                 when (cell) {
-                                    is PhotoCell.Single -> Tile(cell.tile, Modifier.weight(1f))
+                                    is PhotoCell.Single -> Tile(cell.tile, Modifier.weight(1f), onOpen = { onEvent(PhotosEvent.Open(it)) })
                                     is PhotoCell.Pair -> Row(Modifier.weight(2f).testTag("fl_photos_pair_${cell.after.id}"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Tile(cell.before, Modifier.weight(1f), stringResource(R.string.photos_before))
-                                        Tile(cell.after, Modifier.weight(1f), stringResource(R.string.photos_after))
+                                        Tile(cell.before, Modifier.weight(1f), stringResource(R.string.photos_before)) { onEvent(PhotosEvent.Open(it)) }
+                                        Tile(cell.after, Modifier.weight(1f), stringResource(R.string.photos_after)) { onEvent(PhotosEvent.Open(it)) }
                                     }
                                 }
                             }
@@ -89,9 +90,9 @@ private fun List<PhotoCell>.chunkedRows(): List<List<PhotoCell>> {
 }
 
 @Composable
-private fun Tile(tile: PhotoTile, modifier: Modifier, badge: String? = null) {
+private fun Tile(tile: PhotoTile, modifier: Modifier, badge: String? = null, onOpen: (String) -> Unit) {
     val facts = listOfNotNull(tile.roomName, tile.phase).joinToString(" · ")
-    Column(modifier.testTag("fl_photos_tile_${tile.id}"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier.clickable { onOpen(tile.id) }.testTag("fl_photos_tile_${tile.id}"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
             AsyncImage(
                 model = File(tile.imagePath), contentDescription = tile.caption ?: facts.ifBlank { null }, contentScale = ContentScale.Crop,

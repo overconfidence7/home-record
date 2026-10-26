@@ -561,3 +561,25 @@ fun PhotosEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun PhotosLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(), {}) }
+
+private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(
+    loading = false, imagePath = "/none/a1.jpg", caption = "New subpanel in, breakers labeled",
+    rooms = listOf("Kitchen", "Garage", "Main bath", "Basement").mapIndexed { i, n -> com.kurtz.homerecord.fieldlog.photos.PhotoRoomOption("r$i", n) },
+    roomId = "r0", phases = listOf("Rough-in", "Finish", "Inspection"), phase = "Finish", takenAt = 1_792_000_000_000, annotated = true,
+)
+
+@ThemePreviews
+@Composable
+fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, {}, {}, java.time.ZoneId.of("UTC")) }
+
+@ThemePreviews
+@Composable
+fun PhotoDetailDeletePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, {}, {}, java.time.ZoneId.of("UTC"))
+}
+
+@ThemePreviews
+@Composable
+fun PhotoDetailMissingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(loading = false, missing = true), {}, {}, {})
+}

@@ -150,7 +150,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
+                onOpenPhoto = { nav.push(PhotoKey(it)) },
             )
+        }
+        entry<PhotoKey> { key ->
+            com.kurtz.homerecord.fieldlog.photos.PhotoDetailRoute(container.photoDetailDeps(key.photoId), onBack = nav::pop)
         }
         entry<CaptureKey> { key ->
             com.kurtz.homerecord.fieldlog.capture.CaptureRoute(key.jobId, { ctx -> container.captureDeps(ctx, key.jobId) }, onBack = nav::pop)

@@ -31,7 +31,7 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -60,6 +60,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             com.kurtz.homerecord.fieldlog.photos.PhotosRoute(
                 com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao()),
                 onCapture = { onCapture?.invoke() },
+                onOpen = { onOpenPhoto?.invoke(it) },
             )
         },
         houseContent = {

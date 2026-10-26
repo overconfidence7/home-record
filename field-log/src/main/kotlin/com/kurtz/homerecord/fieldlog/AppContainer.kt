@@ -119,6 +119,12 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
+
+    fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(
+        photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits,
+    )
+
     fun captureDeps(context: Context, jobId: String): com.kurtz.homerecord.fieldlog.capture.CaptureDeps {
         val prefs = context.getSharedPreferences("capture", Context.MODE_PRIVATE)
         return com.kurtz.homerecord.fieldlog.capture.CaptureDeps(

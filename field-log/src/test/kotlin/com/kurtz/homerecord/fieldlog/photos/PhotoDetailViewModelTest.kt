@@ -1,0 +1,112 @@
+package com.kurtz.homerecord.fieldlog.photos
+
+import android.content.Context
+import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.data.FloorEntity
+import com.kurtz.homerecord.core.data.HomeEntity
+import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
+import com.kurtz.homerecord.core.data.RoomEntity
+import com.kurtz.homerecord.core.photo.PhotoEdits
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+// AC-F25: caption, room and phase tags, Before mark and delete on one job photo
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35], application = android.app.Application::class)
+class PhotoDetailViewModelTest {
+    private lateinit var db: HomeRecordDatabase
+    private val changes = mutableListOf<String>()
+
+    @Before fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
+            .allowMainThreadQueries().build()
+        runBlocking {
+            db.homeDao().upsert(HomeEntity(id = "h1", name = "Ortiz house", createdAt = 1, updatedAt = 1))
+            db.floorDao().upsert(FloorEntity(id = "f1", homeId = "h1", sortOrder = 0, name = "Main", createdAt = 1, updatedAt = 1))
+            db.roomDao().upsert(RoomEntity(id = "r1", floorId = "f1", name = "Kitchen", createdAt = 1, updatedAt = 1))
+            db.jobDao().upsert(JobEntity(id = "j1", companyId = "c1", homeId = "h1", name = "Ortiz rewire", phasesJson = "[\"Rough-in\",\"Finish\"]", createdAt = 1, updatedAt = 1))
+            db.photoDao().upsert(PhotoEntity(id = "p1", homeId = "h1", jobId = "j1", path = "/m/p1.jpg", takenAt = 5, caption = "Panel", createdAt = 5, updatedAt = 5))
+        }
+    }
+
+    @After fun tearDown() {
+        db.close()
+        Dispatchers.resetMain()
+    }
+
+    private fun vm(id: String = "p1") =
+        PhotoDetailViewModel(PhotoDetailDeps(id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }))
+
+    private suspend fun loaded(v: PhotoDetailViewModel) = v.state.filter { !it.loading }.first()
+
+    private suspend fun row(until: (PhotoEntity?) -> Boolean): PhotoEntity? = kotlinx.coroutines.withTimeout(5_000) {
+        var r = db.photoDao().get("p1")
+        while (!until(r)) { kotlinx.coroutines.delay(20); r = db.photoDao().get("p1") }
+        r
+    }
+
+    @Test fun `loads caption rooms and phases of the job`() = runBlocking {
+        val s = vm().state.filter { !it.loading }.first()
+        assertThat(s.caption).isEqualTo("Panel")
+        assertThat(s.rooms.map { it.name }).containsExactly("Kitchen")
+        assertThat(s.phases).containsExactly("Rough-in", "Finish").inOrder()
+    }
+
+    @Test fun `unknown photo is reported missing`() = runBlocking {
+        assertThat(vm("nope").state.filter { !it.loading }.first().missing).isTrue()
+    }
+
+    @Test fun `caption and tags are saved and queued for sync`() = runBlocking {
+        val v = vm()
+        loaded(v)
+        v.onEvent(PhotoDetailEvent.Caption("Panel, labeled"))
+        v.onEvent(PhotoDetailEvent.SaveCaption)
+        row { it?.caption == "Panel, labeled" }
+        v.onEvent(PhotoDetailEvent.Room("r1"))
+        v.onEvent(PhotoDetailEvent.Phase("Finish"))
+        val row = row { it?.roomId == "r1" && it.stage == "Finish" }!!
+        assertThat(row.caption).isEqualTo("Panel, labeled")
+        assertThat(row.roomId).isEqualTo("r1")
+        assertThat(row.stage).isEqualTo("Finish")
+        assertThat(changes).contains("photo:p1")
+    }
+
+    @Test fun `mark before sets the Before phase`() = runBlocking {
+        val v = vm()
+        loaded(v)
+        v.onEvent(PhotoDetailEvent.MarkBefore)
+        assertThat(v.state.value.isBefore).isTrue()
+        assertThat(row { it?.stage == PhotoEdits.BEFORE }).isNotNull()
+    }
+
+    @Test fun `delete asks first then removes the photo`() = runBlocking {
+        val v = vm()
+        loaded(v)
+        v.onEvent(PhotoDetailEvent.AskDelete)
+        assertThat(v.state.value.confirmDelete).isTrue()
+        v.onEvent(PhotoDetailEvent.CancelDelete)
+        assertThat(db.photoDao().get("p1")).isNotNull()
+        v.onEvent(PhotoDetailEvent.AskDelete)
+        v.onEvent(PhotoDetailEvent.ConfirmDelete)
+        row { it == null }
+        assertThat(v.state.filter { it.deleted }.first().deleted).isTrue()
+    }
+}

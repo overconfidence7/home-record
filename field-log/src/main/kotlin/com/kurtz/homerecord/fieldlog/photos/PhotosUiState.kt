@@ -28,4 +28,5 @@ data class PhotosUiState(
 
 sealed interface PhotosEvent {
     data object Capture : PhotosEvent
+    data class Open(val photoId: String) : PhotosEvent
 }

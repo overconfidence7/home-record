@@ -196,6 +196,17 @@
     <string name="photos_before">Before</string>
     <string name="photos_after">After</string>
     <string name="photos_marked">Marked up</string>
+    <string name="photo_title">Photo</string>
+    <string name="photo_caption">Caption</string>
+    <string name="photo_room">Room</string>
+    <string name="photo_phase">Phase</string>
+    <string name="photo_share">Share photo</string>
+    <string name="photo_delete">Delete</string>
+    <string name="photo_delete_title">Delete this photo?</string>
+    <string name="photo_delete_body">It comes off the job for everyone on the crew.</string>
+    <string name="photo_missing">This photo is gone.</string>
+    <string name="photo_mark_before">Mark as a Before shot</string>
+    <string name="photo_is_before">Marked as a Before shot</string>
     <string name="jobtab_soon">%1$s for this job isn\'t built yet.</string>
     <string name="job_not_found">This job was removed or isn\'t on this phone yet.</string>
     <string name="job_edit">Edit job</string>

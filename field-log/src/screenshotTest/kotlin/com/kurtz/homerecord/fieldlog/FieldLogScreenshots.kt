@@ -265,3 +265,18 @@ fun PhotosEmptyScreenshot() = PhotosEmptyPreview()
 @ThemePreviews
 @Composable
 fun PhotosLoadingScreenshot() = PhotosLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotoDetailScreenshot() = PhotoDetailPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotoDetailDeleteScreenshot() = PhotoDetailDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotoDetailMissingScreenshot() = PhotoDetailMissingPreview()
