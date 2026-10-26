@@ -119,6 +119,13 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    val photoAnnotator by lazy {
+        com.kurtz.homerecord.core.photo.PhotoAnnotator(
+            db, com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRenderer, queueUpload = ::uploadMedia,
+            companyId = { company.current?.companyId }, onChange = ::recordChange,
+        )
+    }
+
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(
