@@ -1126,3 +1126,20 @@ Auto entry review (0 new, 23 still open):
 Coverage note: the auto entry reports 109/109 claimed ACs covered across 42 ticked tasks (0 gaps); nothing to list.
 
 Judged: 226 screenshots (all 48 Field Log and 45 distinct House Manual device shots, 12 suite shots, and 121 crawler shots: House Manual font200 in full, Field Log light in full, plus the changed screens room-page, contact/consumable/service forms, home-full and today-* in every variant, and the blank-frame candidates; the remaining crawler variants and the 405 handoff duplicates were scanned for blank frames only), 17 walkthrough steps. New issues: 4. Product gaps: 0.
+
+## QA auto 2026-10-26 (commit d13b547)
+
+Automated suite run at 2026-10-26 02:20 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F03-jobs fails on field-log (regression of a fixed item) [auto:flow:field-log:F03-jobs] - steps: automated, see qa-results branch latest/ for commit d13b547 - expected: walkthrough step F03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F03-jobs.log
+- [ ] [Major] Flow F04-clock-in fails on field-log (regression of a fixed item) [auto:flow:field-log:F04-clock-in] - steps: automated, see qa-results branch latest/ for commit d13b547 - expected: walkthrough step F04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F04-clock-in.log
+- [ ] [Major] Flow F05-today fails on field-log (regression of a fixed item) [auto:flow:field-log:F05-today] - steps: automated, see qa-results branch latest/ for commit d13b547 - expected: walkthrough step F05 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F05-today.log
+- [ ] [Major] Flow F08-capture fails on field-log [auto:flow:field-log:F08-capture] - steps: automated, see qa-results branch latest/ for commit d13b547 - expected: walkthrough step F08 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F08-capture.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:flow:field-log:F02-invite-join], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:flow:house-manual:H05-contacts], [auto:flow:house-manual:H15-sign-in], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, field-log F03 Fail, field-log F04 Fail, field-log F05 Fail, field-log F06 Pass, field-log F07 Pass, field-log F08 Fail, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Fail, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Fail, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 68 device stages, 534 unit tests, 77 backend tests, coverage 111/111 ACs. Passed: 47. New issues: 4. Critical: 0. Product gaps: n/a (judge entry follows).
