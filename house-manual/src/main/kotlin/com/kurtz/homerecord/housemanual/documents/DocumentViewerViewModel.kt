@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual.documents
 
+import com.kurtz.homerecord.coreui.pages.PageSource
+import com.kurtz.homerecord.coreui.pages.PageSources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository

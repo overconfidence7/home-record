@@ -138,6 +138,8 @@ class AppContainer(private val app: Application) {
         },
     )
 
+    fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(fileId, db.jobFileDao())
+
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(

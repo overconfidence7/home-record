@@ -1,15 +1,7 @@
 package com.kurtz.homerecord.housemanual.documents
 
+import com.kurtz.homerecord.coreui.pages.PageSource
 import androidx.compose.ui.graphics.ImageBitmap
-
-/** One document's pages, rendered on demand so a 40-page manual never sits in memory at once. */
-interface PageSource {
-    val pageCount: Int
-    suspend fun render(index: Int, widthPx: Int): ImageBitmap?
-    /** A page already in memory, shown at once while [render] runs; previews use it. */
-    fun peek(index: Int): ImageBitmap? = null
-    fun close() = Unit
-}
 
 data class DocumentViewerUiState(
     val loading: Boolean = true,

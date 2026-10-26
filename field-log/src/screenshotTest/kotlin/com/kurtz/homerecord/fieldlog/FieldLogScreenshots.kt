@@ -325,3 +325,18 @@ fun FilesLoadingScreenshot() = FilesLoadingPreview()
 @ThemePreviews
 @Composable
 fun FilesDeleteScreenshot() = FilesDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerScreenshot() = FileViewerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerNotOnPhoneScreenshot() = FileViewerNotOnPhonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerNoPreviewScreenshot() = FileViewerNoPreviewPreview()

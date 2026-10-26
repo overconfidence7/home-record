@@ -11,7 +11,7 @@ import com.kurtz.homerecord.core.media.StoredDocument
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerUiState
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerViewModel
-import com.kurtz.homerecord.housemanual.documents.PageSource
+import com.kurtz.homerecord.coreui.pages.PageSource
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 import com.kurtz.homerecord.housemodel.documents.DocumentScope
 import androidx.compose.ui.graphics.ImageBitmap

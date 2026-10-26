@@ -151,6 +151,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
                 onOpenPhoto = { nav.push(PhotoKey(it)) },
+                onOpenFile = { nav.push(FileKey(it)) },
                 files = container.filesDeps(
                     key.jobId,
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
@@ -159,6 +160,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         }
         entry<PhotoKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.PhotoDetailRoute(container.photoDetailDeps(key.photoId), onAnnotate = { nav.push(AnnotateKey(key.photoId)) }, onBack = nav::pop)
+        }
+        entry<FileKey> { key ->
+            com.kurtz.homerecord.fieldlog.files.FileViewerRoute(container.fileViewerDeps(key.fileId), onBack = nav::pop)
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)

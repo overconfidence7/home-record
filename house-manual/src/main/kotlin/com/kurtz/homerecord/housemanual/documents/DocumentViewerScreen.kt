@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.documents
 
+import com.kurtz.homerecord.coreui.pages.PageSource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable

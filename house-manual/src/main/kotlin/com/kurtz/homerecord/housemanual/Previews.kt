@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
+import com.kurtz.homerecord.coreui.pages.PageSource
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -552,7 +553,7 @@ fun DocumentFormPreview() = Frame {
 }
 
 /** A two-page "manual" drawn with canvas so the viewer previews show real pages. */
-private object SamplePages : com.kurtz.homerecord.housemanual.documents.PageSource {
+private object SamplePages : com.kurtz.homerecord.coreui.pages.PageSource {
     override val pageCount = 2
     override suspend fun render(index: Int, widthPx: Int) = peek(index)
     override fun peek(index: Int): androidx.compose.ui.graphics.ImageBitmap {

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog
 
+import androidx.compose.ui.graphics.asImageBitmap
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxSize
@@ -653,5 +654,50 @@ fun FilesLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScr
 fun FilesDeletePreview() = Frame {
     com.kurtz.homerecord.fieldlog.files.FilesScreen(
         filesReady.copy(dialog = com.kurtz.homerecord.fieldlog.files.FilesDialog.Delete("f2", "Panel schedule.pdf")), {},
+    )
+}
+
+/** A two-page plan drawn with canvas so the file viewer previews show real pages. */
+private object SamplePlanPages : com.kurtz.homerecord.coreui.pages.PageSource {
+    override val pageCount = 3
+    override suspend fun render(index: Int, widthPx: Int) = peek(index)
+    override fun peek(index: Int): androidx.compose.ui.graphics.ImageBitmap {
+        val bmp = android.graphics.Bitmap.createBitmap(600, 780, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(android.graphics.Color.WHITE)
+        val ink = android.graphics.Paint().apply { color = android.graphics.Color.DKGRAY; textSize = 34f; isAntiAlias = true }
+        canvas.drawText(listOf("Garage subpanel plan", "Panel schedule", "Permit notes")[index], 40f, 80f, ink)
+        ink.textSize = 24f
+        listOf("100 A subpanel, 20 circuits", "Feeder: 3 AWG copper in 1 in conduit", "Inspection after rough-in")
+            .forEachIndexed { i, line -> canvas.drawText(line, 40f, 140f + i * 40f, ink) }
+        return bmp.asImageBitmap()
+    }
+}
+
+@ThemePreviews
+@Composable
+fun FileViewerPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FileViewerScreen(
+        com.kurtz.homerecord.fieldlog.files.FileViewerUiState(loading = false, name = "Garage plan.pdf", path = "p", mime = "application/pdf", pages = SamplePlanPages), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun FileViewerNotOnPhonePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FileViewerScreen(
+        com.kurtz.homerecord.fieldlog.files.FileViewerUiState(
+            loading = false, name = "Permit.pdf", mime = "application/pdf", problem = com.kurtz.homerecord.fieldlog.files.FileViewerProblem.NotOnPhone,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun FileViewerNoPreviewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FileViewerScreen(
+        com.kurtz.homerecord.fieldlog.files.FileViewerUiState(
+            loading = false, name = "Quote.xlsx", path = "p", mime = "application/vnd.ms-excel", problem = com.kurtz.homerecord.fieldlog.files.FileViewerProblem.NoPreview,
+        ), {},
     )
 }
