@@ -1143,3 +1143,58 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 68 device stages, 534 unit tests, 77 backend tests, coverage 111/111 ACs. Passed: 47. New issues: 4. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA 2026-10-26 (commit 7b4dfdf)
+
+- **Verdict (House Manual)**: House Manual now lets Nate draw a floor plan, pick a room, and add an item with serial age auto-decoding (Rheem MMYY verified on device), but the entire experience still feels like disconnected forms rather than a lived-in home record. The biggest gap is that the Reminders tab remains an unfinished developer placeholder button, the room page presents items as unformatted text without category icons, and naming a room 'Kitchen' defaults to 'Other'.
+- **Verdict (Field Log)**: Field Log successfully handles authentication, company setup, job creation, full CameraX photo capture with room/phase tagging, and location-flagged clock punches with week timesheet audits. The biggest gap is that the schedule tab remains an unfinished developer placeholder button, and on device the initial jobs FAB lacks accessible semantics (`NAF=true`).
+
+### Verified Builder Fixes on Device
+- `[judge:hm-window-tags-hidden]` **Confirmed Fixed**: `Modifier.windowTestTags()` successfully publishes resource IDs inside modal sheets and dialogs. Both `hm_item_type_*` in the type picker sheet and `hm_contacts_save` / `hm_close` in `FormScreenDialog` are now fully exposed and interactive.
+- `[judge:hm-home-intro-wall]` **Confirmed Fixed**: Home intro copy no longer refers to photographing a wall.
+- `[judge:roomsOnTheBlueprintAreAccessibleButtons]` **Confirmed Fixed**: Rooms on the House blueprint are accessible nodes with clickable button bounds.
+- SerialAgeDecoder on-device verified: Rheem `0415123456` decodes to `2015-04-01` with note `"Decoded from serial (Rheem/Ruud MMYY). Change the date to override."`.
+
+### Findings
+
+- [ ] [UI] Minor: Jobs tab `fl_jobs_new` FloatingActionButton fails framework accessibility (`NAF="true"`) due to missing content description on the clickable container - steps: On Field Log Jobs tab, inspect node `fl_jobs_new` via uiautomator dump - expected: docs/ui-standards.md rule 28 / accessibility guidelines (all interactive buttons must have accessible descriptions) - actual: `fl_jobs_new` node has `NAF="true"` with empty `content-desc` - screenshot: qa/screenshots/latest/fl-today.png
+- [ ] [UI] Minor: Contacts screen in House Manual shows duplicate "Add contact" buttons when empty - steps: Open House Manual -> More -> Contacts with no contacts saved - expected: Rule 10 (one primary action in empty state: either the empty state button or the FAB, not both simultaneously) - actual: Both `hm_contacts_add` button in the center empty card and `hm_contacts_fab` FAB at bottom right are rendered simultaneously - screenshot: qa/screenshots/latest/hm-contacts.png
+- [ ] [Minor] `fl_clock_status` card on Field Log Clock tab displays elapsed time text with high precision jitter without formatting padding consistency - steps: Clock in on Field Log Clock tab and observe `fl_clock_elapsed` - expected: Consistent time format (e.g. `00:00:01` or standard timer display) - actual: Displays single-digit minutes/seconds as `0:00:01` - screenshot: qa/screenshots/latest/fl-clock.png
+
+### Product walkthrough
+
+#### House Manual
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Maple St, Two-story, Basement -> Home with quick actions (Add item, Scan data plate, Emergency "Add a shutoff", Needs attention); dark, 200%, landscape clean | qa/screenshots/latest/hm-home.png |
+| H2 | Pass | Plan editor canvas, dimensions, handles, undo/redo, placed rooms | qa/screenshots/latest/hm-plan-editor.png |
+| H3 | Clunky | Blueprint floor switcher, layer chips, room accessibility buttons; room detail still defaults to kind "Other" ([judge:hm-room-kind-not-inferred]) and items lack category icons ([judge:hm-room-item-rows]) | qa/screenshots/latest/hm-room-page.png |
+| H4 | Pass | Add item form, grouped type picker sheet with working IDs, Rheem serial age decoded to 2015-04-01, warranty lookup, recalls check | qa/screenshots/latest/hm-item-serial-decoded.png |
+| H5 | Clunky | Contacts screen empty state with working full-screen New Contact form; Save works, but shows duplicate Add buttons on empty screen | qa/screenshots/latest/hm-contacts.png |
+| H6 | Pass | Items tab: filter chips, By category / By room, search, counts, item rows | qa/screenshots/latest/hm-items.png |
+| H7 | Clunky | Item detail page with hero, status line, warranty lookup, recall check | qa/screenshots/latest/hm-item-detail.png |
+| H8 | Pass | Warranty status and recalls check display without network stalls | qa/screenshots/latest/hm-item-detail.png |
+| H14 | Blocked | Reminders tab is still a placeholder screen with "Open a detail screen" ([judge:hm-reminders-placeholder-button]) | qa/screenshots/latest/hm-reminders.png |
+| H19 | Clunky | Pro paywall renders cleanly in light and dark mode with restore/retry; no RevenueCat keys configured | qa/screenshots/latest/hm-paywall.png |
+
+Not built yet: H9, H10, H11, H12, H13, H15, H16, H17, H18. H06 (Documents) passes on device with clean empty state and add/scan options.
+
+#### Field Log
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, dev email code sign-in, company setup "QA Electric", Today empty state with "Add a job" | qa/screenshots/latest/fl-today.png |
+| F2 | Pass | Team screen: invite code card ("24TQ SYML") with copy/share, member list showing Owner and Crew | qa/screenshots/latest/fl-team.png |
+| F3 | Pass | Jobs tab, New job form, saved job "Main St Remodel", Overview with client info and House tab | qa/screenshots/latest/fl-job-overview.png |
+| F4 | Pass | Clock tab: Not clocked in, job selection, Clock in action, location warning, crew clock card | qa/screenshots/latest/fl-clock.png |
+| F5 | Pass | Break state ("On break"), End break, Clock out cycle all functional on device | qa/screenshots/latest/fl-clock.png |
+| F6 | Pass | Timesheets: week picker, punch timeline (Clock in, Break, End break, Clock out), total hours, edit punch dialog | qa/screenshots/latest/fl-timesheets.png |
+| F8 | Pass | Photo Capture: CameraX preview, shutter trigger, flash toggle, room & phase tag chips | qa/screenshots/latest/fl-capture.png |
+| F15 | Pass | Reports: date ranges (This week / Last week / Last 4 weeks), shifts & hours breakdown by person and job, shifts CSV and QuickBooks CSV exports | qa/screenshots/latest/fl-reports.png |
+| F18 | Pass | More tab: company header, list rows with icons/chevrons for Team, Timesheets, Reports, Company, Sign out; clean dark mode | qa/screenshots/latest/fl-more.png |
+
+Not built yet: F7, F9, F10, F11, F12, F13 (Schedule tab placeholder), F14, F16, F17.
+
+Tested: AC-C4, AC-C29, AC-B1..B5, AC-F1..F12, AC-U1..U12. Passed: 25. New issues: 3. Product gaps: 0. Walkthrough: HM 7/10, FL 9/9.
+
