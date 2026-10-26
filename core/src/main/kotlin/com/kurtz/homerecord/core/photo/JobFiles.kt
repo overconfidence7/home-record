@@ -67,7 +67,7 @@ class JobFiles(
         val rows = db.jobFileDao().listFor(jobId)
         val subs = rows.map { it.folder }.filter { it.startsWith(prefix(here)) && it != here }
             .map { it.removePrefix(prefix(here)).substringBefore('/') }.distinct().sorted()
-        val files = rows.filter { it.folder == here && it.mime != FOLDER_MIME }.sortedBy { it.name.lowercase() }
+        val files = current(rows).filter { it.folder == here && it.mime != FOLDER_MIME }.sortedBy { it.name.lowercase() }
         return FolderListing(here, subs, files)
     }
 
@@ -75,7 +75,13 @@ class JobFiles(
     suspend fun search(jobId: String, query: String): List<JobFileEntity> {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return emptyList()
-        return db.jobFileDao().listFor(jobId).filter { it.mime != FOLDER_MIME && it.name.lowercase().contains(q) }.sortedBy { it.name.lowercase() }
+        return current(db.jobFileDao().listFor(jobId)).filter { it.mime != FOLDER_MIME && it.name.lowercase().contains(q) }.sortedBy { it.name.lowercase() }
+    }
+
+    /** Older versions of a marked-up file stay in its history, not in the list (AC-F21). */
+    private fun current(rows: List<JobFileEntity>): List<JobFileEntity> {
+        val replaced = rows.mapNotNull { it.parentFileId }.toSet()
+        return rows.filter { it.id !in replaced }
     }
 
     private suspend fun folderNames(jobId: String) = db.jobFileDao().listFor(jobId).map { it.folder }.toSet()
