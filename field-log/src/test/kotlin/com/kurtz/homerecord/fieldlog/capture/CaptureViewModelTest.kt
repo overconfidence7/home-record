@@ -68,6 +68,8 @@ class CaptureViewModelTest {
         return CaptureViewModel(deps, SavedStateHandle())
     }
 
+    private suspend fun photosAfter(n: Int) = withTimeout(10_000) { db.photoDao().observeForJob("j1").first { it.size >= n } }
+
     private fun CaptureViewModel.loaded(): CaptureUiState = runBlocking { withTimeout(10_000) { state.first { !it.loading } } }
 
     // AC-F24
@@ -85,11 +87,11 @@ class CaptureViewModelTest {
         vm.onEvent(CaptureEvent.SelectRoom("r1"))
         vm.onEvent(CaptureEvent.SelectPhase("Finish"))
         vm.onEvent(CaptureEvent.Captured("/media/a.jpg"))
-        val row = db.photoDao().observeForJob("j1").first().single()
+        val row = photosAfter(1).single()
         assertThat(row.roomId).isEqualTo("r1")
         assertThat(row.stage).isEqualTo("Finish")
         assertThat(row.lat).isEqualTo(34.05)
-        assertThat(vm.state.value.savedCount).isEqualTo(1)
+        assertThat(withTimeout(10_000) { vm.state.first { it.savedCount >= 1 } }.savedCount).isEqualTo(1)
     }
 
     // AC-F24
@@ -97,7 +99,7 @@ class CaptureViewModelTest {
         location.granted = false
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Captured("/media/b.jpg"))
-        val row = db.photoDao().observeForJob("j1").first().single()
+        val row = photosAfter(1).single()
         assertThat(row.lat).isNull()
     }
 
@@ -116,8 +118,8 @@ class CaptureViewModelTest {
     @Test fun importedGalleryPhotosAreAllSaved() = runBlocking<Unit> {
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Imported(listOf("/media/1.jpg", "/media/2.jpg")))
-        assertThat(db.photoDao().observeForJob("j1").first()).hasSize(2)
-        assertThat(vm.state.value.savedCount).isEqualTo(2)
+        assertThat(photosAfter(1)).hasSize(2)
+        assertThat(withTimeout(10_000) { vm.state.first { it.savedCount >= 2 } }.savedCount).isEqualTo(2)
     }
 
     // AC-F29
