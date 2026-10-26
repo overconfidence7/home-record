@@ -1,0 +1,62 @@
+# Walkthrough F9: Files tab on a job: empty state, new folder, open it, search by name (AC-F19, AC-F23).
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner-f09@example.test"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- tapOn: "Create"
+- tapOn:
+    id: "fl_welcome_name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn:
+    id: "fl_welcome_trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Garage subpanel"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Garage subpanel"
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_files_empty
+    timeout: 10000
+- tapOn:
+    id: fl_files_new_folder
+- tapOn:
+    id: fl_files_name
+- inputText: "Permits"
+- hideKeyboard
+- tapOn:
+    id: fl_files_name_ok
+- extendedWaitUntil:
+    visible:
+      id: fl_files_folder_Permits
+    timeout: 10000
+- tapOn:
+    id: fl_files_folder_Permits
+- assertVisible:
+    id: fl_files_up
+- tapOn:
+    id: fl_files_search
+- inputText: "nothing"
+- assertVisible:
+    id: fl_files_no_match

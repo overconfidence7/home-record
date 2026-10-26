@@ -126,6 +126,18 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
+
+    fun filesDeps(jobId: String, authorId: String?) = com.kurtz.homerecord.fieldlog.files.FilesDeps(
+        jobId, db.jobFileDao(), jobFiles, authorId,
+        queueUpload = { f ->
+            val path = f.path
+            company.current?.companyId?.let { c ->
+                if (path != null) uploadMedia(TenantRef(TenantKind.Company, c), "job_file", f.id, path.substringAfterLast('/'), path, f.mime)
+            }
+        },
+    )
+
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(

@@ -615,3 +615,43 @@ fun AnnotateTextPreview() = Frame {
         {}, {},
     )
 }
+
+private fun fileRow(id: String, name: String, mime: String, size: Long, folder: String = "", offline: Boolean = false) =
+    com.kurtz.homerecord.fieldlog.files.FileRow(id, name, folder, mime, size, offline)
+
+private val filesReady = com.kurtz.homerecord.fieldlog.files.FilesUiState(
+    loading = false, folders = listOf("Permits", "Quotes"),
+    files = listOf(
+        fileRow("f1", "Ortiz first floor plan.pdf", "application/pdf", 18_400_000, offline = true),
+        fileRow("f2", "Panel schedule.pdf", "application/pdf", 640_000),
+        fileRow("f3", "Site notes.txt", "text/plain", 2_100),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun FilesTabPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(filesReady, {}) }
+
+@ThemePreviews
+@Composable
+fun FilesSearchPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FilesScreen(
+        filesReady.copy(query = "permit", results = listOf(fileRow("f4", "Electrical permit.pdf", "application/pdf", 310_000, folder = "Permits"))), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun FilesEmptyPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(com.kurtz.homerecord.fieldlog.files.FilesUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun FilesLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(com.kurtz.homerecord.fieldlog.files.FilesUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun FilesDeletePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FilesScreen(
+        filesReady.copy(dialog = com.kurtz.homerecord.fieldlog.files.FilesDialog.Delete("f2", "Panel schedule.pdf")), {},
+    )
+}

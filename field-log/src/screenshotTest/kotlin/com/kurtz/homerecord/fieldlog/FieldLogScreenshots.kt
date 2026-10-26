@@ -300,3 +300,28 @@ fun AnnotateEmptyScreenshot() = AnnotateEmptyPreview()
 @ThemePreviews
 @Composable
 fun AnnotateTextScreenshot() = AnnotateTextPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesTabScreenshot() = FilesTabPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesSearchScreenshot() = FilesSearchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesEmptyScreenshot() = FilesEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesLoadingScreenshot() = FilesLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesDeleteScreenshot() = FilesDeletePreview()

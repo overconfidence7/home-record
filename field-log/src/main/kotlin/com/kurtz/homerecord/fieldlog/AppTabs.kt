@@ -151,6 +151,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
                 onOpenPhoto = { nav.push(PhotoKey(it)) },
+                files = container.filesDeps(
+                    key.jobId,
+                    (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
+                ),
             )
         }
         entry<PhotoKey> { key ->
