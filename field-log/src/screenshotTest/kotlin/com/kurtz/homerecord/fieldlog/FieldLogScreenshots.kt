@@ -250,3 +250,18 @@ fun CaptureNoCameraScreenshot() = CaptureNoCameraPreview()
 @ThemePreviews
 @Composable
 fun CaptureLoadingScreenshot() = CaptureLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotosTabScreenshot() = PhotosTabPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotosEmptyScreenshot() = PhotosEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotosLoadingScreenshot() = PhotosLoadingPreview()

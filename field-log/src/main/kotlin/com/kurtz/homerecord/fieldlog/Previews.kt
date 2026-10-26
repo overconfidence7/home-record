@@ -525,3 +525,39 @@ fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true,
 @ThemePreviews
 @Composable
 fun CaptureNotePreview() = CaptureFrame(captureReady.copy(noteOpen = true, noteText = "Homeowner wants the island moved 6 in. toward the window."))
+
+private fun tile(id: String, room: String? = null, phase: String? = null, caption: String? = null, annotated: Boolean = false) =
+    com.kurtz.homerecord.fieldlog.photos.PhotoTile(id, "/none/$id.jpg", room, phase, caption, annotated)
+
+private val photosReady = com.kurtz.homerecord.fieldlog.photos.PhotosUiState(
+    loading = false, count = 5,
+    days = listOf(
+        com.kurtz.homerecord.fieldlog.photos.PhotoDayUi(
+            TS_MONDAY.plusDays(2),
+            listOf(
+                com.kurtz.homerecord.fieldlog.photos.PhotoCell.Pair(
+                    tile("b1", "Kitchen", "Rough-in", "Old panel feed"), tile("a1", "Kitchen", "Finish", "New subpanel in", annotated = true),
+                ),
+                com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p1", "Garage", "Rough-in")),
+                com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p2", "Main bath", "Inspection", "GFCI tested")),
+            ),
+        ),
+        com.kurtz.homerecord.fieldlog.photos.PhotoDayUi(
+            TS_MONDAY, listOf(com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p3", "Kitchen", "Rough-in", "Studs open at the range wall"))),
+        ),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun PhotosTabPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(photosReady, {}) }
+
+@ThemePreviews
+@Composable
+fun PhotosEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(loading = false), {})
+}
+
+@ThemePreviews
+@Composable
+fun PhotosLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(), {}) }

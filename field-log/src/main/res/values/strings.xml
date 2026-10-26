@@ -191,6 +191,11 @@
     <string name="jobhouse_empty_title">No plan for this job yet</string>
     <string name="jobhouse_empty_body">Draw the floors and rooms you are working on. Rooms you add when you edit the job show up here too.</string>
     <string name="jobhouse_start">Start the plan</string>
+    <string name="photos_empty">No photos on this job yet. Photos you take show here by day.</string>
+    <string name="photos_take">Take a photo</string>
+    <string name="photos_before">Before</string>
+    <string name="photos_after">After</string>
+    <string name="photos_marked">Marked up</string>
     <string name="jobtab_soon">%1$s for this job isn\'t built yet.</string>
     <string name="job_not_found">This job was removed or isn\'t on this phone yet.</string>
     <string name="job_edit">Edit job</string>

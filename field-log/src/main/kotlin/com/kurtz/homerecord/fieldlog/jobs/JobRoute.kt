@@ -56,6 +56,12 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
         },
         onBack,
         onCapture = onCapture,
+        photosContent = {
+            com.kurtz.homerecord.fieldlog.photos.PhotosRoute(
+                com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao()),
+                onCapture = { onCapture?.invoke() },
+            )
+        },
         houseContent = {
             val homeId = state.homeId
             if (homeId == null) {
