@@ -22,5 +22,6 @@ import kotlinx.serialization.Serializable
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
 
 @Serializable data class PhotoKey(val photoId: String) : NavKey
+@Serializable data class AnnotateKey(val photoId: String) : NavKey
 
 @Serializable data class CaptureKey(val jobId: String) : NavKey

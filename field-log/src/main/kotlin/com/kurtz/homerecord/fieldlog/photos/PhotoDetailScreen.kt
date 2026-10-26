@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -49,6 +50,7 @@ fun PhotoDetailScreen(
     state: PhotoDetailUiState,
     onEvent: (PhotoDetailEvent) -> Unit,
     onShare: () -> Unit,
+    onAnnotate: () -> Unit,
     onBack: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
@@ -58,6 +60,7 @@ fun PhotoDetailScreen(
         onBack = onBack,
         actions = {
             if (!state.loading && !state.missing) {
+                IconButton(onAnnotate, Modifier.testTag("fl_photo_annotate")) { Icon(Icons.Rounded.Edit, stringResource(R.string.photo_annotate)) }
                 IconButton(onShare, Modifier.testTag("fl_photo_share")) { Icon(Icons.Rounded.Share, stringResource(R.string.photo_share)) }
                 IconButton({ onEvent(PhotoDetailEvent.AskDelete) }, Modifier.testTag("fl_photo_delete")) { Icon(Icons.Rounded.Delete, stringResource(R.string.photo_delete)) }
             }

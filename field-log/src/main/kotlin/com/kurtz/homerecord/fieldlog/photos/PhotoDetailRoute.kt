@@ -13,12 +13,12 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import java.io.File
 
 @Composable
-fun PhotoDetailRoute(deps: PhotoDetailDeps, onBack: () -> Unit) {
+fun PhotoDetailRoute(deps: PhotoDetailDeps, onAnnotate: () -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val vm = viewModel<PhotoDetailViewModel>(key = "photo-${deps.photoId}", factory = viewModelFactory { initializer { PhotoDetailViewModel(deps) } })
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.deleted) { if (state.deleted) onBack() }
-    PhotoDetailScreen(state, vm::onEvent, onShare = { sharePhoto(context, state.imagePath) }, onBack = onBack)
+    PhotoDetailScreen(state, vm::onEvent, onShare = { sharePhoto(context, state.imagePath) }, onAnnotate = onAnnotate, onBack = onBack)
 }
 
 private fun sharePhoto(context: Context, path: String) {

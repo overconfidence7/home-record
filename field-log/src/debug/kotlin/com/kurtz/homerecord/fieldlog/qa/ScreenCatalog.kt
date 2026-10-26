@@ -59,6 +59,9 @@ object ScreenCatalog {
         QaScreen("photo-detail", nonRoot = true) { PhotoDetailPreview() },
         QaScreen("photo-detail-delete", nonRoot = true) { PhotoDetailDeletePreview() },
         QaScreen("photo-detail-missing", nonRoot = true) { PhotoDetailMissingPreview() },
+        QaScreen("annotate", nonRoot = true) { AnnotatePreview() },
+        QaScreen("annotate-empty", nonRoot = true) { AnnotateEmptyPreview() },
+        QaScreen("annotate-measure", nonRoot = false) { AnnotateTextPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )

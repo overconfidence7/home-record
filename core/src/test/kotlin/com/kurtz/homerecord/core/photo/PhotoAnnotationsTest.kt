@@ -60,3 +60,36 @@ class PhotoAnnotationsTest {
         assertThat(original.annotationsJson).isEqualTo("[]")
     }
 }
+
+// AC-F26: a finished drag becomes the right mark
+class MarkSketchTest {
+    private fun p(x: Float, y: Float) = NormPoint(x, y)
+
+    @org.junit.Test fun arrowRectangleAndFreehandFromDrags() {
+        assertThat(MarkSketch.finish(AnnotationTool.Arrow, listOf(p(.1f, .1f), p(.5f, .5f)), 1.5f)).isEqualTo(SketchResult.Mark(Annotation.Arrow(p(.1f, .1f), p(.5f, .5f))))
+        assertThat(MarkSketch.finish(AnnotationTool.Rectangle, listOf(p(.1f, .1f), p(.5f, .5f)), 1.5f)).isEqualTo(SketchResult.Mark(Annotation.Rectangle(p(.1f, .1f), p(.5f, .5f))))
+        val pen = listOf(p(.1f, .1f), p(.2f, .3f), p(.3f, .2f))
+        assertThat(MarkSketch.finish(AnnotationTool.Freehand, pen, 1.5f)).isEqualTo(SketchResult.Mark(Annotation.Freehand(pen)))
+    }
+
+    @org.junit.Test fun aTapDrawsNothingExceptText() {
+        val tap = listOf(p(.4f, .4f))
+        assertThat(MarkSketch.finish(AnnotationTool.Arrow, tap, 1.5f)).isEqualTo(SketchResult.Nothing)
+        assertThat(MarkSketch.finish(AnnotationTool.Freehand, tap, 1.5f)).isEqualTo(SketchResult.Nothing)
+        assertThat(MarkSketch.finish(AnnotationTool.Text, tap, 1.5f)).isEqualTo(SketchResult.AskText(p(.4f, .4f)))
+        assertThat(MarkSketch.finish(AnnotationTool.Arrow, emptyList(), 1.5f)).isEqualTo(SketchResult.Nothing)
+    }
+
+    @org.junit.Test fun measureAsksForTheLabel() {
+        assertThat(MarkSketch.finish(AnnotationTool.Measure, listOf(p(.1f, .5f), p(.6f, .5f)), 1.5f)).isEqualTo(SketchResult.AskMeasure(p(.1f, .5f), p(.6f, .5f)))
+    }
+
+    @org.junit.Test fun circleRadiusIsAFractionOfTheShorterSide() {
+        // landscape 2:1, drag 0.25 of the width = 0.5 of the height = radius 0.5 of the shorter side
+        val r = MarkSketch.finish(AnnotationTool.Circle, listOf(p(.5f, .5f), p(.75f, .5f)), 2f) as SketchResult.Mark
+        assertThat((r.mark as Annotation.Circle).radius).isWithin(0.001f).of(0.5f)
+        // portrait 1:2, drag 0.25 of the height = 0.5 of the width... shorter side is width
+        val q = MarkSketch.finish(AnnotationTool.Circle, listOf(p(.5f, .5f), p(.5f, .75f)), 0.5f) as SketchResult.Mark
+        assertThat((q.mark as Annotation.Circle).radius).isWithin(0.001f).of(0.5f)
+    }
+}

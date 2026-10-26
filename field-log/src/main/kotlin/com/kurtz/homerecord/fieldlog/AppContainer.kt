@@ -132,6 +132,17 @@ class AppContainer(private val app: Application) {
         photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits,
     )
 
+    fun annotateDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.AnnotateDeps(
+        photoId, db.photoDao(), photoAnnotator,
+        aspectOf = { path ->
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val o = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                android.graphics.BitmapFactory.decodeFile(path, o)
+                if (o.outWidth > 0 && o.outHeight > 0) o.outWidth.toFloat() / o.outHeight else null
+            }
+        },
+    )
+
     fun captureDeps(context: Context, jobId: String): com.kurtz.homerecord.fieldlog.capture.CaptureDeps {
         val prefs = context.getSharedPreferences("capture", Context.MODE_PRIVATE)
         return com.kurtz.homerecord.fieldlog.capture.CaptureDeps(

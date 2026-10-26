@@ -574,16 +574,44 @@ private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailU
 
 @ThemePreviews
 @Composable
-fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, {}, {}, java.time.ZoneId.of("UTC")) }
+fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, {}, {}, {}, java.time.ZoneId.of("UTC")) }
 
 @ThemePreviews
 @Composable
 fun PhotoDetailDeletePreview() = Frame {
-    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, {}, {}, java.time.ZoneId.of("UTC"))
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, {}, {}, {}, java.time.ZoneId.of("UTC"))
 }
 
 @ThemePreviews
 @Composable
 fun PhotoDetailMissingPreview() = Frame {
-    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(loading = false, missing = true), {}, {}, {})
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(loading = false, missing = true), {}, {}, {}, {})
+}
+
+private val annotateReady = com.kurtz.homerecord.fieldlog.photos.AnnotateUiState(
+    loading = false, imagePath = "/none/a1.jpg", aspect = 4f / 3f,
+    marks = listOf(
+        com.kurtz.homerecord.core.photo.Annotation.Arrow(com.kurtz.homerecord.core.photo.NormPoint(.15f, .2f), com.kurtz.homerecord.core.photo.NormPoint(.4f, .45f)),
+        com.kurtz.homerecord.core.photo.Annotation.Circle(com.kurtz.homerecord.core.photo.NormPoint(.65f, .4f), .12f),
+        com.kurtz.homerecord.core.photo.Annotation.Measure(com.kurtz.homerecord.core.photo.NormPoint(.2f, .8f), com.kurtz.homerecord.core.photo.NormPoint(.7f, .8f), "36 in"),
+        com.kurtz.homerecord.core.photo.Annotation.Text(com.kurtz.homerecord.core.photo.NormPoint(.55f, .15f), "Move panel"),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun AnnotatePreview() = Frame { com.kurtz.homerecord.fieldlog.photos.AnnotateScreen(annotateReady, {}, {}) }
+
+@ThemePreviews
+@Composable
+fun AnnotateEmptyPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.AnnotateScreen(annotateReady.copy(marks = emptyList()), {}, {}) }
+
+@ThemePreviews
+@Composable
+fun AnnotateTextPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.AnnotateScreen(
+        annotateReady.copy(tool = com.kurtz.homerecord.core.photo.AnnotationTool.Measure,
+            pending = com.kurtz.homerecord.fieldlog.photos.PendingMark.Measure(com.kurtz.homerecord.core.photo.NormPoint(.2f, .8f), com.kurtz.homerecord.core.photo.NormPoint(.7f, .8f)), pendingText = "36 in"),
+        {}, {},
+    )
 }

@@ -285,3 +285,18 @@ fun PhotoDetailDeleteScreenshot() = PhotoDetailDeletePreview()
 @ThemePreviews
 @Composable
 fun PhotoDetailMissingScreenshot() = PhotoDetailMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AnnotateScreenshot() = AnnotatePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AnnotateEmptyScreenshot() = AnnotateEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AnnotateTextScreenshot() = AnnotateTextPreview()
