@@ -7,9 +7,13 @@ import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.data.RoomDao
 import com.kurtz.homerecord.core.location.LocationProvider
 import com.kurtz.homerecord.core.photo.CaptureTags
+import com.kurtz.homerecord.core.photo.JobNotes
 import com.kurtz.homerecord.core.photo.JobPhotos
 import com.kurtz.homerecord.core.photo.LensChoice
 import com.kurtz.homerecord.core.photo.LensLimiter
+import com.kurtz.homerecord.core.photo.VoiceRecorder
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +33,10 @@ class CaptureDeps(
     val lastTags: () -> Pair<String?, String?>,
     val rememberTags: (roomId: String?, phase: String?) -> Unit,
     val hasCameraPermission: () -> Boolean,
+    val notes: JobNotes,
+    val recorder: VoiceRecorder,
+    /** Where the next voice memo is written. */
+    val newMemoPath: () -> String,
     val fixTimeoutMs: Long = 3_000,
 )
 
@@ -37,6 +45,8 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
     private var hasBack = true
     private var hasFront = false
     private var wantFront = false
+    private var ticker: Job? = null
+    private var memoPath: String? = null
 
     private val _state = MutableStateFlow(
         CaptureUiState(
@@ -79,8 +89,67 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             is CaptureEvent.Imported -> save(event.paths)
             CaptureEvent.CaptureFailed -> _state.update { it.copy(message = CaptureMessage.SaveFailed) }
             CaptureEvent.DismissMessage -> _state.update { it.copy(message = null) }
+            CaptureEvent.OpenNote -> _state.update { it.copy(noteOpen = true) }
+            CaptureEvent.CloseNote -> _state.update { it.copy(noteOpen = false, noteText = "") }
+            is CaptureEvent.NoteText -> _state.update { it.copy(noteText = event.text) }
+            CaptureEvent.SaveNote -> saveNote()
+            CaptureEvent.VoiceTap -> if (_state.value.recording) stopMemo() else startMemo()
+            CaptureEvent.MicDenied -> _state.update { it.copy(message = CaptureMessage.MicDenied) }
             CaptureEvent.Shutter, CaptureEvent.OpenSettings -> Unit
         }
+    }
+
+    private fun saveNote() {
+        val text = _state.value.noteText
+        viewModelScope.launch {
+            val id = d.notes.addText(d.jobId, text)
+            _state.update {
+                if (id == null && text.isNotBlank()) it.copy(noteOpen = false, noteText = "", message = CaptureMessage.JobGone)
+                else if (id == null) it
+                else it.copy(noteOpen = false, noteText = "", message = CaptureMessage.NoteSaved)
+            }
+        }
+    }
+
+    private fun startMemo() {
+        val path = d.newMemoPath()
+        if (!d.recorder.start(path)) {
+            _state.update { it.copy(message = CaptureMessage.MemoFailed) }
+            return
+        }
+        memoPath = path
+        _state.update { it.copy(recording = true, recordedSeconds = 0, message = null) }
+        ticker = viewModelScope.launch {
+            while (true) {
+                delay(1_000)
+                val seconds = _state.value.recordedSeconds + 1
+                _state.update { it.copy(recordedSeconds = seconds) }
+                if (seconds * 1_000L >= JobNotes.MAX_VOICE_MS) {
+                    stopMemo()
+                    return@launch
+                }
+            }
+        }
+    }
+
+    private fun stopMemo() {
+        val path = memoPath ?: return
+        memoPath = null
+        ticker?.cancel()
+        val length = d.recorder.stop()
+        _state.update { it.copy(recording = false, recordedSeconds = 0) }
+        if (length == null) {
+            _state.update { it.copy(message = CaptureMessage.MemoFailed) }
+            return
+        }
+        viewModelScope.launch {
+            val id = d.notes.addVoice(d.jobId, path)
+            _state.update { it.copy(message = if (id == null) CaptureMessage.JobGone else CaptureMessage.MemoSaved) }
+        }
+    }
+
+    override fun onCleared() {
+        if (_state.value.recording) d.recorder.stop()
     }
 
     private fun remember() = _state.value.let { d.rememberTags(it.roomId, it.phase) }

@@ -12,7 +12,9 @@ import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.RoomEntity
 import com.kurtz.homerecord.core.location.LocationProvider
 import com.kurtz.homerecord.core.model.GeoFix
+import com.kurtz.homerecord.core.photo.JobNotes
 import com.kurtz.homerecord.core.photo.JobPhotos
+import com.kurtz.homerecord.core.photo.VoiceRecorder
 import com.kurtz.homerecord.core.photo.LensChoice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -60,10 +62,21 @@ class CaptureViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private class FakeRecorder(var canStart: Boolean = true, var length: Long? = 4_000L) : VoiceRecorder {
+        var started: String? = null
+        var stops = 0
+        override fun start(path: String): Boolean { if (canStart) started = path; return canStart }
+        override fun stop(): Long? { stops++; return length }
+    }
+
+    private val recorder = FakeRecorder()
+
     private fun vm(jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true): CaptureViewModel {
         val photos = JobPhotos(db, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L })
         val deps = CaptureDeps(
             jobId, db.jobDao(), db.roomDao(), photos, location, { last }, { room, phase -> remembered = room to phase }, { hasCamera },
+            notes = JobNotes(db, { null }, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L }),
+            recorder = recorder, newMemoPath = { "/media/memo.m4a" },
         )
         return CaptureViewModel(deps, SavedStateHandle())
     }
@@ -172,5 +185,67 @@ class CaptureViewModelTest {
         vm.onEvent(CaptureEvent.CycleFlash)
         vm.onEvent(CaptureEvent.CycleFlash)
         assertThat(vm.state.value.flash).isEqualTo(FlashMode.Off)
+    }
+
+    // AC-F27
+    @Test fun typedNoteSavesToTheJobAndClosesTheDialog() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.OpenNote)
+        vm.onEvent(CaptureEvent.NoteText("  Move the island  "))
+        vm.onEvent(CaptureEvent.SaveNote)
+        val rows = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }
+        assertThat(rows.single().text).isEqualTo("Move the island")
+        assertThat(vm.state.value.noteOpen).isFalse()
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.NoteSaved)
+    }
+
+    // AC-F27
+    @Test fun blankNoteSavesNothingAndKeepsTheDialogOpen() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.OpenNote)
+        vm.onEvent(CaptureEvent.NoteText("   "))
+        vm.onEvent(CaptureEvent.SaveNote)
+        assertThat(db.noteDao().listFor("j1")).isEmpty()
+        assertThat(vm.state.value.noteOpen).isTrue()
+    }
+
+    // AC-F27
+    @Test fun voiceTapRecordsThenSavesTheMemoWithoutATranscript() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.VoiceTap)
+        assertThat(vm.state.value.recording).isTrue()
+        assertThat(recorder.started).isEqualTo("/media/memo.m4a")
+        vm.onEvent(CaptureEvent.VoiceTap)
+        val row = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }.single()
+        assertThat(row.voicePath).isEqualTo("/media/memo.m4a")
+        assertThat(row.transcript).isNull()
+        assertThat(vm.state.value.recording).isFalse()
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MemoSaved)
+    }
+
+    // AC-F27
+    @Test fun recorderThatCannotStartShowsAMessageAndDoesNotRecord() {
+        recorder.canStart = false
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.VoiceTap)
+        assertThat(vm.state.value.recording).isFalse()
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MemoFailed)
+    }
+
+    // AC-F27
+    @Test fun emptyRecordingSavesNoNote() = runBlocking<Unit> {
+        recorder.length = null
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.VoiceTap)
+        vm.onEvent(CaptureEvent.VoiceTap)
+        assertThat(db.noteDao().listFor("j1")).isEmpty()
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MemoFailed)
+    }
+
+    // AC-F27
+    @Test fun deniedMicrophoneSaysSo() {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.MicDenied)
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MicDenied)
     }
 }

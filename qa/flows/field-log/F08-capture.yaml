@@ -1,4 +1,4 @@
-# Walkthrough F8: open Capture from a job, shutter and gallery are present, camera denied state offers Settings and gallery (AC-F24, AC-F29, AC-F54).
+# Walkthrough F8: open Capture from a job, shutter and gallery are present, camera denied state offers Settings and gallery and a typed note saves to today (AC-F24, AC-F27, AC-F29, AC-F54).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -44,3 +44,18 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 15000
 - assertVisible:
     id: fl_capture_gallery
+- tapOn:
+    id: fl_capture_note
+- tapOn:
+    id: fl_capture_note_text
+- inputText: "Homeowner wants the island moved"
+- hideKeyboard
+- tapOn:
+    id: fl_capture_note_save
+- extendedWaitUntil:
+    visible:
+      id: fl_capture_message
+    timeout: 10000
+- assertVisible: "Note saved to today."
+- assertVisible:
+    id: fl_capture_voice

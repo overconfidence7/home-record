@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,7 +20,14 @@ import androidx.compose.material.icons.rounded.Cameraswitch
 import androidx.compose.material.icons.rounded.FlashAuto
 import androidx.compose.material.icons.rounded.FlashOff
 import androidx.compose.material.icons.rounded.FlashOn
+import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.EditNote
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -64,6 +72,7 @@ fun CaptureScreen(
     onPickGallery: () -> Unit,
     camera: @Composable (Modifier) -> Unit,
 ) {
+    if (state.noteOpen) NoteDialog(state, onEvent)
     ScreenScaffold(title = stringResource(R.string.cap_title), subtitle = state.jobName.ifBlank { null }, onBack = onBack) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
@@ -126,6 +135,7 @@ fun CaptureScreen(
                         state.message?.let {
                             Text(stringResource(messageText(it)), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("fl_capture_message"))
                         }
+                        NoteVoiceRow(state, onEvent)
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             IconButton(onClick = onPickGallery, Modifier.size(56.dp).testTag("fl_capture_gallery")) {
                                 Icon(Icons.Rounded.PhotoLibrary, stringResource(R.string.cap_gallery))
@@ -148,6 +158,30 @@ fun CaptureScreen(
 }
 
 @Composable
+private fun NoteVoiceRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        OutlinedButton(
+            onClick = { onEvent(CaptureEvent.OpenNote) }, enabled = !state.recording,
+            modifier = Modifier.weight(1f).heightIn(min = 56.dp).testTag("fl_capture_note"),
+        ) {
+            Icon(Icons.Rounded.EditNote, null)
+            Text(stringResource(R.string.cap_note), Modifier.padding(start = 8.dp))
+        }
+        OutlinedButton(
+            onClick = { onEvent(CaptureEvent.VoiceTap) },
+            modifier = Modifier.weight(1f).heightIn(min = 56.dp).testTag("fl_capture_voice"),
+        ) {
+            Icon(if (state.recording) Icons.Rounded.Stop else Icons.Rounded.Mic, null)
+            Text(
+                if (state.recording) stringResource(R.string.cap_recording, "%d:%02d".format(state.recordedSeconds / 60, state.recordedSeconds % 60))
+                else stringResource(R.string.cap_voice),
+                Modifier.padding(start = 8.dp),
+            )
+        }
+    }
+}
+
+@Composable
 private fun Shutter(busy: Boolean, onClick: () -> Unit) {
     val ring = MaterialTheme.colorScheme.primary
     val label = stringResource(R.string.cap_shutter)
@@ -163,6 +197,36 @@ private fun messageText(m: CaptureMessage): Int = when (m) {
     CaptureMessage.SaveFailed -> R.string.cap_save_failed
     CaptureMessage.JobGone -> R.string.cap_job_gone
     CaptureMessage.NoCamera -> R.string.cap_no_camera
+    CaptureMessage.NoteSaved -> R.string.cap_note_saved
+    CaptureMessage.MemoSaved -> R.string.cap_memo_saved
+    CaptureMessage.MemoFailed -> R.string.cap_memo_failed
+    CaptureMessage.MicDenied -> R.string.cap_mic_denied
+}
+
+@Composable
+private fun NoteDialog(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onEvent(CaptureEvent.CloseNote) },
+        title = { Text(stringResource(R.string.cap_note_title)) },
+        text = {
+            OutlinedTextField(
+                value = state.noteText, onValueChange = { onEvent(CaptureEvent.NoteText(it)) },
+                placeholder = { Text(stringResource(R.string.cap_note_hint)) }, minLines = 3,
+                modifier = Modifier.fillMaxWidth().testTag("fl_capture_note_text"),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onEvent(CaptureEvent.SaveNote) }, Modifier.heightIn(min = 56.dp).testTag("fl_capture_note_save")) {
+                Text(stringResource(R.string.cap_note_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onEvent(CaptureEvent.CloseNote) }, Modifier.heightIn(min = 56.dp).testTag("fl_capture_note_cancel")) {
+                Text(stringResource(R.string.cap_note_cancel))
+            }
+        },
+        modifier = Modifier.windowTestTags(),
+    )
 }
 
 /** AC-F29: say why, link to Settings, and still offer the gallery so the job can get photos. */
@@ -178,8 +242,12 @@ private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onP
                 Text(stringResource(R.string.cap_open_settings))
             }
         }
-        OutlinedButton(onClick = onPickGallery, Modifier.fillMaxWidth().testTag("fl_capture_gallery")) {
+        OutlinedButton(onClick = onPickGallery, Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_capture_gallery")) {
             Text(stringResource(R.string.cap_from_gallery))
         }
+        state.message?.let {
+            Text(stringResource(messageText(it)), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("fl_capture_message"))
+        }
+        NoteVoiceRow(state, onEvent)
     }
 }

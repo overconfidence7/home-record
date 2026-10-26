@@ -3,6 +3,7 @@ package com.kurtz.homerecord.fieldlog.capture
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,6 +48,9 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
     val scope = rememberCoroutineScope()
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.onEvent(CaptureEvent.PermissionResult(it)) }
     LaunchedEffect(state.access) { if (state.access == CameraAccess.Unknown) permission.launch(Manifest.permission.CAMERA) }
+    val mic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        vm.onEvent(if (it) CaptureEvent.VoiceTap else CaptureEvent.MicDenied)
+    }
     val imageCapture = remember { ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build() }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) scope.launch {
@@ -65,6 +69,9 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
     val onEvent: (CaptureEvent) -> Unit = { event ->
         when (event) {
             CaptureEvent.Shutter -> takePicture(context, imageCapture, vm)
+            CaptureEvent.VoiceTap ->
+                if (state.recording || context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) vm.onEvent(event)
+                else mic.launch(Manifest.permission.RECORD_AUDIO)
             CaptureEvent.OpenSettings -> context.startActivity(
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),

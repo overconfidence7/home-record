@@ -234,6 +234,16 @@ fun CaptureDeniedScreenshot() = CaptureDeniedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CaptureRecordingScreenshot() = CaptureRecordingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureNoteScreenshot() = CaptureNotePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureNoCameraScreenshot() = CaptureNoCameraPreview()
 
 @PreviewTest

@@ -112,6 +112,13 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    val jobNotes by lazy {
+        com.kurtz.homerecord.core.photo.JobNotes(
+            db, transcriber = com.kurtz.homerecord.fieldlog.capture.NoTranscriber, queueUpload = ::uploadMedia,
+            companyId = { company.current?.companyId }, onChange = ::recordChange,
+        )
+    }
+
     fun captureDeps(context: Context, jobId: String): com.kurtz.homerecord.fieldlog.capture.CaptureDeps {
         val prefs = context.getSharedPreferences("capture", Context.MODE_PRIVATE)
         return com.kurtz.homerecord.fieldlog.capture.CaptureDeps(
@@ -119,6 +126,8 @@ class AppContainer(private val app: Application) {
             location = com.kurtz.homerecord.core.location.FusedLocationProvider(context),
             lastTags = { prefs.getString("room_$jobId", null) to prefs.getString("phase_$jobId", null) },
             rememberTags = { room, phase -> prefs.edit().putString("room_$jobId", room).putString("phase_$jobId", phase).apply() },
+            notes = jobNotes, recorder = com.kurtz.homerecord.fieldlog.capture.AndroidVoiceRecorder(context),
+            newMemoPath = { java.io.File(java.io.File(context.filesDir, "media").also { it.mkdirs() }, "${java.util.UUID.randomUUID()}.m4a").absolutePath },
             hasCameraPermission = { context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED },
         )
     }

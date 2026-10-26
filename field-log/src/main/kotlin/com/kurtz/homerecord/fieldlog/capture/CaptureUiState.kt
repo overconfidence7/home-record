@@ -9,7 +9,7 @@ enum class FlashMode { Off, Auto, On }
 data class CaptureRoom(val id: String, val name: String)
 
 /** What a shot or import told the person; shown as one line over the shutter row. */
-enum class CaptureMessage { SaveFailed, JobGone, NoCamera }
+enum class CaptureMessage { SaveFailed, JobGone, NoCamera, NoteSaved, MemoSaved, MemoFailed, MicDenied }
 
 data class CaptureUiState(
     val loading: Boolean = true,
@@ -25,6 +25,10 @@ data class CaptureUiState(
     val saving: Boolean = false,
     val savedCount: Int = 0,
     val message: CaptureMessage? = null,
+    val noteOpen: Boolean = false,
+    val noteText: String = "",
+    val recording: Boolean = false,
+    val recordedSeconds: Int = 0,
 )
 
 sealed interface CaptureEvent {
@@ -40,6 +44,14 @@ sealed interface CaptureEvent {
     data class Captured(val path: String) : CaptureEvent
     data object CaptureFailed : CaptureEvent
     data class Imported(val paths: List<String>) : CaptureEvent
+    data object OpenNote : CaptureEvent
+    data object CloseNote : CaptureEvent
+    data class NoteText(val text: String) : CaptureEvent
+    data object SaveNote : CaptureEvent
+
+    /** Voice button: starts a memo, or stops and saves the one running. The route asks for the microphone first. */
+    data object VoiceTap : CaptureEvent
+    data object MicDenied : CaptureEvent
     data object OpenSettings : CaptureEvent
     data object DismissMessage : CaptureEvent
 }

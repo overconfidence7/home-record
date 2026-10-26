@@ -517,3 +517,11 @@ fun CaptureNoCameraPreview() = CaptureFrame(captureReady.copy(lens = com.kurtz.h
 @ThemePreviews
 @Composable
 fun CaptureLoadingPreview() = CaptureFrame(com.kurtz.homerecord.fieldlog.capture.CaptureUiState())
+
+@ThemePreviews
+@Composable
+fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true, recordedSeconds = 74))
+
+@ThemePreviews
+@Composable
+fun CaptureNotePreview() = CaptureFrame(captureReady.copy(noteOpen = true, noteText = "Homeowner wants the island moved 6 in. toward the window."))
