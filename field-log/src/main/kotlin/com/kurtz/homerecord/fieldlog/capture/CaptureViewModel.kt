@@ -13,6 +13,7 @@ import com.kurtz.homerecord.core.photo.JobPhotos
 import com.kurtz.homerecord.core.photo.LensChoice
 import com.kurtz.homerecord.core.photo.LensLimiter
 import com.kurtz.homerecord.core.photo.VoiceRecorder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,11 @@ class CaptureDeps(
     val recorder: VoiceRecorder,
     /** Where the next voice memo is written. */
     val newMemoPath: () -> String,
+    /**
+     * Outlives this screen: photo rows, memos and notes are written here so leaving Capture right after a shot,
+     * or while recording, never loses it (AC-F24, AC-F27).
+     */
+    val appScope: CoroutineScope,
     val fixTimeoutMs: Long = 3_000,
 )
 
@@ -114,7 +120,7 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
 
     private fun saveNote() {
         val text = _state.value.noteText
-        viewModelScope.launch {
+        d.appScope.launch {
             val id = d.notes.addText(d.jobId, text)
             _state.update {
                 if (id == null && text.isNotBlank()) it.copy(noteOpen = false, noteText = "", message = CaptureMessage.JobGone)
@@ -155,14 +161,15 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             _state.update { it.copy(message = CaptureMessage.MemoFailed) }
             return
         }
-        viewModelScope.launch {
+        d.appScope.launch {
             val id = d.notes.addVoice(d.jobId, path)
             _state.update { it.copy(message = if (id == null) CaptureMessage.JobGone else CaptureMessage.MemoSaved) }
         }
     }
 
+    /** Leaving while recording keeps what was said so far (AC-F27). */
     override fun onCleared() {
-        if (_state.value.recording) d.recorder.stop()
+        if (_state.value.recording) stopMemo()
     }
 
     private fun remember() = _state.value.let { d.rememberTags(it.roomId, it.phase) }
@@ -181,19 +188,17 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
         val beforeOf = _state.value.takeIf { pairWithGhost && it.ghostOn }?.ghost?.photoId
         val tags = _state.value.let { CaptureTags(d.jobId, it.roomId, it.phase) }
         _state.update { it.copy(saving = true) }
-        viewModelScope.launch {
-            val fix = if (d.location.hasPermission()) d.location.currentFix(d.fixTimeoutMs) else null
-            var ok = 0
-            var gone = false
-            paths.forEach { path ->
-                if (d.photos.save(path, tags, fix, beforeOf) == null) gone = true else ok++
-            }
+        // The rows go in first with no fix and the fix is added after, so Back right after the shutter keeps the photo.
+        d.appScope.launch {
+            val ids = paths.mapNotNull { path -> d.photos.save(path, tags, fix = null, beforeOf = beforeOf) }
             _state.update {
                 it.copy(
-                    saving = false, savedCount = it.savedCount + ok,
-                    message = if (gone) CaptureMessage.JobGone else null,
+                    saving = false, savedCount = it.savedCount + ids.size,
+                    message = if (ids.size < paths.size) CaptureMessage.JobGone else null,
                 )
             }
+            if (ids.isEmpty() || !d.location.hasPermission()) return@launch
+            d.location.currentFix(d.fixTimeoutMs)?.let { d.photos.addFix(ids, it) }
         }
     }
 }

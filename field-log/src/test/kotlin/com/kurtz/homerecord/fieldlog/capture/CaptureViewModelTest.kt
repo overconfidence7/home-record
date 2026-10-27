@@ -17,7 +17,15 @@ import com.kurtz.homerecord.core.photo.JobPhotos
 import com.kurtz.homerecord.core.photo.VoiceRecorder
 import com.kurtz.homerecord.core.photo.LensChoice
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
@@ -34,8 +42,13 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 private class FakeLocation(var granted: Boolean = true) : LocationProvider {
+    /** When set, a fix waits for it, like a phone still looking for GPS. */
+    var slow: CompletableDeferred<Unit>? = null
     override fun hasPermission() = granted
-    override suspend fun currentFix(timeoutMs: Long) = if (granted) GeoFix(34.05, -118.25, 6f) else null
+    override suspend fun currentFix(timeoutMs: Long): GeoFix? {
+        slow?.await()
+        return if (granted) GeoFix(34.05, -118.25, 6f) else null
+    }
 }
 
 @RunWith(RobolectricTestRunner::class)
@@ -44,9 +57,11 @@ class CaptureViewModelTest {
     private lateinit var db: HomeRecordDatabase
     private var remembered: Pair<String?, String?> = null to null
     private val location = FakeLocation()
+    private lateinit var appScope: CoroutineScope
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
+        appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
         runBlocking {
@@ -63,6 +78,7 @@ class CaptureViewModelTest {
     @After fun tearDown() {
         // The photo observer still collecting when the database closes would throw into the next test class.
         runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
+        appScope.cancel()
         db.close()
         Dispatchers.resetMain()
     }
@@ -77,14 +93,17 @@ class CaptureViewModelTest {
     private val recorder = FakeRecorder()
     private val created = mutableListOf<CaptureViewModel>()
 
-    private fun vm(jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true): CaptureViewModel {
+    private fun vm(
+        jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true, store: ViewModelStore = ViewModelStore(),
+    ): CaptureViewModel {
         val photos = JobPhotos(db, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L })
         val deps = CaptureDeps(
             jobId, db.jobDao(), db.roomDao(), photos, location, { last }, { room, phase -> remembered = room to phase }, { hasCamera },
             notes = JobNotes(db, { null }, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L }),
-            recorder = recorder, newMemoPath = { "/media/memo.m4a" },
+            recorder = recorder, newMemoPath = { "/media/memo.m4a" }, appScope = appScope,
         )
-        return CaptureViewModel(deps, SavedStateHandle()).also { created += it }
+        val factory = viewModelFactory { initializer { CaptureViewModel(deps, SavedStateHandle()) } }
+        return ViewModelProvider(store, factory)[CaptureViewModel::class.java].also { created += it }
     }
 
     private suspend fun photosAfter(n: Int) = withTimeout(10_000) { db.photoDao().observeForJob("j1").first { it.size >= n } }
@@ -131,7 +150,8 @@ class CaptureViewModelTest {
         vm.onEvent(CaptureEvent.SelectRoom("r1"))
         vm.onEvent(CaptureEvent.SelectPhase("Finish"))
         vm.onEvent(CaptureEvent.Captured("/media/a.jpg"))
-        val row = photosAfter(1).single()
+        // The row is written first and the fix lands right after it.
+        val row = withTimeout(10_000) { db.photoDao().observeForJob("j1").first { it.singleOrNull()?.lat != null } }.single()
         assertThat(row.roomId).isEqualTo("r1")
         assertThat(row.stage).isEqualTo("Finish")
         assertThat(row.lat).isEqualTo(34.05)
@@ -280,5 +300,35 @@ class CaptureViewModelTest {
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.MicDenied)
         assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MicDenied)
+    }
+
+    // AC-F24: Back right after the shutter used to cancel the save while it waited up to 3 s for a fix.
+    @Test fun leavingRightAfterTheShutterKeepsThePhotoAndAddsTheFixLater() = runBlocking<Unit> {
+        val gps = CompletableDeferred<Unit>().also { location.slow = it }
+        val store = ViewModelStore()
+        val vm = vm(store = store).also { it.loaded() }
+        vm.onEvent(CaptureEvent.SelectRoom("r1"))
+        vm.onEvent(CaptureEvent.Captured("/media/quick.jpg"))
+        store.clear()
+        val row = photosAfter(1).single()
+        assertThat(row.path).isEqualTo("/media/quick.jpg")
+        assertThat(row.roomId).isEqualTo("r1")
+        assertThat(row.lat).isNull()
+        gps.complete(Unit)
+        val fixed = withTimeout(10_000) { db.photoDao().observeForJob("j1").first { it.singleOrNull()?.lat != null } }.single()
+        assertThat(fixed.lat).isEqualTo(34.05)
+        assertThat(fixed.lng).isEqualTo(-118.25)
+    }
+
+    // AC-F27: leaving Capture while recording keeps the memo instead of throwing it away.
+    @Test fun leavingWhileRecordingSavesTheMemo() = runBlocking<Unit> {
+        val store = ViewModelStore()
+        val vm = vm(store = store).also { it.loaded() }
+        vm.onEvent(CaptureEvent.VoiceTap)
+        assertThat(vm.state.value.recording).isTrue()
+        store.clear()
+        assertThat(recorder.stops).isEqualTo(1)
+        val row = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }.single()
+        assertThat(row.voicePath).isEqualTo("/media/memo.m4a")
     }
 }

@@ -69,5 +69,15 @@ class JobPhotos(
         return id
     }
 
+    /**
+     * Adds a location found after the shot was saved, so a photo is never held back waiting for GPS (AC-F24).
+     * A row that already has a fix, or has been deleted, is left alone.
+     */
+    suspend fun addFix(ids: List<String>, fix: GeoFix) {
+        ids.forEach { id ->
+            if (db.photoDao().setFixIfMissing(id, fix.lat, fix.lng, now()) > 0) onChange("photo", id)
+        }
+    }
+
     fun observeForJob(jobId: String): Flow<List<PhotoEntity>> = db.photoDao().observeForJob(jobId)
 }

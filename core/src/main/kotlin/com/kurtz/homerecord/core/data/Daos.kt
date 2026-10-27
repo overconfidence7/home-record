@@ -142,6 +142,9 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listForItem(itemId: String): List<PhotoEntity>
     @Query("SELECT * FROM photo WHERE jobId = :jobId AND deletedAt IS NULL ORDER BY takenAt DESC") fun observeForJob(jobId: String): Flow<List<PhotoEntity>>
     @Query("SELECT COUNT(*) FROM photo WHERE jobId = :jobId AND deletedAt IS NULL") fun observeCountForJob(jobId: String): Flow<Int>
+    /** Sets a late GPS fix in one statement, so a tag or Before edited meanwhile is not overwritten; 0 when already set or deleted. */
+    @Query("UPDATE photo SET lat = :lat, lng = :lng, updatedAt = :at WHERE id = :id AND lat IS NULL AND deletedAt IS NULL")
+    suspend fun setFixIfMissing(id: String, lat: Double, lng: Double, at: Long): Int
     @Query("UPDATE photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

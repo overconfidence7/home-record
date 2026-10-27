@@ -55,6 +55,23 @@ class JobPhotosTest {
         assertThat(db.photoDao().get(id)!!.lat).isNull()
     }
 
+    // AC-F24: the fix found after the row was written is added without touching tags edited meanwhile.
+    @Test fun lateFixFillsOnlyMissingLocationAndKeepsOtherEdits() = runBlocking<Unit> {
+        val id = photos.save("/media/late.jpg", CaptureTags("j1", "r1"), null)!!
+        db.photoDao().upsert(db.photoDao().get(id)!!.copy(stage = "Before"))
+        val located = photos.save("/media/had.jpg", CaptureTags("j1"), GeoFix(1.0, 2.0, 5f))!!
+        changes.clear()
+        clock = 6_000_000L
+        photos.addFix(listOf(id, located), GeoFix(34.0, -118.0, 5f))
+        val row = db.photoDao().get(id)!!
+        assertThat(row.lat).isEqualTo(34.0)
+        assertThat(row.lng).isEqualTo(-118.0)
+        assertThat(row.stage).isEqualTo("Before")
+        assertThat(row.updatedAt).isEqualTo(6_000_000L)
+        assertThat(db.photoDao().get(located)!!.lat).isEqualTo(1.0)
+        assertThat(changes).containsExactly("photo" to id)
+    }
+
     @Test fun missingJobSavesNothing() = runBlocking<Unit> {
         assertThat(photos.save("/media/c.jpg", CaptureTags("gone"), null)).isNull()
         assertThat(changes).isEmpty()

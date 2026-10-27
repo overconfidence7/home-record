@@ -202,6 +202,7 @@ class AppContainer(private val app: Application) {
             notes = jobNotes, recorder = com.kurtz.homerecord.fieldlog.capture.AndroidVoiceRecorder(context),
             newMemoPath = { java.io.File(java.io.File(context.filesDir, "media").also { it.mkdirs() }, "${java.util.UUID.randomUUID()}.m4a").absolutePath },
             hasCameraPermission = { context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED },
+            appScope = scope,
         )
     }
 
