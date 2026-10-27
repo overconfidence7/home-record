@@ -343,22 +343,24 @@ interface OutboxDao {
     @Query("SELECT * FROM outbox WHERE sent = 0 AND tenantKind = :kind AND tenantId = :tenantId ORDER BY seq LIMIT :limit")
     suspend fun pendingFor(kind: String, tenantId: String, limit: Int): List<OutboxEntity>
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0") fun observePendingCount(): kotlinx.coroutines.flow.Flow<Int>
-    @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0 AND entity = :entity AND entityId = :entityId") suspend fun pendingCountFor(entity: String, entityId: String): Int
+    @Query("SELECT payload FROM outbox WHERE sent = 0 AND entity = :entity AND entityId = :entityId ORDER BY seq") suspend fun pendingPayloadsFor(entity: String, entityId: String): List<String>
     @Query("UPDATE outbox SET sent = 1 WHERE seq IN (:seqs)") suspend fun markSent(seqs: List<Long>)
     @Query("UPDATE outbox SET sent = 1, serverSeq = :serverSeq WHERE seq = :seq") suspend fun markSent(seq: Long, serverSeq: Long)
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 1 AND serverSeq = :refused") fun observeRefusedCount(refused: Long): kotlinx.coroutines.flow.Flow<Int>
 }
 
 @Dao
-interface SyncStateDao {
-    @Upsert suspend fun set(state: SyncStateEntity)
-    @Query("SELECT * FROM sync_state WHERE id = 1") suspend fun get(): SyncStateEntity?
+interface SyncCursorDao {
+    @Upsert suspend fun set(cursor: SyncCursorEntity)
+    @Query("SELECT lastServerSeq FROM sync_cursor WHERE tenantKind = :kind AND tenantId = :tenantId") suspend fun get(kind: String, tenantId: String): Long?
+    @Query("DELETE FROM sync_cursor WHERE tenantKind = :kind AND tenantId = :tenantId") suspend fun delete(kind: String, tenantId: String)
 }
 
 @Dao
 interface SyncBaseDao {
     @Upsert suspend fun set(row: SyncBaseEntity)
     @Query("SELECT rowJson FROM sync_base WHERE `key` = :key") suspend fun get(key: String): String?
+    @Query("DELETE FROM sync_base WHERE tenant = :tenant") suspend fun deleteForTenant(tenant: String)
 }
 
 @Dao

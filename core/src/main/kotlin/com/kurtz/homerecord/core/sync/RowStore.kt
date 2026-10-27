@@ -2,6 +2,7 @@ package com.kurtz.homerecord.core.sync
 
 import android.content.ContentValues
 import androidx.room.RoomDatabase
+import androidx.room.withTransaction
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -13,6 +14,9 @@ import kotlinx.serialization.json.longOrNull
 interface RowStore {
     suspend fun read(entity: String, id: String): JsonObject?
     suspend fun write(entity: String, row: JsonObject)
+
+    /** Runs [block] as one transaction, so a pulled row and a local edit never interleave. */
+    suspend fun <T> inTransaction(block: suspend () -> T): T = block()
 }
 
 /**
@@ -55,6 +59,8 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
             )
         }
     }
+
+    override suspend fun <T> inTransaction(block: suspend () -> T): T = db.withTransaction(block)
 
     override suspend fun write(entity: String, row: JsonObject) {
         require(entity in tables) { "Unknown entity $entity" }

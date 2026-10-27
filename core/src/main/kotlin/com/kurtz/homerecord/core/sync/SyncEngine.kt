@@ -6,8 +6,8 @@ import com.kurtz.homerecord.core.data.OutboxDao
 import com.kurtz.homerecord.core.data.OutboxEntity
 import com.kurtz.homerecord.core.data.SyncBaseDao
 import com.kurtz.homerecord.core.data.SyncBaseEntity
-import com.kurtz.homerecord.core.data.SyncStateDao
-import com.kurtz.homerecord.core.data.SyncStateEntity
+import com.kurtz.homerecord.core.data.SyncCursorDao
+import com.kurtz.homerecord.core.data.SyncCursorEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +20,8 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Local-first sync (AC-F53, AC-B20). Every local write calls [recordChange], which appends the row to the
- * outbox. [sync] pushes pending rows in order, then pulls everything after the last `serverSeq` and applies it.
+ * outbox. [sync] pushes pending rows in order, then pulls everything after the tenant's last `serverSeq` (one cursor
+ * per tenant, since the server counts per tenant) and applies each row in a transaction.
  * One sync runs at a time; a failed pass leaves the outbox untouched so the next one retries without duplicates
  * (the server dedupes by `(deviceId, outboxId)`). An op the server refuses on its own is set aside
  * ([OutboxEntity.serverSeq] = [REFUSED]) and logged in the result, so it never blocks the changes behind it; a pulled
@@ -30,7 +31,7 @@ class SyncEngine(
     private val api: SyncApi,
     private val store: RowStore,
     private val outbox: OutboxDao,
-    private val state: SyncStateDao,
+    private val cursors: SyncCursorDao,
     private val base: SyncBaseDao,
     val deviceId: String,
     private val now: () -> Long = System::currentTimeMillis,
@@ -101,14 +102,14 @@ class SyncEngine(
                 }
             }
             do {
-                val since = state.get()?.lastServerSeq ?: 0L
+                val since = cursors.get(tenant.kind.wire, tenant.id) ?: 0L
                 val page = when (val res = api.pull(tenant, since)) {
                     is ApiResult.Err -> return@withLock fail(res.failure)
                     is ApiResult.Ok -> res.value
                 }
                 for (row in page.rows) {
                     try {
-                        apply(row)
+                        apply(tenant, row)
                     } catch (e: kotlinx.coroutines.CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -116,7 +117,7 @@ class SyncEngine(
                     }
                 }
                 pulled += page.rows.size
-                if (page.serverSeq > since) state.set(SyncStateEntity(lastServerSeq = page.serverSeq))
+                if (page.serverSeq > since) cursors.set(SyncCursorEntity(tenant.kind.wire, tenant.id, page.serverSeq))
             } while (page.more)
             _phase.value = SyncPhase.Idle
             ApiResult.Ok(SyncResult(pushed, pulled, conflicts))
@@ -128,14 +129,28 @@ class SyncEngine(
         }
     }
 
-    private suspend fun apply(pulledRow: PulledRow) {
+    /**
+     * Drops what this device knows of [tenant]'s server state (its pull cursor and confirmed rows) once the membership
+     * ends, so a later return pulls from the start. Unsent outbox rows are kept; signing out decides about those.
+     */
+    suspend fun forgetTenant(tenant: TenantRef) {
+        cursors.delete(tenant.kind.wire, tenant.id)
+        base.deleteForTenant(tenant.key)
+    }
+
+    /**
+     * Read, merge and write in one transaction so a local edit cannot land between the read and the write. Only the
+     * fields in this row's unsent outbox payloads count as this device's edits (cr:sync-merge-race).
+     */
+    private suspend fun apply(tenant: TenantRef, pulledRow: PulledRow) = store.inTransaction {
         val local = store.read(pulledRow.entity, pulledRow.entityId)
-        val pending = outbox.pendingCountFor(pulledRow.entity, pulledRow.entityId) > 0
-        val key = "${pulledRow.entity}/${pulledRow.entityId}"
-        val confirmed = if (pending) confirmedRow(key) else null
-        val merged: JsonObject = RowMerge.applyPulled(pulledRow.entity, local, pending, pulledRow.row, pulledRow.times, confirmed)
+        val payloads = outbox.pendingPayloadsFor(pulledRow.entity, pulledRow.entityId)
+        val changedHere = payloads.flatMapTo(mutableSetOf()) { payload ->
+            (runCatching { Json.parseToJsonElement(payload) }.getOrNull() as? JsonObject)?.keys ?: local?.keys.orEmpty()
+        }
+        val merged = RowMerge.applyPulled(pulledRow.entity, local, payloads.isNotEmpty(), pulledRow.row, pulledRow.times, changedHere)
         if (merged != local) store.write(pulledRow.entity, merged)
-        base.set(SyncBaseEntity(key, pulledRow.row.toString()))
+        base.set(SyncBaseEntity("${pulledRow.entity}/${pulledRow.entityId}", pulledRow.row.toString(), tenant.key))
     }
 
     private fun fail(failure: ApiFailure): ApiResult<SyncResult> {

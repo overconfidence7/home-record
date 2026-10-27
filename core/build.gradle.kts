@@ -15,6 +15,8 @@ android {
     }
 
     testOptions { unitTests.isIncludeAndroidResources = true }
+    // Exported Room schemas, for the migration tests.
+    sourceSets { getByName("test") { assets.directories.add("$projectDir/schemas") } }
 }
 
 

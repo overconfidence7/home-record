@@ -28,6 +28,7 @@ import com.kurtz.homerecord.core.sync.RetrofitSyncApi
 import com.kurtz.homerecord.core.sync.RoomRowStore
 import com.kurtz.homerecord.core.sync.SyncCoordinator
 import com.kurtz.homerecord.core.sync.SyncEngine
+import com.kurtz.homerecord.core.sync.endedTenants
 import com.kurtz.homerecord.core.sync.TenantKind
 import com.kurtz.homerecord.core.sync.TenantRef
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +58,7 @@ class AppContainer(app: Application) {
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
         RoomRowStore(db),
         db.outboxDao(),
-        db.syncStateDao(),
+        db.syncCursorDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
     )
@@ -71,6 +72,11 @@ class AppContainer(app: Application) {
         homeTenant,
         AndroidConnectivityMonitor(app),
     )
+
+    init {
+        // A home that is gone (or replaced) starts from scratch if it comes back (cr:sync-global-cursor).
+        scope.launch { homeTenant.endedTenants().collect { syncEngine.forgetTenant(it) } }
+    }
 
     /** Every write goes to the outbox against the device's home, signed in or not; the coordinator sends it. */
     val homes = HomeRepository(db) { entity, id ->

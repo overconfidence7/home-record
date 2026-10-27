@@ -1,7 +1,10 @@
 package com.kurtz.homerecord.core.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteTable
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
 
 @Database(
     entities = [
@@ -41,12 +44,13 @@ import androidx.room.RoomDatabase
         MaterialEntity::class,
         ShareLinkEntity::class,
         OutboxEntity::class,
-        SyncStateEntity::class,
+        SyncCursorEntity::class,
         SyncBaseEntity::class,
         MediaUploadEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class)],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun homeDao(): HomeDao
@@ -85,9 +89,16 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun materialDao(): MaterialDao
     abstract fun shareLinkDao(): ShareLinkDao
     abstract fun outboxDao(): OutboxDao
-    abstract fun syncStateDao(): SyncStateDao
+    abstract fun syncCursorDao(): SyncCursorDao
     abstract fun syncBaseDao(): SyncBaseDao
     abstract fun mediaUploadDao(): MediaUploadDao
+
+    /**
+     * v2 (CR2b): the single pull cursor becomes one per tenant. The old cursor is dropped, so the next sync pulls each
+     * tenant from the start; pulled rows merge, so nothing is duplicated.
+     */
+    @DeleteTable(tableName = "sync_state")
+    class V1ToV2 : AutoMigrationSpec
 
     companion object {
         const val NAME = "homerecord.db"

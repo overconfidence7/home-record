@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.core.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -284,17 +285,23 @@ data class OutboxEntity(
     val serverSeq: Long? = null,
 )
 
-@Entity(tableName = "sync_state")
-data class SyncStateEntity(
-    @PrimaryKey val id: Int = 1,
+/** How far this device has pulled one tenant; `serverSeq` counts per tenant on the server (AC-B20). */
+@Entity(tableName = "sync_cursor", primaryKeys = ["tenantKind", "tenantId"])
+data class SyncCursorEntity(
+    val tenantKind: String,
+    val tenantId: String,
     val lastServerSeq: Long = 0,
 )
 
-/** The row as the server last confirmed it; a push carries only the fields that differ from it (field-level merge). */
-@Entity(tableName = "sync_base")
+/**
+ * The row as the server last confirmed it; a push carries only the fields that differ from it (field-level merge).
+ * [tenant] (`kind:id`) lets a tenant's rows be dropped when the membership ends; empty for rows from before v2.
+ */
+@Entity(tableName = "sync_base", indices = [Index("tenant")])
 data class SyncBaseEntity(
     @PrimaryKey val key: String,
     val rowJson: String,
+    @ColumnInfo(defaultValue = "") val tenant: String = "",
 )
 
 /** One file waiting to go to R2 (AC-F54); survives process death, one row per entity/filename so a retry never uploads twice. */

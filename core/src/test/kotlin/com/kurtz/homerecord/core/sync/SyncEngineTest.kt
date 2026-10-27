@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.RoomEntity
 import com.kurtz.homerecord.core.data.TaskEntity
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -22,21 +23,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** In-memory stand-in for the Worker: serverSeq, (device, outbox) dedupe and per-field last-writer-wins. */
+/** In-memory stand-in for the Worker: serverSeq per tenant, (device, outbox) dedupe and per-field last-writer-wins. */
 private class FakeServer : SyncApi {
     var online = true
     var pushCalls = 0
+    val pullsSince = mutableListOf<Pair<String, Long>>()
     /** Entities this tenant refuses, as the Worker does for a row outside the tenant's list. */
     var refused = emptySet<String>()
     var throwOnPull: Exception? = null
     val extraPulled = mutableListOf<PulledRow>()
-    private var seq = 0L
-    private val rows = LinkedHashMap<String, PulledRow>()
+    private val seqs = HashMap<String, Long>()
+    private val tenants = HashMap<String, LinkedHashMap<String, PulledRow>>()
     private val applied = HashMap<Pair<String, Long>, Long>()
 
     override suspend fun push(tenant: TenantRef, deviceId: String, ops: List<PushOp>): ApiResult<PushResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
         pushCalls++
+        val rows = tenants.getOrPut(tenant.key) { LinkedHashMap() }
         val rejected = ops.filter { it.entity in refused }.map { Rejected(it.outboxId, "entity") }
         val accepted = ops.filter { it.entity !in refused }.map { op ->
             val serverSeq = applied.getOrPut(deviceId to op.outboxId) {
@@ -48,7 +51,9 @@ private class FakeServer : SyncApi {
                 for ((f, v) in incoming) {
                     if (op.updatedAt >= (times[f] ?: Long.MIN_VALUE)) { row[f] = v; times[f] = op.updatedAt }
                 }
-                rows[key] = PulledRow(op.entity, op.entityId, JsonObject(row), times, ++seq)
+                val seq = (seqs[tenant.key] ?: 0L) + 1
+                seqs[tenant.key] = seq
+                rows[key] = PulledRow(op.entity, op.entityId, JsonObject(row), times, seq)
                 seq
             }
             Accepted(op.outboxId, serverSeq)
@@ -59,7 +64,9 @@ private class FakeServer : SyncApi {
     override suspend fun pull(tenant: TenantRef, since: Long): ApiResult<PullResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
         throwOnPull?.let { throw it }
-        val out = (rows.values + extraPulled).filter { it.serverSeq > since }.sortedBy { it.serverSeq }
+        pullsSince += tenant.id to since
+        val rows = tenants[tenant.key]?.values.orEmpty()
+        val out = (rows + extraPulled).filter { it.serverSeq > since }.sortedBy { it.serverSeq }
         return ApiResult.Ok(PullResponse(out, out.lastOrNull()?.serverSeq ?: since))
     }
 }
@@ -76,7 +83,7 @@ class SyncEngineTest {
     private lateinit var b: SyncEngine
 
     private fun engine(db: HomeRecordDatabase, device: String) =
-        SyncEngine(server, RoomRowStore(db), db.outboxDao(), db.syncStateDao(), db.syncBaseDao(), device)
+        SyncEngine(server, RoomRowStore(db), db.outboxDao(), db.syncCursorDao(), db.syncBaseDao(), device)
 
     @Before fun setUp() {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
@@ -211,10 +218,9 @@ class SyncEngineTest {
         fun row(polygon: String, name: String, at: Long) = JsonObject(
             mapOf("id" to JsonPrimitive("r1"), "polygonJson" to JsonPrimitive(polygon), "name" to JsonPrimitive(name), "updatedAt" to JsonPrimitive(at)),
         )
-        val base = row("[1]", "Kitchen", 10)
         val local = row("[1]", "Galley", 50)
         val server = row("[2]", "Kitchen", 20)
-        val merged = RowMerge.applyPulled("room", local, true, server, mapOf("polygonJson" to 20, "name" to 10), base)
+        val merged = RowMerge.applyPulled("room", local, true, server, mapOf("polygonJson" to 20, "name" to 10), changedHere = setOf("id", "name", "updatedAt"))
         assertThat(merged["polygonJson"]?.jsonPrimitive?.content).isEqualTo("[2]")
         assertThat(merged["name"]?.jsonPrimitive?.content).isEqualTo("Galley")
     }
@@ -286,5 +292,68 @@ class SyncEngineTest {
         val merged = RowMerge.applyPulled("task", local, false, server, emptyMap())
         assertThat(merged["title"]?.jsonPrimitive?.content).isEqualTo("New")
         assertThat(merged["note"]?.jsonPrimitive?.content).isEqualTo("Local only")
+    }
+
+    // cr:sync-global-cursor: serverSeq counts per tenant, so each tenant keeps its own pull cursor
+    @Test fun secondTenantOnTheSamePhonePullsItsRowsFromTheStart() = runTest {
+        val other = TenantRef(TenantKind.Company, "c2")
+        for (i in 1..5) save(dbA, a, task("Company one edit $i", i.toLong()))
+        a.sync(tenant)
+        dbB.taskDao().upsert(TaskEntity(id = "t2", jobId = "j9", title = "Company two task", createdAt = 1, updatedAt = 1))
+        b.recordChange(other, "task", "t2")
+        b.sync(other)
+        a.sync(other)
+        assertThat(dbA.taskDao().get("t2")?.title).isEqualTo("Company two task")
+        // A's first pull of the second company starts at 0, not at the first company's cursor.
+        assertThat(server.pullsSince.last()).isEqualTo("c2" to 0L)
+    }
+
+    // cr:sync-global-cursor: a tenant the phone left is pulled from the start when it comes back
+    @Test fun forgottenTenantPullsFromTheStartAndPushesWholeRows() = runTest {
+        save(dbA, a, task("Kept", 10))
+        a.sync(tenant)
+        a.forgetTenant(tenant)
+        server.pullsSince.clear()
+        a.sync(tenant)
+        assertThat(server.pullsSince.first()).isEqualTo("c1" to 0L)
+        a.forgetTenant(tenant)
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "After rejoining", updatedAt = 20))
+        val payload = dbA.outboxDao().pending().single().payload
+        assertThat(payload).contains("jobId")
+    }
+
+    @Test fun endedTenantsEmitsTheTenantLeft() = runTest {
+        val c2 = TenantRef(TenantKind.Company, "c2")
+        val ended = kotlinx.coroutines.flow.flowOf(null, tenant, tenant, c2, null, c2).endedTenants().toList()
+        assertThat(ended).containsExactly(tenant, c2).inOrder()
+    }
+
+    // cr:sync-merge-race: only fields in this phone's unsent payloads stay local; every other field takes the server value
+    @Test fun pullWhileAnEditIsPendingKeepsOnlyTheEditedField() = runTest {
+        save(dbA, a, task("Base", 10))
+        a.sync(tenant); b.sync(tenant)
+        save(dbB, b, dbB.taskDao().get("t1")!!.copy(done = true, updatedAt = 20))
+        b.sync(tenant)
+        // A edits the title offline; its row still says not done, written later than B's done.
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Renamed on A", updatedAt = 50))
+        server.online = false
+        a.sync(tenant)
+        server.online = true
+        assertThat(dbA.outboxDao().pending().single().payload).doesNotContain("\"done\"")
+        a.sync(tenant); b.sync(tenant)
+        for (db in listOf(dbA, dbB)) {
+            val t = db.taskDao().get("t1")!!
+            assertThat(t.title).isEqualTo("Renamed on A")
+            assertThat(t.done).isTrue()
+        }
+    }
+
+    @Test fun mergeKeepsOnlyFieldsChangedHere() {
+        fun row(title: String, done: Int, at: Long) = JsonObject(
+            mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive(title), "done" to JsonPrimitive(done), "updatedAt" to JsonPrimitive(at)),
+        )
+        val merged = RowMerge.applyPulled("task", row("Mine", 0, 50), true, row("Theirs", 1, 20), mapOf("title" to 20, "done" to 20), setOf("id", "title", "updatedAt"))
+        assertThat(merged["title"]?.jsonPrimitive?.content).isEqualTo("Mine")
+        assertThat(merged["done"]).isEqualTo(JsonPrimitive(1))
     }
 }

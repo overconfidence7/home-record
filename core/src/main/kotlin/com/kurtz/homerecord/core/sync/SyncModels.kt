@@ -4,7 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 /** The tenant a sync runs against: a company (Field Log) or a home (House Manual). */
-data class TenantRef(val kind: TenantKind, val id: String)
+data class TenantRef(val kind: TenantKind, val id: String) {
+    /** `kind:id`, the tenant column of local sync bookkeeping. */
+    val key: String get() = "${kind.wire}:$id"
+}
 
 enum class TenantKind(val wire: String, val path: String) {
     Company("company", "companies"),

@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonPrimitive
 /**
  * How a row pulled from the server lands on a device (AC-F53). The server row is already merged; this only
  * protects edits the device has not pushed yet: while the entity has pending outbox rows, a field this device
- * changed (it differs from [base], the row as the server last confirmed it) stays if it was written after the
+ * changed (one of [changedHere], the fields in those unsent payloads) stays if it was written after the
  * server's time for that field, and the append-only lists in [UNION_FIELDS] are
  * unioned. Every other field, `*Json` lists such as polygons and phases included, takes one side whole.
  * Local columns the server row does not carry (a newer app version's column) are kept.
@@ -28,7 +28,7 @@ object RowMerge {
         hasPending: Boolean,
         server: JsonObject,
         times: Map<String, Long>,
-        base: JsonObject? = null,
+        changedHere: Set<String>? = null,
     ): JsonObject {
         if (local == null) return server
         val out = LinkedHashMap<String, JsonElement>(local)
@@ -38,7 +38,7 @@ object RowMerge {
         for ((field, localValue) in local) {
             val serverValue = server[field] ?: continue
             if (field == "id" || localValue == serverValue) continue
-            if (base != null && base[field] == localValue) continue
+            if (changedHere != null && field !in changedHere) continue
             val union = if (isUnionField(entity, field)) unionLists(localValue, serverValue) else null
             out[field] = when {
                 union != null -> union

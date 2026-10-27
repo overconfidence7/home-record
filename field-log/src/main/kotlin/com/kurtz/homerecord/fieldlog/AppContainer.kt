@@ -23,6 +23,7 @@ import com.kurtz.homerecord.core.sync.RetrofitSyncApi
 import com.kurtz.homerecord.core.sync.RoomRowStore
 import com.kurtz.homerecord.core.sync.SyncCoordinator
 import com.kurtz.homerecord.core.sync.SyncEngine
+import com.kurtz.homerecord.core.sync.endedTenants
 import com.kurtz.homerecord.core.sync.TenantKind
 import com.kurtz.homerecord.core.sync.TenantRef
 import kotlinx.coroutines.CoroutineScope
@@ -85,20 +86,27 @@ class AppContainer(private val app: Application) {
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
         RoomRowStore(db),
         db.outboxDao(),
-        db.syncStateDao(),
+        db.syncCursorDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
         )
     }
+
+    private val companyTenant = company.state.map { s -> (s as? CompanyState.Active)?.let { TenantRef(TenantKind.Company, it.membership.companyId) } }
 
     val syncCoordinator by lazy {
         SyncCoordinator(
         scope,
         { tenant -> syncEngine.sync(tenant) },
         auth.state.map { it is AuthState.SignedIn },
-        company.state.map { s -> (s as? CompanyState.Active)?.let { TenantRef(TenantKind.Company, it.membership.companyId) } },
+        companyTenant,
         AndroidConnectivityMonitor(app),
         )
+    }
+
+    init {
+        // A company left or signed out of starts from scratch next time (cr:sync-global-cursor).
+        scope.launch { companyTenant.endedTenants().collect { syncEngine.forgetTenant(it) } }
     }
 
     /** Repositories call this after each write to a synced row; it queues the row and asks for a sync. */
