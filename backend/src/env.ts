@@ -9,7 +9,6 @@ export interface Bindings {
   R2_ACCOUNT_ID?: string;
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
-  R2_BUCKET?: string;
   CLAUDE_API_KEY?: string;
   FCM_SERVICE_ACCOUNT?: string;
   REVENUECAT_WEBHOOK_SECRET?: string;

@@ -29,9 +29,16 @@ import org.robolectric.annotation.Config
 
 private class Net : MediaTransferApi {
     var offline = false
+    var getFailure: ApiFailure? = null
     val downloads = mutableListOf<String>()
-    override suspend fun presign(tenant: TenantRef, entity: String, entityId: String, filename: String): ApiResult<Presigned> =
-        if (offline) ApiResult.Err(ApiFailure.Offline) else ApiResult.Ok(Presigned("k", "put", 0, "https://r2/get/$filename", 0))
+    val signedGets = mutableListOf<String>()
+    override suspend fun presign(tenant: TenantRef, entity: String, entityId: String, filename: String, size: Long, mime: String): ApiResult<Presigned> =
+        error("downloads never sign a PUT")
+    override suspend fun presignGet(tenant: TenantRef, key: String): ApiResult<String> {
+        signedGets += key
+        if (offline) return ApiResult.Err(ApiFailure.Offline)
+        return getFailure?.let { ApiResult.Err(it) } ?: ApiResult.Ok("https://r2/get/${key.substringAfterLast('/')}")
+    }
     override suspend fun put(url: String, file: File, mime: String) = PutOutcome.Ok
     override suspend fun download(url: String, dest: File): Boolean {
         downloads += url
@@ -85,6 +92,14 @@ class JobFileTransfersTest {
         val id = remote()
         net.offline = true
         assertThat(transfers.ensureOnPhone(id)).isEqualTo(OnPhone.NoNetwork)
+        assertThat(net.downloads).isEmpty()
+    }
+
+    @Test fun downloadSignsAGetForTheRowsKeyAndARefusalIsNotANetworkProblem() = runBlocking<Unit> {
+        val id = remote()
+        net.getFailure = ApiFailure.NotFound
+        assertThat(transfers.ensureOnPhone(id)).isEqualTo(OnPhone.Failed)
+        assertThat(net.signedGets).containsExactly(db.jobFileDao().get(id)?.r2Key)
         assertThat(net.downloads).isEmpty()
     }
 

@@ -49,13 +49,22 @@ dev.post("/seed", async (c) => {
 async function resetAll(env: AppEnv["Bindings"]) {
   const tables = [
     "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
-    "memberships", "email_codes", "auth_limits", "companies", "homes", "users",
+    "memberships", "email_codes", "auth_limits", "media_objects", "lookup_log", "companies", "homes", "users",
   ];
   await env.DB.batch(tables.map((t) => env.DB.prepare(`DELETE FROM ${t}`)));
-  let cursor: string | undefined;
+  // Codes and lookup quotas; cached lookup answers stay (they belong to no account).
+  for (const prefix of ["devcode:", "quota:"]) {
+    let cursor: string | undefined;
+    do {
+      const page = await env.CACHE.list({ prefix, cursor });
+      await Promise.all(page.keys.map((k) => env.CACHE.delete(k.name)));
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+  }
+  let after: string | undefined;
   do {
-    const page = await env.CACHE.list({ prefix: "devcode:", cursor });
-    await Promise.all(page.keys.map((k) => env.CACHE.delete(k.name)));
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
+    const page = await env.MEDIA.list({ cursor: after });
+    if (page.objects.length > 0) await env.MEDIA.delete(page.objects.map((o) => o.key));
+    after = page.truncated ? page.cursor : undefined;
+  } while (after);
 }

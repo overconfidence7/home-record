@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.core.photo
 
+import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.MediaCache
@@ -62,9 +63,9 @@ class JobFileTransfers(
         val t = tenant() ?: return OnPhone.NoNetwork
         var offline = false
         val file = cache.open(key) {
-            when (val r = api.presign(t, "job_file", id, key.substringAfterLast('/'))) {
-                is ApiResult.Ok -> r.value.getUrl
-                is ApiResult.Err -> { offline = true; null }
+            when (val r = api.presignGet(t, key)) {
+                is ApiResult.Ok -> r.value
+                is ApiResult.Err -> { offline = r.failure == ApiFailure.Offline; null }
             }
         } ?: return if (offline) OnPhone.NoNetwork else OnPhone.Failed
         jobFiles.setLocal(id, row.offline, file.absolutePath)

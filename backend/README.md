@@ -33,6 +33,13 @@ For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT
 
 `/auth/email/start` allows 5 codes per email and 20 per IP an hour; `/auth/email/verify` allows 10 checks per email (across codes, so asking for a new code does not reset it) and 30 per IP an hour, on top of the 5 wrong guesses one code allows. Over a limit the answer is 429 `{"error":"rate_limited"}`. Counters live in the D1 table `auth_limits` (migration 0006), pruned by the daily cron. The limits are off when `ENVIRONMENT=dev` (the local Worker the QA suite signs in to many times a run); they hold in every other environment, tests included. The code is logged to the console only in dev.
 
+## Media (R2)
+
+One bucket, `homerecord-media`: the `MEDIA` binding in `wrangler.toml` (the orphan cron deletes through it) and `MEDIA_BUCKET` in `src/media/presign.ts` (presigned URLs point at it) must name the same bucket; a test holds them together. Presigning needs the secrets `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` (an R2 API token for that bucket); without them both routes answer 503.
+
+- `POST /media/presign` `{tenantKind, tenantId, entity, entityId, filename, size, contentType}` signs one 10-minute PUT for the file of a row the caller may write (only `photo`, `wall_photo`, `note` at most 25 MB, `document` and `job_file` at most 100 MB; 413 over the cap). The URL signs `Content-Length` and `Content-Type`, so the upload must send exactly those. The first caller to sign a key owns it; only they, or a company's Owner or Office, may sign another PUT for it (403). Company rows follow the sync write rules (`canUpload` in `src/sync/policy.ts`).
+- `POST /media/presign-get` `{tenantKind, tenantId, key}` signs one 7-day GET for an object of a live row of that tenant the caller may see; never a PUT.
+
 ## Tenancy
 
 Every row belongs to a company (Field Log) or a home (House Manual). `requireSession` loads the caller's memberships; tenant routes use `requireTenant()`, which answers 404 for any tenant the caller is not in, so other tenants are indistinguishable from missing ones.

@@ -29,10 +29,15 @@ private class FakeTransfer : MediaTransferApi {
     var downloadOk = true
     var expiresAt = Long.MAX_VALUE
 
-    override suspend fun presign(tenant: TenantRef, entity: String, entityId: String, filename: String): ApiResult<Presigned> {
+    val signed = mutableListOf<Pair<Long, String>>()
+
+    override suspend fun presign(tenant: TenantRef, entity: String, entityId: String, filename: String, size: Long, mime: String): ApiResult<Presigned> {
         presigns++
-        return presignResult ?: ApiResult.Ok(Presigned("${tenant.id}/$entity/$entityId/$filename", "https://r2/put/$presigns", expiresAt, "https://r2/get", 0))
+        signed += size to mime
+        return presignResult ?: ApiResult.Ok(Presigned("${tenant.id}/$entity/$entityId/$filename", "https://r2/put/$presigns", expiresAt))
     }
+
+    override suspend fun presignGet(tenant: TenantRef, key: String): ApiResult<String> = ApiResult.Ok("https://r2/get")
 
     override suspend fun put(url: String, file: File, mime: String): PutOutcome {
         puts += url
@@ -77,6 +82,8 @@ class MediaUploaderTest {
         assertThat(net.puts).containsExactly("https://r2/put/1")
         assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("done")
         assertThat(db.mediaUploadDao().get(id)?.key).isEqualTo("c1/photo/p1/a.jpg")
+        // The PUT is signed for this file's exact size and type (cr:presign-size).
+        assertThat(net.signed).containsExactly(4L to "image/jpeg")
     }
 
     @Test fun queuingTheSameFileTwiceUploadsOnce() = runBlocking<Unit> {
@@ -184,6 +191,17 @@ class MediaUploaderTest {
         net.presignResult = ApiResult.Err(ApiFailure.NotFound)
         assertThat(uploader.runPending().failed).isEqualTo(1)
         assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("failed")
+    }
+
+    @Test fun aFileTooLargeOrRefusedByTheServerGivesUp() = runBlocking<Unit> {
+        // 413 (over the size cap) and 403 (someone else's object) come back as Invalid and Forbidden: retrying cannot help.
+        for (failure in listOf(ApiFailure.Invalid, ApiFailure.Forbidden)) {
+            val id = enqueue("${failure.name}.jpg")
+            net.presignResult = ApiResult.Err(failure)
+            assertThat(uploader.runPending().failed).isEqualTo(1)
+            assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("failed")
+            assertThat(net.puts).isEmpty()
+        }
     }
 
     @Test fun backoffDoublesAndCaps() {

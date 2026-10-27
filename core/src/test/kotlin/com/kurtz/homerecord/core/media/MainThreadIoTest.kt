@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.withTransaction
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobFileEntity
 import com.kurtz.homerecord.core.sync.RoomRowStore
@@ -83,7 +84,15 @@ class MainThreadIoTest {
     @Test fun cacheChecksAndDeletesFilesOnTheIoDispatcher() = runTest {
         val counting = CountingDispatcher()
         val net = object : MediaTransferApi {
-            override suspend fun presign(tenant: com.kurtz.homerecord.core.sync.TenantRef, entity: String, entityId: String, filename: String) =
+            override suspend fun presign(
+                tenant: com.kurtz.homerecord.core.sync.TenantRef,
+                entity: String,
+                entityId: String,
+                filename: String,
+                size: Long,
+                mime: String,
+            ): ApiResult<Presigned> = error("not used")
+            override suspend fun presignGet(tenant: com.kurtz.homerecord.core.sync.TenantRef, key: String): ApiResult<String> =
                 error("not used")
             override suspend fun put(url: String, file: File, mime: String) = PutOutcome.Ok
             override suspend fun download(url: String, dest: File): Boolean { dest.writeText("x"); return true }
@@ -115,5 +124,6 @@ class MainThreadIoTest {
 
     private fun mediaService() = object : MediaService {
         override suspend fun presign(body: PresignRequest) = error("not used")
+        override suspend fun presignGet(body: PresignGetRequest) = error("not used")
     }
 }

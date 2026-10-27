@@ -63,6 +63,17 @@ export function canPush(access: Access, entity: string, stored: Row | null, inco
   return false;
 }
 
+/**
+ * May this caller upload the media of this company row (cr:presign-overwrite)? With the row on the server it is the
+ * push rule; before the row has synced (the upload queue can run first) it is the entity rule alone: captures for
+ * everyone, a Lead's job rows (the row push that follows is still checked against their jobs), the rest admin only.
+ */
+export function canUpload(access: Access, entity: string, stored: Row | null): boolean {
+  if (stored !== null) return canPush(access, entity, stored, {});
+  if (ADMIN_ROLES.has(access.role) || CAPTURE.has(entity)) return true;
+  return access.role === "lead" && LEAD_JOB_ROWS.has(entity);
+}
+
 /** The row as this caller may see it on pull, or null when it is not theirs to see. */
 export function visibleRow(access: Access, entity: string, row: Row): Row | null {
   if (ADMIN_ROLES.has(access.role)) return row;

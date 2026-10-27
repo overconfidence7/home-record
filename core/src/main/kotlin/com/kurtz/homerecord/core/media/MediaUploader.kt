@@ -71,20 +71,20 @@ class MediaUploader(
         val tenant = TenantRef(TenantKind.entries.first { it.wire == row.tenantKind }, row.tenantId)
         var presigned: Presigned? = null
         if (current.putUrl == null || current.key == null || current.putExpiresAt <= now() + EXPIRY_MARGIN_MS) {
-            when (val r = api.presign(tenant, row.entity, row.entityId, row.filename)) {
+            when (val r = api.presign(tenant, row.entity, row.entityId, row.filename, file.length(), row.mime)) {
                 is ApiResult.Ok -> {
                     presigned = r.value
                     current = current.copy(key = r.value.key, putUrl = r.value.putUrl, putExpiresAt = r.value.putExpiresAt)
                     dao.save(current)
                 }
-                is ApiResult.Err -> return back(current, offline = r.failure == ApiFailure.Offline, giveUp = r.failure == ApiFailure.Forbidden || r.failure == ApiFailure.NotFound)
+                is ApiResult.Err -> return back(current, offline = r.failure == ApiFailure.Offline, giveUp = r.failure == ApiFailure.Forbidden || r.failure == ApiFailure.NotFound || r.failure == ApiFailure.Invalid)
             }
         }
         val url = current.putUrl ?: return back(current, offline = false)
         return when (api.put(url, file, row.mime)) {
             PutOutcome.Ok -> {
                 dao.save(current.copy(state = "done", putUrl = null))
-                onUploaded(current, presigned ?: Presigned(current.key.orEmpty(), url, current.putExpiresAt, "", 0))
+                onUploaded(current, presigned ?: Presigned(current.key.orEmpty(), url, current.putExpiresAt))
                 Step.Done
             }
             PutOutcome.Offline -> back(current, offline = true)
