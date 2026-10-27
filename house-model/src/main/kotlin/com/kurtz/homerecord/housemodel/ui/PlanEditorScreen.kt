@@ -72,6 +72,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -172,6 +179,7 @@ fun PlanEditorScreen(
                         canvasHeightDp = canvasHeightDp,
                         onSized = { w, h -> canvasWidthDp = w; canvasHeightDp = h },
                     )
+                    PlanRoomNodes(state, onEvent)
                     if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
                         Text(
                             stringResource(R.string.plan_empty_hint),
@@ -326,6 +334,44 @@ private fun PlanCanvas(
     ) {
         drawPlan(state, measurer, density, scheme.outlineVariant, scheme.surfaceContainerHigh, scheme.primaryContainer, scheme.onPrimaryContainer,
             scheme.primary, scheme.errorContainer, scheme.error, scheme.onSurface, label)
+    }
+}
+
+/**
+ * Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its
+ * bounds, clipped to the canvas (same as the blueprint). Touches still reach the canvas below.
+ */
+@Composable
+private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -> Unit) {
+    val send by rememberUpdatedState(onEvent)
+    val unnamed = stringResource(R.string.plan_unnamed_room)
+    Box(Modifier.fillMaxSize().clipToBounds()) {
+        state.rooms.forEach { room ->
+            key(room.id) {
+                val size = stringResource(
+                    R.string.blueprint_room_size,
+                    LengthParser.format(room.points.maxOf { it.x } - room.points.minOf { it.x }, state.system),
+                    LengthParser.format(room.points.maxOf { it.y } - room.points.minOf { it.y }, state.system),
+                )
+                val left = room.points.minOf { it.x } * state.zoom + state.panX
+                val top = room.points.minOf { it.y } * state.zoom + state.panY
+                val right = room.points.maxOf { it.x } * state.zoom + state.panX
+                val bottom = room.points.maxOf { it.y } * state.zoom + state.panY
+                Box(
+                    Modifier
+                        .offset(left.dp, top.dp)
+                        .size((right - left).coerceAtLeast(0f).dp, (bottom - top).coerceAtLeast(0f).dp)
+                        .testTag("hm_plan_room_${room.id}")
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = room.name.ifBlank { unnamed }
+                            stateDescription = size
+                            selected = room.id == state.selectedId
+                            onClick { send(PlanEditorEvent.Select(room.id)); true }
+                        },
+                )
+            }
+        }
     }
 }
 
