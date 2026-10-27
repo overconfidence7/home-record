@@ -1,6 +1,7 @@
 # Helper, not a walkthrough step: visit every root tab and the first level below it, taking a
 # screenshot of each. The device suite runs it under dark mode, 200% font and landscape with
 # QA_VARIANT set, so the screenshots are named per variant (AC-U8, AC-U9, ui rules 24-33).
+# Tabs are tapped by id: House has an "Items" layer chip that a text match would hit.
 # It never clears state, so it sees whatever the previous flows left behind.
 appId: com.kurtz.homerecord.housemanual
 env:
@@ -14,9 +15,11 @@ env:
     when:
       visible: "Set up your home"
     file: _onboard.yaml
-- tapOn: "Home"
+- tapOn:
+    id: "hm_tab_home"
 - takeScreenshot: tour-${QA_VARIANT}-home
-- tapOn: "House"
+- tapOn:
+    id: "hm_tab_house"
 - takeScreenshot: tour-${QA_VARIANT}-house
 - tapOn: "Floors"
 - takeScreenshot: tour-${QA_VARIANT}-floors
@@ -24,10 +27,14 @@ env:
 - tapOn: "Edit plan"
 - takeScreenshot: tour-${QA_VARIANT}-plan-editor
 - tapOn: "Back"
-- tapOn: "Items"
+- tapOn:
+    id: "hm_tab_items"
 - takeScreenshot: tour-${QA_VARIANT}-items
-- tapOn: "Reminders"
+- tapOn:
+    id: "hm_tab_reminders"
 - takeScreenshot: tour-${QA_VARIANT}-reminders
-- tapOn: "More"
+- tapOn:
+    id: "hm_tab_more"
 - takeScreenshot: tour-${QA_VARIANT}-more
-- tapOn: "Home"
+- tapOn:
+    id: "hm_tab_home"

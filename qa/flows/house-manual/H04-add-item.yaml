@@ -3,7 +3,9 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: H02-draw-plan.yaml
-- tapOn: "Items"
+# By id: H02 ends on House, whose layer row also has an "Items" chip
+- tapOn:
+    id: "hm_tab_items"
 - assertVisible: "No items yet"
 - tapOn:
     id: "hm_items_add"
@@ -118,7 +120,8 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_item_detail_document_attach"
 # AC-H10: the room page lists its items and offers Add item
-- tapOn: "House"
+- tapOn:
+    id: "hm_tab_house"
 - tapOn: "Kitchen"
 - assertVisible:
     id: "hm_room_add_item"
