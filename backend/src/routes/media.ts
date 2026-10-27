@@ -54,17 +54,40 @@ media.post("/media/presign", async (c) => {
   });
 });
 
-/** Cron: removes objects presigned over 30 days ago that no synced row references. Returns the count removed. */
+/** Splits a `tenant/entity/id/filename` key; null when it does not have that shape. */
+export function parseMediaKey(key: string): { tenantId: string; entity: string; entityId: string } | null {
+  const parts = key.split("/");
+  if (parts.length !== 4 || parts.some((p) => p.length === 0)) return null;
+  return { tenantId: parts[0], entity: parts[1], entityId: parts[2] };
+}
+
+/**
+ * Cron: removes objects presigned over 30 days ago whose owning row (the tenant, entity and id in the key)
+ * is gone or soft-deleted. Rows reference their media by id, not by key (a photo row stores no key until
+ * its upload finishes, and only on this phone), so the key itself names the row that keeps it.
+ * Returns the count removed.
+ */
 export async function removeOrphanedMedia(env: AppEnv["Bindings"], now = Date.now()): Promise<number> {
   const cutoff = now - ORPHAN_DAYS * 86_400_000;
-  const { results } = await env.DB.prepare("SELECT object_key FROM media_objects WHERE created_at < ? LIMIT 500")
+  const { results } = await env.DB.prepare(
+    "SELECT object_key, tenant_kind, tenant_id FROM media_objects WHERE created_at < ? LIMIT 500",
+  )
     .bind(cutoff)
-    .all<{ object_key: string }>();
+    .all<{ object_key: string; tenant_kind: string; tenant_id: string }>();
   let removed = 0;
-  for (const { object_key } of results) {
-    const used = await env.DB.prepare("SELECT 1 FROM sync_rows WHERE instr(row_json, ?) > 0 LIMIT 1").bind(object_key).first();
+  for (const { object_key, tenant_kind, tenant_id } of results) {
+    const parsed = parseMediaKey(object_key);
+    const used =
+      parsed === null ||
+      parsed.tenantId !== tenant_id ||
+      (await env.DB.prepare(
+        "SELECT 1 FROM sync_rows WHERE tenant_kind = ? AND tenant_id = ? AND entity = ? AND entity_id = ? " +
+          "AND json_extract(row_json, '$.deletedAt') IS NULL LIMIT 1",
+      )
+        .bind(tenant_kind, tenant_id, parsed.entity, parsed.entityId)
+        .first()) !== null;
     if (used) {
-      // Still referenced: look again in another 30 days.
+      // Still owned (or a key we cannot attribute): look again in another 30 days.
       await env.DB.prepare("UPDATE media_objects SET created_at = ? WHERE object_key = ?").bind(now, object_key).run();
       continue;
     }
