@@ -22,8 +22,8 @@ interface RowStore {
 /**
  * [RowStore] over the Room database's tables; [entity] is the table name and is checked against the schema.
  * [write] keeps only the table's columns, so a row from a newer app version with extra fields still lands, and fills a
- * missing NOT NULL column with its empty value ("" or 0), so a pulled row without this phone's local columns
- * ([LocalColumns], e.g. a photo's `path`) can be stored.
+ * missing NOT NULL device-local column ([LocalColumns], e.g. a photo's `path`) with its empty value ("" or 0), so a
+ * pulled row from another phone can be stored; any other missing NOT NULL column still refuses the row.
  */
 class RoomRowStore(private val db: RoomDatabase) : RowStore {
     private val tables: Set<String> by lazy {
@@ -87,7 +87,7 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
             }
         }
         for ((column, info) in known) {
-            if (column in row || !info.notNull || info.hasDefault) continue
+            if (column in row || !info.notNull || info.hasDefault || !LocalColumns.isLocal(entity, column)) continue
             when (info.type) {
                 "TEXT" -> values.put(column, "")
                 "REAL" -> values.put(column, 0.0)
