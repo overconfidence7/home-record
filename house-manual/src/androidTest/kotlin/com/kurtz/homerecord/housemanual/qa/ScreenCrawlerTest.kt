@@ -3,6 +3,9 @@ package com.kurtz.homerecord.housemanual.qa
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -45,6 +48,14 @@ class ScreenCrawlerTest {
         File(outDir, "$id-$variant.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 90, it) }
     }
 
+    /** Names a failing node so the finding points at the control: tag, text, layout size and touch box in dp. */
+    private fun SemanticsNode.describe(): String {
+        val d = inst.targetContext.resources.displayMetrics.density
+        val tag = config.getOrNull(SemanticsProperties.TestTag) ?: "?"
+        val text = (config.getOrNull(SemanticsProperties.Text) ?: config.getOrNull(SemanticsProperties.ContentDescription))?.joinToString().orEmpty()
+        return "$tag \"$text\" ${(size.width / d).toInt()}x${(size.height / d).toInt()} dp, touch ${(touchBoundsInRoot.width / d).toInt()}x${(touchBoundsInRoot.height / d).toInt()} dp"
+    }
+
     @Test fun everyCatalogScreenOpensAndMeetsTheBasics() {
         assertTrue("catalog is empty", ScreenCatalog.entries.isNotEmpty())
         for (entry in ScreenCatalog.entries) {
@@ -60,7 +71,7 @@ class ScreenCrawlerTest {
                     maxOf(t.width, if (clippedW) n.size.width.toFloat() else 0f) < min ||
                         maxOf(t.height, if (clippedH) n.size.height.toFloat() else 0f) < min
                 }
-                assertTrue("${entry.id}: ${tooSmall.size} clickable nodes under 48 dp", tooSmall.isEmpty())
+                assertTrue("${entry.id}: ${tooSmall.size} clickable nodes under 48 dp: ${tooSmall.map { it.describe() }}", tooSmall.isEmpty())
                 shoot(entry.id, "light")
             }
         }

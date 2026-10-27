@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -55,8 +56,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kurtz.homerecord.core.model.ItemCategory
@@ -283,12 +282,15 @@ private fun WarrantyCard(detail: ItemDetail, state: ItemDetailUiState, onEvent: 
         }
         LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup_again, "hm_item_detail_lookup_again") { onEvent(ItemDetailEvent.LookUp(again = true)) }
         val registeredLabel = stringResource(R.string.item_detail_warranty_registered)
-        Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+        // The whole row toggles, so the target is the full-width 56 dp row rather than the 32 dp switch.
+        Row(
+            Modifier.fillMaxWidth().height(56.dp)
+                .toggleable(value = w.registered, role = Role.Switch, onValueChange = { onEvent(ItemDetailEvent.SetRegistered(it)) })
+                .testTag("hm_item_detail_registered"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(registeredLabel, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-            Switch(
-                checked = w.registered, onCheckedChange = { onEvent(ItemDetailEvent.SetRegistered(it)) },
-                modifier = Modifier.semantics { role = Role.Switch }.testTag("hm_item_detail_registered"),
-            )
+            Switch(checked = w.registered, onCheckedChange = null)
         }
     }
 }
