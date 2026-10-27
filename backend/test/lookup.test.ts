@@ -88,6 +88,34 @@ describe("AC-B10 POST /lookup/warranty", () => {
     expect(await env.CACHE.get(warrantyCacheKey("Acme", "Z1"))).toBeNull();
   });
 
+  it("logs the cost of a billed answer that does not parse and gives the request back", async () => { // AC-B10
+    upstream.mockResolvedValue(new Response(JSON.stringify({
+      content: [{ type: "text", text: "I could not find it." }],
+      usage: { input_tokens: 800, output_tokens: 20, server_tool_use: { web_search_requests: 3 } },
+    }), { status: 200 }));
+    const token = await seedUser("lu4", "lu4@example.com");
+    expect((await post(token, { make: "Acme", model: "Z2" })).status).toBe(502);
+    const log = await env.DB.prepare(
+      "SELECT kind, input_tokens AS i, output_tokens AS o, searches AS s FROM lookup_log WHERE user_id = 'lu4'",
+    ).all();
+    expect(log.results).toEqual([{ kind: "warranty", i: 800, o: 20, s: 3 }]);
+    expect(await env.CACHE.get(warrantyCacheKey("Acme", "Z2"))).toBeNull();
+    const day = new Date().toISOString().slice(0, 10);
+    expect(await env.CACHE.get(`quota:lookup:lu4:${day}`)).toBe("0");
+  });
+
+  it("failed lookups do not use up the daily limit", async () => { // AC-B10
+    const token = await seedUser("lu5", "lu5@example.com");
+    upstream.mockResolvedValue(new Response("boom", { status: 500 }));
+    for (let i = 0; i < FREE_DAILY_LIMIT; i++) expect((await post(token, { make: "Acme", model: "Z3" })).status).toBe(502);
+    upstream.mockRejectedValueOnce(new TypeError("network down"));
+    expect((await post(token, { make: "Acme", model: "Z3" })).status).toBe(502);
+    upstream.mockResolvedValue(new Response(JSON.stringify(recorded), { status: 200 }));
+    expect((await post(token, { make: "Rheem", model: "XG40T06" })).status).toBe(200);
+    const n = await env.DB.prepare("SELECT COUNT(*) AS n FROM lookup_log WHERE user_id = 'lu5'").first<{ n: number }>();
+    expect(n?.n).toBe(1); // only the billed answer is a cost row
+  });
+
   it("limits a free account to 20 lookups a day", async () => {
     const token = await seedUser("lu3", "lu3@example.com");
     for (let i = 0; i < FREE_DAILY_LIMIT; i++) expect((await post(token, { make: "Rheem", model: "XG50T06" })).status).toBe(200);

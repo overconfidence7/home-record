@@ -65,6 +65,47 @@ export interface UpstreamUsage {
   searches: number;
 }
 
+/**
+ * What a paid upstream call came back with. `usage` is set whenever the upstream answered 2xx (the call was
+ * billed), even when its text did not parse and `result` is null; the whole value is null when no billed
+ * answer came back (HTTP error or network failure).
+ */
+export interface UpstreamAnswer<T> {
+  result: T | null;
+  usage: UpstreamUsage;
+}
+
+/** POSTs to the Messages API and reads the text and usage; null on an HTTP error or a network failure. */
+export async function callMessages(
+  apiKey: string,
+  payload: unknown,
+  fetchFn: typeof fetch,
+): Promise<{ text: string; usage: UpstreamUsage } | null> {
+  let res: Response;
+  try {
+    res = await fetchFn("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return null;
+  }
+  if (!res.ok) return null;
+  const body = (await res.json().catch(() => ({}))) as {
+    content?: { type: string; text?: string }[];
+    usage?: { input_tokens?: number; output_tokens?: number; server_tool_use?: { web_search_requests?: number } };
+  };
+  return {
+    text: (body.content ?? []).filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n"),
+    usage: {
+      inputTokens: body.usage?.input_tokens ?? 0,
+      outputTokens: body.usage?.output_tokens ?? 0,
+      searches: body.usage?.server_tool_use?.web_search_requests ?? 0,
+    },
+  };
+}
+
 const PROMPT =
   "Find the manufacturer's residential warranty for this product using web search on the manufacturer's own site first. " +
   "Reply with ONE JSON object and nothing else, with keys: partsYears (number|null), laborYears (number|null), " +
@@ -76,32 +117,13 @@ export async function askClaude(
   apiKey: string,
   req: WarrantyRequest,
   fetchFn: typeof fetch = fetch,
-): Promise<{ result: WarrantyResult; usage: UpstreamUsage } | null> {
+): Promise<UpstreamAnswer<WarrantyResult> | null> {
   const product = [req.make, req.model, req.category ? `(${req.category})` : ""].filter(Boolean).join(" ");
-  const res = await fetchFn("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1024,
-      tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES, allowed_domains: ALLOWED_DOMAINS }],
-      messages: [{ role: "user", content: `${PROMPT}\n\nProduct: ${product}` }],
-    }),
-  });
-  if (!res.ok) return null;
-  const body = (await res.json()) as {
-    content?: { type: string; text?: string }[];
-    usage?: { input_tokens?: number; output_tokens?: number; server_tool_use?: { web_search_requests?: number } };
-  };
-  const text = (body.content ?? []).filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
-  const result = parseWarrantyJson(text);
-  if (!result) return null;
-  return {
-    result,
-    usage: {
-      inputTokens: body.usage?.input_tokens ?? 0,
-      outputTokens: body.usage?.output_tokens ?? 0,
-      searches: body.usage?.server_tool_use?.web_search_requests ?? 0,
-    },
-  };
+  const answer = await callMessages(apiKey, {
+    model: MODEL,
+    max_tokens: 1024,
+    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES, allowed_domains: ALLOWED_DOMAINS }],
+    messages: [{ role: "user", content: `${PROMPT}\n\nProduct: ${product}` }],
+  }, fetchFn);
+  return answer && { result: parseWarrantyJson(answer.text), usage: answer.usage };
 }

@@ -3,6 +3,7 @@ import type { AppEnv } from "../env";
 import { requireSession } from "../tenancy";
 import {
   CACHE_DAYS, FREE_DAILY_LIMIT, PRO_DAILY_LIMIT, askClaude, requestSchema, resultSchema, warrantyCacheKey,
+  type UpstreamUsage,
 } from "../lookup/warranty";
 import { dataPlateRequestSchema, readDataPlate } from "../lookup/dataplate";
 import { RECALL_CACHE_SECONDS, fetchRecalls, recallQuerySchema, recallsCacheKey } from "../lookup/recalls";
@@ -33,6 +34,23 @@ async function takeQuota(env: AppEnv["Bindings"], userId: string): Promise<boole
   return true;
 }
 
+/** Gives back the request taken by [takeQuota] when the lookup could not answer (502/503), so failures cost nothing. */
+async function refundQuota(env: AppEnv["Bindings"], userId: string): Promise<void> {
+  const key = `quota:lookup:${userId}:${new Date().toISOString().slice(0, 10)}`;
+  const used = Number((await env.CACHE.get(key)) ?? "0");
+  if (used > 0) await env.CACHE.put(key, String(used - 1), { expirationTtl: 2 * 86400 });
+}
+
+/** AC-B10: one cost row per billed upstream call, whether or not its answer parsed. */
+async function logCost(db: D1Database, userId: string, kind: string, cacheKey: string, usage: UpstreamUsage): Promise<void> {
+  await db
+    .prepare(
+      "INSERT INTO lookup_log (id, user_id, kind, cache_key, input_tokens, output_tokens, searches, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(crypto.randomUUID(), userId, kind, cacheKey, usage.inputTokens, usage.outputTokens, usage.searches, Date.now())
+    .run();
+}
+
 lookup.post("/lookup/warranty", async (c) => {
   const parsed = requestSchema.safeParse(await c.req.json().catch(() => null));
   if (!parsed.success) return c.json({ error: "bad_request" }, 400);
@@ -47,16 +65,17 @@ lookup.post("/lookup/warranty", async (c) => {
     const cached = resultSchema.safeParse(raw);
     if (cached.success) return c.json({ ...cached.data, cached: true });
   }
-  if (!c.env.CLAUDE_API_KEY) return c.json({ error: "unavailable" }, 503);
+  if (!c.env.CLAUDE_API_KEY) {
+    await refundQuota(c.env, userId);
+    return c.json({ error: "unavailable" }, 503);
+  }
   const found = await askClaude(c.env.CLAUDE_API_KEY, parsed.data);
-  if (!found) return c.json({ error: "lookup_failed" }, 502);
-
+  if (found) await logCost(c.env.DB, userId, "warranty", key, found.usage);
+  if (!found?.result) {
+    await refundQuota(c.env, userId);
+    return c.json({ error: "lookup_failed" }, 502);
+  }
   await c.env.CACHE.put(key, JSON.stringify(found.result), { expirationTtl: CACHE_DAYS * 86400 });
-  await c.env.DB.prepare(
-    "INSERT INTO lookup_log (id, user_id, kind, cache_key, input_tokens, output_tokens, searches, created_at) VALUES (?, ?, 'warranty', ?, ?, ?, ?, ?)",
-  )
-    .bind(crypto.randomUUID(), userId, key, found.usage.inputTokens, found.usage.outputTokens, found.usage.searches, Date.now())
-    .run();
   return c.json({ ...found.result, cached: false });
 });
 
@@ -66,14 +85,16 @@ lookup.post("/lookup/dataplate", async (c) => {
   if (!parsed.success) return c.json({ error: "bad_request" }, 400);
   const userId = c.get("session").userId;
   if (!(await takeQuota(c.env, userId))) return c.json({ error: "rate_limited" }, 429);
-  if (!c.env.CLAUDE_API_KEY) return c.json({ error: "unavailable" }, 503);
+  if (!c.env.CLAUDE_API_KEY) {
+    await refundQuota(c.env, userId);
+    return c.json({ error: "unavailable" }, 503);
+  }
   const found = await readDataPlate(c.env.CLAUDE_API_KEY, parsed.data);
-  if (!found) return c.json({ error: "lookup_failed" }, 502);
-  await c.env.DB.prepare(
-    "INSERT INTO lookup_log (id, user_id, kind, cache_key, input_tokens, output_tokens, searches, created_at) VALUES (?, ?, 'dataplate', '', ?, ?, 0, ?)",
-  )
-    .bind(crypto.randomUUID(), userId, found.usage.inputTokens, found.usage.outputTokens, Date.now())
-    .run();
+  if (found) await logCost(c.env.DB, userId, "dataplate", "", found.usage);
+  if (!found?.result) {
+    await refundQuota(c.env, userId);
+    return c.json({ error: "lookup_failed" }, 502);
+  }
   return c.json(found.result);
 });
 

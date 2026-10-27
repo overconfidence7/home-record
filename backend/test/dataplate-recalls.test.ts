@@ -49,6 +49,17 @@ describe("AC-B11 POST /lookup/dataplate", () => {
     upstream.mockResolvedValueOnce(new Response(JSON.stringify({ content: [{ type: "text", text: "cannot read" }] }), { status: 200 }));
     expect((await post(t, { imageBase64: image })).status).toBe(502);
   });
+  it("logs the cost of an unreadable answer and gives the request back", async () => { // AC-B10, AC-B11
+    const t = await seedUser("dp3", "dp3@example.com");
+    upstream.mockResolvedValueOnce(new Response(JSON.stringify({
+      content: [{ type: "text", text: "cannot read" }], usage: { input_tokens: 700, output_tokens: 5 },
+    }), { status: 200 }));
+    expect((await post(t, { imageBase64: image })).status).toBe(502);
+    const log = await env.DB.prepare("SELECT kind, input_tokens AS i FROM lookup_log WHERE user_id = 'dp3'").all();
+    expect(log.results).toEqual([{ kind: "dataplate", i: 700 }]);
+    const day = new Date().toISOString().slice(0, 10);
+    expect(await env.CACHE.get(`quota:lookup:dp3:${day}`)).toBe("0");
+  });
   it("parses fenced JSON and drops bad dates", () => {
     expect(parseDataPlateJson('```{"make":"GE","model":null,"serial":"S1","manufacturedOn":"June 2020"}```')).toEqual({
       make: "GE", model: null, serial: "S1", manufacturedOn: null,

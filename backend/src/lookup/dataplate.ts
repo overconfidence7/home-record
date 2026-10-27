@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MODEL, type UpstreamUsage } from "./warranty";
+import { MODEL, callMessages, type UpstreamAnswer } from "./warranty";
 
 /** Base64 length cap (~3.5 MB of image); the app sends a downscaled JPEG. */
 export const MAX_IMAGE_BASE64 = 5_000_000;
@@ -39,31 +39,19 @@ export async function readDataPlate(
   apiKey: string,
   req: z.infer<typeof dataPlateRequestSchema>,
   fetchFn: typeof fetch = fetch,
-): Promise<{ result: DataPlateResult; usage: UpstreamUsage } | null> {
-  const res = await fetchFn("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 400,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: req.mediaType, data: req.imageBase64 } },
-            { type: "text", text: PROMPT },
-          ],
-        },
-      ],
-    }),
-  });
-  if (!res.ok) return null;
-  const body = (await res.json()) as {
-    content?: { type: string; text?: string }[];
-    usage?: { input_tokens?: number; output_tokens?: number };
-  };
-  const text = (body.content ?? []).filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
-  const result = parseDataPlateJson(text);
-  if (!result) return null;
-  return { result, usage: { inputTokens: body.usage?.input_tokens ?? 0, outputTokens: body.usage?.output_tokens ?? 0, searches: 0 } };
+): Promise<UpstreamAnswer<DataPlateResult> | null> {
+  const answer = await callMessages(apiKey, {
+    model: MODEL,
+    max_tokens: 400,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: req.mediaType, data: req.imageBase64 } },
+          { type: "text", text: PROMPT },
+        ],
+      },
+    ],
+  }, fetchFn);
+  return answer && { result: parseDataPlateJson(answer.text), usage: { ...answer.usage, searches: 0 } };
 }
