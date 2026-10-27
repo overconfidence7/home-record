@@ -16,12 +16,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.window.DialogProperties
 
 /** A create/edit form with more than two fields: full screen with Close and Save in the top app bar (ui-standards rule 15). */
@@ -37,7 +43,22 @@ fun FormScreenDialog(
         onDismissRequest = onClose,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
+        DialogSystemBarIcons()
         Box(Modifier.fillMaxSize().windowTestTags()) { FormScreenScaffold(title, saveTag, onClose, onSave, content) }
+    }
+}
+
+/** The dialog draws under the status bar, so its icons follow the form's surface, not the platform default (rule 34). */
+@Composable
+private fun DialogSystemBarIcons() {
+    val view = LocalView.current
+    val light = MaterialTheme.colorScheme.surface.luminance() > 0.5f
+    SideEffect {
+        val window = (view.parent as? DialogWindowProvider)?.window ?: return@SideEffect
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightStatusBars = light
+            isAppearanceLightNavigationBars = light
+        }
     }
 }
 

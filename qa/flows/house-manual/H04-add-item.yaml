@@ -1,7 +1,8 @@
-# Walkthrough H4: add a furnace from the Items tab (AC-C30). Needs a home, so it starts from the onboarding helper.
+# Walkthrough H4: add a furnace from the Items tab (AC-C30). Needs a home with rooms, so it builds on
+# H02 (Kitchen and Living room drawn) and files the furnace in the Kitchen.
 appId: com.kurtz.homerecord.housemanual
 ---
-- runFlow: _onboard.yaml
+- runFlow: H02-draw-plan.yaml
 - tapOn: "Items"
 - assertVisible: "No items yet"
 - tapOn:
@@ -24,10 +25,14 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_type_furnace"
 - tapOn:
     id: "hm_item_room"
-- tapOn: "Whole house"
+- tapOn: "Kitchen.*"
 - tapOn:
     id: "hm_item_make"
 - inputText: "Carrier"
+- tapOn:
+    id: "hm_item_model"
+- inputText: "59SC5A080"
+- hideKeyboard
 - takeScreenshot: H04-item-form
 # AC-C30: photo buttons (data plate, item) sit at the end of the form
 - scrollUntilVisible:
@@ -53,13 +58,13 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Furnace.*"
 - tapOn:
     id: "hm_items_group_room"
-- assertVisible: "Whole house.*"
+- assertVisible: "Kitchen.*"
 - tapOn:
     id: "hm_items_filter_warranty_expired"
 - assertVisible: "No items match"
 - tapOn:
     id: "hm_items_clear"
-- assertVisible: "Whole house.*"
+- assertVisible: "Kitchen.*"
 - tapOn:
     id: "hm_items_group_category"
 - assertVisible: "Heating and cooling.*"
@@ -74,7 +79,7 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Duplicate"
 - assertVisible: "Delete"
 - pressKey: back
-# AC-C34, AC-H5: a warranty section without terms offers the lookup (the seed furnace has a make and model)
+# AC-C34, AC-H5: a warranty section without terms offers the lookup (the furnace has a make and model)
 - scrollUntilVisible:
     element:
       id: "hm_item_detail_lookup"
@@ -99,6 +104,11 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_detail_service_add"
 - assertVisible:
     id: "hm_item_detail_service_description"
+# The visit form is full screen (rule 15); Close it with nothing typed and the item page is back
+- tapOn:
+    id: "hm_close"
+- assertNotVisible:
+    id: "hm_item_detail_service_description"
 # AC-C37: the item page offers documents from Files, the scanner, or the home's existing files
 - scrollUntilVisible:
     element:
@@ -112,3 +122,4 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn: "Kitchen"
 - assertVisible:
     id: "hm_room_add_item"
+- assertVisible: "(?i).*furnace.*"
