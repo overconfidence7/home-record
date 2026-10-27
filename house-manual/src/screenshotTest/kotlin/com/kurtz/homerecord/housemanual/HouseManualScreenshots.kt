@@ -193,6 +193,11 @@ fun ItemEditTypeSheetScreenshot() = ItemEditTypeSheetPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemEditTypeSheetSearchScreenshot() = ItemEditTypeSheetSearchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemEditPlateSheetScreenshot() = ItemEditPlateSheetPreview()
 
 @PreviewTest

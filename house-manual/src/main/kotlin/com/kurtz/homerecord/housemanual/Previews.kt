@@ -349,6 +349,10 @@ fun ItemEditTypeSheetPreview() = Frame { com.kurtz.homerecord.housemodel.ui.Subt
 
 @ThemePreviews
 @Composable
+fun ItemEditTypeSheetSearchPreview() = Frame { com.kurtz.homerecord.housemodel.ui.SubtypeList(null, {}, query = "water") }
+
+@ThemePreviews
+@Composable
 fun ItemEditPlateSheetPreview() = Frame {
     com.kurtz.homerecord.housemodel.ui.PlateScanContent(
         com.kurtz.homerecord.housemodel.ui.PlateScan(

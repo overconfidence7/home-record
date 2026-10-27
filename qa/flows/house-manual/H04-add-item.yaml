@@ -13,9 +13,13 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Choose what kind of item this is."
 - tapOn:
     id: "hm_item_type"
-- scrollUntilVisible:
-    element:
+- tapOn:
+    id: "hm_item_type_search"
+- inputText: "furn"
+- extendedWaitUntil:
+    visible:
       id: "hm_item_type_furnace"
+    timeout: 5000
 - tapOn:
     id: "hm_item_type_furnace"
 - tapOn:
@@ -24,7 +28,6 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_item_make"
 - inputText: "Carrier"
-- hideKeyboard
 - takeScreenshot: H04-item-form
 # AC-C30: photo buttons (data plate, item) sit at the end of the form
 - scrollUntilVisible:

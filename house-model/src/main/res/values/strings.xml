@@ -138,6 +138,9 @@
     <string name="item_type">Type</string>
     <string name="item_type_error">Choose what kind of item this is.</string>
     <string name="item_type_selected">Selected</string>
+    <string name="item_type_search">Search types</string>
+    <string name="item_type_search_clear">Clear search</string>
+    <string name="item_type_search_none">Nothing matches \"%1$s\". Clear the search and pick Other.</string>
     <string name="item_room">Room</string>
     <string name="item_room_error">Choose where it lives.</string>
     <string name="item_room_exterior">Exterior</string>

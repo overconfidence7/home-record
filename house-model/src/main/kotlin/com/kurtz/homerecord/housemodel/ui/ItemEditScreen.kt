@@ -2,6 +2,17 @@ package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.ImeAction
+import com.kurtz.homerecord.housemodel.items.SubtypeSearch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -238,20 +249,48 @@ private fun PickerField(label: String, value: String, error: String?, tag: Strin
     )
 }
 
-/** Subtypes grouped under their category, each category with its icon. */
+/** Subtypes grouped under their category, each category with its icon. Opens at full height so no row sits under the navigation bar. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SubtypeSheet(selectedId: String?, onDismiss: () -> Unit, onPick: (String) -> Unit) {
-    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = onDismiss) { SubtypeList(selectedId, onPick) }
+    var query by rememberSaveable { mutableStateOf("") }
+    ModalBottomSheet(
+        modifier = Modifier.windowTestTags(),
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) { SubtypeList(selectedId, onPick, query) { query = it } }
 }
 
 /** The sheet's content, separate so previews can draw it (a modal sheet does not render in screenshot tests). */
 @Composable
-fun SubtypeList(selectedId: String?, onPick: (String) -> Unit) {
-    run {
-        LazyColumn(Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("hm_item_type_sheet")) {
-            ItemCategory.entries.forEach { category ->
-                val subtypes = ItemCategory.all().filter { it.category == category }
+fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "", onQueryChange: (String) -> Unit = {}) {
+    val groups = remember(query) { SubtypeSearch.matching(query) }
+    Column(Modifier.widthIn(max = 640.dp).navigationBarsPadding().imePadding()) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp).testTag("hm_item_type_search"),
+            placeholder = { Text(stringResource(R.string.item_type_search)) },
+            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+            trailingIcon = if (query.isEmpty()) null else {
+                {
+                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.testTag("hm_item_type_search_clear")) {
+                        Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.item_type_search_clear))
+                    }
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        )
+        if (groups.isEmpty()) {
+            Text(
+                stringResource(R.string.item_type_search_none, query.trim()),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp).testTag("hm_item_type_search_none"),
+            )
+        }
+        LazyColumn(Modifier.testTag("hm_item_type_sheet")) {
+            groups.forEach { (category, subtypes) ->
                 item(key = "h_${category.name}") {
                     ListItem(
                         headlineContent = { Text(category.label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) },
