@@ -5,14 +5,16 @@ Hono Worker on Cloudflare: D1 (SQLite), R2 (media), KV (cache, rate limits). See
 ```
 npm ci        # .npmrc sets legacy-peer-deps (npm 10 cannot resolve the pool's peer set otherwise)
 npm test      # vitest in the workers pool; applies migrations/ to a local D1
-npx wrangler dev
+npm run dev   # wrangler dev with ENVIRONMENT=dev (/dev/* helpers on, sign-in limits off)
 ```
+
+`ENVIRONMENT` defaults to `production` in `wrangler.toml`, so a plain `wrangler deploy` or `npx wrangler dev` never exposes `/dev/last-code`, `/dev/reset` or `/dev/seed`. Dev mode is on only when asked for: `npm run dev`, or `ENVIRONMENT=dev` in `backend/.dev.vars` (what the QA workflow writes).
 
 ## Deploy (needs Nate, see BLOCKERS.md)
 
 1. `wrangler d1 create homerecord`, `wrangler kv namespace create CACHE`, `wrangler r2 bucket create homerecord-media`; put the ids in `wrangler.toml`.
 2. `wrangler d1 migrations apply homerecord --remote`
-3. Set the secrets below, then `wrangler deploy`.
+3. Set the secrets below, then `npm run deploy` (`wrangler deploy --var ENVIRONMENT:production`). Check `GET /health` answers `"environment":"production"`.
 
 ## Secrets (`wrangler secret put NAME`; never in source; local dev uses `.dev.vars`)
 
@@ -25,7 +27,7 @@ npx wrangler dev
 | `FCM_SERVICE_ACCOUNT` | push delivery (T047) |
 | `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064) |
 
-For `npx wrangler dev`, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<any long string>`; without it `/auth/email/verify` answers 500. The QA workflow writes one itself.
+For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<any long string>` and `ENVIRONMENT=dev`; without the secret `/auth/email/verify` answers 500, and without `ENVIRONMENT=dev` a plain `npx wrangler dev` runs as production (no `/dev/last-code` for the QA flows). The QA workflow writes both itself.
 
 ## Sign-in rate limits
 

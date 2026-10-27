@@ -20,8 +20,9 @@ binding = "CACHE"
 id = "00000000000000000000000000000000"
 
 [vars]
-# Local default. Production deploys must pass: wrangler deploy --var ENVIRONMENT:production
-ENVIRONMENT = "dev"
+# Fails safe: anything deployed is production, so /dev/* answers 404 and sign-in limits hold.
+# Local runs turn dev on with `npm run dev` (passes --var ENVIRONMENT:dev) or ENVIRONMENT=dev in .dev.vars.
+ENVIRONMENT = "production"
 
 # Orphaned media cleanup (AC-B21), daily 03:00 UTC.
 [triggers]
