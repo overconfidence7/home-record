@@ -1508,3 +1508,73 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: field-log jank:field-log (gfxinfo reported no frames); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 70 device stages, 631 unit tests, 79 backend tests, coverage 117/117 ACs. Passed: 56. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA 2026-10-26 (commit a7989b4)
+
+- **Verdict (House Manual)**: The item creation flow is significantly improved now that the Type sheet opens full height with live search, fixing the navigation bar overlap and furnace selection. The single biggest gap remains the lack of behind-the-wall rough-in layers, photo wall texturing, and 3D floor plan visualization (H9–H11).
+- **Verdict (Field Log)**: The field capture workflow has taken a massive leap forward tonight: crew can now capture photos, annotate copies with drawing tools, take voice memos with live timers, write field notes, and organize job files into folders. The single biggest gap is that the Daily Log does not yet aggregate these notes, photos, and time entries into a sendable client PDF (F9 / T043).
+
+### Findings
+
+- [ ] [Major] Unit test com.kurtz.homerecord.core.data.HomeRecordMigrationTest fails on Windows with IllegalArgumentException: SupportSQLiteDriver expects DB name instead of temp file path - steps: run .\gradlew testDebugUnitTest on Windows - expected: tests pass on all developer platforms (CLAUDE.md: every commit must compile and pass tests) - actual: IllegalArgumentException: This driver is configured to open a database named 'migration-test.db' but 'C:\Users\nkurt\AppData\Local\Temp\robolectric-HomeRecordMigrationTest_...\migration-test.db' was requested. in v1ToV2DropsTheSingleCursorAndKeepsConfirmedRows and v2ToV3AddsR2KeyToPhotoAndNote - screenshot: none
+
+### Confirmed fixed
+
+- [judge:hm-item-type-sheet-under-navbar]: Type sheet opens full height above navigation bar, with hm_item_type_search filtering subtypes in real-time ("furn" finds Furnace), populating type and name properly. Screenshot: qa/screenshots/latest/hm-item-type-sheet-search.png
+- [auto:unit:com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest.typedNoteSavesToTheJobAndClosesTheDialog]: verified fixed in commit 43f48d0e (141/141 field-log unit tests pass).
+- Note & Voice capture (T039c2): Note opens dialog and saves note to job day; Voice requests audio, records with live timer (Stop 0:0x), and saves memo with confirmation. Screenshot: qa/screenshots/latest/fl-capture.png
+- Photos gallery & Annotate (T040b1, T040b2a2, T040b3): Photos grouped by day, detail viewer with caption/marks/share/delete, and Annotate saves marked-up copy with badge while preserving original. Screenshots: qa/screenshots/latest/fl-photos-annotated-grid.png, qa/screenshots/latest/fl-photo-detail.png, qa/screenshots/latest/fl-photo-annotate.png
+- Files tab & Folders (T041b1): Files tab lists empty state, supports search, and creating a folder adds folder row to file list. Screenshot: qa/screenshots/latest/fl-files-folder.png
+
+### Product walkthrough
+
+#### House Manual
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding asks name, house type, foundation, garage; lands on Home | qa/screenshots/latest/hm-home.png |
+| H2 | Pass | Draw plan on grid, rooms, dimensions | qa/screenshots/latest/hm-plan-editor.png |
+| H3 | Pass | House tab shows blueprint, tap room opens it | qa/screenshots/latest/hm-house-blueprint.png |
+| H4 | Pass | Type sheet opens full height with search, "furn" selects Furnace, item saves | qa/screenshots/latest/hm-item-type-sheet-search.png |
+| H5 | Pass | Category picker grouped with icons | qa/screenshots/latest/hm-items.png |
+| H6 | Pass | Items tab grouped by category, warranty filters, search | qa/screenshots/latest/hm-items.png |
+| H7 | Pass | Hero photo, warranty status line, sections, chips | qa/screenshots/latest/hm-item-detail.png |
+| H8 | Pass | Offline/airplane mode keeps warranty | qa/screenshots/latest/hm-item-detail.png |
+| H9 | Blocked | Not built yet (T048 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H10 | Blocked | Not built yet (T049–T051 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H11 | Blocked | Not built yet (T052–T053 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H12 | Blocked | Not built yet (T066–T067 open) | qa/screenshots/latest/hm-more.png |
+| H13 | Blocked | Not built yet (T070–T071 open) | qa/screenshots/latest/hm-home.png |
+| H14 | Blocked | Not built yet (T072 open) | qa/screenshots/latest/hm-reminders.png |
+| H15 | Blocked | Not built yet (T073/T077 open) | qa/screenshots/latest/hm-more.png |
+| H16 | Blocked | Not built yet (T074 open) | qa/screenshots/latest/hm-more.png |
+| H17 | Blocked | Not built yet (T008c/T075 open) | qa/screenshots/latest/hm-more.png |
+| H18 | Blocked | Not built yet (T063 open) | qa/screenshots/latest/hm-more.png |
+| H19 | Blocked | Not built yet (T032 open) | qa/screenshots/latest/hm-paywall.png |
+
+#### Field Log
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, create company, lands on Today | qa/screenshots/latest/fl-today.png |
+| F2 | Pass | Invite crew with code, joins as Crew | qa/screenshots/latest/fl-team.png |
+| F3 | Pass | Create job with client, address, rooms, crew; shows in Jobs | qa/screenshots/latest/fl-job-overview.png |
+| F4 | Pass | Clock in from Today with GPS; ticks status card | qa/screenshots/latest/fl-today.png |
+| F5 | Pass | Break, switch job, clock out; punches in timesheet | qa/screenshots/latest/fl-timesheets.png |
+| F6 | Pass | Timesheets for the week, flags, approve | qa/screenshots/latest/fl-timesheets.png |
+| F7 | Pass | Files tab with folders, search, add; file viewer with PDF | qa/screenshots/latest/fl-files-folder.png |
+| F8 | Pass | Capture with photo shutter, Note dialog, Voice memo recorder with timer, Photos gallery grouped by day, Annotate with marked-up copy | qa/screenshots/latest/fl-photos-annotated-grid.png |
+| F9 | Blocked | Not built yet (T043/T045 open) | qa/screenshots/latest/fl-today.png |
+| F10 | Blocked | Not built yet (T019/T054/T062/T063 open) | qa/screenshots/latest/fl-today.png |
+| F11 | Blocked | Not built yet (T044 open) | qa/screenshots/latest/fl-today.png |
+| F12 | Blocked | Not built yet (T056–T058 open) | qa/screenshots/latest/fl-today.png |
+| F13 | Blocked | Not built yet (T059 open) | qa/screenshots/latest/fl-today.png |
+| F14 | Blocked | Not built yet (T060 open) | qa/screenshots/latest/fl-more.png |
+| F15 | Pass | Reports tab with hours by job, CSV export | qa/screenshots/latest/fl-reports.png |
+| F16 | Blocked | Not built yet (T010/T046 open) | qa/screenshots/latest/fl-today.png |
+| F17 | Blocked | Not built yet (T064 open) | qa/screenshots/latest/fl-more.png |
+| F18 | Pass | More screens (Team, Timesheets, Reports, Company, Settings, Account) open and return cleanly | qa/screenshots/latest/fl-more.png |
+
+Not built yet: H9, H10, H11, H12, H13, H14, H15, H16, H17, H18, H19, F9, F10, F11, F12, F13, F14, F16, F17.
+
+Tested: AC-F19, AC-F20, AC-F23, AC-F24, AC-F25, AC-F26, AC-F27, AC-C30, AC-U1..AC-U12. Passed: 18. New issues: 1. Product gaps: 0. Walkthrough: HM 8/8, FL 9/9.
