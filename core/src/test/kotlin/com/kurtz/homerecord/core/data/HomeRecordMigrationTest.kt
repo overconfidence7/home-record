@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.data
 
 import android.content.Context
+import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.AndroidSQLiteDriver
@@ -55,6 +56,34 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
+    @Test fun everyReleasedVersionMigratesToTheLatest() {
+        for (from in 1 until LATEST) {
+            ApplicationProvider.getApplicationContext<Context>().deleteDatabase(DB)
+            helper.createDatabase(from).use { db ->
+                db.execSQL("INSERT INTO task (id, jobId, title, done, punch, createdAt, updatedAt, source) VALUES ('t$from', 'j1', 'Hang door', 0, 0, 1, 1, 'FIELD_LOG')")
+            }
+            helper.runMigrationsAndValidate(LATEST).use { db ->
+                assertThat(db.texts("SELECT title FROM task WHERE id = 't$from'")).containsExactly("Hang door")
+            }
+        }
+    }
+
+    // The latest version is the one Room exports for the current code (see SchemaVersionGuardTest).
+    @Test fun latestIsTheCompiledVersion() {
+        ApplicationProvider.getApplicationContext<Context>().deleteDatabase(DB)
+        helper.createDatabase(LATEST).use { db ->
+            assertThat(db.count("PRAGMA user_version")).isEqualTo(LATEST.toLong())
+        }
+        val db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
+            .allowMainThreadQueries().build()
+        try {
+            assertThat(db.openHelper.readableDatabase.version).isEqualTo(LATEST)
+        } finally {
+            db.close()
+        }
+    }
+
     private fun SQLiteConnection.count(sql: String): Long = prepare(sql).use { it.step(); it.getLong(0) }
 
     private fun SQLiteConnection.texts(sql: String): List<String> = prepare(sql).use { st ->
@@ -63,5 +92,8 @@ class HomeRecordMigrationTest {
 
     private companion object {
         const val DB = "migration-test.db"
+
+        /** HomeRecordDatabase.version; raise it with each new schema. */
+        const val LATEST = 3
     }
 }
