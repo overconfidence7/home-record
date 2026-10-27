@@ -34,6 +34,26 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // cr:sync-local-columns
+    @Test fun v2ToV3AddsR2KeyToPhotoAndNote() {
+        helper.createDatabase(DB, 2).use { db ->
+            db.execSQL("INSERT INTO photo (id, homeId, path, takenAt, tagsJson, annotationsJson, createdAt, updatedAt, source) VALUES ('p1', 'j1', '/m/p1.jpg', 1, '[]', '[]', 1, 1, 'FIELD_LOG')")
+            db.execSQL("INSERT INTO note (id, jobId, day, text, createdAt, updatedAt, source) VALUES ('n1', 'j1', '2026-10-27', 'Panel moved', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(DB, 3, true).use { db ->
+            db.query("SELECT path, r2Key FROM photo WHERE id = 'p1'").use {
+                assertThat(it.moveToFirst()).isTrue()
+                assertThat(it.getString(0)).isEqualTo("/m/p1.jpg")
+                assertThat(it.isNull(1)).isTrue()
+            }
+            db.query("SELECT text, r2Key FROM note WHERE id = 'n1'").use {
+                assertThat(it.moveToFirst()).isTrue()
+                assertThat(it.getString(0)).isEqualTo("Panel moved")
+                assertThat(it.isNull(1)).isTrue()
+            }
+        }
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }

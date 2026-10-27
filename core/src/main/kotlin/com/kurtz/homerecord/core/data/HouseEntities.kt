@@ -244,8 +244,11 @@ data class PhotoEntity(
     val itemId: String? = null,
     val jobId: String? = null,
     val stage: String? = null,
+    /** Where the bytes sit on this phone; "" when the photo came from another phone and is not downloaded. Local only. */
     val path: String,
     val thumbPath: String? = null,
+    /** The R2 object key once uploaded, so every phone can fetch the photo (cr:sync-local-columns). */
+    val r2Key: String? = null,
     val takenAt: Long,
     val lat: Double? = null,
     val lng: Double? = null,

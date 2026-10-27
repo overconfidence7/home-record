@@ -51,7 +51,7 @@ class SyncEngine(
      * only the fields that differ from the last server-confirmed row, so two devices editing different fields merge.
      */
     suspend fun recordChange(tenant: TenantRef, entity: String, entityId: String) {
-        val row = store.read(entity, entityId) ?: return
+        val row = store.read(entity, entityId)?.let { LocalColumns.strip(entity, it) } ?: return
         val updatedAt = row["updatedAt"]?.jsonPrimitive?.longOrNull ?: now()
         val deleted = row["deletedAt"]?.let { it.toString() != "null" } == true
         outbox.add(
@@ -140,17 +140,19 @@ class SyncEngine(
 
     /**
      * Read, merge and write in one transaction so a local edit cannot land between the read and the write. Only the
-     * fields in this row's unsent outbox payloads count as this device's edits (cr:sync-merge-race).
+     * fields in this row's unsent outbox payloads count as this device's edits (cr:sync-merge-race). The server row's
+     * device-local columns (sent by older builds) are ignored, so this phone keeps its own path and offline choice.
      */
     private suspend fun apply(tenant: TenantRef, pulledRow: PulledRow) = store.inTransaction {
+        val serverRow = LocalColumns.strip(pulledRow.entity, pulledRow.row)
         val local = store.read(pulledRow.entity, pulledRow.entityId)
         val payloads = outbox.pendingPayloadsFor(pulledRow.entity, pulledRow.entityId)
         val changedHere = payloads.flatMapTo(mutableSetOf()) { payload ->
             (runCatching { Json.parseToJsonElement(payload) }.getOrNull() as? JsonObject)?.keys ?: local?.keys.orEmpty()
         }
-        val merged = RowMerge.applyPulled(pulledRow.entity, local, payloads.isNotEmpty(), pulledRow.row, pulledRow.times, changedHere)
+        val merged = RowMerge.applyPulled(pulledRow.entity, local, payloads.isNotEmpty(), serverRow, pulledRow.times, changedHere)
         if (merged != local) store.write(pulledRow.entity, merged)
-        base.set(SyncBaseEntity("${pulledRow.entity}/${pulledRow.entityId}", pulledRow.row.toString(), tenant.key))
+        base.set(SyncBaseEntity("${pulledRow.entity}/${pulledRow.entityId}", serverRow.toString(), tenant.key))
     }
 
     private fun fail(failure: ApiFailure): ApiResult<SyncResult> {

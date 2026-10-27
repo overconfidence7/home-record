@@ -7,6 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.JobFileEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.data.RoomEntity
 import com.kurtz.homerecord.core.data.TaskEntity
 import kotlinx.coroutines.flow.first
@@ -355,5 +357,69 @@ class SyncEngineTest {
         val merged = RowMerge.applyPulled("task", row("Mine", 0, 50), true, row("Theirs", 1, 20), mapOf("title" to 20, "done" to 20), setOf("id", "title", "updatedAt"))
         assertThat(merged["title"]?.jsonPrimitive?.content).isEqualTo("Mine")
         assertThat(merged["done"]).isEqualTo(JsonPrimitive(1))
+    }
+    // cr:sync-local-columns: this phone's file path never goes out; the other phone stores the photo with its R2 key
+    @Test fun photoPathStaysOnThePhoneAndTheR2KeySyncs() = runTest {
+        dbA.photoDao().upsert(
+            PhotoEntity(id = "p1", homeId = "j1", jobId = "j1", path = "/data/a/media/p1.jpg", thumbPath = "/data/a/media/p1_t.jpg", r2Key = "c1/photo/p1/p1.jpg", takenAt = 5, createdAt = 5, updatedAt = 5),
+        )
+        a.recordChange(tenant, "photo", "p1")
+        val payload = dbA.outboxDao().pending().single().payload
+        assertThat(payload).doesNotContain("/data/a")
+        assertThat(payload).contains("r2Key")
+        a.sync(tenant); b.sync(tenant)
+        val onB = dbB.photoDao().get("p1")!!
+        assertThat(onB.path).isEmpty()
+        assertThat(onB.thumbPath).isNull()
+        assertThat(onB.r2Key).isEqualTo("c1/photo/p1/p1.jpg")
+    }
+
+    // cr:sync-local-columns, AC-F20: Available offline and the cached path are per phone and survive the other phone's edit
+    @Test fun jobFileOfflineAndPathAreKeptWhenTheOtherPhoneEdits() = runTest {
+        val file = JobFileEntity(id = "f1", jobId = "j1", name = "Plans.pdf", path = "/a/Plans.pdf", r2Key = "c1/job_file/f1/Plans.pdf", mime = "application/pdf", createdAt = 1, updatedAt = 1)
+        dbA.jobFileDao().upsert(file)
+        a.recordChange(tenant, "job_file", "f1")
+        a.sync(tenant); b.sync(tenant)
+        assertThat(dbB.jobFileDao().get("f1")?.path).isNull()
+        dbB.jobFileDao().upsert(dbB.jobFileDao().get("f1")!!.copy(path = "/b/offline/Plans.pdf", offline = true))
+        dbA.jobFileDao().upsert(dbA.jobFileDao().get("f1")!!.copy(name = "Plans rev B.pdf", updatedAt = 30))
+        a.recordChange(tenant, "job_file", "f1")
+        a.sync(tenant); b.sync(tenant)
+        val onB = dbB.jobFileDao().get("f1")!!
+        assertThat(onB.name).isEqualTo("Plans rev B.pdf")
+        assertThat(onB.path).isEqualTo("/b/offline/Plans.pdf")
+        assertThat(onB.offline).isTrue()
+        assertThat(dbA.jobFileDao().get("f1")?.offline).isFalse()
+    }
+
+    // cr:sync-local-columns: a row an older build pushed with its own path and offline flag does not overwrite this phone's
+    @Test fun pulledLocalColumnsFromAnOlderBuildAreIgnored() = runTest {
+        dbB.jobFileDao().upsert(JobFileEntity(id = "f2", jobId = "j1", name = "Permit.pdf", path = "/b/Permit.pdf", mime = "application/pdf", createdAt = 1, updatedAt = 1))
+        server.extraPulled += PulledRow(
+            "job_file", "f2",
+            JsonObject(
+                mapOf(
+                    "id" to JsonPrimitive("f2"), "jobId" to JsonPrimitive("j1"), "name" to JsonPrimitive("Permit signed.pdf"),
+                    "path" to JsonPrimitive("/a/cache/Permit.pdf"), "offline" to JsonPrimitive(1), "mime" to JsonPrimitive("application/pdf"),
+                    "createdAt" to JsonPrimitive(1), "updatedAt" to JsonPrimitive(40),
+                ),
+            ),
+            serverSeq = 1,
+        )
+        b.sync(tenant)
+        val onB = dbB.jobFileDao().get("f2")!!
+        assertThat(onB.name).isEqualTo("Permit signed.pdf")
+        assertThat(onB.path).isEqualTo("/b/Permit.pdf")
+        assertThat(onB.offline).isFalse()
+        assertThat(dbB.syncBaseDao().get("job_file/f2")).doesNotContain("/a/cache")
+    }
+
+    @Test fun localColumnRule() {
+        assertThat(LocalColumns.isLocal("photo", "path")).isTrue()
+        assertThat(LocalColumns.isLocal("photo", "thumbPath")).isTrue()
+        assertThat(LocalColumns.isLocal("note", "voicePath")).isTrue()
+        assertThat(LocalColumns.isLocal("job_file", "offline")).isTrue()
+        assertThat(LocalColumns.isLocal("photo", "r2Key")).isFalse()
+        assertThat(LocalColumns.isLocal("task", "offline")).isFalse()
     }
 }

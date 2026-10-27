@@ -21,7 +21,9 @@ interface RowStore {
 
 /**
  * [RowStore] over the Room database's tables; [entity] is the table name and is checked against the schema.
- * [write] keeps only the table's columns, so a row from a newer app version with extra fields still lands.
+ * [write] keeps only the table's columns, so a row from a newer app version with extra fields still lands, and fills a
+ * missing NOT NULL column with its empty value ("" or 0), so a pulled row without this phone's local columns
+ * ([LocalColumns], e.g. a photo's `path`) can be stored.
  */
 class RoomRowStore(private val db: RoomDatabase) : RowStore {
     private val tables: Set<String> by lazy {
@@ -32,15 +34,22 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
         names
     }
 
-    private val columns = java.util.concurrent.ConcurrentHashMap<String, Set<String>>()
+    private class Column(val notNull: Boolean, val type: String, val hasDefault: Boolean)
 
-    private fun columnsOf(entity: String): Set<String> = columns.getOrPut(entity) {
-        val names = mutableSetOf<String>()
+    private val columns = java.util.concurrent.ConcurrentHashMap<String, Map<String, Column>>()
+
+    private fun columnsOf(entity: String): Map<String, Column> = columns.getOrPut(entity) {
+        val out = mutableMapOf<String, Column>()
         db.openHelper.readableDatabase.query("PRAGMA table_info(`$entity`)").use {
             val name = it.getColumnIndexOrThrow("name")
-            while (it.moveToNext()) names += it.getString(name)
+            val type = it.getColumnIndexOrThrow("type")
+            val notNull = it.getColumnIndexOrThrow("notnull")
+            val default = it.getColumnIndexOrThrow("dflt_value")
+            while (it.moveToNext()) {
+                out[it.getString(name)] = Column(it.getInt(notNull) == 1, it.getString(type).uppercase(), !it.isNull(default))
+            }
         }
-        names
+        out
     }
 
     override suspend fun read(entity: String, id: String): JsonObject? {
@@ -75,6 +84,15 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
                 p.booleanOrNull != null -> values.put(column, if (p.booleanOrNull == true) 1 else 0)
                 p.longOrNull != null -> values.put(column, p.longOrNull)
                 else -> values.put(column, p.doubleOrNull)
+            }
+        }
+        for ((column, info) in known) {
+            if (column in row || !info.notNull || info.hasDefault) continue
+            when (info.type) {
+                "TEXT" -> values.put(column, "")
+                "REAL" -> values.put(column, 0.0)
+                "BLOB" -> values.put(column, ByteArray(0))
+                else -> values.put(column, 0L)
             }
         }
         db.openHelper.writableDatabase.insert(entity, android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE, values)

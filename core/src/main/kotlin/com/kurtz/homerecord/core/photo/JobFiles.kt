@@ -45,12 +45,18 @@ class JobFiles(
 
     suspend fun move(id: String, folder: String): Boolean = update(id) { it.copy(folder = clean(folder)) }
 
-    /** "Available offline" (AC-F20): the caller downloads the bytes and passes the local [path] when turning it on. */
+    /**
+     * "Available offline" (AC-F20): the caller downloads the bytes and passes the local [path] when turning it on.
+     * Per phone, so it is not synced ([com.kurtz.homerecord.core.sync.LocalColumns]).
+     */
     suspend fun setOffline(id: String, offline: Boolean, path: String? = null): Boolean =
-        update(id) { it.copy(offline = offline, path = if (offline) path ?: it.path else null) }
+        updateLocal(id) { it.copy(offline = offline, path = if (offline) path ?: it.path else null) }
 
-    /** Records where the bytes sit on this phone and whether they are kept offline; a null [path] means not on the phone. */
-    suspend fun setLocal(id: String, offline: Boolean, path: String?): Boolean = update(id) { it.copy(offline = offline, path = path) }
+    /**
+     * Records where the bytes sit on this phone and whether they are kept offline; a null [path] means not on the phone.
+     * Both are this phone's own, so the row is not queued for sync.
+     */
+    suspend fun setLocal(id: String, offline: Boolean, path: String?): Boolean = updateLocal(id) { it.copy(offline = offline, path = path) }
 
     /** Remembers the R2 key once the upload finishes, so other phones (and this one after Free up) can download it. */
     suspend fun setKey(id: String, r2Key: String): Boolean = update(id) { it.copy(r2Key = r2Key) }
@@ -89,6 +95,12 @@ class JobFiles(
     private suspend fun update(id: String, change: (JobFileEntity) -> JobFileEntity): Boolean {
         val row = db.jobFileDao().get(id) ?: return false
         save(change(row).copy(updatedAt = now()))
+        return true
+    }
+
+    private suspend fun updateLocal(id: String, change: (JobFileEntity) -> JobFileEntity): Boolean {
+        val row = db.jobFileDao().get(id) ?: return false
+        db.jobFileDao().upsert(change(row))
         return true
     }
 

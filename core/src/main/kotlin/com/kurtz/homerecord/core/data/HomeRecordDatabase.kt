@@ -48,9 +48,13 @@ import androidx.room.migration.AutoMigrationSpec
         SyncBaseEntity::class,
         MediaUploadEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
+        // v3 (CR2b2): r2Key on photo and note.
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun homeDao(): HomeDao

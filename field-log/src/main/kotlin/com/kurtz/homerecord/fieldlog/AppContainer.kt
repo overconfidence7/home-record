@@ -64,9 +64,11 @@ class AppContainer(private val app: Application) {
     val mediaUploader by lazy {
         com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi, onUploaded = { row, presigned ->
             // Remember where the file lives in R2 so other phones, and this one after Free up, can download it (AC-F20).
-            if (row.entity == "job_file") jobFiles.setKey(row.entityId, presigned.key.ifEmpty { row.key.orEmpty() })
+            uploadedKeys.record(row.entity, row.entityId, presigned.key.ifEmpty { row.key.orEmpty() })
         })
     }
+    private val uploadedKeys by lazy { com.kurtz.homerecord.core.media.UploadedKeys(db, onChange = ::recordChange) }
+
     val mediaCache by lazy {
         com.kurtz.homerecord.core.media.MediaCache(
             java.io.File(app.cacheDir, "downloads"),
