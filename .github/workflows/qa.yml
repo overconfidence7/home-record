@@ -184,7 +184,7 @@ jobs:
         if: needs.prepare.outputs.has_backend == 'true'
         run: |
           cd backend && npm ci --no-audit --no-fund > /dev/null 2>&1
-          echo 'JWT_SECRET=qa-dev-only-secret-not-for-production-0123456789' > .dev.vars
+          printf 'JWT_SECRET=qa-dev-only-secret-not-for-production-0123456789\nENVIRONMENT=dev\n' > .dev.vars
           npx wrangler d1 migrations apply homerecord --local > ../qa-out/wrangler-migrate.log 2>&1 || echo "migrations failed; see wrangler-migrate.log"
           (npx wrangler dev --port 8787 --local > ../qa-out/wrangler-${{ matrix.app }}.log 2>&1 &)
           for i in $(seq 1 30); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done || echo "backend did not answer; device tests that need it will report it"
@@ -256,7 +256,7 @@ jobs:
         if: needs.prepare.outputs.has_backend == 'true'
         run: |
           cd backend && npm ci --no-audit --no-fund > /dev/null 2>&1
-          echo 'JWT_SECRET=qa-dev-only-secret-not-for-production-0123456789' > .dev.vars
+          printf 'JWT_SECRET=qa-dev-only-secret-not-for-production-0123456789\nENVIRONMENT=dev\n' > .dev.vars
           npx wrangler d1 migrations apply homerecord --local > ../qa-out/wrangler-migrate.log 2>&1 || echo "migrations failed; see wrangler-migrate.log"
           (npx wrangler dev --port 8787 --local > ../qa-out/wrangler-handoff.log 2>&1 &)
           for i in $(seq 1 30); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done || true

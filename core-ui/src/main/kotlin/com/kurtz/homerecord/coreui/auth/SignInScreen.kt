@@ -94,6 +94,7 @@ private fun errorText(result: AuthResult): String? = when (result) {
     AuthResult.InvalidCode -> stringResource(R.string.sign_in_err_invalid)
     AuthResult.CodeExpired -> stringResource(R.string.sign_in_err_expired)
     AuthResult.TooManyAttempts -> stringResource(R.string.sign_in_err_locked)
+    AuthResult.RateLimited -> stringResource(R.string.sign_in_err_rate_limited)
     AuthResult.Offline -> stringResource(R.string.sign_in_err_offline)
     AuthResult.Failed -> stringResource(R.string.sign_in_err_failed)
     AuthResult.Success -> null

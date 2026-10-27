@@ -57,6 +57,7 @@ class RetrofitAuthApi(private val service: AuthService) : AuthApi {
             "invalid_code" -> AuthResult.InvalidCode
             "expired" -> AuthResult.CodeExpired
             "locked", "too_many_attempts" -> AuthResult.TooManyAttempts
+            "rate_limited" -> AuthResult.RateLimited
             else -> AuthResult.Failed
         }
     }

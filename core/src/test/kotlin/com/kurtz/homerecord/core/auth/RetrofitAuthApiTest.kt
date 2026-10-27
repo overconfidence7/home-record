@@ -37,6 +37,7 @@ class RetrofitAuthApiTest {
         assertThat(result("""{"error":"invalid_code"}""")).isEqualTo(AuthResult.InvalidCode)
         assertThat(result("""{"error":"expired"}""")).isEqualTo(AuthResult.CodeExpired)
         assertThat(result("""{"error":"locked"}""")).isEqualTo(AuthResult.TooManyAttempts)
+        assertThat(result("""{"error":"rate_limited"}""")).isEqualTo(AuthResult.RateLimited) // AC-B1
         assertThat(result("not json")).isEqualTo(AuthResult.Failed)
     }
 

@@ -5,6 +5,7 @@ import { dev } from "./routes/dev";
 import { company } from "./routes/company";
 import { lookup } from "./routes/lookup";
 import { media, removeOrphanedMedia } from "./routes/media";
+import { pruneLimits } from "./auth/rateLimit";
 import { me } from "./routes/me";
 import { sync } from "./routes/sync";
 import { tenants } from "./routes/tenants";
@@ -32,5 +33,6 @@ app.onError((err, c) => {
 export default Object.assign(app, {
   scheduled: (_event: ScheduledEvent, env: AppEnv["Bindings"], ctx: ExecutionContext) => {
     ctx.waitUntil(removeOrphanedMedia(env));
+    ctx.waitUntil(pruneLimits(env.DB));
   },
 });

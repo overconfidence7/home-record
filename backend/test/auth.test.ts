@@ -1,10 +1,11 @@
 import { env } from "cloudflare:workers";
 import { SignJWT, generateKeyPair } from "jose";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import app from "../src/index";
 import { checkCode, hashCode } from "../src/auth/emailCode";
 import { verifyGoogleIdToken } from "../src/auth/google";
 import { verifyToken } from "../src/session";
+import { START_PER_EMAIL, hit } from "../src/auth/rateLimit";
 
 const post = (path: string, body: unknown) =>
   app.request(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }, env);
@@ -50,6 +51,59 @@ describe("AC-B1 email code", () => {
   });
   it("rejects malformed input", async () => {
     expect((await post("/auth/email/verify", { email: "nope", code: "12" })).status).toBe(400);
+  });
+});
+
+describe("AC-B1 sign-in rate limits", () => {
+  const from = (ip: string) => (path: string, body: unknown, e: object = env) =>
+    app.request(path, { method: "POST", headers: { "Content-Type": "application/json", "CF-Connecting-IP": ip }, body: JSON.stringify(body) }, e);
+  afterEach(() => vi.restoreAllMocks());
+
+  it("allows five code requests per email an hour, from any IP", async () => {
+    for (let i = 0; i < 5; i++) expect((await from(`10.0.1.${i}`)("/auth/email/start", { email: "flood@example.com" })).status).toBe(200);
+    const res = await from("10.0.1.9")("/auth/email/start", { email: "Flood@Example.com" });
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: "rate_limited" });
+  });
+  it("allows twenty code requests per IP an hour, across emails", async () => {
+    const ip = from("10.0.2.1");
+    for (let i = 0; i < 20; i++) expect((await ip("/auth/email/start", { email: `spray${i}@example.com` })).status).toBe(200);
+    expect((await ip("/auth/email/start", { email: "spray-last@example.com" })).status).toBe(429);
+    expect((await from("10.0.2.2")("/auth/email/start", { email: "spray-last@example.com" })).status).toBe(200);
+  });
+  it("a new code does not reset the guess count: ten checks an hour per email, then even the right code is refused", async () => {
+    let n = 0;
+    const guess = (code: string) => from(`10.0.3.${n++}`)("/auth/email/verify", { email: "guess@example.com", code });
+    await plantCode("guess@example.com", "424242");
+    for (let i = 0; i < 5; i++) expect((await guess("000000")).status).toBe(401);
+    expect(await (await guess("424242")).json()).toEqual({ error: "locked" });
+    await plantCode("guess@example.com", "434343"); // what a new /email/start does: fresh code, attempts 0
+    for (let i = 0; i < 4; i++) expect((await guess("000000")).status).toBe(401);
+    const refused = await guess("434343");
+    expect(refused.status).toBe(429);
+    expect(await refused.json()).toEqual({ error: "rate_limited" });
+  });
+  it("allows thirty code checks per IP an hour, across emails", async () => {
+    const ip = from("10.0.4.1");
+    for (let i = 0; i < 30; i++) expect((await ip("/auth/email/verify", { email: `ipguess${i}@example.com`, code: "000000" })).status).toBe(401);
+    await plantCode("ipguess-last@example.com", "515151");
+    expect((await ip("/auth/email/verify", { email: "ipguess-last@example.com", code: "515151" })).status).toBe(429);
+    expect((await from("10.0.4.2")("/auth/email/verify", { email: "ipguess-last@example.com", code: "515151" })).status).toBe(200);
+  });
+  it("a window resets after an hour", async () => {
+    const t = 1_800_000_000_000;
+    for (let i = 0; i < 5; i++) expect(await hit(env.DB, START_PER_EMAIL, "window@example.com", t + i)).toBe(true);
+    expect(await hit(env.DB, START_PER_EMAIL, "window@example.com", t + 10)).toBe(false);
+    expect(await hit(env.DB, START_PER_EMAIL, "window@example.com", t + 3_600_000)).toBe(true);
+  });
+  it("the local dev Worker has no limits and is the only place the code is logged", async () => {
+    const log = vi.spyOn(console, "log");
+    const devEnv = { ...env, ENVIRONMENT: "dev" };
+    for (let i = 0; i < 7; i++) expect((await from("10.0.5.1")("/auth/email/start", { email: "qa-loop@example.com" }, devEnv)).status).toBe(200);
+    expect(log.mock.calls.some((c) => String(c[0]).includes("sign-in code for qa-loop@example.com"))).toBe(true);
+    log.mockClear();
+    expect((await from("10.0.5.2")("/auth/email/start", { email: "quiet@example.com" })).status).toBe(200);
+    expect(log.mock.calls.some((c) => String(c[0]).includes("sign-in code"))).toBe(false);
   });
 });
 

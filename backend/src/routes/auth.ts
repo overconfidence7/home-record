@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { issueToken } from "../session";
 import { CODE_MINUTES, checkCode, generateCode, hashCode, normalizeEmail, sendCode } from "../auth/emailCode";
+import { type Limit, START_PER_EMAIL, START_PER_IP, VERIFY_PER_EMAIL, VERIFY_PER_IP, clientIp, hit, limitsApply } from "../auth/rateLimit";
 import { devCodeKey } from "./dev";
 import { verifyGoogleIdToken } from "../auth/google";
 
@@ -25,10 +26,19 @@ async function upsertUser(db: D1Database, email: string, name: string | null, go
   return id;
 }
 
+/** Counts the request against both the email's and the IP's limit; false when either is used up. */
+async function within(db: D1Database, perEmail: Limit, perIp: Limit, email: string, ip: string): Promise<boolean> {
+  const [emailOk, ipOk] = await Promise.all([hit(db, perEmail, email), hit(db, perIp, ip)]);
+  return emailOk && ipOk;
+}
+
 auth.post("/email/start", async (c) => {
   const parsed = emailSchema.safeParse(await c.req.json().catch(() => null));
   if (!parsed.success) return c.json({ error: "bad_request" }, 400);
   const email = normalizeEmail(parsed.data.email);
+  if (limitsApply(c.env) && !(await within(c.env.DB, START_PER_EMAIL, START_PER_IP, email, clientIp(c.req.raw.headers)))) {
+    return c.json({ error: "rate_limited" }, 429);
+  }
   const code = generateCode();
   await c.env.DB.prepare(
     "INSERT INTO email_codes (email, code_hash, expires_at, attempts) VALUES (?, ?, ?, 0) " +
@@ -45,6 +55,9 @@ auth.post("/email/verify", async (c) => {
   const parsed = verifySchema.safeParse(await c.req.json().catch(() => null));
   if (!parsed.success) return c.json({ error: "bad_request" }, 400);
   const email = normalizeEmail(parsed.data.email);
+  if (limitsApply(c.env) && !(await within(c.env.DB, VERIFY_PER_EMAIL, VERIFY_PER_IP, email, clientIp(c.req.raw.headers)))) {
+    return c.json({ error: "rate_limited" }, 429);
+  }
   const result = await checkCode(c.env.DB, email, parsed.data.code);
   if (result !== "ok") return c.json({ error: result === "invalid" ? "invalid_code" : result }, 401);
   const userId = await upsertUser(c.env.DB, email, null, null);

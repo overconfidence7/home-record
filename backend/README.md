@@ -27,6 +27,10 @@ npx wrangler dev
 
 For `npx wrangler dev`, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<any long string>`; without it `/auth/email/verify` answers 500. The QA workflow writes one itself.
 
+## Sign-in rate limits
+
+`/auth/email/start` allows 5 codes per email and 20 per IP an hour; `/auth/email/verify` allows 10 checks per email (across codes, so asking for a new code does not reset it) and 30 per IP an hour, on top of the 5 wrong guesses one code allows. Over a limit the answer is 429 `{"error":"rate_limited"}`. Counters live in the D1 table `auth_limits` (migration 0006), pruned by the daily cron. The limits are off when `ENVIRONMENT=dev` (the local Worker the QA suite signs in to many times a run); they hold in every other environment, tests included. The code is logged to the console only in dev.
+
 ## Tenancy
 
 Every row belongs to a company (Field Log) or a home (House Manual). `requireSession` loads the caller's memberships; tenant routes use `requireTenant()`, which answers 404 for any tenant the caller is not in, so other tenants are indistinguishable from missing ones.

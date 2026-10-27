@@ -49,7 +49,7 @@ dev.post("/seed", async (c) => {
 async function resetAll(env: AppEnv["Bindings"]) {
   const tables = [
     "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
-    "memberships", "email_codes", "companies", "homes", "users",
+    "memberships", "email_codes", "auth_limits", "companies", "homes", "users",
   ];
   await env.DB.batch(tables.map((t) => env.DB.prepare(`DELETE FROM ${t}`)));
   let cursor: string | undefined;

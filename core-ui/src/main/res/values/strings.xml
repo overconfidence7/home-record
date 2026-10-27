@@ -33,6 +33,7 @@
     <string name="sign_in_err_invalid">That code is not right. Check it and try again.</string>
     <string name="sign_in_err_expired">That code has expired. Go back and send a new one.</string>
     <string name="sign_in_err_locked">Too many wrong codes. Go back and send a new one.</string>
+    <string name="sign_in_err_rate_limited">Too many tries for now. Wait an hour, then try again.</string>
     <string name="sign_in_err_offline">Can\'t reach the server. Check your connection and try again.</string>
     <string name="sign_in_err_failed">Couldn\'t sign in. Try again in a minute.</string>
     <string name="account_signed_in">You are signed in.</string>

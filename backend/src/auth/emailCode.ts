@@ -35,10 +35,10 @@ export async function checkCode(db: D1Database, email: string, code: string, now
   return "ok";
 }
 
-/** Sends through Resend; in dev (no key) logs the code instead. */
+/** Sends through Resend. Without a key the code is logged only in dev; production fails the send, and tests just skip it. */
 export async function sendCode(env: { RESEND_API_KEY?: string; ENVIRONMENT: string }, email: string, code: string): Promise<boolean> {
   if (!env.RESEND_API_KEY) {
-    console.log(`[dev] sign-in code for ${email}: ${code}`);
+    if (env.ENVIRONMENT === "dev") console.log(`[dev] sign-in code for ${email}: ${code}`);
     return env.ENVIRONMENT !== "production";
   }
   const res = await fetch("https://api.resend.com/emails", {

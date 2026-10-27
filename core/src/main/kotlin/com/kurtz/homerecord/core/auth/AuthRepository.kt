@@ -16,6 +16,9 @@ sealed interface AuthResult {
     data object InvalidCode : AuthResult
     data object CodeExpired : AuthResult
     data object TooManyAttempts : AuthResult
+
+    /** The backend refused more codes or checks for this email or network for now (AC-B1 rate limits). */
+    data object RateLimited : AuthResult
     data object Offline : AuthResult
     data object Failed : AuthResult
 }
