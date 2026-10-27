@@ -95,10 +95,11 @@ class CaptureViewModelTest {
 
     private fun vm(
         jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true, store: ViewModelStore = ViewModelStore(),
+        granted: () -> Boolean = { hasCamera },
     ): CaptureViewModel {
         val photos = JobPhotos(db, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L })
         val deps = CaptureDeps(
-            jobId, db.jobDao(), db.roomDao(), photos, location, { last }, { room, phase -> remembered = room to phase }, { hasCamera },
+            jobId, db.jobDao(), db.roomDao(), photos, location, { last }, { room, phase -> remembered = room to phase }, granted,
             notes = JobNotes(db, { null }, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L }),
             recorder = recorder, newMemoPath = { "/media/memo.m4a" }, appScope = appScope,
         )
@@ -219,6 +220,28 @@ class CaptureViewModelTest {
         assertThat(vm.state.value.access).isEqualTo(CameraAccess.Unknown)
         vm.onEvent(CaptureEvent.PermissionResult(false))
         assertThat(vm.state.value.access).isEqualTo(CameraAccess.Denied)
+    }
+
+    // AC-F29: granted in Settings while away, the camera opens on return; revoked there, the denied state shows
+    @Test fun resumeRereadsTheCameraPermission() {
+        var granted = false
+        val vm = vm(hasCamera = false, granted = { granted })
+        vm.onEvent(CaptureEvent.PermissionResult(false))
+        vm.onEvent(CaptureEvent.Resumed)
+        assertThat(vm.state.value.access).isEqualTo(CameraAccess.Denied)
+        granted = true
+        vm.onEvent(CaptureEvent.Resumed)
+        assertThat(vm.state.value.access).isEqualTo(CameraAccess.Granted)
+        granted = false
+        vm.onEvent(CaptureEvent.Resumed)
+        assertThat(vm.state.value.access).isEqualTo(CameraAccess.Denied)
+    }
+
+    // AC-F29: the resume that follows the first system dialog does not cancel the pending ask
+    @Test fun resumeWhileAskingKeepsAsking() {
+        val vm = vm(hasCamera = false)
+        vm.onEvent(CaptureEvent.Resumed)
+        assertThat(vm.state.value.access).isEqualTo(CameraAccess.Unknown)
     }
 
     @Test fun missingJobReportsItAndSavesNothing() = runBlocking<Unit> {

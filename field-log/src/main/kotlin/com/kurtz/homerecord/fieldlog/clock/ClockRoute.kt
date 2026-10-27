@@ -12,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.kurtz.homerecord.core.location.LocationPermissions
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -30,11 +32,12 @@ fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier) {
     LaunchedEffect(state.requestPermission) {
         if (state.requestPermission) launcher.launch(LocationPermissions.ALL)
     }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.onEvent(ClockEvent.Resumed) }
     ClockScreen(
         state,
         { event ->
             if (event == ClockEvent.OpenSettings) {
-                vm.onEvent(ClockEvent.DismissGps)
+                vm.onEvent(ClockEvent.OpenSettings)
                 context.startActivity(
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),

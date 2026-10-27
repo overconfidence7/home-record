@@ -14,6 +14,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.lifecycle.awaitInstance
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -48,6 +51,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
     val scope = rememberCoroutineScope()
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.onEvent(CaptureEvent.PermissionResult(it)) }
     LaunchedEffect(state.access) { if (state.access == CameraAccess.Unknown) permission.launch(Manifest.permission.CAMERA) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.onEvent(CaptureEvent.Resumed) }
     val mic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         vm.onEvent(if (it) CaptureEvent.VoiceTap else CaptureEvent.MicDenied)
     }
@@ -84,7 +88,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
         val previewView = remember { PreviewView(context) }
         LaunchedEffect(state.access, state.lens) {
             if (state.access != CameraAccess.Granted) return@LaunchedEffect
-            val provider = ProcessCameraProvider.getInstance(context).get()
+            val provider = ProcessCameraProvider.awaitInstance(context)
             vm.onEvent(
                 CaptureEvent.CameraInfo(
                     hasBack = provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA),

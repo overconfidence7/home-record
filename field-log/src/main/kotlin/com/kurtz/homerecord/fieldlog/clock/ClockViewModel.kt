@@ -66,6 +66,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
 
     private var settings = CompanySettings()
     private var pending: String? = saved[PENDING] // "in", "switch" or "crew" while the reason sheet is open
+    private var lastKind: String? = null // the punch that last ran, retried when GPS was the blocker
 
     init {
         viewModelScope.launch { settings = d.settings() }
@@ -144,7 +145,16 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
             }
             ClockEvent.CancelReason -> { setPending(null); _state.update { it.copy(farReason = null) } }
             ClockEvent.DismissGps -> _state.update { it.copy(gpsRequired = null) }
-            ClockEvent.OpenSettings -> Unit // handled by ClockRoute
+            ClockEvent.OpenSettings -> {
+                // ClockRoute opens Settings; the punch the GPS dialog stopped runs again if location is allowed there.
+                saved[SETTINGS_RETRY] = lastKind
+                _state.update { it.copy(gpsRequired = null) }
+            }
+            ClockEvent.Resumed -> {
+                val retry = saved.get<String>(SETTINGS_RETRY) ?: return
+                saved[SETTINGS_RETRY] = null
+                if (d.location.hasPermission()) run(retry)
+            }
             is ClockEvent.ToggleCrew -> _state.update { s ->
                 if (s.crew.none { it.id == event.id && !it.onClock }) s
                 else {
@@ -167,6 +177,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         val s = _state.value
         val job = jobFor(s.selectedJobId)
         if (kind != "switch" && s.selectedJobId == null && s.jobs.isNotEmpty()) return // a job is required when the company has any
+        lastKind = kind
         if (kind == "crew") { runCrew(job, reason); return }
         act {
             when (kind) {
@@ -225,5 +236,6 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         const val NOTE = "note"
         const val PENDING = "pending"
         const val CREW = "crew"
+        const val SETTINGS_RETRY = "settingsRetry"
     }
 }

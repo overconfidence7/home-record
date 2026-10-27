@@ -159,6 +159,40 @@ class ClockViewModelTest {
         assertThat(vm.state.value.gpsRequired).isNull()
     }
 
+    // AC-F18: allowing location in Settings from the require-GPS dialog finishes the clock-in on return
+    @Test fun requireGpsRetriesTheClockInAfterSettings() = runBlocking<Unit> {
+        settings = CompanySettings(requireGps = true)
+        location.permitted = false; asked = true
+        val vm = vm()
+        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        await(vm) { it.gpsRequired == true }
+        vm.onEvent(ClockEvent.OpenSettings)
+        assertThat(vm.state.value.gpsRequired).isNull()
+        location.permitted = true
+        vm.onEvent(ClockEvent.Resumed)
+        await(vm) { it.status is ClockStatus.Working }
+        assertThat(kinds()).containsExactly(PunchKind.IN)
+        vm.onEvent(ClockEvent.ClockOut)
+        await(vm) { it.status is ClockStatus.Out }
+        vm.onEvent(ClockEvent.Resumed) // a later return from anywhere punches nothing
+        assertThat(kinds()).containsExactly(PunchKind.IN, PunchKind.OUT).inOrder()
+    }
+
+    // AC-F18: back from Settings still without location, nothing is punched and nothing is retried later
+    @Test fun requireGpsStillDeniedAfterSettingsPunchesNothing() = runBlocking<Unit> {
+        settings = CompanySettings(requireGps = true)
+        location.permitted = false; asked = true
+        val vm = vm()
+        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        await(vm) { it.gpsRequired == true }
+        vm.onEvent(ClockEvent.OpenSettings)
+        vm.onEvent(ClockEvent.Resumed)
+        location.permitted = true
+        vm.onEvent(ClockEvent.Resumed)
+        assertThat(kinds()).isEmpty()
+        assertThat(vm.state.value.status).isEqualTo(ClockStatus.Out)
+    }
+
     @Test fun farFromJobAsksForAReasonThenSaves() = runBlocking<Unit> {
         location.fix = GeoFix(34.1, -118.0, 5f) // about 7 miles away
         val vm = vm()

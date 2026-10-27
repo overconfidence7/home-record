@@ -102,6 +102,14 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             CaptureEvent.Flip -> { wantFront = !wantFront; applyLens() }
             is CaptureEvent.PermissionResult ->
                 _state.update { it.copy(access = if (event.granted) CameraAccess.Granted else CameraAccess.Denied) }
+            CaptureEvent.Resumed -> _state.update {
+                val now = when {
+                    d.hasCameraPermission() -> CameraAccess.Granted
+                    it.access == CameraAccess.Granted -> CameraAccess.Denied // revoked in Settings while away
+                    else -> it.access // still asking, or still denied
+                }
+                it.copy(access = now)
+            }
             is CaptureEvent.CameraInfo -> { hasBack = event.hasBack; hasFront = event.hasFront; applyLens() }
             is CaptureEvent.Captured -> save(listOf(event.path), pairWithGhost = true)
             CaptureEvent.ToggleGhost -> _state.update { it.copy(ghostOn = !it.ghostOn) }

@@ -79,6 +79,9 @@ sealed interface ClockEvent {
     data object CancelReason : ClockEvent
     data object DismissGps : ClockEvent
     data object OpenSettings : ClockEvent
+
+    /** The screen came back to the front, maybe from Settings after [OpenSettings] (AC-F18). */
+    data object Resumed : ClockEvent
     data object DismissNotice : ClockEvent
     data class ToggleCrew(val id: String) : ClockEvent
     data object ClockInCrew : ClockEvent

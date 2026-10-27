@@ -42,6 +42,9 @@ sealed interface CaptureEvent {
     data object CycleFlash : CaptureEvent
     data object Flip : CaptureEvent
     data class PermissionResult(val granted: Boolean) : CaptureEvent
+
+    /** The screen came back to the front, maybe from Settings: re-read the camera permission (AC-F29). */
+    data object Resumed : CaptureEvent
     data class CameraInfo(val hasBack: Boolean, val hasFront: Boolean) : CaptureEvent
 
     /** Shutter button or volume key. The route takes the picture and answers with [Captured] or [CaptureFailed]. */
