@@ -1494,3 +1494,17 @@ Auto entry review (0 new, 12 still open):
 Coverage note: the auto entry reports 114/114 claimed ACs covered across 44 ticked tasks (0 gaps). Per [cr:cov-task-regex] the gate skips subtasks such as T040b3 and so does not yet count AC-F26 (annotate), which has no device test or flow.
 
 Judged: 22 screenshots opened (13 House Manual device shots: both failure shots, H01, H02 ×2, H03, H05, H06, and tour shots in dark, 200% and landscape; 7 Field Log device and crawler shots: tour launch, Today, Clock, Jobs, F02 More, and annotate light, measure, 200% and empty; 1 House Manual crawler item-detail; 1 builder reference AnnotateScreenshot_Light; plus PNG sizes checked for all 15 landscape tour shots), the other ~1060 PNGs (crawler variants of unchanged screens, handoff duplicates) not opened; 18 walkthrough steps. New issues: 6. Product gaps: 0.
+
+## QA auto 2026-10-27 (commit 66a79a5)
+
+Automated suite run at 2026-10-27 03:19 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Unit test com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest.typedNoteSavesToTheJobAndClosesTheDialog fails [auto:unit:com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest.typedNoteSavesToTheJobAndClosesTheDialog] - steps: automated, see qa-results branch latest/ for commit 66a79a5 - expected: test passes (CLAUDE.md: never weaken tests) - actual: com.google.common.truth.AssertionErrorWithFacts: expected to be false
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H02b-shape-doors-stairs], [auto:flow:house-manual:H04-add-item], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, field-log F09 Pass, field-log F09b Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: field-log jank:field-log (gfxinfo reported no frames); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 70 device stages, 631 unit tests, 79 backend tests, coverage 117/117 ACs. Passed: 56. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
