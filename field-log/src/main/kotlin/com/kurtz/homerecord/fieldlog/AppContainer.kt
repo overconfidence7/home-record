@@ -106,6 +106,33 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    private val localWipe by lazy {
+        com.kurtz.homerecord.core.data.LocalDataWipe(
+            clearTables = { db.clearAllTables() },
+            dirs = listOf(
+                java.io.File(app.filesDir, "media"), java.io.File(app.filesDir, "offline-files"),
+                java.io.File(app.cacheDir, "downloads"), java.io.File(app.cacheDir, "exports"),
+            ),
+            clearPrefs = WIPED_PREFS.map { name -> { app.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().commit(); Unit } },
+            exclusive = { block -> syncEngine.exclusive { block() } },
+        )
+    }
+
+    /**
+     * Sign-out the person asked for (More, Welcome, the no-account prompt): ends the session, then removes the company's
+     * data from this phone and refreshes the clock widget (AC-F4). A 401 only ends the session, so unsent work survives
+     * an expired token.
+     */
+    suspend fun signOutAndWipe() {
+        auth.signOut()
+        localWipe.run()
+        runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
+    }
+
+    fun signOut() {
+        scope.launch(Dispatchers.IO) { signOutAndWipe() }
+    }
+
     init {
         // A company left or signed out of starts from scratch next time (cr:sync-global-cursor).
         scope.launch { companyTenant.endedTenants().collect { syncEngine.forgetTenant(it) } }
@@ -316,6 +343,11 @@ class AppContainer(private val app: Application) {
     val pendingJoinCode = MutableStateFlow<String?>(null)
 
     fun inviteLink(code: String): String = "${BuildConfig.API_BASE_URL.trimEnd('/')}/join/$code"
+
+    private companion object {
+        /** This app's own preferences; `sync` (device id) and the token store are not company data. */
+        val WIPED_PREFS = listOf("capture", "clock", "media", "blueprint_layers")
+    }
 }
 
 class HomeRecordApplication : Application() {

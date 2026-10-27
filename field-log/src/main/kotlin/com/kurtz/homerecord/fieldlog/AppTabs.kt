@@ -70,7 +70,7 @@ fun FieldLogApp(container: AppContainer) {
         }
         state is CompanyState.NoCompany -> Scaffold {
             val pending by container.pendingJoinCode.collectAsState()
-            WelcomeRoute(container.company, pending, onSignOut = container.auth::signOut, modifier = Modifier.padding(it))
+            WelcomeRoute(container.company, pending, onSignOut = container::signOut, modifier = Modifier.padding(it))
         }
         state is CompanyState.Failed -> Scaffold {
             val scope = rememberCoroutineScope()
@@ -117,9 +117,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 key.depth == 0 && key.title == "more" -> {
                     var storage by remember { mutableStateOf<com.kurtz.homerecord.core.photo.FileStorage?>(null) }
                     val scope = rememberCoroutineScope()
+                    val unsynced by container.syncEngine.pendingCount.collectAsState(0)
                     LaunchedEffect(Unit) { storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() } }
                     MoreScreen(
-                    MoreUiState(membership.companyName, membership.role, storage),
+                    MoreUiState(membership.companyName, membership.role, storage, unsynced),
                     onEvent = { event ->
                         when (event) {
                             MoreEvent.OpenTeam -> nav.push(TeamKey)
@@ -130,7 +131,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                                 withContext(Dispatchers.IO) { container.jobFileTransfers.freeUp() }
                                 storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() }
                             }
-                            MoreEvent.SignOut -> container.auth.signOut()
+                            MoreEvent.SignOut -> container.signOut()
                         }
                     },
                     )
@@ -142,7 +143,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 key.depth == 0 && key.title == "clock" -> {
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
-                    if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.auth.signOut() }, Modifier)
+                    if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
                     else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) })
                 }
                 key.depth == 0 -> PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
@@ -207,7 +208,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         entry<TimesheetsKey> {
             val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
             val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
-            if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.auth.signOut() }, Modifier)
+            if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
             else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId) }, onBack = nav::pop)
         }
         entry<ReportsKey> {

@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.company.CompanyRole
@@ -35,8 +36,11 @@ import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.company.roleLabel
 
-/** [storage] is what job files hold on this phone (AC-F20); null while it is being counted. */
-data class MoreUiState(val companyName: String, val role: CompanyRole, val storage: FileStorage? = null)
+/**
+ * [storage] is what job files hold on this phone (AC-F20); null while it is being counted. [unsynced] is the count of
+ * changes not yet sent, which sign-out would delete (AC-F4).
+ */
+data class MoreUiState(val companyName: String, val role: CompanyRole, val storage: FileStorage? = null, val unsynced: Int = 0)
 
 sealed interface MoreEvent {
     data object OpenTeam : MoreEvent
@@ -111,11 +115,19 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             modifier = Modifier.windowTestTags(),
             onDismissRequest = { confirmSignOut = false },
             title = { Text(stringResource(R.string.sign_out_title)) },
-            text = { Text(stringResource(R.string.sign_out_body)) },
+            text = {
+                Text(
+                    if (state.unsynced > 0) pluralStringResource(R.plurals.sign_out_body_unsynced, state.unsynced, state.unsynced)
+                    else stringResource(R.string.sign_out_body),
+                    modifier = Modifier.testTag("fl_more_sign_out_body"),
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { confirmSignOut = false; onEvent(MoreEvent.SignOut) }, modifier = Modifier.testTag("fl_more_sign_out_confirm")) { Text(stringResource(R.string.more_sign_out)) }
             },
-            dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text(stringResource(R.string.cancel)) } },
+            dismissButton = {
+                TextButton(onClick = { confirmSignOut = false }, modifier = Modifier.testTag("fl_more_sign_out_cancel")) { Text(stringResource(R.string.cancel)) }
+            },
         )
     }
 }

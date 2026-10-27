@@ -20,7 +20,8 @@ import java.util.concurrent.TimeUnit
 /**
  * Debug-only: `adb shell am broadcast -a com.kurtz.homerecord.fieldlog.qa.SEED -p <pkg> --es scenario regression|reset`.
  * Needs the dev backend (`ENVIRONMENT=dev`). `regression` seeds "QA Electric" with an Owner and a Crew member there and
- * signs this device in as the owner; `reset` signs out and wipes the backend. Result code 1 means done.
+ * signs this device in as the owner; `reset` signs out and wipes the backend. Both first clear this phone's Room
+ * tables, media and prefs (cr:fl-seed-reset). Result code 1 means done.
  */
 class SeedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -33,7 +34,7 @@ class SeedReceiver : BroadcastReceiver() {
                     "regression" -> {
                         val client = httpClient()
                         val base = BuildConfig.API_BASE_URL.trimEnd('/')
-                        container.auth.signOut()
+                        container.signOutAndWipe()
                         post(client, "$base/dev/seed", """{"scenario":"regression"}""")
                         val email = OWNER_EMAIL
                         container.auth.requestEmailCode(email)
@@ -43,7 +44,7 @@ class SeedReceiver : BroadcastReceiver() {
                         result == AuthResult.Success
                     }
                     "reset" -> {
-                        container.auth.signOut()
+                        container.signOutAndWipe()
                         post(httpClient(), "${BuildConfig.API_BASE_URL.trimEnd('/')}/dev/reset", "{}")
                         true
                     }

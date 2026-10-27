@@ -117,6 +117,10 @@
     <string name="more_sign_out">Sign out</string>
     <string name="sign_out_title">Sign out?</string>
     <string name="sign_out_body">Company details saved on this phone are cleared. Sign back in to load them again.</string>
+    <plurals name="sign_out_body_unsynced">
+        <item quantity="one">%d change has not reached the cloud yet. Signing out now deletes it from this phone. Connect to the internet and wait until it syncs, or sign out anyway.</item>
+        <item quantity="other">%d changes have not reached the cloud yet. Signing out now deletes them from this phone. Connect to the internet and wait until they sync, or sign out anyway.</item>
+    </plurals>
 
     <string name="team_title">Team</string>
     <string name="team_members_header">Members (%1$d)</string>

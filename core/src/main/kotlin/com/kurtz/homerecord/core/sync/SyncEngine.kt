@@ -129,6 +129,9 @@ class SyncEngine(
         }
     }
 
+    /** Runs [block] with no sync pass in flight; sign-out wipes the database inside it. */
+    suspend fun <T> exclusive(block: suspend () -> T): T = lock.withLock { block() }
+
     /**
      * Drops what this device knows of [tenant]'s server state (its pull cursor and confirmed rows) once the membership
      * ends, so a later return pulls from the start. Unsent outbox rows are kept; signing out decides about those.
