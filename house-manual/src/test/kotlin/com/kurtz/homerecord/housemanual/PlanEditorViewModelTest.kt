@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -199,6 +200,24 @@ class PlanEditorViewModelTest {
         vm.onEvent(PlanEditorEvent.DragEnd)
         assertThat(vm.state.value.flaggedIds).hasSize(2)
         assertThat(savedPlan(vm) { it.placed.size == 2 }.placed).hasSize(2)
+    }
+
+    // AC-C5: the editor counts as loaded only with its rooms in the state. Before, loading=false went out with an
+    // empty room list and a second update added the rooms from Room's thread; an edit made in between was overwritten
+    // (the cold-run NPEs in the two tests above). StateFlow may conflate the gap, so this guards the invariant
+    // rather than reproducing the race every time.
+    @Test fun loadedStateAlreadyHoldsTheFloorsRooms() = test {
+        val first = vm()
+        first.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        savedPlan(first) { it.placed.size == 1 }
+        val homeId = repo.observeHome().first()!!.id
+        val seen = java.util.Collections.synchronizedList(mutableListOf<Pair<Boolean, Int>>())
+        val second = PlanEditorViewModel(repo, homeId, SavedStateHandle(), newId = { "room-${ids++}" }).also { made += it }
+        val recorder = launch(Dispatchers.Unconfined) { second.state.collect { seen += it.loading to it.rooms.size } }
+        // The recorder always sees the latest value in the end; wait for it rather than for the flow itself.
+        withTimeout(10_000) { while (seen.toList().none { (loading, _) -> !loading }) delay(10) }
+        recorder.cancelAndJoin()
+        assertThat(seen.filter { (loading, _) -> !loading }.map { it.second }.distinct()).containsExactly(1)
     }
 
     @Test fun placeRoomGivesAnUnplacedRoomAShape() = test {

@@ -10,6 +10,7 @@ import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.plan.GridSnapper
 import com.kurtz.homerecord.housemodel.plan.PlanEditor
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanValidator
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -168,6 +169,9 @@ class PlanEditorViewModel(
         pendingEditShape = false
         saved[SELECTED] = keep
         saved[EDIT_SHAPE] = shape
+        val rooms = editor.rooms
+        // One update with the rooms: the editor counts as loaded only once its rooms are in the state, so a
+        // later refresh never lands an older room list over the first edit.
         _state.update {
             it.copy(
                 loading = false,
@@ -179,9 +183,8 @@ class PlanEditorViewModel(
                 selectedWall = null,
                 selectedOpeningId = null,
                 fieldsVersion = it.fieldsVersion + 1,
-            )
+            ).withRooms(rooms)
         }
-        refresh()
     }
 
     private fun select(id: String?) {
@@ -222,17 +225,17 @@ class PlanEditorViewModel(
 
     private fun refresh() {
         val rooms = editor.rooms
-        _state.update {
-            it.copy(
-                rooms = rooms,
-                canUndo = editor.canUndo,
-                canRedo = editor.canRedo,
-                flaggedIds = validator.flaggedRoomIds(rooms),
-                selectedOpeningId = it.selectedOpeningId?.takeIf { oid -> rooms.any { r -> r.openings.any { o -> o.id == oid } } },
-                selectedWall = it.selectedWall?.takeIf { e -> rooms.firstOrNull { r -> r.id == it.selectedId }?.let { r -> e in r.points.indices } == true },
-            )
-        }
+        _state.update { it.withRooms(rooms) }
     }
+
+    private fun PlanEditorUiState.withRooms(rooms: List<PlanRoom>): PlanEditorUiState = copy(
+        rooms = rooms,
+        canUndo = editor.canUndo,
+        canRedo = editor.canRedo,
+        flaggedIds = validator.flaggedRoomIds(rooms),
+        selectedOpeningId = selectedOpeningId?.takeIf { oid -> rooms.any { r -> r.openings.any { o -> o.id == oid } } },
+        selectedWall = selectedWall?.takeIf { e -> rooms.firstOrNull { r -> r.id == selectedId }?.let { r -> e in r.points.indices } == true },
+    )
 
     private fun setView(zoom: Float, panX: Float, panY: Float) {
         saved[ZOOM] = zoom
