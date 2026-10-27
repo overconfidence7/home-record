@@ -1658,3 +1658,18 @@ Auto entry review (1 new, 10 still open):
 Coverage note: the auto entry reports 117/117 claimed ACs covered across 45 ticked tasks (0 gaps); per [cr:cov-task-regex] subtasks such as T040b3 (AC-F26 annotate) are still not counted, and AC-F26 has no device flow.
 
 Judged: 88 screenshots (4 opened singly: H02b and H04 failure shots, H02b stairs, H04 item form; 84 in contact sheets: H01–H18 device shots, every House Manual and Field Log tour shot in dark and 200%, House Manual landscape, Field Log F01–F03, 24 crawler shots of new or changed screens, 1 builder reference `FilesEmptyScreenshot_Light`), plus PNG sizes for all 15 landscape tour shots; the other ~1070 (crawler variants of unchanged screens, handoff duplicates) not opened; 19 walkthrough steps. New issues: 8. Product gaps: 0.
+
+## QA auto 2026-10-27 (commit ee54ff8)
+
+Automated suite run at 2026-10-27 17:47 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Unit test com.kurtz.homerecord.housemanual.PlanEditorViewModelTest.tapAWallThenAddDoorSelectsItAndSaves fails [auto:unit:com.kurtz.homerecord.housemanual.PlanEditorViewModelTest.tapAWallThenAddDoorSelectsItAndSaves] - steps: automated, see qa-results branch latest/ for commit ee54ff8 - expected: test passes (CLAUDE.md: never weaken tests) - actual: java.lang.NullPointerException
+- [ ] [Major] Flow H04-add-item fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H04-add-item] - steps: automated, see qa-results branch latest/ for commit ee54ff8 - expected: walkthrough step H04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H04-add-item.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:logcat:handoff:com.kurtz.homerecord.fieldlog], [auto:logcat:handoff:com.kurtz.homerecord.housemanual], [auto:coldstart:house-manual:house-manual], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, field-log F09 Pass, field-log F09b Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: field-log jank:field-log (gfxinfo reported no frames); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 71 device stages, 670 unit tests, 95 backend tests, coverage 117/117 ACs. Passed: 58. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
