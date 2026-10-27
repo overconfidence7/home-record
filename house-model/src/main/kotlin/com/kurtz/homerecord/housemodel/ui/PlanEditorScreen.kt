@@ -542,8 +542,8 @@ private fun ConfirmDeleteDialog(title: String, body: String, onConfirm: () -> Un
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(body) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.house_room_delete)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.testTag("hm_plan_delete_confirm")) { Text(stringResource(R.string.house_room_delete)) } },
+        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("hm_plan_delete_cancel")) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -710,12 +710,12 @@ private fun StairRow(state: PlanEditorUiState, stair: PlanStair, onEvent: (PlanE
     }
     val target = state.floors.firstOrNull { it.id == stair.toFloorId }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+        OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_plan_stairs_link")) {
             Text(
                 if (target != null) stringResource(R.string.plan_stairs_to, target.name) else stringResource(R.string.plan_stairs_unlinked),
             )
         }
-        IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp)) {
+        IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("hm_plan_delete_stairs")) {
             Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_stairs))
         }
     }

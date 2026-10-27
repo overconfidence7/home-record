@@ -19,5 +19,11 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Delete stairs"
 - takeScreenshot: H02b-stairs
 - tapOn: "Delete stairs"
+# Deleting asks first (ui-standards rule 16)
+- assertVisible: "Delete these stairs?"
+- tapOn:
+    id: "hm_plan_delete_confirm"
+- assertNotVisible:
+    id: "hm_plan_delete_stairs"
 - tapOn: "Back"
 - assertVisible: "Kitchen"
