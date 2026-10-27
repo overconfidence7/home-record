@@ -1578,3 +1578,16 @@ Tested: 70 device stages, 631 unit tests, 79 backend tests, coverage 117/117 ACs
 Not built yet: H9, H10, H11, H12, H13, H14, H15, H16, H17, H18, H19, F9, F10, F11, F12, F13, F14, F16, F17.
 
 Tested: AC-F19, AC-F20, AC-F23, AC-F24, AC-F25, AC-F26, AC-F27, AC-C30, AC-U1..AC-U12. Passed: 18. New issues: 1. Product gaps: 0. Walkthrough: HM 8/8, FL 9/9.
+## QA auto 2026-10-27 (commit 58cbfb0)
+
+Automated suite run at 2026-10-27 11:37 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow H02b-shape-doors-stairs fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H02b-shape-doors-stairs] - steps: automated, see qa-results branch latest/ for commit 58cbfb0 - expected: walkthrough step H02b passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H02b-shape-doors-stairs.log
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:instrumented:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:instrumented:house-manual:house-manual], [auto:flow:house-manual:H04-add-item], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, field-log F09 Pass, field-log F09b Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Fail, house-manual H03 Pass, house-manual H04 Fail, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 71 device stages, 656 unit tests, 92 backend tests, coverage 117/117 ACs. Passed: 58. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
