@@ -119,6 +119,9 @@ class SyncEngine(
                 pulled += page.rows.size
                 if (page.serverSeq > since) cursors.set(SyncCursorEntity(tenant.kind.wire, tenant.id, page.serverSeq))
             } while (page.more)
+            // Accepted rows the pull has confirmed are done; keep the outbox bounded (cr:outbox-growth). Outbox ids
+            // are AUTOINCREMENT, so a pruned id is never reused and the server's (device, outbox id) dedupe holds.
+            cursors.get(tenant.kind.wire, tenant.id)?.let { outbox.pruneConfirmed(tenant.kind.wire, tenant.id, it) }
             _phase.value = SyncPhase.Idle
             ApiResult.Ok(SyncResult(pushed, pulled, conflicts))
         } catch (e: kotlinx.coroutines.CancellationException) {

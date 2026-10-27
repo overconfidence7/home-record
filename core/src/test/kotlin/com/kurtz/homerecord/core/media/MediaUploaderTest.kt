@@ -136,6 +136,29 @@ class MediaUploaderTest {
         assertThat(net.presigns).isEqualTo(2)
     }
 
+    // cr:upload-rejected-loop
+    @Test fun aFreshUrlTheServerKeepsRefusingStopsAfterTheLimit() = runBlocking<Unit> {
+        val id = enqueue()
+        repeat(MediaUploader.MAX_ATTEMPTS) { net.putOutcomes += PutOutcome.Rejected }
+        repeat(MediaUploader.MAX_ATTEMPTS + 2) { uploader.runPending() }
+        assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("failed")
+        assertThat(net.puts).hasSize(MediaUploader.MAX_ATTEMPTS)
+        uploader.retryFailed()
+        assertThat(uploader.runPending().uploaded).isEqualTo(1)
+    }
+
+    @Test fun aRefusedReusedUrlDoesNotCountAgainstTheFile() = runBlocking<Unit> {
+        val id = enqueue()
+        net.putOutcomes += PutOutcome.Failed
+        uploader.runPending()
+        assertThat(db.mediaUploadDao().get(id)?.attempts).isEqualTo(1)
+        clock += 10 * 60_000
+        net.putOutcomes += PutOutcome.Rejected
+        uploader.runPending()
+        assertThat(db.mediaUploadDao().get(id)?.attempts).isEqualTo(1)
+        assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("queued")
+    }
+
     @Test fun repeatedServerFailureStopsThenRetryFailedRequeues() = runBlocking<Unit> {
         val id = enqueue()
         repeat(MediaUploader.MAX_ATTEMPTS) {

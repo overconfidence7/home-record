@@ -262,6 +262,42 @@ class SyncEngineTest {
         assertThat(dbB.roomDao().get("r1")).isNull()
     }
 
+    private fun outboxRows(db: HomeRecordDatabase): List<Pair<Long, Long?>> =
+        db.openHelper.readableDatabase.query("SELECT seq, serverSeq FROM outbox ORDER BY seq").use { c ->
+            buildList { while (c.moveToNext()) add(c.getLong(0) to if (c.isNull(1)) null else c.getLong(1)) }
+        }
+
+    // cr:outbox-growth
+    @Test fun pulledBackRowsArePrunedRefusedAndUnsentRowsStay() = runTest {
+        server.refused = setOf("room")
+        saveRoom(dbA, a, room("[]", "Kitchen", 10))
+        save(dbA, a, task("Patch drywall", 11))
+        a.sync(tenant)
+        // The accepted task row is gone; the refused room row stays for the log.
+        assertThat(outboxRows(dbA).map { it.second }).containsExactly(SyncEngine.REFUSED)
+        assertThat(a.refusedCount.first()).isEqualTo(1)
+        server.online = false
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Offline edit", updatedAt = 12))
+        a.sync(tenant)
+        assertThat(outboxRows(dbA)).hasSize(2)
+        assertThat(a.pendingCount.first()).isEqualTo(1)
+        server.online = true
+        a.sync(tenant); b.sync(tenant)
+        assertThat(outboxRows(dbA)).hasSize(1)
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Offline edit")
+    }
+
+    // cr:outbox-growth: the server dedupes by (device, outbox id), so a pruned id must never come back
+    @Test fun outboxIdsAreNotReusedAfterPruning() = runTest {
+        save(dbA, a, task("Patch drywall", 10))
+        a.sync(tenant)
+        assertThat(outboxRows(dbA)).isEmpty()
+        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Second coat", updatedAt = 11))
+        assertThat(outboxRows(dbA).single().first).isEqualTo(2L)
+        a.sync(tenant); b.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Second coat")
+    }
+
     // cr:sync-exceptions
     @Test fun anExceptionDuringSyncEndsAsFailedNotStuckSyncing() = runTest {
         server.throwOnPull = IllegalStateException("bad response")

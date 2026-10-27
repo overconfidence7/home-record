@@ -88,8 +88,19 @@ class MediaUploader(
                 Step.Done
             }
             PutOutcome.Offline -> back(current, offline = true)
-            // Expired or refused signature: drop it so the next try asks for a fresh one, right away.
-            PutOutcome.Rejected -> { dao.save(current.copy(state = "queued", putUrl = null, putExpiresAt = 0, attempts = current.attempts + 1, nextAttemptAt = now())); Step.Waiting }
+            // Expired or refused signature: drop it so the next try asks for a fresh one, right away. Only a URL that
+            // was fresh in this pass and is still refused counts, so a file the server keeps refusing stops after
+            // MAX_ATTEMPTS instead of looping (cr:upload-rejected-loop).
+            PutOutcome.Rejected -> {
+                val attempts = if (presigned != null) current.attempts + 1 else current.attempts
+                if (attempts >= MAX_ATTEMPTS) {
+                    dao.save(current.copy(state = "failed", attempts = attempts, putUrl = null, putExpiresAt = 0))
+                    Step.Failed
+                } else {
+                    dao.save(current.copy(state = "queued", putUrl = null, putExpiresAt = 0, attempts = attempts, nextAttemptAt = now()))
+                    Step.Waiting
+                }
+            }
             PutOutcome.Failed -> back(current, offline = false)
         }
     }

@@ -31,7 +31,7 @@ class PdfMarkupTest {
             .allowMainThreadQueries().build()
         files = JobFiles(db, { clock })
         markup = PdfMarkup(
-            db, { src, marks, dest -> written += Triple(src, marks, dest); writeOk },
+            db, { src, marks, dest -> written += Triple(src, marks, dest); writeOk }, { "/files/media/" },
             { _, _, id, _, _, _ -> uploads += id }, { company }, { 42L }, { clock },
         )
     }
@@ -57,6 +57,16 @@ class PdfMarkupTest {
         assertThat(kept.path).isEqualTo("/m/plan.pdf")
         assertThat(kept.version).isEqualTo(1)
         assertThat(uploads).containsExactly(id)
+    }
+
+    // cr:pdfmarkup-cache-loss: a markup of a downloaded plan is this phone's own file, kept out of the download cache
+    @Test fun markupOfADownloadIsWrittenToMediaNotBesideTheDownload() = runBlocking<Unit> {
+        val downloaded = files.add("j1", "Plans", "Plan.pdf", "/cache/downloads/abc.pdf", "application/pdf", 10, "Sam")
+        val id = markup.saveVersion(downloaded.id, mark, "Maria")
+        val v2 = db.jobFileDao().get(requireNotNull(id))
+        assertThat(v2?.path).isEqualTo("/files/media/$id.pdf")
+        assertThat(written.single().third).isEqualTo("/files/media/$id.pdf")
+        assertThat(v2?.offline).isTrue()
     }
 
     @Test fun historyListsEveryVersionNewestFirstAndListShowsOnlyTheLatest() = runBlocking<Unit> {

@@ -24,11 +24,14 @@ fun interface MarkedPdfWriter {
 
 /**
  * Marks drawn on a PDF page are saved as a new version of the file with the author and time; the original is never
- * modified (AC-F21). Each version points at the one before it through `parentFileId`.
+ * modified (AC-F21). Each version points at the one before it through `parentFileId`. A new version is this phone's own
+ * file, not a download, so it is written to [mediaDir] (`filesDir/media`), never beside a source in the download cache
+ * where Free up or trimming would drop it before it is uploaded (cr:pdfmarkup-cache-loss, AC-F20).
  */
 class PdfMarkup(
     private val db: HomeRecordDatabase,
     private val writer: MarkedPdfWriter,
+    private val mediaDir: () -> String,
     private val queueUpload: suspend (TenantRef, entity: String, entityId: String, filename: String, path: String, mime: String) -> Unit,
     private val companyId: () -> String?,
     private val sizeOf: (String) -> Long = { java.io.File(it).length() },
@@ -42,8 +45,7 @@ class PdfMarkup(
         val source = file.path ?: return null
         if (file.mime != PDF_MIME) return null
         val id = Ids.newId()
-        val dir = source.substringBeforeLast('/', "")
-        val dest = (if (dir.isEmpty()) "" else "$dir/") + "$id.pdf"
+        val dest = "${mediaDir().trimEnd('/')}/$id.pdf"
         if (!writer.write(source, marks, dest)) return null
         val t = now()
         db.jobFileDao().upsert(
