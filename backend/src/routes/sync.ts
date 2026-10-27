@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv, TenantKind } from "../env";
 import { membershipFor, requireSession, requireTenant } from "../tenancy";
 import { mergeRow, type FieldTimes, type Row } from "../sync/merge";
+import { ADMIN_ROLES, accessFor, canPush, visibleRow, visibleTimes, type Access } from "../sync/policy";
 
 export const sync = new Hono<AppEnv>();
 
@@ -22,7 +23,8 @@ const ENTITIES: Record<TenantKind, Set<string>> = {
   company: new Set([...COMPANY_ENTITIES, ...JOB_HOME_ENTITIES]),
   home: new Set(HOME_ENTITIES),
 };
-const AUTHORITATIVE_ROLES = new Set(["owner", "office"]);
+// Home tenants have no per-role gate; every home member edits the whole home.
+const OPEN_ACCESS = (userId: string): Access => ({ role: "owner", userId, leadJobs: new Set() });
 const PAGE = 500;
 
 const PushBody = z.object({
@@ -54,8 +56,10 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const accepted: { outboxId: number; serverSeq: number }[] = [];
   const conflicts: { entity: string; entityId: string; field: string; reason: string }[] = [];
   // A refused op is answered on its own and the rest of the batch still applies, so one bad row never blocks a phone.
-  const rejected: { outboxId: number; reason: "entity" | "payload" }[] = [];
-  const authoritative = AUTHORITATIVE_ROLES.has(role);
+  const rejected: { outboxId: number; reason: "entity" | "payload" | "role" }[] = [];
+  const authoritative = ADMIN_ROLES.has(role);
+  const userId = c.get("session").userId;
+  const access = kind === "company" ? await accessFor(db, tenantId, userId, role) : OPEN_ACCESS(userId);
 
   for (const op of ops) {
     if (!ENTITIES[kind].has(op.entity)) {
@@ -83,8 +87,14 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
       .prepare("SELECT row_json, times_json, authoritative FROM sync_rows WHERE tenant_kind = ? AND tenant_id = ? AND entity = ? AND entity_id = ?")
       .bind(kind, tenantId, op.entity, op.entityId)
       .first<{ row_json: string; times_json: string; authoritative: number }>();
+    const storedRow = stored ? (JSON.parse(stored.row_json) as Row) : null;
+    // AC-B3: a role may only touch the rows AC-F3 gives it; the refusal is per op like the others.
+    if (!canPush(access, op.entity, storedRow, incoming)) {
+      rejected.push({ outboxId: op.outboxId, reason: "role" });
+      continue;
+    }
     const merged = mergeRow(
-      stored ? { row: JSON.parse(stored.row_json), times: JSON.parse(stored.times_json) as FieldTimes, authoritative: stored.authoritative === 1 } : null,
+      stored && storedRow ? { row: storedRow, times: JSON.parse(stored.times_json) as FieldTimes, authoritative: stored.authoritative === 1 } : null,
       incoming,
       op.updatedAt,
       authoritative,
@@ -129,22 +139,26 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
 
 sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireTenant(), async (c) => {
   const kind = kindOf(c.req.param("kind"));
+  const tenantId = c.req.param("tenantId");
   const since = Number(c.req.query("since") ?? "0");
   if (!Number.isInteger(since) || since < 0) return c.json({ error: "invalid" }, 400);
+  const session = c.get("session");
+  const role = membershipFor(session, kind, tenantId)?.role ?? "";
+  const access = kind === "company" ? await accessFor(c.env.DB, tenantId, session.userId, role) : OPEN_ACCESS(session.userId);
   const { results } = await c.env.DB.prepare(
     `SELECT entity, entity_id, row_json, times_json, server_seq FROM sync_rows
      WHERE tenant_kind = ? AND tenant_id = ? AND server_seq > ? ORDER BY server_seq LIMIT ?`,
   )
-    .bind(kind, c.req.param("tenantId"), since, PAGE + 1)
+    .bind(kind, tenantId, since, PAGE + 1)
     .all<{ entity: string; entity_id: string; row_json: string; times_json: string; server_seq: number }>();
   const more = results.length > PAGE;
-  const rows = results.slice(0, PAGE).map((r) => ({
-    entity: r.entity,
-    entityId: r.entity_id,
-    row: JSON.parse(r.row_json),
-    times: JSON.parse(r.times_json),
-    serverSeq: r.server_seq,
-  }));
-  return c.json({ rows, serverSeq: rows.length ? rows[rows.length - 1].serverSeq : since, more });
+  const page = results.slice(0, PAGE);
+  // Rows this role may not see are skipped, but the cursor still moves past them (AC-B3).
+  const rows = page.flatMap((r) => {
+    const row = visibleRow(access, r.entity, JSON.parse(r.row_json) as Row);
+    if (!row) return [];
+    return [{ entity: r.entity, entityId: r.entity_id, row, times: visibleTimes(access, r.entity, JSON.parse(r.times_json)), serverSeq: r.server_seq }];
+  });
+  return c.json({ rows, serverSeq: page.length ? page[page.length - 1].server_seq : since, more });
 });
 

@@ -31,7 +31,7 @@ describe("AC-B2 dev routes", () => {
     for (const path of ["/dev/last-code?email=a@b.co", "/dev/reset", "/dev/seed"]) {
       expect((await call(path, { method: path.includes("last") ? "GET" : "POST" }, prod)).status).toBe(404);
     }
-    await post("/auth/email/start", { email: "p@example.com" }, prod).catch(() => null);
+    await Promise.resolve(post("/auth/email/start", { email: "p@example.com" }, prod)).catch(() => null);
     expect(await env.CACHE.get("devcode:p@example.com")).toBeNull();
   });
 });
