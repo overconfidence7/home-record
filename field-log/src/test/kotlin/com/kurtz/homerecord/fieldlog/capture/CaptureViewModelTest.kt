@@ -226,8 +226,10 @@ class CaptureViewModelTest {
         vm.onEvent(CaptureEvent.SaveNote)
         val rows = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }
         assertThat(rows.single().text).isEqualTo("Move the island")
-        assertThat(vm.state.value.noteOpen).isFalse()
-        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.NoteSaved)
+        // The row lands before the view model's continuation updates the state, so wait for the state too.
+        val after = withTimeout(10_000) { vm.state.first { it.message == CaptureMessage.NoteSaved } }
+        assertThat(after.noteOpen).isFalse()
+        assertThat(after.noteText).isEmpty()
     }
 
     // AC-F27
@@ -250,8 +252,8 @@ class CaptureViewModelTest {
         val row = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }.single()
         assertThat(row.voicePath).isEqualTo("/media/memo.m4a")
         assertThat(row.transcript).isNull()
-        assertThat(vm.state.value.recording).isFalse()
-        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.MemoSaved)
+        val after = withTimeout(10_000) { vm.state.first { it.message == CaptureMessage.MemoSaved } }
+        assertThat(after.recording).isFalse()
     }
 
     // AC-F27
