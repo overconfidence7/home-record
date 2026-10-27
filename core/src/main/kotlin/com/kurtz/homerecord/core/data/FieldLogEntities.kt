@@ -160,7 +160,10 @@ data class NoteEntity(
     val jobId: String,
     val day: String,
     val text: String = "",
+    /** The voice memo on this phone. Local only. */
     val voicePath: String? = null,
+    /** The memo's R2 object key once uploaded (cr:sync-local-columns). */
+    val r2Key: String? = null,
     val transcript: String? = null,
     val createdAt: Long,
     val updatedAt: Long,

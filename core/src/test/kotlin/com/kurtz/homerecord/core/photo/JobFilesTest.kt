@@ -76,6 +76,8 @@ class JobFilesTest {
         assertThat(db.jobFileDao().get(f.id)!!.path).isNull()
         files.setOffline(f.id, true, "/m/new.pdf")
         assertThat(db.jobFileDao().get(f.id)!!.path).isEqualTo("/m/new.pdf")
+        // cr:sync-local-columns: where the bytes sit and Available offline are this phone's own, never queued for sync
+        assertThat(changes).containsExactly(f.id)
         assertThat(files.delete(f.id)).isTrue()
         assertThat(files.list("j1", "").files).isEmpty()
         assertThat(files.delete(f.id)).isFalse()
