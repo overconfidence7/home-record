@@ -29,3 +29,5 @@
 
 - Decision to confirm (CR1, cr:ci-probe-sha): the QA suite and judge each commit to `build` after testing, so `build` HEAD is always a QA commit and Definition of done item 2 ("qa/last-tested.txt equals the current build HEAD") can never hold literally. Builder will read it as "equals the newest commit that changes anything other than REVIEW.md, PROGRESS.md and qa/last-tested.txt" (CR2m). Confirm, or change CLAUDE.md's wording.
 - Decision to confirm (CR1, cr:dev-env-default): the backend has not been deployed. Before the first `wrangler deploy` (once CLOUDFLARE_API_TOKEN arrives), CR2f must land: today a plain deploy would expose /dev/last-code and /dev/reset in production.
+- Decision to confirm (CR2e1): through sync, Crew and Sub cannot write job files, daily logs, change orders, materials or the job's house plan (rooms, walls, doors, stairs); Lead can, on jobs they are on (house rows on any job, since they carry no job id). Crew captures (photos, notes) are allowed on every job of the company, not only jobs they are assigned to. Say if crew should draw on FL-House or add receipts.
+
