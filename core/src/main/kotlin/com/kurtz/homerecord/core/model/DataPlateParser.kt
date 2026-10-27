@@ -31,7 +31,8 @@ object DataPlateParser {
     private val code = Regex("""^[A-Z0-9][A-Z0-9\-/.]{3,}$""")
 
     fun parse(rawLines: List<String>): DataPlateProposal {
-        val lines = rawLines.map { it.trim().replace(Regex("\\s+"), " ") }.filter { it.isNotEmpty() }
+        // Real labels repeat lines ("120V", "WARNING"); one copy is enough to tap and keeps list keys unique.
+        val lines = rawLines.map { it.trim().replace(Regex("\\s+"), " ") }.filter { it.isNotEmpty() }.distinct()
         var model: String? = null
         var serial: String? = null
         for ((i, line) in lines.withIndex()) {

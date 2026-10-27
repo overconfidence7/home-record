@@ -61,6 +61,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.coreui.components.DateField
 import com.kurtz.homerecord.coreui.components.FormScaffold
@@ -340,7 +341,7 @@ fun PlateScanContent(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
                 }
             }
         }
-        items(scan.lines, key = { it }) { line ->
+        itemsIndexed(scan.lines, key = { i, _ -> "line_$i" }) { _, line ->
             ListItem(
                 headlineContent = { Text(line) },
                 modifier = Modifier.clickable { onEvent(ItemEditEvent.PlateAssign(line)) }.heightIn(min = 48.dp).testTag("hm_item_plate_line"),

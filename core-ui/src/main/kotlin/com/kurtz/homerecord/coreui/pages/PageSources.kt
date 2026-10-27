@@ -8,8 +8,6 @@ import android.os.ParcelFileDescriptor
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -59,11 +57,11 @@ private class PdfPages(file: File) : PageSource {
         fd.close()
         throw e
     }
-    private val lock = Mutex() // PdfRenderer allows one open page at a time
+    private val gate = RenderGate() // PdfRenderer allows one open page at a time, and close must wait for it
     override val pageCount = renderer.pageCount
 
     override suspend fun render(index: Int, widthPx: Int): ImageBitmap? = withContext(Dispatchers.IO) {
-        lock.withLock {
+        gate.use {
             runCatching {
                 renderer.openPage(index).use { page ->
                     val height = (widthPx.toFloat() * page.height / page.width).toInt().coerceAtLeast(1)
@@ -76,7 +74,7 @@ private class PdfPages(file: File) : PageSource {
         }
     }
 
-    override fun close() {
+    override fun close() = gate.close {
         renderer.close()
         fd.close()
     }

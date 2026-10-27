@@ -3,6 +3,9 @@ package com.kurtz.homerecord.housemanual.items
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -309,15 +312,27 @@ fun DocumentsCard(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) 
 fun AttachDocumentSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     if (!state.showAttach) return
     ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ItemDetailEvent.HideAttach) }) {
-        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.item_detail_attach_title), style = MaterialTheme.typography.titleLarge)
-            if (state.attachable.isEmpty()) Text(stringResource(R.string.item_detail_attach_empty), style = MaterialTheme.typography.bodyLarge)
-            state.attachable.forEach { doc ->
-                TextButton(
-                    onClick = { onEvent(ItemDetailEvent.AttachDocument(doc.id)) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_item_detail_attach_row"),
-                ) { Text(doc.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge) }
-            }
+        AttachDocumentContent(state, onEvent)
+    }
+}
+
+/** The sheet's scrolling list, so every document in a full home stays reachable at 200% text; tests draw it. */
+@Composable
+fun AttachDocumentContent(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    LazyColumn(
+        Modifier.testTag("hm_item_detail_attach_list"),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item(key = "title") { Text(stringResource(R.string.item_detail_attach_title), style = MaterialTheme.typography.titleLarge) }
+        if (state.attachable.isEmpty()) {
+            item(key = "empty") { Text(stringResource(R.string.item_detail_attach_empty), style = MaterialTheme.typography.bodyLarge) }
+        }
+        items(state.attachable, key = { it.id }) { doc ->
+            TextButton(
+                onClick = { onEvent(ItemDetailEvent.AttachDocument(doc.id)) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_item_detail_attach_row"),
+            ) { Text(doc.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge) }
         }
     }
 }

@@ -42,6 +42,7 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
     screenshotTestImplementation(libs.compose.ui.tooling)
     screenshotTestImplementation(libs.screenshot.validation.api)
 }

@@ -40,4 +40,12 @@ class DataPlateParserTest {
         assertThat(DataPlateParser.parse(listOf("A.O. Smith")).make).isNull() // spacing variant not in list; user taps the line
         assertThat(DataPlateParser.parse(listOf("AO SMITH")).make).isEqualTo("A. O. Smith")
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C31")
+    fun repeatedLinesAreListedOnce() {
+        val p = DataPlateParser.parse(listOf("WARNING", "120V", "MODEL: XE50T10H45U0", "120V", " WARNING ", "120  V"))
+        assertThat(p.lines).containsExactly("WARNING", "120V", "MODEL: XE50T10H45U0", "120 V").inOrder()
+        assertThat(p.model).isEqualTo("XE50T10H45U0")
+    }
 }
