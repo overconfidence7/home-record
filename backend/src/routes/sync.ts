@@ -43,6 +43,89 @@ const PushBody = z.object({
     .max(200),
 });
 
+type PushOp = z.infer<typeof PushBody>["ops"][number];
+type Applied =
+  | { result: "accepted"; seq: number; conflicts: ReturnType<typeof mergeRow>["conflicts"] }
+  | { result: "role" }
+  | { result: "busy" };
+const TRIES = 10;
+
+// The row's server_seq, or -1 while it does not exist: the version a write compares against (?1..?2 tenant, ?5..?6 row).
+const ROW_VERSION = `COALESCE((SELECT server_seq FROM sync_rows
+  WHERE tenant_kind = ?1 AND tenant_id = ?2 AND entity = ?5 AND entity_id = ?6), -1)`;
+// True inside the write batch once this op (?3 device, ?4 outbox row) took the tenant's newest seq and the row is
+// still at the version the merge was computed from (?7).
+const CLAIMED = `EXISTS (SELECT 1 FROM sync_applied a JOIN sync_counters c ON c.tenant_kind = a.tenant_kind AND c.tenant_id = a.tenant_id
+  WHERE a.tenant_kind = ?1 AND a.tenant_id = ?2 AND a.device_id = ?3 AND a.outbox_id = ?4 AND a.server_seq = c.seq)
+  AND ${ROW_VERSION} = ?7`;
+
+/**
+ * Applies one op as a compare-and-swap (cr:sync-seq-race). The idempotency record and the stored row are read in one
+ * batch, the merge runs here, and the write is one batch (one transaction) that claims the next seq, bumps the
+ * counter, logs conflicts and writes the row only while the row is still at the version that was read. A concurrent
+ * push that changed the row first makes the batch a no-op and the op is merged again on the new row, so no edit is
+ * lost, a seq is never taken without its row, and a retried duplicate is acknowledged instead of failing.
+ */
+async function applyOp(
+  db: D1Database, kind: TenantKind, tenantId: string, deviceId: string, op: PushOp, incoming: Row,
+  access: Access, authoritative: boolean,
+): Promise<Applied> {
+  for (let attempt = 0; attempt < TRIES; attempt++) {
+    const [doneRes, storedRes] = await db.batch([
+      db.prepare("SELECT server_seq FROM sync_applied WHERE tenant_kind = ? AND tenant_id = ? AND device_id = ? AND outbox_id = ?")
+        .bind(kind, tenantId, deviceId, op.outboxId),
+      db.prepare(
+        "SELECT row_json, times_json, authoritative, server_seq FROM sync_rows WHERE tenant_kind = ? AND tenant_id = ? AND entity = ? AND entity_id = ?",
+      ).bind(kind, tenantId, op.entity, op.entityId),
+    ]);
+    const done = (doneRes.results as { server_seq: number }[])[0];
+    if (done) return { result: "accepted", seq: done.server_seq, conflicts: [] };
+    const stored = (storedRes.results as { row_json: string; times_json: string; authoritative: number; server_seq: number }[])[0];
+    const storedRow = stored ? (JSON.parse(stored.row_json) as Row) : null;
+    // AC-B3: a role may only touch the rows AC-F3 gives it; the refusal is per op like the others.
+    if (!canPush(access, op.entity, storedRow, incoming)) return { result: "role" };
+    const merged = mergeRow(
+      stored && storedRow ? { row: storedRow, times: JSON.parse(stored.times_json) as FieldTimes, authoritative: stored.authoritative === 1 } : null,
+      incoming,
+      op.updatedAt,
+      authoritative,
+      op.entity,
+    );
+    // Only punches become authoritative: an Owner/Office edit of a punch pins it against crew writes.
+    const pin = op.entity === "punch" && authoritative && stored ? 1 : (stored?.authoritative ?? 0);
+    const key = [kind, tenantId, deviceId, op.outboxId, op.entity, op.entityId, stored?.server_seq ?? -1] as const;
+    const results = await db.batch([
+      db.prepare("INSERT OR IGNORE INTO sync_counters (tenant_kind, tenant_id, seq) VALUES (?, ?, 0)").bind(kind, tenantId),
+      db.prepare(
+        `INSERT OR IGNORE INTO sync_applied (tenant_kind, tenant_id, device_id, outbox_id, server_seq)
+         SELECT ?1, ?2, ?3, ?4, seq + 1 FROM sync_counters WHERE tenant_kind = ?1 AND tenant_id = ?2 AND ${ROW_VERSION} = ?7`,
+      ).bind(...key),
+      db.prepare(
+        `UPDATE sync_counters SET seq = seq + 1 WHERE tenant_kind = ?1 AND tenant_id = ?2 AND EXISTS (SELECT 1 FROM sync_applied a
+           WHERE a.tenant_kind = ?1 AND a.tenant_id = ?2 AND a.device_id = ?3 AND a.outbox_id = ?4 AND a.server_seq = sync_counters.seq + 1)
+         RETURNING seq`,
+      ).bind(...key.slice(0, 4)),
+      ...merged.conflicts.map((x) =>
+        db.prepare(
+          `INSERT INTO sync_conflicts (tenant_kind, tenant_id, entity, entity_id, field, kept_json, dropped_json, reason, device_id, at)
+           SELECT ?1, ?2, ?5, ?6, ?8, ?9, ?10, ?11, ?3, ?12 WHERE ${CLAIMED}`,
+        ).bind(...key, x.field, JSON.stringify(x.kept ?? null), JSON.stringify(x.dropped ?? null), x.reason, Date.now()),
+      ),
+      // Last, because writing the row moves its version and ends the claim.
+      db.prepare(
+        `INSERT INTO sync_rows (tenant_kind, tenant_id, entity, entity_id, row_json, times_json, authoritative, server_seq)
+         SELECT ?1, ?2, ?5, ?6, ?8, ?9, ?10, c.seq FROM sync_counters c WHERE c.tenant_kind = ?1 AND c.tenant_id = ?2 AND ${CLAIMED}
+         ON CONFLICT (tenant_kind, tenant_id, entity, entity_id) DO UPDATE SET
+           row_json = excluded.row_json, times_json = excluded.times_json,
+           authoritative = excluded.authoritative, server_seq = excluded.server_seq`,
+      ).bind(...key, JSON.stringify(merged.row), JSON.stringify(merged.times), pin),
+    ]);
+    const bumped = (results[2].results as { seq: number }[])[0];
+    if (bumped) return { result: "accepted", seq: bumped.seq, conflicts: merged.conflicts };
+  }
+  return { result: "busy" };
+}
+
 const kindOf = (param: string): TenantKind => (param === "companies" ? "company" : "home");
 
 sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, requireTenant(), async (c) => {
@@ -75,64 +158,15 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
       rejected.push({ outboxId: op.outboxId, reason: "payload" });
       continue;
     }
-    const done = await db
-      .prepare("SELECT server_seq FROM sync_applied WHERE tenant_kind = ? AND tenant_id = ? AND device_id = ? AND outbox_id = ?")
-      .bind(kind, tenantId, deviceId, op.outboxId)
-      .first<{ server_seq: number }>();
-    if (done) {
-      accepted.push({ outboxId: op.outboxId, serverSeq: done.server_seq });
-      continue;
-    }
-    const stored = await db
-      .prepare("SELECT row_json, times_json, authoritative FROM sync_rows WHERE tenant_kind = ? AND tenant_id = ? AND entity = ? AND entity_id = ?")
-      .bind(kind, tenantId, op.entity, op.entityId)
-      .first<{ row_json: string; times_json: string; authoritative: number }>();
-    const storedRow = stored ? (JSON.parse(stored.row_json) as Row) : null;
-    // AC-B3: a role may only touch the rows AC-F3 gives it; the refusal is per op like the others.
-    if (!canPush(access, op.entity, storedRow, incoming)) {
+    const outcome = await applyOp(db, kind, tenantId, deviceId, op, incoming, access, authoritative);
+    if (outcome.result === "role") {
       rejected.push({ outboxId: op.outboxId, reason: "role" });
       continue;
     }
-    const merged = mergeRow(
-      stored && storedRow ? { row: storedRow, times: JSON.parse(stored.times_json) as FieldTimes, authoritative: stored.authoritative === 1 } : null,
-      incoming,
-      op.updatedAt,
-      authoritative,
-      op.entity,
-    );
-    await db.prepare("INSERT OR IGNORE INTO sync_counters (tenant_kind, tenant_id, seq) VALUES (?, ?, 0)").bind(kind, tenantId).run();
-    const counter = await db
-      .prepare("UPDATE sync_counters SET seq = seq + 1 WHERE tenant_kind = ? AND tenant_id = ? RETURNING seq")
-      .bind(kind, tenantId)
-      .first<{ seq: number }>();
-    const seq = counter?.seq ?? 0;
-    // Only punches become authoritative: an Owner/Office edit of a punch pins it against crew writes.
-    const pin = op.entity === "punch" && authoritative && stored !== null ? 1 : (stored?.authoritative ?? 0);
-    const statements = [
-      db
-        .prepare(
-          `INSERT INTO sync_rows (tenant_kind, tenant_id, entity, entity_id, row_json, times_json, authoritative, server_seq)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-           ON CONFLICT (tenant_kind, tenant_id, entity, entity_id) DO UPDATE SET
-             row_json = excluded.row_json, times_json = excluded.times_json,
-             authoritative = excluded.authoritative, server_seq = excluded.server_seq`,
-        )
-        .bind(kind, tenantId, op.entity, op.entityId, JSON.stringify(merged.row), JSON.stringify(merged.times), pin, seq),
-      db
-        .prepare("INSERT INTO sync_applied (tenant_kind, tenant_id, device_id, outbox_id, server_seq) VALUES (?, ?, ?, ?, ?)")
-        .bind(kind, tenantId, deviceId, op.outboxId, seq),
-      ...merged.conflicts.map((x) =>
-        db
-          .prepare(
-            `INSERT INTO sync_conflicts (tenant_kind, tenant_id, entity, entity_id, field, kept_json, dropped_json, reason, device_id, at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          )
-          .bind(kind, tenantId, op.entity, op.entityId, x.field, JSON.stringify(x.kept ?? null), JSON.stringify(x.dropped ?? null), x.reason, deviceId, Date.now()),
-      ),
-    ];
-    await db.batch(statements);
-    for (const x of merged.conflicts) conflicts.push({ entity: op.entity, entityId: op.entityId, field: x.field, reason: x.reason });
-    accepted.push({ outboxId: op.outboxId, serverSeq: seq });
+    // Lost the race on this row every try: stop here so later ops keep their order; the phone retries the rest.
+    if (outcome.result === "busy") break;
+    for (const x of outcome.conflicts) conflicts.push({ entity: op.entity, entityId: op.entityId, field: x.field, reason: x.reason });
+    accepted.push({ outboxId: op.outboxId, serverSeq: outcome.seq });
   }
   return c.json({ accepted, conflicts, rejected });
 });
@@ -147,7 +181,9 @@ sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireT
   const access = kind === "company" ? await accessFor(c.env.DB, tenantId, session.userId, role) : OPEN_ACCESS(session.userId);
   const { results } = await c.env.DB.prepare(
     `SELECT entity, entity_id, row_json, times_json, server_seq FROM sync_rows
-     WHERE tenant_kind = ? AND tenant_id = ? AND server_seq > ? ORDER BY server_seq LIMIT ?`,
+     WHERE tenant_kind = ?1 AND tenant_id = ?2 AND server_seq > ?3
+       AND server_seq <= (SELECT seq FROM sync_counters WHERE tenant_kind = ?1 AND tenant_id = ?2)
+     ORDER BY server_seq LIMIT ?4`,
   )
     .bind(kind, tenantId, since, PAGE + 1)
     .all<{ entity: string; entity_id: string; row_json: string; times_json: string; server_seq: number }>();

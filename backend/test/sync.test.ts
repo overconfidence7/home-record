@@ -294,3 +294,71 @@ describe("AC-B3 sync role gates (AC-F3)", () => {
     expect((await json(await push(t.lead, t.co, "lead", [punch(2, "p2", t.crewId, "j1")]))).rejected).toEqual([{ outboxId: 2, reason: "role" }]);
   });
 });
+
+describe("AC-B20 concurrent pushes (cr:sync-seq-race)", () => {
+  it("two phones editing different fields of one row at once both keep their edit (AC-F52)", async () => {
+    const owner = await seedUser("s-o20", "s-o20@x.com");
+    await seedCompany("s-c20", "Co", "s-o20");
+    await push(owner, "s-c20", "seed", [op(1, "t1", { title: "Start", notes: "Start" }, 1)]);
+    // Like SyncEngine, a phone sends an op again until the server acknowledges it.
+    const send = async (device: string, body: ReturnType<typeof op>): Promise<number> => {
+      for (;;) {
+        const res = await push(owner, "s-c20", device, [body]);
+        expect(res.status).toBe(200);
+        const accepted = (await json(res)).accepted;
+        if (accepted.length) return accepted[0].serverSeq;
+      }
+    };
+    const rounds = Array.from({ length: 8 }, (_, i) => i + 1);
+    const seqs = await Promise.all(
+      rounds.flatMap((i) => [send("dev-a", op(i, "t1", { title: `A${i}` }, 100 + i)), send("dev-b", op(i, "t1", { notes: `B${i}` }, 100 + i))]),
+    );
+    // Every op took its own seq, with no gaps after the seed's 1.
+    expect([...seqs].sort((a, b) => a - b)).toEqual(Array.from({ length: 16 }, (_, i) => i + 2));
+    const all = await pull(owner, "s-c20");
+    expect(all.rows).toHaveLength(1);
+    expect(all.rows[0].row).toMatchObject({ title: "A8", notes: "B8" });
+    expect(all.serverSeq).toBe(17);
+  });
+
+  it("the same op retried in parallel is applied once and every retry gets its seq (AC-F55)", async () => {
+    const owner = await seedUser("s-o21", "s-o21@x.com");
+    await seedCompany("s-c21", "Co", "s-o21");
+    const ops = [op(3, "t1", { title: "Once" }, 10)];
+    const responses = await Promise.all(Array.from({ length: 5 }, () => push(owner, "s-c21", "dev-a", ops)));
+    expect(responses.map((r) => r.status)).toEqual([200, 200, 200, 200, 200]);
+    const bodies = await Promise.all(responses.map((r) => json(r)));
+    for (const b of bodies) expect(b.accepted).toEqual([{ outboxId: 3, serverSeq: 1 }]);
+    expect((await pull(owner, "s-c21")).serverSeq).toBe(1);
+    const extra = await json(await push(owner, "s-c21", "dev-a", [op(4, "t2", { title: "Next" }, 11)]));
+    expect(extra.accepted).toEqual([{ outboxId: 4, serverSeq: 2 }]);
+  });
+
+  it("a phone pulling while others push never moves its cursor past a row it has not seen (AC-F52)", async () => {
+    const owner = await seedUser("s-o22", "s-o22@x.com");
+    await seedCompany("s-c22", "Co", "s-o22");
+    const seen = new Set<string>();
+    let cursor = 0;
+    let pushing = true;
+    const puller = (async () => {
+      while (pushing) {
+        const page = await pull(owner, "s-c22", cursor);
+        for (const r of page.rows) seen.add(r.entityId);
+        cursor = page.serverSeq;
+      }
+    })();
+    await Promise.all(
+      ["a", "b", "c"].map(async (d) => {
+        for (let i = 1; i <= 6; i++) await push(owner, "s-c22", `dev-${d}`, [op(i, `${d}${i}`, { title: d }, i)]);
+      }),
+    );
+    pushing = false;
+    await puller;
+    for (let page = await pull(owner, "s-c22", cursor); page.rows.length; page = await pull(owner, "s-c22", cursor)) {
+      for (const r of page.rows) seen.add(r.entityId);
+      cursor = page.serverSeq;
+    }
+    expect(seen.size).toBe(18);
+    expect(cursor).toBe(18);
+  });
+});
