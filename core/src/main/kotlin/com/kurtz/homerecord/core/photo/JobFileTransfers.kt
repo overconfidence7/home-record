@@ -6,8 +6,11 @@ import com.kurtz.homerecord.core.media.MediaCache
 import com.kurtz.homerecord.core.media.MediaTransferApi
 import com.kurtz.homerecord.core.sync.TenantRef
 import java.io.File
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 /** Where a file's upload to R2 stands, for the row on the Files tab (AC-F19). */
 enum class UploadStatus { None, Waiting, Uploading, Failed, Uploaded }
@@ -21,7 +24,8 @@ enum class OnPhone { Ready, NoNetwork, NotUploaded, Failed }
 
 /**
  * Moves job file bytes between the phone and R2 (AC-F19, AC-F20). Files marked Available offline live in [offlineDir];
- * anything else downloaded on open goes through [cache] and can be dropped with [freeUp].
+ * anything else downloaded on open goes through [cache] and can be dropped with [freeUp]. File checks and copies run on
+ * [io], so view models can call this from Main (S7).
  */
 class JobFileTransfers(
     private val db: HomeRecordDatabase,
@@ -30,6 +34,7 @@ class JobFileTransfers(
     private val offlineDir: File,
     private val tenant: () -> TenantRef?,
     private val jobFiles: JobFiles,
+    private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     fun uploadStatus(fileId: String): Flow<UploadStatus> =
         db.mediaUploadDao().observeFor("job_file", fileId).map {
@@ -42,15 +47,17 @@ class JobFileTransfers(
             }
         }
 
-    fun storage(): FileStorage = FileStorage(
-        offlineBytes = offlineDir.listFiles()?.filter { it.isFile }?.sumOf { it.length() } ?: 0,
+    suspend fun storage(): FileStorage = FileStorage(
+        offlineBytes = withContext(io) { offlineDir.listFiles()?.filter { it.isFile }?.sumOf { it.length() } ?: 0 },
         cachedBytes = cache.sizeBytes(),
     )
+
+    private suspend fun isOnDisk(path: String?) = path != null && withContext(io) { File(path).isFile }
 
     /** Makes sure the bytes of [id] are on the phone, downloading them when needed; the viewer reads the row's path afterwards. */
     suspend fun ensureOnPhone(id: String): OnPhone {
         val row = db.jobFileDao().get(id) ?: return OnPhone.Failed
-        if (row.path?.let { File(it).isFile } == true) return OnPhone.Ready
+        if (isOnDisk(row.path)) return OnPhone.Ready
         val key = row.r2Key ?: return OnPhone.NotUploaded
         val t = tenant() ?: return OnPhone.NoNetwork
         var offline = false
@@ -68,25 +75,27 @@ class JobFileTransfers(
     suspend fun setAvailableOffline(id: String, on: Boolean): OnPhone {
         if (on) ensureOnPhone(id).let { if (it != OnPhone.Ready) return it }
         val row = db.jobFileDao().get(id) ?: return OnPhone.Failed
-        val src = row.path?.let(::File)?.takeIf { it.isFile }
+        val src = row.path?.takeIf { isOnDisk(it) }?.let(::File)
         when {
             src == null -> jobFiles.setLocal(id, on, null)
             on && inCache(src) -> {
-                offlineDir.mkdirs()
                 val dest = File(offlineDir, "${row.id}_${src.name}")
-                src.copyTo(dest, overwrite = true)
-                src.delete()
+                withContext(io) { move(src, dest) }
                 jobFiles.setLocal(id, true, dest.absolutePath)
             }
             !on && src.parentFile == offlineDir && row.r2Key != null -> {
                 val back = cache.fileFor(row.r2Key)
-                src.copyTo(back, overwrite = true)
-                src.delete()
+                withContext(io) { move(src, back) }
                 jobFiles.setLocal(id, false, back.absolutePath)
             }
             else -> jobFiles.setLocal(id, on, row.path)
         }
         return OnPhone.Ready
+    }
+
+    private fun move(src: File, dest: File) {
+        src.copyTo(dest, overwrite = true)
+        src.delete()
     }
 
     private fun inCache(f: File) = f.parentFile == cache.fileFor("x").parentFile
@@ -95,7 +104,7 @@ class JobFileTransfers(
     suspend fun freeUp(): Long {
         val freed = cache.freeUp()
         for (row in db.jobFileDao().withLocalPath()) {
-            if (!row.offline && row.path?.let { File(it).isFile } != true) jobFiles.setLocal(row.id, false, null)
+            if (!row.offline && !isOnDisk(row.path)) jobFiles.setLocal(row.id, false, null)
         }
         return freed
     }

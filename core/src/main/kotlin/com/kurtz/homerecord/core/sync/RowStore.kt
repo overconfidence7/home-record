@@ -3,6 +3,9 @@ package com.kurtz.homerecord.core.sync
 import android.content.ContentValues
 import androidx.room.RoomDatabase
 import androidx.room.withTransaction
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -24,8 +27,14 @@ interface RowStore {
  * [write] keeps only the table's columns, so a row from a newer app version with extra fields still lands, and fills a
  * missing NOT NULL device-local column ([LocalColumns], e.g. a photo's `path`) with its empty value ("" or 0), so a
  * pulled row from another phone can be stored; any other missing NOT NULL column still refuses the row.
+ * A call on the main thread runs its query on [io], since SyncEngine.record is called from view models (S7). Any other
+ * thread queries in place: inside a Room transaction (ours or a repository's that records a change) the transaction
+ * thread holds the connection, and a hop to another thread would not see the uncommitted row or would wait on it.
  */
-class RoomRowStore(private val db: RoomDatabase) : RowStore {
+class RoomRowStore(private val db: RoomDatabase, private val io: CoroutineDispatcher = Dispatchers.IO) : RowStore {
+    private suspend fun <T> onIo(block: () -> T): T =
+        if (android.os.Looper.getMainLooper()?.isCurrentThread == true) withContext(io) { block() } else block()
+
     private val tables: Set<String> by lazy {
         val names = mutableSetOf<String>()
         db.openHelper.readableDatabase.query("SELECT name FROM sqlite_master WHERE type = 'table'").use {
@@ -52,7 +61,9 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
         out
     }
 
-    override suspend fun read(entity: String, id: String): JsonObject? {
+    override suspend fun read(entity: String, id: String): JsonObject? = onIo { readNow(entity, id) }
+
+    private fun readNow(entity: String, id: String): JsonObject? {
         require(entity in tables) { "Unknown entity $entity" }
         return db.openHelper.readableDatabase.query("SELECT * FROM $entity WHERE id = ?", arrayOf(id)).use { c ->
             if (!c.moveToFirst()) return@use null
@@ -71,7 +82,9 @@ class RoomRowStore(private val db: RoomDatabase) : RowStore {
 
     override suspend fun <T> inTransaction(block: suspend () -> T): T = db.withTransaction(block)
 
-    override suspend fun write(entity: String, row: JsonObject) {
+    override suspend fun write(entity: String, row: JsonObject) = onIo { writeNow(entity, row) }
+
+    private fun writeNow(entity: String, row: JsonObject) {
         require(entity in tables) { "Unknown entity $entity" }
         val values = ContentValues()
         val known = columnsOf(entity)

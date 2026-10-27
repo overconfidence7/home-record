@@ -39,7 +39,7 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
 
     private suspend fun load() {
         var row = d.dao.get(d.fileId)
-        if (row != null && row.path?.let { File(it).isFile } != true) {
+        if (row != null && !withContext(Dispatchers.IO) { row.path?.let { File(it).isFile } == true }) {
             // Not on the phone: fetch it now; a file never marked Available offline downloads on open.
             d.ensureOnPhone(d.fileId)
             row = d.dao.get(d.fileId)
