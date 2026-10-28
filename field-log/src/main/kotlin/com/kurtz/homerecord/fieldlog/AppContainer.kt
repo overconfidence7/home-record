@@ -232,9 +232,7 @@ class AppContainer(private val app: Application) {
         photoId, db.photoDao(), photoAnnotator,
         aspectOf = { path ->
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                val o = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                android.graphics.BitmapFactory.decodeFile(path, o)
-                if (o.outWidth > 0 && o.outHeight > 0) o.outWidth.toFloat() / o.outHeight else null
+                com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRenderer.uprightAspect(path)
             }
         },
     )

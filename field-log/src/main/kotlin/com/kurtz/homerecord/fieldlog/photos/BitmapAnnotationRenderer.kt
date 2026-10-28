@@ -3,10 +3,13 @@ package com.kurtz.homerecord.fieldlog.photos
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import android.media.ExifInterface
 import com.kurtz.homerecord.core.photo.Annotation
 import com.kurtz.homerecord.core.photo.AnnotatedImageRenderer
+import com.kurtz.homerecord.core.photo.ImageOrientation
 import com.kurtz.homerecord.core.photo.NormPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,18 +18,56 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-/** Burns marks into a copy of the photo as a JPEG (AC-F26). Mark colour is a fixed high-visibility red, not a theme colour. */
+/**
+ * Burns marks into an upright copy of the photo as a JPEG (AC-F26). The stored image is turned by its EXIF orientation
+ * first, since the editor shows it upright, and decoded at most [MAX_PIXELS] so a large shot fits in memory. Mark colour
+ * is a fixed high-visibility red, not a theme colour.
+ */
 object BitmapAnnotationRenderer : AnnotatedImageRenderer {
     private const val MARK_COLOR = 0xFFE53935.toInt()
+    private const val MAX_PIXELS = 8_000_000L
 
     override suspend fun render(sourcePath: String, marks: List<Annotation>, destPath: String): Boolean = withContext(Dispatchers.IO) {
         runCatching {
-            val source = BitmapFactory.decodeFile(sourcePath) ?: return@runCatching false
-            val out = source.copy(Bitmap.Config.ARGB_8888, true)
-            source.recycle()
+            val out = decodeUpright(sourcePath) ?: return@runCatching false
             draw(Canvas(out), out.width.toFloat(), out.height.toFloat(), marks)
             File(destPath).outputStream().use { out.compress(Bitmap.CompressFormat.JPEG, 90, it) }.also { out.recycle() }
         }.getOrDefault(false)
+    }
+
+    /** The EXIF orientation of the image at [path]; upright when it has none or cannot be read. */
+    fun orientationOf(path: String): ImageOrientation = runCatching {
+        ImageOrientation.fromExif(ExifInterface(path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL))
+    }.getOrDefault(ImageOrientation.Upright)
+
+    /** Upright width over height of the image at [path], as the editor and Coil show it, or null when it cannot be read. */
+    fun uprightAspect(path: String): Float? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        return orientationOf(path).uprightAspect(bounds.outWidth, bounds.outHeight)
+    }
+
+    /** Decodes [path] mutable, sampled under the pixel cap and turned upright; only a turned image needs a second bitmap. */
+    internal fun decodeUpright(path: String): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = ImageOrientation.sampleSize(bounds.outWidth, bounds.outHeight, MAX_PIXELS)
+            inMutable = true
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        val stored = BitmapFactory.decodeFile(path, options) ?: return null
+        val orientation = orientationOf(path)
+        if (orientation.isIdentity) return stored
+        // Turn, then mirror: EXIF 5 (transpose) is a quarter turn clockwise followed by a horizontal flip.
+        val matrix = Matrix().apply {
+            postRotate(orientation.rotationDegrees.toFloat())
+            if (orientation.flipHorizontal) postScale(-1f, 1f)
+        }
+        val upright = Bitmap.createBitmap(stored, 0, 0, stored.width, stored.height, matrix, true)
+        if (upright !== stored) stored.recycle()
+        return if (upright.isMutable) upright else upright.copy(Bitmap.Config.ARGB_8888, true).also { upright.recycle() }
     }
 
     /** Draws onto [canvas] sized [w] by [h]; the same marks as the editor shows, scaled to the photo. */

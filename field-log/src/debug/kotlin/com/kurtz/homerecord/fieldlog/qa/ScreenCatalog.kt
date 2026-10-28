@@ -72,7 +72,7 @@ object ScreenCatalog {
         QaScreen("file-viewer-no-preview", nonRoot = true) { FileViewerNoPreviewPreview() },
         QaScreen("annotate", nonRoot = true) { AnnotatePreview() },
         QaScreen("annotate-empty", nonRoot = true) { AnnotateEmptyPreview() },
-        QaScreen("annotate-measure", nonRoot = false) { AnnotateTextPreview() },
+        QaScreen("annotate-measure", nonRoot = true) { AnnotateTextPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
     )

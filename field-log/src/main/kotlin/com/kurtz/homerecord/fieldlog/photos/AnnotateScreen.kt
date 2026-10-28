@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,14 +14,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.CropSquare
 import androidx.compose.material.icons.rounded.Gesture
 import androidx.compose.material.icons.rounded.NorthEast
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Straighten
 import androidx.compose.material.icons.rounded.TextFields
-import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -58,9 +56,9 @@ import coil3.compose.AsyncImage
 import com.kurtz.homerecord.core.photo.Annotation
 import com.kurtz.homerecord.core.photo.AnnotationTool
 import com.kurtz.homerecord.core.photo.NormPoint
+import com.kurtz.homerecord.coreui.components.FormScaffold
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.windowTestTags
-import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.fieldlog.R
 import java.io.File
 import kotlin.math.atan2
@@ -85,35 +83,38 @@ private fun toolLabel(t: AnnotationTool): Int = when (t) {
     AnnotationTool.Measure -> R.string.annotate_measure
 }
 
-/** FL-Annotate: mark up a photo, undo, and save the result as a copy (AC-F26). */
+/**
+ * FL-Annotate: mark up a photo, undo, and save the result as a copy (AC-F26). A full-screen editor (rules 3 and 15):
+ * Close and Save in the top bar, and Close or system back asks before throwing drawn marks away.
+ */
 @Composable
-fun AnnotateScreen(state: AnnotateUiState, onEvent: (AnnotateEvent) -> Unit, onBack: () -> Unit) {
-    ScreenScaffold(
+fun AnnotateScreen(state: AnnotateUiState, onEvent: (AnnotateEvent) -> Unit, onClose: () -> Unit) {
+    FormScaffold(
         title = stringResource(R.string.annotate_title),
-        onBack = onBack,
-        actions = {
-            IconButton({ onEvent(AnnotateEvent.Undo) }, Modifier.testTag("fl_annotate_undo"), enabled = state.canUndo) {
-                Icon(Icons.Rounded.Undo, stringResource(R.string.annotate_undo))
-            }
-            IconButton({ onEvent(AnnotateEvent.Save) }, Modifier.testTag("fl_annotate_save"), enabled = state.canSave) {
-                Icon(Icons.Rounded.Check, stringResource(R.string.annotate_save))
-            }
-        },
-    ) { padding ->
+        dirty = state.marks.isNotEmpty() && !state.saved,
+        saveEnabled = state.canSave,
+        onClose = onClose,
+        onSave = { onEvent(AnnotateEvent.Save) },
+    ) {
         when {
-            state.loading -> LoadingState(Modifier.padding(padding))
+            state.loading -> LoadingState()
             state.missing -> Text(
-                stringResource(R.string.photo_missing), Modifier.padding(padding).padding(24.dp).testTag("fl_annotate_missing"),
+                stringResource(R.string.photo_missing), Modifier.padding(vertical = 16.dp).testTag("fl_annotate_missing"),
                 style = MaterialTheme.typography.bodyLarge,
             )
-            else -> Column(Modifier.padding(padding).fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AnnotationTool.entries.forEach { t ->
-                        FilterChip(
-                            t == state.tool, { onEvent(AnnotateEvent.Tool(t)) }, { Text(stringResource(toolLabel(t))) },
-                            Modifier.heightIn(min = 48.dp).testTag("fl_annotate_tool_${t.name.lowercase()}"),
-                            leadingIcon = { Icon(toolIcon(t), null) },
-                        )
+            else -> {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton({ onEvent(AnnotateEvent.Undo) }, Modifier.testTag("fl_annotate_undo"), enabled = state.canUndo) {
+                        Icon(Icons.AutoMirrored.Rounded.Undo, stringResource(R.string.annotate_undo))
+                    }
+                    Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AnnotationTool.entries.forEach { t ->
+                            FilterChip(
+                                t == state.tool, { onEvent(AnnotateEvent.Tool(t)) }, { Text(stringResource(toolLabel(t))) },
+                                Modifier.heightIn(min = 48.dp).testTag("fl_annotate_tool_${t.name.lowercase()}"),
+                                leadingIcon = { Icon(toolIcon(t), null) },
+                            )
+                        }
                     }
                 }
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
