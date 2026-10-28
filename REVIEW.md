@@ -1741,3 +1741,20 @@ Auto entry review (0 new, 6 still open): `[auto:coldstart:*]` debug medians 3929
 Coverage note: the auto entry reports 117/117 claimed ACs covered across 45 ticked tasks (0 gaps); subtasks such as T040b3 (AC-F26 annotate) are still not counted per [cr:cov-task-regex].
 
 Judged: 86 screenshots (in contact sheets: 23 House Manual flow shots, 14 House Manual dark and 200% tour, 8 Field Log F01–F03, 16 Field Log dark and 200% tour, 9 launch/monkey/release shots, 16 crawler shots of changed or walkthrough screens), plus PNG sizes for all 15 landscape tour shots; the other ~1100 (crawler variants of unchanged screens, handoff duplicates) not opened; 18 walkthrough steps. New issues: 2. Product gaps: 0.
+
+## QA auto 2026-10-28 (commit 8400117)
+
+Automated suite run at 2026-10-28 03:26 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F04-clock-in fails on field-log (regression of a fixed item) [auto:flow:field-log:F04-clock-in] - steps: automated, see qa-results branch latest/ for commit 8400117 - expected: walkthrough step F04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F04-clock-in.log
+- [ ] [Major] Flow F04b-location-allow fails on field-log [auto:flow:field-log:F04b-location-allow] - steps: automated, see qa-results branch latest/ for commit 8400117 - expected: walkthrough step F04b passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F04b-location-allow.log
+- [ ] [Major] Flow F05-today fails on field-log (regression of a fixed item) [auto:flow:field-log:F05-today] - steps: automated, see qa-results branch latest/ for commit 8400117 - expected: walkthrough step F05 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F05-today.log
+- [ ] [Major] house-manual cold start too slow (regression of a fixed item) [auto:coldstart:handoff:house-manual] - steps: automated, see qa-results branch latest/ for commit 8400117 - expected: under 1,500 ms (AC-U11) - actual: median 1710 ms over 1500 ms (AC-U11)
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Fail, field-log F04b Fail, field-log F05 Fail, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, field-log F09 Pass, field-log F09b Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: field-log jank:field-log (gfxinfo reported no frames); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 71 device stages, 711 unit tests, 108 backend tests, coverage 117/117 ACs. Passed: 58. New issues: 4. Critical: 0. Product gaps: n/a (judge entry follows).
