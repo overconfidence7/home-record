@@ -220,3 +220,6 @@ One `PdfViewer(pages, tagPrefix)` serves House Manual documents and Field Log fi
 
 ## 2026-10-28 — Form Save: on for new records, on for edits only once changed (CR2r1, cr:form-dialog)
 House Manual's full-screen forms (contacts, consumables, service visits) enable Save for a new record so a tap shows what is missing inline (ui-standards rule 21's "or it focuses/shows the first invalid field" path, which the H05 flow relies on), and for an edit only after something changed (nothing to save otherwise). Close and back ask "Discard changes?" only when the draft differs from what the form opened with; the open draft and that original both live in SavedStateHandle. One `DiscardChangesDialog` in :core-ui serves FormScaffold and the House Manual form dialog.
+
+## 2026-10-28 — Upkeep Delete confirms over the open form (CR2r2, cr:upkeep-delete-confirm)
+Delete in the consumable and service forms opens "Delete <spec or what was done>?" over the form instead of deleting at once (ui-standards rule 16). A confirm dialog rather than Undo, matching the item, contact and document deletes already in House Manual. The pending record is kept as kind and id in SavedStateHandle and named from the saved row, so it survives process death and a record deleted elsewhere shows no confirm; Cancel keeps the form open, Close on the form drops the confirm.
