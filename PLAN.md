@@ -49,6 +49,7 @@ The builder moved from Sonnet 5.5 to Opus 5.5 on 2026-10-26. Everything on `buil
   - [ ] CR2q: Shared UI for both apps: tag prefix in :house-model, RoomViewModel, PdfViewer and scanner in :core-ui, ItemDetail navigation out of the VM, pending capture in SavedStateHandle (cr:shared-hm-tags, cr:room-route-mvvm, cr:pdf-viewer-dup, cr:vm-nav-lambdas, cr:photo-pending-remember)
   - [ ] CR2r: House Manual form and list conformance: FormScaffold with dirty and SavedStateHandle drafts, upkeep delete confirm, Cards to RecordListItem rows (cr:form-dialog, cr:upkeep-delete-confirm, cr:card-lists)
   - [ ] CR2s: Field Log UI conformance: 64 dp clock buttons, JobEdit client phone/email and room delete confirm, Today pull to refresh, tab replay, Photos grid and FAB (cr:fl-clock-64dp, cr:fl-jobedit-client-contact, cr:fl-jobedit-room-delete, cr:fl-today-pull, cr:fl-tab-replay, cr:fl-photos-grid)
+    - [x] CR2s1: tab replay: a widget tab request is handled once (cr:fl-tab-replay)
   - [ ] CR2t: House Manual debug seed with items, warranties, consumables, an overdue task, contacts and a PDF (cr:seed-items)
   - [ ] CR2u: Minor sweep: the remaining Minor [cr:*] items in REVIEW.md, several per run, oldest first
 
