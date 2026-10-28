@@ -90,7 +90,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
     val scope = rememberCoroutineScope()
     val tabs = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
-    HomeRecordApp(tabs = tabs, tabRequests = container.tabRequests, entries = { nav ->
+    HomeRecordApp(tabs = tabs, tabRequests = container.tabRequests.flow, entries = { nav ->
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             when {

@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
 
     /** The clock widget's button opens the Clock tab (AC-F17). */
     private fun handleWidget(intent: Intent?) {
-        if (intent?.getBooleanExtra(ClockWidget.OPEN_CLOCK.name, false) == true) container.tabRequests.tryEmit("clock")
+        if (intent?.getBooleanExtra(ClockWidget.OPEN_CLOCK.name, false) == true) container.tabRequests.request("clock")
     }
 
     /** `fieldlog://join/<code>` from the invite page prefills the join form. */

@@ -26,6 +26,7 @@ import com.kurtz.homerecord.core.sync.SyncEngine
 import com.kurtz.homerecord.core.sync.endedTenants
 import com.kurtz.homerecord.core.sync.TenantKind
 import com.kurtz.homerecord.core.sync.TenantRef
+import com.kurtz.homerecord.coreui.shell.TabRequests
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,7 +42,7 @@ import okhttp3.OkHttpClient
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
 class AppContainer(private val app: Application) {
     /** Tab ids asked for from outside the UI (the clock widget); held until the tabs are on screen. */
-    val tabRequests = kotlinx.coroutines.flow.MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
+    val tabRequests = TabRequests()
 
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
     @Volatile var activityContext: Context? = null

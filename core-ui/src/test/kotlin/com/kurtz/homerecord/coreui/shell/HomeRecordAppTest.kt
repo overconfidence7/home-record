@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -23,7 +24,10 @@ import org.robolectric.annotation.Config
 class HomeRecordAppTest {
     @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
-    private fun setApp() = rule.setContent {
+    private fun setApp(requests: TabRequests? = null) = rule.setContent { app(requests) }
+
+    @androidx.compose.runtime.Composable
+    private fun app(requests: TabRequests? = null) {
         val tabs = listOf(
             AppTab("a", "Alpha", Icons.Rounded.Home, Icons.Rounded.Home, PlaceholderKey("a")),
             AppTab("b", "Beta", Icons.Rounded.Settings, Icons.Rounded.Settings, PlaceholderKey("b")),
@@ -33,7 +37,7 @@ class HomeRecordAppTest {
                 if (key.depth == 0) PlaceholderRoot(key.title, { nav.push(key.copy(depth = 1)) })
                 else PlaceholderDetail("Detail ${key.title}", nav::pop, {})
             }
-        })
+        }, tabRequests = requests?.flow)
     }
 
     @Test fun tabsShowIconAndLabelAndSwitch() {
@@ -68,5 +72,21 @@ class HomeRecordAppTest {
         rule.onAllNodesWithText("Detail a").onFirst().assertIsDisplayed()
         rule.onNodeWithText("Alpha").performClick()
         rule.onNodeWithText("Open a detail screen").assertIsDisplayed()
+    }
+
+    // cr:fl-tab-replay: a widget request opens its tab once; the person's later choice survives rotation.
+    @Test fun tabRequestOpensTabOnceAndRotationKeepsTheChosenTab() {
+        val requests = TabRequests()
+        requests.request("b")
+        val restore = StateRestorationTester(rule)
+        restore.setContent { app(requests) }
+        rule.onNodeWithText("b", substring = false).assertIsDisplayed()
+        rule.onNodeWithText("Alpha").performClick()
+        rule.onNodeWithText("a", substring = false).assertIsDisplayed()
+        restore.emulateSavedInstanceStateRestore()
+        rule.onNodeWithText("a", substring = false).assertIsDisplayed()
+        // A new request still switches tabs.
+        requests.request("b")
+        rule.onNodeWithText("b", substring = false).assertIsDisplayed()
     }
 }
