@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,6 +32,7 @@ import com.kurtz.homerecord.coreui.components.DateField
 import com.kurtz.homerecord.coreui.components.FormScaffold
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
 
 /** FL-JobEdit. Client name, phone and email, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
@@ -94,6 +98,39 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
             imeAction = ImeAction.Default, singleLine = false,
         )
     }
+    state.removing?.let { RemoveRoomDialog(it, onEvent) }
+}
+
+/** Confirm before a room on the plan, or with photos, items or tasks, comes off the job (rule 16). */
+@Composable
+private fun RemoveRoomDialog(r: RoomRemoval, onEvent: (JobEditEvent) -> Unit) {
+    val parts = listOfNotNull(
+        r.photos.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.job_room_photos, it, it) },
+        r.items.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.job_room_items, it, it) },
+        r.tasks.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.job_room_tasks, it, it) },
+    )
+    val list = if (parts.size < 2) parts.firstOrNull() else stringResource(R.string.job_room_list_and, parts.dropLast(1).joinToString(", "), parts.last())
+    val body = when {
+        list == null -> stringResource(R.string.job_room_remove_placed)
+        r.placed -> stringResource(R.string.job_room_remove_placed_used, list)
+        else -> stringResource(R.string.job_room_remove_used, list)
+    }
+    AlertDialog(
+        onDismissRequest = { onEvent(JobEditEvent.CancelRemoveRoom) },
+        title = { Text(stringResource(R.string.job_room_remove_title, r.name)) },
+        text = { Text(body) },
+        confirmButton = {
+            TextButton({ onEvent(JobEditEvent.ConfirmRemoveRoom) }, Modifier.heightIn(min = 48.dp).testTag("fl_jobedit_room_remove_confirm")) {
+                Text(stringResource(R.string.job_room_remove))
+            }
+        },
+        dismissButton = {
+            TextButton({ onEvent(JobEditEvent.CancelRemoveRoom) }, Modifier.heightIn(min = 48.dp).testTag("fl_jobedit_room_remove_cancel")) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        modifier = Modifier.windowTestTags(),
+    )
 }
 
 /** A text field with an Add button and removable chips below it; tags are `<tag>_input`, `<tag>_add` and `<tag>s`. */

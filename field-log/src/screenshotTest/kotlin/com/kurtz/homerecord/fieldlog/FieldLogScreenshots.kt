@@ -97,6 +97,11 @@ fun JobEditScreenshot() = JobEditPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun JobEditRemoveRoomScreenshot() = JobEditRemoveRoomPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun JobOverviewScreenshot() = JobOverviewPreview()
 
 @PreviewTest

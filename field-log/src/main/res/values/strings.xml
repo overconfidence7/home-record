@@ -185,6 +185,24 @@
     <string name="job_rooms">Rooms</string>
     <string name="job_rooms_helper">Rooms you will work in. Place them on the plan later.</string>
     <string name="job_rooms_add">Add</string>
+    <string name="job_room_remove_title">Remove %1$s?</string>
+    <string name="job_room_remove_placed">It comes off the plan.</string>
+    <string name="job_room_remove_placed_used">It comes off the plan, and the job keeps its %1$s without a room.</string>
+    <string name="job_room_remove_used">The job keeps its %1$s without a room.</string>
+    <string name="job_room_list_and">%1$s and %2$s</string>
+    <string name="job_room_remove">Remove</string>
+    <plurals name="job_room_photos">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <plurals name="job_room_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <plurals name="job_room_tasks">
+        <item quantity="one">%d task</item>
+        <item quantity="other">%d tasks</item>
+    </plurals>
     <string name="job_crew">Crew</string>
     <string name="job_crew_empty">Your team shows up here once you are online. Invite people from More &gt; Team.</string>
     <string name="job_phases">Phases</string>

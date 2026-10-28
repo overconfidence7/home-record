@@ -32,7 +32,16 @@ interface RoomDao {
     @Query("SELECT room.* FROM room JOIN floor ON room.floorId = floor.id WHERE floor.homeId = :homeId AND room.deletedAt IS NULL AND floor.deletedAt IS NULL ORDER BY room.createdAt") fun observeForHome(homeId: String): Flow<List<RoomEntity>>
     @Query("SELECT room.* FROM room JOIN floor ON room.floorId = floor.id WHERE floor.homeId = :homeId AND room.deletedAt IS NULL AND floor.deletedAt IS NULL ORDER BY room.createdAt") suspend fun listForHome(homeId: String): List<RoomEntity>
     @Query("SELECT floorId, COUNT(*) AS rooms FROM room WHERE deletedAt IS NULL GROUP BY floorId") fun observeCounts(): Flow<List<FloorRoomCount>>
+    @Query(
+        "SELECT (SELECT COUNT(*) FROM photo WHERE roomId = :id AND deletedAt IS NULL) AS photos, " +
+            "(SELECT COUNT(*) FROM item WHERE roomId = :id AND deletedAt IS NULL) AS items, " +
+            "(SELECT COUNT(*) FROM task WHERE roomId = :id AND deletedAt IS NULL) AS tasks",
+    )
+    suspend fun usage(id: String): RoomUsage
 }
+
+/** Live rows that point at a room, so removing it can say what goes with it. */
+data class RoomUsage(val photos: Int, val items: Int, val tasks: Int)
 
 data class FloorRoomCount(val floorId: String, val rooms: Int)
 

@@ -37,6 +37,8 @@ data class JobEditUiState(
     val lat: Double? = null,
     val lng: Double? = null,
     val members: List<CrewOption> = emptyList(),
+    /** A saved room the user asked to remove that is on the plan or has photos, items or tasks; waits for a confirm. */
+    val removing: RoomRemoval? = null,
 ) {
     /** Coordinates for the map link; only while the address still matches the one that was resolved (AC-F5). */
     val mapPoint: Pair<Double, Double>? get() {
@@ -60,6 +62,8 @@ sealed interface JobEditEvent {
     data class Notes(val v: String) : JobEditEvent
     data class AddRoom(val v: String) : JobEditEvent
     data class RemoveRoom(val v: String) : JobEditEvent
+    data object ConfirmRemoveRoom : JobEditEvent
+    data object CancelRemoveRoom : JobEditEvent
     data class AddPhase(val v: String) : JobEditEvent
     data class RemovePhase(val v: String) : JobEditEvent
     data class AddOfficeEmail(val v: String) : JobEditEvent
@@ -120,7 +124,12 @@ class JobEditViewModel(
             is JobEditEvent.Budget -> edit { it.copy(budgetHoursText = event.v) }
             is JobEditEvent.Notes -> edit { it.copy(notes = event.v) }
             is JobEditEvent.AddRoom -> edit { it.withRoom(event.v) }
-            is JobEditEvent.RemoveRoom -> edit { it.withoutRoom(event.v) }
+            is JobEditEvent.RemoveRoom -> removeRoom(event.v)
+            JobEditEvent.ConfirmRemoveRoom -> _state.value.removing?.let { r ->
+                _state.update { it.copy(removing = null) }
+                edit { it.withoutRoom(r.name) }
+            }
+            JobEditEvent.CancelRemoveRoom -> _state.update { it.copy(removing = null) }
             is JobEditEvent.AddPhase -> edit { it.withPhase(event.v) }
             is JobEditEvent.RemovePhase -> edit { it.withoutPhase(event.v) }
             is JobEditEvent.AddOfficeEmail -> edit { it.withOfficeEmail(event.v) }
@@ -135,6 +144,16 @@ class JobEditViewModel(
     private fun edit(change: (JobDraft) -> JobDraft) {
         _state.update { it.copy(draft = change(it.draft)) }
         saved[DRAFT] = encode(_state.value.draft)
+    }
+
+    /** An empty, unplaced room goes at once; one on the plan or with photos, items or tasks asks first (ui-standards rule 16). */
+    private fun removeRoom(name: String) {
+        viewModelScope.launch {
+            val homeId = jobId?.let { jobs.get(it) }?.homeId
+            val room = homeId?.let { h -> jobRooms(h).firstOrNull { it.name.equals(name.trim(), ignoreCase = true) } }
+            val removal = RoomRemoval.of(name, room, room?.let { rooms.usage(it.id) })
+            if (removal == null) edit { it.withoutRoom(name) } else _state.update { it.copy(removing = removal) }
+        }
     }
 
     private fun save() {

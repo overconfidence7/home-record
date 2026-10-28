@@ -231,11 +231,66 @@ class JobEditTest {
         val edit = vm(job.id)
         assertThat(edit.state.value.draft.rooms).containsExactly("Kitchen", "Pantry")
         edit.onEvent(JobEditEvent.RemoveRoom("Pantry"))
+        // an unplaced, empty room comes off at once, with no confirm
+        edit.awaitDraft { "Pantry" !in it.rooms }
+        assertThat(edit.state.value.removing).isNull()
         edit.onEvent(JobEditEvent.AddRoom("Garage"))
         edit.save()
         assertThat(db.roomDao().listFor(floor.id).map { it.name }).containsExactly("Kitchen", "Garage")
         assertThat(db.jobDao().get(job.id)?.homeId).isEqualTo(job.homeId)
         assertThat(changes.count { it.first == "room" }).isEqualTo(2 + 2)
+    }
+
+    private suspend fun JobEditViewModel.awaitDraft(check: (JobDraft) -> Boolean) {
+        withContext(Dispatchers.Default) { withTimeout(5000) { state.first { check(it.draft) } } }
+    }
+
+    // AC-F48, ui-standards rule 16 (cr:fl-jobedit-room-delete): a room on the plan or with photos asks first and names what goes.
+    @Test fun removingARoomInUseAsksFirstAndCancelKeepsIt() = runTest {
+        val vm = vm()
+        vm.onEvent(JobEditEvent.Name("Kitchen remodel"))
+        vm.onEvent(JobEditEvent.AddRoom("Kitchen"))
+        vm.onEvent(JobEditEvent.AddRoom("Pantry"))
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        val kitchen = db.roomDao().listForHome(job.homeId!!).first { it.name == "Kitchen" }
+        db.roomDao().upsert(kitchen.copy(polygonJson = """[{"x":0,"y":0},{"x":144,"y":0},{"x":144,"y":120},{"x":0,"y":120}]"""))
+        repeat(2) { n ->
+            db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p$n", homeId = job.homeId!!, roomId = kitchen.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
+        }
+        db.taskDao().upsert(com.kurtz.homerecord.core.data.TaskEntity(id = "t1", jobId = job.id, title = "Patch drywall", roomId = kitchen.id, createdAt = 1, updatedAt = 1))
+
+        val edit = vm(job.id)
+        edit.onEvent(JobEditEvent.RemoveRoom("Kitchen"))
+        val asked = withContext(Dispatchers.Default) { withTimeout(5000) { edit.state.first { it.removing != null } } }
+        assertThat(asked.removing).isEqualTo(RoomRemoval("Kitchen", placed = true, photos = 2, items = 0, tasks = 1))
+        assertThat(asked.draft.rooms).contains("Kitchen")
+        edit.onEvent(JobEditEvent.CancelRemoveRoom)
+        assertThat(edit.state.value.removing).isNull()
+        assertThat(edit.state.value.draft.rooms).containsExactly("Kitchen", "Pantry")
+        assertThat(edit.state.value.dirty).isFalse()
+    }
+
+    @Test fun confirmingTheRemovalTakesTheRoomOffOnSave() = runTest {
+        val vm = vm()
+        vm.onEvent(JobEditEvent.Name("Bath refresh"))
+        vm.onEvent(JobEditEvent.AddRoom("Hall bath"))
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        val bath = db.roomDao().listForHome(job.homeId!!).single()
+        db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = job.homeId!!, roomId = bath.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
+
+        val edit = vm(job.id)
+        edit.onEvent(JobEditEvent.RemoveRoom("Hall bath"))
+        withContext(Dispatchers.Default) { withTimeout(5000) { edit.state.first { it.removing != null } } }
+        assertThat(edit.state.value.removing?.placed).isFalse()
+        assertThat(edit.state.value.removing?.photos).isEqualTo(1)
+        edit.onEvent(JobEditEvent.ConfirmRemoveRoom)
+        assertThat(edit.state.value.removing).isNull()
+        assertThat(edit.state.value.draft.rooms).isEmpty()
+        edit.save()
+        assertThat(db.roomDao().listForHome(job.homeId!!)).isEmpty()
+        assertThat(changes.last { it.first == "room" }.second).isEqualTo(bath.id)
     }
 
     @Test fun phasesAndOfficeEmailsSaveAndReload() = runTest {

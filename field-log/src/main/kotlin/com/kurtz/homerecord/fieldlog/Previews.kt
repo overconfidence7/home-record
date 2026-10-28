@@ -32,6 +32,7 @@ import com.kurtz.homerecord.fieldlog.jobs.JobRow
 import com.kurtz.homerecord.fieldlog.jobs.JobRowGroups
 import com.kurtz.homerecord.fieldlog.jobs.JobsScreen
 import com.kurtz.homerecord.fieldlog.jobs.JobsUiState
+import com.kurtz.homerecord.fieldlog.jobs.RoomRemoval
 import com.kurtz.homerecord.fieldlog.more.MoreScreen
 import com.kurtz.homerecord.fieldlog.more.MoreUiState
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
@@ -233,6 +234,16 @@ fun JobEditPreview() = Frame {
     )
     val team = listOf(CrewOption("m1", "Dana Ortiz"), CrewOption("m2", "Marcus Bell"), CrewOption("m3", "Priya Raman"))
     JobEditScreen(JobEditUiState(loading = false, members = team, isNew = false, draft = draft, initial = draft.copy(notes = ""), savedAddress = draft.address, lat = 39.76, lng = -84.19), {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun JobEditRemoveRoomPreview() = Frame {
+    val draft = JobDraft(name = "Kitchen remodel", clientName = "Okafor family", address = "22 Linden Ave, Kettering", rooms = listOf("Kitchen", "Pantry"))
+    JobEditScreen(
+        JobEditUiState(loading = false, isNew = false, draft = draft, initial = draft, removing = RoomRemoval("Kitchen", placed = true, photos = 14, items = 2, tasks = 3)),
+        {}, {},
+    )
 }
 
 private val sampleOverview = com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(
