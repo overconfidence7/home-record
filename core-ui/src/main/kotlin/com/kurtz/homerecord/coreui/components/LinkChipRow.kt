@@ -2,8 +2,10 @@ package com.kurtz.homerecord.coreui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -11,6 +13,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -20,7 +23,10 @@ import com.kurtz.homerecord.coreui.R
 
 data class LinkChip(val id: String, val label: String, val icon: ImageVector? = null)
 
-/** Links between records as chips (AC-U7). Pass [onRemove] to show a remove X on each chip. */
+/**
+ * Links between records as chips (AC-U7). Pass [onRemove] to show a remove X on each chip.
+ * Each chip and its X are 48 dp touch targets (rule 30, AC-U4); the X icon stays 18 dp inside its box.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LinkChipRow(
@@ -37,13 +43,19 @@ fun LinkChipRow(
                 leadingIcon = link.icon?.let { { Icon(it, contentDescription = null, modifier = Modifier.size(18.dp)) } },
                 trailingIcon = onRemove?.let {
                     {
-                        Icon(
-                            Icons.Rounded.Close,
-                            contentDescription = stringResource(R.string.remove_link, link.label),
-                            modifier = Modifier.size(18.dp).clickable(role = Role.Button) { it(link) },
-                        )
+                        Box(
+                            Modifier.size(48.dp).clickable(role = Role.Button) { it(link) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Rounded.Close,
+                                contentDescription = stringResource(R.string.remove_link, link.label),
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
                     }
                 },
+                modifier = Modifier.heightIn(min = 48.dp),
             )
         }
     }
