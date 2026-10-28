@@ -5,7 +5,7 @@ import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.model.JobGroups
 import com.kurtz.homerecord.core.model.JobOrdering
-import com.kurtz.homerecord.core.model.JobStatus
+import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.model.JobSummary
 
 /** One row of FL-Jobs. */
@@ -30,7 +30,7 @@ object JobListMapper {
             val summary = JobSummary(
                 id = job.id,
                 name = job.name,
-                status = runCatching { JobStatus.valueOf(job.status) }.getOrDefault(JobStatus.ACTIVE),
+                status = job.effectiveStatus(today),
                 startDate = job.startDate,
                 endDate = job.endDate,
                 scheduledDays = daysByJob[job.id].orEmpty(),

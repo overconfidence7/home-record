@@ -39,6 +39,19 @@ class JobListMapperTest {
         assertThat(rows.first { it.summary.id == "j1" }.clientName).isEqualTo("Rivera family")
     }
 
+    // AC-F6: groups follow today's date, not the status stored at the last save
+    @Test fun storedStatusIsReadForToday() {
+        val stale = listOf(
+            job("u", "Basement finish", status = "UPCOMING", start = "2026-10-20"),
+            JobEntity("e", "c1", name = "Deck", status = "ACTIVE", endDate = "2026-10-21", createdAt = 1, updatedAt = 1),
+            JobEntity("a", "c1", name = "Shed", status = "ARCHIVED", startDate = "2026-10-01", createdAt = 1, updatedAt = 1),
+        )
+        val g = JobListMapper.group(JobListMapper.rows(stale, clients, emptyList(), today), "", today, showArchived = true)
+        assertThat(g.active.map { it.summary.id }).containsExactly("u")
+        assertThat(g.done.map { it.summary.id }).containsExactly("e")
+        assertThat(g.archived.map { it.summary.id }).containsExactly("a")
+    }
+
     @Test fun archivedOnlyWhenAsked() {
         assertThat(JobListMapper.group(rows, "", today, true).archived.map { it.summary.id }).containsExactly("j5")
     }

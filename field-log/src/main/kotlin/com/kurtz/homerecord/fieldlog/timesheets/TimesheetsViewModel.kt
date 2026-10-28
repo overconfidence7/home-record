@@ -8,7 +8,9 @@ import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
 import com.kurtz.homerecord.core.data.TimesheetApprovalEntity
+import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.TimesheetRules
+import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.punch.PunchRepository
 import com.kurtz.homerecord.core.punch.TimesheetApprovals
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +61,8 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
             combine(d.members, d.punches, d.jobs, d.approvalRows, combine(week, d.settings, ::Pair)) { members, punches, jobs, approvals, (start, rules) ->
                 settings = rules
                 latestPunches = punches
-                latestJobs = jobs.filter { it.status == "ACTIVE" }.map { JobChoice(it.id, it.name) }
+                val today = Instant.ofEpochMilli(d.now()).atZone(d.zone).toLocalDate().toString()
+                latestJobs = jobs.filter { it.effectiveStatus(today) == JobStatus.ACTIVE }.map { JobChoice(it.id, it.name) }
                 val ids = members.map { it.id }.toSet()
                 val people = TimesheetsBuilder.build(
                     members, punches, jobs.associate { it.id to it.name },

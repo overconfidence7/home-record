@@ -5,7 +5,9 @@ import com.kurtz.homerecord.core.data.AssignmentEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.OnSiteBuilder
+import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.punch.ClockStatus
 
 /** Turns synced rows into what FL-Today shows (AC-F16): my clock status, my jobs today, and for admins who is on site. */
@@ -20,7 +22,7 @@ object TodayMapper {
         today: String,
         now: Long,
     ): TodayUiState {
-        val liveJobs = jobs.filter { it.status == "ACTIVE" }
+        val liveJobs = jobs.filter { it.effectiveStatus(today) == JobStatus.ACTIVE }
         val jobNames = jobs.associate { it.id to it.name }
         val onSite = OnSiteBuilder.build(punches, members.associate { it.id to it.name }, jobNames, now)
         val mine = onSite.firstOrNull { it.memberId == memberId }

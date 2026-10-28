@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.model.JobStatus
+import com.kurtz.homerecord.core.model.JobStatusRule
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -52,12 +54,8 @@ data class JobDraft(
 
     val canSave: Boolean get() = name.isNotBlank() && !budgetInvalid && !datesInvalid
 
-    /** Status follows the dates: a future start is Upcoming, a past end is Done, anything else Active. */
-    fun statusFor(today: String): String = when {
-        startDate != null && startDate > today -> "UPCOMING"
-        endDate != null && endDate < today -> "DONE"
-        else -> "ACTIVE"
-    }
+    /** Status follows the dates: a future start is Upcoming, a past end is Done, anything else Active ([JobStatusRule]). */
+    fun statusFor(today: String): String = JobStatusRule.effective(JobStatus.ACTIVE.name, startDate, endDate, today).name
 
     fun toEntity(existing: JobEntity?, id: String, companyId: String, clientId: String?, today: String, now: Long, homeId: String? = existing?.homeId): JobEntity =
         (existing ?: JobEntity(id = id, companyId = companyId, name = name.trim(), createdAt = now, updatedAt = now)).copy(

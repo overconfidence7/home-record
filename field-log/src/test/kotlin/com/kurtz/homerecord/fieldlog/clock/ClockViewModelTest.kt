@@ -94,6 +94,14 @@ class ClockViewModelTest {
         assertThat(vm(approvals = kotlinx.coroutines.flow.flowOf(listOf(row))).state.value.weekApproved).isTrue()
     }
 
+    // AC-F8: a job saved as Upcoming is in the picker once its start date comes; a future one is not
+    @Test fun upcomingJobJoinsThePickerOnItsStartDate() = runBlocking<Unit> {
+        val today = java.time.Instant.ofEpochMilli(clock).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        db.jobDao().upsert(JobEntity(id = "j4", companyId = "c1", name = "Basement finish", status = "UPCOMING", startDate = today.toString(), createdAt = 4, updatedAt = 4))
+        db.jobDao().upsert(JobEntity(id = "j5", companyId = "c1", name = "Porch", status = "UPCOMING", startDate = today.plusDays(1).toString(), createdAt = 5, updatedAt = 5))
+        assertThat(vm().state.value.jobs.map { it.id }).containsExactly("j1", "j2", "j4")
+    }
+
     @Test fun listsActiveJobsAndClockInNeedsOne() = runBlocking<Unit> {
         val vm = vm()
         assertThat(vm.state.value.jobs.map { it.id }).containsExactly("j1", "j2")

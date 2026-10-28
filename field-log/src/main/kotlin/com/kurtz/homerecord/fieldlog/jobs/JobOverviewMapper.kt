@@ -7,7 +7,7 @@ import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.TaskEntity
 import com.kurtz.homerecord.core.model.JobOrdering
-import com.kurtz.homerecord.core.model.JobStatus
+import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.model.JobSummary
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.builtins.ListSerializer
@@ -28,7 +28,7 @@ object JobOverviewMapper {
         photoCount: Int,
         today: String,
     ): JobOverviewUiState {
-        val status = runCatching { JobStatus.valueOf(job.status) }.getOrDefault(JobStatus.ACTIVE)
+        val status = job.effectiveStatus(today)
         val summary = JobSummary(job.id, job.name, status, job.startDate, job.endDate, assignments.map { it.date })
         val names = members.associate { it.id to it.name }
         return JobOverviewUiState(

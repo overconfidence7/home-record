@@ -52,6 +52,18 @@ class TodayMapperTest {
         assertThat(state.hasJobs).isTrue()
     }
 
+    // AC-F8: a job saved as Upcoming shows on Today once its start date comes, without a re-save
+    @Test fun anUpcomingJobWhoseStartDateCameIsTodaysJob() {
+        val saved = listOf(
+            JobEntity(id = "j4", companyId = "c", name = "Basement finish", status = "UPCOMING", startDate = "2026-10-25", createdAt = 0, updatedAt = 0),
+            JobEntity(id = "j5", companyId = "c", name = "Porch rebuild", status = "UPCOMING", startDate = "2026-11-09", createdAt = 0, updatedAt = 0),
+        )
+        val assignments = listOf(assign("j4", "me", "2026-10-25"), assign("j5", "me", "2026-10-25"))
+        val state = TodayMapper.map(TodayUiState("Kurtz Electric", CompanyRole.Crew), "me", emptyList(), members, saved, assignments, "2026-10-25", now)
+        assertThat(state.jobs.map { it.id }).containsExactly("j4")
+        assertThat(state.hasJobs).isTrue()
+    }
+
     @Test fun noActiveJobsKeepsTheFirstRunEmptyState() {
         val state = TodayMapper.map(TodayUiState("Kurtz Electric", CompanyRole.Owner), "me", emptyList(), members, emptyList(), emptyList(), "2026-10-25", now)
         assertThat(state.hasJobs).isFalse()

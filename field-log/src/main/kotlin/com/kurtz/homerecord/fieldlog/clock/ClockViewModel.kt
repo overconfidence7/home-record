@@ -12,7 +12,9 @@ import com.kurtz.homerecord.core.punch.CrewClock
 import com.kurtz.homerecord.core.punch.CrewResult
 import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.location.LocationProvider
+import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.TimesheetRules
+import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.punch.ClockContext
 import com.kurtz.homerecord.core.punch.ClockController
 import com.kurtz.homerecord.core.punch.ClockJob
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.ZoneId
 
 /** Everything the clock screen needs from the outside, so tests can swap each piece. */
@@ -76,10 +79,12 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                 Triple(jobs, shifts, approved)
             }
                 .collect { (jobs, shifts, approved) ->
-                    val options = jobs.filter { it.status == "ACTIVE" }
+                    val now = d.now()
+                    // Status is read for today, so a job whose start date has come shows here without a re-save.
+                    val today = Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString()
+                    val options = jobs.filter { it.effectiveStatus(today) == JobStatus.ACTIVE }
                         .map { ClockJobOption(it.id, it.name, it.address, it.lat, it.lng) }
                     val status = d.controller.status(d.companyId, d.memberId)
-                    val now = d.now()
                     val rules = TimesheetRules.from(settings.overtimeRule)
                     val sheet = WeekSheetBuilder.build(shifts, rules, settings.breakRule, d.zone, now)
                     // The last job worked is preselected, so the widget's Clock in lands on it (AC-F17).

@@ -40,7 +40,7 @@ The builder moved from Sonnet 5.5 to Opus 5.5 on 2026-10-26. Everything on `buil
   - [x] CR2k: Field Log sign-out wipe with an unsynced-data warning, and seed reset clearing Room and media (cr:fl-signout-wipe, cr:fl-seed-reset)
   - [ ] CR2l: Field Log company settings and role as a local Flow: settings synced or sent with the membership, role in every UiState, actions hidden by role, lead limited to assigned jobs, JobStatusRule (cr:fl-settings-source, cr:fl-role-gates, cr:fl-job-status-stale)
     - [x] CR2l1: company clock rules sent with the membership on /me, cached with it, and a live Flow in Clock, Timesheets and Reports (cr:fl-settings-source)
-    - [ ] CR2l2: JobStatusRule.effective(job, today) used everywhere instead of the stored status (cr:fl-job-status-stale)
+    - [x] CR2l2: JobStatusRule.effective(job, today) used everywhere instead of the stored status (cr:fl-job-status-stale)
     - [ ] CR2l3: role in every UiState, actions hidden by role, lead limited to assigned jobs (cr:fl-role-gates)
   - [ ] CR2m: QA truthfulness: coverage-check regex and loose rules, flows renamed to walkthrough steps, tour variant env, probe sha, F01 silent skip, H04 rooms, comment-only AC claims, handoff stage set (cr:cov-task-regex, cr:cov-loose-rules, cr:qa-flow-step-mismatch, cr:qa-tour-variant-env, cr:ci-probe-sha, cr:qa-f01-silent-skip, cr:qa-h04-kitchen, cr:qa-ac-claims-comment, cr:ci-handoff-dup)
   - [ ] CR2n: House model integrity: item and room/floor delete cascades in a transaction, wall identity by endpoints, plan editor commits on Done, transactional savePlan (cr:item-delete-cascade, cr:room-delete-cascade, cr:wall-identity, cr:plan-keystroke-commit)
