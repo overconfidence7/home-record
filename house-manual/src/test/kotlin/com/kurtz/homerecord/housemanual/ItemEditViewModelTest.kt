@@ -284,6 +284,53 @@ class ItemEditViewModelTest {
         assertThat(media.files).doesNotContain(path)
         assertThat(vm.state.value.draft.photos).isEmpty()
     }
+
+    // AC-C31: a data plate shot whose result lands after process death is still filed as a plate and read (cr:photo-pending-remember).
+    @AcceptanceCriterion("AC-C31")
+    @Test fun cameraResultAfterProcessDeathKeepsThePlateKindAndScans() = runTest {
+        home()
+        val handle = SavedStateHandle()
+        val vm = made(items, homes, homeId, null, handle)
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        vm.onEvent(ItemEditEvent.PhotoLaunchHandled)
+        media.files += path
+
+        val revived = made(items, homes, homeId, null, SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        revived.state.first { !it.loading }
+        revived.onEvent(ItemEditEvent.CameraResult(ok = true))
+        assertThat(revived.state.value.draft.photos.map { it.kind to it.path }).containsExactly(PhotoKind.DATA_PLATE to path)
+        assertThat(revived.state.first { it.plateScan != null }.plateScan!!.model).isEqualTo("XG50T06EC36U1")
+        // The request is answered once; a stray second result adds nothing.
+        revived.onEvent(ItemEditEvent.CameraResult(ok = true))
+        assertThat(revived.state.value.draft.photos).hasSize(1)
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun cancelledCameraDiscardsTheFileAndGalleryKeepsItsKindAcrossRecreation() = runTest {
+        home()
+        val handle = SavedStateHandle()
+        val vm = made(items, homes, homeId, null, handle)
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.ITEM))
+        val path = vm.state.value.photoLaunch!!.target!!.path
+        media.files += path
+        vm.onEvent(ItemEditEvent.CameraResult(ok = false))
+        assertThat(media.files).doesNotContain(path)
+        assertThat(vm.state.value.draft.photos).isEmpty()
+
+        vm.onEvent(ItemEditEvent.ChoosePhoto(PhotoKind.DATA_PLATE))
+        val revived = made(items, homes, homeId, null, SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        revived.state.first { !it.loading }
+        revived.onEvent(ItemEditEvent.GalleryResult("content://picked/3"))
+        assertThat(revived.state.value.draft.photos.single().kind).isEqualTo(PhotoKind.DATA_PLATE)
+
+        // Backing out of the gallery adds nothing.
+        revived.onEvent(ItemEditEvent.ChoosePhoto(PhotoKind.ITEM))
+        revived.onEvent(ItemEditEvent.GalleryResult(null))
+        assertThat(revived.state.value.draft.photos).hasSize(1)
+    }
 }
 
 private class FakeMediaFiles : MediaFiles {

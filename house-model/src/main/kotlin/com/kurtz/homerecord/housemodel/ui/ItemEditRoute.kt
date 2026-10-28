@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.kurtz.homerecord.core.media.MediaFiles
@@ -50,24 +49,18 @@ fun ItemEditRoute(
         }
     }
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }
-    var pending by remember { mutableStateOf<Pair<PhotoKind, String>?>(null) }
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        pending?.let { (kind, path) -> if (ok) vm.onEvent(ItemEditEvent.PhotoCaptured(kind, path)) else media.discard(path) }
-        pending = null
-    }
-    var galleryKind by remember { mutableStateOf(PhotoKind.ITEM) }
+    // The pending kind and file live in the view model's SavedStateHandle, so a result after rotation or process death still lands.
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> vm.onEvent(ItemEditEvent.CameraResult(ok)) }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        if (uri != null) vm.onEvent(ItemEditEvent.PhotoPicked(galleryKind, uri.toString()))
+        vm.onEvent(ItemEditEvent.GalleryResult(uri?.toString()))
     }
     LaunchedEffect(state.photoLaunch) {
         val launch = state.photoLaunch ?: return@LaunchedEffect
         vm.onEvent(ItemEditEvent.PhotoLaunchHandled)
         val target = launch.target
         if (target != null) {
-            pending = launch.kind to target.path
             camera.launch(Uri.parse(target.uri))
         } else {
-            galleryKind = launch.kind
             gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
     }

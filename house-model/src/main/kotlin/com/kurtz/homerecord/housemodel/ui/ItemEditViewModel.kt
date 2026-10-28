@@ -85,10 +85,28 @@ class ItemEditViewModel(
             ItemEditEvent.ClosePicker -> _state.update { it.copy(picker = null) }
             is ItemEditEvent.OpenPhotoSheet -> _state.update { it.copy(photoSheetFor = event.kind) }
             ItemEditEvent.ClosePhotoSheet -> _state.update { it.copy(photoSheetFor = null) }
-            is ItemEditEvent.TakePhoto ->
-                _state.update { it.copy(photoSheetFor = null, photoLaunch = PhotoLaunch(event.kind, media.newCaptureTarget())) }
-            is ItemEditEvent.ChoosePhoto ->
+            is ItemEditEvent.TakePhoto -> {
+                val target = media.newCaptureTarget()
+                keepPending(event.kind, target.path)
+                _state.update { it.copy(photoSheetFor = null, photoLaunch = PhotoLaunch(event.kind, target)) }
+            }
+            is ItemEditEvent.ChoosePhoto -> {
+                keepPending(event.kind, null)
                 _state.update { it.copy(photoSheetFor = null, photoLaunch = PhotoLaunch(event.kind, null)) }
+            }
+            is ItemEditEvent.CameraResult -> {
+                val kind = pendingKind()
+                val path = saved.get<String>(PENDING_PATH)
+                keepPending(null, null)
+                if (kind != null && path != null) {
+                    if (event.ok) onEvent(ItemEditEvent.PhotoCaptured(kind, path)) else media.discard(path)
+                }
+            }
+            is ItemEditEvent.GalleryResult -> {
+                val kind = pendingKind() ?: PhotoKind.ITEM
+                keepPending(null, null)
+                event.uri?.let { onEvent(ItemEditEvent.PhotoPicked(kind, it)) }
+            }
             ItemEditEvent.PhotoLaunchHandled -> _state.update { it.copy(photoLaunch = null) }
             is ItemEditEvent.PhotoCaptured -> if (media.exists(event.path)) addPhoto(event.kind, event.path)
             is ItemEditEvent.PhotoPicked -> viewModelScope.launch { media.import(event.uri)?.let { addPhoto(event.kind, it) } }
@@ -119,6 +137,14 @@ class ItemEditViewModel(
             ItemEditEvent.Save -> save()
         }
     }
+
+    /** Keeps the open camera or gallery request in [saved], so a result that lands after rotation or process death is filed right. */
+    private fun keepPending(kind: PhotoKind?, path: String?) {
+        saved[PENDING_KIND] = kind?.name
+        saved[PENDING_PATH] = path
+    }
+
+    private fun pendingKind(): PhotoKind? = saved.get<String>(PENDING_KIND)?.let { k -> PhotoKind.entries.firstOrNull { it.name == k } }
 
     private fun addPhoto(kind: PhotoKind, path: String) {
         val draft = _state.value.draft
@@ -219,6 +245,8 @@ class ItemEditViewModel(
         const val KEY = "draft"
         const val PHOTOS = "photos"
         const val DECODED = "decoded"
+        const val PENDING_KIND = "pendingKind"
+        const val PENDING_PATH = "pendingPath"
 
         fun encodePhoto(p: DraftPhoto) = "${p.id.orEmpty()}|${p.kind.name}|${p.path}"
 

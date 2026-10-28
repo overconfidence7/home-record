@@ -10,7 +10,7 @@ import com.kurtz.homerecord.housemodel.items.PhotoKind
 /** Which picker sheet the item form has open. */
 enum class ItemPicker { SUBTYPE, ROOM }
 
-/** One request for the route to open the camera ([target] set) or the gallery; answered with PhotoCaptured or PhotoPicked. */
+/** One request for the route to open the camera ([target] set) or the gallery; answered with CameraResult or GalleryResult. */
 data class PhotoLaunch(val kind: PhotoKind, val target: CaptureTarget?)
 
 /** The recognized-lines sheet (AC-C31): every line OCR found, the values proposed or assigned so far, and the field a tap fills. */
@@ -71,6 +71,10 @@ sealed interface ItemEditEvent {
     data object PhotoLaunchHandled : ItemEditEvent
     data class PhotoCaptured(val kind: PhotoKind, val path: String) : ItemEditEvent
     data class PhotoPicked(val kind: PhotoKind, val uri: String) : ItemEditEvent
+    /** The camera came back; the kind and file are the pending ones the view model kept through rotation and process death. */
+    data class CameraResult(val ok: Boolean) : ItemEditEvent
+    /** The gallery came back with [uri], or null when nothing was picked; filed under the pending kind. */
+    data class GalleryResult(val uri: String?) : ItemEditEvent
     data class RemovePhoto(val path: String) : ItemEditEvent
     data class PlateTarget(val field: PlateField) : ItemEditEvent
     data class PlateAssign(val line: String) : ItemEditEvent
