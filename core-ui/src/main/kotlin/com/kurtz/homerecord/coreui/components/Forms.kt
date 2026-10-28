@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -117,6 +118,7 @@ fun LabeledField(
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
     singleLine: Boolean = true,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     OutlinedTextField(
         value = value,
@@ -127,6 +129,7 @@ fun LabeledField(
         isError = error != null,
         singleLine = singleLine,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardActions = keyboardActions,
     )
 }
 
@@ -139,6 +142,8 @@ fun LengthField(
     system: UnitSystem,
     modifier: Modifier = Modifier,
     required: Boolean = false,
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     var text by rememberSaveable { mutableStateOf(inches?.let { LengthParser.format(it, system) }.orEmpty()) }
     var touched by rememberSaveable { mutableStateOf(false) }
@@ -157,6 +162,8 @@ fun LengthField(
         helper = stringResource(if (system == UnitSystem.IMPERIAL) R.string.length_helper_imperial else R.string.length_helper_metric),
         error = if (invalid) stringResource(R.string.length_error) else null,
         keyboardType = KeyboardType.Text,
+        imeAction = imeAction,
+        keyboardActions = keyboardActions,
     )
 }
 

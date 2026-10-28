@@ -56,6 +56,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -560,7 +564,11 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
         )
     }
     val focus = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     LaunchedEffect(room.id, state.focusName) { if (state.focusName) focus.requestFocus() }
+    // Name and size are one edit each: committed on IME Done or when focus leaves the field, not per keystroke.
+    val commitOnBlur = Modifier.onFocusChanged { if (!it.isFocused) onEvent(PlanEditorEvent.CommitFields) }
+    val commitOnDone = KeyboardActions(onDone = { onEvent(PlanEditorEvent.CommitFields); focusManager.clearFocus() })
     BoxWithConstraints {
         Surface(tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -572,7 +580,7 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                         label = stringResource(R.string.plan_room_name),
                         value = room.name,
                         onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
-                        modifier = Modifier.focusRequester(focus).testTag("hm_plan_room_name"),
+                        modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("hm_plan_room_name"),
                     )
                 }
                 OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_plan_room_kind")) {
@@ -588,14 +596,16 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                                 inches = room.widthIn,
                                 onInchesChange = { width = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f).testTag("hm_plan_room_width"),
+                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("hm_plan_room_width"),
                             )
                             LengthField(
                                 label = stringResource(R.string.plan_room_length),
                                 inches = room.lengthIn,
                                 onInchesChange = { length = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f).testTag("hm_plan_room_length"),
+                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("hm_plan_room_length"),
+                                imeAction = ImeAction.Done,
+                                keyboardActions = commitOnDone,
                             )
                         }
                     }

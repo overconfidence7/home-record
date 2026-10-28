@@ -13,6 +13,7 @@ import com.kurtz.homerecord.housemodel.plan.PlanEditor
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanValidator
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +21,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
  * HM-Plan (AC-C5, AC-C6, AC-C10, AC-C12). Every committed edit is saved to the database right away, so leaving the
- * editor or losing the process never drops work. Floor, selection and view survive through [SavedStateHandle].
+ * editor or losing the process never drops work. A typed name or size is one edit: it is held (in [SavedStateHandle])
+ * until IME Done, focus leaves the field, or the next other edit, then becomes one undo step and one save. Floor, selection and view survive through [SavedStateHandle].
  */
 class PlanEditorViewModel(
     private val repo: HomeRepository,
@@ -74,6 +77,12 @@ class PlanEditorViewModel(
     }
 
     fun onEvent(event: PlanEditorEvent) {
+        // Typing stays pending; any other edit, selection, undo or floor change first commits it.
+        if (event !is PlanEditorEvent.Rename && event !is PlanEditorEvent.SetSize &&
+            event !is PlanEditorEvent.Transform && event !is PlanEditorEvent.Fit
+        ) {
+            commitFields()
+        }
         when (event) {
             is PlanEditorEvent.SelectFloor -> floorById(event.floorId)?.let { launch { loadFloor(it) } }
             is PlanEditorEvent.AddRoom -> {
@@ -101,9 +110,19 @@ class PlanEditorViewModel(
                 editor.commit()
                 commit(_state.value.selectedId, focusName = false)
             }
-            is PlanEditorEvent.Rename -> selectedId()?.let { editor.rename(it, event.name); commit(it, bumpFields = false) }
+            is PlanEditorEvent.Rename -> selectedId()?.let { id ->
+                editor.previewRename(id, event.name)
+                hold(id) { saved[PENDING_NAME] = event.name }
+                refresh()
+            }
             is PlanEditorEvent.SetKind -> selectedId()?.let { editor.setKind(it, event.kind); commit(it, bumpFields = false) }
-            is PlanEditorEvent.SetSize -> selectedId()?.let { editor.setSize(it, event.widthIn, event.lengthIn); commit(it, bumpFields = false) }
+            is PlanEditorEvent.SetSize -> selectedId()?.let { id ->
+                hold(id) {
+                    saved[PENDING_WIDTH] = event.widthIn
+                    saved[PENDING_LENGTH] = event.lengthIn
+                }
+            }
+            PlanEditorEvent.CommitFields -> Unit
             is PlanEditorEvent.SetEditShape -> setEditShape(event.on && selectedId() != null)
             is PlanEditorEvent.AddCorner -> selectedId()?.let { id ->
                 if (editor.addCorner(id, event.edgeIndex, event.at) != null) commit(id, bumpFields = false)
@@ -169,6 +188,10 @@ class PlanEditorViewModel(
         pendingEditShape = false
         saved[SELECTED] = keep
         saved[EDIT_SHAPE] = shape
+        // A name or size typed before the process died comes back as still pending on its room.
+        val pendingName: String? = saved[PENDING_NAME]
+        if (saved.get<String>(PENDING_ROOM) != keep) clearPending()
+        else if (keep != null && pendingName != null) editor.previewRename(keep, pendingName)
         val rooms = editor.rooms
         // One update with the rooms: the editor counts as loaded only once its rooms are in the state, so a
         // later refresh never lands an older room list over the first edit.
@@ -185,6 +208,33 @@ class PlanEditorViewModel(
                 fieldsVersion = it.fieldsVersion + 1,
             ).withRooms(rooms)
         }
+    }
+
+    private fun hold(roomId: String, write: () -> Unit) {
+        if (saved.get<String>(PENDING_ROOM) != roomId) {
+            commitFields()
+            saved[PENDING_ROOM] = roomId
+        }
+        write()
+    }
+
+    /** Turns the pending name and size into undo steps and saves once. Nothing pending, nothing happens. */
+    private fun commitFields() {
+        val roomId: String = saved[PENDING_ROOM] ?: return
+        val width: Int? = saved[PENDING_WIDTH]
+        val length: Int? = saved[PENDING_LENGTH]
+        clearPending()
+        editor.commit()
+        if (width != null && length != null) editor.setSize(roomId, width, length)
+        refresh()
+        save()
+    }
+
+    private fun clearPending() {
+        saved.remove<String>(PENDING_ROOM)
+        saved.remove<String>(PENDING_NAME)
+        saved.remove<Int>(PENDING_WIDTH)
+        saved.remove<Int>(PENDING_LENGTH)
     }
 
     private fun select(id: String?) {
@@ -218,9 +268,14 @@ class PlanEditorViewModel(
             )
         }
         refresh()
+        save()
+    }
+
+    /** Saves the floor; a save that has started finishes even when the editor closes right after. */
+    private fun save() {
         val floorId = _state.value.floorId ?: return
         val rooms = editor.rooms
-        launch { saveLock.withLock { repo.savePlan(floorId, rooms) } }
+        launch { withContext(NonCancellable) { saveLock.withLock { repo.savePlan(floorId, rooms) } } }
     }
 
     private fun refresh() {
@@ -268,6 +323,10 @@ class PlanEditorViewModel(
         private const val ZOOM = "zoom"
         private const val PAN_X = "panX"
         private const val PAN_Y = "panY"
+        private const val PENDING_ROOM = "pendingRoom"
+        private const val PENDING_NAME = "pendingName"
+        private const val PENDING_WIDTH = "pendingWidth"
+        private const val PENDING_LENGTH = "pendingLength"
         const val MIN_ZOOM = 0.15f
         const val MAX_ZOOM = 6f
         private const val FIT_MARGIN_DP = 24f

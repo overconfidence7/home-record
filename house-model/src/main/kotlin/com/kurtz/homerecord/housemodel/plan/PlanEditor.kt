@@ -97,6 +97,11 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
 
     fun rename(id: String, name: String) = change(id) { it.copy(name = name) }
 
+    /** Shows room [id] renamed while the name is being typed; [commit] makes it one undo step. */
+    fun previewRename(id: String, name: String) {
+        draft = (draft ?: history.current).map { if (it.id == id) it.copy(name = name) else it }
+    }
+
     fun setKind(id: String, kind: RoomKind) = change(id) { it.copy(kind = kind.name) }
 
     /** Types a new width and length for a rectangular room, keeping its top-left corner. Other shapes are unchanged. */

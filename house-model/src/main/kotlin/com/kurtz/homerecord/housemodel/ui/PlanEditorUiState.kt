@@ -51,9 +51,13 @@ sealed interface PlanEditorEvent {
     data class DragMove(val roomId: String, val dxIn: Int, val dyIn: Int) : PlanEditorEvent
     data class DragEdge(val roomId: String, val edgeIndex: Int, val deltaIn: Int) : PlanEditorEvent
     data object DragEnd : PlanEditorEvent
+    /** Typed name, shown on the plan at once and committed with [CommitFields] or the next other edit. */
     data class Rename(val name: String) : PlanEditorEvent
     data class SetKind(val kind: RoomKind) : PlanEditorEvent
+    /** Typed width and length; held until [CommitFields] so a half-typed number never resizes the room. */
     data class SetSize(val widthIn: Int, val lengthIn: Int) : PlanEditorEvent
+    /** IME Done or focus left a field: the typed name and size become one undo step each and are saved. */
+    data object CommitFields : PlanEditorEvent
     data class SetEditShape(val on: Boolean) : PlanEditorEvent
     data class AddCorner(val edgeIndex: Int, val at: Pt) : PlanEditorEvent
     data class DragCorner(val index: Int, val dxIn: Int, val dyIn: Int) : PlanEditorEvent

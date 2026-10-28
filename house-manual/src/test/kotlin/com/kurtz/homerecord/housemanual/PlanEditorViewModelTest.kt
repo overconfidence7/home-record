@@ -115,12 +115,72 @@ class PlanEditorViewModelTest {
         vm.onEvent(PlanEditorEvent.Rename("Kitchen"))
         vm.onEvent(PlanEditorEvent.SetKind(RoomKind.KITCHEN))
         vm.onEvent(PlanEditorEvent.SetSize(180, 120))
+        vm.onEvent(PlanEditorEvent.CommitFields)
         assertThat(vm.state.value.selected?.widthIn).isEqualTo(180)
         vm.onEvent(PlanEditorEvent.Undo)
         assertThat(vm.state.value.selected?.widthIn).isEqualTo(144)
         vm.onEvent(PlanEditorEvent.Redo)
         assertThat(vm.state.value.selected?.name).isEqualTo("Kitchen")
         assertThat(savedPlan(vm) { it.placed.singleOrNull()?.kind == "KITCHEN" }.placed.single().kind).isEqualTo("KITCHEN")
+    }
+
+    // AC-C10, AC-C6: a typed name is one undo step and one save, not one per keystroke.
+    @Test fun typingANameIsOneUndoStepCommittedOnDone() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        val id = vm.state.value.selectedId
+        listOf("K", "Ki", "Kit", "Kitchen").forEach { vm.onEvent(PlanEditorEvent.Rename(it)) }
+        // Shown on the plan while typing, not yet an undo step.
+        assertThat(vm.state.value.selected?.name).isEqualTo("Kitchen")
+        vm.onEvent(PlanEditorEvent.CommitFields)
+        assertThat(savedPlan(vm) { it.placed.singleOrNull()?.name == "Kitchen" }.placed.single().name).isEqualTo("Kitchen")
+        vm.onEvent(PlanEditorEvent.Undo)
+        val s = vm.state.value
+        assertThat(s.rooms.single { it.id == id }.name).isEmpty()
+        vm.onEvent(PlanEditorEvent.Undo)
+        assertThat(vm.state.value.rooms).isEmpty()
+    }
+
+    // AC-C6: typing "14" passes through "1"; the room is not resized to 1 ft on the way.
+    @Test fun aHalfTypedSizeNeverResizesTheRoom() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.SetSize(12, 144))
+        assertThat(vm.state.value.selected?.widthIn).isEqualTo(144)
+        vm.onEvent(PlanEditorEvent.SetSize(168, 144))
+        assertThat(vm.state.value.selected?.widthIn).isEqualTo(144)
+        vm.onEvent(PlanEditorEvent.CommitFields)
+        assertThat(vm.state.value.selected?.widthIn).isEqualTo(168)
+        assertThat(savedPlan(vm) { it.placed.singleOrNull()?.widthIn == 168 }.placed.single().widthIn).isEqualTo(168)
+        vm.onEvent(PlanEditorEvent.Undo)
+        assertThat(vm.state.value.selected?.widthIn).isEqualTo(144)
+    }
+
+    // AC-C10: tapping Done (deselect) or any other edit commits what was typed first; leaving autosaves.
+    @Test fun theNextEditCommitsATypedNameFirst() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.Rename("Den"))
+        vm.onEvent(PlanEditorEvent.Select(null))
+        assertThat(vm.state.value.rooms.single().name).isEqualTo("Den")
+        assertThat(savedPlan(vm) { it.placed.singleOrNull()?.name == "Den" }.placed.single().name).isEqualTo("Den")
+        assertThat(vm.state.value.canUndo).isTrue()
+    }
+
+    // AC-C10: a name and size typed just before process death are still there, still pending.
+    @Test fun aPendingNameAndSizeSurviveARecreatedViewModel() = test {
+        val handle = SavedStateHandle()
+        val first = vm(handle)
+        first.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        savedPlan(first) { it.placed.size == 1 }
+        first.onEvent(PlanEditorEvent.Rename("Pantry"))
+        first.onEvent(PlanEditorEvent.SetSize(96, 144))
+
+        val second = vm(handle)
+        withTimeout(10_000) { second.state.first { it.selected?.name == "Pantry" } }
+        second.onEvent(PlanEditorEvent.CommitFields)
+        val saved = savedPlan(second) { it.placed.singleOrNull()?.let { r -> r.name == "Pantry" && r.widthIn == 96 } == true }
+        assertThat(saved.placed.single().widthIn).isEqualTo(96)
     }
 
     @Test fun dragMoveIsOneUndoStepAndSavesOnDragEnd() = test {
