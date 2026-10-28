@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -151,7 +152,7 @@ private val RoomSections = listOf(
 
 @Composable
 private fun RoomSectionCard(section: RoomSection) {
-    Card(Modifier.fillMaxWidth().testTag("hm_room_${section.tag}")) {
+    Card(Modifier.fillMaxWidth().testTag("${LocalTagPrefix.current}_room_${section.tag}")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(section.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -164,7 +165,7 @@ private fun RoomSectionCard(section: RoomSection) {
 
 @Composable
 private fun RoomItemsCard(items: List<RoomItem>, onOpen: (String) -> Unit, onAdd: (() -> Unit)?) {
-    Card(Modifier.fillMaxWidth().testTag("hm_room_items")) {
+    Card(Modifier.fillMaxWidth().testTag("${LocalTagPrefix.current}_room_items")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Rounded.Inventory2, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -175,7 +176,7 @@ private fun RoomItemsCard(items: List<RoomItem>, onOpen: (String) -> Unit, onAdd
             }
             items.forEach { item ->
                 Column(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onOpen(item.id) }.testTag("hm_room_item_${item.id}"),
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onOpen(item.id) }.testTag("${LocalTagPrefix.current}_room_item_${item.id}"),
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(item.name, style = MaterialTheme.typography.bodyLarge)
@@ -183,7 +184,7 @@ private fun RoomItemsCard(items: List<RoomItem>, onOpen: (String) -> Unit, onAdd
                 }
             }
             if (onAdd != null) {
-                TextButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_room_add_item")) {
+                TextButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_room_add_item")) {
                     Text(stringResource(R.string.room_add_item))
                 }
             }

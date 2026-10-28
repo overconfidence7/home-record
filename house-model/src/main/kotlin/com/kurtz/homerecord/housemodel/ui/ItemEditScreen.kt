@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.imePadding
@@ -99,55 +100,55 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             label = stringResource(R.string.item_type),
             value = subtype?.let { "${it.category.label}, ${it.label}" }.orEmpty(),
             error = if (ItemField.SUBTYPE in errors) stringResource(R.string.item_type_error) else null,
-            tag = "hm_item_type",
+            tag = "${LocalTagPrefix.current}_item_type",
             onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.SUBTYPE)) },
         )
         PickerField(
             label = stringResource(R.string.item_room),
             value = roomName.orEmpty(),
             error = if (ItemField.ROOM in errors) stringResource(R.string.item_room_error) else null,
-            tag = "hm_item_room",
+            tag = "${LocalTagPrefix.current}_item_room",
             onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.ROOM)) },
         )
         LabeledField(
             stringResource(R.string.item_name), d.name, { onEvent(ItemEditEvent.Change(d.copy(name = it))) },
-            Modifier.testTag("hm_item_name"), required = true,
+            Modifier.testTag("${LocalTagPrefix.current}_item_name"), required = true,
             error = if (ItemField.NAME in errors) stringResource(R.string.item_name_error) else null,
         )
-        LabeledField(stringResource(R.string.item_make), d.make, { onEvent(ItemEditEvent.Change(d.copy(make = it))) }, Modifier.testTag("hm_item_make"))
-        LabeledField(stringResource(R.string.item_model), d.model, { onEvent(ItemEditEvent.Change(d.copy(model = it))) }, Modifier.testTag("hm_item_model"))
-        LabeledField(stringResource(R.string.item_serial), d.serial, { onEvent(ItemEditEvent.Change(d.copy(serial = it))) }, Modifier.testTag("hm_item_serial"))
+        LabeledField(stringResource(R.string.item_make), d.make, { onEvent(ItemEditEvent.Change(d.copy(make = it))) }, Modifier.testTag("${LocalTagPrefix.current}_item_make"))
+        LabeledField(stringResource(R.string.item_model), d.model, { onEvent(ItemEditEvent.Change(d.copy(model = it))) }, Modifier.testTag("${LocalTagPrefix.current}_item_model"))
+        LabeledField(stringResource(R.string.item_serial), d.serial, { onEvent(ItemEditEvent.Change(d.copy(serial = it))) }, Modifier.testTag("${LocalTagPrefix.current}_item_serial"))
         DateField(
             stringResource(R.string.item_manufactured), d.manufacturedOn.ifBlank { null },
-            { onEvent(ItemEditEvent.Change(d.copy(manufacturedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_manufactured"),
+            { onEvent(ItemEditEvent.Change(d.copy(manufacturedOn = it.orEmpty()))) }, Modifier.testTag("${LocalTagPrefix.current}_item_manufactured"),
         )
         state.decodedRule?.let {
             Text(
-                stringResource(R.string.item_manufactured_decoded, it), Modifier.testTag("hm_item_manufactured_note"),
+                stringResource(R.string.item_manufactured_decoded, it), Modifier.testTag("${LocalTagPrefix.current}_item_manufactured_note"),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         DateField(
             stringResource(R.string.item_purchased), d.purchasedOn.ifBlank { null },
-            { onEvent(ItemEditEvent.Change(d.copy(purchasedOn = it.orEmpty()))) }, Modifier.testTag("hm_item_purchased"),
+            { onEvent(ItemEditEvent.Change(d.copy(purchasedOn = it.orEmpty()))) }, Modifier.testTag("${LocalTagPrefix.current}_item_purchased"),
         )
         DateField(
             stringResource(R.string.item_in_service), d.inServiceOn.ifBlank { null },
-            { onEvent(ItemEditEvent.Change(d.copy(inServiceOn = it.orEmpty()))) }, Modifier.testTag("hm_item_in_service"),
+            { onEvent(ItemEditEvent.Change(d.copy(inServiceOn = it.orEmpty()))) }, Modifier.testTag("${LocalTagPrefix.current}_item_in_service"),
         )
         LabeledField(
             stringResource(R.string.item_price), d.price, { onEvent(ItemEditEvent.Change(d.copy(price = it))) },
-            Modifier.testTag("hm_item_price"), keyboardType = KeyboardType.Decimal,
+            Modifier.testTag("${LocalTagPrefix.current}_item_price"), keyboardType = KeyboardType.Decimal,
             error = if (ItemField.PRICE in errors) stringResource(R.string.item_price_error) else null,
         )
-        LabeledField(stringResource(R.string.item_vendor), d.vendor, { onEvent(ItemEditEvent.Change(d.copy(vendor = it))) }, Modifier.testTag("hm_item_vendor"))
+        LabeledField(stringResource(R.string.item_vendor), d.vendor, { onEvent(ItemEditEvent.Change(d.copy(vendor = it))) }, Modifier.testTag("${LocalTagPrefix.current}_item_vendor"))
         LabeledField(
             stringResource(R.string.item_manual_url), d.manualUrl, { onEvent(ItemEditEvent.Change(d.copy(manualUrl = it))) },
-            Modifier.testTag("hm_item_manual_url"), keyboardType = KeyboardType.Uri,
+            Modifier.testTag("${LocalTagPrefix.current}_item_manual_url"), keyboardType = KeyboardType.Uri,
         )
         LabeledField(
             stringResource(R.string.item_notes), d.notes, { onEvent(ItemEditEvent.Change(d.copy(notes = it))) },
-            Modifier.testTag("hm_item_notes"), singleLine = false,
+            Modifier.testTag("${LocalTagPrefix.current}_item_notes"), singleLine = false,
         )
         if (state.scanning) {
             Text(stringResource(R.string.item_plate_reading), style = MaterialTheme.typography.bodyMedium)
@@ -195,7 +196,7 @@ private fun PhotosSection(photos: List<DraftPhoto>, onEvent: (ItemEditEvent) -> 
                     )
                     IconButton(
                         onClick = { onEvent(ItemEditEvent.RemovePhoto(photo.path)) },
-                        modifier = Modifier.align(Alignment.TopEnd).testTag("hm_item_photo_remove"),
+                        modifier = Modifier.align(Alignment.TopEnd).testTag("${LocalTagPrefix.current}_item_photo_remove"),
                     ) {
                         Icon(Icons.Rounded.Close, stringResource(R.string.item_photo_remove, label))
                     }
@@ -206,11 +207,11 @@ private fun PhotosSection(photos: List<DraftPhoto>, onEvent: (ItemEditEvent) -> 
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         OutlinedButton(
             onClick = { onEvent(ItemEditEvent.OpenPhotoSheet(PhotoKind.DATA_PLATE)) },
-            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_item_photo_data_plate"),
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_photo_data_plate"),
         ) { Text(stringResource(R.string.item_photo_data_plate), textAlign = TextAlign.Center) }
         OutlinedButton(
             onClick = { onEvent(ItemEditEvent.OpenPhotoSheet(PhotoKind.ITEM)) },
-            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_item_photo_item"),
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_photo_item"),
         ) { Text(stringResource(R.string.item_photo_item), textAlign = TextAlign.Center) }
     }
 }
@@ -270,12 +271,12 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp).testTag("hm_item_type_search"),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp).testTag("${LocalTagPrefix.current}_item_type_search"),
             placeholder = { Text(stringResource(R.string.item_type_search)) },
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             trailingIcon = if (query.isEmpty()) null else {
                 {
-                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.testTag("hm_item_type_search_clear")) {
+                    IconButton(onClick = { onQueryChange("") }, modifier = Modifier.testTag("${LocalTagPrefix.current}_item_type_search_clear")) {
                         Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.item_type_search_clear))
                     }
                 }
@@ -287,10 +288,10 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "
             Text(
                 stringResource(R.string.item_type_search_none, query.trim()),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp).testTag("hm_item_type_search_none"),
+                modifier = Modifier.padding(16.dp).testTag("${LocalTagPrefix.current}_item_type_search_none"),
             )
         }
-        LazyColumn(Modifier.testTag("hm_item_type_sheet")) {
+        LazyColumn(Modifier.testTag("${LocalTagPrefix.current}_item_type_sheet")) {
             groups.forEach { (category, subtypes) ->
                 item(key = "h_${category.name}") {
                     ListItem(
@@ -302,7 +303,7 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "
                     ListItem(
                         headlineContent = { Text(subtype.label) },
                         trailingContent = if (subtype.id == selectedId) { { Text(stringResource(R.string.item_type_selected)) } } else null,
-                        modifier = Modifier.clickable { onPick(subtype.id) }.padding(start = 40.dp).testTag("hm_item_type_${subtype.id}"),
+                        modifier = Modifier.clickable { onPick(subtype.id) }.padding(start = 40.dp).testTag("${LocalTagPrefix.current}_item_type_${subtype.id}"),
                     )
                 }
             }
@@ -321,7 +322,7 @@ private fun PlateScanSheet(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
 @Composable
 fun PlateScanContent(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
     LazyColumn(
-        Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("hm_item_plate_sheet"),
+        Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("${LocalTagPrefix.current}_item_plate_sheet"),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -336,7 +337,7 @@ fun PlateScanContent(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
                         selected = scan.target == field,
                         onClick = { onEvent(ItemEditEvent.PlateTarget(field)) },
                         label = { Text(if (value.isBlank()) name else "$name: $value") },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_plate_${field.name.lowercase()}"),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_plate_${field.name.lowercase()}"),
                     )
                 }
             }
@@ -344,19 +345,19 @@ fun PlateScanContent(scan: PlateScan, onEvent: (ItemEditEvent) -> Unit) {
         itemsIndexed(scan.lines, key = { i, _ -> "line_$i" }) { _, line ->
             ListItem(
                 headlineContent = { Text(line) },
-                modifier = Modifier.clickable { onEvent(ItemEditEvent.PlateAssign(line)) }.heightIn(min = 48.dp).testTag("hm_item_plate_line"),
+                modifier = Modifier.clickable { onEvent(ItemEditEvent.PlateAssign(line)) }.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_plate_line"),
             )
         }
         item {
             Button(
                 onClick = { onEvent(ItemEditEvent.PlateApply) },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_item_plate_apply"),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_plate_apply"),
             ) { Text(stringResource(R.string.item_plate_apply)) }
         }
         item {
             OutlinedButton(
                 onClick = { onEvent(ItemEditEvent.PlateDismiss) },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_item_plate_skip"),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_item_plate_skip"),
             ) { Text(stringResource(R.string.item_plate_skip)) }
         }
     }

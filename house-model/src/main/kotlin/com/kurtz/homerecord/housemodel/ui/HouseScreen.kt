@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,7 +80,7 @@ fun HouseScreen(
                 FilterChip(
                     selected = floor.id == state.floorId,
                     onClick = { onEvent(HouseEvent.SelectFloor(floor.id)) },
-                    modifier = Modifier.testTag("hm_house_floor_${floor.id}"),
+                    modifier = Modifier.testTag("${LocalTagPrefix.current}_house_floor_${floor.id}"),
                     label = { Text(floor.name) },
                 )
             }
@@ -94,7 +95,7 @@ fun HouseScreen(
                     body = stringResource(R.string.house_floor_empty_body),
                     actionLabel = stringResource(R.string.house_edit_plan),
                     onAction = onEditPlan,
-                    actionModifier = Modifier.testTag("hm_house_edit_plan"),
+                    actionModifier = Modifier.testTag("${LocalTagPrefix.current}_house_edit_plan"),
                 )
             } else {
                 BlueprintCanvas(
@@ -123,19 +124,19 @@ fun HouseScreen(
         val buttons: @Composable (Modifier) -> Unit = { m ->
             // An empty floor already offers Edit plan in its empty state; one primary action only.
             if (state.rooms.isNotEmpty()) {
-                OutlinedButton(onClick = onEditPlan, modifier = m.testTag("hm_house_edit_plan")) {
+                OutlinedButton(onClick = onEditPlan, modifier = m.testTag("${LocalTagPrefix.current}_house_edit_plan")) {
                     Icon(Icons.Rounded.Edit, contentDescription = null)
                     Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp))
                 }
             }
-            OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("hm_house_floors")) {
+            OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("${LocalTagPrefix.current}_house_floors")) {
                 Icon(Icons.Rounded.Layers, contentDescription = null)
                 Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp))
             }
             OutlinedButton(
                 onClick = { onEvent(HouseEvent.ExportPdf) },
                 enabled = state.rooms.isNotEmpty() && !state.exporting,
-                modifier = m.testTag("hm_house_export"),
+                modifier = m.testTag("${LocalTagPrefix.current}_house_export"),
             ) {
                 Icon(Icons.Rounded.PictureAsPdf, contentDescription = null)
                 Text(stringResource(R.string.house_export_pdf), modifier = Modifier.padding(start = 8.dp))

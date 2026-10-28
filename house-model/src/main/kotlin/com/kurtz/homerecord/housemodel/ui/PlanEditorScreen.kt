@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -136,13 +137,13 @@ fun PlanEditorScreen(
         subtitle = homeName,
         onBack = onBack,
         actions = {
-            IconButton(onClick = { onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp)) }, enabled = state.rooms.isNotEmpty(), modifier = Modifier.testTag("hm_plan_fit")) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp)) }, enabled = state.rooms.isNotEmpty(), modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_fit")) {
                 Icon(Icons.Rounded.CenterFocusStrong, contentDescription = stringResource(R.string.plan_fit))
             }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("hm_plan_undo")) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_undo")) {
                 Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.plan_undo))
             }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo, modifier = Modifier.testTag("hm_plan_redo")) {
+            IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_redo")) {
                 Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(R.string.plan_redo))
             }
         },
@@ -156,7 +157,7 @@ fun PlanEditorScreen(
                     },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.plan_add_room)) },
-                    modifier = Modifier.testTag("hm_plan_add_room"),
+                    modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_add_room"),
                 )
             }
         },
@@ -209,7 +210,7 @@ private fun FloorSwitcher(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
             FilterChip(
                 selected = floor.id == state.floorId,
                 onClick = { onEvent(PlanEditorEvent.SelectFloor(floor.id)) },
-                modifier = Modifier.testTag("hm_plan_floor_${floor.id}"),
+                modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_floor_${floor.id}"),
                 label = { Text(floor.name) },
             )
         }
@@ -259,7 +260,7 @@ private fun PlanCanvas(
     }
     Canvas(
         modifier
-            .testTag("hm_plan_canvas")
+            .testTag("${LocalTagPrefix.current}_plan_canvas")
             .semantics { contentDescription = summary }
             .onSizeChanged {
                 onSized(it.width / density, it.height / density)
@@ -365,7 +366,7 @@ private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
                     Modifier
                         .offset(left.dp, top.dp)
                         .size((right - left).coerceAtLeast(0f).dp, (bottom - top).coerceAtLeast(0f).dp)
-                        .testTag("hm_plan_room_${room.id}")
+                        .testTag("${LocalTagPrefix.current}_plan_room_${room.id}")
                         .semantics {
                             role = Role.Button
                             contentDescription = room.name.ifBlank { unnamed }
@@ -546,8 +547,8 @@ private fun ConfirmDeleteDialog(title: String, body: String, onConfirm: () -> Un
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(body) },
-        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.testTag("hm_plan_delete_confirm")) { Text(stringResource(R.string.house_room_delete)) } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("hm_plan_delete_cancel")) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_delete_confirm")) { Text(stringResource(R.string.house_room_delete)) } },
+        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_delete_cancel")) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -580,10 +581,10 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                         label = stringResource(R.string.plan_room_name),
                         value = room.name,
                         onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
-                        modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("hm_plan_room_name"),
+                        modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_name"),
                     )
                 }
-                OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_plan_room_kind")) {
+                OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_room_kind")) {
                     Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
                 }
                 if (room.points.size == 4) {
@@ -596,14 +597,14 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                                 inches = room.widthIn,
                                 onInchesChange = { width = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("hm_plan_room_width"),
+                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_width"),
                             )
                             LengthField(
                                 label = stringResource(R.string.plan_room_length),
                                 inches = room.lengthIn,
                                 onInchesChange = { length = it; commitSize(width, length, onEvent) },
                                 system = state.system,
-                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("hm_plan_room_length"),
+                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_length"),
                                 imeAction = ImeAction.Done,
                                 keyboardActions = commitOnDone,
                             )
@@ -629,23 +630,23 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                 ) {
                     FilledTonalButton(
                         onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_done"),
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_done"),
                     ) {
                         Text(stringResource(R.string.plan_done))
                     }
                     if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_edit_shape")) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_edit_shape")) {
                             Icon(Icons.Rounded.Polyline, contentDescription = null)
                             Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                     if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_stairs")) {
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_stairs")) {
                             Icon(Icons.Rounded.Stairs, contentDescription = null)
                             Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
-                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_room")) {
+                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_delete_room")) {
                         Icon(Icons.Rounded.Delete, contentDescription = null)
                         Text(stringResource(R.string.plan_delete_room), modifier = Modifier.padding(start = 8.dp))
                     }
@@ -673,10 +674,10 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
             style = MaterialTheme.typography.bodyMedium,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_door")) {
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_door")) {
                 Text(stringResource(R.string.plan_add_door))
             }
-            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_add_window")) {
+            FilledTonalButton(onClick = { onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_window")) {
                 Text(stringResource(R.string.plan_add_window))
             }
         }
@@ -691,9 +692,9 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
                     inches = opening.widthIn,
                     onInchesChange = { w -> if (w != null) onEvent(PlanEditorEvent.SetOpeningWidth(w)) },
                     system = state.system,
-                    modifier = Modifier.weight(1f).testTag("hm_plan_opening_width"),
+                    modifier = Modifier.weight(1f).testTag("${LocalTagPrefix.current}_plan_opening_width"),
                 )
-                OutlinedButton(onClick = { onEvent(PlanEditorEvent.DeleteOpening) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_plan_delete_opening")) {
+                OutlinedButton(onClick = { onEvent(PlanEditorEvent.DeleteOpening) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_delete_opening")) {
                     Icon(Icons.Rounded.Delete, contentDescription = null)
                     Text(
                         stringResource(if (opening.kind == OpeningKind.DOOR) R.string.plan_delete_door else R.string.plan_delete_window),
@@ -720,12 +721,12 @@ private fun StairRow(state: PlanEditorUiState, stair: PlanStair, onEvent: (PlanE
     }
     val target = state.floors.firstOrNull { it.id == stair.toFloorId }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("hm_plan_stairs_link")) {
+        OutlinedButton(onClick = { picking = true }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_stairs_link")) {
             Text(
                 if (target != null) stringResource(R.string.plan_stairs_to, target.name) else stringResource(R.string.plan_stairs_unlinked),
             )
         }
-        IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("hm_plan_delete_stairs")) {
+        IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("${LocalTagPrefix.current}_plan_delete_stairs")) {
             Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_stairs))
         }
     }

@@ -211,3 +211,6 @@ Every edge of a placed room now has a `wall` row (before, only edges with a door
 
 ## 2026-10-28 — Plan editor typing is one edit (CR2n3, cr:plan-keystroke-commit)
 A typed room name is shown on the plan as a draft (`PlanEditor.previewRename`) and a typed width/length is held without resizing, both in the ViewModel's SavedStateHandle; IME Done, focus leaving the field, Done, the editor closing or any other edit commits them as one undo step each and one save. Chosen over merging per-keystroke undo steps because a half-typed size ("1" on the way to "14") would still resize the room and write the outbox. Plan saves run under NonCancellable so a save started as the editor closes finishes.
+
+## 2026-10-28 — The theme provides the test tag prefix (CR2q3a, cr:shared-hm-tags)
+`Brand` carries its tag prefix (`hm`, `fl`) and `HomeRecordTheme` provides it as `LocalTagPrefix`, so every screen in :house-model (House, Floors, Plan editor, Room, Item form) tags `<app>_<screen>_<element>` by the app that shows it, including in previews, screenshot tests and Robolectric tests that wrap the screen in the theme. The apps' own `LocalTagPrefix` providers stay (same value). Floors rows are `<app>_floors_row_<id>` instead of the bare `row_<id>`. House Manual ids are unchanged, so its flows need no edit.

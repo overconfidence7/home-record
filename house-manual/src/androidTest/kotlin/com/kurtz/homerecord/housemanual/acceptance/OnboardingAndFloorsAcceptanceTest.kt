@@ -52,8 +52,8 @@ class OnboardingAndFloorsAcceptanceTest {
                 FloorsScreen(FloorsUiState(loading = false, floors = listOf(basement, main)), onEvent = { events += it }, onBack = {})
             }
         }
-        rule.onNodeWithTag("row_f-main").assertIsDisplayed()
-        rule.onNodeWithTag("row_f-basement").assertIsDisplayed()
+        rule.onNodeWithTag("hm_floors_row_f-main").assertIsDisplayed()
+        rule.onNodeWithTag("hm_floors_row_f-basement").assertIsDisplayed()
         rule.onNodeWithTag("hm_floors_fab").performClick()
         assertThat(events).contains(FloorsEvent.AddClicked)
     }

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,7 @@ fun FloorsScreen(
         onBack = onBack,
         floatingActionButton = {
             if (!state.loading && state.floors.isNotEmpty()) {
-                FloatingActionButton(onClick = { onEvent(FloorsEvent.AddClicked) }, modifier = Modifier.testTag("hm_floors_fab")) {
+                FloatingActionButton(onClick = { onEvent(FloorsEvent.AddClicked) }, modifier = Modifier.testTag("${LocalTagPrefix.current}_floors_fab")) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.floors_add))
                 }
             }
@@ -126,10 +127,10 @@ private fun FloorRow(floor: FloorSummary, canMoveUp: Boolean, canMoveDown: Boole
         supporting = supporting,
         leading = { Icon(Icons.Rounded.Layers, contentDescription = null) },
         onClick = { onEvent(FloorsEvent.EditClicked(floor)) },
-        modifier = Modifier.testTag("row_${floor.id}"),
+        modifier = Modifier.testTag("${LocalTagPrefix.current}_floors_row_${floor.id}"),
         trailing = {
             Column {
-                IconButton(onClick = { menu = true }, modifier = Modifier.testTag("hm_floors_menu_${floor.id}")) {
+                IconButton(onClick = { menu = true }, modifier = Modifier.testTag("${LocalTagPrefix.current}_floors_menu_${floor.id}")) {
                     Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.floor_more, floor.name))
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {

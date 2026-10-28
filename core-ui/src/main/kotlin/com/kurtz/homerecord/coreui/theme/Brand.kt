@@ -5,8 +5,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-/** Which app is themed; selects the fallback palette used when dynamic color is unavailable. */
-enum class Brand { HouseManual, FieldLog }
+/** Which app is themed; selects the fallback palette used when dynamic color is unavailable, and the test tag prefix. */
+enum class Brand(val tagPrefix: String) { HouseManual("hm"), FieldLog("fl") }
 
 private val HmPrimary = Color(0xFF1F5FA6)
 private val HmOnPrimary = Color(0xFFFFFFFF)

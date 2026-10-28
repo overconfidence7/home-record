@@ -10,9 +10,11 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 
 /** Shared 8 dp-grid corner radii. */
 internal val HomeRecordShapes = Shapes(
@@ -23,7 +25,10 @@ internal val HomeRecordShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp),
 )
 
-/** Dynamic color on Android 12+, brand palette otherwise; light and dark; standard motion. */
+/**
+ * Dynamic color on Android 12+, brand palette otherwise; light and dark; standard motion.
+ * Also provides the brand's test tag prefix, so shared screens tag `hm_` or `fl_` by app.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeRecordTheme(
@@ -43,6 +48,7 @@ fun HomeRecordTheme(
         motionScheme = MotionScheme.standard(),
         shapes = HomeRecordShapes,
         typography = Typography(),
-        content = content,
-    )
+    ) {
+        CompositionLocalProvider(LocalTagPrefix provides brand.tagPrefix, content = content)
+    }
 }
