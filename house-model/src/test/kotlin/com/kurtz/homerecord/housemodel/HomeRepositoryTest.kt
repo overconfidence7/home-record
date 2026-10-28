@@ -123,7 +123,7 @@ class HomeRepositoryTest {
             .withStair(PlanStair("s1", upper.id, listOf(Pt(10, 10), Pt(46, 10), Pt(46, 130), Pt(10, 130))))
         val den = PlanRoom.rectangle("d1", "Den", "OFFICE", 144, 0, 120, 120)
         repo.savePlan(main.id, listOf(hall, den))
-        val wallId = db.wallDao().listFor("h1").single().id
+        val wallId = db.wallDao().listFor("h1").single { it.edgeIndex == 0 }.id
         db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = "i1", homeId = id, roomId = "h1", category = "LIGHTING", subtype = "light", name = "Hall light", wallId = wallId, createdAt = 1, updatedAt = 1))
         db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = id, roomId = "h1", path = "/m/p.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
         changes.clear()
@@ -149,7 +149,7 @@ class HomeRepositoryTest {
         repo.savePlan(main.id, listOf(PlanRoom.rectangle("h1", "Hall", "HALL", 0, 0, 144, 120).withStair(PlanStair("s1", upper.id, listOf(Pt(10, 10), Pt(46, 10), Pt(46, 130), Pt(10, 130))))))
         val bedroom = PlanRoom.rectangle("b1", "Bedroom", "BEDROOM", 0, 0, 144, 120).withOpening(PlanOpening("o9", 1, OpeningKind.WINDOW, 30, 36, 48))
         repo.savePlan(upper.id, listOf(bedroom))
-        val wallId = db.wallDao().listFor("b1").single().id
+        val wallId = db.wallDao().listFor("b1").single { it.edgeIndex == 1 }.id
         db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = "i2", homeId = id, roomId = "b1", category = "LIGHTING", subtype = "light", name = "Ceiling fan", createdAt = 1, updatedAt = 1))
         changes.clear()
 
@@ -193,7 +193,8 @@ class HomeRepositoryTest {
         val loaded = repo.loadPlan(main.id).placed.single()
         assertThat(loaded.openings).containsExactlyElementsIn(hall.openings)
         assertThat(loaded.stairs).containsExactlyElementsIn(hall.stairs)
-        assertThat(db.wallDao().listFor("h1")).hasSize(2)
+        // cr:wall-identity: every edge has a wall row, not only the ones with an opening.
+        assertThat(db.wallDao().listFor("h1").map { it.edgeIndex }).containsExactly(0, 1, 2, 3)
         assertThat(changes).containsAtLeast("opening/o1", "opening/o2", "stair/s1")
 
         changes.clear()
@@ -205,6 +206,72 @@ class HomeRepositoryTest {
         assertThat(after.openings.map { it.id }).containsExactly("o2")
         assertThat(after.stairs).isEmpty()
         assertThat(changes).containsAtLeast("opening/o1", "stair/s1")
+    }
+
+    // cr:wall-identity: walls are matched by endpoints, so a reshape keeps their ids, openings and wall photos.
+    @AcceptanceCriterion("AC-C17")
+    @Test fun reshapingARoomKeepsItsWallsAndTheirPhotos() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+            .withOpening(PlanOpening("o1", 2, OpeningKind.WINDOW, 40, 36, 48))
+        repo.savePlan(main.id, listOf(kitchen))
+        val before = db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }
+        db.wallPhotoDao().upsert(com.kurtz.homerecord.core.data.WallPhotoEntity(id = "wp1", wallId = before.getValue(2), originalPath = "/m/s.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+
+        // A corner on the north wall shifts the south wall from edge 2 to edge 3.
+        val notched = kitchen.withCornerOnEdge(0, Pt(72, 0))
+        repo.savePlan(main.id, listOf(notched))
+        val after = db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }
+        assertThat(after).hasSize(5)
+        assertThat(after[3]).isEqualTo(before[2])
+        assertThat(after[2]).isEqualTo(before[1])
+        assertThat(after[4]).isEqualTo(before[3])
+        assertThat(db.wallPhotoDao().listFor(before.getValue(2)).map { it.id }).containsExactly("wp1")
+        assertThat(db.openingDao().get("o1")!!.wallId).isEqualTo(before[2])
+        assertThat(repo.loadPlan(main.id).placed.single().openings.single().edgeIndex).isEqualTo(notched.openings.single().edgeIndex)
+
+        // Dragging the east side out keeps every wall and updates its length.
+        changes.clear()
+        repo.savePlan(main.id, listOf(notched.resizedEdge(2, 168)))
+        assertThat(db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }).isEqualTo(after)
+        assertThat(db.wallDao().get(after.getValue(3))!!.lengthIn).isEqualTo(168)
+        assertThat(changes.filter { it.startsWith("wall/") }).isNotEmpty()
+    }
+
+    @AcceptanceCriterion("AC-C17")
+    @Test fun aWallWhoseEdgeIsGoneIsDeletedWithItsPhotosAndItemsLeaveIt() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val den = PlanRoom("d1", "Den", "OFFICE", listOf(Pt(0, 0), Pt(144, 0), Pt(144, 60), Pt(96, 60), Pt(96, 120), Pt(0, 120)))
+        repo.savePlan(main.id, listOf(den))
+        val walls = db.wallDao().listFor("d1").map { it.id }.toSet()
+        assertThat(walls).hasSize(6)
+        walls.forEach { w ->
+            db.wallPhotoDao().upsert(com.kurtz.homerecord.core.data.WallPhotoEntity(id = "p-$w", wallId = w, originalPath = "/m/$w.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+            db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = "i-$w", homeId = id, roomId = "d1", category = "LIGHTING", subtype = "light", name = "Sconce", wallId = w, createdAt = 1, updatedAt = 1))
+        }
+        changes.clear()
+
+        repo.savePlan(main.id, listOf(den.withoutCorner(3)))
+
+        // The notch's two sides become one diagonal: four walls keep their ids, the diagonal is a new wall.
+        val after = db.wallDao().listFor("d1").map { it.id }.toSet()
+        val kept = after intersect walls
+        val gone = walls - after
+        assertThat(after).hasSize(5)
+        assertThat(kept).hasSize(4)
+        assertThat(gone).hasSize(2)
+        gone.forEach { lost ->
+            assertThat(db.wallPhotoDao().listFor(lost)).isEmpty()
+            assertThat(db.itemDao().get("i-$lost")!!.wallId).isNull()
+            assertThat(db.itemDao().get("i-$lost")!!.roomId).isEqualTo("d1")
+            assertThat(changes).containsAtLeast("wall/$lost", "wall_photo/p-$lost", "item/i-$lost")
+        }
+        kept.forEach { w ->
+            assertThat(db.wallPhotoDao().listFor(w)).hasSize(1)
+            assertThat(db.itemDao().get("i-$w")!!.wallId).isEqualTo(w)
+        }
     }
 
     @Test fun savePlanOnlyRecordsRowsThatChanged() = runTest {

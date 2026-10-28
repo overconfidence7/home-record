@@ -14,6 +14,8 @@
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
 
+- 2026-10-28 (CR2n2): When a plan edit removes a wall (a corner deleted, or two sides turned into a diagonal), its wall photos and wall overlays are deleted with it, and items hung on it stay in the room off the wall. The alternative is keeping those photos on the room with no wall.
+
 - 2026-10-28 (CR2n1): Deleting a room (on the plan or with its floor) moves its items to Whole house instead of deleting them, and keeps its photos and documents in the home with no room; deleting an item keeps its documents (link cleared) but takes its photos, warranty, reminders, consumables and service history. Stairs on another floor that led to a deleted floor stay, with no destination.
 - 2026-10-28 (CR2l3): Crew and Sub cannot delete job photos, even their own; only Owner, Office and the job's Lead can. Photos carry no author column yet, so "own photo" cannot be told apart; the server still accepts a crew photo delete (captures are open to everyone in backend/src/sync/policy.ts). Say if Crew should delete their own shots (needs an author column on photo, a Room version bump and the same rule on the server).
 - 2026-10-28 (CR2l3): A Lead's "assigned jobs" are the jobs with a job_crew row or a scheduled day (assignment) naming them, the same set the server uses; a Lead still clocks themselves in on any active job and still sees every job in Jobs.

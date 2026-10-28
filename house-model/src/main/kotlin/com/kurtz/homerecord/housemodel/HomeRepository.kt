@@ -13,7 +13,9 @@ import com.kurtz.homerecord.housemodel.plan.PlanCodec
 import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanStair
+import com.kurtz.homerecord.housemodel.plan.SavedWall
 import com.kurtz.homerecord.housemodel.plan.WallDeriver
+import com.kurtz.homerecord.housemodel.plan.WallMatcher
 import com.kurtz.homerecord.core.data.RoomEntity
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
@@ -192,39 +194,58 @@ class HomeRepository(
         return FloorPlan(placed, unplaced)
     }
 
-    /** Writes doors, windows and stairs of [room]; walls are created for edges that carry an opening. */
+    /**
+     * Writes the walls, doors, windows and stairs of [room]. Every edge has a wall row; a wall keeps its id through a
+     * reshape by matching the stored outline to the new one by endpoints (WallMatcher), so its photos stay on it.
+     * Walls whose edge is gone are soft deleted with their wall photos and wall overlays, and items on them stay in the
+     * room off the wall. Runs before the room row itself is written.
+     */
     private suspend fun saveOpeningsAndStairs(room: PlanRoom, allRooms: List<PlanRoom>, ceilingHeightIn: Int, at: Long) {
         val derived = WallDeriver().derive(allRooms).filter { it.roomId == room.id }.associateBy { it.edgeIndex }
-        val walls = db.wallDao().listFor(room.id).toMutableList()
-        fun wallFor(edge: Int): WallEntity {
-            val d = derived[edge]
-            val fresh = { id: String ->
-                WallEntity(
-                    id = id, roomId = room.id, edgeIndex = edge, orientation = d?.orientation ?: "N",
-                    lengthIn = d?.lengthIn ?: 0, heightIn = ceilingHeightIn, exterior = d?.exterior ?: false, createdAt = at, updatedAt = at,
-                )
-            }
-            return walls.firstOrNull { it.edgeIndex == edge } ?: fresh(Ids.newId()).also { walls += it }
-        }
-        val existingOpenings = walls.flatMap { db.openingDao().listFor(it.id) }.associateBy { it.id }
+        val stored = db.wallDao().listFor(room.id)
+        val oldOutline = db.roomDao().get(room.id)?.let { PlanCodec.decode(it.polygonJson) }.orEmpty()
+        val match = WallMatcher().match(oldOutline, stored.map { SavedWall(it.id, it.edgeIndex) }, room.points)
+        val storedById = stored.associateBy { it.id }
+        val existingOpenings = stored.flatMap { db.openingDao().listFor(it.id) }.associateBy { it.id }
         val keepOpenings = room.openings.map { it.id }.toSet()
         existingOpenings.values.filter { it.id !in keepOpenings }.forEach {
             db.openingDao().softDelete(it.id, at)
             onChange("opening", it.id)
         }
-        room.openings.forEach { o ->
-            val wall = wallFor(o.edgeIndex)
-            val d = derived[o.edgeIndex]
-            val stored = db.wallDao().get(wall.id)
-            if (stored == null || (d != null && (stored.lengthIn != d.lengthIn || stored.orientation != d.orientation || stored.exterior != d.exterior))) {
-                db.wallDao().upsert(wall.copy(lengthIn = d?.lengthIn ?: wall.lengthIn, orientation = d?.orientation ?: wall.orientation, exterior = d?.exterior ?: wall.exterior, updatedAt = at))
+        match.removed.forEach { wallId ->
+            db.wallPhotoDao().listFor(wallId).forEach { db.wallPhotoDao().softDelete(it.id, at); onChange("wall_photo", it.id) }
+            db.overlayDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach { db.overlayDao().softDelete(it.id, at); onChange("overlay", it.id) }
+            db.itemDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach {
+                db.itemDao().upsert(it.copy(wallId = null, updatedAt = at))
+                onChange("item", it.id)
+            }
+            db.wallDao().softDelete(wallId, at)
+            onChange("wall", wallId)
+        }
+        val wallOfEdge = room.points.indices.associateWith { edge ->
+            val d = derived[edge]
+            val row = match.wallOfEdge[edge]?.let { storedById[it] }
+            val wall = row?.copy(
+                edgeIndex = edge, lengthIn = d?.lengthIn ?: row.lengthIn, orientation = d?.orientation ?: row.orientation,
+                exterior = d?.exterior ?: row.exterior,
+            ) ?: WallEntity(
+                id = Ids.newId(), roomId = room.id, edgeIndex = edge, orientation = d?.orientation ?: "N",
+                lengthIn = d?.lengthIn ?: room.edgeLength(edge), heightIn = ceilingHeightIn, exterior = d?.exterior ?: false,
+                createdAt = at, updatedAt = at,
+            )
+            if (wall != row) {
+                db.wallDao().upsert(wall.copy(updatedAt = at))
                 onChange("wall", wall.id)
             }
+            wall.id
+        }
+        room.openings.forEach { o ->
+            val wallId = wallOfEdge[o.edgeIndex] ?: return@forEach
             val row = existingOpenings[o.id]
-            if (row == null || row.wallId != wall.id || row.kind != o.kind.name || row.offsetIn != o.offsetIn || row.widthIn != o.widthIn || row.heightIn != o.heightIn) {
+            if (row == null || row.wallId != wallId || row.kind != o.kind.name || row.offsetIn != o.offsetIn || row.widthIn != o.widthIn || row.heightIn != o.heightIn) {
                 db.openingDao().upsert(
                     OpeningEntity(
-                        id = o.id, wallId = wall.id, kind = o.kind.name, offsetIn = o.offsetIn, widthIn = o.widthIn, heightIn = o.heightIn,
+                        id = o.id, wallId = wallId, kind = o.kind.name, offsetIn = o.offsetIn, widthIn = o.widthIn, heightIn = o.heightIn,
                         createdAt = row?.createdAt ?: at, updatedAt = at,
                     ),
                 )

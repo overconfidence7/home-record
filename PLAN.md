@@ -45,7 +45,7 @@ The builder moved from Sonnet 5.5 to Opus 5.5 on 2026-10-26. Everything on `buil
   - [ ] CR2m: QA truthfulness: coverage-check regex and loose rules, flows renamed to walkthrough steps, tour variant env, probe sha, F01 silent skip, H04 rooms, comment-only AC claims, handoff stage set (cr:cov-task-regex, cr:cov-loose-rules, cr:qa-flow-step-mismatch, cr:qa-tour-variant-env, cr:ci-probe-sha, cr:qa-f01-silent-skip, cr:qa-h04-kitchen, cr:qa-ac-claims-comment, cr:ci-handoff-dup)
   - [ ] CR2n: House model integrity: item and room/floor delete cascades in a transaction, wall identity by endpoints, plan editor commits on Done, transactional savePlan (cr:item-delete-cascade, cr:room-delete-cascade, cr:wall-identity, cr:plan-keystroke-commit)
     - [x] CR2n1: item and room/floor delete cascades in one transaction, transactional savePlan (cr:item-delete-cascade, cr:room-delete-cascade)
-    - [ ] CR2n2: wall identity by endpoints, every wall upserted on save (cr:wall-identity)
+    - [x] CR2n2: wall identity by endpoints, every wall upserted on save (cr:wall-identity)
     - [ ] CR2n3: plan editor commits name and size on Done, not per keystroke (cr:plan-keystroke-commit)
   - [x] CR2o: Photo data model: separate pairRole from phase, ghost off by default and same room only, EXIF-correct annotated copy, annotate discard prompt (cr:fl-before-phase, cr:fl-ghost-autopair, cr:fl-annotate-exif, cr:fl-annotate-discard)
     - [x] CR2o1: separate pairRole column from the phase (Room v4, migration moves stage "Before"), Before toggle on FL-Photo, ghost off by default and same room only, one After per Before (cr:fl-before-phase, cr:fl-ghost-autopair)
