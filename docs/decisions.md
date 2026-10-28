@@ -214,3 +214,6 @@ A typed room name is shown on the plan as a draft (`PlanEditor.previewRename`) a
 
 ## 2026-10-28 — The theme provides the test tag prefix (CR2q3a, cr:shared-hm-tags)
 `Brand` carries its tag prefix (`hm`, `fl`) and `HomeRecordTheme` provides it as `LocalTagPrefix`, so every screen in :house-model (House, Floors, Plan editor, Room, Item form) tags `<app>_<screen>_<element>` by the app that shows it, including in previews, screenshot tests and Robolectric tests that wrap the screen in the theme. The apps' own `LocalTagPrefix` providers stay (same value). Floors rows are `<app>_floors_row_<id>` instead of the bare `row_<id>`. House Manual ids are unchanged, so its flows need no edit.
+
+## 2026-10-28 — PdfViewer and the document scanner live in :core-ui (CR2q3c, cr:pdf-viewer-dup)
+One `PdfViewer(pages, tagPrefix)` serves House Manual documents and Field Log files, so thumbnails, zoom and page rendering stay identical in both apps; the screen passes its tag prefix (`hm_document`, `fl_file`) because the screen name differs per app. `rememberDocumentScanner` moved with it and :core-ui now carries the ML Kit document scanner dependency (approved list) so Field Log can scan into Files (T042c) and Materials without depending on House Manual code.
