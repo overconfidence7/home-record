@@ -12,14 +12,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.PictureAsPdf
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import com.kurtz.homerecord.housemanual.FormScreenDialog
-import androidx.compose.material3.Card
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -41,6 +47,7 @@ import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.coreui.components.DateField
 import com.kurtz.homerecord.coreui.components.LabeledField
+import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableField
@@ -52,10 +59,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-/** Consumables on the item page (AC-C35): what to buy, how many, and where to reorder. */
+/** Consumables on the item page (AC-C35): what to buy, how many, and where to reorder. The row opens the edit form. */
 @Composable
-fun ConsumablesCard(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> Unit) {
-    UpkeepCard(
+fun ConsumablesSection(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> Unit) {
+    UpkeepSection(
         title = stringResource(R.string.item_detail_consumables),
         addLabel = stringResource(R.string.item_detail_consumable_add),
         addTag = "hm_item_detail_consumable_add",
@@ -64,32 +71,29 @@ fun ConsumablesCard(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> 
         isEmpty = rows.isEmpty(),
     ) {
         rows.forEach { c ->
-            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(c.spec, style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        stringResource(R.string.item_detail_consumable_line, kindLabel(c.kind), c.quantity),
-                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                c.reorderUrl?.let { url ->
-                    AssistChip(
-                        onClick = { onEvent(ItemDetailEvent.OpenLink(url)) }, label = { Text(stringResource(R.string.item_detail_consumable_reorder)) },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_consumable_reorder"),
-                    )
-                }
-                TextButton(onClick = { onEvent(ItemDetailEvent.OpenConsumable(c.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_consumable_edit")) {
-                    Text(stringResource(R.string.item_detail_edit))
-                }
-            }
+            RecordListItem(
+                headline = c.spec,
+                supporting = stringResource(R.string.item_detail_consumable_line, kindLabel(c.kind), c.quantity),
+                leading = { Icon(Icons.Rounded.Inventory2, contentDescription = null) },
+                trailing = c.reorderUrl?.let { url ->
+                    {
+                        IconButton(onClick = { onEvent(ItemDetailEvent.OpenLink(url)) }, modifier = Modifier.size(48.dp).testTag("hm_item_detail_consumable_reorder")) {
+                            Icon(Icons.Rounded.ShoppingCart, contentDescription = stringResource(R.string.item_detail_consumable_reorder, c.spec))
+                        }
+                    }
+                } ?: { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
+                onClick = { onEvent(ItemDetailEvent.OpenConsumable(c.id)) },
+                onClickLabel = stringResource(R.string.item_detail_edit),
+                modifier = Modifier.testTag("hm_item_detail_consumable_edit"),
+            )
         }
     }
 }
 
-/** Service history on the item page, newest first (AC-C36). */
+/** Service history on the item page, newest first (AC-C36). The row opens the edit form. */
 @Composable
-fun ServiceCard(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, onEvent: (ItemDetailEvent) -> Unit) {
-    UpkeepCard(
+fun ServiceSection(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, onEvent: (ItemDetailEvent) -> Unit) {
+    UpkeepSection(
         title = stringResource(R.string.item_detail_service),
         addLabel = stringResource(R.string.item_detail_service_add),
         addTag = "hm_item_detail_service_add",
@@ -98,25 +102,21 @@ fun ServiceCard(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, 
         isEmpty = rows.isEmpty(),
     ) {
         rows.forEach { r ->
-            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(r.description, style = MaterialTheme.typography.bodyLarge)
-                    val cost = r.costCents?.let { NumberFormat.getCurrencyInstance(Locale.US).format(it / 100.0) }
-                    Text(
-                        listOfNotNull(shortDate(r.date), cost, contacts.firstOrNull { it.id == r.contactId }?.name).joinToString(", "),
-                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                TextButton(onClick = { onEvent(ItemDetailEvent.OpenService(r.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_service_edit")) {
-                    Text(stringResource(R.string.item_detail_edit))
-                }
-            }
+            val cost = r.costCents?.let { NumberFormat.getCurrencyInstance(Locale.US).format(it / 100.0) }
+            RecordListItem(
+                headline = r.description,
+                supporting = listOfNotNull(shortDate(r.date), cost, contacts.firstOrNull { it.id == r.contactId }?.name).joinToString(", "),
+                leading = { Icon(Icons.Rounded.Build, contentDescription = null) },
+                onClick = { onEvent(ItemDetailEvent.OpenService(r.id)) },
+                onClickLabel = stringResource(R.string.item_detail_edit),
+                modifier = Modifier.testTag("hm_item_detail_service_edit"),
+            )
         }
     }
 }
 
 @Composable
-private fun UpkeepCard(
+private fun UpkeepSection(
     title: String,
     addLabel: String,
     addTag: String,
@@ -125,10 +125,10 @@ private fun UpkeepCard(
     isEmpty: Boolean,
     rows: @Composable () -> Unit,
 ) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            if (isEmpty) Text(emptyText, style = MaterialTheme.typography.bodyLarge) else rows()
+    Section(title) {
+        if (!isEmpty) rows()
+        Inset {
+            if (isEmpty) Text(emptyText, style = MaterialTheme.typography.bodyLarge)
             OutlinedButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag(addTag)) {
                 Icon(Icons.Rounded.Add, contentDescription = null)
                 Text(addLabel, Modifier.padding(start = 8.dp))
@@ -299,22 +299,18 @@ private fun shortDate(iso: String): String =
 
 /** Documents attached to the item (AC-C37): open in the viewer, add from Files or the scanner, or attach one already in the home. */
 @Composable
-fun DocumentsCard(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.item_detail_documents), style = MaterialTheme.typography.titleMedium)
-            if (state.documents.isEmpty()) {
-                Text(stringResource(R.string.item_detail_documents_empty), style = MaterialTheme.typography.bodyLarge)
-            } else {
-                state.documents.forEach { doc ->
-                    TextButton(
-                        onClick = { onEvent(ItemDetailEvent.OpenDocument(doc.id)) },
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_item_detail_document_row"),
-                    ) {
-                        Text(doc.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
+fun DocumentsSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    Section(stringResource(R.string.item_detail_documents)) {
+        state.documents.forEach { doc ->
+            RecordListItem(
+                headline = doc.name,
+                leading = { Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null) },
+                onClick = { onEvent(ItemDetailEvent.OpenDocument(doc.id)) },
+                modifier = Modifier.testTag("hm_item_detail_document_row"),
+            )
+        }
+        Inset {
+            if (state.documents.isEmpty()) Text(stringResource(R.string.item_detail_documents_empty), style = MaterialTheme.typography.bodyLarge)
             if (state.documentNotice) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.documents_unsupported), Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
@@ -324,7 +320,7 @@ fun DocumentsCard(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) 
                 }
             }
             @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { onEvent(ItemDetailEvent.UploadDocument) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_document_add")) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                     Text(stringResource(R.string.item_detail_document_add), Modifier.padding(start = 8.dp))

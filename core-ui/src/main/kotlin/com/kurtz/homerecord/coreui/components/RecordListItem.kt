@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-/** The standard list row (AC-U3): leading icon or thumbnail, headline, supporting text, trailing meta or chevron. */
+/** The standard list row (AC-U3): leading icon or thumbnail, optional overline label, headline, supporting text, trailing meta or chevron. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecordListItem(
@@ -24,18 +24,21 @@ fun RecordListItem(
     modifier: Modifier = Modifier,
     supporting: String? = null,
     supportingMaxLines: Int = 2,
+    overline: String? = null,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    onClickLabel: String? = null,
     colors: ListItemColors = ListItemDefaults.colors(),
 ) {
     val click = if (onClick != null || onLongClick != null) {
-        Modifier.combinedClickable(onClick = { onClick?.invoke() }, onLongClick = onLongClick)
+        Modifier.combinedClickable(onClickLabel = onClickLabel, onClick = { onClick?.invoke() }, onLongClick = onLongClick)
     } else Modifier
     ListItem(
         headlineContent = { Text(headline, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge) },
         supportingContent = supporting?.let { { Text(it, maxLines = supportingMaxLines, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) } },
+        overlineContent = overline?.let { { Text(it, style = MaterialTheme.typography.labelMedium) } },
         leadingContent = leading,
         trailingContent = trailing,
         colors = colors,
