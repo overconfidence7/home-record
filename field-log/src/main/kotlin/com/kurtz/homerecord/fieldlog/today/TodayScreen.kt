@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
@@ -72,6 +73,8 @@ data class TodayUiState(
     val jobs: List<TodayJob> = emptyList(),
     /** Owner and Office only (AC-F16). */
     val onSite: List<OnSiteEntry> = emptyList(),
+    /** A pull to refresh is running (AC-F16). */
+    val refreshing: Boolean = false,
 )
 
 /**
@@ -87,11 +90,15 @@ fun TodayScreen(
     onOpenClock: () -> Unit = {},
     onOpenJob: (String) -> Unit = {},
     onAddJob: () -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
         SyncStatusChip(state.syncPhase, state.pendingChanges, onSyncNow, Modifier.padding(horizontal = 16.dp))
-        if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onOpenClock, onOpenJob, Modifier.weight(1f))
-        else TodayBody(state, onInviteCrew, onAddJob, Modifier.weight(1f))
+        // Pull down syncs and reloads the team, so "On site now" is current (AC-F16).
+        PullToRefreshBox(state.refreshing, onRefresh, Modifier.weight(1f).fillMaxWidth().testTag("fl_today_refresh")) {
+            if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onOpenClock, onOpenJob, Modifier.fillMaxSize())
+            else TodayBody(state, onInviteCrew, onAddJob, Modifier.fillMaxSize())
+        }
     }
 }
 

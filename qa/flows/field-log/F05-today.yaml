@@ -46,6 +46,15 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "On site now"
 - assertVisible:
     id: fl_today_on_site_empty
+# Pull down refreshes the sync and the team list; the list stays put (AC-F16).
+- swipe:
+    from:
+      id: fl_today_clock_card
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: fl_today_on_site_empty
+    timeout: 10000
 - tapOn:
     id: fl_today_clock_action
 - extendedWaitUntil:

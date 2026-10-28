@@ -393,5 +393,4 @@
     <string name="cap_mic_denied">Allow the microphone in Settings to record voice memos.</string>
     <string name="cap_open_settings">Open Settings</string>
     <string name="cap_from_gallery">Add from gallery</string>
-    <string name="job_take_photo">Take photo</string>
 </resources>

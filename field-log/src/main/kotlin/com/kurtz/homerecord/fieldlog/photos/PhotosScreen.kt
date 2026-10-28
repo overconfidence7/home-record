@@ -10,11 +10,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +32,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kurtz.homerecord.coreui.components.LoadingState
@@ -32,41 +43,63 @@ import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** The Photos tab of FL-Job: days newest first, two tiles to a row, a before/after pair sharing one row (AC-F24, AC-F25). */
+/**
+ * The Photos tab of FL-Job: days newest first in a three-column grid with 2 dp gaps (ui-standards rule 27), a
+ * before/after pair two cells wide, and the capture FAB (SPEC FL-Job; AC-F24, AC-F25). Room, phase and caption are on
+ * the Photo page; the tile reads them out as its description.
+ */
 @Composable
 fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier: Modifier = Modifier) {
-    when {
-        state.loading -> LoadingState(modifier)
-        state.days.isEmpty() -> Column(
-            modifier.fillMaxSize().padding(24.dp).testTag("fl_photos_empty"),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(stringResource(R.string.photos_empty), style = MaterialTheme.typography.bodyLarge)
-            Button(onClick = { onEvent(PhotosEvent.Capture) }, Modifier.testTag("fl_photos_take")) { Text(stringResource(R.string.photos_take)) }
-        }
-        else -> {
-            val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
-            LazyColumn(
-                modifier.fillMaxSize().testTag("fl_photos_list"),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+    Box(modifier.fillMaxSize()) {
+        when {
+            state.loading -> LoadingState(Modifier.fillMaxSize())
+            state.days.isEmpty() -> Column(
+                Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 96.dp).testTag("fl_photos_empty"),
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                state.days.forEach { day ->
-                    item(key = "d-${day.day}") { Text(day.day.format(fmt), style = MaterialTheme.typography.titleMedium) }
-                    items(day.cells.chunkedRows(), key = { row -> row.joinToString("-") { it.key() } }) { row ->
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            row.forEach { cell ->
-                                when (cell) {
-                                    is PhotoCell.Single -> Tile(cell.tile, Modifier.weight(1f), onOpen = { onEvent(PhotosEvent.Open(it)) })
-                                    is PhotoCell.Pair -> Row(Modifier.weight(2f).testTag("fl_photos_pair_${cell.after.id}"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Tile(cell.before, Modifier.weight(1f), stringResource(R.string.photos_before)) { onEvent(PhotosEvent.Open(it)) }
-                                        Tile(cell.after, Modifier.weight(1f), stringResource(R.string.photos_after)) { onEvent(PhotosEvent.Open(it)) }
-                                    }
-                                }
-                            }
-                            if (row.size == 1 && row[0] is PhotoCell.Single) Box(Modifier.weight(1f))
-                        }
+                Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.photos_empty), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+            }
+            else -> PhotoGrid(state, onEvent)
+        }
+        if (!state.loading) {
+            ExtendedFloatingActionButton(
+                onClick = { onEvent(PhotosEvent.Capture) },
+                icon = { Icon(Icons.Rounded.PhotoCamera, contentDescription = null) },
+                text = { Text(stringResource(R.string.photos_take)) },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_photos_fab"),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhotoGrid(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit) {
+    val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
+    val gap = 2.dp
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier.fillMaxSize().testTag("fl_photos_list"),
+        // Room at the bottom so the last row clears the FAB.
+        contentPadding = PaddingValues(bottom = 96.dp),
+        horizontalArrangement = Arrangement.spacedBy(gap),
+        verticalArrangement = Arrangement.spacedBy(gap),
+    ) {
+        state.days.forEach { day ->
+            item(key = "d-${day.day}", span = { GridItemSpan(maxLineSpan) }) {
+                Text(
+                    day.day.format(fmt),
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp).semantics { heading() },
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+            items(day.cells, key = { it.key() }, span = { GridItemSpan(if (it is PhotoCell.Pair) 2 else 1) }) { cell ->
+                when (cell) {
+                    is PhotoCell.Single -> Tile(cell.tile, Modifier.fillMaxWidth(), onOpen = { onEvent(PhotosEvent.Open(it)) })
+                    is PhotoCell.Pair -> Row(Modifier.fillMaxWidth().testTag("fl_photos_pair_${cell.after.id}"), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                        Tile(cell.before, Modifier.weight(1f), stringResource(R.string.photos_before)) { onEvent(PhotosEvent.Open(it)) }
+                        Tile(cell.after, Modifier.weight(1f), stringResource(R.string.photos_after)) { onEvent(PhotosEvent.Open(it)) }
                     }
                 }
             }
@@ -79,35 +112,25 @@ private fun PhotoCell.key(): String = when (this) {
     is PhotoCell.Pair -> after.id
 }
 
-/** Rows hold two singles, or one pair (a pair is two tiles wide). */
-private fun List<PhotoCell>.chunkedRows(): List<List<PhotoCell>> {
-    val rows = mutableListOf<MutableList<PhotoCell>>()
-    for (cell in this) {
-        val last = rows.lastOrNull()
-        if (cell is PhotoCell.Single && last != null && last.size == 1 && last[0] is PhotoCell.Single) last.add(cell) else rows.add(mutableListOf(cell))
-    }
-    return rows
-}
-
 @Composable
 private fun Tile(tile: PhotoTile, modifier: Modifier, badge: String? = null, onOpen: (String) -> Unit) {
-    val facts = listOfNotNull(tile.roomName, tile.phase).joinToString(" · ")
-    Column(modifier.clickable { onOpen(tile.id) }.testTag("fl_photos_tile_${tile.id}"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
-            AsyncImage(
-                model = File(tile.imagePath), contentDescription = tile.caption ?: facts.ifBlank { null }, contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+    val description = listOfNotNull(badge, tile.caption, tile.roomName, tile.phase).joinToString(", ").ifBlank { null }
+    Box(
+        modifier.aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clickable { onOpen(tile.id) }.testTag("fl_photos_tile_${tile.id}"),
+    ) {
+        AsyncImage(
+            model = File(tile.imagePath), contentDescription = description, contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        val label = badge ?: if (tile.annotated) stringResource(R.string.photos_marked) else null
+        if (label != null) {
+            Text(
+                label, Modifier.align(Alignment.TopStart).padding(4.dp).clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)).padding(horizontal = 6.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
             )
-            val label = badge ?: if (tile.annotated) stringResource(R.string.photos_marked) else null
-            if (label != null) {
-                Text(
-                    label, Modifier.align(Alignment.TopStart).padding(6.dp).clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)).padding(horizontal = 8.dp, vertical = 2.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                )
-            }
         }
-        if (facts.isNotBlank()) Text(facts, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        tile.caption?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
     }
 }

@@ -33,8 +33,15 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_save
 - tapOn: "Garage subpanel"
+# Capture is the Photos tab's FAB (SPEC FL-Job).
 - tapOn:
-    id: fl_job_capture
+    id: fl_job_tab_photos
+- extendedWaitUntil:
+    visible:
+      id: fl_photos_empty
+    timeout: 10000
+- tapOn:
+    id: fl_photos_fab
 - tapOn:
     text: "Don.t allow"
     optional: true
