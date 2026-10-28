@@ -169,6 +169,11 @@
     <string name="job_edit_title">Edit job</string>
     <string name="job_name">Job name</string>
     <string name="job_client">Client</string>
+    <string name="job_client_phone">Client phone</string>
+    <string name="job_client_phone_error">Enter a phone number with 7 to 15 digits.</string>
+    <string name="job_client_email">Client email</string>
+    <string name="job_client_email_helper">The daily log can be sent here.</string>
+    <string name="job_client_email_error">Enter an email like name@example.com.</string>
     <string name="job_address">Address</string>
     <string name="job_address_helper">Used for the map link and the far-from-job check.</string>
     <string name="job_map_link">Open in Maps</string>

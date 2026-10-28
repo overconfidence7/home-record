@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.ClientDao
-import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.FloorDao
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeDao
@@ -52,6 +51,8 @@ data class JobEditUiState(
 sealed interface JobEditEvent {
     data class Name(val v: String) : JobEditEvent
     data class Client(val v: String) : JobEditEvent
+    data class ClientPhone(val v: String) : JobEditEvent
+    data class ClientEmail(val v: String) : JobEditEvent
     data class Address(val v: String) : JobEditEvent
     data class Start(val v: String?) : JobEditEvent
     data class End(val v: String?) : JobEditEvent
@@ -91,10 +92,10 @@ class JobEditViewModel(
     init {
         viewModelScope.launch {
             val existing = jobId?.let { jobs.get(it) }
-            val clientName = existing?.clientId?.let { clients.get(it)?.name }
+            val client = existing?.clientId?.let { clients.get(it) }
             val roomNames = existing?.homeId?.let { jobRooms(it).map { r -> r.name } }.orEmpty()
             val crewIds = jobId?.let { crew.listFor(it).map { c -> c.memberId } }.orEmpty()
-            val initial = existing?.let { JobDraft.from(it, clientName, roomNames, crewIds) } ?: JobDraft()
+            val initial = existing?.let { JobDraft.from(it, client, roomNames, crewIds) } ?: JobDraft()
             val draft = saved.get<String>(DRAFT)?.let(::decode) ?: initial
             _state.value = JobEditUiState(
                 loading = false, isNew = existing == null, draft = draft, initial = initial,
@@ -111,6 +112,8 @@ class JobEditViewModel(
         when (event) {
             is JobEditEvent.Name -> edit { it.copy(name = event.v) }
             is JobEditEvent.Client -> edit { it.copy(clientName = event.v) }
+            is JobEditEvent.ClientPhone -> edit { it.copy(clientPhone = event.v) }
+            is JobEditEvent.ClientEmail -> edit { it.copy(clientEmail = event.v) }
             is JobEditEvent.Address -> edit { it.copy(address = event.v) }
             is JobEditEvent.Start -> edit { it.copy(startDate = event.v) }
             is JobEditEvent.End -> edit { it.copy(endDate = event.v) }
@@ -141,17 +144,15 @@ class JobEditViewModel(
         viewModelScope.launch {
             val now = clock()
             val id = jobId ?: newId
-            val typed = s.draft.clientName.trim()
-            val clientId = if (typed.isEmpty()) {
-                null
-            } else {
-                val match = clients.listFor(companyId).firstOrNull { it.name.equals(typed, ignoreCase = true) }
-                match?.id ?: UUID.randomUUID().toString().also { cid ->
-                    clients.upsert(ClientEntity(id = cid, companyId = companyId, name = typed, createdAt = now, updatedAt = now))
-                    recordChange("client", cid)
-                }
-            }
             val before = jobs.get(id)
+            val typed = s.draft.clientName.trim()
+            val match = clients.listFor(companyId).firstOrNull { it.name.equals(typed, ignoreCase = true) }
+            val client = s.draft.clientFor(match, sameClient = match != null && match.id == before?.clientId, UUID.randomUUID().toString(), companyId, now)
+            if (client != null && client != match) {
+                clients.upsert(client.copy(updatedAt = now))
+                recordChange("client", client.id)
+            }
+            val clientId = client?.id
             val homeId = syncRooms(before, s.draft, now)
             val entity = s.draft.toEntity(before, id, companyId, clientId, todayProvider(), now, homeId)
             jobs.upsert(entity)
@@ -202,13 +203,13 @@ class JobEditViewModel(
     }
 
     // Fields are joined with the unit separator; none of them can type it on a phone keyboard.
-    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP), d.phases.joinToString(ROOM_SEP), d.officeEmails.joinToString(ROOM_SEP), d.crew.joinToString(ROOM_SEP))
+    private fun encode(d: JobDraft) = listOf(d.name, d.clientName, d.clientPhone, d.clientEmail, d.address, d.startDate.orEmpty(), d.endDate.orEmpty(), d.budgetHoursText, d.notes, d.rooms.joinToString(ROOM_SEP), d.phases.joinToString(ROOM_SEP), d.officeEmails.joinToString(ROOM_SEP), d.crew.joinToString(ROOM_SEP))
         .joinToString(SEP)
 
     private fun decode(raw: String): JobDraft? {
         val p = raw.split(SEP)
-        if (p.size != 11) return null
-        return JobDraft(p[0], p[1], p[2], p[3].ifEmpty { null }, p[4].ifEmpty { null }, p[5], p[6], p[7].items(), p[8].items(), p[9].items(), p[10].items())
+        if (p.size != 13) return null
+        return JobDraft(p[0], p[1], p[2], p[3], p[4], p[5].ifEmpty { null }, p[6].ifEmpty { null }, p[7], p[8], p[9].items(), p[10].items(), p[11].items(), p[12].items())
     }
 
     private fun String.items(): List<String> = split(ROOM_SEP).filter { it.isNotEmpty() }

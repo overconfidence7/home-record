@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.core.model.JobStatusRule
@@ -11,6 +12,9 @@ import kotlinx.serialization.json.Json
 data class JobDraft(
     val name: String = "",
     val clientName: String = "",
+    /** Client phone and email live on the client row; the daily log and Clients use them (AC-F33, AC-F45). */
+    val clientPhone: String = "",
+    val clientEmail: String = "",
     val address: String = "",
     val startDate: String? = null,
     val endDate: String? = null,
@@ -52,7 +56,23 @@ data class JobDraft(
 
     fun withoutOfficeEmail(email: String) = copy(officeEmails = officeEmails.filterNot { it.equals(email, ignoreCase = true) })
 
-    val canSave: Boolean get() = name.isNotBlank() && !budgetInvalid && !datesInvalid
+    val clientEmailInvalid: Boolean get() = clientEmail.isNotBlank() && !isEmail(clientEmail.trim())
+    val clientPhoneInvalid: Boolean get() = clientPhone.isNotBlank() && clientPhone.count(Char::isDigit) !in 7..15
+
+    val canSave: Boolean get() = name.isNotBlank() && !budgetInvalid && !datesInvalid && !clientEmailInvalid && !clientPhoneInvalid
+
+    /**
+     * The client row this draft saves, or null when no client is named. [match] is the company's client with the same
+     * name. A blank phone or email clears the stored one only on the job's own client ([sameClient]); naming a
+     * known client on another job leaves the details already on file in place.
+     */
+    fun clientFor(match: ClientEntity?, sameClient: Boolean, id: String, companyId: String, now: Long): ClientEntity? {
+        val typed = clientName.trim()
+        if (typed.isEmpty()) return null
+        fun pick(draft: String, stored: String?) = draft.trim().ifBlank { if (sameClient) null else stored }
+        val base = match ?: ClientEntity(id = id, companyId = companyId, name = typed, createdAt = now, updatedAt = now)
+        return base.copy(phone = pick(clientPhone, match?.phone), email = pick(clientEmail, match?.email))
+    }
 
     /** Status follows the dates: a future start is Upcoming, a past end is Done, anything else Active ([JobStatusRule]). */
     fun statusFor(today: String): String = JobStatusRule.effective(JobStatus.ACTIVE.name, startDate, endDate, today).name
@@ -79,9 +99,11 @@ data class JobDraft(
     companion object {
         const val MAX_BUDGET_HOURS = 100_000
 
-        fun from(job: JobEntity, clientName: String?, rooms: List<String> = emptyList(), crew: List<String> = emptyList()) = JobDraft(
+        fun from(job: JobEntity, client: ClientEntity?, rooms: List<String> = emptyList(), crew: List<String> = emptyList()) = JobDraft(
             name = job.name,
-            clientName = clientName.orEmpty(),
+            clientName = client?.name.orEmpty(),
+            clientPhone = client?.phone.orEmpty(),
+            clientEmail = client?.email.orEmpty(),
             address = job.address.orEmpty(),
             startDate = job.startDate,
             endDate = job.endDate,

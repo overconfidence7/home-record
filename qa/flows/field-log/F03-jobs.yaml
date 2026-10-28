@@ -35,6 +35,14 @@ appId: com.kurtz.homerecord.fieldlog
 - inputText: "Rivera"
 - hideKeyboard
 - tapOn:
+    id: fl_jobedit_client_phone
+- inputText: "9375550142"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_client_email
+- inputText: "ana.rivera@example.com"
+- hideKeyboard
+- tapOn:
     id: fl_jobedit_address
 - inputText: "12 Oak St"
 - hideKeyboard

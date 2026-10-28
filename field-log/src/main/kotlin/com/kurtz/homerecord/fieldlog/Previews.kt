@@ -227,8 +227,8 @@ fun JobsNoMatchesPreview() = Frame {
 @Composable
 fun JobEditPreview() = Frame {
     val draft = JobDraft(
-        name = "Panel upgrade 200A", clientName = "Rivera family", address = "418 Maple St, Dayton",
-        startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
+        name = "Panel upgrade 200A", clientName = "Rivera family", clientPhone = "(937) 555-0142", clientEmail = "ana.rivera@example.com",
+        address = "418 Maple St, Dayton", startDate = "2026-10-23", endDate = "2026-10-30", budgetHoursText = "40", notes = "Gate code 4471. Dog in back yard.",
         rooms = listOf("Kitchen", "Basement", "Garage"), crew = listOf("m1"),
     )
     val team = listOf(CrewOption("m1", "Dana Ortiz"), CrewOption("m2", "Marcus Bell"), CrewOption("m3", "Priya Raman"))

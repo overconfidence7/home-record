@@ -133,6 +133,79 @@ class JobEditTest {
         assertThat(again.state.value.mapPoint).isNull()
     }
 
+    // AC-F33, AC-F45: the client's phone and email are typed on the job and saved on the client row.
+    @Test fun clientPhoneAndEmailSaveOnTheClientAndReload() = runTest {
+        val vm = vm()
+        vm.onEvent(JobEditEvent.Name("Panel upgrade"))
+        vm.onEvent(JobEditEvent.Client("Rivera family"))
+        vm.onEvent(JobEditEvent.ClientPhone("(937) 555-0142"))
+        vm.onEvent(JobEditEvent.ClientEmail(" ana.rivera@example.com "))
+        vm.save()
+        val job = db.jobDao().listFor("c1").single()
+        val client = db.clientDao().get(job.clientId ?: error("no client"))
+        assertThat(client?.phone).isEqualTo("(937) 555-0142")
+        assertThat(client?.email).isEqualTo("ana.rivera@example.com")
+        val again = vm(job.id).state.value
+        assertThat(again.draft.clientPhone).isEqualTo("(937) 555-0142")
+        assertThat(again.draft.clientEmail).isEqualTo("ana.rivera@example.com")
+        assertThat(again.dirty).isFalse()
+    }
+
+    // AC-F45: editing the job's own client updates its details once; clearing a field clears it.
+    @Test fun editingTheJobsClientUpdatesOrClearsItsDetails() = runTest {
+        val first = vm()
+        first.onEvent(JobEditEvent.Name("Panel upgrade"))
+        first.onEvent(JobEditEvent.Client("Okafor"))
+        first.onEvent(JobEditEvent.ClientPhone("937-555-0100"))
+        first.onEvent(JobEditEvent.ClientEmail("okafor@example.com"))
+        first.save()
+        val id = db.jobDao().listFor("c1").single().id
+        changes.clear()
+        val edit = vm(id)
+        edit.onEvent(JobEditEvent.ClientPhone("937-555-0199"))
+        edit.onEvent(JobEditEvent.ClientEmail(""))
+        edit.save()
+        val client = db.clientDao().listFor("c1").single()
+        assertThat(client.phone).isEqualTo("937-555-0199")
+        assertThat(client.email).isNull()
+        assertThat(changes.map { it.first }).containsExactly("client", "job").inOrder()
+    }
+
+    // AC-F45: naming a known client on a new job with blank details keeps the ones on file; unchanged details write nothing.
+    @Test fun aKnownClientKeepsItsDetailsWhenLeftBlank() = runTest {
+        val first = vm()
+        first.onEvent(JobEditEvent.Name("Panel upgrade"))
+        first.onEvent(JobEditEvent.Client("Okafor"))
+        first.onEvent(JobEditEvent.ClientPhone("937-555-0100"))
+        first.save()
+        changes.clear()
+        val second = vm()
+        second.onEvent(JobEditEvent.Name("Kitchen circuits"))
+        second.onEvent(JobEditEvent.Client("okafor"))
+        second.save()
+        assertThat(db.clientDao().listFor("c1").single().phone).isEqualTo("937-555-0100")
+        assertThat(changes.map { it.first }).containsExactly("job")
+    }
+
+    // AC-F33: a mistyped client email or phone blocks Save with a message.
+    @Test fun badClientEmailOrPhoneBlocksSave() {
+        val ok = JobDraft(name = "Panel", clientName = "Rivera", clientPhone = "+1 937 555 0142", clientEmail = "ana@example.com")
+        assertThat(ok.canSave).isTrue()
+        assertThat(ok.copy(clientEmail = "ana@example").let { it.clientEmailInvalid && !it.canSave }).isTrue()
+        assertThat(ok.copy(clientPhone = "555").let { it.clientPhoneInvalid && !it.canSave }).isTrue()
+        assertThat(ok.copy(clientPhone = "", clientEmail = "").canSave).isTrue()
+    }
+
+    @Test fun clientDetailsSurviveProcessDeath() = runTest {
+        val handle = SavedStateHandle()
+        val vm = vm(saved = handle)
+        vm.onEvent(JobEditEvent.ClientPhone("937-555-0142"))
+        vm.onEvent(JobEditEvent.ClientEmail("ana@example.com"))
+        val draft = vm(saved = handle).state.value.draft
+        assertThat(draft.clientPhone).isEqualTo("937-555-0142")
+        assertThat(draft.clientEmail).isEqualTo("ana@example.com")
+    }
+
     @Test fun unsavedTextSurvivesProcessDeath() = runTest {
         val handle = SavedStateHandle()
         vm(saved = handle).onEvent(JobEditEvent.Name("Half typed"))

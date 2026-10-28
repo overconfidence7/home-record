@@ -31,7 +31,7 @@ import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
 
-/** FL-JobEdit. Client, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
+/** FL-JobEdit. Client name, phone and email, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
 @Composable
 fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClose: () -> Unit) {
     if (state.loading) {
@@ -48,6 +48,15 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
     ) {
         LabeledField(stringResource(R.string.job_name), d.name, { onEvent(JobEditEvent.Name(it)) }, Modifier.testTag("fl_jobedit_name"), required = true)
         LabeledField(stringResource(R.string.job_client), d.clientName, { onEvent(JobEditEvent.Client(it)) }, Modifier.testTag("fl_jobedit_client"))
+        LabeledField(
+            stringResource(R.string.job_client_phone), d.clientPhone, { onEvent(JobEditEvent.ClientPhone(it)) }, Modifier.testTag("fl_jobedit_client_phone"),
+            error = if (d.clientPhoneInvalid) stringResource(R.string.job_client_phone_error) else null, keyboardType = KeyboardType.Phone,
+        )
+        LabeledField(
+            stringResource(R.string.job_client_email), d.clientEmail, { onEvent(JobEditEvent.ClientEmail(it)) }, Modifier.testTag("fl_jobedit_client_email"),
+            helper = stringResource(R.string.job_client_email_helper),
+            error = if (d.clientEmailInvalid) stringResource(R.string.job_client_email_error) else null, keyboardType = KeyboardType.Email,
+        )
         LabeledField(stringResource(R.string.job_address), d.address, { onEvent(JobEditEvent.Address(it)) }, Modifier.testTag("fl_jobedit_address"), helper = stringResource(R.string.job_address_helper))
         state.mapPoint?.let { (lat, lng) ->
             val context = LocalContext.current
