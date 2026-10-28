@@ -37,6 +37,16 @@ class RetrofitCompanyApiTest {
         assertThat(result.value).containsExactly(CompanyMembership("c1", "Kurtz Builders", CompanyRole.Lead, 5, null))
     }
 
+    // AC-F9, AC-F12, AC-F13, AC-F18 (cr:fl-settings-source): the clock rules arrive with the membership for every role
+    @Test fun meReadsTheClockRulesForAnyRole() = runTest {
+        val r = Recorder(body = """{"user":{"id":"u","email":"a@b.com"},"memberships":[
+            {"kind":"company","id":"c1","role":"crew","name":"Kurtz Builders",
+             "settings":{"otRule":"daily8weekly40","breakRule":true,"requireGps":true,"punchDistanceFt":300,"photoOnPunch":false}}]}""")
+        val result = r.api().me() as ApiResult.Ok
+        assertThat(result.value.single().settings)
+            .isEqualTo(CompanySettings(OvertimeRule.Daily8Weekly40, breakRule = true, requireGps = true, punchDistanceFt = 300))
+    }
+
     @Test fun createSendsTrimmedFieldsAndOmitsBlanks() = runTest {
         val r = Recorder(body = """{"id":"c9","role":"owner"}""")
         assertThat(r.api().create(" Kurtz ", "", "555")).isEqualTo(ApiResult.Ok("c9"))

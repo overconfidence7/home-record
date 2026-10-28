@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog
 
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.*
@@ -59,7 +60,11 @@ fun FieldLogApp(container: AppContainer) {
     val auth by container.auth.state.collectAsState()
     val company by container.company.state.collectAsState()
     val signedIn = auth is AuthState.SignedIn
-    LaunchedEffect(signedIn) { if (signedIn) container.company.refresh() }
+    // Refreshed on every return to the app, so a role or clock-rule change the office made reaches this phone (AC-F18).
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(signedIn, lifecycle) {
+        if (signedIn) lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) { container.company.refresh() }
+    }
     val state = company
     when {
         auth is AuthState.Restoring -> Scaffold { LoadingState(Modifier.padding(it)) }

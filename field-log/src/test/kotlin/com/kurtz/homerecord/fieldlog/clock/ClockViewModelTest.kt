@@ -51,7 +51,7 @@ class ClockViewModelTest {
     private val created = mutableListOf<ClockViewModel>()
     private val location = FakeLocation()
     private var asked = false
-    private var settings = CompanySettings()
+    private val settings = kotlinx.coroutines.flow.MutableStateFlow(CompanySettings())
     private var clock = 5_000_000L
 
     @Before fun setUp() {
@@ -74,7 +74,7 @@ class ClockViewModelTest {
     private suspend fun vm(role: CompanyRole = CompanyRole.Crew, approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())): ClockViewModel {
         val punches = PunchRepository(db, { clock })
         val deps = ClockDeps(
-            "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, { settings },
+            "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, settings,
             { asked }, { asked = true }, now = { clock }, ticks = emptyFlow(),
             role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"), approvals = approvals,
         )
@@ -149,7 +149,7 @@ class ClockViewModelTest {
     }
 
     @Test fun requireGpsWithoutPermissionOffersSettings() = runBlocking<Unit> {
-        settings = CompanySettings(requireGps = true)
+        settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
@@ -159,9 +159,19 @@ class ClockViewModelTest {
         assertThat(vm.state.value.gpsRequired).isNull()
     }
 
+    // AC-F18 (cr:fl-settings-source): Require GPS turned on by the office while Clock is open applies to the next punch
+    @Test fun requireGpsSetAfterOpeningApplies() = runBlocking<Unit> {
+        location.permitted = false; asked = true
+        val vm = vm()
+        settings.value = CompanySettings(requireGps = true)
+        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        assertThat(await(vm) { it.gpsRequired != null }.gpsRequired).isTrue()
+        assertThat(kinds()).isEmpty()
+    }
+
     // AC-F18: allowing location in Settings from the require-GPS dialog finishes the clock-in on return
     @Test fun requireGpsRetriesTheClockInAfterSettings() = runBlocking<Unit> {
-        settings = CompanySettings(requireGps = true)
+        settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
@@ -180,7 +190,7 @@ class ClockViewModelTest {
 
     // AC-F18: back from Settings still without location, nothing is punched and nothing is retried later
     @Test fun requireGpsStillDeniedAfterSettingsPunchesNothing() = runBlocking<Unit> {
-        settings = CompanySettings(requireGps = true)
+        settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)

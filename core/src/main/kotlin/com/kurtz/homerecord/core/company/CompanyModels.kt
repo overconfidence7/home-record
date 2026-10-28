@@ -34,13 +34,17 @@ enum class CompanyRole(val wire: String) {
     }
 }
 
-/** The signed-in user's place in one company, from `GET /me`. */
+/**
+ * The signed-in user's place in one company, from `GET /me`. [settings] are the company's clock rules, sent to every
+ * role and cached with the membership so they hold offline (AC-F9, AC-F12, AC-F13, AC-F18).
+ */
 data class CompanyMembership(
     val companyId: String,
     val companyName: String,
     val role: CompanyRole,
     val trialEndsAt: Long?,
     val entitlement: String?,
+    val settings: CompanySettings = CompanySettings(),
 )
 
 data class TeamMember(
@@ -117,6 +121,7 @@ data class MeMembership(
     val name: String,
     val entitlement: String? = null,
     @SerialName("trialEndsAt") val trialEndsAt: Long? = null,
+    val settings: SettingsBody? = null,
 )
 
 @Serializable data class MeResponse(val user: MeUser, val memberships: List<MeMembership>)
@@ -141,6 +146,15 @@ data class SettingsBody(
     val requireGps: Boolean? = null,
     val punchDistanceFt: Int? = null,
     val photoOnPunch: Boolean? = null,
+)
+
+/** Wire settings to the app's; a missing field takes the backend's default. */
+fun SettingsBody?.toSettings(): CompanySettings = CompanySettings(
+    overtimeRule = OvertimeRule.fromWire(this?.otRule.orEmpty()),
+    breakRule = this?.breakRule ?: false,
+    requireGps = this?.requireGps ?: false,
+    punchDistanceFt = this?.punchDistanceFt ?: CompanySettings.DEFAULT_PUNCH_DISTANCE_FT,
+    photoOnPunch = this?.photoOnPunch ?: false,
 )
 
 @Serializable

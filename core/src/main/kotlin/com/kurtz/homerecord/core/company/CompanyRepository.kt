@@ -1,8 +1,11 @@
 package com.kurtz.homerecord.core.company
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /** Where the signed-in user stands with a company. */
 sealed interface CompanyState {
@@ -27,6 +30,13 @@ class CompanyRepository(private val api: CompanyApi, private val cache: CompanyC
     val state: StateFlow<CompanyState> = _state.asStateFlow()
 
     val current: CompanyMembership? get() = (_state.value as? CompanyState.Active)?.membership
+
+    /**
+     * The company's clock rules for every role, from the cached membership (so offline too) and updated on each
+     * refresh; the defaults until a company is active (AC-F9, AC-F12, AC-F13, AC-F18).
+     */
+    val settings: Flow<CompanySettings> =
+        _state.map { (it as? CompanyState.Active)?.membership?.settings ?: CompanySettings() }.distinctUntilChanged()
 
     suspend fun refresh() {
         when (val r = api.me()) {

@@ -96,7 +96,7 @@ const updateBody = z.object({
   settings: settingsSchema.optional(),
 });
 
-const DEFAULT_SETTINGS = { otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false };
+export const DEFAULT_SETTINGS = { otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false };
 
 /** FL-Company: Owner and Office only (AC-F3); everyone else gets the same 404 as a missing company. */
 company.get("/:kind{companies}/:tenantId/profile", requireSession, requireTenant(ADMIN), async (c) => {

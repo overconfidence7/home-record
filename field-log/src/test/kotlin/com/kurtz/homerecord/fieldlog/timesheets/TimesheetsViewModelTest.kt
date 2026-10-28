@@ -65,6 +65,8 @@ class TimesheetsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val settings = kotlinx.coroutines.flow.MutableStateFlow(CompanySettings())
+
     private val repo get() = PunchRepository(db, { now }, zone = { zone })
 
     private suspend fun shift(who: String, day: Int, from: Int, to: Int) {
@@ -76,7 +78,7 @@ class TimesheetsViewModelTest {
         val deps = TimesheetsDeps(
             "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
             db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
-            db.timesheetApprovalDao().observeAll(), { CompanySettings() }, zone, { now },
+            db.timesheetApprovalDao().observeAll(), settings, zone, { now },
         )
         return TimesheetsViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
     }
@@ -90,6 +92,16 @@ class TimesheetsViewModelTest {
         assertThat(s.weekStart).isEqualTo(monday)
         assertThat(s.people.map { it.name }).containsExactly("Dana Whitfield", "Sam Rivera").inOrder()
         assertThat(s.approvable).isEqualTo(2)
+    }
+
+    // AC-F12 (cr:fl-settings-source): an overtime rule changed after the screen opened recomputes the week
+    @Test fun overtimeRuleChangeRecomputesTheWeek() = runBlocking<Unit> {
+        shift("m1", 0, 8, 18)
+        val vm = vm()
+        assertThat(vm.state.value.people.single().sheet.overtimeMillis).isEqualTo(0)
+        settings.value = CompanySettings(com.kurtz.homerecord.core.company.OvertimeRule.Daily8)
+        val s = await(vm) { it.people.single().sheet.overtimeMillis > 0 }
+        assertThat(s.people.single().sheet.overtimeMillis).isEqualTo(2 * 3_600_000L)
     }
 
     @Test fun previousWeekIsEmptyAndNextIsBlockedAtThisWeek() = runBlocking<Unit> {
@@ -166,6 +178,6 @@ class TimesheetsViewModelTest {
     private fun depsFor() = TimesheetsDeps(
         "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
         db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
-        db.timesheetApprovalDao().observeAll(), { CompanySettings() }, zone, { now },
+        db.timesheetApprovalDao().observeAll(), settings, zone, { now },
     )
 }

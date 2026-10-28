@@ -39,7 +39,7 @@ class ClockDeps(
     val punches: PunchRepository,
     val jobs: JobDao,
     val location: LocationProvider,
-    val settings: suspend () -> CompanySettings,
+    val settings: Flow<CompanySettings>,
     val permissionAsked: () -> Boolean,
     val markPermissionAsked: () -> Unit,
     val zone: ZoneId = ZoneId.systemDefault(),
@@ -69,9 +69,12 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     private var lastKind: String? = null // the punch that last ran, retried when GPS was the blocker
 
     init {
-        viewModelScope.launch { settings = d.settings() }
         viewModelScope.launch {
-            combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.approvals) { jobs, shifts, approved -> Triple(jobs, shifts, approved) }
+            // The rules are live: a change from the office reflows the week sheet and applies to the next punch.
+            combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.approvals, d.settings) { jobs, shifts, approved, rules ->
+                settings = rules
+                Triple(jobs, shifts, approved)
+            }
                 .collect { (jobs, shifts, approved) ->
                     val options = jobs.filter { it.status == "ACTIVE" }
                         .map { ClockJobOption(it.id, it.name, it.address, it.lat, it.lng) }

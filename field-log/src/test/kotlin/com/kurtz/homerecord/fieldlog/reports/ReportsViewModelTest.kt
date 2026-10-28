@@ -47,7 +47,7 @@ class ReportsViewModelTest {
             punches = flowOf(punches),
             jobs = flowOf(listOf(JobEntity(id = "j1", companyId = "c1", name = "Garage subpanel", createdAt = 1, updatedAt = 1))),
             clients = flowOf(emptyList()),
-            settings = { CompanySettings() },
+            settings = flowOf(CompanySettings()),
             share = { if (shareFails) throw IOException("disk") else shared += it },
             zone = zone, now = { now },
         )

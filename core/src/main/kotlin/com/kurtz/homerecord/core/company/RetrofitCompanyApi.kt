@@ -39,7 +39,7 @@ interface CompanyService {
 class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
     override suspend fun me() = call {
         service.me().memberships.filter { it.kind == "company" }.map {
-            CompanyMembership(it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement)
+            CompanyMembership(it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement, it.settings.toSettings())
         }
     }
 
@@ -66,7 +66,6 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
 
     override suspend fun profile(companyId: String) = call {
         val p = service.profile(companyId)
-        val s = p.settings
         CompanyProfile(
             id = p.id ?: companyId,
             name = p.name.orEmpty(),
@@ -74,13 +73,7 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
             phone = p.phone,
             email = p.email,
             address = p.address,
-            settings = CompanySettings(
-                overtimeRule = OvertimeRule.fromWire(s?.otRule.orEmpty()),
-                breakRule = s?.breakRule ?: false,
-                requireGps = s?.requireGps ?: false,
-                punchDistanceFt = s?.punchDistanceFt ?: CompanySettings.DEFAULT_PUNCH_DISTANCE_FT,
-                photoOnPunch = s?.photoOnPunch ?: false,
-            ),
+            settings = p.settings.toSettings(),
         )
     }
 

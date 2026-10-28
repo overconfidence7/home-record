@@ -35,7 +35,7 @@ class TimesheetsDeps(
     val punches: Flow<List<PunchEntity>>,
     val jobs: Flow<List<JobEntity>>,
     val approvalRows: Flow<List<TimesheetApprovalEntity>>,
-    val settings: suspend () -> CompanySettings,
+    val settings: Flow<CompanySettings>,
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
 )
@@ -55,9 +55,9 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
     private var latestJobs: List<JobChoice> = emptyList()
 
     init {
-        viewModelScope.launch { settings = d.settings() }
         viewModelScope.launch {
-            combine(d.members, d.punches, d.jobs, d.approvalRows, week) { members, punches, jobs, approvals, start ->
+            combine(d.members, d.punches, d.jobs, d.approvalRows, combine(week, d.settings, ::Pair)) { members, punches, jobs, approvals, (start, rules) ->
+                settings = rules
                 latestPunches = punches
                 latestJobs = jobs.filter { it.status == "ACTIVE" }.map { JobChoice(it.id, it.name) }
                 val ids = members.map { it.id }.toSet()

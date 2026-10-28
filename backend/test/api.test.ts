@@ -55,7 +55,10 @@ describe("/me", () => {
     const body = (await res.json()) as { user: { email: string }; memberships: Record<string, unknown>[] };
     expect(body.user.email).toBe("me@example.com");
     expect(body.memberships).toEqual([
-      { kind: "company", id: "c-me", role: "owner", name: "Kurtz Builders", entitlement: null, trialEndsAt: 1_900_000_000_000 },
+      {
+        kind: "company", id: "c-me", role: "owner", name: "Kurtz Builders", entitlement: null, trialEndsAt: 1_900_000_000_000,
+        settings: { otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false },
+      },
     ]);
   });
 });

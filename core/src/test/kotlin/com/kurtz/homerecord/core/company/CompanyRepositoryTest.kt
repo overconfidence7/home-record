@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.company
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -96,5 +97,24 @@ class CompanyRepositoryTest {
         repo.clear()
         assertThat(cache.stored).isNull()
         assertThat(repo.state.value).isEqualTo(CompanyState.Loading)
+    }
+
+    // AC-F9, AC-F12, AC-F13, AC-F18 (cr:fl-settings-source): the rules come from the cached membership, so a Crew phone
+    // offline still has them, and a refresh replaces them
+    @Test fun settingsComeFromTheCachedMembershipAndFollowRefresh() = runTest {
+        val strict = CompanySettings(OvertimeRule.Daily8, breakRule = true, requireGps = true, punchDistanceFt = 200)
+        val crew = kurtz.copy(role = CompanyRole.Crew, settings = strict)
+        val api = FakeCompanyApi().apply { memberships = ApiResult.Err(ApiFailure.Offline) }
+        val repo = CompanyRepository(api, FakeCompanyCache(crew))
+        repo.refresh()
+        assertThat(repo.settings.first()).isEqualTo(strict)
+        val relaxed = strict.copy(requireGps = false)
+        api.memberships = ApiResult.Ok(listOf(crew.copy(settings = relaxed)))
+        repo.refresh()
+        assertThat(repo.settings.first()).isEqualTo(relaxed)
+    }
+
+    @Test fun settingsAreTheDefaultsWithoutACompany() = runTest {
+        assertThat(CompanyRepository(FakeCompanyApi(), FakeCompanyCache()).settings.first()).isEqualTo(CompanySettings())
     }
 }

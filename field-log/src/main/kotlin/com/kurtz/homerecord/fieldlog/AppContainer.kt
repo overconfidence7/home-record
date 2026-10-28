@@ -240,7 +240,7 @@ class AppContainer(private val app: Application) {
     }
     val clock by lazy { com.kurtz.homerecord.core.punch.ClockController(punches, com.kurtz.homerecord.core.location.FusedLocationProvider(app)) }
 
-    /** What FL-Clock needs; settings come from the company profile when this role can read it, else the defaults. */
+    /** What FL-Clock needs; the clock rules come with the cached membership, so every role has them offline too. */
     fun clockDeps(context: Context, membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String): com.kurtz.homerecord.fieldlog.clock.ClockDeps {
         val prefs = context.getSharedPreferences("clock", Context.MODE_PRIVATE)
         val location = com.kurtz.homerecord.core.location.FusedLocationProvider(context)
@@ -248,10 +248,7 @@ class AppContainer(private val app: Application) {
             companyId = membership.companyId, memberId = memberId,
             controller = com.kurtz.homerecord.core.punch.ClockController(punches, location), punches = punches,
             jobs = db.jobDao(), location = location,
-            settings = {
-                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
-                    ?: com.kurtz.homerecord.core.company.CompanySettings()
-            },
+            settings = company.settings,
             permissionAsked = { prefs.getBoolean("location_asked", false) },
             markPermissionAsked = { prefs.edit().putBoolean("location_asked", true).apply() },
             role = membership.role,
@@ -268,10 +265,7 @@ class AppContainer(private val app: Application) {
             punches = db.punchDao().observeFor(membership.companyId),
             jobs = db.jobDao().observeFor(membership.companyId),
             clients = db.clientDao().observeFor(membership.companyId),
-            settings = {
-                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
-                    ?: com.kurtz.homerecord.core.company.CompanySettings()
-            },
+            settings = company.settings,
             share = { sharer.share(sharer.write(it)) },
         )
     }
@@ -285,10 +279,7 @@ class AppContainer(private val app: Application) {
             punches = db.punchDao().observeFor(membership.companyId),
             jobs = db.jobDao().observeFor(membership.companyId),
             approvalRows = db.timesheetApprovalDao().observeAll(),
-            settings = {
-                (companyApi.profile(membership.companyId) as? com.kurtz.homerecord.core.company.ApiResult.Ok)?.value?.settings
-                    ?: com.kurtz.homerecord.core.company.CompanySettings()
-            },
+            settings = company.settings,
         )
 
     fun todayDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =

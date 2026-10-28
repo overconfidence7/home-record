@@ -34,7 +34,7 @@ class ReportsDeps(
     val punches: Flow<List<PunchEntity>>,
     val jobs: Flow<List<JobEntity>>,
     val clients: Flow<List<ClientEntity>>,
-    val settings: suspend () -> CompanySettings,
+    val settings: Flow<CompanySettings>,
     val share: suspend (TimeExportFile) -> Unit,
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
@@ -54,9 +54,9 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
     )
 
     init {
-        viewModelScope.launch { settings = d.settings() }
         viewModelScope.launch {
-            combine(d.members, d.punches, d.jobs, d.clients, range) { members, punches, jobs, clients, r ->
+            combine(d.members, d.punches, d.jobs, d.clients, combine(range, d.settings, ::Pair)) { members, punches, jobs, clients, (r, rules) ->
+                settings = rules
                 latest = Snapshot(members, punches, jobs, clients)
                 val weeks = weeksOf(r)
                 val now = d.now()

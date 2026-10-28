@@ -166,6 +166,17 @@ describe("FL-Company profile", () => {
     const { owner, id } = await setup("prof2");
     expect((await call("PATCH", `/companies/${id}/profile`, owner, { settings: { punchDistanceFt: 5 } })).status).toBe(400);
   });
+  // AC-F9, AC-F12, AC-F13, AC-F18 (cr:fl-settings-source): clock rules reach every role through /me
+  it("sends the clock rules with every company membership, Crew included", async () => {
+    const { owner, id, code } = await setup("prof3");
+    const crew = await joinAs("prof3", code);
+    const before = (await json(await call("GET", "/me", crew.token))).memberships[0];
+    expect(before.settings).toEqual({ otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false });
+    await call("PATCH", `/companies/${id}/profile`, owner, { settings: { requireGps: true, punchDistanceFt: 300, otRule: "daily8", breakRule: true } });
+    const after = (await json(await call("GET", "/me", crew.token))).memberships[0];
+    expect(after.settings).toEqual({ otRule: "daily8", breakRule: true, requireGps: true, punchDistanceFt: 300, photoOnPunch: false });
+    expect(after.role).toBe("crew");
+  });
 });
 
 describe("invite landing page", () => {
