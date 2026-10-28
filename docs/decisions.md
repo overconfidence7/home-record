@@ -217,3 +217,6 @@ A typed room name is shown on the plan as a draft (`PlanEditor.previewRename`) a
 
 ## 2026-10-28 — PdfViewer and the document scanner live in :core-ui (CR2q3c, cr:pdf-viewer-dup)
 One `PdfViewer(pages, tagPrefix)` serves House Manual documents and Field Log files, so thumbnails, zoom and page rendering stay identical in both apps; the screen passes its tag prefix (`hm_document`, `fl_file`) because the screen name differs per app. `rememberDocumentScanner` moved with it and :core-ui now carries the ML Kit document scanner dependency (approved list) so Field Log can scan into Files (T042c) and Materials without depending on House Manual code.
+
+## 2026-10-28 — Form Save: on for new records, on for edits only once changed (CR2r1, cr:form-dialog)
+House Manual's full-screen forms (contacts, consumables, service visits) enable Save for a new record so a tap shows what is missing inline (ui-standards rule 21's "or it focuses/shows the first invalid field" path, which the H05 flow relies on), and for an edit only after something changed (nothing to save otherwise). Close and back ask "Discard changes?" only when the draft differs from what the form opened with; the open draft and that original both live in SavedStateHandle. One `DiscardChangesDialog` in :core-ui serves FormScaffold and the House Manual form dialog.
