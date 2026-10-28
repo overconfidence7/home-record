@@ -3,6 +3,9 @@ appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
     clearState: true
+    # The first clock in must find location not yet allowed (AC-F18); say so instead of trusting clearState.
+    permissions:
+      location: deny
 - runFlow:
     file: _sign-in.yaml
     env:
