@@ -1,4 +1,4 @@
-package com.kurtz.homerecord.housemanual.documents
+package com.kurtz.homerecord.coreui.pages
 
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
@@ -10,7 +10,7 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 
-/** Returns a function that opens the ML Kit document scanner; [onPdf] gets the PDF uri, [onFailed] a scanner or result failure. */
+/** Returns a function that opens the ML Kit document scanner (HM Documents, FL Files and Materials); [onPdf] gets the PDF uri, [onFailed] a scanner or result failure. */
 @Composable
 fun rememberDocumentScanner(onPdf: (String) -> Unit, onFailed: () -> Unit): () -> Unit {
     val activity = LocalActivity.current

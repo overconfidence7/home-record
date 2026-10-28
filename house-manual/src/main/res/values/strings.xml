@@ -184,7 +184,6 @@
     <string name="document_viewer_share">Share</string>
     <string name="document_viewer_missing_title">This file can\'t be opened</string>
     <string name="document_viewer_missing_body">It may have been removed from this phone. Go back and try another document.</string>
-    <string name="document_viewer_page">Page %1$d of %2$d</string>
     <string name="document_viewer_open">Open %1$s</string>
     <string name="documents_title">Documents</string>
     <string name="documents_add">Add document</string>

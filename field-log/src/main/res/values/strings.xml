@@ -247,8 +247,6 @@
     <string name="file_viewer_title">File</string>
     <string name="file_viewer_share">Share</string>
     <string name="file_viewer_back">Back to files</string>
-    <string name="file_viewer_page">Page %1$d of %2$d</string>
-    <string name="file_viewer_go_to_page">Go to page %1$d</string>
     <string name="file_viewer_try_again">Try again</string>
     <string name="file_viewer_not_on_phone_title">Not on this phone yet</string>
     <string name="file_viewer_not_on_phone_body">This file hasn\'t downloaded here. Connect to the internet and try again.</string>

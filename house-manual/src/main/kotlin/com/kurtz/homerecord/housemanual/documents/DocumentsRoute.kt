@@ -8,6 +8,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.coreui.pages.rememberDocumentScanner
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 
 @Composable

@@ -55,4 +55,6 @@
     <string name="warranty_active">Warranty until %1$s</string>
     <string name="warranty_expiring">Expires %1$s</string>
     <string name="warranty_expired">Warranty expired %1$s</string>
+    <string name="pdf_viewer_page">Page %1$d of %2$d</string>
+    <string name="pdf_viewer_go_to_page">Go to page %1$d</string>
 </resources>

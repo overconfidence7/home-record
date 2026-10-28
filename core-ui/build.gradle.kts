@@ -35,6 +35,7 @@ dependencies {
     api(libs.lifecycle.viewmodel.navigation3)
     api(libs.lifecycle.viewmodel.compose)
     api(libs.kotlinx.serialization.json)
+    implementation(libs.mlkit.document.scanner)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)

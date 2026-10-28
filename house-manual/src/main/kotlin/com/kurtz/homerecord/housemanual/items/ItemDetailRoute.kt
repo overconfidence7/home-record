@@ -14,7 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.lookup.RecallApi
 import com.kurtz.homerecord.housemanual.R
-import com.kurtz.homerecord.housemanual.documents.rememberDocumentScanner
+import com.kurtz.homerecord.coreui.pages.rememberDocumentScanner
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
