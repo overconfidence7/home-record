@@ -170,6 +170,39 @@ class ItemDetailWarrantyTest {
         assertThat(rows.first().costCents).isEqualTo(8950L)
     }
 
+    @AcceptanceCriterion("AC-U6")
+    @Test fun upkeepFormIsDirtyOnlyAfterAChangeAndKeepsDraftThroughProcessDeath() = runTest {
+        // AC-C35 (cr:form-dialog): Save stays off and Close needs no prompt until something changes
+        val id = heater()
+        val saved = SavedStateHandle()
+        val first = vm(id, saved)
+        first.onEvent(ItemDetailEvent.OpenConsumable(null))
+        val opened = first.await { it.consumableForm != null }
+        assertThat(opened.formDirty).isFalse()
+        assertThat(opened.formCanSave).isTrue() // a new record's Save shows what is missing
+        val typed = ConsumableDraft(spec = "16x25x1 MERV 8", quantity = "2")
+        first.onEvent(ItemDetailEvent.ChangeConsumable(typed))
+        assertThat(first.await { it.consumableForm == typed }.formDirty).isTrue()
+        first.onEvent(ItemDetailEvent.ChangeConsumable(ConsumableDraft()))
+        assertThat(first.await { it.consumableForm == ConsumableDraft() }.formDirty).isFalse()
+        first.onEvent(ItemDetailEvent.ChangeConsumable(typed))
+
+        val second = vm(id, saved)
+        val restored = second.await { it.consumableForm != null }
+        assertThat(restored.consumableForm).isEqualTo(typed)
+        assertThat(restored.formDirty).isTrue()
+        second.onEvent(ItemDetailEvent.CloseForm)
+        assertThat(second.await { it.consumableForm == null }.formDirty).isFalse()
+        assertThat(vm(id, saved).await { !it.loading }.consumableForm).isNull()
+
+        second.onEvent(ItemDetailEvent.OpenService(null))
+        val service = ServiceDraft(date = "2026-02-01", description = "Tune-up", cost = "89.50")
+        second.onEvent(ItemDetailEvent.ChangeService(service))
+        val third = vm(id, saved).await { it.serviceForm != null }
+        assertThat(third.serviceForm).isEqualTo(service)
+        assertThat(third.formDirty).isTrue()
+    }
+
     @AcceptanceCriterion("AC-C39")
     @Test fun serviceFormOffersContactsAndSavesTheChosenOne() = runTest {
         val id = heater()

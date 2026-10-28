@@ -89,20 +89,28 @@ fun FormScaffold(
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
         ) { content() }
     }
-    if (confirmDiscard) {
-        AlertDialog(
-            modifier = Modifier.windowTestTags(),
-            onDismissRequest = { confirmDiscard = false },
-            title = { Text(stringResource(R.string.discard_title)) },
-            text = { Text(stringResource(R.string.discard_body)) },
-            confirmButton = {
-                TextButton(onClick = { confirmDiscard = false; onClose() }) { Text(stringResource(R.string.discard)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.keep_editing)) }
-            },
-        )
-    }
+    if (confirmDiscard) DiscardChangesDialog(onDiscard = { confirmDiscard = false; onClose() }, onKeepEditing = { confirmDiscard = false })
+}
+
+/** "Discard changes?" asked when a dirty form is closed (ui-standards rule 3); every form uses this one. */
+@Composable
+fun DiscardChangesDialog(onDiscard: () -> Unit, onKeepEditing: () -> Unit) {
+    AlertDialog(
+        modifier = Modifier.windowTestTags(),
+        onDismissRequest = onKeepEditing,
+        title = { Text(stringResource(R.string.discard_title)) },
+        text = { Text(stringResource(R.string.discard_body)) },
+        confirmButton = {
+            TextButton(onClick = onDiscard, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_discard")) {
+                Text(stringResource(R.string.discard))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onKeepEditing, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_keep_editing")) {
+                Text(stringResource(R.string.keep_editing))
+            }
+        },
+    )
 }
 
 /** Text field with a real label, required marker and inline error (ui-standards 21). */

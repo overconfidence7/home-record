@@ -150,6 +150,8 @@ fun UpkeepFormSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit
     FormScreenDialog(
         title = title,
         saveTag = if (c != null) "hm_item_detail_consumable_save" else "hm_item_detail_service_save",
+        dirty = state.formDirty,
+        saveEnabled = state.formCanSave,
         onClose = { onEvent(ItemDetailEvent.CloseForm) },
         onSave = { onEvent(if (c != null) ItemDetailEvent.SaveConsumable else ItemDetailEvent.SaveService) },
     ) {

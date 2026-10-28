@@ -94,4 +94,29 @@ class ContactsViewModelTest {
         vm.onEvent(ContactsEvent.ConfirmDelete)
         vm.await { it.rows.isEmpty() && it.confirmDeleteId == null }
     }
+
+    @AcceptanceCriterion("AC-U6")
+    @Test fun editFormIsDirtyOnlyAfterAChangeAndSurvivesProcessDeath() {
+        // AC-C39 (cr:form-dialog): an opened contact is clean until edited; the original survives so dirty does too
+        val first = vm()
+        first.onEvent(ContactsEvent.OpenForm(null))
+        first.onEvent(ContactsEvent.ChangeForm(ContactDraft(name = "Dale", phone = "555-0142")))
+        first.onEvent(ContactsEvent.SaveForm)
+        val id = first.await { it.rows.isNotEmpty() && it.form == null }.rows.single().contact.id
+
+        val saved = SavedStateHandle()
+        val vm = vm(saved)
+        vm.onEvent(ContactsEvent.OpenForm(id))
+        val opened = vm.await { it.form?.id == id }
+        assertThat(opened.formDirty).isFalse()
+        assertThat(opened.formCanSave).isFalse() // nothing changed, nothing to save
+        vm.onEvent(ContactsEvent.ChangeForm(checkNotNull(opened.form).copy(trade = "HVAC")))
+        val edited = vm.await { it.form?.trade == "HVAC" }
+        assertThat(edited.formDirty).isTrue()
+        assertThat(edited.formCanSave).isTrue()
+
+        val restored = vm(saved).await { it.form != null }
+        assertThat(restored.form?.trade).isEqualTo("HVAC")
+        assertThat(restored.formDirty).isTrue()
+    }
 }

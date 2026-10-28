@@ -478,7 +478,7 @@ fun ItemDetailUpkeepPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ItemDetailConsumableFormPreview() = Frame {
-    FormScreenScaffold(stringResource(R.string.item_detail_consumable_add), "hm_item_detail_consumable_save", {}, {}) {
+    FormScreenScaffold(stringResource(R.string.item_detail_consumable_add), "hm_item_detail_consumable_save", true, {}, {}) {
         com.kurtz.homerecord.housemanual.items.ConsumableFormContent(
             com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft(id = "c1", spec = "", quantity = "2", reorderUrl = "https://example.com/filters"), true, {},
         )
@@ -488,7 +488,7 @@ fun ItemDetailConsumableFormPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ItemDetailServiceFormPreview() = Frame {
-    FormScreenScaffold(stringResource(R.string.item_detail_service_add), "hm_item_detail_service_save", {}, {}) {
+    FormScreenScaffold(stringResource(R.string.item_detail_service_add), "hm_item_detail_service_save", true, {}, {}) {
         com.kurtz.homerecord.housemanual.items.ServiceFormContent(
             com.kurtz.homerecord.housemodel.upkeep.ServiceDraft(date = "2026-03-14", contactId = "c1", description = "Annual tune-up and igniter check", cost = "149.00"),
             sampleContacts.map { it.contact }, false, {},
@@ -521,7 +521,7 @@ fun ContactsLoadingPreview() = Frame { ContactsScreen(ContactsUiState(), {}) }
 @ThemePreviews
 @Composable
 fun ContactFormPreview() = Frame {
-    FormScreenScaffold(stringResource(R.string.contacts_form_new), "hm_contacts_save", {}, {}) {
+    FormScreenScaffold(stringResource(R.string.contacts_form_new), "hm_contacts_save", true, {}, {}) {
         ContactFormContent(ContactDraft(name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlan"), true, {})
     }
 }

@@ -83,6 +83,8 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
         FormScreenDialog(
             title = stringResource(if (form.id == null) R.string.contacts_form_new else R.string.contacts_form_edit),
             saveTag = "hm_contacts_save",
+            dirty = state.formDirty,
+            saveEnabled = state.formCanSave,
             onClose = { onEvent(ContactsEvent.CloseForm) },
             onSave = { onEvent(ContactsEvent.SaveForm) },
         ) {

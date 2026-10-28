@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Item page (AC-H7). The delete confirmation and a pending navigation live in [SavedStateHandle] so they survive rotation and
- * process death; the route reads [ItemDetailUiState.nav] and navigates, so the ViewModel never holds a composition's lambdas.
+ * Item page (AC-H7). The delete confirmation, a pending navigation and an open upkeep form (its draft and what it opened with)
+ * live in [SavedStateHandle] so they survive rotation and process death; the route reads [ItemDetailUiState.nav] and navigates, so the ViewModel never holds a composition's lambdas.
  */
 class ItemDetailViewModel(
     private val repo: ItemRepository,
@@ -58,9 +58,18 @@ class ItemDetailViewModel(
 
     private val recallState = MutableStateFlow<RecallUi>(RecallUi.Idle)
 
-    private val forms = MutableStateFlow(FormsUi())
+    private val forms = MutableStateFlow(restoreForms())
 
-    private data class FormsUi(val consumable: ConsumableDraft? = null, val service: ServiceDraft? = null, val showErrors: Boolean = false)
+    private data class FormsUi(
+        val consumable: ConsumableDraft? = null,
+        val service: ServiceDraft? = null,
+        val showErrors: Boolean = false,
+        /** The draft the open form started from; the form is dirty while it differs. */
+        val original: Any? = null,
+    ) {
+        val dirty: Boolean get() = (consumable ?: service)?.let { it != original } ?: false
+        val canSave: Boolean get() = (consumable ?: service) != null && (dirty || (consumable?.id ?: service?.id) == null)
+    }
 
     private val upkeepRows = combine(upkeep.observeConsumables(itemId), upkeep.observeService(itemId)) { c, s -> c to s }
 
@@ -84,7 +93,7 @@ class ItemDetailViewModel(
         val (u, contacts) = uc
         ItemDetailUiState(
             loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
-            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors, contacts = contacts,
+            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, formDirty = f.dirty, formCanSave = f.canSave, showFormErrors = f.showErrors, contacts = contacts,
             documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice, recalls = r,
         )
     }
@@ -123,28 +132,28 @@ class ItemDetailViewModel(
                 val draft = row?.let {
                     ConsumableDraft(it.id, runCatching { ConsumableKind.valueOf(it.kind) }.getOrDefault(ConsumableKind.OTHER), it.spec, it.quantity.toString(), it.reorderUrl.orEmpty())
                 } ?: ConsumableDraft()
-                forms.value = FormsUi(consumable = draft)
+                setForms(FormsUi(consumable = draft, original = draft))
             }
-            is ItemDetailEvent.ChangeConsumable -> forms.update { it.copy(consumable = e.draft) }
+            is ItemDetailEvent.ChangeConsumable -> if (forms.value.consumable != null) setForms(forms.value.copy(consumable = e.draft))
             ItemDetailEvent.SaveConsumable -> viewModelScope.launch {
                 val draft = forms.value.consumable ?: return@launch
-                if (upkeep.saveConsumable(itemId, draft) == null) forms.update { it.copy(showErrors = true) } else forms.value = FormsUi()
+                setForms(if (upkeep.saveConsumable(itemId, draft) == null) forms.value.copy(showErrors = true) else FormsUi())
             }
-            is ItemDetailEvent.DeleteConsumable -> viewModelScope.launch { upkeep.deleteConsumable(e.id); forms.value = FormsUi() }
+            is ItemDetailEvent.DeleteConsumable -> viewModelScope.launch { upkeep.deleteConsumable(e.id); setForms(FormsUi()) }
             is ItemDetailEvent.OpenService -> {
                 val row = e.id?.let { id -> state.value.service.firstOrNull { it.id == id } }
                 val draft = row?.let {
                     ServiceDraft(it.id, it.date, it.contactId, it.description, it.costCents?.let { c -> "%d.%02d".format(c / 100, c % 100) }.orEmpty())
                 } ?: ServiceDraft()
-                forms.value = FormsUi(service = draft)
+                setForms(FormsUi(service = draft, original = draft))
             }
-            is ItemDetailEvent.ChangeService -> forms.update { it.copy(service = e.draft) }
+            is ItemDetailEvent.ChangeService -> if (forms.value.service != null) setForms(forms.value.copy(service = e.draft))
             ItemDetailEvent.SaveService -> viewModelScope.launch {
                 val draft = forms.value.service ?: return@launch
-                if (upkeep.saveService(itemId, draft) == null) forms.update { it.copy(showErrors = true) } else forms.value = FormsUi()
+                setForms(if (upkeep.saveService(itemId, draft) == null) forms.value.copy(showErrors = true) else FormsUi())
             }
-            is ItemDetailEvent.DeleteService -> viewModelScope.launch { upkeep.deleteService(e.id); forms.value = FormsUi() }
-            ItemDetailEvent.CloseForm -> forms.value = FormsUi()
+            is ItemDetailEvent.DeleteService -> viewModelScope.launch { upkeep.deleteService(e.id); setForms(FormsUi()) }
+            ItemDetailEvent.CloseForm -> setForms(FormsUi())
             is ItemDetailEvent.DocumentPicked -> viewModelScope.launch {
                 val id = documents.add(homeId, DocumentScope.Item(itemId), e.uri)
                 documentUi.update { it.copy(notice = id == null) }
@@ -204,6 +213,25 @@ class ItemDetailViewModel(
         saved[NAV_COPY] = (v as? ItemDetailNav.OpenCopy)?.id
     }
 
+    private fun setForms(f: FormsUi) {
+        forms.value = f
+        saved[FORM_ERRORS] = f.showErrors
+        saved[FORM_CONSUMABLE] = f.consumable?.let(::consumableToList)
+        saved[FORM_SERVICE] = f.service?.let(::serviceToList)
+        saved[FORM_ORIGINAL] = when (val o = f.original) {
+            is ConsumableDraft -> consumableToList(o)
+            is ServiceDraft -> serviceToList(o)
+            else -> null
+        }
+    }
+
+    private fun restoreForms(): FormsUi {
+        val consumable = saved.get<List<String>>(FORM_CONSUMABLE)?.let(::consumableFromList)
+        val service = saved.get<List<String>>(FORM_SERVICE)?.let(::serviceFromList)
+        val original = saved.get<List<String>>(FORM_ORIGINAL)?.let { if (consumable != null) consumableFromList(it) else serviceFromList(it) }
+        return FormsUi(consumable, service, saved[FORM_ERRORS] ?: false, original)
+    }
+
     private fun setAttach(v: Boolean) {
         documentUi.update { it.copy(showAttach = v) }
         saved[ATTACH] = v
@@ -214,5 +242,21 @@ class ItemDetailViewModel(
         const val ATTACH = "showAttach"
         const val NAV_CLOSED = "navClosed"
         const val NAV_COPY = "navCopy"
+        const val FORM_CONSUMABLE = "consumableForm"
+        const val FORM_SERVICE = "serviceForm"
+        const val FORM_ORIGINAL = "formOriginal"
+        const val FORM_ERRORS = "formErrors"
+
+        fun consumableToList(d: ConsumableDraft) = arrayListOf(d.id.orEmpty(), d.kind.name, d.spec, d.quantity, d.reorderUrl)
+
+        fun consumableFromList(l: List<String>): ConsumableDraft? = l.takeIf { it.size == 5 }?.let {
+            ConsumableDraft(it[0].ifEmpty { null }, runCatching { ConsumableKind.valueOf(it[1]) }.getOrDefault(ConsumableKind.OTHER), it[2], it[3], it[4])
+        }
+
+        fun serviceToList(d: ServiceDraft) = arrayListOf(d.id.orEmpty(), d.date, d.contactId.orEmpty(), d.description, d.cost)
+
+        fun serviceFromList(l: List<String>): ServiceDraft? = l.takeIf { it.size == 5 }?.let {
+            ServiceDraft(it[0].ifEmpty { null }, it[1], it[2].ifEmpty { null }, it[3], it[4])
+        }
     }
 }

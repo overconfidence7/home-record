@@ -19,3 +19,24 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_contacts_save"
 - assertVisible: "Maria Soto"
 - takeScreenshot: H05-contacts
+# AC-U6 (cr:form-dialog): a typed-in form asks before Close throws it away; Keep editing keeps the text
+- tapOn:
+    id: "hm_contacts_fab"
+- tapOn:
+    id: "hm_contacts_name"
+- inputText: "Dale Harlan"
+- hideKeyboard
+- tapOn:
+    id: "hm_close"
+- extendedWaitUntil:
+    visible: "Discard changes?"
+    timeout: 5000
+- tapOn:
+    id: "hm_keep_editing"
+- assertVisible: "Dale Harlan"
+- tapOn:
+    id: "hm_close"
+- tapOn:
+    id: "hm_discard"
+- assertVisible: "Maria Soto"
+- assertNotVisible: "Dale Harlan"

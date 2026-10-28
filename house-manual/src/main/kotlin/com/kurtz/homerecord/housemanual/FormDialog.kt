@@ -19,6 +19,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.kurtz.homerecord.coreui.components.DiscardChangesDialog
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.Modifier
@@ -30,21 +35,29 @@ import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.window.DialogProperties
 
-/** A create/edit form with more than two fields: full screen with Close and Save in the top app bar (ui-standards rule 15). */
+/**
+ * A create/edit form with more than two fields: full screen with Close and Save in the top app bar (ui-standards rule 15).
+ * When [dirty], Close and system back ask before discarding (rule 3); Save is enabled only while [saveEnabled].
+ */
 @Composable
 fun FormScreenDialog(
     title: String,
     saveTag: String,
+    dirty: Boolean,
+    saveEnabled: Boolean,
     onClose: () -> Unit,
     onSave: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    var confirmDiscard by rememberSaveable { mutableStateOf(false) }
+    val requestClose = { if (dirty) confirmDiscard = true else onClose() }
     Dialog(
-        onDismissRequest = onClose,
+        onDismissRequest = requestClose,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         DialogSystemBarIcons()
-        Box(Modifier.fillMaxSize().windowTestTags()) { FormScreenScaffold(title, saveTag, onClose, onSave, content) }
+        Box(Modifier.fillMaxSize().windowTestTags()) { FormScreenScaffold(title, saveTag, saveEnabled, requestClose, onSave, content) }
+        if (confirmDiscard) DiscardChangesDialog(onDiscard = { confirmDiscard = false; onClose() }, onKeepEditing = { confirmDiscard = false })
     }
 }
 
@@ -68,6 +81,7 @@ private fun DialogSystemBarIcons() {
 fun FormScreenScaffold(
     title: String,
     saveTag: String,
+    saveEnabled: Boolean,
     onClose: () -> Unit,
     onSave: () -> Unit,
     content: @Composable () -> Unit,
@@ -83,7 +97,7 @@ fun FormScreenScaffold(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onSave, modifier = Modifier.heightIn(min = 48.dp).testTag(saveTag)) {
+                    TextButton(onClick = onSave, enabled = saveEnabled, modifier = Modifier.heightIn(min = 48.dp).testTag(saveTag)) {
                         Text(stringResource(R.string.form_save))
                     }
                 },

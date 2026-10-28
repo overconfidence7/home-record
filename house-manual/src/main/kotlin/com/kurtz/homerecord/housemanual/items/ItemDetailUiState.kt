@@ -33,6 +33,10 @@ data class ItemDetailUiState(
     val recalls: RecallUi = RecallUi.Idle,
     val consumableForm: ConsumableDraft? = null,
     val serviceForm: ServiceDraft? = null,
+    /** The open upkeep form differs from what it opened with: Save is enabled and Close asks before discarding. */
+    val formDirty: Boolean = false,
+    /** Save is on for a new record (a tap shows what is missing, rule 21) and for an edit once something changed. */
+    val formCanSave: Boolean = false,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */
     val showFormErrors: Boolean = false,
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
