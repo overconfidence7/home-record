@@ -71,26 +71,28 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     )
     val state: StateFlow<ClockUiState> = _state.asStateFlow()
 
-    private var settings = CompanySettings()
+    @Volatile private var settings = CompanySettings()
     private var pending: String? = saved[PENDING] // "in", "switch" or "crew" while the reason sheet is open
     private var lastKind: String? = null // the punch that last ran, retried when GPS was the blocker
 
     init {
+        // Collected on their own so a rule changed by the office reaches the next punch without waiting on the Room flows below.
+        viewModelScope.launch { d.settings.collect { settings = it } }
         viewModelScope.launch {
             // The rules are live: a change from the office reflows the week sheet and applies to the next punch.
             combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.approvals, d.settings) { jobs, shifts, approved, rules ->
-                settings = rules
-                Triple(jobs, shifts, approved)
+                Triple(jobs, shifts, approved) to rules
             }
-                .collect { (jobs, shifts, approved) ->
+                .collect { (rows, company) ->
+                    val (jobs, shifts, approved) = rows
                     val now = d.now()
                     // Status is read for today, so a job whose start date has come shows here without a re-save.
                     val today = Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString()
                     val options = jobs.filter { it.effectiveStatus(today) == JobStatus.ACTIVE }
                         .map { ClockJobOption(it.id, it.name, it.address, it.lat, it.lng) }
                     val status = d.controller.status(d.companyId, d.memberId)
-                    val rules = TimesheetRules.from(settings.overtimeRule)
-                    val sheet = WeekSheetBuilder.build(shifts, rules, settings.breakRule, d.zone, now)
+                    val rules = TimesheetRules.from(company.overtimeRule)
+                    val sheet = WeekSheetBuilder.build(shifts, rules, company.breakRule, d.zone, now)
                     // The last job worked is preselected, so the widget's Clock in lands on it (AC-F17).
                     val lastJob = shifts.lastOrNull()?.segments?.lastOrNull()?.jobId?.takeIf { id -> options.any { it.id == id } }
                     _state.update { s ->

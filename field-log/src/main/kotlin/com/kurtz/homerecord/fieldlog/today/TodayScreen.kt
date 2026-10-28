@@ -135,7 +135,7 @@ private fun ClockCard(clock: TodayClock, onOpenClock: () -> Unit) {
             clock.jobName?.let { Text(it, style = MaterialTheme.typography.bodyLarge) }
             clock.startedAt?.let { Text(stringResource(R.string.today_since, timeText(it), elapsedText(clock.now - it)), Modifier.testTag("fl_today_elapsed"), style = MaterialTheme.typography.bodyMedium) }
             val action = if (clock.status == ClockStatus.Out) R.string.clock_in else R.string.today_open_clock
-            Button(onClick = onOpenClock, Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_today_clock_action")) { Text(stringResource(action)) }
+            Button(onClick = onOpenClock, Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("fl_today_clock_action")) { Text(stringResource(action)) }
         }
     }
 }

@@ -40,7 +40,9 @@ import com.kurtz.homerecord.fieldlog.R
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private val ButtonHeight = 56.dp
+// Rule 30: Clock in, Clock out and their siblings are 64 dp; every other target on the clock screen is 56 dp.
+private val ButtonHeight = 64.dp
+private val TargetHeight = 56.dp
 
 /** FL-Clock: status, job picker, Clock in / Break / Switch / Clock out, then "My timesheet" (AC-F8, AC-F10, AC-F18). */
 @Composable
@@ -112,7 +114,7 @@ private fun NoLocationNotice(onEvent: (ClockEvent) -> Unit) {
     Card(Modifier.fillMaxWidth().testTag("fl_clock_no_location")) {
         Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.clock_no_location), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = { onEvent(ClockEvent.DismissNotice) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.dismiss)) }
+            TextButton(onClick = { onEvent(ClockEvent.DismissNotice) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.dismiss)) }
         }
     }
 }
@@ -120,7 +122,7 @@ private fun NoLocationNotice(onEvent: (ClockEvent) -> Unit) {
 @Composable
 private fun JobRadio(job: ClockJobOption, selected: Boolean, onEvent: (ClockEvent) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp)
+        Modifier.fillMaxWidth().heightIn(min = TargetHeight)
             .selectable(selected, role = Role.RadioButton, onClick = { onEvent(ClockEvent.SelectJob(job.id)) })
             .testTag("fl_clock_job_${job.id}"),
         verticalAlignment = Alignment.CenterVertically,
@@ -183,7 +185,7 @@ private fun CrewCard(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                     val text = if (n.skippedNames.isEmpty()) pluralStringResource(R.plurals.clock_crew_done, n.punched, n.punched)
                     else stringResource(R.string.clock_crew_done_skipped, pluralStringResource(R.plurals.clock_crew_done, n.punched, n.punched), n.skippedNames.joinToString(", "))
                     Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                    TextButton(onClick = { onEvent(ClockEvent.DismissCrewNotice) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.dismiss)) }
+                    TextButton(onClick = { onEvent(ClockEvent.DismissCrewNotice) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.dismiss)) }
                 }
             }
             if (state.crew.isEmpty()) Text(stringResource(R.string.clock_crew_empty), style = MaterialTheme.typography.bodyMedium)
@@ -191,7 +193,7 @@ private fun CrewCard(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                 state.crew.forEach { p ->
                     val checked = p.id in state.crewSelected
                     Row(
-                        Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                        Modifier.fillMaxWidth().heightIn(min = TargetHeight)
                             .toggleable(checked, enabled = !p.onClock, role = Role.Checkbox, onValueChange = { onEvent(ClockEvent.ToggleCrew(p.id)) })
                             .testTag("fl_clock_crew_${p.id}"),
                         verticalAlignment = Alignment.CenterVertically,
@@ -268,8 +270,8 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
             onDismissRequest = { onEvent(ClockEvent.ExplainSkip) },
             title = { Text(stringResource(R.string.clock_explain_title)) },
             text = { Text(stringResource(R.string.clock_explain_body)) },
-            confirmButton = { TextButton({ onEvent(ClockEvent.ExplainContinue) }, Modifier.heightIn(min = 48.dp).testTag("fl_clock_explain_ok")) { Text(stringResource(R.string.clock_explain_continue)) } },
-            dismissButton = { TextButton({ onEvent(ClockEvent.ExplainSkip) }, Modifier.heightIn(min = 48.dp).testTag("fl_clock_explain_skip")) { Text(stringResource(R.string.clock_explain_skip)) } },
+            confirmButton = { TextButton({ onEvent(ClockEvent.ExplainContinue) }, Modifier.heightIn(min = TargetHeight).testTag("fl_clock_explain_ok")) { Text(stringResource(R.string.clock_explain_continue)) } },
+            dismissButton = { TextButton({ onEvent(ClockEvent.ExplainSkip) }, Modifier.heightIn(min = TargetHeight).testTag("fl_clock_explain_skip")) { Text(stringResource(R.string.clock_explain_skip)) } },
         )
     }
     state.farReason?.let { sheet ->
@@ -282,7 +284,7 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                     Text(stringResource(R.string.clock_far_body, sheet.distanceFt), style = MaterialTheme.typography.bodyMedium)
                     FarReasonSheet.choices.forEach { choice ->
                         Row(
-                            Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            Modifier.fillMaxWidth().heightIn(min = TargetHeight)
                                 .selectable(sheet.choice == choice, role = Role.RadioButton, onClick = { onEvent(ClockEvent.PickReason(choice)) }),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -299,8 +301,8 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                     }
                 }
             },
-            confirmButton = { TextButton({ onEvent(ClockEvent.SaveReason) }, Modifier.heightIn(min = 48.dp).testTag("fl_clock_far_save"), enabled = sheet.canSave) { Text(stringResource(R.string.save)) } },
-            dismissButton = { TextButton({ onEvent(ClockEvent.CancelReason) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) } },
+            confirmButton = { TextButton({ onEvent(ClockEvent.SaveReason) }, Modifier.heightIn(min = TargetHeight).testTag("fl_clock_far_save"), enabled = sheet.canSave) { Text(stringResource(R.string.save)) } },
+            dismissButton = { TextButton({ onEvent(ClockEvent.CancelReason) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.cancel)) } },
         )
     }
     state.gpsRequired?.let { permissionMissing ->
@@ -310,10 +312,10 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
             title = { Text(stringResource(R.string.clock_gps_title)) },
             text = { Text(stringResource(if (permissionMissing) R.string.clock_gps_permission else R.string.clock_gps_signal)) },
             confirmButton = {
-                if (permissionMissing) TextButton({ onEvent(ClockEvent.OpenSettings) }, Modifier.heightIn(min = 48.dp).testTag("fl_clock_gps_settings")) { Text(stringResource(R.string.clock_open_settings)) }
-                else TextButton({ onEvent(ClockEvent.DismissGps) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.dismiss)) }
+                if (permissionMissing) TextButton({ onEvent(ClockEvent.OpenSettings) }, Modifier.heightIn(min = TargetHeight).testTag("fl_clock_gps_settings")) { Text(stringResource(R.string.clock_open_settings)) }
+                else TextButton({ onEvent(ClockEvent.DismissGps) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.dismiss)) }
             },
-            dismissButton = if (permissionMissing) { { TextButton({ onEvent(ClockEvent.DismissGps) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) } } } else null,
+            dismissButton = if (permissionMissing) { { TextButton({ onEvent(ClockEvent.DismissGps) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.cancel)) } } } else null,
         )
     }
 }
