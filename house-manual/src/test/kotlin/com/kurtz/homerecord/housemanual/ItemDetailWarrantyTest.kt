@@ -14,6 +14,7 @@ import com.kurtz.homerecord.housemanual.items.ItemDetailEvent
 import com.kurtz.homerecord.housemanual.items.ItemDetailNav
 import com.kurtz.homerecord.housemanual.items.ItemDetailViewModel
 import com.kurtz.homerecord.housemanual.items.RecallUi
+import com.kurtz.homerecord.housemanual.items.UpkeepDelete
 import com.kurtz.homerecord.housemanual.items.LookupNote
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemRepository
@@ -245,6 +246,53 @@ class ItemDetailWarrantyTest {
         val bare = vm(items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Heater")).orEmpty())
         bare.onEvent(ItemDetailEvent.CheckRecalls)
         assertThat(bare.await { it.recalls == RecallUi.NeedsMake }.recalls).isEqualTo(RecallUi.NeedsMake)
+    }
+
+    @AcceptanceCriterion("AC-U6")
+    @Test fun upkeepDeleteAsksFirstCancelKeepsAndConfirmDeletesThroughProcessDeath() = runTest {
+        // AC-C35, AC-C36 (cr:upkeep-delete-confirm): Delete in a form names the record and waits for Delete
+        val id = heater()
+        val saved = SavedStateHandle()
+        val vm = vm(id, saved)
+        vm.onEvent(ItemDetailEvent.OpenConsumable(null))
+        vm.onEvent(ItemDetailEvent.ChangeConsumable(ConsumableDraft(spec = "16x25x1 MERV 8", quantity = "2")))
+        vm.onEvent(ItemDetailEvent.SaveConsumable)
+        val cid = vm.await { it.consumableForm == null && it.consumables.size == 1 }.consumables.single().id
+        vm.onEvent(ItemDetailEvent.OpenConsumable(cid))
+        vm.await { it.consumableForm?.id == cid }
+        vm.onEvent(ItemDetailEvent.AskDeleteConsumable(cid))
+        assertThat(vm.await { it.confirmUpkeepDelete != null }.confirmUpkeepDelete).isEqualTo(UpkeepDelete.Consumable(cid, "16x25x1 MERV 8"))
+        assertThat(vm.state.value.consumables).hasSize(1)
+        vm.onEvent(ItemDetailEvent.CancelUpkeepDelete)
+        val kept = vm.await { it.confirmUpkeepDelete == null }
+        assertThat(kept.consumables).hasSize(1)
+        assertThat(kept.consumableForm?.id).isEqualTo(cid)
+
+        // Process death with the confirm open: the restored page shows the same confirm over the same form.
+        vm.onEvent(ItemDetailEvent.AskDeleteConsumable(cid))
+        vm.await { it.confirmUpkeepDelete != null }
+        val restored = vm(id, SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) }))
+        assertThat(restored.await { it.confirmUpkeepDelete != null }.consumableForm?.id).isEqualTo(cid)
+        restored.onEvent(ItemDetailEvent.ConfirmUpkeepDelete)
+        val gone = restored.await { it.consumables.isEmpty() && it.consumableForm == null }
+        assertThat(gone.confirmUpkeepDelete).isNull()
+
+        restored.onEvent(ItemDetailEvent.OpenService(null))
+        restored.onEvent(ItemDetailEvent.ChangeService(ServiceDraft(date = "2026-02-01", description = "Flushed tank")))
+        restored.onEvent(ItemDetailEvent.SaveService)
+        val sid = restored.await { it.serviceForm == null && it.service.size == 1 }.service.single().id
+        restored.onEvent(ItemDetailEvent.OpenService(sid))
+        restored.await { it.serviceForm?.id == sid }
+        restored.onEvent(ItemDetailEvent.AskDeleteService(sid))
+        assertThat(restored.await { it.confirmUpkeepDelete != null }.confirmUpkeepDelete).isEqualTo(UpkeepDelete.Service(sid, "Flushed tank"))
+        restored.onEvent(ItemDetailEvent.CloseForm) // closing the form drops its confirm
+        assertThat(restored.await { it.serviceForm == null }.confirmUpkeepDelete).isNull()
+        assertThat(restored.state.value.service).hasSize(1)
+        restored.onEvent(ItemDetailEvent.OpenService(sid))
+        restored.onEvent(ItemDetailEvent.AskDeleteService(sid))
+        restored.await { it.confirmUpkeepDelete != null }
+        restored.onEvent(ItemDetailEvent.ConfirmUpkeepDelete)
+        assertThat(restored.await { it.service.isEmpty() }.serviceForm).isNull()
     }
 
     /** cr:vm-nav-lambdas: the VM asks for navigation through state; it never calls a composition's lambda. */

@@ -496,6 +496,17 @@ fun ItemDetailServiceFormPreview() = Frame {
     }
 }
 
+/** Delete in the consumable form asks first (rule 16). */
+@ThemePreviews
+@Composable
+fun ItemDetailConsumableDeletePreview() = Frame {
+    val draft = com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft(id = "c1", spec = "16x25x1 MERV 8", quantity = "2", reorderUrl = "https://example.com/filters")
+    FormScreenScaffold(stringResource(R.string.item_detail_consumable_edit_title), "hm_item_detail_consumable_save", false, {}, {}) {
+        com.kurtz.homerecord.housemanual.items.ConsumableFormContent(draft, false, {})
+    }
+    com.kurtz.homerecord.housemanual.items.UpkeepDeleteDialog(com.kurtz.homerecord.housemanual.items.UpkeepDelete.Consumable("c1", "16x25x1 MERV 8"), {})
+}
+
 private val sampleContacts = listOf(
     com.kurtz.homerecord.housemodel.upkeep.ContactRow(
         ContactEntity(id = "c1", homeId = "h1", name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlanheating.example", notes = "Annual tune-up in September.", createdAt = 1, updatedAt = 1),

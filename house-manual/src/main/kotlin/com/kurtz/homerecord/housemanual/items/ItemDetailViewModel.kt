@@ -71,6 +71,13 @@ class ItemDetailViewModel(
         val canSave: Boolean get() = (consumable ?: service) != null && (dirty || (consumable?.id ?: service?.id) == null)
     }
 
+    /** The record a Delete confirm is open for, kept as kind and id so it survives process death. */
+    private data class PendingDelete(val kind: String, val id: String)
+
+    private val upkeepDelete = MutableStateFlow(
+        saved.get<List<String>>(UPKEEP_DELETE)?.takeIf { it.size == 2 }?.let { PendingDelete(it[0], it[1]) },
+    )
+
     private val upkeepRows = combine(upkeep.observeConsumables(itemId), upkeep.observeService(itemId)) { c, s -> c to s }
 
     private val contactRows = upkeep.observeContacts(homeId).map { rows -> rows.map { it.contact } }
@@ -98,7 +105,9 @@ class ItemDetailViewModel(
         )
     }
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav) { s, n -> s.copy(nav = n) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete) { s, n, p ->
+        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
         when (e) {
@@ -139,7 +148,7 @@ class ItemDetailViewModel(
                 val draft = forms.value.consumable ?: return@launch
                 setForms(if (upkeep.saveConsumable(itemId, draft) == null) forms.value.copy(showErrors = true) else FormsUi())
             }
-            is ItemDetailEvent.DeleteConsumable -> viewModelScope.launch { upkeep.deleteConsumable(e.id); setForms(FormsUi()) }
+            is ItemDetailEvent.AskDeleteConsumable -> setUpkeepDelete(PendingDelete(CONSUMABLE, e.id))
             is ItemDetailEvent.OpenService -> {
                 val row = e.id?.let { id -> state.value.service.firstOrNull { it.id == id } }
                 val draft = row?.let {
@@ -152,8 +161,18 @@ class ItemDetailViewModel(
                 val draft = forms.value.service ?: return@launch
                 setForms(if (upkeep.saveService(itemId, draft) == null) forms.value.copy(showErrors = true) else FormsUi())
             }
-            is ItemDetailEvent.DeleteService -> viewModelScope.launch { upkeep.deleteService(e.id); setForms(FormsUi()) }
-            ItemDetailEvent.CloseForm -> setForms(FormsUi())
+            is ItemDetailEvent.AskDeleteService -> setUpkeepDelete(PendingDelete(SERVICE, e.id))
+            ItemDetailEvent.CancelUpkeepDelete -> setUpkeepDelete(null)
+            ItemDetailEvent.ConfirmUpkeepDelete -> viewModelScope.launch {
+                val p = upkeepDelete.value ?: return@launch
+                if (p.kind == CONSUMABLE) upkeep.deleteConsumable(p.id) else upkeep.deleteService(p.id)
+                setUpkeepDelete(null)
+                setForms(FormsUi())
+            }
+            ItemDetailEvent.CloseForm -> {
+                setUpkeepDelete(null)
+                setForms(FormsUi())
+            }
             is ItemDetailEvent.DocumentPicked -> viewModelScope.launch {
                 val id = documents.add(homeId, DocumentScope.Item(itemId), e.uri)
                 documentUi.update { it.copy(notice = id == null) }
@@ -168,6 +187,17 @@ class ItemDetailViewModel(
             }
             ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument -> Unit // navigation is the route's job
         }
+    }
+
+    /** Names the pending record from its saved row; a record deleted elsewhere shows no confirm. */
+    private fun upkeepDeleteFor(p: PendingDelete, s: ItemDetailUiState): UpkeepDelete? = when (p.kind) {
+        CONSUMABLE -> s.consumables.firstOrNull { it.id == p.id }?.let { UpkeepDelete.Consumable(it.id, it.spec) }
+        else -> s.service.firstOrNull { it.id == p.id }?.let { UpkeepDelete.Service(it.id, it.description) }
+    }
+
+    private fun setUpkeepDelete(p: PendingDelete?) {
+        upkeepDelete.value = p
+        saved[UPKEEP_DELETE] = p?.let { arrayListOf(it.kind, it.id) }
     }
 
     private fun checkRecalls() {
@@ -246,6 +276,9 @@ class ItemDetailViewModel(
         const val FORM_SERVICE = "serviceForm"
         const val FORM_ORIGINAL = "formOriginal"
         const val FORM_ERRORS = "formErrors"
+        const val UPKEEP_DELETE = "upkeepDelete"
+        const val CONSUMABLE = "consumable"
+        const val SERVICE = "service"
 
         fun consumableToList(d: ConsumableDraft) = arrayListOf(d.id.orEmpty(), d.kind.name, d.spec, d.quantity, d.reorderUrl)
 

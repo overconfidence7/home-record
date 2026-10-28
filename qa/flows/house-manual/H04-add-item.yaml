@@ -99,6 +99,27 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_detail_consumable_add"
 - assertVisible:
     id: "hm_item_detail_consumable_add"
+# Rule 16, AC-U6: Delete in the consumable form asks first; Cancel keeps the record and the form, Delete removes it
+- tapOn:
+    id: "hm_item_detail_consumable_edit"
+- tapOn:
+    id: "hm_item_detail_consumable_delete"
+- assertVisible:
+    id: "hm_item_detail_upkeep_delete_confirm"
+- tapOn:
+    id: "hm_item_detail_upkeep_delete_cancel"
+- assertVisible:
+    id: "hm_item_detail_consumable_spec"
+- tapOn:
+    id: "hm_item_detail_consumable_delete"
+- tapOn:
+    id: "hm_item_detail_upkeep_delete_confirm"
+- extendedWaitUntil:
+    notVisible:
+      id: "hm_item_detail_consumable_spec"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_item_detail_consumable_edit"
 - scrollUntilVisible:
     element:
       id: "hm_item_detail_service_add"

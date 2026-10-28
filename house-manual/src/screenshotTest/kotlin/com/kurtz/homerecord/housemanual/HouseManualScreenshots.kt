@@ -253,6 +253,11 @@ fun ItemDetailUpkeepScreenshot() = ItemDetailUpkeepPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemDetailConsumableDeleteScreenshot() = ItemDetailConsumableDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemDetailRecallsScreenshot() = ItemDetailRecallsPreview()
 
 @PreviewTest

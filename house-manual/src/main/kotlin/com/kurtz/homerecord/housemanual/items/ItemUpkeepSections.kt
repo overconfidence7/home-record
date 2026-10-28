@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import com.kurtz.homerecord.housemanual.FormScreenDialog
 import androidx.compose.material3.Card
@@ -158,6 +159,37 @@ fun UpkeepFormSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit
         if (c != null) ConsumableFormContent(c, state.showFormErrors, onEvent)
         if (s != null) ServiceFormContent(s, state.contacts, state.showFormErrors, onEvent)
     }
+    state.confirmUpkeepDelete?.let { UpkeepDeleteDialog(it, onEvent) }
+}
+
+/** "Delete 16x25x1 MERV 8?" over the open form (rule 16); Delete removes the record and closes the form, Cancel keeps both. */
+@Composable
+fun UpkeepDeleteDialog(target: UpkeepDelete, onEvent: (ItemDetailEvent) -> Unit) {
+    AlertDialog(
+        modifier = Modifier.windowTestTags(),
+        onDismissRequest = { onEvent(ItemDetailEvent.CancelUpkeepDelete) },
+        title = { Text(stringResource(R.string.item_detail_upkeep_delete_title, target.label)) },
+        text = {
+            Text(
+                stringResource(
+                    when (target) {
+                        is UpkeepDelete.Consumable -> R.string.item_detail_consumable_delete_body
+                        is UpkeepDelete.Service -> R.string.item_detail_service_delete_body
+                    },
+                ),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onEvent(ItemDetailEvent.ConfirmUpkeepDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_upkeep_delete_confirm")) {
+                Text(stringResource(R.string.item_detail_delete))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onEvent(ItemDetailEvent.CancelUpkeepDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_upkeep_delete_cancel")) {
+                Text(stringResource(R.string.item_detail_cancel))
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -193,7 +225,7 @@ fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: 
             error = if (ConsumableField.URL in errors) stringResource(R.string.item_detail_consumable_url_error) else null,
             modifier = Modifier.testTag("hm_item_detail_consumable_url"),
         )
-        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteConsumable(it)) } }, tag = "consumable")
+        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.AskDeleteConsumable(it)) } }, tag = "consumable")
     }
 }
 
@@ -235,7 +267,7 @@ fun ServiceFormContent(draft: ServiceDraft, contacts: List<ContactEntity>, showE
             error = if (ServiceField.COST in errors) stringResource(R.string.item_detail_service_cost_error) else null,
             modifier = Modifier.testTag("hm_item_detail_service_cost"),
         )
-        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.DeleteService(it)) } }, tag = "service")
+        FormButtons(draft.id, onDelete = { draft.id?.let { onEvent(ItemDetailEvent.AskDeleteService(it)) } }, tag = "service")
     }
 }
 

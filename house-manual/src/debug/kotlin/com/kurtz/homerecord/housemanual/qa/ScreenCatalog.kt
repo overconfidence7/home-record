@@ -67,6 +67,7 @@ object ScreenCatalog {
         QaScreen("item-detail-recalls", nonRoot = true) { ItemDetailRecallsPreview() },
         QaScreen("item-detail-consumable-form", nonRoot = true) { ItemDetailConsumableFormPreview() },
         QaScreen("item-detail-service-form", nonRoot = true) { ItemDetailServiceFormPreview() },
+        QaScreen("item-detail-consumable-delete", nonRoot = true) { ItemDetailConsumableDeletePreview() },
         QaScreen("item-detail-review-badge", nonRoot = true) { ItemDetailReviewBadgePreview() },
         QaScreen("item-detail-review-sheet", nonRoot = false) { ItemDetailReviewSheetPreview() },
         QaScreen("item-detail-delete", nonRoot = true) { ItemDetailDeletePreview() },

@@ -39,9 +39,19 @@ data class ItemDetailUiState(
     val formCanSave: Boolean = false,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */
     val showFormErrors: Boolean = false,
+    /** A consumable or service record waiting on "Delete …?" (rule 16); null when no confirm is showing. */
+    val confirmUpkeepDelete: UpkeepDelete? = null,
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
     val nav: ItemDetailNav? = null,
 )
+
+/** The upkeep record a Delete confirm names: [label] is its size or part number, or what was done. */
+sealed interface UpkeepDelete {
+    val id: String
+    val label: String
+    data class Consumable(override val id: String, override val label: String) : UpkeepDelete
+    data class Service(override val id: String, override val label: String) : UpkeepDelete
+}
 
 /** Navigation the ViewModel asks for after a delete or duplicate; the route owns the back stack. */
 sealed interface ItemDetailNav {
@@ -79,11 +89,16 @@ sealed interface ItemDetailEvent {
     data class OpenConsumable(val id: String?) : ItemDetailEvent
     data class ChangeConsumable(val draft: ConsumableDraft) : ItemDetailEvent
     data object SaveConsumable : ItemDetailEvent
-    data class DeleteConsumable(val id: String) : ItemDetailEvent
+    /** Delete in the consumable form: asks first ([ItemDetailUiState.confirmUpkeepDelete]). */
+    data class AskDeleteConsumable(val id: String) : ItemDetailEvent
     data class OpenService(val id: String?) : ItemDetailEvent
     data class ChangeService(val draft: ServiceDraft) : ItemDetailEvent
     data object SaveService : ItemDetailEvent
-    data class DeleteService(val id: String) : ItemDetailEvent
+    /** Delete in the service form: asks first. */
+    data class AskDeleteService(val id: String) : ItemDetailEvent
+    data object CancelUpkeepDelete : ItemDetailEvent
+    /** Deletes the record [ItemDetailUiState.confirmUpkeepDelete] names and closes its form. */
+    data object ConfirmUpkeepDelete : ItemDetailEvent
     /** Closes whichever upkeep form is open without saving. */
     data object CloseForm : ItemDetailEvent
     data object UploadDocument : ItemDetailEvent
