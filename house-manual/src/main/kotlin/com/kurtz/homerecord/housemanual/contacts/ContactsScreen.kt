@@ -16,16 +16,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.kurtz.homerecord.housemanual.FormScreenDialog
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemodel.upkeep.ContactDraft
@@ -71,10 +71,9 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
             )
             else -> LazyColumn(
                 Modifier.padding(padding).fillMaxWidth(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 88.dp),
             ) {
-                items(state.rows, key = { it.contact.id }) { ContactCard(it, onEvent) }
+                items(state.rows, key = { it.contact.id }) { ContactRowItem(it, onEvent, Modifier.animateItem()) }
             }
         }
     }
@@ -110,43 +109,42 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
     }
 }
 
+/** One contact as a list row (rule 7): tap edits, the trailing buttons call or email. */
 @Composable
-private fun ContactCard(row: ContactRow, onEvent: (ContactsEvent) -> Unit) {
+private fun ContactRowItem(row: ContactRow, onEvent: (ContactsEvent) -> Unit, modifier: Modifier = Modifier) {
     val c = row.contact
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(c.name, style = MaterialTheme.typography.titleMedium)
-                    val sub = listOfNotNull(c.trade, c.company).joinToString(", ")
-                    if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                TextButton(onClick = { onEvent(ContactsEvent.OpenForm(c.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_contacts_edit")) {
-                    Text(stringResource(R.string.item_detail_edit))
-                }
-            }
-            if (row.itemNames.isNotEmpty()) {
-                Text(
-                    stringResource(R.string.contacts_serviced, row.itemNames.joinToString(", "), pluralStringResource(R.plurals.contacts_visits, row.serviceCount, row.serviceCount)),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                c.phone?.let { phone ->
-                    OutlinedButton(onClick = { onEvent(ContactsEvent.Call(phone)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_contacts_call")) {
-                        Icon(Icons.Rounded.Phone, contentDescription = null)
-                        Text(phone, Modifier.padding(start = 8.dp))
+    val sub = listOfNotNull(c.trade, c.company).joinToString(", ").ifEmpty { null }
+    val serviced = if (row.itemNames.isEmpty()) null else stringResource(
+        R.string.contacts_serviced,
+        row.itemNames.joinToString(", "),
+        pluralStringResource(R.plurals.contacts_visits, row.serviceCount, row.serviceCount),
+    )
+    val supporting = listOfNotNull(sub, serviced, c.notes?.takeIf { it.isNotBlank() }).take(2).joinToString("\n").ifEmpty { null }
+    RecordListItem(
+        headline = c.name,
+        supporting = supporting,
+        // the two lines wrap at 200% font; the row grows instead of cutting "Serviced …" (rule 32)
+        supportingMaxLines = 6,
+        leading = { Icon(Icons.Rounded.Person, contentDescription = null) },
+        trailing = if (c.phone == null && c.email == null) null else {
+            {
+                Row {
+                    c.phone?.let { phone ->
+                        IconButton(onClick = { onEvent(ContactsEvent.Call(phone)) }, modifier = Modifier.testTag("hm_contacts_call")) {
+                            Icon(Icons.Rounded.Phone, contentDescription = stringResource(R.string.contacts_call, c.name, phone))
+                        }
                     }
-                }
-                c.email?.let { address ->
-                    OutlinedButton(onClick = { onEvent(ContactsEvent.Email(address)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_contacts_email")) {
-                        Icon(Icons.Rounded.Email, contentDescription = stringResource(R.string.contacts_email))
+                    c.email?.let { address ->
+                        IconButton(onClick = { onEvent(ContactsEvent.Email(address)) }, modifier = Modifier.testTag("hm_contacts_email")) {
+                            Icon(Icons.Rounded.Email, contentDescription = stringResource(R.string.contacts_email_to, c.name))
+                        }
                     }
                 }
             }
-            if (!c.notes.isNullOrBlank()) Text(c.notes.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
+        },
+        onClick = { onEvent(ContactsEvent.OpenForm(c.id)) },
+        modifier = modifier.testTag("hm_contacts_row"),
+    )
 }
 
 /** The contact form as sheet content; previewed directly because sheets don't render in screenshot tests. */

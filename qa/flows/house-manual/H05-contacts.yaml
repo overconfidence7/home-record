@@ -40,3 +40,12 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_discard"
 - assertVisible: "Maria Soto"
 - assertNotVisible: "Dale Harlan"
+# AC-U3 (cr:card-lists): a contact is a list row; tapping it opens Edit contact
+- tapOn:
+    id: "hm_contacts_row"
+- extendedWaitUntil:
+    visible: "Edit contact"
+    timeout: 5000
+- tapOn:
+    id: "hm_close"
+- assertVisible: "Maria Soto"

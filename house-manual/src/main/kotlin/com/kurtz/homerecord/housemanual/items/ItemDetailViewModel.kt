@@ -165,9 +165,10 @@ class ItemDetailViewModel(
             ItemDetailEvent.CancelUpkeepDelete -> setUpkeepDelete(null)
             ItemDetailEvent.ConfirmUpkeepDelete -> viewModelScope.launch {
                 val p = upkeepDelete.value ?: return@launch
-                if (p.kind == CONSUMABLE) upkeep.deleteConsumable(p.id) else upkeep.deleteService(p.id)
+                // close the confirm and form first, so no state shows the form over a record the list already dropped
                 setUpkeepDelete(null)
                 setForms(FormsUi())
+                if (p.kind == CONSUMABLE) upkeep.deleteConsumable(p.id) else upkeep.deleteService(p.id)
             }
             ItemDetailEvent.CloseForm -> {
                 setUpkeepDelete(null)

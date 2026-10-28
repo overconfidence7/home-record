@@ -23,6 +23,7 @@ fun RecordListItem(
     headline: String,
     modifier: Modifier = Modifier,
     supporting: String? = null,
+    supportingMaxLines: Int = 2,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
     onClick: (() -> Unit)? = null,
@@ -34,7 +35,7 @@ fun RecordListItem(
     } else Modifier
     ListItem(
         headlineContent = { Text(headline, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge) },
-        supportingContent = supporting?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) } },
+        supportingContent = supporting?.let { { Text(it, maxLines = supportingMaxLines, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) } },
         leadingContent = leading,
         trailingContent = trailing,
         colors = colors,

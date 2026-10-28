@@ -62,6 +62,8 @@ The builder moved from Sonnet 5.5 to Opus 5.5 on 2026-10-26. Everything on `buil
     - [x] CR2r1: House Manual form dialog (contacts, consumable, service) asks before discarding when dirty, Save on for a new record or a changed edit, upkeep drafts and their originals in SavedStateHandle (cr:form-dialog)
     - [x] CR2r2: consumable and service record Delete confirm with an AlertDialog (cr:upkeep-delete-confirm)
     - [ ] CR2r3: Contacts, Documents and item page sections as RecordListItem rows under section headers instead of Cards (cr:card-lists)
+      - [x] CR2r3a: Contacts and Documents lists as RecordListItem rows (row opens, trailing call/email or rename buttons), folder headers per rule 9
+      - [ ] CR2r3b: item page Details, Warranty, Recalls, Consumables, Service history and Documents sections as section headers with RecordListItem rows instead of Cards
   - [x] CR2s: Field Log UI conformance: 64 dp clock buttons, JobEdit client phone/email and room delete confirm, Today pull to refresh, tab replay, Photos grid and FAB (cr:fl-clock-64dp, cr:fl-jobedit-client-contact, cr:fl-jobedit-room-delete, cr:fl-today-pull, cr:fl-tab-replay, cr:fl-photos-grid)
     - [x] CR2s1: tab replay: a widget tab request is handled once (cr:fl-tab-replay)
     - [x] CR2s2: Clock in and Clock out 64 dp, clock dialog actions and rows 56 dp (cr:fl-clock-64dp)

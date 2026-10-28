@@ -196,6 +196,7 @@
     <string name="documents_unfiled">Not in a folder</string>
     <string name="documents_unsupported">That file could not be added. Only PDFs and photos work.</string>
     <string name="documents_dismiss">Dismiss</string>
+    <string name="documents_edit">Rename or move %1$s</string>
     <string name="documents_form_title">Edit document</string>
     <string name="documents_name">Name</string>
     <string name="documents_folder">Folder</string>
@@ -212,7 +213,8 @@
         <item quantity="one">%d visit</item>
         <item quantity="other">%d visits</item>
     </plurals>
-    <string name="contacts_email">Email</string>
+    <string name="contacts_call">Call %1$s at %2$s</string>
+    <string name="contacts_email_to">Email %1$s</string>
     <string name="contacts_form_new">New contact</string>
     <string name="contacts_form_edit">Edit contact</string>
     <string name="contacts_name">Name</string>

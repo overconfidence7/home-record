@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material3.AlertDialog
@@ -28,6 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -42,6 +44,7 @@ import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
 
@@ -92,18 +95,18 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
                 )
                 else -> LazyColumn(
                     Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 88.dp),
                 ) {
                     state.folders.forEach { folder ->
                         item(key = "folder:" + folder.name) {
                             Text(
                                 folder.name.ifEmpty { stringResource(R.string.documents_unfiled) },
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(top = 8.dp),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.animateItem().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                             )
                         }
-                        items(folder.documents, key = { it.id }) { DocumentRow(it, onEvent) }
+                        items(folder.documents, key = { it.id }) { DocumentRow(it, onEvent, Modifier.animateItem()) }
                     }
                 }
             }
@@ -134,20 +137,21 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
     }
 }
 
+/** One document as a list row (rule 7): tap opens the viewer, the trailing button renames or moves it. */
 @Composable
-private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit) {
-    Card(onClick = { onEvent(DocumentsEvent.Open(doc.id)) }, modifier = Modifier.fillMaxWidth().testTag("hm_documents_row")) {
-        Row(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null)
-            Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                Text(doc.name, style = MaterialTheme.typography.titleSmall)
-                Text(formatSize(doc.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit, modifier: Modifier = Modifier) {
+    RecordListItem(
+        headline = doc.name,
+        supporting = formatSize(doc.size),
+        leading = { Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null) },
+        trailing = {
+            IconButton(onClick = { onEvent(DocumentsEvent.OpenForm(doc.id)) }, modifier = Modifier.testTag("hm_documents_edit")) {
+                Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.documents_edit, doc.name))
             }
-            TextButton(onClick = { onEvent(DocumentsEvent.OpenForm(doc.id)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_documents_edit")) {
-                Text(stringResource(R.string.item_detail_edit))
-            }
-        }
-    }
+        },
+        onClick = { onEvent(DocumentsEvent.Open(doc.id)) },
+        modifier = modifier.testTag("hm_documents_row"),
+    )
 }
 
 private fun formatSize(bytes: Long): String = when {
