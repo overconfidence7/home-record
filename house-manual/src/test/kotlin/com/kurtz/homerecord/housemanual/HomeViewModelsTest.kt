@@ -13,7 +13,12 @@ import com.kurtz.homerecord.housemanual.onboarding.OnboardingViewModel
 import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.HouseType
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -33,6 +38,8 @@ import org.robolectric.annotation.Config
 class HomeViewModelsTest {
     private lateinit var db: HomeRecordDatabase
     private lateinit var repo: HomeRepository
+    // ViewModels collect Room flows on Main; they are cancelled before the db closes so none queries a closed pool in a later test.
+    private val vms = mutableListOf<ViewModel>()
 
     @Before fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -42,19 +49,20 @@ class HomeViewModelsTest {
     }
 
     @After fun tearDown() {
+        runBlocking { vms.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
     }
 
     @Test fun drawPlanWithoutNameOrTypeShowsErrorsAndCreatesNothing() = runTest {
-        val vm = OnboardingViewModel(repo)
+        val vm = OnboardingViewModel(repo).also { vms += it }
         vm.onEvent(OnboardingEvent.DrawPlan)
         assertThat(vm.state.value.showErrors).isTrue()
         assertThat(repo.observeHome().first()).isNull()
     }
 
     @Test fun drawPlanCreatesHomeWithTemplateFloors() = runTest {
-        val vm = OnboardingViewModel(repo)
+        val vm = OnboardingViewModel(repo).also { vms += it }
         vm.onEvent(OnboardingEvent.NameChanged("Maple St"))
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.CAPE_COD))
         vm.onEvent(OnboardingEvent.FoundationChanged(Foundation.SLAB))
@@ -65,7 +73,7 @@ class HomeViewModelsTest {
     }
 
     @Test fun skipKeepsTheTypesFloors() = runTest {
-        val vm = OnboardingViewModel(repo)
+        val vm = OnboardingViewModel(repo).also { vms += it }
         vm.onEvent(OnboardingEvent.NameChanged("Cabin"))
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.TWO_STORY))
         vm.onEvent(OnboardingEvent.Skip)
@@ -75,12 +83,12 @@ class HomeViewModelsTest {
 
     @Test fun answersSurviveProcessDeathThroughSavedState() {
         val handle = androidx.lifecycle.SavedStateHandle()
-        OnboardingViewModel(repo, handle).apply {
+        OnboardingViewModel(repo, handle).also { vms += it }.apply {
             onEvent(OnboardingEvent.NameChanged("Maple St"))
             onEvent(OnboardingEvent.TypeChanged(HouseType.COLONIAL))
             onEvent(OnboardingEvent.GarageChanged(true))
         }
-        val restored = OnboardingViewModel(repo, handle).state.value
+        val restored = OnboardingViewModel(repo, handle).also { vms += it }.state.value
         assertThat(restored.name).isEqualTo("Maple St")
         assertThat(restored.type).isEqualTo(HouseType.COLONIAL)
         assertThat(restored.attachedGarage).isTrue()
@@ -91,7 +99,7 @@ class HomeViewModelsTest {
 
     @Test fun floorsViewModelAddsMovesEditsAndDeletes() = runTest {
         val id = repo.createHome(com.kurtz.homerecord.housemodel.NewHome("Maple St", null, HouseType.COLONIAL, Foundation.BASEMENT, true))
-        val vm = FloorsViewModel(repo, id)
+        val vm = FloorsViewModel(repo, id).also { vms += it }
         vm.awaitFloors("Basement", "Main", "Upper")
 
         vm.onEvent(FloorsEvent.AddClicked)
