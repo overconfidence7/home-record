@@ -1829,3 +1829,17 @@ Auto entry review (2 new, 7 still open): the two instrumented Majors are real ap
 Coverage note: the auto entry reports 117/117 claimed ACs covered across 45 ticked tasks (0 gaps); subtask fixes like CR2s4's room-removal prompt are covered by the crawler, which is the test now failing.
 
 Judged: 67 screenshots, 19 walkthrough steps. New issues: 2. Product gaps: 0.
+
+## QA auto 2026-10-28 (commit da39b7e)
+
+Automated suite run at 2026-10-28 23:00 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+No new automated findings.
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F05 Pass, field-log F06 Pass, field-log F07 Pass, field-log F08 Pass, field-log F09 Pass, field-log F09b Pass, house-manual H01 Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H15 Pass, house-manual H18 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 71 device stages, 784 unit tests, 108 backend tests, coverage 117/117 ACs. Passed: 61. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
