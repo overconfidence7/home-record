@@ -28,7 +28,7 @@ class PhotoDetailDeps(
     val gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>,
 )
 
-/** FL-Photo: caption, room and phase tags, the Before mark and delete for one job photo (AC-F25). */
+/** FL-Photo: caption, room and phase tags, the Before mark (its own tag, cr:fl-before-phase) and delete for one job photo (AC-F25). */
 class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
     private val _state = MutableStateFlow(PhotoDetailUiState())
     val state: StateFlow<PhotoDetailUiState> = _state.asStateFlow()
@@ -58,7 +58,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             PhotoDetailUiState(
                 loading = false, imagePath = p.path, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
                 phases = phases, phase = p.stage, takenAt = p.takenAt, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
-                isBefore = p.stage == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId) ?: false,
+                isBefore = p.pairRole == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId) ?: false,
             )
         }
     }
@@ -72,12 +72,13 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
                 saveTags()
             }
             is PhotoDetailEvent.Phase -> {
-                _state.update { it.copy(phase = event.phase, isBefore = event.phase == PhotoEdits.BEFORE) }
+                _state.update { it.copy(phase = event.phase) }
                 saveTags()
             }
-            PhotoDetailEvent.MarkBefore -> {
-                _state.update { it.copy(phase = PhotoEdits.BEFORE, isBefore = true) }
-                viewModelScope.launch { writes.withLock { d.edits.markBefore(d.photoId) } }
+            PhotoDetailEvent.ToggleBefore -> {
+                val before = !_state.value.isBefore
+                _state.update { it.copy(isBefore = before) }
+                viewModelScope.launch { writes.withLock { d.edits.setBefore(d.photoId, before) } }
             }
             PhotoDetailEvent.AskDelete -> _state.update { it.copy(confirmDelete = it.canDelete) }
             PhotoDetailEvent.CancelDelete -> _state.update { it.copy(confirmDelete = false) }

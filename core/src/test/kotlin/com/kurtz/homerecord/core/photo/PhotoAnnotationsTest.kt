@@ -51,11 +51,13 @@ class PhotoAnnotationsTest {
     }
 
     @Test fun annotatedCopyKeepsTagsAndLeavesOriginal() {
-        val original = photo("a", 100, before = "b").copy(roomId = "r1", stage = "Framing", caption = "Stud bay")
+        val original = photo("a", 100, before = "b").copy(roomId = "r1", stage = "Framing", caption = "Stud bay", pairRole = PhotoEdits.BEFORE)
         val copy = PhotoGallery.copyWithMarks(original, "a2", "/m/a2.jpg", listOf(Annotation.Circle(NormPoint(0.5f, 0.5f), 0.1f)), 200)
         assertThat(copy.id).isEqualTo("a2")
         assertThat(copy.roomId).isEqualTo("r1")
         assertThat(copy.caption).isEqualTo("Stud bay")
+        assertThat(copy.stage).isEqualTo("Framing")
+        assertThat(copy.pairRole).isNull() // the copy is not a second Before to pair with
         assertThat(AnnotationCodec.decode(copy.annotationsJson)).hasSize(1)
         assertThat(original.annotationsJson).isEqualTo("[]")
     }

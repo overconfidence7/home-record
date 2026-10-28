@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,16 +22,18 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -112,9 +116,22 @@ fun PhotoDetailScreen(
                     }
                 }
                 if (state.annotated) Text(stringResource(R.string.photos_marked), style = MaterialTheme.typography.labelLarge)
-                OutlinedButton(
-                    { onEvent(PhotoDetailEvent.MarkBefore) }, Modifier.heightIn(min = 48.dp).testTag("fl_photo_mark_before"), enabled = !state.isBefore,
-                ) { Text(stringResource(if (state.isBefore) R.string.photo_is_before else R.string.photo_mark_before)) }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                        .toggleable(state.isBefore, role = Role.Switch) { onEvent(PhotoDetailEvent.ToggleBefore) }
+                        .testTag("fl_photo_mark_before"),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.photo_mark_before), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            stringResource(R.string.photo_before_hint), style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(checked = state.isBefore, onCheckedChange = null)
+                }
             }
         }
     }

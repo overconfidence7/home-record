@@ -33,7 +33,8 @@ data class CaptureUiState(
     val recording: Boolean = false,
     val recordedSeconds: Int = 0,
     val ghost: GhostShot? = null,
-    val ghostOn: Boolean = true,
+    /** Off until the person turns it on, so a shot is only paired as an After on purpose (cr:fl-ghost-autopair). */
+    val ghostOn: Boolean = false,
 )
 
 sealed interface CaptureEvent {

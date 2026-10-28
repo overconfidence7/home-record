@@ -91,7 +91,11 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
 
     private fun refreshGhost() {
         val pick = GhostPicker.pick(jobPhotos, _state.value.roomId)
-        _state.update { it.copy(ghost = pick?.let { p -> GhostShot(p.id, p.path) }) }
+        _state.update {
+            val ghost = pick?.let { p -> GhostShot(p.id, p.path) }
+            // A different Before (or none) starts with the overlay off again: the person chooses each pairing.
+            it.copy(ghost = ghost, ghostOn = it.ghostOn && ghost?.photoId == it.ghost?.photoId)
+        }
     }
 
     fun onEvent(event: CaptureEvent) {
@@ -195,7 +199,8 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
     private fun save(paths: List<String>, pairWithGhost: Boolean = false) {
         val beforeOf = _state.value.takeIf { pairWithGhost && it.ghostOn }?.ghost?.photoId
         val tags = _state.value.let { CaptureTags(d.jobId, it.roomId, it.phase) }
-        _state.update { it.copy(saving = true) }
+        // One After per Before: the overlay goes off with the shot that pairs it, so a quick second shot is a plain photo.
+        _state.update { it.copy(saving = true, ghostOn = it.ghostOn && beforeOf == null) }
         // The rows go in first with no fix and the fix is added after, so Back right after the shutter keeps the photo.
         d.appScope.launch {
             val ids = paths.mapNotNull { path -> d.photos.save(path, tags, fix = null, beforeOf = beforeOf) }

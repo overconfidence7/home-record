@@ -19,8 +19,11 @@ class PhotoEdits(
     suspend fun setTags(id: String, roomId: String?, phase: String?): Boolean =
         update(id) { it.copy(roomId = roomId, stage = phase?.trim()?.takeIf { p -> p.isNotEmpty() }) }
 
-    /** Marks [id] as a "Before" shot: it stays a plain photo until an After links to it with [JobPhotos.save]'s `beforeOf`. */
-    suspend fun markBefore(id: String): Boolean = update(id) { it.copy(stage = BEFORE) }
+    /**
+     * Marks [id] as a "Before" shot, or takes the mark off, without touching its phase (cr:fl-before-phase). A Before
+     * stays a plain photo until an After links to it with [JobPhotos.save]'s `beforeOf`; an existing pair is kept.
+     */
+    suspend fun setBefore(id: String, before: Boolean): Boolean = update(id) { it.copy(pairRole = BEFORE.takeIf { before }) }
 
     suspend fun delete(id: String): Boolean {
         if (db.photoDao().get(id) == null) return false

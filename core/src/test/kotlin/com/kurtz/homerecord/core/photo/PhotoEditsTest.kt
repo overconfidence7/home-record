@@ -41,11 +41,25 @@ class PhotoEditsTest {
         assertThat(changes).containsExactly("photo" to "p1", "photo" to "p1")
     }
 
-    @Test fun tagsAndBeforeMark() = runBlocking<Unit> {
+    // AC-F25, cr:fl-before-phase: room, phase and the Before mark are separate tags.
+    @Test fun beforeMarkKeepsThePhaseAndCanBeTakenOff() = runBlocking<Unit> {
         edits.setTags("p1", "r1", "Rough-in")
         assertThat(db.photoDao().get("p1")!!.roomId).isEqualTo("r1")
-        edits.markBefore("p1")
-        assertThat(db.photoDao().get("p1")!!.stage).isEqualTo(PhotoEdits.BEFORE)
+        edits.setBefore("p1", true)
+        db.photoDao().get("p1")!!.let {
+            assertThat(it.pairRole).isEqualTo(PhotoEdits.BEFORE)
+            assertThat(it.stage).isEqualTo("Rough-in")
+        }
+        edits.setTags("p1", "r1", "Finish")
+        db.photoDao().get("p1")!!.let {
+            assertThat(it.pairRole).isEqualTo(PhotoEdits.BEFORE)
+            assertThat(it.stage).isEqualTo("Finish")
+        }
+        edits.setBefore("p1", false)
+        db.photoDao().get("p1")!!.let {
+            assertThat(it.pairRole).isNull()
+            assertThat(it.stage).isEqualTo("Finish")
+        }
     }
 
     @Test fun deleteIsSoftAndQueued() = runBlocking<Unit> {

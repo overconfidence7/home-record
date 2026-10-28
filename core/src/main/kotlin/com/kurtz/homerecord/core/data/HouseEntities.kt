@@ -255,6 +255,8 @@ data class PhotoEntity(
     val caption: String? = null,
     val tagsJson: String = "[]",
     val beforeOfPhotoId: String? = null,
+    /** [PhotoEdits.BEFORE] when marked as a Before shot; separate from the phase in [stage] (cr:fl-before-phase). */
+    val pairRole: String? = null,
     val annotationsJson: String = "[]",
     val createdAt: Long,
     val updatedAt: Long,

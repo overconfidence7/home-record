@@ -78,6 +78,6 @@ object PhotoGallery {
     fun copyWithMarks(original: PhotoEntity, newId: String, newPath: String, marks: List<Annotation>, now: Long): PhotoEntity =
         original.copy(
             id = newId, path = newPath, thumbPath = null, annotationsJson = AnnotationCodec.encode(marks),
-            beforeOfPhotoId = null, createdAt = now, updatedAt = now,
+            beforeOfPhotoId = null, pairRole = null, createdAt = now, updatedAt = now,
         )
 }

@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.DeleteTable
 import androidx.room.RoomDatabase
 import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 
 @Database(
     entities = [
@@ -48,12 +50,14 @@ import androidx.room.migration.AutoMigrationSpec
         SyncBaseEntity::class,
         MediaUploadEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
         // v3 (CR2b2): r2Key on photo and note.
         AutoMigration(from = 2, to = 3),
+        // v4 (CR2o1): pairRole on photo, so Before no longer sits in the phase column.
+        AutoMigration(from = 3, to = 4, spec = HomeRecordDatabase.V3ToV4::class),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
@@ -103,6 +107,13 @@ abstract class HomeRecordDatabase : RoomDatabase() {
      */
     @DeleteTable(tableName = "sync_state")
     class V1ToV2 : AutoMigrationSpec
+
+    /** v4 (cr:fl-before-phase): a photo whose phase was "Before" becomes a Before shot with no phase. */
+    class V3ToV4 : AutoMigrationSpec {
+        override fun onPostMigrate(connection: SQLiteConnection) {
+            connection.execSQL("UPDATE photo SET pairRole = 'Before', stage = NULL WHERE stage = 'Before'")
+        }
+    }
 
     companion object {
         const val NAME = "homerecord.db"

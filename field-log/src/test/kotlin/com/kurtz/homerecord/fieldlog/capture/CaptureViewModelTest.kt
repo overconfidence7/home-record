@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.photo.PhotoEdits
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
@@ -125,24 +126,51 @@ class CaptureViewModelTest {
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Captured("/media/before.jpg"))
         val before = photosAfter(1).single()
-        db.photoDao().upsert(before.copy(stage = "Before"))
-        val ghost = withTimeout(10_000) { vm.state.first { it.ghost != null } }.ghost
-        assertThat(ghost?.photoId).isEqualTo(before.id)
+        db.photoDao().upsert(before.copy(pairRole = PhotoEdits.BEFORE))
+        val ghosted = withTimeout(10_000) { vm.state.first { it.ghost != null } }
+        assertThat(ghosted.ghost?.photoId).isEqualTo(before.id)
+        assertThat(ghosted.ghostOn).isFalse() // cr:fl-ghost-autopair: pairing is opt-in
+        vm.onEvent(CaptureEvent.ToggleGhost)
         vm.onEvent(CaptureEvent.Captured("/media/after.jpg"))
         val after = photosAfter(2).first { it.path == "/media/after.jpg" }
         assertThat(after.beforeOfPhotoId).isEqualTo(before.id)
         assertThat(withTimeout(10_000) { vm.state.first { it.ghost == null } }.ghost).isNull()
     }
 
-    // AC-F25
+    // AC-F25, cr:fl-ghost-autopair: with a Before on the job, a shot is plain unless the overlay was turned on.
     @Test fun ghostOffTakesAPlainShot() = runBlocking<Unit> {
         val vm = vm().also { it.loaded() }
         vm.onEvent(CaptureEvent.Captured("/media/before.jpg"))
-        db.photoDao().upsert(photosAfter(1).single().copy(stage = "Before"))
+        db.photoDao().upsert(photosAfter(1).single().copy(pairRole = PhotoEdits.BEFORE))
         withTimeout(10_000) { vm.state.first { it.ghost != null } }
-        vm.onEvent(CaptureEvent.ToggleGhost)
         vm.onEvent(CaptureEvent.Captured("/media/plain.jpg"))
         assertThat(photosAfter(2).first { it.path == "/media/plain.jpg" }.beforeOfPhotoId).isNull()
+        vm.onEvent(CaptureEvent.ToggleGhost)
+        vm.onEvent(CaptureEvent.ToggleGhost)
+        vm.onEvent(CaptureEvent.Captured("/media/plain2.jpg"))
+        assertThat(photosAfter(3).first { it.path == "/media/plain2.jpg" }.beforeOfPhotoId).isNull()
+    }
+
+    // AC-F25, cr:fl-ghost-autopair: a Before from another room is not offered, and a second quick shot is not paired.
+    @Test fun ghostOnlyFromTheSelectedRoomAndOneAfterPerBefore() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.SelectRoom("r1"))
+        vm.onEvent(CaptureEvent.Captured("/media/kitchen-before.jpg"))
+        db.photoDao().upsert(photosAfter(1).single().copy(pairRole = PhotoEdits.BEFORE))
+        withTimeout(10_000) { vm.state.first { it.ghost != null } }
+        vm.onEvent(CaptureEvent.SelectRoom("r2"))
+        assertThat(vm.state.value.ghost).isNull()
+        vm.onEvent(CaptureEvent.Captured("/media/garage.jpg"))
+        assertThat(photosAfter(2).first { it.path == "/media/garage.jpg" }.beforeOfPhotoId).isNull()
+        vm.onEvent(CaptureEvent.SelectRoom("r1"))
+        assertThat(vm.state.value.ghost).isNotNull()
+        vm.onEvent(CaptureEvent.ToggleGhost)
+        vm.onEvent(CaptureEvent.Captured("/media/kitchen-after.jpg"))
+        assertThat(vm.state.value.ghostOn).isFalse()
+        vm.onEvent(CaptureEvent.Captured("/media/kitchen-more.jpg"))
+        val rows = photosAfter(4)
+        assertThat(rows.first { it.path == "/media/kitchen-after.jpg" }.beforeOfPhotoId).isNotNull()
+        assertThat(rows.first { it.path == "/media/kitchen-more.jpg" }.beforeOfPhotoId).isNull()
     }
 
     // AC-F24

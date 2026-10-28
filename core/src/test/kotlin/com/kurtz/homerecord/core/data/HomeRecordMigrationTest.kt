@@ -56,6 +56,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // cr:fl-before-phase: a photo whose phase was "Before" keeps being a Before shot, now with no phase.
+    @Test fun v3ToV4MovesBeforeOutOfThePhase() {
+        helper.createDatabase(3).use { db ->
+            db.execSQL("INSERT INTO photo (id, homeId, stage, path, takenAt, tagsJson, annotationsJson, createdAt, updatedAt, source) VALUES ('p1', 'j1', 'Before', '/m/p1.jpg', 1, '[]', '[]', 1, 1, 'FIELD_LOG')")
+            db.execSQL("INSERT INTO photo (id, homeId, stage, path, takenAt, tagsJson, annotationsJson, createdAt, updatedAt, source) VALUES ('p2', 'j1', 'Rough-in', '/m/p2.jpg', 1, '[]', '[]', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(4).use { db ->
+            assertThat(db.texts("SELECT id FROM photo WHERE pairRole = 'Before' AND stage IS NULL")).containsExactly("p1")
+            assertThat(db.texts("SELECT stage FROM photo WHERE id = 'p2' AND pairRole IS NULL")).containsExactly("Rough-in")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -94,6 +106,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 3
+        const val LATEST = 4
     }
 }

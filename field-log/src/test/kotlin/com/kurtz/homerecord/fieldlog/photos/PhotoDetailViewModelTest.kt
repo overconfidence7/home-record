@@ -91,12 +91,21 @@ class PhotoDetailViewModelTest {
         assertThat(changes).contains("photo:p1")
     }
 
-    @Test fun `mark before sets the Before phase`() = runBlocking {
+    // AC-F25, cr:fl-before-phase: the Before mark is its own tag; the phase survives it and it can be undone.
+    @Test fun `before toggles on and off and keeps the phase`() = runBlocking {
         val v = vm()
         loaded(v)
-        v.onEvent(PhotoDetailEvent.MarkBefore)
+        v.onEvent(PhotoDetailEvent.Phase("Finish"))
+        v.onEvent(PhotoDetailEvent.ToggleBefore)
         assertThat(v.state.value.isBefore).isTrue()
-        assertThat(row { it?.stage == PhotoEdits.BEFORE }).isNotNull()
+        assertThat(v.state.value.phase).isEqualTo("Finish")
+        assertThat(row { it?.pairRole == PhotoEdits.BEFORE && it.stage == "Finish" }).isNotNull()
+        v.onEvent(PhotoDetailEvent.Phase("Rough-in"))
+        assertThat(v.state.value.isBefore).isTrue()
+        assertThat(row { it?.pairRole == PhotoEdits.BEFORE && it.stage == "Rough-in" }).isNotNull()
+        v.onEvent(PhotoDetailEvent.ToggleBefore)
+        assertThat(v.state.value.isBefore).isFalse()
+        assertThat(row { it != null && it.pairRole == null && it.stage == "Rough-in" }).isNotNull()
     }
 
     @Test fun `delete asks first then removes the photo`() = runBlocking {

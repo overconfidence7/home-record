@@ -26,7 +26,8 @@ sealed interface PhotoDetailEvent {
     data object SaveCaption : PhotoDetailEvent
     data class Room(val id: String?) : PhotoDetailEvent
     data class Phase(val phase: String?) : PhotoDetailEvent
-    data object MarkBefore : PhotoDetailEvent
+    /** Marks or unmarks the photo as a Before shot; the phase stays as it is (cr:fl-before-phase). */
+    data object ToggleBefore : PhotoDetailEvent
     data object AskDelete : PhotoDetailEvent
     data object CancelDelete : PhotoDetailEvent
     data object ConfirmDelete : PhotoDetailEvent
