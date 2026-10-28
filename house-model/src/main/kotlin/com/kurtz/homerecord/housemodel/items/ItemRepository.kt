@@ -227,9 +227,35 @@ class ItemRepository(
         }
     }
 
+    /**
+     * Soft deletes the item with its warranty, consumables, service history, reminders, photos and panel, in one
+     * transaction (cr:item-delete-cascade). Documents and overlays stay in the home with the link cleared, breaker
+     * links go, and items that named it as their shutoff lose that link.
+     */
     suspend fun delete(id: String) {
-        db.itemDao().softDelete(id, now())
-        onChange("item", id)
+        val at = now()
+        db.withTransaction {
+            db.warrantyDao().listFor(id).forEach { db.warrantyDao().softDelete(it.id, at); onChange("warranty", it.id) }
+            db.consumableDao().listFor(id).forEach { db.consumableDao().softDelete(it.id, at); onChange("consumable", it.id) }
+            db.serviceRecordDao().listFor(id).forEach { db.serviceRecordDao().softDelete(it.id, at); onChange("service_record", it.id) }
+            db.maintenanceTaskDao().listForItem(id).forEach { db.maintenanceTaskDao().softDelete(it.id, at); onChange("maintenance_task", it.id) }
+            db.photoDao().listForItem(id).forEach { db.photoDao().softDelete(it.id, at); onChange("photo", it.id) }
+            db.breakerLinkDao().listForItem(id).forEach { db.breakerLinkDao().softDelete(it.id, at); onChange("breaker_link", it.id) }
+            db.panelDao().listFor(id).forEach { panel ->
+                db.breakerDao().listFor(panel.id).forEach { b ->
+                    db.breakerLinkDao().listFor(b.id).forEach { db.breakerLinkDao().softDelete(it.id, at); onChange("breaker_link", it.id) }
+                    db.breakerDao().softDelete(b.id, at)
+                    onChange("breaker", b.id)
+                }
+                db.panelDao().softDelete(panel.id, at)
+                onChange("panel", panel.id)
+            }
+            db.documentDao().listForItem(id).forEach { db.documentDao().upsert(it.copy(itemId = null, updatedAt = at)); onChange("document", it.id) }
+            db.overlayDao().listForItem(id).forEach { db.overlayDao().upsert(it.copy(itemId = null, updatedAt = at)); onChange("overlay", it.id) }
+            db.itemDao().listByShutoff(id).forEach { db.itemDao().upsert(it.copy(shutoffItemId = null, updatedAt = at)); onChange("item", it.id) }
+            db.itemDao().softDelete(id, at)
+            onChange("item", id)
+        }
     }
 
     private fun String.clean() = trim().takeIf { it.isNotEmpty() }

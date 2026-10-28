@@ -118,4 +118,37 @@ class ItemRepositoryTest {
         assertThat(db.warrantyDao().get("w1")!!.registered).isTrue()
         assertThat(changes).contains("warranty/w1")
     }
+
+    // cr:item-delete-cascade: the delete dialog says "Its photos, reminders and warranty go with it".
+    @AcceptanceCriterion("AC-H2")
+    @Test fun deleteTakesWarrantyRemindersConsumablesAndPhotosWithIt() = runTest {
+        val id = repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM))))!!
+        val other = repo.save("h1", furnace().copy(name = "Water heater"))!!
+        db.itemDao().upsert(repo.get(other)!!.copy(shutoffItemId = id))
+        db.warrantyDao().upsert(com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, endsOn = "2026-11-01", createdAt = 1, updatedAt = 1))
+        db.serviceRecordDao().upsert(com.kurtz.homerecord.core.data.ServiceRecordEntity(id = "s1", itemId = id, date = "2026-01-04", description = "Tune-up", createdAt = 1, updatedAt = 1))
+        db.documentDao().upsert(com.kurtz.homerecord.core.data.DocumentEntity(id = "d1", homeId = "h1", itemId = id, name = "Manual", path = "/m/d.pdf", mime = "application/pdf", createdAt = 1, updatedAt = 1))
+        val photoId = db.photoDao().listForItem(id).single().id
+        val consumableId = db.consumableDao().listFor(id).single().id
+        db.maintenanceTaskDao().upsert(com.kurtz.homerecord.core.data.MaintenanceTaskEntity(id = "t-late", homeId = "h1", itemId = id, title = "Replace furnace filter", dueOn = "2026-09-01", createdAt = 1, updatedAt = 1))
+        val taskIds = db.maintenanceTaskDao().listForItem(id).map { it.id }
+        assertThat(repo.observeHomeSummary("h1", emptyMap()).first().attention.map { it.itemId }).contains(id)
+        changes.clear()
+
+        repo.delete(id)
+
+        assertThat(db.warrantyDao().listFor(id)).isEmpty()
+        assertThat(db.consumableDao().listFor(id)).isEmpty()
+        assertThat(db.serviceRecordDao().listFor(id)).isEmpty()
+        assertThat(db.maintenanceTaskDao().listForItem(id)).isEmpty()
+        assertThat(db.photoDao().listForItem(id)).isEmpty()
+        assertThat(db.documentDao().get("d1")!!.itemId).isNull()
+        assertThat(repo.get(other)!!.shutoffItemId).isNull()
+        assertThat(changes).containsAtLeast("item/$id", "warranty/w1", "service_record/s1", "photo/$photoId", "consumable/$consumableId", "document/d1", "item/$other")
+        taskIds.forEach { assertThat(changes).contains("maintenance_task/$it") }
+        // Needs attention no longer lists the deleted furnace's warranty or reminders.
+        val tasksLeft = db.maintenanceTaskDao().listFor("h1").map { it.itemId }.toSet()
+        assertThat(tasksLeft).containsExactly(other)
+        assertThat(repo.observeHomeSummary("h1", emptyMap()).first().attention.map { it.itemId }).doesNotContain(id)
+    }
 }

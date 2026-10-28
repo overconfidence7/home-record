@@ -88,6 +88,8 @@ interface OverlayDao {
     @Query("SELECT * FROM overlay WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<OverlayEntity>>
     @Query("SELECT * FROM overlay WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<OverlayEntity>
     @Query("UPDATE overlay SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM overlay WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<OverlayEntity>
+    @Query("SELECT * FROM overlay WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<OverlayEntity>
 }
 
 @Dao
@@ -98,6 +100,8 @@ interface ItemDao {
     @Query("SELECT * FROM item WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ItemEntity>>
     @Query("SELECT * FROM item WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ItemEntity>
     @Query("UPDATE item SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM item WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<ItemEntity>
+    @Query("SELECT * FROM item WHERE shutoffItemId = :shutoffId AND deletedAt IS NULL") suspend fun listByShutoff(shutoffId: String): List<ItemEntity>
 }
 
 @Dao
@@ -139,6 +143,8 @@ interface DocumentDao {
     @Query("SELECT * FROM document WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<DocumentEntity>>
     @Query("SELECT * FROM document WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<DocumentEntity>
     @Query("UPDATE document SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM document WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<DocumentEntity>
+    @Query("SELECT * FROM document WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<DocumentEntity>
 }
 
 @Dao
@@ -149,6 +155,7 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<PhotoEntity>
     @Query("SELECT * FROM photo WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") fun observeForItem(itemId: String): Flow<List<PhotoEntity>>
     @Query("SELECT * FROM photo WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listForItem(itemId: String): List<PhotoEntity>
+    @Query("SELECT * FROM photo WHERE roomId = :roomId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listForRoom(roomId: String): List<PhotoEntity>
     @Query("SELECT * FROM photo WHERE jobId = :jobId AND deletedAt IS NULL ORDER BY takenAt DESC") fun observeForJob(jobId: String): Flow<List<PhotoEntity>>
     @Query("SELECT COUNT(*) FROM photo WHERE jobId = :jobId AND deletedAt IS NULL") fun observeCountForJob(jobId: String): Flow<Int>
     /** Sets a late GPS fix in one statement, so a tag or Before edited meanwhile is not overwritten; 0 when already set or deleted. */
@@ -173,6 +180,7 @@ interface MaintenanceTaskDao {
     @Query("SELECT * FROM maintenance_task WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<MaintenanceTaskEntity>>
     @Query("SELECT * FROM maintenance_task WHERE homeId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<MaintenanceTaskEntity>
     @Query("UPDATE maintenance_task SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM maintenance_task WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<MaintenanceTaskEntity>
 }
 
 @Dao
@@ -200,6 +208,8 @@ interface BreakerLinkDao {
     @Query("SELECT * FROM breaker_link WHERE breakerId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<BreakerLinkEntity>>
     @Query("SELECT * FROM breaker_link WHERE breakerId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<BreakerLinkEntity>
     @Query("UPDATE breaker_link SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    @Query("SELECT * FROM breaker_link WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<BreakerLinkEntity>
+    @Query("SELECT * FROM breaker_link WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<BreakerLinkEntity>
 }
 
 @Dao

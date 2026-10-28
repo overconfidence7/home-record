@@ -46,7 +46,7 @@
     <string name="house_room_rename">Rename</string>
     <string name="house_room_delete">Delete</string>
     <string name="house_room_delete_title">Delete %1$s?</string>
-    <string name="house_room_delete_body">The room comes off the plan. Its walls, doors and windows go with it.</string>
+    <string name="house_room_delete_body">The room comes off the plan. Its walls, doors and windows go with it, and its items move to Whole house.</string>
     <string name="plan_title">Floor plan</string>
     <string name="plan_fit">Fit plan to screen</string>
     <string name="plan_undo">Undo</string>

@@ -112,6 +112,57 @@ class HomeRepositoryTest {
         assertThat(changes).contains("floor/${main.id}")
     }
 
+    // cr:room-delete-cascade: "Its walls, doors and windows go with it, and its items move to Whole house."
+    @AcceptanceCriterion("AC-C3")
+    @Test fun deletingARoomTakesItsWallsOpeningsAndStairsAndMovesItsItems() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val upper = repo.observeFloors(id).first().single { it.name == "Upper" }
+        val hall = PlanRoom.rectangle("h1", "Hall", "HALL", 0, 0, 144, 120)
+            .withOpening(PlanOpening("o1", 0, OpeningKind.DOOR, 20, 32, 80))
+            .withStair(PlanStair("s1", upper.id, listOf(Pt(10, 10), Pt(46, 10), Pt(46, 130), Pt(10, 130))))
+        val den = PlanRoom.rectangle("d1", "Den", "OFFICE", 144, 0, 120, 120)
+        repo.savePlan(main.id, listOf(hall, den))
+        val wallId = db.wallDao().listFor("h1").single().id
+        db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = "i1", homeId = id, roomId = "h1", category = "LIGHTING", subtype = "light", name = "Hall light", wallId = wallId, createdAt = 1, updatedAt = 1))
+        db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = id, roomId = "h1", path = "/m/p.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+        changes.clear()
+
+        repo.savePlan(main.id, listOf(den))
+
+        assertThat(db.wallDao().listFor("h1")).isEmpty()
+        assertThat(db.openingDao().listFor(wallId)).isEmpty()
+        assertThat(db.stairDao().listFor("h1")).isEmpty()
+        val light = db.itemDao().get("i1")!!
+        assertThat(light.roomId).isEqualTo(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE)
+        assertThat(light.wallId).isNull()
+        assertThat(db.photoDao().get("p1")!!.roomId).isNull()
+        assertThat(changes).containsAtLeast("room/h1", "wall/$wallId", "opening/o1", "stair/s1", "item/i1", "photo/p1")
+        assertThat(repo.loadPlan(main.id).placed.map { it.id }).containsExactly("d1")
+    }
+
+    @AcceptanceCriterion("AC-C3")
+    @Test fun deletingAFloorCascadesToItsRoomsAndUnlinksStairsThatLedThere() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val upper = repo.observeFloors(id).first().single { it.name == "Upper" }
+        repo.savePlan(main.id, listOf(PlanRoom.rectangle("h1", "Hall", "HALL", 0, 0, 144, 120).withStair(PlanStair("s1", upper.id, listOf(Pt(10, 10), Pt(46, 10), Pt(46, 130), Pt(10, 130))))))
+        val bedroom = PlanRoom.rectangle("b1", "Bedroom", "BEDROOM", 0, 0, 144, 120).withOpening(PlanOpening("o9", 1, OpeningKind.WINDOW, 30, 36, 48))
+        repo.savePlan(upper.id, listOf(bedroom))
+        val wallId = db.wallDao().listFor("b1").single().id
+        db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = "i2", homeId = id, roomId = "b1", category = "LIGHTING", subtype = "light", name = "Ceiling fan", createdAt = 1, updatedAt = 1))
+        changes.clear()
+
+        repo.deleteFloor(upper.id)
+
+        assertThat(db.roomDao().listFor(upper.id)).isEmpty()
+        assertThat(db.wallDao().listFor("b1")).isEmpty()
+        assertThat(db.openingDao().listFor(wallId)).isEmpty()
+        assertThat(db.itemDao().get("i2")!!.roomId).isEqualTo(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE)
+        assertThat(db.stairDao().get("s1")!!.toFloorId).isNull()
+        assertThat(changes).containsAtLeast("floor/${upper.id}", "room/b1", "wall/$wallId", "opening/o9", "item/i2", "stair/s1")
+    }
+
     @Test fun savePlanRoundTripsAndSoftDeletesRemovedRooms() = runTest {
         val id = colonial()
         val main = repo.observeFloors(id).first().single { it.name == "Main" }

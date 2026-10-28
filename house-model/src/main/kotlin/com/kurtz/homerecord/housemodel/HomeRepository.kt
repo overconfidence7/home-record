@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.OpeningEntity
 import com.kurtz.homerecord.core.data.StairEntity
 import com.kurtz.homerecord.core.data.WallEntity
+import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanCodec
 import com.kurtz.homerecord.housemodel.plan.PlanOpening
@@ -248,29 +249,28 @@ class HomeRepository(
 
     /**
      * Saves the editor's rooms for [floorId]. Rooms that were shaped before and are missing now are soft deleted;
-     * rooms that never had a shape are left alone.
+     * rooms that never had a shape are left alone. One transaction, so a half-saved plan is never synced.
      */
     suspend fun savePlan(floorId: String, rooms: List<PlanRoom>) {
-        val at = now()
-        val existing = db.roomDao().listFor(floorId).associateBy { it.id }
-        val keep = rooms.map { it.id }.toSet()
-        val ceiling = db.floorDao().get(floorId)?.ceilingHeightIn ?: DEFAULT_CEILING_IN
-        existing.values.filter { it.id !in keep && PlanCodec.decode(it.polygonJson).isNotEmpty() }.forEach {
-            db.roomDao().softDelete(it.id, at)
-            onChange("room", it.id)
-        }
-        rooms.forEach { saveOpeningsAndStairs(it, rooms, ceiling, at) }
-        rooms.forEach { room ->
-            val json = PlanCodec.encode(room.points)
-            val row = existing[room.id]
-            if (row == null) {
-                db.roomDao().upsert(RoomEntity(id = room.id, floorId = floorId, name = room.name, kind = room.kind, polygonJson = json, createdAt = at, updatedAt = at))
-            } else if (row.name != room.name || row.kind != room.kind || row.polygonJson != json) {
-                db.roomDao().upsert(row.copy(name = room.name, kind = room.kind, polygonJson = json, updatedAt = at))
-            } else {
-                return@forEach
+        db.withTransaction {
+            val at = now()
+            val existing = db.roomDao().listFor(floorId).associateBy { it.id }
+            val keep = rooms.map { it.id }.toSet()
+            val ceiling = db.floorDao().get(floorId)?.ceilingHeightIn ?: DEFAULT_CEILING_IN
+            existing.values.filter { it.id !in keep && PlanCodec.decode(it.polygonJson).isNotEmpty() }.forEach { deleteRoomRows(it.id, at) }
+            rooms.forEach { saveOpeningsAndStairs(it, rooms, ceiling, at) }
+            rooms.forEach { room ->
+                val json = PlanCodec.encode(room.points)
+                val row = existing[room.id]
+                if (row == null) {
+                    db.roomDao().upsert(RoomEntity(id = room.id, floorId = floorId, name = room.name, kind = room.kind, polygonJson = json, createdAt = at, updatedAt = at))
+                } else if (row.name != room.name || row.kind != room.kind || row.polygonJson != json) {
+                    db.roomDao().upsert(row.copy(name = room.name, kind = room.kind, polygonJson = json, updatedAt = at))
+                } else {
+                    return@forEach
+                }
+                onChange("room", room.id)
             }
-            onChange("room", room.id)
         }
     }
 
@@ -282,15 +282,48 @@ class HomeRepository(
 
     suspend fun roomCount(floorId: String): Int = db.roomDao().listFor(floorId).size
 
-    /** Soft deletes the floor and its rooms. */
+    /** Soft deletes the floor and its rooms with everything on them, and unlinks stairs that led to it, in one transaction. */
     suspend fun deleteFloor(floorId: String) {
         val at = now()
-        db.roomDao().listFor(floorId).forEach {
-            db.roomDao().softDelete(it.id, at)
-            onChange("room", it.id)
+        db.withTransaction {
+            db.roomDao().listFor(floorId).forEach { deleteRoomRows(it.id, at) }
+            val homeId = db.floorDao().get(floorId)?.homeId
+            if (homeId != null) {
+                db.roomDao().listForHome(homeId).forEach { room ->
+                    db.stairDao().listFor(room.id).filter { it.toFloorId == floorId }.forEach {
+                        db.stairDao().upsert(it.copy(toFloorId = null, updatedAt = at))
+                        onChange("stair", it.id)
+                    }
+                }
+            }
+            db.floorDao().softDelete(floorId, at)
+            onChange("floor", floorId)
         }
-        db.floorDao().softDelete(floorId, at)
-        onChange("floor", floorId)
+    }
+
+    /**
+     * Soft deletes a room with its walls (their doors, windows and wall photos), stairs, overlays and breaker links
+     * (cr:room-delete-cascade). Items in it move to Whole house; photos and documents stay in the home with no room.
+     * Callers hold the transaction.
+     */
+    private suspend fun deleteRoomRows(roomId: String, at: Long) {
+        db.wallDao().listFor(roomId).forEach { wall ->
+            db.openingDao().listFor(wall.id).forEach { db.openingDao().softDelete(it.id, at); onChange("opening", it.id) }
+            db.wallPhotoDao().listFor(wall.id).forEach { db.wallPhotoDao().softDelete(it.id, at); onChange("wall_photo", it.id) }
+            db.wallDao().softDelete(wall.id, at)
+            onChange("wall", wall.id)
+        }
+        db.stairDao().listFor(roomId).forEach { db.stairDao().softDelete(it.id, at); onChange("stair", it.id) }
+        db.overlayDao().listForRoom(roomId).forEach { db.overlayDao().softDelete(it.id, at); onChange("overlay", it.id) }
+        db.breakerLinkDao().listForRoom(roomId).forEach { db.breakerLinkDao().softDelete(it.id, at); onChange("breaker_link", it.id) }
+        db.itemDao().listForRoom(roomId).forEach {
+            db.itemDao().upsert(it.copy(roomId = PseudoRooms.WHOLE_HOUSE, wallId = null, planX = null, planY = null, updatedAt = at))
+            onChange("item", it.id)
+        }
+        db.photoDao().listForRoom(roomId).forEach { db.photoDao().upsert(it.copy(roomId = null, updatedAt = at)); onChange("photo", it.id) }
+        db.documentDao().listForRoom(roomId).forEach { db.documentDao().upsert(it.copy(roomId = null, updatedAt = at)); onChange("document", it.id) }
+        db.roomDao().softDelete(roomId, at)
+        onChange("room", roomId)
     }
 
     private companion object {
