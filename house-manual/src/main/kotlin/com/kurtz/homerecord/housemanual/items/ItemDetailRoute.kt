@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,7 +45,7 @@ fun ItemDetailRoute(
         key = itemId,
         factory = viewModelFactory {
             initializer {
-                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), onBack, onOpenCopy, recalls)
+                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), recalls)
             }
         },
     )
@@ -55,7 +56,15 @@ fun ItemDetailRoute(
         onPdf = { vm.onEvent(ItemDetailEvent.DocumentPicked(it)) },
         onFailed = { vm.onEvent(ItemDetailEvent.DocumentScanFailed) },
     )
-    ItemDetailScreen(vm.state.collectAsState().value, onEvent = {
+    val state = vm.state.collectAsState().value
+    LaunchedEffect(state.nav) {
+        when (val nav = state.nav ?: return@LaunchedEffect) {
+            ItemDetailNav.Closed -> onBack()
+            is ItemDetailNav.OpenCopy -> onOpenCopy(nav.id)
+        }
+        vm.onEvent(ItemDetailEvent.NavHandled)
+    }
+    ItemDetailScreen(state, onEvent = {
         when (it) {
             ItemDetailEvent.Back -> onBack()
             ItemDetailEvent.Edit -> onEdit()

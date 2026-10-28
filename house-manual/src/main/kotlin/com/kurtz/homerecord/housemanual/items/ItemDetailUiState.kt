@@ -35,7 +35,15 @@ data class ItemDetailUiState(
     val serviceForm: ServiceDraft? = null,
     /** Set once the user taps Save on a form with errors, so required fields show their messages. */
     val showFormErrors: Boolean = false,
+    /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
+    val nav: ItemDetailNav? = null,
 )
+
+/** Navigation the ViewModel asks for after a delete or duplicate; the route owns the back stack. */
+sealed interface ItemDetailNav {
+    data object Closed : ItemDetailNav
+    data class OpenCopy(val id: String) : ItemDetailNav
+}
 
 /** The "Check recalls" result (AC-B12). */
 sealed interface RecallUi {
@@ -84,4 +92,6 @@ sealed interface ItemDetailEvent {
     data object HideAttach : ItemDetailEvent
     data class AttachDocument(val id: String) : ItemDetailEvent
     data object Back : ItemDetailEvent
+    /** The route has acted on [ItemDetailUiState.nav]. */
+    data object NavHandled : ItemDetailEvent
 }

@@ -27,7 +27,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Item page (AC-H7). The delete confirmation lives in [SavedStateHandle] so it survives rotation and process death. */
+/**
+ * Item page (AC-H7). The delete confirmation and a pending navigation live in [SavedStateHandle] so they survive rotation and
+ * process death; the route reads [ItemDetailUiState.nav] and navigates, so the ViewModel never holds a composition's lambdas.
+ */
 class ItemDetailViewModel(
     private val repo: ItemRepository,
     private val lookup: WarrantyLookupRepository,
@@ -38,11 +41,16 @@ class ItemDetailViewModel(
     detail: Flow<ItemDetail?>,
     private val copySuffix: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
-    private val onClose: () -> Unit = {},
-    private val onOpenCopy: (String) -> Unit = {},
     private val recallApi: RecallApi? = null,
 ) : ViewModel() {
     private val confirmDelete = MutableStateFlow(saved[CONFIRM] ?: false)
+
+    private val nav = MutableStateFlow(
+        when {
+            saved[NAV_CLOSED] ?: false -> ItemDetailNav.Closed
+            else -> saved.get<String>(NAV_COPY)?.let { ItemDetailNav.OpenCopy(it) }
+        },
+    )
 
     private val lookupState = MutableStateFlow(LookupUi())
 
@@ -71,7 +79,7 @@ class ItemDetailViewModel(
 
     private val upkeepContactsDocs = combine(upkeepAndContacts, documentRows, recallState) { uc, docs, r -> Triple(uc, docs, r) }
 
-    val state: StateFlow<ItemDetailUiState> = combine(detail, confirmDelete, lookupState, upkeepContactsDocs, forms) { d, c, l, ucd, f ->
+    private val content = combine(detail, confirmDelete, lookupState, upkeepContactsDocs, forms) { d, c, l, ucd, f ->
         val (uc, docs, r) = ucd
         val (u, contacts) = uc
         ItemDetailUiState(
@@ -79,7 +87,9 @@ class ItemDetailViewModel(
             consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, showFormErrors = f.showErrors, contacts = contacts,
             documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice, recalls = r,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
+    }
+
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav) { s, n -> s.copy(nav = n) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
         when (e) {
@@ -88,9 +98,10 @@ class ItemDetailViewModel(
             ItemDetailEvent.ConfirmDelete -> viewModelScope.launch {
                 repo.delete(itemId)
                 setConfirm(false)
-                onClose()
+                setNav(ItemDetailNav.Closed)
             }
-            ItemDetailEvent.Duplicate -> viewModelScope.launch { repo.duplicate(itemId, copySuffix)?.let(onOpenCopy) }
+            ItemDetailEvent.Duplicate -> viewModelScope.launch { repo.duplicate(itemId, copySuffix)?.let { setNav(ItemDetailNav.OpenCopy(it)) } }
+            ItemDetailEvent.NavHandled -> setNav(null)
             is ItemDetailEvent.SetRegistered -> viewModelScope.launch { repo.setRegistered(itemId, e.registered) }
             is ItemDetailEvent.LookUp -> lookUp(e.again)
             ItemDetailEvent.CheckRecalls -> checkRecalls()
@@ -187,6 +198,12 @@ class ItemDetailViewModel(
         saved[CONFIRM] = v
     }
 
+    private fun setNav(v: ItemDetailNav?) {
+        nav.value = v
+        saved[NAV_CLOSED] = v == ItemDetailNav.Closed
+        saved[NAV_COPY] = (v as? ItemDetailNav.OpenCopy)?.id
+    }
+
     private fun setAttach(v: Boolean) {
         documentUi.update { it.copy(showAttach = v) }
         saved[ATTACH] = v
@@ -195,5 +212,7 @@ class ItemDetailViewModel(
     private companion object {
         const val CONFIRM = "confirmDelete"
         const val ATTACH = "showAttach"
+        const val NAV_CLOSED = "navClosed"
+        const val NAV_COPY = "navCopy"
     }
 }

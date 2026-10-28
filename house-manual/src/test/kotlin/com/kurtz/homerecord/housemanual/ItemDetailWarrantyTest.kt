@@ -11,6 +11,7 @@ import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.core.warranty.WarrantyLookupApi
 import com.kurtz.homerecord.core.warranty.WarrantyTerms
 import com.kurtz.homerecord.housemanual.items.ItemDetailEvent
+import com.kurtz.homerecord.housemanual.items.ItemDetailNav
 import com.kurtz.homerecord.housemanual.items.ItemDetailViewModel
 import com.kurtz.homerecord.housemanual.items.RecallUi
 import com.kurtz.homerecord.housemanual.items.LookupNote
@@ -22,6 +23,7 @@ import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
 import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import java.time.LocalDate
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -86,7 +88,7 @@ class ItemDetailWarrantyTest {
         override suspend fun check(make: String, model: String?) = recallResult
     }
 
-    private fun vm(id: String) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", recallApi = recallApi).also {
+    private fun vm(id: String, saved: SavedStateHandle = SavedStateHandle()) = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", saved, recallApi = recallApi).also {
         vms += it
         it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
     }
@@ -210,5 +212,40 @@ class ItemDetailWarrantyTest {
         val bare = vm(items.save("h1", ItemDraft(subtypeId = "water_heater", roomId = PseudoRooms.WHOLE_HOUSE, name = "Heater")).orEmpty())
         bare.onEvent(ItemDetailEvent.CheckRecalls)
         assertThat(bare.await { it.recalls == RecallUi.NeedsMake }.recalls).isEqualTo(RecallUi.NeedsMake)
+    }
+
+    /** cr:vm-nav-lambdas: the VM asks for navigation through state; it never calls a composition's lambda. */
+    @AcceptanceCriterion("AC-H7")
+    @Test fun deleteAsksTheRouteToCloseOnceAndTheRequestSurvivesProcessDeath() = runTest {
+        val id = heater()
+        val saved = SavedStateHandle()
+        val vm = vm(id, saved)
+        vm.await { it.detail != null }
+        vm.onEvent(ItemDetailEvent.AskDelete)
+        vm.onEvent(ItemDetailEvent.ConfirmDelete)
+        assertThat(vm.await { it.nav != null }.nav).isEqualTo(ItemDetailNav.Closed)
+        assertThat(items.get(id)).isNull()
+        // Process death before the route acted: a VM restored from the same handle still asks to close.
+        val restored = vm(id, SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) }))
+        assertThat(restored.await { !it.loading }.nav).isEqualTo(ItemDetailNav.Closed)
+        restored.onEvent(ItemDetailEvent.NavHandled)
+        assertThat(restored.await { it.nav == null }.nav).isNull()
+        vm.onEvent(ItemDetailEvent.NavHandled)
+        assertThat(vm.await { it.nav == null }.confirmDelete).isFalse()
+    }
+
+    @AcceptanceCriterion("AC-H7")
+    @Test fun duplicateAsksTheRouteToOpenTheCopyAndHandledClearsIt() = runTest {
+        val id = heater()
+        val vm = vm(id)
+        vm.await { it.detail != null }
+        vm.onEvent(ItemDetailEvent.Duplicate)
+        val nav = vm.await { it.nav != null }.nav
+        assertThat(nav).isInstanceOf(ItemDetailNav.OpenCopy::class.java)
+        val copyId = (nav as ItemDetailNav.OpenCopy).id
+        assertThat(copyId).isNotEqualTo(id)
+        assertThat(items.get(copyId)?.name).isEqualTo("Water heater copy")
+        vm.onEvent(ItemDetailEvent.NavHandled)
+        assertThat(vm.await { it.nav == null }.detail?.item?.id).isEqualTo(id)
     }
 }
