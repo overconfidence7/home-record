@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ fun RecordListItem(
     trailing: (@Composable () -> Unit)? = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(),
 ) {
     val click = if (onClick != null || onLongClick != null) {
         Modifier.combinedClickable(onClick = { onClick?.invoke() }, onLongClick = onLongClick)
@@ -34,6 +37,7 @@ fun RecordListItem(
         supportingContent = supporting?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) } },
         leadingContent = leading,
         trailingContent = trailing,
+        colors = colors,
         modifier = modifier.heightIn(min = 56.dp).then(click),
     )
 }

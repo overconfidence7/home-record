@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -23,59 +24,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
-import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.RecordListItem
+import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemodel.R
-import com.kurtz.homerecord.housemodel.HomeRepository
-import com.kurtz.homerecord.housemodel.items.ItemRepository
-import com.kurtz.homerecord.housemodel.items.ItemRow
-import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.RoomKind
-
-data class RoomUiState(
-    val loading: Boolean = true,
-    val room: PlanRoom? = null,
-    val system: UnitSystem = UnitSystem.IMPERIAL,
-    val floorName: String? = null,
-    val homeName: String? = null,
-    val items: List<RoomItem> = emptyList(),
-)
-
-data class RoomItem(val id: String, val name: String, val detail: String)
-
-/** The room's items by name; detail is make and model, or the category when neither is set (AC-H10). */
-fun roomItemsFor(rows: List<ItemRow>, roomId: String): List<RoomItem> =
-    rows.filter { it.roomId == roomId }.sortedBy { it.name.lowercase() }.map {
-        RoomItem(it.id, it.name, listOfNotNull(it.make, it.model).joinToString(" ").ifBlank { it.categoryLabel })
-    }
 
 /** HM-Room, opened from the blueprint (AC-C14). Each section says what it will hold until its feature lands (AC-U4). */
 @Composable
-fun RoomScreen(state: RoomUiState, onBack: () -> Unit, onOpenItem: (String) -> Unit = {}, onAddItem: (() -> Unit)? = null) {
+fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
     val subtitle = listOfNotNull(state.floorName, state.homeName).joinToString(" · ").ifBlank { null }
+    val room = state.room
     ScreenScaffold(
-        title = if (state.loading || state.room != null) {
-            state.room?.name?.ifBlank { null } ?: stringResource(R.string.plan_unnamed_room)
-        } else {
-            stringResource(R.string.room_screen_title)
+        title = when {
+            room != null -> room.name.ifBlank { stringResource(R.string.plan_unnamed_room) }
+            else -> stringResource(R.string.room_screen_title)
         },
         subtitle = subtitle,
-        onBack = onBack,
+        onBack = { onEvent(RoomEvent.Back) },
     ) { padding ->
-        val room = state.room
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
             room == null -> EmptyState(
@@ -83,7 +58,7 @@ fun RoomScreen(state: RoomUiState, onBack: () -> Unit, onOpenItem: (String) -> U
                 headline = stringResource(R.string.room_not_found_title),
                 body = stringResource(R.string.room_not_found_body),
                 actionLabel = stringResource(R.string.room_back),
-                onAction = onBack,
+                onAction = { onEvent(RoomEvent.Back) },
                 modifier = Modifier.padding(padding),
             )
             else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -97,45 +72,11 @@ fun RoomScreen(state: RoomUiState, onBack: () -> Unit, onOpenItem: (String) -> U
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 RoomSections.forEach { section ->
-                    if (section.tag == "items") RoomItemsCard(state.items, onOpenItem, onAddItem) else RoomSectionCard(section)
+                    if (section.tag == "items") RoomItemsCard(state.items, state.canAddItem, onEvent) else RoomSectionCard(section)
                 }
             }
         }
     }
-}
-
-/** Room page without the item list, for apps that keep no items (Field Log). */
-@Composable
-fun RoomRoute(repo: HomeRepository, roomId: String, onBack: () -> Unit) {
-    var state by remember(roomId) { mutableStateOf(RoomUiState()) }
-    LaunchedEffect(roomId) {
-        val where = repo.roomLocation(roomId)
-        state = RoomUiState(loading = false, room = repo.findRoom(roomId), floorName = where?.floorName, homeName = where?.homeName)
-    }
-    RoomScreen(state, onBack)
-}
-
-@Composable
-fun RoomRoute(
-    repo: HomeRepository,
-    items: ItemRepository,
-    homeId: String,
-    roomId: String,
-    onBack: () -> Unit,
-    onOpenItem: (String) -> Unit,
-    onAddItem: (roomId: String) -> Unit,
-) {
-    var state by remember(roomId) { mutableStateOf(RoomUiState()) }
-    LaunchedEffect(roomId) {
-        val where = repo.roomLocation(roomId)
-        state = RoomUiState(loading = false, room = repo.findRoom(roomId), floorName = where?.floorName, homeName = where?.homeName, items = state.items)
-    }
-    LaunchedEffect(roomId, homeId) {
-        items.observeRows(homeId, emptyMap()).collect { rows ->
-            state = state.copy(items = roomItemsFor(rows, roomId))
-        }
-    }
-    RoomScreen(state, onBack, onOpenItem, onAddItem = { onAddItem(roomId) })
 }
 
 private data class RoomSection(val tag: String, val icon: ImageVector, @StringRes val title: Int, @StringRes val empty: Int)
@@ -164,28 +105,41 @@ private fun RoomSectionCard(section: RoomSection) {
 }
 
 @Composable
-private fun RoomItemsCard(items: List<RoomItem>, onOpen: (String) -> Unit, onAdd: (() -> Unit)?) {
-    Card(Modifier.fillMaxWidth().testTag("${LocalTagPrefix.current}_room_items")) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun RoomItemsCard(items: List<RoomItem>, canAdd: Boolean, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    Card(Modifier.fillMaxWidth().testTag("${prefix}_room_items")) {
+        Column(Modifier.padding(vertical = 8.dp)) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Rounded.Inventory2, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(stringResource(R.string.room_section_items), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
             }
             if (items.isEmpty()) {
-                Text(stringResource(R.string.room_section_items_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.room_section_items_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
             }
             items.forEach { item ->
-                Column(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onOpen(item.id) }.testTag("${LocalTagPrefix.current}_room_item_${item.id}"),
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(item.name, style = MaterialTheme.typography.bodyLarge)
-                    Text(item.detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.testTag("${prefix}_room_item_${item.id}")) {
+                    RecordListItem(
+                        headline = item.name,
+                        supporting = item.detail,
+                        leading = { Icon(itemIcon(item.iconName), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        onClick = { onEvent(RoomEvent.OpenItem(item.id)) },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    )
+                    WarrantyStatusLine(item.warranty, Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp))
                 }
             }
-            if (onAdd != null) {
-                TextButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_room_add_item")) {
-                    Text(stringResource(R.string.room_add_item))
+            if (canAdd) {
+                TextButton(
+                    onClick = { onEvent(RoomEvent.AddItem) },
+                    modifier = Modifier.padding(horizontal = 4.dp).heightIn(min = 48.dp).testTag("${prefix}_room_add_item"),
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Text(stringResource(R.string.room_add_item), modifier = Modifier.padding(start = 8.dp))
                 }
             }
         }

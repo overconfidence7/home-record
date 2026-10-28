@@ -21,6 +21,9 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 
 /** A room that exists but has no shape on the plan yet. */
 data class UnplacedRoom(val id: String, val name: String, val kind: String)
@@ -163,6 +166,12 @@ class HomeRepository(
         val row = db.roomDao().get(roomId) ?: return null
         return loadPlan(row.floorId).placed.firstOrNull { it.id == roomId }
     }
+
+    /** One placed room as the plan changes; emits null once it is deleted or loses its shape (HM-Room). */
+    fun observeRoom(roomId: String): Flow<PlanRoom?> = flow {
+        val row = db.roomDao().get(roomId)
+        if (row == null) emit(null) else emitAll(observePlan(row.floorId).map { plan -> plan.placed.firstOrNull { it.id == roomId } })
+    }.distinctUntilChanged()
 
     /** Where a room lives, for the room page subtitle: its floor id and name plus the home name. */
     suspend fun roomLocation(roomId: String): RoomLocation? {

@@ -27,6 +27,7 @@ import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
 import com.kurtz.homerecord.housemodel.RoomChoice
 import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.core.model.WarrantyStatus
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.housemanual.contacts.ContactFormContent
 import com.kurtz.homerecord.housemanual.documents.DocumentFormContent
@@ -275,11 +276,16 @@ fun HouseNoFloorsPreview() = Frame { houseScreen(HouseUiState(loading = false, h
 
 @ThemePreviews
 @Composable
-fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", items = listOf(RoomItem("i1", "Dishwasher", "Bosch SHPM88Z75N"), RoomItem("i2", "Range hood", "Broan"))), {}, onAddItem = {}) }
+fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", canAddItem = true,
+    items = listOf(
+        RoomItem("i1", "Dishwasher", "Bosch SHPM88Z75N", iconName = ItemCategory.subtype("dishwasher")?.iconName ?: "Category", warranty = WarrantyStatus.Active("2028-03-14")),
+        RoomItem("i2", "Range hood", "Broan", iconName = ItemCategory.subtype("range_hood")?.iconName ?: "Category"),
+    ),
+), {}) }
 
 @ThemePreviews
 @Composable
-fun RoomMissingPreview() = Frame { RoomScreen(RoomUiState(loading = false), {}) }
+fun RoomMissingPreview() = Frame { RoomScreen(RoomUiState(loading = false)) {} }
 
 private val itemRooms = listOf(RoomChoice("r1", "Kitchen", "Main"), RoomChoice("r2", "Utility room", "Basement"), RoomChoice("r3", "Primary bedroom", "Upper"))
 
