@@ -62,7 +62,9 @@ fun PhotoDetailScreen(
             if (!state.loading && !state.missing) {
                 IconButton(onAnnotate, Modifier.testTag("fl_photo_annotate")) { Icon(Icons.Rounded.Edit, stringResource(R.string.photo_annotate)) }
                 IconButton(onShare, Modifier.testTag("fl_photo_share")) { Icon(Icons.Rounded.Share, stringResource(R.string.photo_share)) }
-                IconButton({ onEvent(PhotoDetailEvent.AskDelete) }, Modifier.testTag("fl_photo_delete")) { Icon(Icons.Rounded.Delete, stringResource(R.string.photo_delete)) }
+                if (state.canDelete) {
+                    IconButton({ onEvent(PhotoDetailEvent.AskDelete) }, Modifier.testTag("fl_photo_delete")) { Icon(Icons.Rounded.Delete, stringResource(R.string.photo_delete)) }
+                }
             }
         },
     ) { padding ->

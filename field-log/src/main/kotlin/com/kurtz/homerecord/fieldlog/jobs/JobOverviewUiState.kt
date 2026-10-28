@@ -26,6 +26,8 @@ data class JobOverviewUiState(
     val today: String = "",
     /** The job's own house model; null until the first room or the House tab creates it (AC-F48). */
     val homeId: String? = null,
+    /** Edit job is Owner and Office only (AC-F3). */
+    val canEdit: Boolean = true,
 )
 
 sealed interface JobOverviewEvent {

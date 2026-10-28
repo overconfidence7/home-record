@@ -7,20 +7,21 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.core.company.RoleGates
 import com.kurtz.homerecord.core.data.AssignmentDao
 import com.kurtz.homerecord.core.data.ClientDao
 import com.kurtz.homerecord.core.data.JobDao
 
 @Composable
-fun JobsRoute(companyId: String, jobs: JobDao, clients: ClientDao, assignments: AssignmentDao, onEditJob: (String?) -> Unit, modifier: Modifier = Modifier) {
+fun JobsRoute(companyId: String, jobs: JobDao, clients: ClientDao, assignments: AssignmentDao, gates: kotlinx.coroutines.flow.Flow<RoleGates>, onEditJob: (String?) -> Unit, modifier: Modifier = Modifier) {
     val vm = viewModel<JobsViewModel>(
-        factory = viewModelFactory { initializer { JobsViewModel(companyId, jobs, clients, assignments, createSavedStateHandle()) } },
+        factory = viewModelFactory { initializer { JobsViewModel(companyId, jobs, clients, assignments, gates, createSavedStateHandle()) } },
     )
     JobsScreen(
         vm.state.collectAsState().value,
         { event ->
             when (event) {
-                JobsEvent.New -> onEditJob(null)
+                JobsEvent.New -> if (vm.state.value.canAddJob) onEditJob(null)
                 is JobsEvent.Open -> onEditJob(event.jobId)
                 else -> vm.onEvent(event)
             }

@@ -77,6 +77,11 @@ fun JobsListScreenshot() = JobsListPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun JobsCrewScreenshot() = JobsCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun JobsEmptyScreenshot() = JobsEmptyPreview()
 
 @PreviewTest
@@ -279,6 +284,11 @@ fun PhotoDetailScreenshot() = PhotoDetailPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PhotoDetailCrewScreenshot() = PhotoDetailCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PhotoDetailDeleteScreenshot() = PhotoDetailDeletePreview()
 
 @PreviewTest
@@ -305,6 +315,11 @@ fun AnnotateTextScreenshot() = AnnotateTextPreview()
 @ThemePreviews
 @Composable
 fun FilesTabScreenshot() = FilesTabPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FilesCrewScreenshot() = FilesCrewPreview()
 
 @PreviewTest
 @ThemePreviews

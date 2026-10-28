@@ -9,6 +9,8 @@ data class JobsUiState(
     val noMatches: Boolean = false,
     /** Today, ISO, so rows can say "Today" and "Tomorrow". */
     val today: String = "",
+    /** New job is Owner and Office only; hidden, not greyed out, for everyone else (AC-F3). */
+    val canAddJob: Boolean = true,
 )
 
 sealed interface JobsEvent {

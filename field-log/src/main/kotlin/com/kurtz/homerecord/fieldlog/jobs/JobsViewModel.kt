@@ -3,9 +3,11 @@ package com.kurtz.homerecord.fieldlog.jobs
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.company.RoleGates
 import com.kurtz.homerecord.core.data.AssignmentDao
 import com.kurtz.homerecord.core.data.ClientDao
 import com.kurtz.homerecord.core.data.JobDao
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -18,6 +20,7 @@ class JobsViewModel(
     jobs: JobDao,
     clients: ClientDao,
     assignments: AssignmentDao,
+    gates: Flow<RoleGates>,
     private val saved: SavedStateHandle,
     private val todayProvider: () -> String = { LocalDate.now().toString() },
 ) : ViewModel() {
@@ -25,12 +28,12 @@ class JobsViewModel(
     private val showArchived = saved.getStateFlow(ARCHIVED, false)
 
     val state: StateFlow<JobsUiState> = combine(
-        jobs.observeFor(companyId),
+        combine(jobs.observeFor(companyId), gates) { j, g -> j to g },
         clients.observeFor(companyId),
         assignments.observeForCompany(companyId),
         query,
         showArchived,
-    ) { j, c, a, q, arch ->
+    ) { (j, g), c, a, q, arch ->
         val today = todayProvider()
         val all = JobListMapper.rows(j, c, a, today)
         val groups = JobListMapper.group(all, q, today, arch)
@@ -41,8 +44,9 @@ class JobsViewModel(
             groups = groups,
             noMatches = all.isNotEmpty() && groups.isEmpty && q.isNotBlank(),
             today = today,
+            canAddJob = g.canEditJobs,
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, JobsUiState(query = saved.get<String>(QUERY).orEmpty()))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, JobsUiState(query = saved.get<String>(QUERY).orEmpty(), canAddJob = false))
 
     fun onEvent(event: JobsEvent) {
         when (event) {

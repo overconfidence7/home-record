@@ -17,6 +17,8 @@ data class PhotoDetailUiState(
     val isBefore: Boolean = false,
     val confirmDelete: Boolean = false,
     val deleted: Boolean = false,
+    /** Delete is for Owner, Office and the job's Lead (AC-F3). */
+    val canDelete: Boolean = true,
 )
 
 sealed interface PhotoDetailEvent {

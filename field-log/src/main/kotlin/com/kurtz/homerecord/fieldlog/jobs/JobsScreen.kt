@@ -50,12 +50,14 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
             else -> JobsList(state, onEvent, Modifier.weight(1f))
         }
     }
-    ExtendedFloatingActionButton(
-        onClick = { onEvent(JobsEvent.New) },
-        icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-        text = { Text(stringResource(R.string.jobs_new)) },
-        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_jobs_new"),
-    )
+    if (state.canAddJob) {
+        ExtendedFloatingActionButton(
+            onClick = { onEvent(JobsEvent.New) },
+            icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+            text = { Text(stringResource(R.string.jobs_new)) },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_jobs_new"),
+        )
+    }
     }
 }
 

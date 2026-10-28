@@ -38,12 +38,13 @@ class JobOverviewViewModel(
     tasks: TaskDao,
     punches: PunchDao,
     photos: PhotoDao,
+    gates: Flow<com.kurtz.homerecord.core.company.RoleGates>,
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
     private val job: Flow<com.kurtz.homerecord.core.data.JobEntity?> = jobs.observeFor(companyId).map { list -> list.firstOrNull { it.id == jobId } }
 
-    val state: StateFlow<JobOverviewUiState> = job.flatMapLatest { j ->
+    val state: StateFlow<JobOverviewUiState> = combine(job.flatMapLatest { j ->
         if (j == null) {
             flowOf(JobOverviewUiState(loading = false, notFound = true))
         } else {
@@ -62,5 +63,5 @@ class JobOverviewViewModel(
                 JobOverviewMapper.build(j, c, cr, m, a, t, worked, n, today.toString())
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState())
+    }, gates) { s, g -> s.copy(canEdit = g.canEditJobs) }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState(canEdit = false))
 }

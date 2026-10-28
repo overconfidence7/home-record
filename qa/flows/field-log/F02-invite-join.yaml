@@ -62,6 +62,14 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Today"
     timeout: 15000
+# Crew cannot add a job (AC-F3: no New job button at all)
+- tapOn:
+    id: "fl_tab_jobs"
+- extendedWaitUntil:
+    visible: "Jobs"
+    timeout: 10000
+- assertNotVisible:
+    id: "fl_jobs_new"
 # Crew cannot see Team or Company (AC-F3: hidden, not greyed out)
 - tapOn: "More"
 - assertNotVisible: "Team"

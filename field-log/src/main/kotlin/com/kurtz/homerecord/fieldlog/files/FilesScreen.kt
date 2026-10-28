@@ -58,7 +58,7 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
             placeholder = { Text(stringResource(R.string.files_search)) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("fl_files_search"),
         )
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (state.canManage) Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { onEvent(FilesEvent.AddFile) }, Modifier.heightIn(min = 56.dp).testTag("fl_files_add")) {
                 Icon(Icons.Rounded.FileUpload, null); Text(stringResource(R.string.files_add), Modifier.padding(start = 8.dp))
             }
@@ -97,11 +97,13 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
                                         stringResource(if (f.offline) R.string.files_offline_off else R.string.files_offline_on),
                                     )
                                 }
-                                IconButton({ onEvent(FilesEvent.AskRename(f.id)) }, Modifier.testTag("fl_files_rename_${f.id}")) {
-                                    Icon(Icons.Rounded.Edit, stringResource(R.string.files_rename))
-                                }
-                                IconButton({ onEvent(FilesEvent.AskDelete(f.id)) }, Modifier.testTag("fl_files_delete_${f.id}")) {
-                                    Icon(Icons.Rounded.Delete, stringResource(R.string.files_delete))
+                                if (state.canManage) {
+                                    IconButton({ onEvent(FilesEvent.AskRename(f.id)) }, Modifier.testTag("fl_files_rename_${f.id}")) {
+                                        Icon(Icons.Rounded.Edit, stringResource(R.string.files_rename))
+                                    }
+                                    IconButton({ onEvent(FilesEvent.AskDelete(f.id)) }, Modifier.testTag("fl_files_delete_${f.id}")) {
+                                        Icon(Icons.Rounded.Delete, stringResource(R.string.files_delete))
+                                    }
                                 }
                             }
                         },

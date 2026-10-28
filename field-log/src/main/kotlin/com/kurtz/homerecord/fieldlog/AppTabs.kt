@@ -142,7 +142,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     )
                 }
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
-                    membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(),
+                    membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(), container.roleGates,
                     onEditJob = { if (it == null) nav.push(JobEditKey(null)) else nav.push(JobKey(it)) },
                 )
                 key.depth == 0 && key.title == "clock" -> {
@@ -176,6 +176,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     key.jobId,
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
                 ),
+                gates = container.roleGates,
             )
         }
         entry<PhotoKey> { key ->

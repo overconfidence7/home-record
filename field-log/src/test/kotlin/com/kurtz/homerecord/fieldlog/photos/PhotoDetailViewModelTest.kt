@@ -52,8 +52,10 @@ class PhotoDetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(id: String = "p1") =
-        PhotoDetailViewModel(PhotoDetailDeps(id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }))
+    private fun vm(id: String = "p1", gates: com.kurtz.homerecord.core.company.RoleGates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)) =
+        PhotoDetailViewModel(
+            PhotoDetailDeps(id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }, kotlinx.coroutines.flow.flowOf(gates)),
+        )
 
     private suspend fun loaded(v: PhotoDetailViewModel) = v.state.filter { !it.loading }.first()
 
@@ -108,5 +110,23 @@ class PhotoDetailViewModelTest {
         v.onEvent(PhotoDetailEvent.ConfirmDelete)
         row { it == null }
         assertThat(v.state.filter { it.deleted }.first().deleted).isTrue()
+    }
+
+    // AC-F3: Crew cannot delete; a Lead can only on a job they are on
+    @Test fun `crew and an off-job lead cannot delete`() = runBlocking {
+        for (gates in listOf(
+            com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Crew, setOf("j1")),
+            com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Lead, setOf("j2")),
+        )) {
+            val v = vm(gates = gates)
+            assertThat(loaded(v).canDelete).isFalse()
+            v.onEvent(PhotoDetailEvent.AskDelete)
+            assertThat(v.state.value.confirmDelete).isFalse()
+            v.onEvent(PhotoDetailEvent.ConfirmDelete)
+            kotlinx.coroutines.delay(100)
+            assertThat(db.photoDao().get("p1")).isNotNull()
+        }
+        val lead = vm(gates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Lead, setOf("j1")))
+        assertThat(lead.state.filter { !it.loading && it.canDelete }.first().canDelete).isTrue()
     }
 }

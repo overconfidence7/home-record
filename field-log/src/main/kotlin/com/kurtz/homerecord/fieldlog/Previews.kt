@@ -208,6 +208,11 @@ private val sampleJobs = JobRowGroups(
 @Composable
 fun JobsListPreview() = Frame { JobsScreen(JobsUiState(loading = false, groups = sampleJobs, today = "2026-10-22"), {}) }
 
+/** Crew and Lead see the jobs but no New job button (AC-F3). */
+@ThemePreviews
+@Composable
+fun JobsCrewPreview() = Frame { JobsScreen(JobsUiState(loading = false, groups = sampleJobs, today = "2026-10-22", canAddJob = false), {}) }
+
 @ThemePreviews
 @Composable
 fun JobsEmptyPreview() = Frame { JobsScreen(JobsUiState(loading = false), {}) }
@@ -577,6 +582,13 @@ private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailU
 @Composable
 fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, {}, {}, {}, java.time.ZoneId.of("UTC")) }
 
+/** Crew tag and caption the photo but cannot delete it (AC-F3). */
+@ThemePreviews
+@Composable
+fun PhotoDetailCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(canDelete = false), {}, {}, {}, {}, java.time.ZoneId.of("UTC"))
+}
+
 @ThemePreviews
 @Composable
 fun PhotoDetailDeletePreview() = Frame {
@@ -632,6 +644,11 @@ private val filesReady = com.kurtz.homerecord.fieldlog.files.FilesUiState(
 @ThemePreviews
 @Composable
 fun FilesTabPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(filesReady, {}) }
+
+/** Crew and Sub view and keep files offline; no Add, New folder, Rename or Delete (AC-F3). */
+@ThemePreviews
+@Composable
+fun FilesCrewPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(filesReady.copy(canManage = false), {}) }
 
 @ThemePreviews
 @Composable

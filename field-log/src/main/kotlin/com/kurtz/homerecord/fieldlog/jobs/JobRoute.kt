@@ -31,14 +31,14 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
             initializer {
                 JobOverviewViewModel(
                     companyId, jobId, db.jobDao(), db.clientDao(), db.jobCrewDao(), db.memberDao(),
-                    db.assignmentDao(), db.taskDao(), db.punchDao(), db.photoDao(),
+                    db.assignmentDao(), db.taskDao(), db.punchDao(), db.photoDao(), gates,
                 )
             }
         },
@@ -51,7 +51,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
         { event ->
             when (event) {
                 is JobOverviewEvent.OpenTab -> tab = event.tab
-                JobOverviewEvent.OpenEdit -> onEdit()
+                JobOverviewEvent.OpenEdit -> if (state.canEdit) onEdit()
             }
         },
         onBack,

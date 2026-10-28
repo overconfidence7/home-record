@@ -130,4 +130,25 @@ class FilesViewModelTest {
         vm2.onEvent(FilesEvent.ToggleOffline(row.id, true))
         assertThat(runBlocking { withTimeout(5_000) { vm2.state.first { it.notice != null } } }.notice).isEqualTo(FilesNotice.DownloadFailed)
     }
+
+    // AC-F3: Crew and Sub only view; a stray add, folder, rename or delete changes nothing and the state says so
+    @Test fun crewCannotAddRenameOrDelete() {
+        val files = JobFiles(db)
+        runBlocking { files.add("j3", "", "plan.pdf", "/m/plan.pdf", "application/pdf", 10, "m1") }
+        val crew = FilesViewModel(FilesDeps("j3", db.jobFileDao(), files, "m2", canManage = kotlinx.coroutines.flow.flowOf(false)))
+        val s = runBlocking { withTimeout(5_000) { crew.state.first { it.files.isNotEmpty() } } }
+        assertThat(s.canManage).isFalse()
+        val id = s.files.single().id
+        crew.added(ImportedFile("extra.pdf", "/media/extra.pdf", "application/pdf", 1))
+        crew.onEvent(FilesEvent.CreateFolder("Permits"))
+        crew.onEvent(FilesEvent.AskRename(id))
+        crew.onEvent(FilesEvent.Rename(id, "Renamed.pdf"))
+        crew.onEvent(FilesEvent.AskDelete(id))
+        crew.onEvent(FilesEvent.Delete(id))
+        runBlocking { kotlinx.coroutines.delay(200) }
+        val rows = runBlocking { db.jobFileDao().listFor("j3") }
+        assertThat(rows.map { it.name }).containsExactly("plan.pdf")
+        assertThat(crew.state.value.dialog).isNull()
+        assertThat(uploaded).isEmpty()
+    }
 }

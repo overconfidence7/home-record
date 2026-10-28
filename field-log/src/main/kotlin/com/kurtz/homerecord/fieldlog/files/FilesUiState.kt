@@ -29,6 +29,8 @@ data class FilesUiState(
     val results: List<FileRow> = emptyList(),
     val dialog: FilesDialog? = null,
     val notice: FilesNotice? = null,
+    /** Add, new folder, rename and delete: Owner, Office and the job's Lead; Crew and Sub only view (AC-F3). */
+    val canManage: Boolean = true,
 )
 
 enum class FilesNotice { FolderExists, AddFailed, DownloadFailed }

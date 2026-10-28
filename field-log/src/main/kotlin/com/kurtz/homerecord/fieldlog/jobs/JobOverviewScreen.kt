@@ -55,10 +55,12 @@ fun JobOverviewScreen(state: JobOverviewUiState, onEvent: (JobOverviewEvent) -> 
                     Modifier.testTag("fl_job_crew"),
                 )
             }
-            OutlinedButton(
-                onClick = { onEvent(JobOverviewEvent.OpenEdit) },
-                modifier = Modifier.heightIn(min = 48.dp).testTag("fl_job_edit"),
-            ) { Text(stringResource(R.string.job_edit)) }
+            if (state.canEdit) {
+                OutlinedButton(
+                    onClick = { onEvent(JobOverviewEvent.OpenEdit) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("fl_job_edit"),
+                ) { Text(stringResource(R.string.job_edit)) }
+            }
         }
     }
 }

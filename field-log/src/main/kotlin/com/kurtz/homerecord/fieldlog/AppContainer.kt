@@ -31,6 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import androidx.glance.appwidget.updateAll
@@ -170,6 +172,22 @@ class AppContainer(private val app: Application) {
 
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
+    /**
+     * What this person may do, live: the role from the cached membership (a role change from the office lands on the
+     * next /me refresh) and, for a Lead, the jobs they are on. Least privilege while no company is active (AC-F3).
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val roleGates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates> by lazy {
+        combine(
+            company.state.map { (it as? CompanyState.Active)?.membership?.role ?: com.kurtz.homerecord.core.company.CompanyRole.Crew },
+            auth.state.map { (it as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of) },
+        ) { role, memberId -> role to memberId }
+            .distinctUntilChanged()
+            .flatMapLatest { (role, memberId) ->
+                com.kurtz.homerecord.core.company.RoleGates.observe(role, memberId, db.jobCrewDao(), db.assignmentDao())
+            }
+    }
+
     fun filesDeps(jobId: String, authorId: String?) = com.kurtz.homerecord.fieldlog.files.FilesDeps(
         jobId, db.jobFileDao(), jobFiles, authorId,
         uploads = db.mediaUploadDao().observeAllFor("job_file").map { rows ->
@@ -183,6 +201,7 @@ class AppContainer(private val app: Application) {
             }
         },
         setOffline = jobFileTransfers::setAvailableOffline,
+        canManage = roleGates.map { it.canManageFiles(jobId) },
         queueUpload = { f ->
             val path = f.path
             company.current?.companyId?.let { c ->
@@ -205,7 +224,7 @@ class AppContainer(private val app: Application) {
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(
-        photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits,
+        photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits, roleGates,
     )
 
     fun annotateDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.AnnotateDeps(
@@ -255,6 +274,7 @@ class AppContainer(private val app: Application) {
             crewClock = com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, location), location),
             members = db.memberDao().observeFor(membership.companyId),
             approvals = db.timesheetApprovalDao().observeFor(memberId),
+            gates = roleGates,
         )
     }
 

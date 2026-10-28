@@ -32,6 +32,8 @@ class FilesDeps(
     val uploads: Flow<Map<String, UploadStatus>> = flowOf(emptyMap()),
     /** Turns Available offline on or off, downloading the file when needed (AC-F20). */
     val setOffline: suspend (id: String, on: Boolean) -> OnPhone = { _, _ -> OnPhone.Ready },
+    /** Whether this person may add, rename and delete files on this job (RoleGates.canManageFiles, AC-F3). */
+    val canManage: Flow<Boolean> = flowOf(true),
 )
 
 /** The job's Files tab: folders, search by name, add, rename, delete (AC-F19, AC-F23). */
@@ -41,7 +43,9 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
     private val dialog = MutableStateFlow<FilesDialog?>(null)
     private val notice = MutableStateFlow<FilesNotice?>(null)
 
-    val state: StateFlow<FilesUiState> = combine(combine(d.dao.observeFor(d.jobId), d.uploads) { r, u -> r to u }, folder, query, dialog, notice) { (rows, up), f, q, dlg, note ->
+    private val canManage = d.canManage.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val state: StateFlow<FilesUiState> = combine(combine(d.dao.observeFor(d.jobId), d.uploads, canManage) { r, u, m -> Triple(r, u, m) }, folder, query, dialog, notice) { (rows, up, manage), f, q, dlg, note ->
         fun JobFileEntity.row() = FileRow(id, name, folder, mime, size, offline, up[id] ?: UploadStatus.None)
         val live = rows.filter { it.mime != JobFiles.FOLDER_MIME }
         val here = f.prefixOf()
@@ -51,11 +55,12 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
             files = live.filter { it.folder == f }.sortedBy { it.name.lowercase() }.map { it.row() },
             query = q,
             results = if (q.isBlank()) emptyList() else live.filter { it.name.lowercase().contains(q.trim().lowercase()) }.sortedBy { it.name.lowercase() }.map { it.row() },
-            dialog = dlg, notice = note,
+            dialog = if (manage) dlg else null, notice = note, canManage = manage,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FilesUiState())
 
     fun onEvent(e: FilesEvent) {
+        if (e.changesFiles() && !canManage.value) return
         when (e) {
             FilesEvent.AddFile -> Unit
             FilesEvent.NewFolder -> dialog.value = FilesDialog.NewFolder
@@ -81,12 +86,16 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
 
     /** Stores a picked file in the open folder and queues its upload. Null result from the importer shows a notice. */
     fun added(file: ImportedFile?) {
+        if (!canManage.value) return
         if (file == null) { notice.value = FilesNotice.AddFailed; return }
         viewModelScope.launch {
             val row = d.files.add(d.jobId, folder.value, file.name, file.path, file.mime, file.size, d.author)
             d.queueUpload(row)
         }
     }
+
+    private fun FilesEvent.changesFiles() = this is FilesEvent.AddFile || this is FilesEvent.NewFolder || this is FilesEvent.CreateFolder ||
+        this is FilesEvent.AskRename || this is FilesEvent.Rename || this is FilesEvent.AskDelete || this is FilesEvent.Delete
 
     private fun setFolder(path: String) { folder.value = path; saved[FOLDER] = path }
 

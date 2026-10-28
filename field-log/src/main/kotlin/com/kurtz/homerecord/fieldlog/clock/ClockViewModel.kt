@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.company.CompanyRole
+import com.kurtz.homerecord.core.company.RoleGates
 import com.kurtz.homerecord.core.company.CompanySettings
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.TimesheetApprovalEntity
@@ -54,16 +55,19 @@ class ClockDeps(
     val members: Flow<List<MemberEntity>> = emptyFlow(),
     /** This person's approved weeks, so the sheet can say Approved (AC-F14). */
     val approvals: Flow<List<TimesheetApprovalEntity>> = flowOf(emptyList()),
+    /** Which jobs this person runs; a Lead clocks in the crew only on those (AC-F3). */
+    val gates: Flow<RoleGates> = flowOf(RoleGates(role)),
 )
 
 /** FL-Clock: clock in with job and GPS, break, switch, clock out, and this week's timesheet (AC-F8..F10, AC-F18). */
 class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val canLead = d.crewClock != null && (d.role == CompanyRole.Lead || d.role.isAdmin)
+    private var gates = RoleGates(d.role)
     private val _state = MutableStateFlow(
         ClockUiState(
-            selectedJobId = saved[JOB], note = saved[NOTE] ?: "", now = d.now(), canLeadCrew = canLead,
+            selectedJobId = saved[JOB], note = saved[NOTE] ?: "", now = d.now(),
             crewSelected = saved.get<List<String>>(CREW)?.toSet() ?: emptySet(),
-        ),
+        ).gated(),
     )
     val state: StateFlow<ClockUiState> = _state.asStateFlow()
 
@@ -92,10 +96,11 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     _state.update { s ->
                         val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: lastJob ?: options.singleOrNull()?.id
                         s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, now = now,
-                            weekApproved = approved.any { it.weekStart == WeekKey.of(now, d.zone) })
+                            weekApproved = approved.any { it.weekStart == WeekKey.of(now, d.zone) }).gated()
                     }
                 }
         }
+        if (canLead) viewModelScope.launch { d.gates.collect { g -> gates = g; _state.update { it.gated() } } }
         if (canLead) viewModelScope.launch {
             combine(d.members, d.punches.observeShifts(d.companyId, d.memberId)) { members, _ -> members }.collect { refreshCrew(it) }
         }
@@ -115,12 +120,15 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         }
     }
 
+    /** The crew card shows only for a job this person runs: any job for Owner and Office, a Lead's own jobs (AC-F3, AC-F11). */
+    private fun ClockUiState.gated() = copy(canLeadCrew = canLead && gates.canClockCrew(selectedJobId))
+
     private fun ctx() = ClockContext(d.companyId, d.memberId, settings)
     private fun jobFor(id: String?): ClockJob? = _state.value.jobs.firstOrNull { it.id == id }?.let { ClockJob(it.id, it.lat, it.lng) }
 
     fun onEvent(event: ClockEvent) {
         when (event) {
-            is ClockEvent.SelectJob -> { saved[JOB] = event.id; _state.update { it.copy(selectedJobId = event.id) } }
+            is ClockEvent.SelectJob -> { saved[JOB] = event.id; _state.update { it.copy(selectedJobId = event.id).gated() } }
             is ClockEvent.Note -> { saved[NOTE] = event.text; _state.update { it.copy(note = event.text) } }
             ClockEvent.ClockIn -> {
                 if (!d.location.hasPermission() && !d.permissionAsked()) _state.update { it.copy(explainLocation = true) }
@@ -197,6 +205,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
 
     private fun runCrew(job: ClockJob?, reason: String?) {
         val crew = d.crewClock ?: return
+        if (!_state.value.canLeadCrew) return
         val ids = _state.value.crewSelected
         viewModelScope.launch {
             _state.update { it.copy(gettingLocation = true) }

@@ -14,6 +14,9 @@
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
 
+- 2026-10-28 (CR2l3): Crew and Sub cannot delete job photos, even their own; only Owner, Office and the job's Lead can. Photos carry no author column yet, so "own photo" cannot be told apart; the server still accepts a crew photo delete (captures are open to everyone in backend/src/sync/policy.ts). Say if Crew should delete their own shots (needs an author column on photo, a Room version bump and the same rule on the server).
+- 2026-10-28 (CR2l3): A Lead's "assigned jobs" are the jobs with a job_crew row or a scheduled day (assignment) naming them, the same set the server uses; a Lead still clocks themselves in on any active job and still sees every job in Jobs.
+
 - 2026-10-19 (Nate, at re-scope): v1 docs carried into this repo are `docs/voice.md`, `docs/billing.md`, `scripts/setup-android.sh`, `scripts/ci-gradle.sh` and `.github/workflows/testing-apks.yml`. No code. Confirm or strike.
 - 2026-10-19 (Nate, at re-scope): push notifications use Firebase Cloud Messaging for delivery only (free; Cloudflare has no push service). No other Firebase product. Confirm or choose "no push in v2".
 - 2026-10-19 (Nate, at re-scope): email codes and handoff emails go through Resend (free tier 3,000/month). Confirm or name another sender.

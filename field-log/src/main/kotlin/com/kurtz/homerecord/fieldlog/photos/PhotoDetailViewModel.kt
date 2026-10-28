@@ -24,6 +24,8 @@ class PhotoDetailDeps(
     val jobs: JobDao,
     val rooms: RoomDao,
     val edits: PhotoEdits,
+    /** Who may do what; delete needs [RoleGates.canDeletePhoto] for the photo's job (AC-F3). */
+    val gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>,
 )
 
 /** FL-Photo: caption, room and phase tags, the Before mark and delete for one job photo (AC-F25). */
@@ -34,7 +36,11 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
     /** Edits land in the order they were made, so a quick room then phase tap cannot be overwritten by the older write. */
     private val writes = Mutex()
 
+    @Volatile private var jobId: String? = null
+    @Volatile private var gates: com.kurtz.homerecord.core.company.RoleGates? = null
+
     init {
+        viewModelScope.launch { d.gates.collect { g -> gates = g; _state.update { it.copy(canDelete = g.canDeletePhoto(jobId)) } } }
         viewModelScope.launch { load() }
     }
 
@@ -44,6 +50,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             _state.update { it.copy(loading = false, missing = true) }
             return
         }
+        jobId = p.jobId
         val job = p.jobId?.let { d.jobs.get(it) }
         val rooms = (job?.homeId ?: p.homeId).let { d.rooms.listForHome(it) }.map { PhotoRoomOption(it.id, it.name) }
         val phases = job?.let { runCatching { Json.decodeFromString(ListSerializer(String.serializer()), it.phasesJson) }.getOrNull() }.orEmpty()
@@ -51,7 +58,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             PhotoDetailUiState(
                 loading = false, imagePath = p.path, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
                 phases = phases, phase = p.stage, takenAt = p.takenAt, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
-                isBefore = p.stage == PhotoEdits.BEFORE,
+                isBefore = p.stage == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId) ?: false,
             )
         }
     }
@@ -72,9 +79,9 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
                 _state.update { it.copy(phase = PhotoEdits.BEFORE, isBefore = true) }
                 viewModelScope.launch { writes.withLock { d.edits.markBefore(d.photoId) } }
             }
-            PhotoDetailEvent.AskDelete -> _state.update { it.copy(confirmDelete = true) }
+            PhotoDetailEvent.AskDelete -> _state.update { it.copy(confirmDelete = it.canDelete) }
             PhotoDetailEvent.CancelDelete -> _state.update { it.copy(confirmDelete = false) }
-            PhotoDetailEvent.ConfirmDelete -> viewModelScope.launch {
+            PhotoDetailEvent.ConfirmDelete -> if (_state.value.canDelete) viewModelScope.launch {
                 d.edits.delete(d.photoId)
                 _state.update { it.copy(confirmDelete = false, deleted = true) }
             }

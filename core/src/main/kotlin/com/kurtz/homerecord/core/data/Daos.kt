@@ -234,6 +234,7 @@ interface JobCrewDao {
     @Query("SELECT * FROM job_crew WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): JobCrewEntity?
     @Query("SELECT * FROM job_crew WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<JobCrewEntity>>
     @Query("SELECT * FROM job_crew WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<JobCrewEntity>
+    @Query("SELECT DISTINCT jobId FROM job_crew WHERE memberId = :memberId AND deletedAt IS NULL") fun observeJobIdsForMember(memberId: String): Flow<List<String>>
     @Query("UPDATE job_crew SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 
@@ -317,6 +318,7 @@ interface AssignmentDao {
     @Query("SELECT * FROM assignment WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): AssignmentEntity?
     @Query("SELECT * FROM assignment WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<AssignmentEntity>>
     @Query("SELECT * FROM assignment WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<AssignmentEntity>
+    @Query("SELECT DISTINCT jobId FROM assignment WHERE memberId = :memberId AND deletedAt IS NULL") fun observeJobIdsForMember(memberId: String): Flow<List<String>>
     @Query("SELECT a.* FROM assignment a JOIN job j ON a.jobId = j.id WHERE j.companyId = :companyId AND j.deletedAt IS NULL AND a.deletedAt IS NULL")
     fun observeForCompany(companyId: String): Flow<List<AssignmentEntity>>
     @Query("UPDATE assignment SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)

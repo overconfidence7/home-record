@@ -71,12 +71,13 @@ class ClockViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private suspend fun vm(role: CompanyRole = CompanyRole.Crew, approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())): ClockViewModel {
+    private suspend fun vm(role: CompanyRole = CompanyRole.Crew, leadJobs: Set<String> = emptySet(), approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())): ClockViewModel {
         val punches = PunchRepository(db, { clock })
         val deps = ClockDeps(
             "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, settings,
             { asked }, { asked = true }, now = { clock }, ticks = emptyFlow(),
             role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"), approvals = approvals,
+            gates = kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(role, leadJobs)),
         )
         return ClockViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
     }
@@ -236,12 +237,12 @@ class ClockViewModelTest {
     // AC-F11: a lead ticks people, one tap punches each with clockedInBy; people already in are shown but not pickable
     @Test fun leadClocksInSelectedCrewOnTheSelectedJob() = runBlocking<Unit> {
         addMember("m1", "Lead"); addMember("m2", "Maria"); addMember("m3", "Dev")
-        val vm = vm(CompanyRole.Lead)
+        val vm = vm(CompanyRole.Lead, leadJobs = setOf("j1"))
+        vm.onEvent(ClockEvent.SelectJob("j1"))
         val s0 = await(vm) { it.crew.size == 2 }
         assertThat(s0.canLeadCrew).isTrue()
         assertThat(s0.crew.map { it.id }).containsExactly("m2", "m3")
         vm.onEvent(ClockEvent.ToggleCrew("m2")); vm.onEvent(ClockEvent.ToggleCrew("m3"))
-        vm.onEvent(ClockEvent.SelectJob("j1"))
         vm.onEvent(ClockEvent.ClockInCrew)
         val s1 = await(vm) { it.crewNotice != null }
         assertThat(s1.crewNotice?.punched).isEqualTo(2)
@@ -253,6 +254,20 @@ class ClockViewModelTest {
         await(vm) { s -> s.crew.all { it.onClock } }
         vm.onEvent(ClockEvent.ToggleCrew("m2"))
         assertThat(vm.state.value.crewSelected).isEmpty()
+    }
+
+    // AC-F3: a Lead clocks in the crew only on jobs they are on; on another job the card is gone and a stray tap punches no one
+    @Test fun leadGetsNoCrewCardOnAJobTheyAreNotOn() = runBlocking<Unit> {
+        addMember("m1", "Lead"); addMember("m2", "Maria")
+        val vm = vm(CompanyRole.Lead, leadJobs = setOf("j1"))
+        await(vm) { it.crew.size == 1 }
+        vm.onEvent(ClockEvent.SelectJob("j2"))
+        assertThat(vm.state.value.canLeadCrew).isFalse()
+        vm.onEvent(ClockEvent.ToggleCrew("m2"))
+        vm.onEvent(ClockEvent.ClockInCrew)
+        assertThat(db.punchDao().listFor("c1")).isEmpty()
+        vm.onEvent(ClockEvent.SelectJob("j1"))
+        assertThat(vm.state.value.canLeadCrew).isTrue()
     }
 
     @Test fun crewMembersGetNoCrewCard() = runBlocking<Unit> {
