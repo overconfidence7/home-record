@@ -218,6 +218,13 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    /** Photos and voice memos taken on another phone arrive as records only; this fetches their bytes by R2 key (AC-F55). */
+    val mediaDownloads by lazy {
+        com.kurtz.homerecord.core.media.MediaDownloads(
+            db, mediaApi, mediaCache, tenant = { company.current?.companyId?.let { TenantRef(TenantKind.Company, it) } },
+        )
+    }
+
     fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(
         fileId, db.jobFileDao(), ensureOnPhone = jobFileTransfers::ensureOnPhone,
     )
@@ -226,6 +233,7 @@ class AppContainer(private val app: Application) {
 
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(
         photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits, roleGates,
+        isOnPhone = mediaDownloads::isOnPhone, download = mediaDownloads::photo,
     )
 
     fun annotateDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.AnnotateDeps(
@@ -248,6 +256,7 @@ class AppContainer(private val app: Application) {
             newMemoPath = { java.io.File(java.io.File(context.filesDir, "media").also { it.mkdirs() }, "${java.util.UUID.randomUUID()}.m4a").absolutePath },
             hasCameraPermission = { context.checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED },
             appScope = scope,
+            isOnPhone = mediaDownloads::isOnPhone, downloadPhoto = mediaDownloads::photo,
         )
     }
 

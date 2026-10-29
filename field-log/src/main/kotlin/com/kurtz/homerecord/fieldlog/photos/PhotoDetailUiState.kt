@@ -2,11 +2,15 @@ package com.kurtz.homerecord.fieldlog.photos
 
 data class PhotoRoomOption(val id: String, val name: String)
 
+/** Whether the photo's bytes are here; a photo pulled from another phone downloads by its R2 key first (cr:sync-local-columns). */
+enum class PhotoImage { Ready, Downloading, NoNetwork, NotUploaded, Failed }
+
 /** One photo opened full screen: its caption and tags are editable, share and delete sit in the bar (AC-F25). */
 data class PhotoDetailUiState(
     val loading: Boolean = true,
     val missing: Boolean = false,
     val imagePath: String = "",
+    val image: PhotoImage = PhotoImage.Ready,
     val caption: String = "",
     val rooms: List<PhotoRoomOption> = emptyList(),
     val roomId: String? = null,
@@ -31,4 +35,6 @@ sealed interface PhotoDetailEvent {
     data object AskDelete : PhotoDetailEvent
     data object CancelDelete : PhotoDetailEvent
     data object ConfirmDelete : PhotoDetailEvent
+    /** Tries the download again after no network or a failure. */
+    data object RetryDownload : PhotoDetailEvent
 }

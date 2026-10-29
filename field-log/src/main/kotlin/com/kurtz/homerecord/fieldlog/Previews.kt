@@ -565,6 +565,11 @@ fun CaptureLoadingPreview() = CaptureFrame(com.kurtz.homerecord.fieldlog.capture
 @Composable
 fun CaptureGhostPreview() = CaptureFrame(captureReady.copy(ghost = com.kurtz.homerecord.fieldlog.capture.GhostShot("b1", "/none/b1.jpg"), ghostOn = true))
 
+/** The Before was taken on another phone and is still downloading (cr:sync-local-columns). */
+@ThemePreviews
+@Composable
+fun CaptureGhostDownloadingPreview() = CaptureFrame(captureReady.copy(ghost = com.kurtz.homerecord.fieldlog.capture.GhostShot("b1", ""), ghostOn = true))
+
 @ThemePreviews
 @Composable
 fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true, recordedSeconds = 74))
@@ -573,8 +578,8 @@ fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true,
 @Composable
 fun CaptureNotePreview() = CaptureFrame(captureReady.copy(noteOpen = true, noteText = "Homeowner wants the island moved 6 in. toward the window."))
 
-private fun tile(id: String, room: String? = null, phase: String? = null, caption: String? = null, annotated: Boolean = false) =
-    com.kurtz.homerecord.fieldlog.photos.PhotoTile(id, "/none/$id.jpg", room, phase, caption, annotated)
+private fun tile(id: String, room: String? = null, phase: String? = null, caption: String? = null, annotated: Boolean = false, here: Boolean = true) =
+    com.kurtz.homerecord.fieldlog.photos.PhotoTile(id, if (here) "/none/$id.jpg" else "", room, phase, caption, annotated)
 
 private val photosReady = com.kurtz.homerecord.fieldlog.photos.PhotosUiState(
     loading = false, count = 5,
@@ -586,7 +591,7 @@ private val photosReady = com.kurtz.homerecord.fieldlog.photos.PhotosUiState(
                     tile("b1", "Kitchen", "Rough-in", "Old panel feed"), tile("a1", "Kitchen", "Finish", "New subpanel in", annotated = true),
                 ),
                 com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p1", "Garage", "Rough-in")),
-                com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p2", "Main bath", "Inspection", "GFCI tested")),
+                com.kurtz.homerecord.fieldlog.photos.PhotoCell.Single(tile("p2", "Main bath", "Inspection", "GFCI tested", here = false)),
             ),
         ),
         com.kurtz.homerecord.fieldlog.photos.PhotoDayUi(
@@ -630,6 +635,24 @@ fun PhotoDetailCrewPreview() = Frame {
 @Composable
 fun PhotoDetailDeletePreview() = Frame {
     com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, {}, {}, {}, java.time.ZoneId.of("UTC"))
+}
+
+/** A photo taken on another phone, downloading by its R2 key (AC-F55). */
+@ThemePreviews
+@Composable
+fun PhotoDetailDownloadingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(
+        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.Downloading), {}, {}, {}, {}, java.time.ZoneId.of("UTC"),
+    )
+}
+
+/** The same photo with no connection: what to do, and Retry. */
+@ThemePreviews
+@Composable
+fun PhotoDetailOfflinePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(
+        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.NoNetwork, annotated = false), {}, {}, {}, {}, java.time.ZoneId.of("UTC"),
+    )
 }
 
 @ThemePreviews

@@ -271,6 +271,13 @@
     <string name="photo_delete_title">Delete this photo?</string>
     <string name="photo_delete_body">It comes off the job for everyone on the crew.</string>
     <string name="photo_missing">This photo is gone.</string>
+    <string name="photo_downloading">Downloading the photo…</string>
+    <string name="photo_offline">Not on this phone yet. Connect to the internet and try again.</string>
+    <string name="photo_not_uploaded">This photo is still uploading from the phone that took it. Try again in a minute.</string>
+    <string name="photo_download_failed">Couldn\'t download this photo. Try again.</string>
+    <string name="photo_unreadable">Couldn\'t open this photo</string>
+    <string name="photos_not_here">Photo not on this phone yet</string>
+    <string name="cap_ghost_downloading">Downloading the Before photo…</string>
     <string name="photo_mark_before">Before shot</string>
     <string name="photo_before_hint">Turn on Line up with Before in the camera to take its After.</string>
     <string name="photo_annotate">Mark up</string>

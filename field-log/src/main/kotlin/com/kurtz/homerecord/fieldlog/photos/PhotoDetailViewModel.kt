@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.data.PhotoDao
 import com.kurtz.homerecord.core.data.RoomDao
 import com.kurtz.homerecord.core.photo.AnnotationCodec
+import com.kurtz.homerecord.core.photo.OnPhone
 import com.kurtz.homerecord.core.photo.PhotoEdits
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,10 @@ class PhotoDetailDeps(
     val edits: PhotoEdits,
     /** Who may do what; delete needs [RoleGates.canDeletePhoto] for the photo's job (AC-F3). */
     val gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>,
+    /** Whether a path's bytes are on this phone; checked off Main by the caller's implementation (S7). */
+    val isOnPhone: suspend (String) -> Boolean = { true },
+    /** Fetches a photo pulled from another phone by its R2 key ([com.kurtz.homerecord.core.media.MediaDownloads.photo]). */
+    val download: suspend (String) -> OnPhone = { OnPhone.Ready },
 )
 
 /** FL-Photo: caption, room and phase tags, the Before mark (its own tag, cr:fl-before-phase) and delete for one job photo (AC-F25). */
@@ -53,12 +58,31 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
         jobId = p.jobId
         val job = p.jobId?.let { d.jobs.get(it) }
         val rooms = (job?.homeId ?: p.homeId).let { d.rooms.listForHome(it) }.map { PhotoRoomOption(it.id, it.name) }
+        val onPhone = d.isOnPhone(p.path)
         val phases = job?.let { runCatching { Json.decodeFromString(ListSerializer(String.serializer()), it.phasesJson) }.getOrNull() }.orEmpty()
         _state.update {
             PhotoDetailUiState(
-                loading = false, imagePath = p.path, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
+                loading = false, imagePath = if (onPhone) p.path else "", image = if (onPhone) PhotoImage.Ready else PhotoImage.Downloading, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
                 phases = phases, phase = p.stage, takenAt = p.takenAt, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
                 isBefore = p.pairRole == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId) ?: false,
+            )
+        }
+        if (!onPhone) download()
+    }
+
+    private suspend fun download() {
+        _state.update { it.copy(image = PhotoImage.Downloading) }
+        val result = d.download(d.photoId)
+        val path = if (result == OnPhone.Ready) d.photos.get(d.photoId)?.path.orEmpty() else ""
+        _state.update {
+            it.copy(
+                imagePath = path,
+                image = when (result) {
+                    OnPhone.Ready -> PhotoImage.Ready
+                    OnPhone.NoNetwork -> PhotoImage.NoNetwork
+                    OnPhone.NotUploaded -> PhotoImage.NotUploaded
+                    OnPhone.Failed -> PhotoImage.Failed
+                },
             )
         }
     }
@@ -82,6 +106,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             }
             PhotoDetailEvent.AskDelete -> _state.update { it.copy(confirmDelete = it.canDelete) }
             PhotoDetailEvent.CancelDelete -> _state.update { it.copy(confirmDelete = false) }
+            PhotoDetailEvent.RetryDownload -> if (_state.value.image != PhotoImage.Downloading) viewModelScope.launch { download() }
             PhotoDetailEvent.ConfirmDelete -> if (_state.value.canDelete) viewModelScope.launch {
                 d.edits.delete(d.photoId)
                 _state.update { it.copy(confirmDelete = false, deleted = true) }

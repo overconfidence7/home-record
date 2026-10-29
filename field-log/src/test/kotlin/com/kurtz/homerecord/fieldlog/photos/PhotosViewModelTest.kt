@@ -95,4 +95,36 @@ class PhotosViewModelTest {
         assertThat(pair.before.annotated).isFalse()
         assertThat(s.count).isEqualTo(2)
     }
+
+    // AC-F55: a photo taken on another phone arrives as a record only (path ""); its tile waits with no image while
+    // it downloads by key once, and fills in when the row's path is set (cr:sync-local-columns).
+    @Test fun `photo from another phone shows a placeholder and downloads once`() = runBlocking<Unit> {
+        db.photoDao().upsert(photo("mine", at(21, 8)))
+        db.photoDao().upsert(photo("theirs", at(21, 9)).copy(path = "", r2Key = "c1/photo/theirs/IMG.jpg"))
+        val asked = mutableListOf<String>()
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val model = PhotosViewModel(
+            PhotosDeps(
+                "j1", db.photoDao(), db.jobDao(), db.roomDao(), zone,
+                missing = { paths -> paths.filterTo(mutableSetOf()) { it.isNullOrEmpty() } },
+                download = { id ->
+                    asked += id
+                    gate.await()
+                    db.photoDao().setLocalPath(id, "/cache/$id.jpg")
+                    com.kurtz.homerecord.core.photo.OnPhone.Ready
+                },
+            ),
+        )
+        val waiting = model.state.filter { !it.loading }.first()
+        val tiles = waiting.days.single().cells.map { (it as PhotoCell.Single).tile }.associateBy { it.id }
+        assertThat(tiles.getValue("theirs").imagePath).isEmpty()
+        assertThat(tiles.getValue("mine").imagePath).isEqualTo("/m/mine.jpg")
+        // Another change to the list while the download runs does not start a second one.
+        db.photoDao().upsert(photo("later", at(21, 10)))
+        model.state.filter { it.count == 3 }.first()
+        gate.complete(Unit)
+        val done = model.state.filter { s -> s.days.flatMap { it.cells }.any { (it as PhotoCell.Single).tile.imagePath == "/cache/theirs.jpg" } }.first()
+        assertThat(done.count).isEqualTo(3)
+        assertThat(asked).containsExactly("theirs")
+    }
 }

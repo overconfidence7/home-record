@@ -320,6 +320,21 @@ fun PhotoDetailMissingScreenshot() = PhotoDetailMissingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PhotoDetailDownloadingScreenshot() = PhotoDetailDownloadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotoDetailOfflineScreenshot() = PhotoDetailOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureGhostDownloadingScreenshot() = CaptureGhostDownloadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun AnnotateScreenshot() = AnnotatePreview()
 
 @PreviewTest

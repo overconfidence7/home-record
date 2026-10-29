@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -119,10 +120,20 @@ private fun Tile(tile: PhotoTile, modifier: Modifier, badge: String? = null, onO
         modifier.aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .clickable { onOpen(tile.id) }.testTag("fl_photos_tile_${tile.id}"),
     ) {
-        AsyncImage(
-            model = File(tile.imagePath), contentDescription = description, contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
+        if (tile.imagePath.isEmpty()) {
+            // Taken on another phone and still downloading: say so instead of an empty square.
+            Icon(
+                Icons.Rounded.CloudDownload,
+                contentDescription = listOfNotNull(stringResource(R.string.photos_not_here), description).joinToString(", "),
+                Modifier.align(Alignment.Center).size(32.dp).testTag("fl_photos_tile_waiting_${tile.id}"),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            AsyncImage(
+                model = File(tile.imagePath), contentDescription = description, contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         val label = badge ?: if (tile.annotated) stringResource(R.string.photos_marked) else null
         if (label != null) {
             Text(

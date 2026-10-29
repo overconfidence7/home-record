@@ -97,12 +97,15 @@ class CaptureViewModelTest {
     private fun vm(
         jobId: String = "j1", last: Pair<String?, String?> = null to null, hasCamera: Boolean = true, store: ViewModelStore = ViewModelStore(),
         granted: () -> Boolean = { hasCamera },
+        isOnPhone: suspend (String) -> Boolean = { true },
+        downloadPhoto: suspend (String) -> com.kurtz.homerecord.core.photo.OnPhone = { com.kurtz.homerecord.core.photo.OnPhone.Ready },
     ): CaptureViewModel {
         val photos = JobPhotos(db, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L })
         val deps = CaptureDeps(
             jobId, db.jobDao(), db.roomDao(), photos, location, { last }, { room, phase -> remembered = room to phase }, granted,
             notes = JobNotes(db, { null }, { _, _, _, _, _, _ -> }, { "c1" }, { 9_000L }),
             recorder = recorder, newMemoPath = { "/media/memo.m4a" }, appScope = appScope,
+            isOnPhone = isOnPhone, downloadPhoto = downloadPhoto,
         )
         val factory = viewModelFactory { initializer { CaptureViewModel(deps, SavedStateHandle()) } }
         return ViewModelProvider(store, factory)[CaptureViewModel::class.java].also { created += it }
@@ -381,5 +384,28 @@ class CaptureViewModelTest {
         assertThat(recorder.stops).isEqualTo(1)
         val row = withTimeout(10_000) { db.noteDao().observeFor("j1").first { it.isNotEmpty() } }.single()
         assertThat(row.voicePath).isEqualTo("/media/memo.m4a")
+    }
+
+    // AC-F25, AC-F55: a Before taken on another phone has no bytes here; the overlay waits with an empty path while it
+    // downloads by key once, and shows the photo when the row's path is set (cr:sync-local-columns).
+    @Test fun ghostFromAnotherPhoneDownloadsBeforeShowing() = runBlocking<Unit> {
+        val asked = mutableListOf<String>()
+        val vm = vm(
+            isOnPhone = { it.isNotEmpty() },
+            downloadPhoto = { id ->
+                asked += id
+                db.photoDao().setLocalPath(id, "/cache/before.jpg")
+                com.kurtz.homerecord.core.photo.OnPhone.Ready
+            },
+        ).also { it.loaded() }
+        db.photoDao().upsert(
+            com.kurtz.homerecord.core.data.PhotoEntity(
+                id = "theirs", homeId = "h1", jobId = "j1", path = "", r2Key = "c1/photo/theirs/IMG.jpg", pairRole = PhotoEdits.BEFORE,
+                takenAt = 1_000, createdAt = 1_000, updatedAt = 1_000,
+            ),
+        )
+        val shown = withTimeout(10_000) { vm.state.first { it.ghost?.path == "/cache/before.jpg" } }
+        assertThat(shown.ghost?.photoId).isEqualTo("theirs")
+        assertThat(asked).containsExactly("theirs")
     }
 }

@@ -2,6 +2,8 @@ package com.kurtz.homerecord.fieldlog.capture
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,10 +130,20 @@ private fun Viewfinder(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, c
     Box(modifier.background(Color.Black).testTag("fl_capture_viewfinder")) {
         camera(Modifier.fillMaxSize())
         state.ghost?.takeIf { state.ghostOn }?.let {
-            coil3.compose.AsyncImage(
-                model = java.io.File(it.path), contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().alpha(0.3f).testTag("fl_capture_ghost"),
-            )
+            if (it.path.isEmpty()) {
+                Text(
+                    stringResource(R.string.cap_ghost_downloading),
+                    Modifier.align(Alignment.Center).padding(16.dp).clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)).padding(horizontal = 12.dp, vertical = 8.dp)
+                        .testTag("fl_capture_ghost_waiting"),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            } else {
+                coil3.compose.AsyncImage(
+                    model = java.io.File(it.path), contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().alpha(0.3f).testTag("fl_capture_ghost"),
+                )
+            }
         }
         state.ghost?.let {
             FilterChip(

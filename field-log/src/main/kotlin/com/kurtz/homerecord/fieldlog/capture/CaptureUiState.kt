@@ -8,7 +8,7 @@ enum class FlashMode { Off, Auto, On }
 
 data class CaptureRoom(val id: String, val name: String)
 
-/** The Before shot drawn at 30% over the preview so the After lines up (AC-F25). */
+/** The Before shot drawn at 30% over the preview so the After lines up (AC-F25); [path] is "" while it downloads. */
 data class GhostShot(val photoId: String, val path: String)
 
 /** What a shot or import told the person; shown as one line over the shutter row. */

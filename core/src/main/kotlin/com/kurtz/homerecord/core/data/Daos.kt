@@ -161,6 +161,8 @@ interface PhotoDao {
     /** Sets a late GPS fix in one statement, so a tag or Before edited meanwhile is not overwritten; 0 when already set or deleted. */
     @Query("UPDATE photo SET lat = :lat, lng = :lng, updatedAt = :at WHERE id = :id AND lat IS NULL AND deletedAt IS NULL")
     suspend fun setFixIfMissing(id: String, lat: Double, lng: Double, at: Long): Int
+    /** Where this phone keeps the bytes; device-local, so it neither bumps updatedAt nor syncs (cr:sync-local-columns). */
+    @Query("UPDATE photo SET path = :path WHERE id = :id") suspend fun setLocalPath(id: String, path: String)
     @Query("UPDATE photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 
@@ -301,6 +303,8 @@ interface NoteDao {
     @Query("SELECT * FROM note WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): NoteEntity?
     @Query("SELECT * FROM note WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<NoteEntity>>
     @Query("SELECT * FROM note WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<NoteEntity>
+    /** Where this phone keeps the memo; device-local, so it neither bumps updatedAt nor syncs (cr:sync-local-columns). */
+    @Query("UPDATE note SET voicePath = :path WHERE id = :id") suspend fun setVoicePath(id: String, path: String)
     @Query("UPDATE note SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

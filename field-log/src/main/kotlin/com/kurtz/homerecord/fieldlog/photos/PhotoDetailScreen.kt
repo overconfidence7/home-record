@@ -1,5 +1,19 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.rounded.BrokenImage
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -36,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
@@ -63,9 +76,11 @@ fun PhotoDetailScreen(
         subtitle = if (state.takenAt > 0) DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).format(Instant.ofEpochMilli(state.takenAt).atZone(zone)) else null,
         onBack = onBack,
         actions = {
-            if (!state.loading && !state.missing) {
+            if (!state.loading && !state.missing && state.image == PhotoImage.Ready) {
                 IconButton(onAnnotate, Modifier.testTag("fl_photo_annotate")) { Icon(Icons.Rounded.Edit, stringResource(R.string.photo_annotate)) }
                 IconButton(onShare, Modifier.testTag("fl_photo_share")) { Icon(Icons.Rounded.Share, stringResource(R.string.photo_share)) }
+            }
+            if (!state.loading && !state.missing) {
                 if (state.canDelete) {
                     IconButton({ onEvent(PhotoDetailEvent.AskDelete) }, Modifier.testTag("fl_photo_delete")) { Icon(Icons.Rounded.Delete, stringResource(R.string.photo_delete)) }
                 }
@@ -82,10 +97,7 @@ fun PhotoDetailScreen(
                 Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp).testTag("fl_photo_body"),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                AsyncImage(
-                    model = File(state.imagePath), contentDescription = state.caption.ifBlank { null }, contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp).testTag("fl_photo_image"),
-                )
+                PhotoFrame(state, onEvent)
                 OutlinedTextField(
                     state.caption, { onEvent(PhotoDetailEvent.Caption(it)) },
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_photo_caption").onFocusChanged { if (!it.isFocused) onEvent(PhotoDetailEvent.SaveCaption) },
@@ -115,7 +127,6 @@ fun PhotoDetailScreen(
                         }
                     }
                 }
-                if (state.annotated) Text(stringResource(R.string.photos_marked), style = MaterialTheme.typography.labelLarge)
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 56.dp)
                         .toggleable(state.isBefore, role = Role.Switch) { onEvent(PhotoDetailEvent.ToggleBefore) }
@@ -144,5 +155,67 @@ fun PhotoDetailScreen(
             confirmButton = { TextButton({ onEvent(PhotoDetailEvent.ConfirmDelete) }, Modifier.heightIn(min = 48.dp).testTag("fl_photo_delete_confirm")) { Text(stringResource(R.string.photo_delete)) } },
             dismissButton = { TextButton({ onEvent(PhotoDetailEvent.CancelDelete) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) } },
         )
+    }
+}
+
+/**
+ * The photo in a fixed 4:3 frame with a placeholder while it loads and a broken-image fallback (ui-standards rule 27),
+ * "Marked up" as a badge on it, and, for a photo pulled from another phone, the download's progress or what to do.
+ */
+@Composable
+private fun PhotoFrame(state: PhotoDetailUiState, onEvent: (PhotoDetailEvent) -> Unit) {
+    Box(
+        Modifier.fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh).testTag("fl_photo_image"),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (state.image == PhotoImage.Ready) {
+            SubcomposeAsyncImage(
+                model = File(state.imagePath), contentDescription = state.caption.ifBlank { null }, contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize(),
+                loading = { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
+                error = { FrameMessage(Icons.Rounded.BrokenImage, stringResource(R.string.photo_unreadable)) },
+            )
+        } else {
+            val text = when (state.image) {
+                PhotoImage.NoNetwork -> R.string.photo_offline
+                PhotoImage.NotUploaded -> R.string.photo_not_uploaded
+                PhotoImage.Failed -> R.string.photo_download_failed
+                else -> R.string.photo_downloading
+            }
+            FrameMessage(
+                if (state.image == PhotoImage.NoNetwork) Icons.Rounded.CloudOff else Icons.Rounded.CloudDownload,
+                stringResource(text),
+                busy = state.image == PhotoImage.Downloading,
+            ) {
+                if (state.image != PhotoImage.Downloading) {
+                    TextButton({ onEvent(PhotoDetailEvent.RetryDownload) }, Modifier.heightIn(min = 48.dp).testTag("fl_photo_retry")) {
+                        Text(stringResource(com.kurtz.homerecord.coreui.R.string.retry))
+                    }
+                }
+            }
+        }
+        if (state.annotated) {
+            Text(
+                stringResource(R.string.photos_marked),
+                Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)).padding(horizontal = 8.dp, vertical = 4.dp)
+                    .testTag("fl_photo_marked"),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FrameMessage(icon: ImageVector, text: String, busy: Boolean = false, action: @Composable () -> Unit = {}) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("fl_photo_image_message"),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (busy) CircularProgressIndicator() else Icon(icon, contentDescription = null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        action()
     }
 }

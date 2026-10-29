@@ -2,7 +2,7 @@ package com.kurtz.homerecord.fieldlog.photos
 
 import java.time.LocalDate
 
-/** One photo in the gallery grid. [imagePath] is the thumbnail when there is one (AC-F24). */
+/** One photo in the gallery grid. [imagePath] is the thumbnail when there is one, "" while it downloads (AC-F24, AC-F55). */
 data class PhotoTile(
     val id: String,
     val imagePath: String,

@@ -138,4 +138,45 @@ class PhotoDetailViewModelTest {
         val lead = vm(gates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Lead, setOf("j1")))
         assertThat(lead.state.filter { !it.loading && it.canDelete }.first().canDelete).isTrue()
     }
+
+    // AC-F55: a photo from another phone has no bytes here; the page shows the download, says why it stopped
+    // (offline), and Retry fetches it by key and shows it (cr:sync-local-columns, judge:fl-photo-detail-no-image).
+    @Test fun `photo from another phone downloads with offline and retry`() = runBlocking<Unit> {
+        db.photoDao().upsert(PhotoEntity(id = "p2", homeId = "h1", jobId = "j1", path = "", r2Key = "c1/photo/p2/IMG.jpg", takenAt = 6, createdAt = 6, updatedAt = 6))
+        val answers = ArrayDeque(listOf(com.kurtz.homerecord.core.photo.OnPhone.NoNetwork, com.kurtz.homerecord.core.photo.OnPhone.Ready))
+        val v = PhotoDetailViewModel(
+            PhotoDetailDeps(
+                "p2", db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") },
+                kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)),
+                isOnPhone = { it.isNotEmpty() },
+                download = { id ->
+                    val r = answers.removeFirst()
+                    if (r == com.kurtz.homerecord.core.photo.OnPhone.Ready) db.photoDao().setLocalPath(id, "/cache/p2.jpg")
+                    r
+                },
+            ),
+        )
+        val offline = v.state.filter { !it.loading && it.image != PhotoImage.Downloading }.first()
+        assertThat(offline.image).isEqualTo(PhotoImage.NoNetwork)
+        assertThat(offline.imagePath).isEmpty()
+        v.onEvent(PhotoDetailEvent.RetryDownload)
+        val shown = v.state.filter { it.image == PhotoImage.Ready }.first()
+        assertThat(shown.imagePath).isEqualTo("/cache/p2.jpg")
+        assertThat(changes).isEmpty()
+    }
+
+    @Test fun `photo on this phone is shown without a download`() = runBlocking<Unit> {
+        var asked = false
+        val v = PhotoDetailViewModel(
+            PhotoDetailDeps(
+                "p1", db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") },
+                kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)),
+                isOnPhone = { true }, download = { asked = true; com.kurtz.homerecord.core.photo.OnPhone.Ready },
+            ),
+        )
+        val s = loaded(v)
+        assertThat(s.image).isEqualTo(PhotoImage.Ready)
+        assertThat(s.imagePath).isEqualTo("/m/p1.jpg")
+        assertThat(asked).isFalse()
+    }
 }

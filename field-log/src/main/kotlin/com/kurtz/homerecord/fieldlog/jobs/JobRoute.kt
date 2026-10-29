@@ -31,7 +31,7 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -57,7 +57,10 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
         onBack,
         photosContent = {
             com.kurtz.homerecord.fieldlog.photos.PhotosRoute(
-                com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao()),
+                if (downloads == null) com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao())
+                else com.kurtz.homerecord.fieldlog.photos.PhotosDeps(
+                    jobId, db.photoDao(), db.jobDao(), db.roomDao(), missing = downloads::missing, download = downloads::photo,
+                ),
                 onCapture = { onCapture?.invoke() },
                 onOpen = { onOpenPhoto?.invoke(it) },
             )

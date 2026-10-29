@@ -46,6 +46,10 @@ class CaptureDeps(
      */
     val appScope: CoroutineScope,
     val fixTimeoutMs: Long = 3_000,
+    /** Whether a path's bytes are on this phone; the Before to line up with may have been taken on another phone. */
+    val isOnPhone: suspend (String) -> Boolean = { true },
+    /** Fetches that Before by its R2 key ([com.kurtz.homerecord.core.media.MediaDownloads.photo]). */
+    val downloadPhoto: suspend (String) -> com.kurtz.homerecord.core.photo.OnPhone = { com.kurtz.homerecord.core.photo.OnPhone.Ready },
 )
 
 /** FL-Capture: tags, flash, lens and saving every shot with job, room, phase, time and fix (AC-F24, AC-F29). */
@@ -96,6 +100,22 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             // A different Before (or none) starts with the overlay off again: the person chooses each pairing.
             it.copy(ghost = ghost, ghostOn = it.ghostOn && ghost?.photoId == it.ghost?.photoId)
         }
+        if (pick != null) viewModelScope.launch { fetchGhost(pick.id, pick.path) }
+    }
+
+    /** Photo id whose download is running, so a burst of list changes fetches it once. */
+    private var ghostFetch: String? = null
+
+    /**
+     * A Before pulled from another phone has no bytes here yet: the overlay waits with an empty path (the viewfinder
+     * says it is downloading) and fills in when the download sets the row's path (cr:sync-local-columns).
+     */
+    private suspend fun fetchGhost(id: String, path: String) {
+        if (d.isOnPhone(path)) return
+        _state.update { s -> s.ghost?.takeIf { g -> g.photoId == id && g.path.isNotEmpty() }?.let { s.copy(ghost = it.copy(path = "")) } ?: s }
+        if (ghostFetch == id) return
+        ghostFetch = id
+        if (d.downloadPhoto(id) != com.kurtz.homerecord.core.photo.OnPhone.Ready) ghostFetch = null
     }
 
     fun onEvent(event: CaptureEvent) {
