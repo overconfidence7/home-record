@@ -7,6 +7,7 @@ import com.kurtz.homerecord.housemanual.HomeRecordApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Debug-only: `adb shell am broadcast -a com.kurtz.homerecord.housemanual.qa.SEED -p <pkg> --es scenario regression|reset`.
@@ -20,8 +21,16 @@ class SeedReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             val ok = try {
                 when (scenario) {
-                    "regression" -> { RegressionSeed.seed(container.db, container.homes); true }
-                    "reset" -> { RegressionSeed.reset(container.db); true }
+                    "regression" -> {
+                        val pdf = context.assets.open("qa/sample.pdf").use { it.readBytes() }
+                        RegressionSeed.seed(container.db, container.homes, documentsDir = File(context.filesDir, "documents"), pdf = pdf)
+                        true
+                    }
+                    "reset" -> {
+                        RegressionSeed.reset(container.db)
+                        File(context.filesDir, "documents").deleteRecursively()
+                        true
+                    }
                     else -> false
                 }
             } catch (e: Exception) {
