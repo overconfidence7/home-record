@@ -1,3 +1,5 @@
+import { secretKey } from "../session";
+
 export const CODE_MINUTES = 10;
 export const MAX_ATTEMPTS = 5;
 
@@ -6,10 +8,14 @@ export function generateCode(): string {
   return n.toString().padStart(6, "0");
 }
 
-export async function hashCode(email: string, code: string): Promise<string> {
-  const bytes = new TextEncoder().encode(`${email}:${code}`);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+/**
+ * HMAC-SHA256 of the email and code under the server secret (cr:code-hash): a copy of the table alone
+ * cannot be brute-forced back to live codes, since a million guesses each need the key.
+ */
+export async function hashCode(secret: string, email: string, code: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", secretKey(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`email-code:${email}:${code}`));
+  return [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export function normalizeEmail(raw: string): string {
@@ -19,7 +25,7 @@ export function normalizeEmail(raw: string): string {
 export type VerifyResult = "ok" | "invalid" | "expired" | "locked";
 
 /** Checks and consumes a code. Wrong guesses count; five locks the code until a new one is requested. */
-export async function checkCode(db: D1Database, email: string, code: string, now = Date.now()): Promise<VerifyResult> {
+export async function checkCode(db: D1Database, secret: string, email: string, code: string, now = Date.now()): Promise<VerifyResult> {
   const row = await db
     .prepare("SELECT code_hash, expires_at, attempts FROM email_codes WHERE email = ?")
     .bind(email)
@@ -27,7 +33,7 @@ export async function checkCode(db: D1Database, email: string, code: string, now
   if (!row) return "invalid";
   if (row.expires_at < now) return "expired";
   if (row.attempts >= MAX_ATTEMPTS) return "locked";
-  if (row.code_hash !== (await hashCode(email, code))) {
+  if (row.code_hash !== (await hashCode(secret, email, code))) {
     await db.prepare("UPDATE email_codes SET attempts = attempts + 1 WHERE email = ?").bind(email).run();
     return "invalid";
   }

@@ -13,7 +13,7 @@ const post = (path: string, body: unknown) =>
 async function plantCode(email: string, code: string, expiresAt = Date.now() + 60_000) {
   await env.DB.prepare(
     "INSERT OR REPLACE INTO email_codes (email, code_hash, expires_at, attempts) VALUES (?, ?, ?, 0)",
-  ).bind(email, await hashCode(email, code), expiresAt).run();
+  ).bind(email, await hashCode(env.JWT_SECRET, email, code), expiresAt).run();
 }
 
 describe("AC-B1 email code", () => {
@@ -42,8 +42,8 @@ describe("AC-B1 email code", () => {
   });
   it("rejects a wrong code and locks after five", async () => {
     await plantCode("c@example.com", "222222");
-    for (let i = 0; i < 5; i++) expect(await checkCode(env.DB, "c@example.com", "000000")).toBe("invalid");
-    expect(await checkCode(env.DB, "c@example.com", "222222")).toBe("locked");
+    for (let i = 0; i < 5; i++) expect(await checkCode(env.DB, env.JWT_SECRET, "c@example.com", "000000")).toBe("invalid");
+    expect(await checkCode(env.DB, env.JWT_SECRET, "c@example.com", "222222")).toBe("locked");
   });
   it("rejects an expired code", async () => {
     await plantCode("d@example.com", "333333", Date.now() - 1);

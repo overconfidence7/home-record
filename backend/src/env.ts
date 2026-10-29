@@ -27,4 +27,4 @@ export interface Session {
   memberships: Membership[];
 }
 
-export type AppEnv = { Bindings: Bindings; Variables: { session: Session } };
+export type AppEnv = { Bindings: Bindings; Variables: { session: Session; sessionEnded?: boolean } };

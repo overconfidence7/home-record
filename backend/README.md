@@ -20,18 +20,25 @@ npm run dev   # wrangler dev with ENVIRONMENT=dev (/dev/* helpers on, sign-in li
 
 | Name | Used by |
 | --- | --- |
-| `JWT_SECRET` | session tokens (any long random string) |
+| `JWT_SECRET` | session tokens and the email-code HMAC; at least 32 bytes (`openssl rand -base64 48`), shorter and every signed-in route and sign-in answers 500 |
 | `GOOGLE_CLIENT_ID` | Sign in with Google ID-token audience (T008) |
 | `RESEND_API_KEY` | email codes and handoff emails (T008, T0xx) |
+| `R2_ACCOUNT_ID` | presigned media URLs: the Cloudflare account that owns the bucket |
+| `R2_ACCESS_KEY_ID` | presigned media URLs: an R2 API token scoped to `homerecord-media` |
+| `R2_SECRET_ACCESS_KEY` | presigned media URLs: that token's secret |
 | `CLAUDE_API_KEY` | warranty and data-plate lookup (T025) |
 | `FCM_SERVICE_ACCOUNT` | push delivery (T047) |
 | `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064) |
 
-For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<any long string>` and `ENVIRONMENT=dev`; without the secret `/auth/email/verify` answers 500, and without `ENVIRONMENT=dev` a plain `npx wrangler dev` runs as production (no `/dev/last-code` for the QA flows). The QA workflow writes both itself.
+For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<a random string of at least 32 bytes>` and `ENVIRONMENT=dev`; without the secret (or with a shorter one) sign-in answers 500, and without `ENVIRONMENT=dev` a plain `npx wrangler dev` runs as production (no `/dev/last-code` for the QA flows). The QA workflow writes both itself.
 
 ## Sign-in rate limits
 
 `/auth/email/start` allows 5 codes per email and 20 per IP an hour; `/auth/email/verify` allows 10 checks per email (across codes, so asking for a new code does not reset it) and 30 per IP an hour, on top of the 5 wrong guesses one code allows. Over a limit the answer is 429 `{"error":"rate_limited"}`. Counters live in the D1 table `auth_limits` (migration 0006), pruned by the daily cron. The limits are off when `ENVIRONMENT=dev` (the local Worker the QA suite signs in to many times a run); they hold in every other environment, tests included. The code is logged to the console only in dev.
+
+## Sessions
+
+Tokens are HS256 JWTs (30 days, refreshed on every signed-in request through `X-Refreshed-Token`). Each carries the user's `token_version` (`users.token_version`, migration 0008) as `ver`; `requireSession` refuses any other version. `POST /auth/revoke` bumps it, which signs out every phone of that account at once (204); signing in again issues a token at the new version. Email codes are stored as an HMAC-SHA256 under `JWT_SECRET`, so a copy of `email_codes` alone does not give the codes away.
 
 ## Media (R2)
 

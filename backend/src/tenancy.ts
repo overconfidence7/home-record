@@ -1,6 +1,6 @@
 import type { Context, MiddlewareHandler } from "hono";
 import type { AppEnv, Membership, Session, TenantKind } from "./env";
-import { issueToken, verifyToken } from "./session";
+import { issueToken, readToken } from "./session";
 
 export async function loadMemberships(db: D1Database, userId: string): Promise<Membership[]> {
   const { results } = await db
@@ -10,18 +10,24 @@ export async function loadMemberships(db: D1Database, userId: string): Promise<M
   return results.map((r) => ({ tenantKind: r.tenant_kind, tenantId: r.tenant_id, role: r.role }));
 }
 
-/** Requires a valid bearer token, loads memberships, and refreshes the token on use (AC-B1). */
+/**
+ * Requires a valid bearer token of the user's current token_version, loads memberships, and refreshes
+ * the token on use (AC-B1). A token from before a revoke (`POST /auth/revoke`) answers 401.
+ */
 export const requireSession: MiddlewareHandler<AppEnv> = async (c, next) => {
   const header = c.req.header("Authorization") ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  const userId = token ? await verifyToken(c.env.JWT_SECRET, token) : null;
-  if (!userId) return c.json({ error: "unauthorized" }, 401);
-  const user = await c.env.DB.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first();
-  if (!user) return c.json({ error: "unauthorized" }, 401);
-  const session: Session = { userId, memberships: await loadMemberships(c.env.DB, userId) };
+  const claims = token ? await readToken(c.env.JWT_SECRET, token) : null;
+  if (!claims) return c.json({ error: "unauthorized" }, 401);
+  const user = await c.env.DB.prepare("SELECT token_version FROM users WHERE id = ?")
+    .bind(claims.userId)
+    .first<{ token_version: number }>();
+  if (!user || user.token_version !== claims.version) return c.json({ error: "unauthorized" }, 401);
+  const session: Session = { userId: claims.userId, memberships: await loadMemberships(c.env.DB, claims.userId) };
   c.set("session", session);
   await next();
-  c.res.headers.set("X-Refreshed-Token", await issueToken(c.env.JWT_SECRET, userId));
+  if (c.get("sessionEnded")) return;
+  c.res.headers.set("X-Refreshed-Token", await issueToken(c.env.JWT_SECRET, claims.userId, Date.now(), user.token_version));
 };
 
 /**
