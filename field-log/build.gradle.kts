@@ -19,12 +19,27 @@ android {
         versionName = "0.1.0"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
     }
+    // Release key from local.properties (homerecord.storeFile, storePassword, keyAlias, keyPassword); the
+    // testing-apks workflow writes its testing key there, a store build puts the upload key there. Without
+    // them the release APK comes out unsigned.
+    signingConfigs {
+        val storeFile = localProp("homerecord.storeFile", "")
+        if (storeFile.isNotEmpty()) {
+            create("release") {
+                this.storeFile = file(storeFile)
+                storePassword = localProp("homerecord.storePassword", "")
+                keyAlias = localProp("homerecord.keyAlias", "")
+                keyPassword = localProp("homerecord.keyPassword", "")
+            }
+        }
+    }
     buildTypes {
         debug { buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"") }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
             buildConfigField("String", "API_BASE_URL", "\"${releaseApiBaseUrl()}\"")
         }
         // QA only (AC-U11 scroll jank, qa/scripts/device-suite.sh): the release code with R8 and the baseline

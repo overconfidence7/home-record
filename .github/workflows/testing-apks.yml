@@ -7,8 +7,8 @@ name: Testing APKs
 # Signing: both variants are signed with a "testing" keystore that is created on
 # the first run and kept in the Actions cache, so later builds install over earlier
 # ones. If the cache is ever evicted the key changes and the phone will ask for an
-# uninstall first (noted in the release body). Store builds use the real key via
-# docs/release.md and never come from here.
+# uninstall first (noted in the release body). Store builds put the upload key in the same
+# local.properties keys (homerecord.*) and never come from here.
 
 on:
   push:
@@ -69,7 +69,7 @@ jobs:
         if: steps.probe.outputs.skip != 'true'
         run: bash scripts/setup-android.sh
 
-      # Leave platforms/android-37.0 exactly as sdkmanager installs it: AGP 8.13 resolves
+      # Leave platforms/android-37.0 exactly as sdkmanager installs it: AGP resolves
       # compileSdk 37 to that directory itself. Adding, copying or symlinking an
       # android-37 next to it makes AGP re-download 37.0 and then fail with
       # "Failed to find target with hash string 'android-37'" (seen on the first runs).
@@ -135,8 +135,8 @@ jobs:
           mkdir -p out
           cp house-manual/build/outputs/apk/debug/house-manual-debug.apk      "out/house-manual-debug-$sha.apk"
           cp field-log/build/outputs/apk/debug/field-log-debug.apk            "out/field-log-debug-$sha.apk"
-          # Until the release signing config lands (PLAN T081) Gradle emits *-release-unsigned.apk;
-          # sign those with the testing key here so the release variant still installs.
+          # The release signingConfig reads the homerecord.* keys written to local.properties above,
+          # so Gradle emits a signed *-release.apk; an unsigned one (keys missing) is signed here.
           signer="$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)"
           for app in house-manual field-log; do
             dir="$app/build/outputs/apk/release"

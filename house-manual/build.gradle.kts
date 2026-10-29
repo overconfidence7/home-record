@@ -19,6 +19,20 @@ android {
         versionName = "0.1.0"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
     }
+    // Release key from local.properties (homerecord.storeFile, storePassword, keyAlias, keyPassword); the
+    // testing-apks workflow writes its testing key there, a store build puts the upload key there. Without
+    // them the release APK comes out unsigned.
+    signingConfigs {
+        val storeFile = localProp("homerecord.storeFile", "")
+        if (storeFile.isNotEmpty()) {
+            create("release") {
+                this.storeFile = file(storeFile)
+                storePassword = localProp("homerecord.storePassword", "")
+                keyAlias = localProp("homerecord.keyAlias", "")
+                keyPassword = localProp("homerecord.keyPassword", "")
+            }
+        }
+    }
     buildTypes {
         // Keys per docs/billing.md; blank means the free tier with a Retry paywall.
         debug {
@@ -29,6 +43,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
             buildConfigField("String", "API_BASE_URL", "\"${releaseApiBaseUrl()}\"")
             buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"")
         }
