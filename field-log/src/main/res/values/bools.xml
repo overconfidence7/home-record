@@ -1,3 +1,4 @@
 <resources>
-    <bool name="allow_cleartext">true</bool>
+    <!-- Release builds speak HTTPS only; src/debug allows cleartext for wrangler dev on 10.0.2.2. -->
+    <bool name="allow_cleartext">false</bool>
 </resources>

@@ -18,12 +18,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionName = "0.1.0"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
-        buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
     }
     buildTypes {
         // Keys per docs/billing.md; blank means the free tier with a Retry paywall.
-        debug { buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.testApiKey", "REVENUECAT_TEST_API_KEY").ifEmpty { revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY") }}\"") }
-        release { buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"") }
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.testApiKey", "REVENUECAT_TEST_API_KEY").ifEmpty { revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY") }}\"")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("String", "API_BASE_URL", "\"${releaseApiBaseUrl()}\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -53,6 +61,15 @@ fun apiBaseUrl(): String {
     val p = Properties()
     if (f.exists()) f.inputStream().use { p.load(it) }
     return p.getProperty("api.baseUrl", "http://10.0.2.2:8787")
+}
+
+// Release builds talk to the production Worker over HTTPS only; `api.baseUrl` (the emulator
+// host) never reaches them. Override with `api.releaseBaseUrl` or API_RELEASE_BASE_URL.
+fun releaseApiBaseUrl(): String {
+    val url = localProp("api.releaseBaseUrl", "").ifEmpty { System.getenv("API_RELEASE_BASE_URL").orEmpty() }
+        .ifEmpty { "https://api.homerecord.app" }
+    require(url.startsWith("https://")) { "release API base URL must be https: $url" }
+    return url
 }
 
 dependencies {
