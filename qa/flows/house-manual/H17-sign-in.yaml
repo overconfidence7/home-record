@@ -1,4 +1,4 @@
-# Walkthrough H15: signing in with an email code from the More tab (AC-H15 sign-in part, AC-B1).
+# Walkthrough H17: signing in with an email code from the More tab (AC-H15 sign-in part, AC-B1).
 # Needs the dev backend (ENVIRONMENT=dev, PLAN Q005) for /dev/last-code. Env EMAIL defaults below.
 # The upload/second-device/merge parts of AC-H15 land with T075.
 appId: com.kurtz.homerecord.housemanual
@@ -33,8 +33,8 @@ env:
 - extendedWaitUntil:
     visible: "Sign out"
     timeout: 15000
-- takeScreenshot: H15-signed-in
+- takeScreenshot: H17-signed-in
 # Signing out keeps the local copy (AC-H15)
 - tapOn: "Sign out"
 - tapOn: "House"
-- takeScreenshot: H15-local-copy-kept
+- takeScreenshot: H17-local-copy-kept

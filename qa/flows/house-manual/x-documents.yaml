@@ -1,4 +1,4 @@
-# Documents from the More tab (AC-C37): upload and camera scan buttons; the viewer opens from a row (needs a seeded document, JVM tests cover it). The system file picker is not driven here; JVM tests cover the add path.
+# Not a walkthrough step (x- prefix): Documents from the More tab (AC-C37): upload and camera scan buttons; the viewer opens from a row (needs a seeded document, JVM tests cover it). The system file picker is not driven here; JVM tests cover the add path.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
@@ -12,4 +12,4 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_documents_fab"
 - assertVisible:
     id: "hm_documents_scan"
-- takeScreenshot: H06-documents
+- takeScreenshot: x-documents

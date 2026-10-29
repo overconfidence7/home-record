@@ -63,6 +63,16 @@ def junit_counts(path):
     return tests, bad
 
 
+STEP_FLOW = re.compile(r"^([HF]\d{2}[a-z]?)-")
+
+
+def walkthrough_step(label):
+    """Walkthrough step of a flow named for it (`H02b-shape-doors-stairs` -> `H02b`), or None for
+    flows that are not a walkthrough step (`x-contacts`), so they never mark a step Pass or Fail."""
+    m = STEP_FLOW.match(label)
+    return m.group(1) if m else None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True)
@@ -159,9 +169,11 @@ def main():
             if cands:
                 shot = f"qa-results:latest/{app}/screenshots/{os.path.basename(cands[0])}"
             if kind == "flow":
-                step = label.split("-")[0]
-                walkthrough[(app, step)] = "Fail"
-                add(f"auto:flow:{app}:{label}", MAJOR, f"Flow {label} fails on {app}", f"walkthrough step {step} passes (qa/product-walkthrough.md)", f"see qa-results latest/{app}/maestro/{label}.log", shot, app)
+                step = walkthrough_step(label)
+                if step:
+                    walkthrough[(app, step)] = "Fail"
+                expected = f"walkthrough step {step} passes (qa/product-walkthrough.md)" if step else "the flow passes (not a walkthrough step)"
+                add(f"auto:flow:{app}:{label}", MAJOR, f"Flow {label} fails on {app}", expected, f"see qa-results latest/{app}/maestro/{label}.log", shot, app)
             elif kind in ("install", "install-test"):
                 add(f"auto:{kind}:{app}:{label}", CRIT, f"{label}: {kind} failed", "APK installs on the emulator", det, app=app)
             elif kind == "coldstart":
@@ -184,8 +196,9 @@ def main():
         # walkthrough steps covered by passing flows
         for s in stages:
             if s["stage"].startswith("flow:") and s["status"] == "pass":
-                step = s["stage"][5:].split("-")[0]
-                walkthrough.setdefault((app, step), "Pass")
+                step = walkthrough_step(s["stage"][5:])
+                if step:
+                    walkthrough.setdefault((app, step), "Pass")
 
     # ------------------------------------------------------- dedupe vs REVIEW
     review = read(a.review)

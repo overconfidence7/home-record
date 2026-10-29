@@ -1,4 +1,4 @@
-# Walkthrough F7: Owner opens Reports from More; an empty range says so, the range chips work, exports are offered (AC-F15, AC-F46).
+# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are offered (AC-F15, AC-F46).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -6,7 +6,7 @@ appId: com.kurtz.homerecord.fieldlog
 - runFlow:
     file: _sign-in.yaml
     env:
-      EMAIL: "qa-owner-f07@example.test"
+      EMAIL: "qa-owner-f15@example.test"
 - extendedWaitUntil:
     visible: "Set up your company"
     timeout: 15000

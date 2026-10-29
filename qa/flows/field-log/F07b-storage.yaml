@@ -1,4 +1,4 @@
-# Walkthrough F9: Storage on this phone is listed in More with a Free up action (AC-F20).
+# Walkthrough F7: Storage on this phone is listed in More with a Free up action (AC-F20).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -6,7 +6,7 @@ appId: com.kurtz.homerecord.fieldlog
 - runFlow:
     file: _sign-in.yaml
     env:
-      EMAIL: "qa-owner-f09b@example.test"
+      EMAIL: "qa-owner-f07b@example.test"
 - extendedWaitUntil:
     visible: "Set up your company"
     timeout: 15000

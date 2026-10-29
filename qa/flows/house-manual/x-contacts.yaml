@@ -1,4 +1,4 @@
-# Contacts from the More tab (AC-C39). Needs a home, so it starts from the onboarding helper.
+# Not a walkthrough step (x- prefix): Contacts from the More tab (AC-C39). Needs a home, so it starts from the onboarding helper.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
@@ -18,7 +18,7 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_contacts_save"
 - assertVisible: "Maria Soto"
-- takeScreenshot: H05-contacts
+- takeScreenshot: x-contacts
 # AC-U6 (cr:form-dialog): a typed-in form asks before Close throws it away; Keep editing keeps the text
 - tapOn:
     id: "hm_contacts_fab"
