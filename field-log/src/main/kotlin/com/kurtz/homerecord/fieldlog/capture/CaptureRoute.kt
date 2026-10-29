@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -72,7 +73,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
     }
     val onEvent: (CaptureEvent) -> Unit = { event ->
         when (event) {
-            CaptureEvent.Shutter -> takePicture(context, imageCapture, vm)
+            CaptureEvent.Shutter -> if (state.canShoot) takePicture(context, imageCapture, vm)
             CaptureEvent.VoiceTap ->
                 if (state.recording || context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) vm.onEvent(event)
                 else mic.launch(Manifest.permission.RECORD_AUDIO)
@@ -87,6 +88,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
         val owner = LocalLifecycleOwner.current
         val previewView = remember { PreviewView(context) }
         LaunchedEffect(state.access, state.lens) {
+            vm.onEvent(CaptureEvent.CameraStarting)
             if (state.access != CameraAccess.Granted) return@LaunchedEffect
             val provider = ProcessCameraProvider.awaitInstance(context)
             vm.onEvent(
@@ -103,6 +105,8 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
             val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
             provider.unbindAll()
             runCatching { provider.bindToLifecycle(owner, selector, preview, imageCapture) }
+                .onSuccess { vm.onEvent(CaptureEvent.CameraReady) }
+                .onFailure { Log.w(TAG, "Couldn't bind the camera", it); vm.onEvent(CaptureEvent.CameraFailed) }
         }
         AndroidView({ previewView }, modifier)
     }
@@ -114,10 +118,15 @@ private fun takePicture(context: Context, imageCapture: ImageCapture, vm: Captur
         ImageCapture.OutputFileOptions.Builder(file).build(), ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(output: ImageCapture.OutputFileResults) = vm.onEvent(CaptureEvent.Captured(file.absolutePath))
-            override fun onError(exception: ImageCaptureException) = vm.onEvent(CaptureEvent.CaptureFailed)
+            override fun onError(exception: ImageCaptureException) {
+                Log.w(TAG, "Couldn't take the photo (ImageCapture error ${exception.imageCaptureError})", exception)
+                vm.onEvent(CaptureEvent.CaptureFailed)
+            }
         },
     )
 }
+
+private const val TAG = "FieldLogCapture"
 
 private fun mediaDir(context: Context): File = File(context.filesDir, "media").also { it.mkdirs() }
 

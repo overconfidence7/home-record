@@ -285,6 +285,11 @@ fun CaptureNoCameraScreenshot() = CaptureNoCameraPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CaptureStartingScreenshot() = CaptureStartingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureLoadingScreenshot() = CaptureLoadingPreview()
 
 @PreviewTest

@@ -546,6 +546,7 @@ private val captureRooms = listOf(
 private val captureReady = com.kurtz.homerecord.fieldlog.capture.CaptureUiState(
     loading = false, jobName = "Ortiz kitchen rewire", rooms = captureRooms, phases = listOf("Rough-in", "Inspection", "Finish"),
     roomId = "r1", phase = "Rough-in", canFlip = true, access = com.kurtz.homerecord.fieldlog.capture.CameraAccess.Granted, savedCount = 3,
+    cameraReady = true,
 )
 
 @Composable
@@ -578,6 +579,11 @@ fun CaptureDeniedPreview() = CaptureFrame(captureReady.copy(access = com.kurtz.h
 @ThemePreviews
 @Composable
 fun CaptureNoCameraPreview() = CaptureFrame(captureReady.copy(lens = com.kurtz.homerecord.core.photo.LensChoice.None))
+
+/** CameraX is still binding (slow on the CI emulator): the shutter shows a spinner and waits. */
+@ThemePreviews
+@Composable
+fun CaptureStartingPreview() = CaptureFrame(captureReady.copy(cameraReady = false, savedCount = 0))
 
 @ThemePreviews
 @Composable

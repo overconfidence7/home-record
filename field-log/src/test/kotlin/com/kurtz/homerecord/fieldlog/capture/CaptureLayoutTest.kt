@@ -12,6 +12,13 @@ import com.kurtz.homerecord.fieldlog.CaptureReadyPreview
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.performClick
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -52,5 +59,18 @@ class CaptureLayoutTest {
         rule.setContent { CaptureReadyPreview() }
         rule.onNodeWithTag("fl_capture_viewfinder").assertHeightIsAtLeast(300.dp)
         assertShutterOnScreen()
+    }
+
+    // AC-F24: until the camera is bound the shutter shows a spinner and does nothing
+    @Test fun shutterIsOffWhileTheCameraStarts() {
+        val events = mutableListOf<CaptureEvent>()
+        var state by mutableStateOf(CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted))
+        rule.setContent { CaptureScreen(state, { events += it }, onBack = {}, onPickGallery = {}, camera = { Box(it) }) }
+        rule.onNodeWithTag("fl_capture_shutter").assertIsNotEnabled()
+        rule.onNodeWithTag("fl_capture_starting").assertExists()
+        state = state.copy(cameraReady = true)
+        rule.onNodeWithTag("fl_capture_starting").assertDoesNotExist()
+        rule.onNodeWithTag("fl_capture_shutter").assertIsEnabled().performClick()
+        assertThat(events).containsExactly(CaptureEvent.Shutter)
     }
 }

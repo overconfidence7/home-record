@@ -12,7 +12,7 @@ data class CaptureRoom(val id: String, val name: String)
 data class GhostShot(val photoId: String, val path: String)
 
 /** What a shot or import told the person; shown as one line over the shutter row. */
-enum class CaptureMessage { SaveFailed, JobGone, NoCamera, NoteSaved, MemoSaved, MemoFailed, MicDenied }
+enum class CaptureMessage { SaveFailed, CameraFailed, JobGone, NoCamera, NoteSaved, MemoSaved, MemoFailed, MicDenied }
 
 data class CaptureUiState(
     val loading: Boolean = true,
@@ -35,7 +35,12 @@ data class CaptureUiState(
     val ghost: GhostShot? = null,
     /** Off until the person turns it on, so a shot is only paired as an After on purpose (cr:fl-ghost-autopair). */
     val ghostOn: Boolean = false,
-)
+    /** True once CameraX has bound the preview and ImageCapture; a shot before that fails (seen on the CI emulator). */
+    val cameraReady: Boolean = false,
+) {
+    /** The shutter and the volume keys take a picture only when the camera is bound and the last shot is saved. */
+    val canShoot: Boolean get() = !loading && access == CameraAccess.Granted && lens != LensChoice.None && cameraReady && !saving
+}
 
 sealed interface CaptureEvent {
     data class SelectRoom(val id: String?) : CaptureEvent
@@ -47,6 +52,13 @@ sealed interface CaptureEvent {
     /** The screen came back to the front, maybe from Settings: re-read the camera permission (AC-F29). */
     data object Resumed : CaptureEvent
     data class CameraInfo(val hasBack: Boolean, val hasFront: Boolean) : CaptureEvent
+
+    /** The route is (re)binding the camera, for a new lens or after the permission came back: the shutter waits. */
+    data object CameraStarting : CaptureEvent
+    data object CameraReady : CaptureEvent
+
+    /** Binding threw: say so; the gallery still works. */
+    data object CameraFailed : CaptureEvent
 
     /** Shutter button or volume key. The route takes the picture and answers with [Captured] or [CaptureFailed]. */
     data object Shutter : CaptureEvent

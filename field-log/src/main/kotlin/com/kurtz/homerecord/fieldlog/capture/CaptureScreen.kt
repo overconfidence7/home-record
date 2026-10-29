@@ -57,6 +57,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -93,7 +94,7 @@ fun CaptureScreen(
                 val keys = Modifier.focusRequester(focus).focusTarget()
                     .onPreviewKeyEvent { e ->
                         val volume = e.key.nativeKeyCode == AndroidKeyEvent.KEYCODE_VOLUME_UP || e.key.nativeKeyCode == AndroidKeyEvent.KEYCODE_VOLUME_DOWN
-                        if (volume && e.type == KeyEventType.KeyUp) onEvent(CaptureEvent.Shutter)
+                        if (volume && e.type == KeyEventType.KeyUp && state.canShoot) onEvent(CaptureEvent.Shutter)
                         volume
                     }
                 BoxWithConstraints(Modifier.padding(padding).fillMaxSize().then(keys)) {
@@ -208,7 +209,7 @@ private fun ShutterRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, o
         IconButton(onClick = onPickGallery, Modifier.size(56.dp).testTag("fl_capture_gallery")) {
             Icon(Icons.Rounded.PhotoLibrary, stringResource(R.string.cap_gallery))
         }
-        Shutter(state.saving) { onEvent(CaptureEvent.Shutter) }
+        Shutter(enabled = state.canShoot, starting = !state.cameraReady) { onEvent(CaptureEvent.Shutter) }
         Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
             if (state.savedCount > 0) {
                 Text(
@@ -245,19 +246,21 @@ private fun NoteVoiceRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit)
 }
 
 @Composable
-private fun Shutter(busy: Boolean, onClick: () -> Unit) {
-    val ring = MaterialTheme.colorScheme.primary
-    val label = stringResource(R.string.cap_shutter)
+private fun Shutter(enabled: Boolean, starting: Boolean, onClick: () -> Unit) {
+    val ring = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val label = stringResource(if (starting) R.string.cap_shutter_starting else R.string.cap_shutter)
     IconButton(
-        onClick = onClick, enabled = !busy,
+        onClick = onClick, enabled = enabled,
         modifier = Modifier.size(80.dp).border(4.dp, ring, CircleShape).testTag("fl_capture_shutter").semantics { contentDescription = label },
     ) {
-        Box(Modifier.size(60.dp).background(ring, CircleShape))
+        if (starting) CircularProgressIndicator(Modifier.size(40.dp).testTag("fl_capture_starting"), color = ring)
+        else Box(Modifier.size(60.dp).background(ring, CircleShape))
     }
 }
 
 private fun messageText(m: CaptureMessage): Int = when (m) {
     CaptureMessage.SaveFailed -> R.string.cap_save_failed
+    CaptureMessage.CameraFailed -> R.string.cap_camera_failed
     CaptureMessage.JobGone -> R.string.cap_job_gone
     CaptureMessage.NoCamera -> R.string.cap_no_camera
     CaptureMessage.NoteSaved -> R.string.cap_note_saved

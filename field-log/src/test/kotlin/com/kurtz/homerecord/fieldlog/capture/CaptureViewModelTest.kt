@@ -237,6 +237,29 @@ class CaptureViewModelTest {
         assertThat(vm.state.value.lens).isEqualTo(LensChoice.Front)
     }
 
+    // AC-F24: the shutter waits for CameraX to bind (F08b on the CI emulator tapped it while init was still retrying)
+    @Test fun shutterWaitsUntilTheCameraIsBound() {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.CameraInfo(hasBack = true, hasFront = false))
+        assertThat(vm.state.value.canShoot).isFalse()
+        vm.onEvent(CaptureEvent.CameraReady)
+        assertThat(vm.state.value.canShoot).isTrue()
+        vm.onEvent(CaptureEvent.CameraStarting) // rebinding for a new lens
+        assertThat(vm.state.value.canShoot).isFalse()
+    }
+
+    // AC-F24
+    @Test fun cameraThatWillNotBindSaysSoAndKeepsTheShutterOff() {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.CameraInfo(hasBack = true, hasFront = false))
+        vm.onEvent(CaptureEvent.CameraFailed)
+        assertThat(vm.state.value.canShoot).isFalse()
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.CameraFailed)
+        vm.onEvent(CaptureEvent.CameraReady)
+        assertThat(vm.state.value.message).isNull()
+        assertThat(vm.state.value.canShoot).isTrue()
+    }
+
     // AC-F29
     @Test fun noCameraAtAllSaysSo() {
         val vm = vm().also { it.loaded() }

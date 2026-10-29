@@ -386,6 +386,8 @@
     <string name="cap_ghost">Line up with Before</string>
     <string name="cap_gallery">Add from gallery</string>
     <string name="cap_shutter">Take photo</string>
+    <string name="cap_shutter_starting">Starting the camera</string>
+    <string name="cap_camera_failed">Couldn\'t start the camera. Go back and open it again, or add photos from the gallery.</string>
     <string name="cap_save_failed">Couldn\'t save the photo. Check free space and try again.</string>
     <string name="cap_job_gone">This job is gone, so the photo wasn\'t saved.</string>
     <string name="cap_no_camera">This device has no camera. You can still add photos from the gallery.</string>

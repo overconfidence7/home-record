@@ -52,6 +52,12 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 15000
 - assertNotVisible:
     id: fl_capture_denied
+# The shutter stays off with a spinner until CameraX has bound; the emulator's camera init retries for ~6 s
+- extendedWaitUntil:
+    visible:
+      id: fl_capture_shutter
+      enabled: true
+    timeout: 30000
 - tapOn:
     id: fl_capture_shutter
 - extendedWaitUntil:

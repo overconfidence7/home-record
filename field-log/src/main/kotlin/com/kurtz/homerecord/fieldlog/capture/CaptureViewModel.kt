@@ -139,6 +139,11 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             CaptureEvent.ToggleGhost -> _state.update { it.copy(ghostOn = !it.ghostOn) }
             is CaptureEvent.Imported -> save(event.paths)
             CaptureEvent.CaptureFailed -> _state.update { it.copy(message = CaptureMessage.SaveFailed) }
+            CaptureEvent.CameraStarting -> _state.update { it.copy(cameraReady = false) }
+            CaptureEvent.CameraReady -> _state.update {
+                it.copy(cameraReady = true, message = it.message?.takeIf { m -> m != CaptureMessage.CameraFailed })
+            }
+            CaptureEvent.CameraFailed -> _state.update { it.copy(cameraReady = false, message = CaptureMessage.CameraFailed) }
             CaptureEvent.DismissMessage -> _state.update { it.copy(message = null) }
             CaptureEvent.OpenNote -> _state.update { it.copy(noteOpen = true) }
             CaptureEvent.CloseNote -> _state.update { it.copy(noteOpen = false, noteText = "") }

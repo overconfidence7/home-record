@@ -48,6 +48,7 @@ object ScreenCatalog {
         QaScreen("capture-denied", nonRoot = true) { CaptureDeniedPreview() },
         QaScreen("capture-no-camera", nonRoot = true) { CaptureNoCameraPreview() },
         QaScreen("capture-loading", nonRoot = true) { CaptureLoadingPreview() },
+        QaScreen("capture-starting", nonRoot = true) { CaptureStartingPreview() },
         QaScreen("timesheets-week", nonRoot = true) { TimesheetsWeekPreview() },
         QaScreen("timesheets-collapsed", nonRoot = true) { TimesheetsCollapsedPreview() },
         QaScreen("timesheets-edit", nonRoot = true) { TimesheetsEditPreview() },
