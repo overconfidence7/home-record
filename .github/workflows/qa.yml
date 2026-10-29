@@ -42,6 +42,8 @@ jobs:
     outputs:
       skip: ${{ steps.probe.outputs.skip }}
       sha: ${{ steps.probe.outputs.sha }}
+      short: ${{ steps.probe.outputs.short }}
+      has_handoff: ${{ steps.probe.outputs.has_handoff }}
       has_backend: ${{ steps.probe.outputs.has_backend }}
     steps:
       - uses: actions/checkout@v4
@@ -52,14 +54,29 @@ jobs:
       - name: Decide whether there is anything to test
         id: probe
         run: |
-          sha=$(git rev-parse HEAD); short=$(git rev-parse --short HEAD)
-          echo "sha=$short" >> "$GITHUB_OUTPUT"
-          last=$(git show origin/qa-results:latest/sha 2>/dev/null || echo none)
+          # The commit under test is the newest one that changes more than the bookkeeping files the
+          # suite, the judge and the builder's "record fix sha" commits write; those never change
+          # what is tested, and HEAD is almost always one of them.
+          sha=$(git log -1 --format=%H HEAD -- . ':(exclude)REVIEW.md' ':(exclude)PROGRESS.md' ':(exclude)qa/last-tested.txt')
+          [ -n "$sha" ] || sha=$(git rev-parse HEAD)
+          short=$(git rev-parse --short "$sha")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "short=$short" >> "$GITHUB_OUTPUT"
+          # latest/sha is the full sha; runs before CR2m4 wrote a short one, so match as a prefix
+          last=$(git show origin/qa-results:latest/sha 2>/dev/null | tr -d '[:space:]')
           skip=false
           if [ ! -x gradlew ] || [ ! -f settings.gradle.kts ]; then skip=true; echo "No Gradle project yet."; fi
-          if [ "$last" = "$sha" ] && [ "${{ github.event.inputs.force }}" != "true" ]; then skip=true; echo "HEAD $short already tested."; fi
+          if [ -n "$last" ] && [ "${#last}" -ge 7 ] && [ "${sha#"$last"}" != "$sha" ] && [ "${{ github.event.inputs.force }}" != "true" ]; then
+            skip=true; echo "Commit $short (HEAD $(git rev-parse --short HEAD)) already tested."
+          fi
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
+          # the handoff job runs the cross-app flows only, and only once there are some
+          if ls qa/flows/handoff/*.yaml 2>/dev/null | grep -qv '/_[^/]*\.yaml$'; then echo "has_handoff=true" >> "$GITHUB_OUTPUT"; else echo "has_handoff=false" >> "$GITHUB_OUTPUT"; fi
           [ -f backend/package.json ] && echo "has_backend=true" >> "$GITHUB_OUTPUT" || echo "has_backend=false" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the commit under test
+        if: steps.probe.outputs.skip != 'true'
+        run: git checkout -q --detach "${{ steps.probe.outputs.sha }}"
 
       - uses: actions/setup-java@v5
         if: steps.probe.outputs.skip != 'true'
@@ -127,7 +144,8 @@ jobs:
           set +e
           ./gradlew --no-daemon --console=plain :house-manual:assembleDebug :field-log:assembleDebug \
             :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
-            :house-manual:assembleRelease :field-log:assembleRelease --continue > qa-out/apk/gradle.log 2>&1
+            :house-manual:assembleRelease :field-log:assembleRelease \
+            :house-manual:assembleBenchmark :field-log:assembleBenchmark --continue > qa-out/apk/gradle.log 2>&1
           rc=$?
           if [ $rc -ne 0 ]; then
             # packageDebug has failed once on a shared runner (disk or parallel packaging); free space and retry serially
@@ -135,7 +153,8 @@ jobs:
             rm -rf build/reports ./*/build/reports ./*/build/intermediates/lint* 2>/dev/null
             ./gradlew --no-daemon --console=plain --max-workers=1 :house-manual:assembleDebug :field-log:assembleDebug \
               :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
-              :house-manual:assembleRelease :field-log:assembleRelease --continue >> qa-out/apk/gradle.log 2>&1
+              :house-manual:assembleRelease :field-log:assembleRelease \
+            :house-manual:assembleBenchmark :field-log:assembleBenchmark --continue >> qa-out/apk/gradle.log 2>&1
             rc=$?
           fi
           echo $rc > qa-out/apk/exit-code
@@ -145,6 +164,8 @@ jobs:
             cp $app/build/outputs/apk/androidTest/debug/$app-debug-androidTest.apk qa-out/apk/ 2>/dev/null || echo "no androidTest apk for $app (crawler not built yet)"
             rel=$(ls $app/build/outputs/apk/release/$app-release*.apk 2>/dev/null | head -n 1)
             [ -n "$rel" ] && cp "$rel" qa-out/apk/$app-release.apk || echo "no release apk for $app"
+            # jank stage (AC-U11): release code plus the debug seed, signed with the debug key
+            cp $app/build/outputs/apk/benchmark/$app-benchmark.apk qa-out/apk/ 2>/dev/null || echo "no benchmark apk for $app"
           done
           ls -la qa-out/apk
 
@@ -164,7 +185,7 @@ jobs:
         app: [house-manual, field-log]
     steps:
       - uses: actions/checkout@v4
-        with: { ref: build }
+        with: { ref: "${{ needs.prepare.outputs.sha }}" }
       - uses: actions/download-artifact@v4
         with: { name: qa-prepare, path: qa-out }
       - uses: actions/setup-java@v5
@@ -231,12 +252,14 @@ jobs:
   handoff:
     name: Handoff between the apps
     needs: [prepare, device]
-    if: needs.prepare.outputs.skip != 'true' && always()
+    # layer 4 only: install both apps, the cross-app flows in qa/flows/handoff and logcat; the
+    # per-app stages already ran in the device jobs. Skipped while there are no handoff flows.
+    if: needs.prepare.outputs.skip != 'true' && needs.prepare.outputs.has_handoff == 'true' && always()
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-        with: { ref: build }
+        with: { ref: "${{ needs.prepare.outputs.sha }}" }
       - uses: actions/download-artifact@v4
         with: { name: qa-prepare, path: qa-out }
       - uses: actions/setup-java@v5
@@ -296,7 +319,7 @@ jobs:
         with: { path: qa-in }
       - name: Summarize
         run: |
-          python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.sha }}" --review REVIEW.md --out qa-publish
+          python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.short }}" --review REVIEW.md --out qa-publish ${{ needs.prepare.outputs.has_handoff != 'true' && '--no-handoff' || '' }}
           cat qa-publish/summary.md
       - name: Publish to the qa-results branch
         run: bash qa/scripts/publish-results.sh qa-publish "${{ needs.prepare.outputs.sha }}"
@@ -306,11 +329,11 @@ jobs:
           git config user.email "qa@homerecord.invalid"
           for attempt in 1 2 3 4; do
             git fetch origin build && git reset --hard origin/build
-            python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.sha }}" --review REVIEW.md --out qa-publish --apply-review
+            python3 qa/scripts/summarize.py --input qa-in --sha "${{ needs.prepare.outputs.short }}" --review REVIEW.md --out qa-publish ${{ needs.prepare.outputs.has_handoff != 'true' && '--no-handoff' || '' }} --apply-review
             # only a run whose device jobs all produced results counts as having tested the commit
-            if [ -f qa-publish/tested-ok ]; then git rev-parse "${{ needs.prepare.outputs.sha }}" > qa/last-tested.txt; fi
+            if [ -f qa-publish/tested-ok ]; then echo "${{ needs.prepare.outputs.sha }}" > qa/last-tested.txt; fi
             git add REVIEW.md qa/last-tested.txt
-            git commit -q -m "QA auto $(date -u +%Y-%m-%d\ %H:%M) UTC (commit ${{ needs.prepare.outputs.sha }})" || { echo "nothing to record"; break; }
+            git commit -q -m "QA auto $(date -u +%Y-%m-%d\ %H:%M) UTC (commit ${{ needs.prepare.outputs.short }})" || { echo "nothing to record"; break; }
             git push origin HEAD:build && break
             echo "push rejected, retrying ($attempt)"; sleep 10
           done
