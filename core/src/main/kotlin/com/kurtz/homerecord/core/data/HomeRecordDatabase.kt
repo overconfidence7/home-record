@@ -86,7 +86,6 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun jobDao(): JobDao
     abstract fun jobCrewDao(): JobCrewDao
     abstract fun punchDao(): PunchDao
-    abstract fun shiftDao(): ShiftDao
     abstract fun timesheetApprovalDao(): TimesheetApprovalDao
     abstract fun jobFileDao(): JobFileDao
     abstract fun noteDao(): NoteDao

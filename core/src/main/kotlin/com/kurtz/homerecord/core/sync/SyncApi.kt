@@ -1,12 +1,10 @@
 package com.kurtz.homerecord.core.sync
 
-import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.net.apiCall
 import com.kurtz.homerecord.core.company.ApiResult
-import java.io.IOException
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
@@ -33,21 +31,7 @@ class RetrofitSyncApi(private val service: SyncService) : SyncApi {
 
     override suspend fun pull(tenant: TenantRef, since: Long) = call { service.pull(tenant.kind.path, tenant.id, since) }
 
-    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> =
-        try {
-            ApiResult.Ok(block())
-        } catch (e: HttpException) {
-            ApiResult.Err(
-                when (e.code()) {
-                    404 -> ApiFailure.NotFound
-                    403 -> ApiFailure.Forbidden
-                    400 -> ApiFailure.Invalid
-                    else -> ApiFailure.Failed
-                },
-            )
-        } catch (e: IOException) {
-            ApiResult.Err(ApiFailure.Offline)
-        }
+    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> = apiCall(block = block)
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }

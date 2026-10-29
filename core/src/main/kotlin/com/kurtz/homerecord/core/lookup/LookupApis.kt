@@ -1,14 +1,14 @@
 package com.kurtz.homerecord.core.lookup
 
+import com.kurtz.homerecord.core.net.invalidOrFailed
+import com.kurtz.homerecord.core.net.apiCall
 import android.util.Base64
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
-import java.io.IOException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
@@ -67,12 +67,6 @@ internal interface LookupService {
     @GET("recalls") suspend fun recalls(@Query("make") make: String, @Query("model") model: String?): RecallsResponseBody
 }
 
-private fun Throwable.toFailure(): ApiFailure? = when (this) {
-    is HttpException -> if (code() == 400) ApiFailure.Invalid else ApiFailure.Failed
-    is IOException -> ApiFailure.Offline
-    else -> null
-}
-
 /**
  * Retrofit side of both lookups. [encodeJpeg] turns a stored photo into downscaled JPEG bytes (null when unreadable),
  * so the Android bitmap work stays out of this class and tests can pass bytes directly.
@@ -83,19 +77,15 @@ class RetrofitLookupApi internal constructor(
 ) : DataPlateVisionApi, RecallApi {
     override suspend fun read(path: String): ApiResult<PlateReading> {
         val bytes = encodeJpeg(path) ?: return ApiResult.Err(ApiFailure.Invalid)
-        return try {
+        return apiCall(::invalidOrFailed) {
             val r = service.dataPlate(PlateRequestBody(Base64.encodeToString(bytes, Base64.NO_WRAP)))
-            ApiResult.Ok(PlateReading(r.make, r.model, r.serial, r.manufacturedOn))
-        } catch (e: Exception) {
-            ApiResult.Err(e.toFailure() ?: throw e)
+            PlateReading(r.make, r.model, r.serial, r.manufacturedOn)
         }
     }
 
-    override suspend fun check(make: String, model: String?): ApiResult<List<RecallInfo>> = try {
+    override suspend fun check(make: String, model: String?): ApiResult<List<RecallInfo>> = apiCall(::invalidOrFailed) {
         val r = service.recalls(make.trim(), model?.trim()?.ifEmpty { null })
-        ApiResult.Ok(r.recalls.map { RecallInfo(it.recallNumber, it.title, it.recallDate, it.hazard, it.remedy, it.url, it.modelMatch) })
-    } catch (e: Exception) {
-        ApiResult.Err(e.toFailure() ?: throw e)
+        r.recalls.map { RecallInfo(it.recallNumber, it.title, it.recallDate, it.hazard, it.remedy, it.url, it.modelMatch) }
     }
 
     companion object {

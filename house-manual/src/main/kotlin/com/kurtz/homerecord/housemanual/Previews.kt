@@ -659,8 +659,8 @@ fun HomeSearchNonePreview() = Frame { HomeScreen(HomeUiState(loading = false, ho
 fun HomeLoadingPreview() = Frame { HomeScreen(HomeUiState(), {}) }
 
 private val samplePlans = listOf(
-    com.kurtz.homerecord.core.billing.ProPlan("pro_annual", com.kurtz.homerecord.core.billing.ProPlanKind.Annual, "$19.99 / year"),
-    com.kurtz.homerecord.core.billing.ProPlan("pro_lifetime", com.kurtz.homerecord.core.billing.ProPlanKind.Lifetime, "$49.99"),
+    com.kurtz.homerecord.core.billing.ProPlan("pro_annual", com.kurtz.homerecord.core.billing.ProPlanKind.Annual, "$24.99 / year"),
+    com.kurtz.homerecord.core.billing.ProPlan("pro_lifetime", com.kurtz.homerecord.core.billing.ProPlanKind.Lifetime, "$59.00"),
 )
 
 @ThemePreviews

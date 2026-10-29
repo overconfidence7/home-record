@@ -107,6 +107,10 @@ data class PunchEntity(
     val source: String = Sources.FIELD_LOG,
 )
 
+/**
+ * SPEC's `Shift` (derived, cached). Shifts are built from punches on every read ([com.kurtz.homerecord.core.punch.PunchRepository.observeShifts]),
+ * so the app writes no rows here; the table stays so a `shift` row pulled from sync still has a place to land.
+ */
 @Entity(tableName = "shift", indices = [Index("memberId")])
 data class ShiftEntity(
     @PrimaryKey val id: String,

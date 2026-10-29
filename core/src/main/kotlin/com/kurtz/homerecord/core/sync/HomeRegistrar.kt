@@ -1,14 +1,12 @@
 package com.kurtz.homerecord.core.sync
 
-import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.net.apiCall
 import com.kurtz.homerecord.core.company.ApiResult
-import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
@@ -30,21 +28,7 @@ interface HomeRegistrationService {
 
 class RetrofitHomeRegistrationApi(private val service: HomeRegistrationService) : HomeRegistrationApi {
     override suspend fun register(homeId: String, name: String): ApiResult<Unit> =
-        try {
-            service.register(homeId, RegisterHomeRequest(name))
-            ApiResult.Ok(Unit)
-        } catch (e: HttpException) {
-            ApiResult.Err(
-                when (e.code()) {
-                    404 -> ApiFailure.NotFound
-                    403 -> ApiFailure.Forbidden
-                    400 -> ApiFailure.Invalid
-                    else -> ApiFailure.Failed
-                },
-            )
-        } catch (e: IOException) {
-            ApiResult.Err(ApiFailure.Offline)
-        }
+        apiCall { service.register(homeId, RegisterHomeRequest(name)); Unit }
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }

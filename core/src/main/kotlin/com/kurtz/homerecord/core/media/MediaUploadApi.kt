@@ -1,6 +1,6 @@
 package com.kurtz.homerecord.core.media
 
-import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.net.apiCall
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.sync.TenantRef
 import java.io.File
@@ -15,7 +15,6 @@ import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
@@ -83,22 +82,7 @@ class RetrofitMediaTransferApi(
         service.presignGet(PresignGetRequest(tenant.kind.wire, tenant.id, key)).getUrl
     }
 
-    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> =
-        try {
-            ApiResult.Ok(block())
-        } catch (e: HttpException) {
-            ApiResult.Err(
-                when (e.code()) {
-                    404 -> ApiFailure.NotFound
-                    403 -> ApiFailure.Forbidden
-                    // 413: larger than the server lets this kind of file be; trying again will not help.
-                    400, 413 -> ApiFailure.Invalid
-                    else -> ApiFailure.Failed
-                },
-            )
-        } catch (e: IOException) {
-            ApiResult.Err(ApiFailure.Offline)
-        }
+    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> = apiCall(block = block)
 
     // The presigned URL carries its own signature, so these go through a client without the bearer interceptor.
     override suspend fun put(url: String, file: File, mime: String): PutOutcome = withContext(io) {

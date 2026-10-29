@@ -1,7 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
 import com.google.common.truth.Truth.assertThat
-import com.kurtz.homerecord.core.billing.FakeProBilling
 import com.kurtz.homerecord.core.billing.LimitGate
 import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.housemanual.paywall.PaywallEvent
@@ -26,7 +25,7 @@ class PaywallViewModelTest {
         val vm = PaywallViewModel(FakeProBilling(), LimitedFeature.SixteenthItem)
         val s = vm.state.value
         assertThat(s.loading).isFalse()
-        assertThat(s.plans.map { it.price }).containsExactly("$19.99 / year", "$49.99").inOrder()
+        assertThat(s.plans.map { it.price }).containsExactly("$24.99 / year", "$59.00").inOrder()
         assertThat(s.feature).isEqualTo(LimitedFeature.SixteenthItem)
     }
 

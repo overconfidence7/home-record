@@ -13,13 +13,6 @@ object UnavailableEntitlements : Entitlements {
     override val isPro: StateFlow<Boolean> = MutableStateFlow(false)
 }
 
-/** Test and debug stand-in whose Pro state can be flipped. */
-class FakeEntitlements(pro: Boolean = false) : Entitlements {
-    private val state = MutableStateFlow(pro)
-    override val isPro: StateFlow<Boolean> = state
-    fun setPro(value: Boolean) { state.value = value }
-}
-
 /** What the free tier can't do; each maps to an HM-Paywall opening. */
 enum class LimitedFeature { SecondHome, SixteenthItem, SecondPanel, CloudSync }
 
@@ -65,19 +58,4 @@ object UnavailableBilling : ProBilling {
     override suspend fun plans(): Result<List<ProPlan>> = Result.failure(IllegalStateException("No billing key"))
     override suspend fun purchase(planId: String): Result<Unit> = Result.failure(IllegalStateException("No billing key"))
     override suspend fun restore(): Result<Unit> = Result.failure(IllegalStateException("No billing key"))
-}
-
-/** Test and preview billing: plans are fixed, a purchase or restore flips Pro like the Test Store does. */
-class FakeProBilling(
-    var offered: Result<List<ProPlan>> = Result.success(
-        listOf(ProPlan("pro_annual", ProPlanKind.Annual, "$19.99 / year"), ProPlan("pro_lifetime", ProPlanKind.Lifetime, "$49.99")),
-    ),
-    var purchaseResult: Result<Unit> = Result.success(Unit),
-    private val restoreFindsPro: Boolean = true,
-) : ProBilling {
-    private val state = MutableStateFlow(false)
-    override val isPro: StateFlow<Boolean> = state
-    override suspend fun plans() = offered
-    override suspend fun purchase(planId: String): Result<Unit> = purchaseResult.onSuccess { state.value = true }
-    override suspend fun restore(): Result<Unit> = if (restoreFindsPro) { state.value = true; Result.success(Unit) } else Result.failure(NoSuchElementException("Nothing to restore"))
 }

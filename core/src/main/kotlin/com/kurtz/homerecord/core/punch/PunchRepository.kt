@@ -3,7 +3,6 @@ package com.kurtz.homerecord.core.punch
 import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.PunchEntity
-import com.kurtz.homerecord.core.data.ShiftEntity
 import com.kurtz.homerecord.core.model.GeoFix
 import com.kurtz.homerecord.core.model.Shift
 import com.kurtz.homerecord.core.model.ShiftBuilder
@@ -66,7 +65,6 @@ class PunchRepository(
             ),
         )
         onChange("punch", id)
-        rebuildShifts(p.companyId, p.memberId)
         return id
     }
 
@@ -83,7 +81,6 @@ class PunchRepository(
         val edits = json.decodeFromString<List<PunchEdit>>(old.editsJson) + entry
         db.punchDao().upsert(old.copy(at = newAt, jobId = newJobId, editsJson = json.encodeToString(edits), updatedAt = stamp))
         onChange("punch", punchId)
-        rebuildShifts(old.companyId, old.memberId)
         return true
     }
 
@@ -109,20 +106,6 @@ class PunchRepository(
     /** The member's most recent punch, or null before the first. */
     suspend fun lastPunch(companyId: String, memberId: String): PunchEntity? =
         db.punchDao().listFor(companyId).filter { it.memberId == memberId }.maxByOrNull { it.at }
-
-    private suspend fun rebuildShifts(companyId: String, memberId: String) {
-        val stamp = now()
-        val shifts = ShiftBuilder.build(db.punchDao().listFor(companyId).filter { it.memberId == memberId }.map(::toShiftPunch), stamp)
-        db.shiftDao().listFor(memberId).forEach { db.shiftDao().softDelete(it.id, stamp) }
-        shifts.forEach { s ->
-            db.shiftDao().upsert(
-                ShiftEntity(
-                    id = "$memberId-${s.startAt}", memberId = memberId, jobId = s.jobId, startAt = s.startAt, endAt = s.endAt,
-                    breakMinutes = (s.breakMillis() / 60_000).toInt(), createdAt = stamp, updatedAt = stamp,
-                ),
-            )
-        }
-    }
 
     private fun toShiftPunch(p: PunchEntity) = ShiftPunch(p.memberId, p.jobId, p.kind, p.at, p.farFromJob, edited = p.editsJson != "[]")
 }

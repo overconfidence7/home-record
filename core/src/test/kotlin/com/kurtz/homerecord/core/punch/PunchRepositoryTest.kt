@@ -59,9 +59,9 @@ class PunchRepositoryTest {
         assertThat(repo.openShift("c1", "m1")).isNull()
         val shift = repo.observeShifts("c1").first().single()
         assertThat(shift.breakMillis()).isEqualTo(600_000L)
-        val cached = db.shiftDao().listFor("m1").single()
-        assertThat(cached.endAt).isEqualTo(8_000_000L)
-        assertThat(cached.breakMinutes).isEqualTo(10)
+        assertThat(shift.endAt).isEqualTo(8_000_000L)
+        // Shifts are derived on read; punches write no cached shift rows (cr:shift-cache-dead).
+        db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM shift").use { it.moveToFirst(); assertThat(it.getInt(0)).isEqualTo(0) }
     }
 
     @Test fun editWithoutReasonIsRefused() = runBlocking<Unit> {

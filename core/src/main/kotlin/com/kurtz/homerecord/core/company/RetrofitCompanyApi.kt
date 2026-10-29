@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.core.company
 
-import java.io.IOException
+import com.kurtz.homerecord.core.net.failureForStatus
+import com.kurtz.homerecord.core.net.apiCall
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
@@ -88,24 +89,14 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
         )
     }
 
-    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> =
-        try {
-            ApiResult.Ok(block())
-        } catch (e: HttpException) {
-            ApiResult.Err(failureFor(e))
-        } catch (e: IOException) {
-            ApiResult.Err(ApiFailure.Offline)
-        }
+    private suspend fun <T> call(block: suspend () -> T): ApiResult<T> = apiCall(::failureFor, block)
 
     private fun failureFor(e: HttpException): ApiFailure {
         val code = e.response()?.errorBody()?.string()?.let { runCatching { json.decodeFromString<com.kurtz.homerecord.core.auth.ErrorBody>(it).error }.getOrNull() }
         return when {
             code == "invalid_code" -> ApiFailure.InvalidCode
             code == "already_in_company" -> ApiFailure.AlreadyInCompany
-            e.code() == 404 -> ApiFailure.NotFound
-            e.code() == 403 -> ApiFailure.Forbidden
-            e.code() == 400 -> ApiFailure.Invalid
-            else -> ApiFailure.Failed
+            else -> failureForStatus(e)
         }
     }
 

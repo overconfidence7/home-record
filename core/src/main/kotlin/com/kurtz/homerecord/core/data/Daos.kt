@@ -269,15 +269,6 @@ interface PunchDao {
 }
 
 @Dao
-interface ShiftDao {
-    @Upsert suspend fun upsert(row: ShiftEntity)
-    @Query("SELECT * FROM shift WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): ShiftEntity?
-    @Query("SELECT * FROM shift WHERE memberId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ShiftEntity>>
-    @Query("SELECT * FROM shift WHERE memberId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ShiftEntity>
-    @Query("UPDATE shift SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
-}
-
-@Dao
 interface TimesheetApprovalDao {
     @Upsert suspend fun upsert(row: TimesheetApprovalEntity)
     @Query("SELECT * FROM timesheet_approval WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): TimesheetApprovalEntity?

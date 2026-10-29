@@ -79,6 +79,30 @@ class PdfMarkupTest {
         assertThat(files.search("j1", "plan").map { it.id }).containsExactly(v3)
     }
 
+    // cr:pdf-history-branch: two markups of one version both stay in the history, newest first
+    @Test fun historyKeepsBothBranchesOfOneVersion() = runBlocking<Unit> {
+        val v1 = plan()
+        clock = 2_000L
+        val maria = requireNotNull(markup.saveVersion(v1.id, mark, "Maria"))
+        clock = 3_000L
+        val sam = requireNotNull(markup.saveVersion(v1.id, mark, "Sam"))
+        clock = 4_000L
+        val next = requireNotNull(markup.saveVersion(maria, mark, "Maria"))
+        val expected = listOf(next, sam, maria, v1.id)
+        assertThat(markup.history(v1.id).map { it.id }).containsExactlyElementsIn(expected).inOrder()
+        assertThat(markup.history(sam).map { it.id }).containsExactlyElementsIn(expected).inOrder()
+        assertThat(files.list("j1", "Plans").files.map { it.id }).containsExactly(next, sam)
+    }
+
+    // cr:pdf-history-branch: a parent cycle from bad synced data ends instead of looping forever
+    @Test fun historyStopsOnAParentCycle() = runBlocking<Unit> {
+        val v1 = plan()
+        clock = 2_000L
+        val v2 = requireNotNull(markup.saveVersion(v1.id, mark, "Maria"))
+        db.jobFileDao().upsert(requireNotNull(db.jobFileDao().get(v1.id)).copy(parentFileId = v2))
+        assertThat(markup.history(v2).map { it.id }).containsExactly(v2, v1.id).inOrder()
+    }
+
     @Test fun nothingSavedForNoMarksNotOnPhoneNotPdfOrFailedWrite() = runBlocking<Unit> {
         val f = plan()
         assertThat(markup.saveVersion(f.id, emptyList(), "Sam")).isNull()

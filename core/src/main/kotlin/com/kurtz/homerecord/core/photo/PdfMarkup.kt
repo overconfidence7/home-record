@@ -59,14 +59,29 @@ class PdfMarkup(
         return id
     }
 
-    /** All versions of the file that [fileId] belongs to, newest first (AC-F21). */
+    /**
+     * All versions of the file that [fileId] belongs to, newest first (AC-F21). Two people marking up the same version
+     * branch the history; every branch is listed. A parent cycle (only possible from bad synced data) ends the walk.
+     */
     suspend fun history(fileId: String): List<JobFileEntity> {
         val any = db.jobFileDao().get(fileId) ?: return emptyList()
-        val rows = db.jobFileDao().listFor(any.jobId).associateBy { it.id }
+        val rows = db.jobFileDao().listFor(any.jobId)
+        val byId = rows.associateBy { it.id }
+        val children = rows.groupBy { it.parentFileId }
         var root: JobFileEntity = any
-        while (true) root = root.parentFileId?.let { rows[it] } ?: break
-        val chain = generateSequence(root) { cur -> rows.values.firstOrNull { it.parentFileId == cur.id } }
-        return chain.toList().reversed()
+        val climbed = mutableSetOf(root.id)
+        while (true) {
+            val parent = root.parentFileId?.let { byId[it] } ?: break
+            if (!climbed.add(parent.id)) break
+            root = parent
+        }
+        val seen = mutableSetOf<String>()
+        val queue = ArrayDeque(listOf(root))
+        while (queue.isNotEmpty()) {
+            val cur = queue.removeFirst()
+            if (seen.add(cur.id)) queue += children[cur.id].orEmpty()
+        }
+        return seen.mapNotNull { byId[it] }.sortedWith(compareByDescending<JobFileEntity> { it.createdAt }.thenByDescending { it.version })
     }
 
     companion object {

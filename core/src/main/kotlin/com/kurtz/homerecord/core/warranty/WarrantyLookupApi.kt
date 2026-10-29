@@ -1,14 +1,13 @@
 package com.kurtz.homerecord.core.warranty
 
-import com.kurtz.homerecord.core.company.ApiFailure
+import com.kurtz.homerecord.core.net.invalidOrFailed
+import com.kurtz.homerecord.core.net.apiCall
 import com.kurtz.homerecord.core.company.ApiResult
-import java.io.IOException
 import kotlin.math.roundToInt
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
@@ -55,25 +54,19 @@ internal interface WarrantyLookupService {
 
 class RetrofitWarrantyLookupApi internal constructor(private val service: WarrantyLookupService) : WarrantyLookupApi {
     override suspend fun lookup(make: String, model: String, category: String?, serial: String?): ApiResult<WarrantyTerms> =
-        try {
+        apiCall(::invalidOrFailed) {
             val r = service.lookup(WarrantyRequestBody(make.trim(), model.trim(), category?.trim()?.ifEmpty { null }, serial?.trim()?.ifEmpty { null }))
-            ApiResult.Ok(
-                WarrantyTerms(
-                    partsMonths = r.partsYears?.let { (it * 12).roundToInt() },
-                    laborMonths = r.laborYears?.let { (it * 12).roundToInt() },
-                    specialTerms = r.specialTerms,
-                    registrationRequired = r.registrationRequired,
-                    registrationUrl = r.registrationUrl,
-                    manualUrl = r.manualUrl,
-                    sourceUrl = r.sourceUrl,
-                    confidence = r.confidence.uppercase().takeIf { it in setOf("HIGH", "MEDIUM", "LOW") } ?: "LOW",
-                    summary = r.summary,
-                ),
+            WarrantyTerms(
+                partsMonths = r.partsYears?.let { (it * 12).roundToInt() },
+                laborMonths = r.laborYears?.let { (it * 12).roundToInt() },
+                specialTerms = r.specialTerms,
+                registrationRequired = r.registrationRequired,
+                registrationUrl = r.registrationUrl,
+                manualUrl = r.manualUrl,
+                sourceUrl = r.sourceUrl,
+                confidence = r.confidence.uppercase().takeIf { it in setOf("HIGH", "MEDIUM", "LOW") } ?: "LOW",
+                summary = r.summary,
             )
-        } catch (e: HttpException) {
-            ApiResult.Err(if (e.code() == 400) ApiFailure.Invalid else ApiFailure.Failed)
-        } catch (e: IOException) {
-            ApiResult.Err(ApiFailure.Offline)
         }
 
     companion object {
