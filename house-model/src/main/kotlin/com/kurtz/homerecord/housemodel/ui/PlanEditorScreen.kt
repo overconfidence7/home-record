@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -172,29 +176,59 @@ fun PlanEditorScreen(
                 onAction = onOpenFloors,
                 modifier = Modifier.padding(padding),
             )
-            else -> Column(Modifier.fillMaxSize().padding(padding)) {
-                FloorSwitcher(state, onEvent)
-                if (state.unplaced.isNotEmpty()) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
-                Box(Modifier.weight(1f).fillMaxWidth()) {
-                    PlanCanvas(
-                        state = state,
-                        onEvent = onEvent,
-                        modifier = Modifier.fillMaxSize(),
-                        canvasWidthDp = canvasWidthDp,
-                        canvasHeightDp = canvasHeightDp,
-                        onSized = { w, h -> canvasWidthDp = w; canvasHeightDp = h },
-                    )
-                    PlanRoomNodes(state, onEvent)
-                    if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
-                        Text(
-                            stringResource(R.string.plan_empty_hint),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.Center).padding(32.dp),
-                        )
+            // The panel sits above the keyboard (imePadding) and, on a wide window, beside the plan instead of under it.
+            else -> BoxWithConstraints(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding()) {
+                val room = state.selected
+                val panelWidth = minOf(360.dp, maxWidth * 0.45f)
+                val panelMaxHeight = maxHeight * 0.55f
+                val plan: @Composable (Modifier) -> Unit = { modifier ->
+                    PlanArea(state, onEvent, canvasWidthDp, canvasHeightDp, { w, h -> canvasWidthDp = w; canvasHeightDp = h }, modifier)
+                }
+                if (room != null && maxWidth > maxHeight && maxWidth >= 600.dp) {
+                    Row(Modifier.fillMaxSize()) {
+                        plan(Modifier.weight(1f).fillMaxHeight())
+                        RoomPanel(state, room, onEvent, Modifier.width(panelWidth).fillMaxHeight())
+                    }
+                } else {
+                    Column(Modifier.fillMaxSize()) {
+                        plan(Modifier.weight(1f).fillMaxWidth())
+                        if (room != null) RoomPanel(state, room, onEvent, Modifier.fillMaxWidth().heightIn(max = panelMaxHeight))
                     }
                 }
-                state.selected?.let { room -> RoomPanel(state, room, onEvent) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlanArea(
+    state: PlanEditorUiState,
+    onEvent: (PlanEditorEvent) -> Unit,
+    canvasWidthDp: Float,
+    canvasHeightDp: Float,
+    onSized: (Float, Float) -> Unit,
+    modifier: Modifier,
+) {
+    Column(modifier) {
+        FloorSwitcher(state, onEvent)
+        if (state.unplaced.isNotEmpty()) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            PlanCanvas(
+                state = state,
+                onEvent = onEvent,
+                modifier = Modifier.fillMaxSize(),
+                canvasWidthDp = canvasWidthDp,
+                canvasHeightDp = canvasHeightDp,
+                onSized = onSized,
+            )
+            PlanRoomNodes(state, onEvent)
+            if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
+                Text(
+                    stringResource(R.string.plan_empty_hint),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.Center).padding(32.dp),
+                )
             }
         }
     }
@@ -552,8 +586,12 @@ private fun ConfirmDeleteDialog(title: String, body: String, onConfirm: () -> Un
     )
 }
 
+/**
+ * The inspector for the selected room. Its fields scroll; the action row stays pinned at the bottom so Done is never
+ * cut off. A tapped wall or door shows only its own controls, and Done goes back to the room.
+ */
 @Composable
-private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEditorEvent) -> Unit) {
+private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEditorEvent) -> Unit, modifier: Modifier) {
     var pickingKind by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable(room.id) { mutableStateOf(false) }
     if (confirmDelete) {
@@ -564,70 +602,98 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
             onDismiss = { confirmDelete = false },
         )
     }
+    val onWall = !state.editShape && (state.selectedWall != null || state.selectedOpening != null)
     val focus = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(room.id, state.focusName) { if (state.focusName) focus.requestFocus() }
+    LaunchedEffect(room.id, state.focusName) { if (state.focusName && !onWall) focus.requestFocus() }
     // Name and size are one edit each: committed on IME Done or when focus leaves the field, not per keystroke.
     val commitOnBlur = Modifier.onFocusChanged { if (!it.isFocused) onEvent(PlanEditorEvent.CommitFields) }
     val commitOnDone = KeyboardActions(onDone = { onEvent(PlanEditorEvent.CommitFields); focusManager.clearFocus() })
-    BoxWithConstraints {
-        Surface(tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+    Surface(tonalElevation = 3.dp, modifier = modifier) {
+        Column(Modifier.padding(vertical = 8.dp)) {
             Column(
-                Modifier.heightIn(max = maxHeight * 0.55f).verticalScroll(rememberScrollState()).padding(16.dp),
+                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                key(room.id) {
-                    LabeledField(
-                        label = stringResource(R.string.plan_room_name),
-                        value = room.name,
-                        onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
-                        modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_name"),
+                if (onWall) {
+                    Text(
+                        room.name.ifBlank { stringResource(R.string.plan_unnamed_room) },
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-                OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_room_kind")) {
-                    Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
-                }
-                if (room.points.size == 4) {
-                    key(room.id, state.fieldsVersion) {
-                        var width by remember { mutableStateOf<Int?>(room.widthIn) }
-                        var length by remember { mutableStateOf<Int?>(room.lengthIn) }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            LengthField(
-                                label = stringResource(R.string.plan_room_width),
-                                inches = room.widthIn,
-                                onInchesChange = { width = it; commitSize(width, length, onEvent) },
-                                system = state.system,
-                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_width"),
-                            )
-                            LengthField(
-                                label = stringResource(R.string.plan_room_length),
-                                inches = room.lengthIn,
-                                onInchesChange = { length = it; commitSize(width, length, onEvent) },
-                                system = state.system,
-                                modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_length"),
-                                imeAction = ImeAction.Done,
-                                keyboardActions = commitOnDone,
-                            )
+                    OpeningControls(state, room, onEvent)
+                } else {
+                    key(room.id) {
+                        LabeledField(
+                            label = stringResource(R.string.plan_room_name),
+                            value = room.name,
+                            onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
+                            modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_name"),
+                        )
+                    }
+                    OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_room_kind")) {
+                        Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
+                    }
+                    if (room.points.size == 4) {
+                        key(room.id, state.fieldsVersion) {
+                            var width by remember { mutableStateOf<Int?>(room.widthIn) }
+                            var length by remember { mutableStateOf<Int?>(room.lengthIn) }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                LengthField(
+                                    label = stringResource(R.string.plan_room_width),
+                                    inches = room.widthIn,
+                                    onInchesChange = { width = it; commitSize(width, length, onEvent) },
+                                    system = state.system,
+                                    modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_width"),
+                                )
+                                LengthField(
+                                    label = stringResource(R.string.plan_room_length),
+                                    inches = room.lengthIn,
+                                    onInchesChange = { length = it; commitSize(width, length, onEvent) },
+                                    system = state.system,
+                                    modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_length"),
+                                    imeAction = ImeAction.Done,
+                                    keyboardActions = commitOnDone,
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            stringResource(R.string.plan_room_size_summary, LengthParser.format(room.widthIn, state.system), LengthParser.format(room.lengthIn, state.system)),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    if (state.editShape) {
+                        Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        if (room.openings.isEmpty() && room.stairs.isEmpty()) {
+                            Text(stringResource(R.string.plan_wall_hint), style = MaterialTheme.typography.bodyMedium)
+                        }
+                        room.stairs.forEach { stair -> StairRow(state, stair, onEvent) }
+                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_stairs")) {
+                            Icon(Icons.Rounded.Stairs, contentDescription = null)
+                            Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
-                } else {
-                    Text(
-                        stringResource(R.string.plan_room_size_summary, LengthParser.format(room.widthIn, state.system), LengthParser.format(room.lengthIn, state.system)),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                if (!state.editShape) OpeningControls(state, room, onEvent)
-                if (state.editShape) {
-                    Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
                 }
                 if (room.id in state.flaggedIds) {
                     Text(stringResource(R.string.plan_room_flagged), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
                 }
-                @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-                androidx.compose.foundation.layout.FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+            }
+            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+            androidx.compose.foundation.layout.FlowRow(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (onWall) {
+                    FilledTonalButton(
+                        onClick = { onEvent(PlanEditorEvent.SelectOpening(null)) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_wall_done"),
+                    ) {
+                        Text(stringResource(R.string.plan_done))
+                    }
+                } else {
                     FilledTonalButton(
                         onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
                         modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_done"),
@@ -640,15 +706,8 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
                             Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
-                    if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_stairs")) {
-                            Icon(Icons.Rounded.Stairs, contentDescription = null)
-                            Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
-                        }
-                    }
-                    OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_delete_room")) {
-                        Icon(Icons.Rounded.Delete, contentDescription = null)
-                        Text(stringResource(R.string.plan_delete_room), modifier = Modifier.padding(start = 8.dp))
+                    IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("${LocalTagPrefix.current}_plan_delete_room")) {
+                        Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_room))
                     }
                 }
             }
@@ -664,7 +723,7 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
     }
 }
 
-/** Door and window controls for the tapped wall or opening, and the stairs list (AC-C9). */
+/** Door and window controls for the tapped wall or opening (AC-C9). */
 @Composable
 private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEditorEvent) -> Unit) {
     val opening = state.selectedOpening
@@ -681,8 +740,6 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
                 Text(stringResource(R.string.plan_add_window))
             }
         }
-    } else if (opening == null && room.openings.isEmpty() && room.stairs.isEmpty()) {
-        Text(stringResource(R.string.plan_wall_hint), style = MaterialTheme.typography.bodyMedium)
     }
     if (opening != null) {
         key(opening.id, state.fieldsVersion) {
@@ -704,7 +761,6 @@ private fun OpeningControls(state: PlanEditorUiState, room: PlanRoom, onEvent: (
             }
         }
     }
-    room.stairs.forEach { stair -> StairRow(state, stair, onEvent) }
 }
 
 @Composable
