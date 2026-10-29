@@ -39,6 +39,7 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_files_empty
     timeout: 10000
+# AC-F23: a new folder is listed and opens with a way back up
 - tapOn:
     id: fl_files_new_folder
 - tapOn:
@@ -55,6 +56,7 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_files_folder_Permits
 - assertVisible:
     id: fl_files_up
+# AC-F23: search by file name says when nothing matches
 - tapOn:
     id: fl_files_search
 - inputText: "nothing"

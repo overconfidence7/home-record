@@ -147,3 +147,28 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_room_add_item"
 - assertVisible: "(?i).*furnace.*"
+# AC-H3: Home search finds the furnace by its model number and opens its page, and finds the room by name
+- tapOn:
+    id: "hm_tab_home"
+- tapOn:
+    id: "hm_home_search"
+- inputText: "59SC5A"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Furnace.*"
+    timeout: 5000
+- tapOn: "Furnace.*"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+- tapOn: "Back"
+- tapOn:
+    id: "hm_home_search_clear"
+- tapOn:
+    id: "hm_home_search"
+- inputText: "Kitch"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 5000

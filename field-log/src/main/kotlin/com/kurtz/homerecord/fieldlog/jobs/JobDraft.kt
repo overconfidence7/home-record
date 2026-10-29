@@ -83,9 +83,9 @@ data class JobDraft(
             clientId = clientId,
             homeId = homeId,
             address = address.trim().ifBlank { null },
-            // A changed address invalidates old coordinates; they are resolved again when online.
-            lat = if (existing?.address == address.trim().ifBlank { null }) existing?.lat else null,
-            lng = if (existing?.address == address.trim().ifBlank { null }) existing?.lng else null,
+            // A changed address invalidates old coordinates; they are resolved again when online. Typed coordinates are their own.
+            lat = CoordinateAddress.parse(address)?.lat ?: if (existing?.address == address.trim().ifBlank { null }) existing?.lat else null,
+            lng = CoordinateAddress.parse(address)?.lng ?: if (existing?.address == address.trim().ifBlank { null }) existing?.lng else null,
             status = if (existing?.status == "ARCHIVED") "ARCHIVED" else statusFor(today),
             startDate = startDate,
             endDate = endDate,

@@ -3,6 +3,7 @@ appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
 - tapOn: "More"
+# AC-H18 (paywall part): Pro opens HM-Paywall with the reason and Restore; prices need the Test Store key
 - tapOn:
     id: "hm_more_pro"
 - assertVisible: "Restore purchases"

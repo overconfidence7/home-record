@@ -50,7 +50,7 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - tapOn:
     id: fl_clock_explain_ok
-# The system location dialog must appear (it did not when only precise was requested).
+# AC-F8, AC-F18: the system location dialog must appear (it did not when only precise was requested); allowed, the punch saves.
 - extendedWaitUntil:
     visible: "While using the app"
     timeout: 10000

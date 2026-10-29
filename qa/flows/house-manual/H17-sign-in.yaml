@@ -28,6 +28,7 @@ env:
     id: "hm_sign_in_code"
 - inputText: ${output.devCode}
 - hideKeyboard
+# AC-H15 (sign-in part): the code signs in and Sign out appears
 - tapOn:
     id: "hm_sign_in_verify"
 - extendedWaitUntil:
@@ -36,5 +37,12 @@ env:
 - takeScreenshot: H17-signed-in
 # Signing out keeps the local copy (AC-H15)
 - tapOn: "Sign out"
-- tapOn: "House"
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 10000
+- tapOn:
+    id: "hm_tab_home"
+- assertVisible:
+    id: "hm_home_title"
+    text: "Maple St"
 - takeScreenshot: H17-local-copy-kept

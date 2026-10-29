@@ -19,6 +19,7 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_onboarding_foundation_basement"
 - takeScreenshot: H01-onboarding-filled
+# AC-H1, AC-C1: one onboarding screen, then Skip lands on Home with the tabs
 - tapOn:
     id: "hm_onboarding_skip"
 - extendedWaitUntil:

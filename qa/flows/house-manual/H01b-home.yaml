@@ -2,14 +2,17 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
+# AC-H1: the Home empty state offers the quick actions and the emergency card
 - assertVisible:
     id: "hm_home_add_item"
 - assertVisible:
     id: "hm_home_scan_plate"
 - assertVisible:
     id: "hm_home_emergency"
+# AC-H2: with nothing to show, Needs attention is one line, not an empty card
 - assertVisible:
     id: "hm_home_attention_none"
+# AC-H3 (no match; H04 searches a real item): a search with no match says so, clearing it brings Home back
 - tapOn:
     id: "hm_home_search"
 - inputText: "zzzz"

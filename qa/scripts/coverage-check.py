@@ -10,12 +10,16 @@ What counts as a reference:
     or an instrumented test does not stand in for the JVM test (CLAUDE.md QA rule 1).
   - backend criteria (AC-B*): the AC id appears in a `backend/**/*.test.ts` vitest file.
   - every other criterion: the AC id appears in an `androidTest` file (instrumented acceptance
-    test, PLAN Q003) or a Maestro flow under qa/flows/. Screenshot tests are not coverage.
+    test, PLAN Q003) or in a tagged asserted step of a Maestro flow under qa/flows/. Screenshot
+    tests are not coverage.
   - nothing under node_modules or build/ counts.
 
-A criterion mentioned in a file only as prose ("see AC-H5") still counts; the intent is that
-the builder tags the test with the id. The output JSON lists missing ids per task so
-summarize.py can file one Major finding per task with gaps.
+A tagged asserted step in a flow is a comment in the commands section (after `---`) naming the
+AC, followed by the steps up to the next comment, at least one of which asserts
+(assertVisible, assertNotVisible, assertTrue, extendedWaitUntil, scrollUntilVisible). The flow's
+header comment above `---` and a comment over steps that only tap or type do not count
+(cr:qa-ac-claims-comment). The output JSON lists missing ids per task so summarize.py can file
+one Major finding per task with gaps.
 
 Usage: coverage-check.py --plan PLAN.md --spec SPEC.md --out coverage.json
 """
@@ -24,6 +28,8 @@ import argparse, glob, json, re, sys
 AC = re.compile(r"AC-([CHFBU])(\d+)(?:\.\.(?:AC-)?([CHFBU])?(\d+))?")
 TASK = re.compile(r"\s*- \[x\] ((?:CR|[TQRV])\d+[a-z0-9]*):(.*)")
 SKIP = re.compile(r"(^|/)(node_modules|build|\.gradle)/")
+COMMENT = re.compile(r"^\s*#")
+ASSERT = re.compile(r"^\s*-?\s*(assertVisible|assertNotVisible|assertTrue|extendedWaitUntil|scrollUntilVisible)\b")
 
 
 def expand(text):
@@ -35,6 +41,27 @@ def expand(text):
                 ids.add(f"AC-{p}{i}")
         else:
             ids.add(f"AC-{p}{a}")
+    return ids
+
+
+def flow_ids(text):
+    """AC ids from the flow's tagged asserted steps: a comment after `---` and the steps under it."""
+    lines = [l.rstrip("\n") for l in text.splitlines()]
+    stripped = [l.strip() for l in lines]
+    if "---" not in stripped:
+        return set()
+    ids, tag, asserted, in_comment = set(), "", False, False
+    for line in lines[stripped.index("---") + 1:] + ["#"]:
+        if COMMENT.match(line):
+            if not in_comment:  # a new step block starts; settle the previous one
+                if asserted:
+                    ids |= expand(tag)
+                tag, asserted = "", False
+            tag += line + "\n"
+            in_comment = True
+        else:
+            in_comment = False
+            asserted = asserted or bool(ASSERT.match(line))
     return ids
 
 
@@ -62,7 +89,8 @@ def main():
     def refs(paths):
         ids = set()
         for f in paths:
-            ids |= expand(open(f, encoding="utf-8", errors="ignore").read())
+            text = open(f, encoding="utf-8", errors="ignore").read()
+            ids |= flow_ids(text) if f.endswith(".yaml") else expand(text)
         return ids
 
     jvm_files = files("**/src/test/**/*.kt")

@@ -1,4 +1,4 @@
-# Walkthrough H2: draw rooms on the plan (AC-C5, AC-C6, AC-C10, AC-C12 basics; AC-C4 feet-and-inches length entry).
+# Walkthrough H2: draw rooms on the plan (AC-C5, AC-C6, AC-C10, AC-C12; H03 checks the AC-C4 feet-and-inches length).
 # Builds on H01 (runs it first so the home exists), then adds two rooms, undoes one, rotates.
 appId: com.kurtz.homerecord.housemanual
 ---
@@ -35,6 +35,15 @@ appId: com.kurtz.homerecord.housemanual
 - eraseText: 20
 - inputText: "Living room"
 - hideKeyboard
+# AC-C12: rotating keeps the selected room and its name typed but not yet committed
+- setOrientation: LANDSCAPE_LEFT
+- assertVisible:
+    id: "hm_plan_room_name"
+- assertVisible: "Living room"
+- setOrientation: PORTRAIT
+- assertVisible:
+    id: "hm_plan_room_name"
+- assertVisible: "Living room"
 - tapOn: "Done"
 - takeScreenshot: H02-plan-two-rooms
 # Undo removes the last room, redo brings it back (AC-C10)

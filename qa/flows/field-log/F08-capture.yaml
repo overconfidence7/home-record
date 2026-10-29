@@ -1,4 +1,4 @@
-# Walkthrough F8: open Capture from a job, shutter and gallery are present, camera denied state offers Settings and gallery and a typed note saves to today (AC-F24, AC-F27, AC-F29, AC-F54).
+# Walkthrough F8: open Capture from a job, shutter and gallery are present, camera denied state offers Settings and gallery and a typed note saves to today (AC-F27, AC-F29). F08b takes a photo.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -40,6 +40,7 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_photos_empty
     timeout: 10000
+# AC-F29: with the camera refused, Capture explains, links to Settings and still offers the gallery
 - tapOn:
     id: fl_photos_fab
 - tapOn:
@@ -50,7 +51,10 @@ appId: com.kurtz.homerecord.fieldlog
       id: fl_capture_gallery
     timeout: 15000
 - assertVisible:
-    id: fl_capture_gallery
+    id: fl_capture_denied
+- assertVisible:
+    id: fl_capture_settings
+# AC-F27: a typed note saves to the job and today; voice memo is offered
 - tapOn:
     id: fl_capture_note
 - tapOn:

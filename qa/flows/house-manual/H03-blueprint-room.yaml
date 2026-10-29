@@ -10,6 +10,8 @@ appId: com.kurtz.homerecord.housemanual
 # Room page is a non-root screen: it has the back arrow and names the room (AC-U2, ui rule 7)
 - assertVisible: "Back"
 - assertVisible: "Kitchen"
+# AC-C4: the length H02 typed as 12'6" reads back as 12' 6"
+- assertVisible: '14'' by 12'' 6".*'
 # Room page sections are present as the T017 shell of AC-H10 (items list arrives with T021+)
 - assertVisible:
     id: "hm_room_items"

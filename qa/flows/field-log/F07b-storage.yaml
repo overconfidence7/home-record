@@ -22,6 +22,7 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "Create company"
 - extendedWaitUntil:
     visible: "Today"
+# AC-F20 (storage part): More lists storage on this phone with Free up
 - tapOn: "More"
 - extendedWaitUntil:
     visible:

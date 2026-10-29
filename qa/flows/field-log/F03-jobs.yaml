@@ -46,6 +46,7 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_jobedit_address
 - inputText: "12 Oak St"
 - hideKeyboard
+# AC-F5: the new job with client and address saves and is listed; its Overview shows both
 - tapOn:
     id: fl_save
 - extendedWaitUntil:
@@ -53,10 +54,28 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - tapOn: "Garage subpanel"
 - assertVisible: "Rivera"
+- assertVisible:
+    id: fl_job_address
+    text: "12 Oak St"
+# AC-F7: Overview shows hours this week, photos, open tasks, the next scheduled day and the crew
+- assertVisible:
+    id: fl_job_stat_hours
+- assertVisible:
+    id: fl_job_stat_photos
+- scrollUntilVisible:
+    element:
+      id: fl_job_stat_tasks
+- scrollUntilVisible:
+    element:
+      id: fl_job_next_day
+- scrollUntilVisible:
+    element:
+      id: fl_job_crew
 - takeScreenshot: F03-job-overview
 - swipe:
     start: 85%, 15%
     end: 10%, 15%
+# AC-F48: the job's House tab starts the same plan editor House Manual uses
 - tapOn:
     id: fl_job_tab_house
 - extendedWaitUntil:

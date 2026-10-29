@@ -70,6 +70,7 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Clocked in"
     timeout: 15000
+# AC-F10, AC-F16: back on Today the clock card shows the job and the elapsed time
 - tapOn: "Today"
 - extendedWaitUntil:
     visible:

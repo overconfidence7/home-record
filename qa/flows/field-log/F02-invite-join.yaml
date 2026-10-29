@@ -29,8 +29,11 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "More"
 - assertVisible: "Team"
 - assertVisible: "Company"
+# AC-F2: the Owner's Team page shows the invite code to share
 - tapOn: "Team"
 - assertVisible: "Invite code"
+- assertVisible:
+    id: "fl_team_code"
 - copyTextFrom:
     id: "fl_team_code"
 - takeScreenshot: F02-team-owner
@@ -46,7 +49,7 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "Sign out?"
 - tapOn: "Sign out"
 - assertVisible: "Email"
-# Second account joins with the code
+# AC-F2 (join part): a second account joins with the code and lands on Today
 - runFlow:
     file: _sign-in.yaml
     env:

@@ -48,10 +48,12 @@ appId: com.kurtz.homerecord.fieldlog
           id: "fl_welcome_trade"
       - inputText: "Electrical"
       - hideKeyboard
+      # AC-F1: creating a company lands the Owner on Today, whose empty state says to add a job or invite the crew
       - tapOn: "Create company"
       - extendedWaitUntil:
           visible: "Today"
           timeout: 15000
+      - assertVisible: "Add a job or invite your crew.*"
       - assertVisible: "Jobs"
       - assertVisible: "Clock"
       - assertVisible: "Schedule"

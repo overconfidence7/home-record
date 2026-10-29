@@ -22,6 +22,7 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn: "Create company"
 - extendedWaitUntil:
     visible: "Today"
+# AC-F14 (week view part): Timesheets opens on a week; an empty week says so and the week picker moves
 - tapOn: "More"
 - tapOn:
     id: fl_more_timesheets

@@ -1,4 +1,6 @@
-# Walkthrough F4: clock in on a job, take a break, switch, clock out; the week shows on My timesheet (AC-F8, AC-F10, AC-F11, AC-F18).
+# Walkthrough F4 and F5: clock in on a job without location, take a break, clock out; then with location two miles
+# from the job clock in with a reason, switch job, clock out; the week shows the far-from-job flag on My timesheet.
+# Jobs are given typed coordinates so the far-from-job check needs no geocoder (AC-F8, AC-F9, AC-F10, AC-F18).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -34,15 +36,35 @@ appId: com.kurtz.homerecord.fieldlog
 - inputText: "Garage subpanel"
 - hideKeyboard
 - tapOn:
+    id: fl_jobedit_address
+- inputText: "40.0, -75.0"
+- hideKeyboard
+- tapOn:
     id: fl_save
 - extendedWaitUntil:
     visible: "Garage subpanel"
+    timeout: 10000
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Kitchen remodel"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_address
+- inputText: "40.029, -75.0"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Kitchen remodel"
     timeout: 10000
 - tapOn: "Clock"
 - extendedWaitUntil:
     visible: "Not clocked in"
     timeout: 10000
 - assertVisible: "My timesheet"
+- tapOn: "Garage subpanel"
 - tapOn:
     id: fl_clock_in
 # First clock in explains location before the system prompt (AC-F18); decline to take the no-location path.
@@ -54,8 +76,10 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Clocked in"
     timeout: 15000
+# AC-F8: with location declined the punch still saves and the status card ticks
 - assertVisible:
     id: fl_clock_elapsed
+# AC-F10: Break start and end, then Clock out closes the shift
 - tapOn:
     id: fl_clock_break
 - extendedWaitUntil:
@@ -71,7 +95,51 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Not clocked in"
     timeout: 10000
-# Owner and leads see the crew clock-in card on the Clock tab (AC-F11).
+# Owner and leads see the crew clock-in card on the Clock tab (punching crew needs a crew member; not driven here).
 - scrollUntilVisible:
     element:
       id: fl_clock_crew
+# AC-F8, AC-F9: location allowed and the phone two miles from Garage subpanel: Clock in gets a fix and asks why
+- stopApp
+- setLocation:
+    latitude: 40.029
+    longitude: -75.0
+- launchApp:
+    permissions:
+      location: allow
+- tapOn: "Clock"
+- extendedWaitUntil:
+    visible: "Not clocked in"
+    timeout: 10000
+- tapOn: "Garage subpanel"
+- tapOn:
+    id: fl_clock_in
+- extendedWaitUntil:
+    visible: "You're away from the job"
+    timeout: 15000
+- tapOn: "Supply house"
+- tapOn:
+    id: fl_clock_far_save
+- extendedWaitUntil:
+    visible: "Clocked in"
+    timeout: 10000
+# AC-F10: Switch job to Kitchen remodel, where the phone is, needs no reason; the status card names the new job
+- tapOn: "Kitchen remodel"
+- tapOn:
+    id: fl_clock_switch
+- extendedWaitUntil:
+    visible:
+      text: "Kitchen remodel"
+      childOf:
+        id: fl_clock_status
+    timeout: 15000
+- assertNotVisible: "You're away from the job"
+- tapOn:
+    id: fl_clock_out
+- extendedWaitUntil:
+    visible: "Not clocked in"
+    timeout: 10000
+# AC-F10, AC-F12: My timesheet shows today's punches with the far-from-job flag
+- scrollUntilVisible:
+    element:
+      text: ".*Far from job.*"

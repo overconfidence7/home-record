@@ -29,6 +29,7 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_reports_empty
     timeout: 10000
+# AC-F15 (export part): an empty range says so; the shifts CSV and the QuickBooks export are offered
 - tapOn:
     id: fl_reports_range_LastFourWeeks
 - assertVisible:

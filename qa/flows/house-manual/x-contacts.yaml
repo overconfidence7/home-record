@@ -6,6 +6,7 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_more_contacts"
 - assertVisible: "No contacts yet"
+# AC-C39: a contact needs a name; saved, it is listed
 - tapOn:
     id: "hm_contacts_add"
 - tapOn:
