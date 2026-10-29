@@ -12,6 +12,7 @@ appId: com.kurtz.homerecord.fieldlog
     file: ../_scripts/fetch-dev-code.js
     env:
       EMAIL: ${EMAIL}
+- assertTrue: ${output.devCode != null && output.devCode != ''}
 - tapOn: "Code"
 - inputText: ${output.devCode}
 - hideKeyboard

@@ -80,6 +80,8 @@ def main():
     ap.add_argument("--review", default="REVIEW.md")
     ap.add_argument("--out", required=True)
     ap.add_argument("--apply-review", action="store_true")
+    ap.add_argument("--no-handoff", action="store_true",
+                    help="the handoff job was skipped because qa/flows/handoff has no flows yet; do not expect its results")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     inp = a.input
@@ -143,7 +145,11 @@ def main():
     stage_rows = []
     walkthrough = {}
     device_ok = True   # False when any expected device job produced no stages: the run does not count as a test
-    for app in sorted(set(EXPECTED_DEVICE_APPS) | {os.path.basename(d)[len("qa-device-"):] for d in glob.glob(os.path.join(inp, "qa-device-*"))}):
+    expected_apps = set(EXPECTED_DEVICE_APPS)
+    if a.no_handoff:
+        expected_apps.discard("handoff")
+        skipped.append(("handoff", "flows", "no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run"))
+    for app in sorted(expected_apps | {os.path.basename(d)[len("qa-device-"):] for d in glob.glob(os.path.join(inp, "qa-device-*"))}):
         appdir = os.path.join(inp, "qa-device-" + app)
         try:
             stages = json.load(open(os.path.join(appdir, "stages.json")))

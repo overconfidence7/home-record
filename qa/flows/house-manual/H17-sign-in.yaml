@@ -24,6 +24,7 @@ env:
     file: ../_scripts/fetch-dev-code.js
     env:
       EMAIL: ${EMAIL}
+- assertTrue: ${output.devCode != null && output.devCode != ''}
 - tapOn:
     id: "hm_sign_in_code"
 - inputText: ${output.devCode}

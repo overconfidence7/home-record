@@ -4,10 +4,17 @@
 # Tabs are tapped by id: House has an "Items" layer chip that a text match would hit.
 # It never clears state, so it sees whatever the previous flows left behind.
 appId: com.kurtz.homerecord.housemanual
-env:
-  QA_VARIANT: light
 ---
+# No `env:` default here: a flow's own env overrides `maestro test -e`, which named every
+# variant's shots tour-light-*. The variant comes from -e QA_VARIANT, light when unset.
+- evalScript: ${output.variant = (typeof QA_VARIANT !== 'undefined' && QA_VARIANT) || 'light'}
 - launchApp
+# `settings put system user_rotation 1` left the emulator portrait; rotate from the flow instead
+- runFlow:
+    when:
+      true: ${output.variant == 'landscape'}
+    commands:
+      - setOrientation: LANDSCAPE_LEFT
 - extendedWaitUntil:
     visible: "Set up your home|Home"
     timeout: 20000
@@ -17,24 +24,29 @@ env:
     file: _onboard.yaml
 - tapOn:
     id: "hm_tab_home"
-- takeScreenshot: tour-${QA_VARIANT}-home
+- takeScreenshot: tour-${output.variant}-home
 - tapOn:
     id: "hm_tab_house"
-- takeScreenshot: tour-${QA_VARIANT}-house
+- takeScreenshot: tour-${output.variant}-house
 - tapOn: "Floors"
-- takeScreenshot: tour-${QA_VARIANT}-floors
+- takeScreenshot: tour-${output.variant}-floors
 - tapOn: "Back"
 - tapOn: "Edit plan"
-- takeScreenshot: tour-${QA_VARIANT}-plan-editor
+- takeScreenshot: tour-${output.variant}-plan-editor
 - tapOn: "Back"
 - tapOn:
     id: "hm_tab_items"
-- takeScreenshot: tour-${QA_VARIANT}-items
+- takeScreenshot: tour-${output.variant}-items
 - tapOn:
     id: "hm_tab_reminders"
-- takeScreenshot: tour-${QA_VARIANT}-reminders
+- takeScreenshot: tour-${output.variant}-reminders
 - tapOn:
     id: "hm_tab_more"
-- takeScreenshot: tour-${QA_VARIANT}-more
+- takeScreenshot: tour-${output.variant}-more
 - tapOn:
     id: "hm_tab_home"
+- runFlow:
+    when:
+      true: ${output.variant == 'landscape'}
+    commands:
+      - setOrientation: PORTRAIT

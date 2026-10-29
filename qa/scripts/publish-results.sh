@@ -2,7 +2,7 @@
 # Publish a QA run to the qa-results branch.
 #
 # Layout of the branch (one commit, rewritten each run so the repo does not grow):
-#   latest/sha                      short sha of the tested build commit
+#   latest/sha                      full sha of the tested commit (newest non-bookkeeping commit on build)
 #   latest/summary.md, results.json, review-entry.md
 #   latest/jvm/, backend/, apk/     logs and reports from the prepare job
 #   latest/<app>/screenshots/*.png  every screenshot the device suite took
@@ -10,9 +10,9 @@
 #   history/<date>-<sha>/summary.md + results.json   small per-run record, kept across runs
 #
 # Runs inside the checked-out repo (a git worktree shares its credentials).
-# Usage: publish-results.sh <qa-publish dir with summary.md> <short sha>
+# Usage: publish-results.sh <qa-publish dir with summary.md> <full sha>
 set -euo pipefail
-PUB="$1"; SHA="$2"
+PUB="$1"; FULL="$2"; SHA="${FULL:0:7}"
 IN="${QA_INPUT_DIR:-qa-in}"
 STAMP="$(date -u +%Y-%m-%d-%H%M)-$SHA"
 work=$(mktemp -d)
@@ -27,7 +27,7 @@ git worktree add -q --detach "$work" HEAD
     git archive origin/qa-results history 2>/dev/null | tar -x 2>/dev/null || true
   fi
   mkdir -p latest "history/$STAMP"
-  echo "$SHA" > latest/sha
+  echo "$FULL" > latest/sha
   cp "$OLDPWD/$PUB"/summary.md "$OLDPWD/$PUB"/results.json "$OLDPWD/$PUB"/review-entry.md latest/ 2>/dev/null || true
   cp "$OLDPWD/$PUB"/summary.md "$OLDPWD/$PUB"/results.json "history/$STAMP/" 2>/dev/null || true
   for d in jvm backend apk; do

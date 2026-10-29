@@ -1,6 +1,6 @@
 # Walkthrough F1 (first half): fresh install shows sign-in, then the company welcome
-# (AC-F1 shell, AC-B1). Completing sign-in on the emulator needs the dev sign-in endpoint from
-# PLAN Q005; until it lands this flow checks the screens that exist and stops.
+# (AC-F1 shell, AC-B1). Sign-in uses the code from the local backend's /dev/last-code; when the
+# backend is down there is no code and the flow fails rather than passing unsigned-in.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -26,36 +26,34 @@ appId: com.kurtz.homerecord.fieldlog
     file: ../_scripts/fetch-dev-code.js
     env:
       EMAIL: "qa-owner@example.test"
-- runFlow:
-    when:
-      true: ${output.devCode != null && output.devCode != ''}
-    commands:
-      - tapOn: "Code"
-      - inputText: ${output.devCode}
-      - hideKeyboard
-      - tapOn:
-          id: "fl_sign_in_verify"
-      - extendedWaitUntil:
-          visible: "Set up your company"
-          timeout: 15000
-      - takeScreenshot: F01-welcome
-      - tapOn: "Create"
-      - tapOn:
-          id: "fl_welcome_name"
-      - inputText: "QA Electric"
-      - hideKeyboard
-      - tapOn:
-          id: "fl_welcome_trade"
-      - inputText: "Electrical"
-      - hideKeyboard
-      # AC-F1: creating a company lands the Owner on Today, whose empty state says to add a job or invite the crew
-      - tapOn: "Create company"
-      - extendedWaitUntil:
-          visible: "Today"
-          timeout: 15000
-      - assertVisible: "Add a job or invite your crew.*"
-      - assertVisible: "Jobs"
-      - assertVisible: "Clock"
-      - assertVisible: "Schedule"
-      - assertVisible: "More"
-      - takeScreenshot: F01-today-empty
+# No code means the dev backend never answered: that is a failure, not a skip
+- assertTrue: ${output.devCode != null && output.devCode != ''}
+- tapOn: "Code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn:
+    id: "fl_sign_in_verify"
+- extendedWaitUntil:
+    visible: "Set up your company"
+    timeout: 15000
+- takeScreenshot: F01-welcome
+- tapOn: "Create"
+- tapOn:
+    id: "fl_welcome_name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn:
+    id: "fl_welcome_trade"
+- inputText: "Electrical"
+- hideKeyboard
+# AC-F1: creating a company lands the Owner on Today, whose empty state says to add a job or invite the crew
+- tapOn: "Create company"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- assertVisible: "Add a job or invite your crew.*"
+- assertVisible: "Jobs"
+- assertVisible: "Clock"
+- assertVisible: "Schedule"
+- assertVisible: "More"
+- takeScreenshot: F01-today-empty

@@ -2,31 +2,43 @@
 # device suite sets (light, dark, font200, landscape). Field Log needs a signed-in company for
 # its tabs; when the app is still on the sign-in screen the tour screenshots that and stops.
 appId: com.kurtz.homerecord.fieldlog
-env:
-  QA_VARIANT: light
 ---
+# No `env:` default here: a flow's own env overrides `maestro test -e`, which named every
+# variant's shots tour-light-*. The variant comes from -e QA_VARIANT, light when unset.
+- evalScript: ${output.variant = (typeof QA_VARIANT !== 'undefined' && QA_VARIANT) || 'light'}
 - launchApp
-- takeScreenshot: tour-${QA_VARIANT}-launch
+# `settings put system user_rotation 1` left the emulator portrait; rotate from the flow instead
+- runFlow:
+    when:
+      true: ${output.variant == 'landscape'}
+    commands:
+      - setOrientation: LANDSCAPE_LEFT
+- takeScreenshot: tour-${output.variant}-launch
 - runFlow:
     when:
       visible: "Today"
     commands:
       - tapOn: "Today"
-      - takeScreenshot: tour-${QA_VARIANT}-today
+      - takeScreenshot: tour-${output.variant}-today
       - tapOn: "Jobs"
-      - takeScreenshot: tour-${QA_VARIANT}-jobs
+      - takeScreenshot: tour-${output.variant}-jobs
       - tapOn: "Clock"
-      - takeScreenshot: tour-${QA_VARIANT}-clock
+      - takeScreenshot: tour-${output.variant}-clock
       - tapOn: "Schedule"
-      - takeScreenshot: tour-${QA_VARIANT}-schedule
+      - takeScreenshot: tour-${output.variant}-schedule
       - tapOn: "More"
-      - takeScreenshot: tour-${QA_VARIANT}-more
+      - takeScreenshot: tour-${output.variant}-more
       - tapOn: "Team"
-      - takeScreenshot: tour-${QA_VARIANT}-team
+      - takeScreenshot: tour-${output.variant}-team
       - tapOn:
           id: "fl_back"
       - tapOn: "Company"
-      - takeScreenshot: tour-${QA_VARIANT}-company
+      - takeScreenshot: tour-${output.variant}-company
       - tapOn:
           id: "fl_close"
       - tapOn: "Today"
+- runFlow:
+    when:
+      true: ${output.variant == 'landscape'}
+    commands:
+      - setOrientation: PORTRAIT

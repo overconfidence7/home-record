@@ -18,6 +18,7 @@
 #   monkey       1,500 random events, must not crash
 #   release      release APK installs and launches (signed with a throwaway key if unsigned)
 #   logcat       FATAL EXCEPTION / ANR / StrictMode scan for the package
+# handoff runs install, permissions, fixtures, seed, flows and logcat only.
 set -uo pipefail
 
 APP="${1:?app}"; ROOT="${2:?qa-out dir}"
@@ -31,6 +32,10 @@ case "$APP" in
   handoff)      PKGS="com.kurtz.homerecord.fieldlog com.kurtz.homerecord.housemanual"; APPS="field-log house-manual" ;;
   *) echo "unknown app $APP"; exit 2 ;;
 esac
+# The handoff job is layer 4 only (qa/README.md): install both apps, fixtures, seed, the flows in
+# qa/flows/handoff and logcat. Cold start, instrumented, variants, jank, monkey and release ran in
+# the per-app jobs; running them again only filed duplicate [auto:*:handoff:*] findings.
+PER_APP="$APPS"; [ "$APP" = handoff ] && PER_APP=""
 pkg_of() { case "$1" in house-manual) echo com.kurtz.homerecord.housemanual ;; field-log) echo com.kurtz.homerecord.fieldlog ;; esac; }
 
 STAGES="$OUT/stages.json"; echo "[]" > "$STAGES"
@@ -97,7 +102,7 @@ else
 fi
 
 # -------------------------------------------------------------- coldstart
-for a in $APPS; do
+for a in $PER_APP; do
   p=$(pkg_of "$a"); times=""
   for i in 1 2 3; do
     adb shell am force-stop "$p" >/dev/null 2>&1
@@ -124,7 +129,7 @@ for a in $APPS; do
 done
 
 # ------------------------------------------------------------ instrumented
-for a in $APPS; do
+for a in $PER_APP; do
   p=$(pkg_of "$a")
   if adb shell pm list packages 2>/dev/null | grep -q "^package:$p.test$"; then
     adb shell "rm -rf /sdcard/Download/qa/$a; mkdir -p /sdcard/Download/qa/$a" >/dev/null 2>&1 || true
@@ -165,7 +170,7 @@ else
 fi
 
 # --------------------------------------------------------------- variants
-if [ -f "$FLOWDIR/_tour.yaml" ]; then
+if [ -n "$PER_APP" ] && [ -f "$FLOWDIR/_tour.yaml" ]; then
   for v in dark font200 landscape; do
     case $v in
       dark) adb shell cmd uimode night yes ;;
@@ -183,7 +188,7 @@ fi
 for s in "$OUT"/maestro/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/"; done
 
 # ------------------------------------------------------------------- jank
-for a in $APPS; do
+for a in $PER_APP; do
   p=$(pkg_of "$a")
   adb shell dumpsys gfxinfo "$p" reset >/dev/null 2>&1
   adb shell am start -n "$p/.MainActivity" >/dev/null 2>&1; sleep 2
@@ -200,7 +205,7 @@ for a in $APPS; do
 done
 
 # ----------------------------------------------------------------- monkey
-for a in $APPS; do
+for a in $PER_APP; do
   p=$(pkg_of "$a")
   adb shell monkey -p "$p" --throttle 40 --pct-syskeys 0 --pct-anyevent 0 -s 42 -v 1500 > "$OUT/logs/monkey-$a.txt" 2>&1
   if grep -q "// CRASH\|// NOT RESPONDING" "$OUT/logs/monkey-$a.txt"; then record "monkey:$a" fail "crash or ANR during monkey (logs/monkey-$a.txt)"; else record "monkey:$a" pass "1500 events, no crash"; fi
@@ -208,7 +213,7 @@ for a in $APPS; do
 done
 
 # ---------------------------------------------------------------- release
-for a in $APPS; do
+for a in $PER_APP; do
   p=$(pkg_of "$a"); rel="$APK/$a-release.apk"
   if [ ! -f "$rel" ]; then record "release:$a" skip "no release apk"; continue; fi
   signer=$(ls -d "${ANDROID_HOME:-$HOME/.android-sdk}"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -n 1)
