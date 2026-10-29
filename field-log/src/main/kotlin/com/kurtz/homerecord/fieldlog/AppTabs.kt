@@ -98,19 +98,22 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 {
                     val phase by container.syncEngine.phase.collectAsState()
                     val pending by container.syncEngine.pendingCount.collectAsState(0)
+                    val refused by container.syncEngine.refused.collectAsState(emptyList())
+                    val clearRefused: () -> Unit = { scope.launch { container.syncEngine.clearRefused() } }
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
                     if (memberId == null) {
                         TodayScreen(
-                            TodayUiState(membership.companyName, membership.role, phase, pending),
+                            TodayUiState(membership.companyName, membership.role, phase, pending, refused),
                             onInviteCrew = { nav.push(TeamKey) },
                             onSyncNow = container.syncCoordinator::requestSync,
                             onAddJob = { nav.push(JobEditKey(null)) },
+                            onClearRefused = clearRefused,
                         )
                     } else {
                         com.kurtz.homerecord.fieldlog.today.TodayRoute(
                             deps = { container.todayDeps(membership, memberId) },
-                            syncPhase = phase, pending = pending,
+                            syncPhase = phase, pending = pending, refused = refused, onClearRefused = clearRefused,
                             onInviteCrew = { nav.push(TeamKey) },
                             onSyncNow = container.syncCoordinator::requestSync,
                             onOpenClock = { nav.selectTab("clock") },

@@ -73,7 +73,11 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
     }
 
     /** Sync status comes from the engine, not the database. */
-    fun setSync(phase: com.kurtz.homerecord.core.sync.SyncPhase, pending: Int) {
-        _state.update { it.copy(syncPhase = phase, pendingChanges = pending) }
+    fun setSync(
+        phase: com.kurtz.homerecord.core.sync.SyncPhase,
+        pending: Int,
+        refused: List<com.kurtz.homerecord.core.sync.RefusedChange> = emptyList(),
+    ) {
+        _state.update { it.copy(syncPhase = phase, pendingChanges = pending, refusedChanges = refused) }
     }
 }

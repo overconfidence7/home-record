@@ -22,15 +22,19 @@ import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.coreui.R
 import com.kurtz.homerecord.coreui.components.LoadingState
 
-/** Sign-in when signed out, account summary with sign out when signed in. */
+/**
+ * Sign-in when signed out, account summary with sign out when signed in. [syncStatus] shows under the summary while
+ * signed in (House Manual's sync chip, refused changes included).
+ */
 @Composable
-fun AccountRoute(repo: AuthRepository, modifier: Modifier = Modifier) {
+fun AccountRoute(repo: AuthRepository, modifier: Modifier = Modifier, syncStatus: @Composable () -> Unit = {}) {
     val auth = repo.state.collectAsState().value
     if (auth is AuthState.Restoring) {
         LoadingState(modifier)
     } else if (auth is AuthState.SignedIn) {
         Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(stringResource(R.string.account_signed_in), style = MaterialTheme.typography.titleMedium)
+            syncStatus()
             Text(stringResource(R.string.account_sign_out_note), style = MaterialTheme.typography.bodyMedium)
             OutlinedButton(onClick = repo::signOut, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.account_sign_out))

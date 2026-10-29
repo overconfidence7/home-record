@@ -56,6 +56,11 @@ fun TodayCrewOutScreenshot() = TodayCrewOutPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun TodaySyncRefusedScreenshot() = TodaySyncRefusedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun TodayCrewNothingScheduledScreenshot() = TodayCrewNothingScheduledPreview()
 
 @PreviewTest

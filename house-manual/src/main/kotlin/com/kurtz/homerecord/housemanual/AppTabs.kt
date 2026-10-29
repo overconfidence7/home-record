@@ -49,6 +49,7 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemanual.house.OnboardingRoute
 import com.kurtz.homerecord.coreui.auth.AccountRoute
+import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
 import com.kurtz.homerecord.coreui.shell.PlaceholderDetail
@@ -174,7 +175,16 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                             leadingContent = { Icon(Icons.Outlined.Description, contentDescription = null) },
                             modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(DocumentsKey) }.testTag("hm_more_documents"),
                         )
-                        AccountRoute(container.auth, Modifier.weight(1f))
+                        AccountRoute(container.auth, Modifier.weight(1f)) {
+                            val phase by container.syncEngine.phase.collectAsState()
+                            val pending by container.syncEngine.pendingCount.collectAsState(0)
+                            val refused by container.syncEngine.refused.collectAsState(emptyList())
+                            SyncStatus(
+                                phase, pending, refused,
+                                onSyncNow = container.syncCoordinator::requestSync,
+                                onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
+                            )
+                        }
                     }
                 }
             } else if (key.depth == 0) {

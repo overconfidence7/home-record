@@ -171,6 +171,23 @@ fun TodayCrewOutPreview() = Frame {
     )
 }
 
+/** Two changes the server refused: the chip says so and a tap lists them (cr:sync-poison-op). */
+@ThemePreviews
+@Composable
+fun TodaySyncRefusedPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Crew, hasJobs = true, jobs = todayJobs.take(1),
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
+            refusedChanges = listOf(
+                com.kurtz.homerecord.core.sync.RefusedChange("opening", "o1", TODAY_NOW - 2 * 3600_000L),
+                com.kurtz.homerecord.core.sync.RefusedChange("stair", "s1", TODAY_NOW - 3 * 3600_000L),
+            ),
+        ),
+        onInviteCrew = {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun TodayCrewNothingScheduledPreview() = Frame {

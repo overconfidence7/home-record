@@ -11,6 +11,7 @@ import com.kurtz.homerecord.core.data.SyncCursorEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -45,6 +46,16 @@ class SyncEngine(
 
     /** Count of changes the server refused and that will not be sent again. */
     val refusedCount: Flow<Int> = outbox.observeRefusedCount(REFUSED)
+
+    /** The refused changes, newest first, one per record (a record refused twice shows its latest change). */
+    val refused: Flow<List<RefusedChange>> = outbox.observeRefused(REFUSED).map { rows ->
+        rows.distinctBy { it.entity to it.entityId }.map { RefusedChange(it.entity, it.entityId, it.updatedAt) }
+    }
+
+    /** Clears the refused list once the user has seen it; the records themselves stay as they are on this phone. */
+    suspend fun clearRefused() {
+        outbox.clearRefused(REFUSED)
+    }
 
     /**
      * Queue the current stored row of [entity]/[entityId] (soft deletes included) for the next push. The payload holds

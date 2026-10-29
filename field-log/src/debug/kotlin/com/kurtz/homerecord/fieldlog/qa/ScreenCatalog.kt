@@ -18,6 +18,7 @@ object ScreenCatalog {
         QaScreen("today-crew", nonRoot = false) { TodayCrewPreview() },
         QaScreen("today-admin-on-site", nonRoot = false) { TodayAdminOnSitePreview() },
         QaScreen("today-crew-out", nonRoot = false) { TodayCrewOutPreview() },
+        QaScreen("today-sync-refused", nonRoot = false) { TodaySyncRefusedPreview() },
         QaScreen("today-crew-nothing-scheduled", nonRoot = false) { TodayCrewNothingScheduledPreview() },
         QaScreen("jobs-list", nonRoot = false) { JobsListPreview() },
         QaScreen("jobs-crew", nonRoot = false) { JobsCrewPreview() },

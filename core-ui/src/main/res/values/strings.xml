@@ -51,6 +51,34 @@
         <item quantity="one">Offline · %d change waiting</item>
         <item quantity="other">Offline · %d changes waiting</item>
     </plurals>
+    <plurals name="sync_refused">
+        <item quantity="one">%d change didn\'t sync. Tap to see it</item>
+        <item quantity="other">%d changes didn\'t sync. Tap to see them</item>
+    </plurals>
+    <string name="sync_refused_title">Changes that didn\'t sync</string>
+    <string name="sync_refused_body">The server turned these down, so they are saved on this phone only. Your other changes keep syncing.</string>
+    <string name="sync_refused_clear">Clear list</string>
+    <string name="sync_entity_home">Home details</string>
+    <string name="sync_entity_floor">Floor</string>
+    <string name="sync_entity_room">Room</string>
+    <string name="sync_entity_wall">Wall</string>
+    <string name="sync_entity_opening">Door or window</string>
+    <string name="sync_entity_stair">Stairs</string>
+    <string name="sync_entity_item">Item</string>
+    <string name="sync_entity_upkeep">Upkeep</string>
+    <string name="sync_entity_contact">Contact</string>
+    <string name="sync_entity_file">File</string>
+    <string name="sync_entity_panel">Breaker panel</string>
+    <string name="sync_entity_job">Job</string>
+    <string name="sync_entity_client">Client</string>
+    <string name="sync_entity_punch">Clock in or out</string>
+    <string name="sync_entity_photo">Photo</string>
+    <string name="sync_entity_note">Note</string>
+    <string name="sync_entity_task">Task</string>
+    <string name="sync_entity_daily_log">Daily log</string>
+    <string name="sync_entity_change_order">Change order</string>
+    <string name="sync_entity_material">Material</string>
+    <string name="sync_entity_other">Other change</string>
     <string name="warranty_unknown">Warranty unknown</string>
     <string name="warranty_active">Warranty until %1$s</string>
     <string name="warranty_expiring">Expires %1$s</string>

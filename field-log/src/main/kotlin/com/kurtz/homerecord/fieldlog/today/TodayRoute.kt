@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.core.sync.RefusedChange
 import com.kurtz.homerecord.core.sync.SyncPhase
 
 @Composable
@@ -14,6 +15,8 @@ fun TodayRoute(
     deps: () -> TodayDeps,
     syncPhase: SyncPhase,
     pending: Int,
+    refused: List<RefusedChange>,
+    onClearRefused: () -> Unit,
     onInviteCrew: () -> Unit,
     onSyncNow: () -> Unit,
     onOpenClock: () -> Unit,
@@ -22,6 +25,6 @@ fun TodayRoute(
     modifier: Modifier = Modifier,
 ) {
     val vm = viewModel<TodayViewModel>(factory = viewModelFactory { initializer { TodayViewModel(deps()) } })
-    LaunchedEffect(syncPhase, pending) { vm.setSync(syncPhase, pending) }
-    TodayScreen(vm.state.collectAsState().value, onInviteCrew, modifier, onSyncNow, onOpenClock, onOpenJob, onAddJob, vm::refresh)
+    LaunchedEffect(syncPhase, pending, refused) { vm.setSync(syncPhase, pending, refused) }
+    TodayScreen(vm.state.collectAsState().value, onInviteCrew, modifier, onSyncNow, onOpenClock, onOpenJob, onAddJob, vm::refresh, onClearRefused)
 }

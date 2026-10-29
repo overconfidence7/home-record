@@ -46,9 +46,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.company.CompanyRole
+import com.kurtz.homerecord.core.sync.RefusedChange
 import com.kurtz.homerecord.core.sync.SyncPhase
 import com.kurtz.homerecord.coreui.components.EmptyState
-import com.kurtz.homerecord.coreui.components.SyncStatusChip
+import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.fieldlog.R
 
 /** My clock status for the card at the top of Today. [now] drives the elapsed time. */
@@ -67,6 +68,8 @@ data class TodayUiState(
     val role: CompanyRole,
     val syncPhase: SyncPhase = SyncPhase.Idle,
     val pendingChanges: Int = 0,
+    /** Changes the server refused, listed from the sync chip (cr:sync-poison-op). */
+    val refusedChanges: List<RefusedChange> = emptyList(),
     /** The company has at least one active job; until then Today explains what to do first (AC-F1). */
     val hasJobs: Boolean = false,
     val clock: TodayClock? = null,
@@ -91,9 +94,10 @@ fun TodayScreen(
     onOpenJob: (String) -> Unit = {},
     onAddJob: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onClearRefused: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
-        SyncStatusChip(state.syncPhase, state.pendingChanges, onSyncNow, Modifier.padding(horizontal = 16.dp))
+        SyncStatus(state.syncPhase, state.pendingChanges, state.refusedChanges, onSyncNow, onClearRefused, Modifier.padding(horizontal = 16.dp))
         // Pull down syncs and reloads the team, so "On site now" is current (AC-F16).
         PullToRefreshBox(state.refreshing, onRefresh, Modifier.weight(1f).fillMaxWidth().testTag("fl_today_refresh")) {
             if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onOpenClock, onOpenJob, Modifier.fillMaxSize())

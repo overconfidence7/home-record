@@ -56,6 +56,12 @@ data class PulledRow(
 @Serializable
 data class PullResponse(val rows: List<PulledRow> = emptyList(), val serverSeq: Long = 0, val more: Boolean = false)
 
+/**
+ * A change the server refused (cr:sync-poison-op). It stays on this phone, is never sent again, and is listed on the
+ * sync status until the user clears the list. [updatedAt] is when the change was made on this phone.
+ */
+data class RefusedChange(val entity: String, val entityId: String, val updatedAt: Long)
+
 /** What one [SyncEngine.sync] pass did; [conflicts] is the log of writes the server refused or dropped. */
 data class SyncResult(val pushed: Int, val pulled: Int, val conflicts: List<ConflictNote>)
 

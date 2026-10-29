@@ -262,6 +262,24 @@ class SyncEngineTest {
         assertThat(dbB.roomDao().get("r1")).isNull()
     }
 
+    // AC-F53, cr:sync-poison-op "show it" (CR2a2): the refused list names each record once, newest change first, and clears
+    @Test fun refusedChangesAreListedOncePerRecordAndClear() = runTest {
+        server.refused = setOf("room")
+        saveRoom(dbA, a, room("[]", "Kitchen", 10))
+        a.sync(tenant)
+        saveRoom(dbA, a, room("[]", "Kitchen and dining", 20))
+        save(dbA, a, task("Patch drywall", 21))
+        a.sync(tenant)
+        assertThat(a.refusedCount.first()).isEqualTo(2)
+        assertThat(a.refused.first()).containsExactly(RefusedChange("room", "r1", 20))
+        a.clearRefused()
+        assertThat(a.refused.first()).isEmpty()
+        assertThat(a.refusedCount.first()).isEqualTo(0)
+        // The record itself stays on this phone; only the list is cleared.
+        assertThat(dbA.roomDao().get("r1")?.name).isEqualTo("Kitchen and dining")
+        assertThat(a.pendingCount.first()).isEqualTo(0)
+    }
+
     private fun outboxRows(db: HomeRecordDatabase): List<Pair<Long, Long?>> =
         db.openHelper.readableDatabase.query("SELECT seq, serverSeq FROM outbox ORDER BY seq").use { c ->
             buildList { while (c.moveToNext()) add(c.getLong(0) to if (c.isNull(1)) null else c.getLong(1)) }

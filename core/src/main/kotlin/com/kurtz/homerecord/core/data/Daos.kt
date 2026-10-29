@@ -371,6 +371,8 @@ interface OutboxDao {
     @Query("UPDATE outbox SET sent = 1 WHERE seq IN (:seqs)") suspend fun markSent(seqs: List<Long>)
     @Query("UPDATE outbox SET sent = 1, serverSeq = :serverSeq WHERE seq = :seq") suspend fun markSent(seq: Long, serverSeq: Long)
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 1 AND serverSeq = :refused") fun observeRefusedCount(refused: Long): kotlinx.coroutines.flow.Flow<Int>
+    @Query("SELECT * FROM outbox WHERE sent = 1 AND serverSeq = :refused ORDER BY seq DESC") fun observeRefused(refused: Long): kotlinx.coroutines.flow.Flow<List<OutboxEntity>>
+    @Query("DELETE FROM outbox WHERE sent = 1 AND serverSeq = :refused") suspend fun clearRefused(refused: Long): Int
     /** Drops rows the server accepted and this device has pulled back (serverSeq ≤ the tenant's cursor); refused rows (serverSeq < 0) stay for the log. */
     @Query("DELETE FROM outbox WHERE sent = 1 AND tenantKind = :kind AND tenantId = :tenantId AND serverSeq >= 0 AND serverSeq <= :upTo")
     suspend fun pruneConfirmed(kind: String, tenantId: String, upTo: Long): Int

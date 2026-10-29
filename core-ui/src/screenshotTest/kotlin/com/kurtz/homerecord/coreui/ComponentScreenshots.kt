@@ -52,4 +52,9 @@ fun SyncStatusChipScreenshot() = com.kurtz.homerecord.coreui.components.SyncStat
 @PreviewTest
 @ThemeScreenshots
 @Composable
+fun RefusedChangesDialogScreenshot() = com.kurtz.homerecord.coreui.components.RefusedChangesDialogPreview()
+
+@PreviewTest
+@ThemeScreenshots
+@Composable
 fun WarrantyStatusLineScreenshot() = com.kurtz.homerecord.coreui.components.WarrantyStatusLinePreview()
