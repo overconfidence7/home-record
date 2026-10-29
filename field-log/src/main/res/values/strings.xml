@@ -366,6 +366,12 @@
     <string name="flag_no_break">No break</string>
     <string name="flag_overlap">Overlaps another shift</string>
     <string name="flag_edited">Edited</string>
+    <string name="clock_changes_title">Changes to your punches</string>
+    <string name="clock_change_time">%1$s, %2$s: %3$s to %4$s</string>
+    <string name="clock_change_same_time">%1$s, %2$s at %3$s</string>
+    <string name="clock_change_job">Job: %1$s to %2$s</string>
+    <string name="clock_change_by">Changed by %1$s on %2$s at %3$s</string>
+    <string name="clock_change_reason">Reason: %1$s</string>
     <string name="clock_no_account">Can\'t tell who you are. Retry signs you out so you can sign in again.</string>
     <string name="widget_description">Clock status and a Clock in or Clock out button.</string>
     <string name="widget_signed_out">Sign in to clock in</string>

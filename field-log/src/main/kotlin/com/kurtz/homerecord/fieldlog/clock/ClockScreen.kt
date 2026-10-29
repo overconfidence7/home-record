@@ -29,11 +29,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ShiftFlag
+import com.kurtz.homerecord.fieldlog.timesheets.kindLabel
 import com.kurtz.homerecord.core.punch.ClockStatus
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
@@ -46,22 +49,25 @@ private val TargetHeight = 56.dp
 
 /** FL-Clock: status, job picker, Clock in / Break / Switch / Clock out, then "My timesheet" (AC-F8, AC-F10, AC-F18). */
 @Composable
-fun ClockScreen(state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifier: Modifier = Modifier) {
+fun ClockScreen(
+    state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifier: Modifier = Modifier, listState: LazyListState = rememberLazyListState(),
+) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
         Text(
             stringResource(R.string.clock_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 8.dp),
         )
-        if (state.loading) LoadingState(Modifier.weight(1f)) else ClockBody(state, onEvent, Modifier.weight(1f))
+        if (state.loading) LoadingState(Modifier.weight(1f)) else ClockBody(state, onEvent, listState, Modifier.weight(1f))
     }
     ClockDialogs(state, onEvent)
 }
 
 @Composable
-private fun ClockBody(state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifier: Modifier) {
+private fun ClockBody(state: ClockUiState, onEvent: (ClockEvent) -> Unit, listState: LazyListState, modifier: Modifier) {
     LazyColumn(
         modifier.testTag("fl_clock_list"),
+        state = listState,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -83,6 +89,7 @@ private fun ClockBody(state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifi
         item { Actions(state, onEvent) }
         if (state.canLeadCrew && state.status !is ClockStatus.OnBreak) item { CrewCard(state, onEvent) }
         item { Timesheet(state) }
+        if (state.sheet != null && state.changes.isNotEmpty()) item { PunchChanges(state.changes) }
     }
 }
 
@@ -242,6 +249,38 @@ private fun Timesheet(state: ClockUiState) {
         if (sheet.overtimeMillis > 0) TotalRow(R.string.clock_total_overtime, sheet.overtimeMillis)
         if (sheet.doubleMillis > 0) TotalRow(R.string.clock_total_double, sheet.doubleMillis)
         TotalRow(R.string.clock_total, sheet.totalMillis, bold = true)
+    }
+}
+
+/** The audit trail on my own punches, so the crew sees who changed a punch, when and why (AC-F14). */
+@Composable
+private fun PunchChanges(changes: List<PunchChange>) = Column(Modifier.fillMaxWidth().testTag("fl_clock_changes")) {
+    val dayFormat = DateTimeFormatter.ofPattern("EEE, MMM d")
+    val timeFormat = DateTimeFormatter.ofPattern("h:mm a")
+    val noJob = stringResource(R.string.ts_punch_no_job)
+    Text(stringResource(R.string.clock_changes_title), style = MaterialTheme.typography.titleMedium)
+    changes.forEach { c ->
+        Column(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 4.dp).testTag("fl_clock_change_${c.punchId}")) {
+            val kind = stringResource(kindLabel(c.kind))
+            val day = c.day.format(dayFormat)
+            Text(
+                if (c.timeChanged) stringResource(R.string.clock_change_time, kind, day, c.before.format(timeFormat), c.after.format(timeFormat))
+                else stringResource(R.string.clock_change_same_time, kind, day, c.after.format(timeFormat)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (c.jobChanged) Text(
+                stringResource(R.string.clock_change_job, c.beforeJob ?: noJob, c.afterJob ?: noJob),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                stringResource(R.string.clock_change_by, c.byName, c.changedAt.toLocalDate().format(dayFormat), c.changedAt.toLocalTime().format(timeFormat)),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                stringResource(R.string.clock_change_reason, c.reason),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

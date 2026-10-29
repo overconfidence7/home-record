@@ -59,6 +59,14 @@ class ClockDeps(
     val gates: Flow<RoleGates> = flowOf(RoleGates(role)),
 )
 
+private data class ClockRows(
+    val jobs: List<com.kurtz.homerecord.core.data.JobEntity>,
+    val shifts: List<com.kurtz.homerecord.core.model.Shift>,
+    val punches: List<com.kurtz.homerecord.core.data.PunchEntity>,
+    val approved: List<TimesheetApprovalEntity>,
+    val settings: CompanySettings,
+)
+
 /** FL-Clock: clock in with job and GPS, break, switch, clock out, and this week's timesheet (AC-F8..F10, AC-F18). */
 class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val canLead = d.crewClock != null && (d.role == CompanyRole.Lead || d.role.isAdmin)
@@ -80,11 +88,11 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         viewModelScope.launch { d.settings.collect { settings = it } }
         viewModelScope.launch {
             // The rules are live: a change from the office reflows the week sheet and applies to the next punch.
-            combine(d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.approvals, d.settings) { jobs, shifts, approved, rules ->
-                Triple(jobs, shifts, approved) to rules
-            }
-                .collect { (rows, company) ->
-                    val (jobs, shifts, approved) = rows
+            combine(
+                d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.punches.observePunches(d.companyId, d.memberId),
+                d.approvals, d.settings,
+            ) { jobs, shifts, punches, approved, rules -> ClockRows(jobs, shifts, punches, approved, rules) }
+                .collect { (jobs, shifts, punches, approved, company) ->
                     val now = d.now()
                     // Status is read for today, so a job whose start date has come shows here without a re-save.
                     val today = Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString()
@@ -93,11 +101,13 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     val status = d.controller.status(d.companyId, d.memberId)
                     val rules = TimesheetRules.from(company.overtimeRule)
                     val sheet = WeekSheetBuilder.build(shifts, rules, company.breakRule, d.zone, now)
+                    val monday = sheet.days.first().date
+                    val changes = PunchChangesBuilder.build(punches, jobs.associate { it.id to it.name }, monday, d.zone)
                     // The last job worked is preselected, so the widget's Clock in lands on it (AC-F17).
                     val lastJob = shifts.lastOrNull()?.segments?.lastOrNull()?.jobId?.takeIf { id -> options.any { it.id == id } }
                     _state.update { s ->
                         val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: lastJob ?: options.singleOrNull()?.id
-                        s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, now = now,
+                        s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, changes = changes, now = now,
                             weekApproved = approved.any { it.weekStart == WeekKey.of(now, d.zone) }).gated()
                     }
                 }

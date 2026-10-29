@@ -39,6 +39,8 @@ data class ClockUiState(
     val gpsRequired: Boolean? = null,
     val savedWithoutLocation: Boolean = false,
     val sheet: WeekSheet? = null,
+    /** Who changed my punches this week, when and why, newest first (AC-F14). */
+    val changes: List<PunchChange> = emptyList(),
     /** A manager approved this week for me; punches in it are locked (AC-F14). */
     val weekApproved: Boolean = false,
     /** Leads (and Owner/Office) can clock in the crew from their own phone (AC-F11). */

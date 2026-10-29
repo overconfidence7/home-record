@@ -32,6 +32,7 @@ object ScreenCatalog {
         QaScreen("clock-out", nonRoot = false) { ClockOutPreview() },
         QaScreen("clock-working", nonRoot = false) { ClockWorkingPreview() },
         QaScreen("clock-approved", nonRoot = false) { ClockApprovedPreview() },
+        QaScreen("clock-changes", nonRoot = false) { ClockChangesPreview() },
         QaScreen("clock-crew", nonRoot = false) { ClockCrewPreview() },
         QaScreen("clock-break", nonRoot = false) { ClockBreakPreview() },
         QaScreen("clock-far-reason", nonRoot = false) { ClockFarReasonPreview() },

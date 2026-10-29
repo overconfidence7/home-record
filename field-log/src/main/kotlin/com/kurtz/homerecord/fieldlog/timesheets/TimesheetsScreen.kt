@@ -258,7 +258,7 @@ private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEven
     }
 }
 
-private fun kindLabel(kind: String): Int = when (kind) {
+internal fun kindLabel(kind: String): Int = when (kind) {
     PunchKind.IN -> R.string.punch_in
     PunchKind.OUT -> R.string.punch_out
     PunchKind.BREAK_START -> R.string.punch_break_start

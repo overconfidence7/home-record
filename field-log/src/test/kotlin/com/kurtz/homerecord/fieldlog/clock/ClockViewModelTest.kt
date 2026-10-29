@@ -95,6 +95,25 @@ class ClockViewModelTest {
         assertThat(vm(approvals = kotlinx.coroutines.flow.flowOf(listOf(row))).state.value.weekApproved).isTrue()
     }
 
+    // AC-F14: an owner's edit to my punch shows on My timesheet with who, when, before and after, and why
+    @Test fun ownerEditOfMyPunchShowsWhoWhenAndWhy() = runBlocking<Unit> {
+        val vm = vm()
+        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        await(vm) { it.status is ClockStatus.Working }
+        val punch = db.punchDao().listFor("c1").single()
+        clock += 60_000
+        assertThat(PunchRepository(db, { clock }).edit(punch.id, "boss", "Dana Ruiz", punch.at - 1_800_000, "j2", "Started at the supply house")).isTrue()
+        val change = await(vm) { it.changes.isNotEmpty() }.changes.single()
+        assertThat(change.punchId).isEqualTo(punch.id)
+        assertThat(change.kind).isEqualTo(PunchKind.IN)
+        assertThat(change.byName).isEqualTo("Dana Ruiz")
+        assertThat(change.reason).isEqualTo("Started at the supply house")
+        assertThat(change.timeChanged).isTrue()
+        assertThat(change.jobChanged).isTrue()
+        assertThat(change.beforeJob).isEqualTo("Garage subpanel")
+        assertThat(change.afterJob).isEqualTo("Kitchen")
+    }
+
     // AC-F8: a job saved as Upcoming is in the picker once its start date comes; a future one is not
     @Test fun upcomingJobJoinsThePickerOnItsStartDate() = runBlocking<Unit> {
         val today = java.time.Instant.ofEpochMilli(clock).atZone(java.time.ZoneId.systemDefault()).toLocalDate()

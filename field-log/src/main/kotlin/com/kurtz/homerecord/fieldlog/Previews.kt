@@ -330,6 +330,28 @@ fun ClockOutPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(
 @Composable
 fun ClockApprovedPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(weekApproved = true), {}) }
 
+private val clockChanges = listOf(
+    com.kurtz.homerecord.fieldlog.clock.PunchChange(
+        "p1", com.kurtz.homerecord.core.model.PunchKind.IN, java.time.LocalDate.of(2026, 10, 20), java.time.LocalTime.of(7, 30), java.time.LocalTime.of(6, 45),
+        "Dana Ruiz", java.time.LocalDateTime.of(2026, 10, 21, 16, 10), "Forgot to clock in at the supply house",
+    ),
+    com.kurtz.homerecord.fieldlog.clock.PunchChange(
+        "p2", com.kurtz.homerecord.core.model.PunchKind.OUT, java.time.LocalDate.of(2026, 10, 19), java.time.LocalTime.of(16, 30), java.time.LocalTime.of(16, 30),
+        "Dana Ruiz", java.time.LocalDateTime.of(2026, 10, 20, 8, 5), "Was on the Ortiz job after lunch",
+        jobChanged = true, beforeJob = "Garage subpanel", afterJob = "Ortiz kitchen remodel",
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun ClockChangesPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState().copy(changes = clockChanges), {},
+        // Scrolled to the bottom, where the changes sit under the week's totals.
+        listState = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = 6),
+    )
+}
+
 @ThemePreviews
 @Composable
 fun ClockWorkingPreview() = Frame {
