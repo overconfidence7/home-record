@@ -3,9 +3,10 @@ package com.kurtz.homerecord.core.auth
 import java.io.IOException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import com.kurtz.homerecord.core.net.LazyCallFactory
+import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Response
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -65,10 +66,10 @@ class RetrofitAuthApi(private val service: AuthService) : AuthApi {
     companion object {
         internal val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, client: OkHttpClient = OkHttpClient()): RetrofitAuthApi {
+        fun create(baseUrl: String, client: Call.Factory = LazyCallFactory.plain): RetrofitAuthApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client)
+                .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitAuthApi(retrofit.create(AuthService::class.java))

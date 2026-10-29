@@ -6,8 +6,8 @@ import com.kurtz.homerecord.core.company.ApiResult
 import java.io.IOException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -101,10 +101,10 @@ class RetrofitLookupApi internal constructor(
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, client: OkHttpClient, encodeJpeg: (String) -> ByteArray?): RetrofitLookupApi {
+        fun create(baseUrl: String, client: Call.Factory, encodeJpeg: (String) -> ByteArray?): RetrofitLookupApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client)
+                .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitLookupApi(retrofit.create(LookupService::class.java), encodeJpeg)

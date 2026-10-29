@@ -4,8 +4,8 @@ import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import java.io.IOException
 import kotlinx.serialization.json.Json
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -52,10 +52,10 @@ class RetrofitSyncApi(private val service: SyncService) : SyncApi {
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, client: OkHttpClient): RetrofitSyncApi {
+        fun create(baseUrl: String, client: Call.Factory): RetrofitSyncApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client)
+                .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitSyncApi(retrofit.create(SyncService::class.java))

@@ -2,8 +2,8 @@ package com.kurtz.homerecord.core.company
 
 import java.io.IOException
 import kotlinx.serialization.json.Json
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -111,10 +111,10 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, client: OkHttpClient): RetrofitCompanyApi {
+        fun create(baseUrl: String, client: Call.Factory): RetrofitCompanyApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client)
+                .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitCompanyApi(retrofit.create(CompanyService::class.java))

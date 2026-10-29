@@ -1,0 +1,6 @@
+# Baseline profile (AC-U11 cold start). ProfileInstaller, which Compose already brings in, hands these rules to ART
+# so HomeRecord's own code (the app, :core, :core-ui and :house-model) is compiled ahead of time on install instead
+# of being interpreted on the first launches. Compose, Room and the other libraries ship their own profiles,
+# which AGP merges with this one.
+HSPLcom/kurtz/homerecord/**->**(**)**
+Lcom/kurtz/homerecord/**;

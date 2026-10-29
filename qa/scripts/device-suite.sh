@@ -8,7 +8,9 @@
 #
 # Stages (each one skips cleanly when the thing it needs is not built yet):
 #   install      debug APK (+ androidTest APK) installed
-#   coldstart    `am start -W` three times, median TotalTime (AC-U11: under 1500 ms)
+#   coldstart    `am start -W` three times, median TotalTime (AC-U11: under 1500 ms). Gated on the release
+#                APK in the release stage (what people install); the debug number is kept as information
+#                and gated only when no release APK was built
 #   permissions  runtime permissions granted so flows don't hit system dialogs
 #   seed         debug-only seed broadcast (<pkg>.qa.SEED) for the regression scenario
 #   instrumented androidTest run: acceptance tests + screen crawler (Q002/Q003 in PLAN.md)
@@ -16,7 +18,8 @@
 #   variants     the _tour flow under dark mode, 200% font and landscape (screenshots)
 #   jank         scroll the longest list and read dumpsys gfxinfo janky-frame percentage
 #   monkey       1,500 random events, must not crash
-#   release      release APK installs and launches (signed with a throwaway key if unsigned)
+#   release      release APK installs and launches (signed with a throwaway key if unsigned); then its
+#                baseline profile is compiled as a Play install would and cold start is measured on it
 #   logcat       FATAL EXCEPTION / ANR / StrictMode scan for the package
 # handoff runs install, permissions, fixtures, seed, flows and logcat only.
 set -uo pipefail
@@ -113,8 +116,11 @@ for a in $PER_APP; do
   done
   if [ -n "$times" ]; then
     med=$(echo $times | tr ' ' '\n' | sort -n | sed -n '2p')
-    echo "{\"app\":\"$a\",\"coldStartMs\":[$(echo $times | tr ' ' ',')],\"medianMs\":$med}" > "$OUT/coldstart-$a.json"
-    if [ "$med" -le 1500 ]; then record "coldstart:$a" pass "median ${med} ms"; else record "coldstart:$a" fail "median ${med} ms over 1500 ms (AC-U11)"; fi
+    echo "{\"app\":\"$a\",\"build\":\"debug\",\"coldStartMs\":[$(echo $times | tr ' ' ',')],\"medianMs\":$med}" > "$OUT/coldstart-debug-$a.json"
+    if [ -f "$APK/$a-release.apk" ]; then
+      # A debuggable build runs without AOT code and with StrictMode on; AC-U11 is judged on the release stage.
+      echo "== coldstart:$a (debug, not gated): median ${med} ms"
+    elif [ "$med" -le 1500 ]; then record "coldstart:$a" pass "median ${med} ms (debug; no release apk)"; else record "coldstart:$a" fail "median ${med} ms over 1500 ms (AC-U11, debug; no release apk)"; fi
   else
     record "coldstart:$a" fail "MainActivity did not start"
   fi
@@ -222,15 +228,36 @@ for a in $PER_APP; do
       [ -f "$OUT/qa.jks" ] || keytool -genkeypair -keystore "$OUT/qa.jks" -storepass qa123456 -keypass qa123456 -alias qa -keyalg RSA -keysize 2048 -validity 1000 -dname "CN=qa" >/dev/null 2>&1
       "$signer" sign --ks "$OUT/qa.jks" --ks-pass pass:qa123456 --ks-key-alias qa --key-pass pass:qa123456 --out "$OUT/$a-release-signed.apk" "$rel" >/dev/null 2>&1 && rel="$OUT/$a-release-signed.apk"
     else
-      record "release:$a" skip "unsigned release apk and no apksigner on this runner"; continue
+      record "release:$a" skip "unsigned release apk and no apksigner on this runner"
+      record "coldstart:$a" fail "release build could not be measured (unsigned, no apksigner)"; continue
     fi
   fi
   adb uninstall "$p" >/dev/null 2>&1 || true
   if adb install -r -g "$rel" > "$OUT/logs/install-release-$a.txt" 2>&1; then
     adb shell am force-stop "$p"; t=$(adb shell am start -W -n "$p/.MainActivity" 2>/dev/null | sed -n 's/^TotalTime: *//p' | tr -d '\r'); sleep 3
     if adb shell pidof "$p" >/dev/null 2>&1; then record "release:$a" pass "R8 build launches (${t:-?} ms)"; shot "$a-release-launch"; else record "release:$a" fail "release build did not stay running"; fi
+    # Cold start as installed from Play: the APK's baseline profile (assets/dexopt) compiled ahead of time, which is
+    # what Macrobenchmark's CompilationMode.Partial does. Three launches, median TotalTime (AC-U11).
+    adb shell am broadcast -a androidx.profileinstaller.action.INSTALL_PROFILE "$p/androidx.profileinstaller.ProfileInstallReceiver" > "$OUT/logs/profile-$a.txt" 2>&1
+    adb shell am force-stop "$p"
+    adb shell cmd package compile -f -m speed-profile "$p" >> "$OUT/logs/profile-$a.txt" 2>&1
+    times=""
+    for i in 1 2 3; do
+      adb shell am force-stop "$p" >/dev/null 2>&1; sleep 1
+      rt=$(adb shell am start -W -n "$p/.MainActivity" 2>/dev/null | sed -n 's/^TotalTime: *//p' | tr -d '\r')
+      [ -n "$rt" ] && times="$times $rt"
+      sleep 2
+    done
+    if [ -n "$times" ]; then
+      med=$(echo $times | tr ' ' '\n' | sort -n | sed -n "$(( ($(echo $times | wc -w) + 1) / 2 ))p")
+      echo "{\"app\":\"$a\",\"build\":\"release\",\"coldStartMs\":[$(echo $times | tr ' ' ',')],\"medianMs\":$med}" > "$OUT/coldstart-$a.json"
+      if [ "$med" -le 1500 ]; then record "coldstart:$a" pass "median ${med} ms (release, profile compiled)"; else record "coldstart:$a" fail "median ${med} ms over 1500 ms (AC-U11, release, profile compiled)"; fi
+    else
+      record "coldstart:$a" fail "release MainActivity did not start"
+    fi
   else
     record "release:$a" fail "$(tail -n 1 "$OUT/logs/install-release-$a.txt")"
+    record "coldstart:$a" fail "release build could not be measured (install failed)"
   fi
   adb uninstall "$p" >/dev/null 2>&1 || true
   [ -f "$APK/$a-debug.apk" ] && adb install -r -g "$APK/$a-debug.apk" >/dev/null 2>&1 || true

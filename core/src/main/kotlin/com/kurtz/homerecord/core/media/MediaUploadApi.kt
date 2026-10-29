@@ -10,8 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import com.kurtz.homerecord.core.net.LazyCallFactory
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.HttpException
@@ -64,7 +65,7 @@ interface MediaService {
 /** OkHttp's `execute()` blocks, so [put] and [download] run on [io] and are safe to call from Main (S7). */
 class RetrofitMediaTransferApi(
     private val service: MediaService,
-    private val client: OkHttpClient,
+    private val client: Call.Factory,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : MediaTransferApi {
     override suspend fun presign(
@@ -131,10 +132,10 @@ class RetrofitMediaTransferApi(
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, authed: OkHttpClient, plain: OkHttpClient = OkHttpClient()): RetrofitMediaTransferApi {
+        fun create(baseUrl: String, authed: Call.Factory, plain: Call.Factory = LazyCallFactory.plain): RetrofitMediaTransferApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(authed)
+                .callFactory(authed)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitMediaTransferApi(retrofit.create(MediaService::class.java), plain)

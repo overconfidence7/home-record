@@ -37,6 +37,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
+import com.kurtz.homerecord.core.net.LazyCallFactory
+import okhttp3.Call
 import okhttp3.OkHttpClient
 
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
@@ -52,7 +54,7 @@ class AppContainer(app: Application) {
     val auth = AuthRepository(authApi, tokens, CredentialManagerGoogleSource({ activityContext }, BuildConfig.GOOGLE_WEB_CLIENT_ID), restoreNow = false)
 
     /** Client for authenticated calls (sync): adds the bearer token and handles refresh and 401. */
-    val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(SessionInterceptor(auth, tokens)).build()
+    val http: Call.Factory = LazyCallFactory { OkHttpClient.Builder().addInterceptor(SessionInterceptor(auth, tokens)).build() }
 
     val syncEngine = SyncEngine(
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),

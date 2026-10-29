@@ -6,8 +6,8 @@ import java.io.IOException
 import kotlin.math.roundToInt
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -79,10 +79,10 @@ class RetrofitWarrantyLookupApi internal constructor(private val service: Warran
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        fun create(baseUrl: String, client: OkHttpClient): RetrofitWarrantyLookupApi {
+        fun create(baseUrl: String, client: Call.Factory): RetrofitWarrantyLookupApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
-                .client(client)
+                .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
             return RetrofitWarrantyLookupApi(retrofit.create(WarrantyLookupService::class.java))
