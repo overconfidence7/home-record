@@ -2,11 +2,16 @@
 """Coverage gate: every acceptance criterion that a ticked PLAN.md task claims must be
 referenced by a test or a flow.
 
+Which tasks: every ticked PLAN.md line whose id is T, Q, R, V or CR plus any suffix (T040b2,
+T041b2b, CR2g1), with AC ids read from anywhere on the line, not only an `(acceptance: …)` group.
+
 What counts as a reference:
-  - `[unit]` criteria: the AC id appears in any `src/test/**/*.kt` file (a named JVM test) or,
-    for backend criteria, in a `backend/**/*.test.ts` file.
+  - `[unit]` criteria: the AC id appears in a `src/test/**/*.kt` file (a named JVM test). A flow
+    or an instrumented test does not stand in for the JVM test (CLAUDE.md QA rule 1).
+  - backend criteria (AC-B*): the AC id appears in a `backend/**/*.test.ts` vitest file.
   - every other criterion: the AC id appears in an `androidTest` file (instrumented acceptance
-    test, PLAN Q003), a Maestro flow under qa/flows/, or a screenshot test file.
+    test, PLAN Q003) or a Maestro flow under qa/flows/. Screenshot tests are not coverage.
+  - nothing under node_modules or build/ counts.
 
 A criterion mentioned in a file only as prose ("see AC-H5") still counts; the intent is that
 the builder tags the test with the id. The output JSON lists missing ids per task so
@@ -17,6 +22,8 @@ Usage: coverage-check.py --plan PLAN.md --spec SPEC.md --out coverage.json
 import argparse, glob, json, re, sys
 
 AC = re.compile(r"AC-([CHFBU])(\d+)(?:\.\.(?:AC-)?([CHFBU])?(\d+))?")
+TASK = re.compile(r"\s*- \[x\] ((?:CR|[TQRV])\d+[a-z0-9]*):(.*)")
+SKIP = re.compile(r"(^|/)(node_modules|build|\.gradle)/")
 
 
 def expand(text):
@@ -46,31 +53,39 @@ def main():
             unit.add(m.group(1))
     defined = set(re.findall(r"\| (AC-[CHFBU]\d+)", spec))
 
-    unit_files = (glob.glob("**/src/test/**/*.kt", recursive=True)
-                  + glob.glob("backend/**/*.test.ts", recursive=True) + glob.glob("backend/**/*.spec.ts", recursive=True))
-    device_files = (glob.glob("**/src/androidTest/**/*.kt", recursive=True)
-                    + glob.glob("qa/flows/**/*.yaml", recursive=True)
-                    + glob.glob("**/src/screenshotTest*/**/*.kt", recursive=True))
-    unit_refs, device_refs = set(), set()
-    for f in unit_files:
-        unit_refs |= expand(open(f, encoding="utf-8", errors="ignore").read())
-    for f in device_files:
-        device_refs |= expand(open(f, encoding="utf-8", errors="ignore").read())
+    def files(*patterns):
+        found = set()
+        for pat in patterns:
+            found |= {f for f in glob.glob(pat, recursive=True) if not SKIP.search(f)}
+        return sorted(found)
+
+    def refs(paths):
+        ids = set()
+        for f in paths:
+            ids |= expand(open(f, encoding="utf-8", errors="ignore").read())
+        return ids
+
+    jvm_files = files("**/src/test/**/*.kt")
+    backend_files = files("backend/**/*.test.ts", "backend/**/*.spec.ts")
+    device_files = files("**/src/androidTest/**/*.kt", "qa/flows/**/*.yaml")
+    unit_files = jvm_files + backend_files
+    jvm_refs, backend_refs, device_refs = refs(jvm_files), refs(backend_files), refs(device_files)
 
     tasks = []
     for line in open(a.plan, encoding="utf-8"):
-        m = re.match(r"\s*- \[x\] ([TQ]\d+[a-z]?):(.*)", line)
+        m = TASK.match(line)
         if not m:
             continue
         tid, rest = m.group(1), m.group(2)
-        acm = re.search(r"\(acceptance:([^)]*)\)", rest)
-        if not acm:
+        ids = sorted(expand(rest) & defined, key=lambda s: (s[3], int(s[4:])))
+        if not ids:
             continue
-        ids = sorted(expand(acm.group(1)) & defined, key=lambda s: (s[3], int(s[4:])))
         missing = []
         for ac in ids:
-            if ac in unit or ac.startswith("AC-B"):
-                ok = ac in unit_refs or ac in device_refs
+            if ac.startswith("AC-B"):
+                ok = ac in backend_refs
+            elif ac in unit:
+                ok = ac in jvm_refs
             else:
                 ok = ac in device_refs
             if not ok:
