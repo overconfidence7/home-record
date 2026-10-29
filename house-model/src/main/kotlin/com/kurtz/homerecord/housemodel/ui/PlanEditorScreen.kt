@@ -609,107 +609,116 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
     // Name and size are one edit each: committed on IME Done or when focus leaves the field, not per keystroke.
     val commitOnBlur = Modifier.onFocusChanged { if (!it.isFocused) onEvent(PlanEditorEvent.CommitFields) }
     val commitOnDone = KeyboardActions(onDone = { onEvent(PlanEditorEvent.CommitFields); focusManager.clearFocus() })
-    Surface(tonalElevation = 3.dp, modifier = modifier) {
-        Column(Modifier.padding(vertical = 8.dp)) {
-            Column(
-                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (onWall) {
-                    Text(
-                        room.name.ifBlank { stringResource(R.string.plan_unnamed_room) },
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    OpeningControls(state, room, onEvent)
-                } else {
-                    key(room.id) {
-                        LabeledField(
-                            label = stringResource(R.string.plan_room_name),
-                            value = room.name,
-                            onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
-                            modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_name"),
-                        )
-                    }
-                    OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_room_kind")) {
-                        Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
-                    }
-                    if (room.points.size == 4) {
-                        key(room.id, state.fieldsVersion) {
-                            var width by remember { mutableStateOf<Int?>(room.widthIn) }
-                            var length by remember { mutableStateOf<Int?>(room.lengthIn) }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                LengthField(
-                                    label = stringResource(R.string.plan_room_width),
-                                    inches = room.widthIn,
-                                    onInchesChange = { width = it; commitSize(width, length, onEvent) },
-                                    system = state.system,
-                                    modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_width"),
-                                )
-                                LengthField(
-                                    label = stringResource(R.string.plan_room_length),
-                                    inches = room.lengthIn,
-                                    onInchesChange = { length = it; commitSize(width, length, onEvent) },
-                                    system = state.system,
-                                    modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_length"),
-                                    imeAction = ImeAction.Done,
-                                    keyboardActions = commitOnDone,
-                                )
-                            }
-                        }
-                    } else {
-                        Text(
-                            stringResource(R.string.plan_room_size_summary, LengthParser.format(room.widthIn, state.system), LengthParser.format(room.lengthIn, state.system)),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    if (state.editShape) {
-                        Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
-                    } else {
-                        if (room.openings.isEmpty() && room.stairs.isEmpty()) {
-                            Text(stringResource(R.string.plan_wall_hint), style = MaterialTheme.typography.bodyMedium)
-                        }
-                        room.stairs.forEach { stair -> StairRow(state, stair, onEvent) }
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_stairs")) {
-                            Icon(Icons.Rounded.Stairs, contentDescription = null)
-                            Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
-                        }
+    val actions: @Composable (Modifier) -> Unit = { actionsModifier ->
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = actionsModifier,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (onWall) {
+                FilledTonalButton(
+                    onClick = { onEvent(PlanEditorEvent.SelectOpening(null)) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_wall_done"),
+                ) {
+                    Text(stringResource(R.string.plan_done))
+                }
+            } else {
+                FilledTonalButton(
+                    onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_done"),
+                ) {
+                    Text(stringResource(R.string.plan_done))
+                }
+                if (!state.editShape) {
+                    OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_edit_shape")) {
+                        Icon(Icons.Rounded.Polyline, contentDescription = null)
+                        Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
                     }
                 }
-                if (room.id in state.flaggedIds) {
-                    Text(stringResource(R.string.plan_room_flagged), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("${LocalTagPrefix.current}_plan_delete_room")) {
+                    Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_room))
                 }
             }
-            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-            androidx.compose.foundation.layout.FlowRow(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (onWall) {
-                    FilledTonalButton(
-                        onClick = { onEvent(PlanEditorEvent.SelectOpening(null)) },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_wall_done"),
-                    ) {
-                        Text(stringResource(R.string.plan_done))
-                    }
-                } else {
-                    FilledTonalButton(
-                        onClick = { onEvent(if (state.editShape) PlanEditorEvent.SetEditShape(false) else PlanEditorEvent.Select(null)) },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_done"),
-                    ) {
-                        Text(stringResource(R.string.plan_done))
-                    }
-                    if (!state.editShape) {
-                        OutlinedButton(onClick = { onEvent(PlanEditorEvent.SetEditShape(true)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_edit_shape")) {
-                            Icon(Icons.Rounded.Polyline, contentDescription = null)
-                            Text(stringResource(R.string.plan_edit_shape), modifier = Modifier.padding(start = 8.dp))
+        }
+    }
+    Surface(tonalElevation = 3.dp, modifier = modifier) {
+        // With little height (landscape with the keyboard open) a pinned row would leave the fields no room, so the
+        // actions scroll with them instead.
+        BoxWithConstraints {
+            val pinActions = maxHeight >= PinnedActionsMinHeight
+            Column(Modifier.padding(vertical = 8.dp)) {
+                Column(
+                    Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (onWall) {
+                        Text(
+                            room.name.ifBlank { stringResource(R.string.plan_unnamed_room) },
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        OpeningControls(state, room, onEvent)
+                    } else {
+                        key(room.id) {
+                            LabeledField(
+                                label = stringResource(R.string.plan_room_name),
+                                value = room.name,
+                                onValueChange = { onEvent(PlanEditorEvent.Rename(it)) },
+                                modifier = Modifier.focusRequester(focus).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_name"),
+                            )
+                        }
+                        OutlinedButton(onClick = { pickingKind = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_room_kind")) {
+                            Text(stringResource(R.string.plan_room_kind, kindLabel(RoomKind.parse(room.kind))))
+                        }
+                        if (room.points.size == 4) {
+                            key(room.id, state.fieldsVersion) {
+                                var width by remember { mutableStateOf<Int?>(room.widthIn) }
+                                var length by remember { mutableStateOf<Int?>(room.lengthIn) }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    LengthField(
+                                        label = stringResource(R.string.plan_room_width),
+                                        inches = room.widthIn,
+                                        onInchesChange = { width = it; commitSize(width, length, onEvent) },
+                                        system = state.system,
+                                        modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_width"),
+                                    )
+                                    LengthField(
+                                        label = stringResource(R.string.plan_room_length),
+                                        inches = room.lengthIn,
+                                        onInchesChange = { length = it; commitSize(width, length, onEvent) },
+                                        system = state.system,
+                                        modifier = Modifier.weight(1f).then(commitOnBlur).testTag("${LocalTagPrefix.current}_plan_room_length"),
+                                        imeAction = ImeAction.Done,
+                                        keyboardActions = commitOnDone,
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                stringResource(R.string.plan_room_size_summary, LengthParser.format(room.widthIn, state.system), LengthParser.format(room.lengthIn, state.system)),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        if (state.editShape) {
+                            Text(stringResource(R.string.plan_edit_shape_hint), style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                            if (room.openings.isEmpty() && room.stairs.isEmpty()) {
+                                Text(stringResource(R.string.plan_wall_hint), style = MaterialTheme.typography.bodyMedium)
+                            }
+                            room.stairs.forEach { stair -> StairRow(state, stair, onEvent) }
+                            OutlinedButton(onClick = { onEvent(PlanEditorEvent.AddStair) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_plan_add_stairs")) {
+                                Icon(Icons.Rounded.Stairs, contentDescription = null)
+                                Text(stringResource(R.string.plan_add_stairs), modifier = Modifier.padding(start = 8.dp))
+                            }
                         }
                     }
-                    IconButton(onClick = { confirmDelete = true }, modifier = Modifier.size(48.dp).testTag("${LocalTagPrefix.current}_plan_delete_room")) {
-                        Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.plan_delete_room))
+                    if (room.id in state.flaggedIds) {
+                        Text(stringResource(R.string.plan_room_flagged), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
                     }
+                    if (!pinActions) actions(Modifier)
                 }
+                if (pinActions) actions(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
             }
         }
     }
@@ -722,6 +731,9 @@ private fun RoomPanel(state: PlanEditorUiState, room: PlanRoom, onEvent: (PlanEd
         )
     }
 }
+
+/** Below this height the inspector's action row scrolls with the fields instead of staying pinned. */
+private val PinnedActionsMinHeight = 200.dp
 
 /** Door and window controls for the tapped wall or opening (AC-C9). */
 @Composable

@@ -163,6 +163,10 @@ run_flow() { # file label [variant]
   # tour shots keep their own tour-<variant>-<screen> names; failure captures of other flows get a flow- prefix
   local prefix="flow-$label-"; case "$label" in tour-*) prefix="" ;; esac
   for s in "$OUT"/maestro/*.png "$OUT/maestro/out-$label"/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/$prefix$(basename "$s")"; done
+  # A flow that fails after setOrientation leaves the device rotated; put it back so the next flow starts portrait
+  # (the landscape variant sets its rotation again before each tour run)
+  adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
+  adb shell cmd window user-rotation lock 0 >/dev/null 2>&1 || true
   return $rc
 }
 FLOWDIR="qa/flows/$APP"

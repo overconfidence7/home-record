@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.theme.Brand
@@ -75,6 +76,18 @@ class PlanEditorInspectorTest {
         rule.onNodeWithTag("hm_plan_done").assertIsDisplayed()
         rule.onNodeWithTag("hm_plan_delete_room").assertIsDisplayed()
         rule.onNodeWithTag("hm_plan_done").performClick()
+        assertThat(events.last()).isEqualTo(PlanEditorEvent.Select(null))
+    }
+
+    // Phone landscape with the keyboard up leaves about 90 dp under the top bar: the name field gets the room and the
+    // actions scroll with it instead of squeezing it to nothing (auto:flow:house-manual:H02-draw-plan).
+    @AcceptanceCriterion("AC-C12")
+    @Config(qualifiers = "w800dp-h170dp-land")
+    @Test fun shortLandscapePanelKeepsTheNameFieldVisible() {
+        val events = mutableListOf<PlanEditorEvent>()
+        show(state, events)
+        rule.onNodeWithTag("hm_plan_room_name").assertIsDisplayed()
+        rule.onNodeWithTag("hm_plan_done").performScrollTo().assertIsDisplayed().performClick()
         assertThat(events.last()).isEqualTo(PlanEditorEvent.Select(null))
     }
 }
