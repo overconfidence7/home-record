@@ -1912,3 +1912,20 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
 
 Tested: 71 device stages, 790 unit tests, 108 backend tests, coverage 214/214 ACs. Passed: 61. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-29 (commit 82c76a0)
+
+Automated suite run at 2026-10-29 12:37 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Instrumented tests fail on field-log (regression of a fixed item) [auto:instrumented:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: all acceptance tests and the screen crawler pass - actual: 1 failing of 16 (qa-results latest/field-log/instrumented/field-log.txt)
+- [ ] [Major] Flow F08b-capture-photo fails on field-log [auto:flow:field-log:F08b-capture-photo] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: walkthrough step F08b passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F08b-capture-photo.log
+- [ ] [Major] Flow H02-draw-plan fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H02-draw-plan] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: walkthrough step H02 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H02-draw-plan.log
+- [ ] [Major] Flow H02b-shape-doors-stairs fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H02b-shape-doors-stairs] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: walkthrough step H02b passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H02b-shape-doors-stairs.log
+- [ ] [Major] Flow H03-blueprint-room fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H03-blueprint-room] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: walkthrough step H03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H03-blueprint-room.log
+- [ ] [Major] Flow H04-add-item fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H04-add-item] - steps: automated, see qa-results branch latest/ for commit 82c76a0 - expected: walkthrough step H04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H04-add-item.log
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F08 Pass, field-log F08b Fail, field-log F15 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Fail, house-manual H02b Fail, house-manual H03 Fail, house-manual H04 Fail, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: field-log jank:field-log (not measurable: no benchmark apk); handoff seed:field-log (no debug seed receiver yet (PLAN Q005)); handoff seed:house-manual (no debug seed receiver yet (PLAN Q005)); handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff); house-manual jank:house-manual (not measurable: no benchmark apk)
+
+Tested: 62 device stages, 817 unit tests, 108 backend tests, coverage 215/215 ACs. Passed: 50. New issues: 6. Critical: 0. Product gaps: n/a (judge entry follows).
