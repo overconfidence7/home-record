@@ -32,6 +32,21 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"${releaseApiBaseUrl()}\"")
             buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"")
         }
+        // QA only (AC-U11 scroll jank, qa/scripts/device-suite.sh): the release code with R8 and the baseline
+        // profile, signed with the debug key, plus the debug seed receiver and the dev backend so the suite can
+        // fill a 200-row list. Never shipped; `release` stays free of debug code.
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
+        }
+    }
+    sourceSets.getByName("benchmark") {
+        kotlin.srcDir("src/debug/kotlin")
+        assets.srcDir("src/debug/assets")
+        res.srcDir("src/debug/res")
+        manifest.srcFile("src/debug/AndroidManifest.xml")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

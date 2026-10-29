@@ -1,0 +1,16 @@
+# Helper, not a walkthrough step: the device suite's jank stage (AC-U11, S7) runs it on the benchmark build after
+# the long-list seed (200 items). It opens Items and waits for the rows; the suite then scrolls with adb and reads
+# dumpsys gfxinfo, so nothing here scrolls.
+appId: com.kurtz.homerecord.housemanual
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 30000
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 20000

@@ -92,4 +92,15 @@ class RegressionSeedTest {
         RegressionSeed.reset(db)
         assertThat(repo.observeHome().first()).isNull()
     }
+
+    // AC-U11: the jank stage scrolls a 200-row Items list (S7)
+    @Test fun longListSeedGivesItemsTwoHundredRowsWithDistinctNames() = runTest {
+        val today = LocalDate.of(2026, 10, 29)
+        val homeId = RegressionSeed.seedLongList(db, repo, today = today)
+        val rows = ItemRepository(db, today = { today }).observeRows(homeId, emptyMap()).first()
+        assertThat(rows).hasSize(RegressionSeed.LONG_LIST_ITEMS)
+        assertThat(rows.map { it.name }.toSet()).hasSize(RegressionSeed.LONG_LIST_ITEMS)
+        assertThat(rows.map { it.name }).containsAtLeast("Furnace", "Wall paint, Kitchen", "Smoke alarm, Bedroom 2")
+        assertThat(db.homeDao().observeAll().first()).hasSize(1)
+    }
 }

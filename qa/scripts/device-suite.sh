@@ -16,8 +16,9 @@
 #   instrumented androidTest run: acceptance tests + screen crawler (Q002/Q003 in PLAN.md)
 #   flows        every Maestro flow in qa/flows/<app>/, each in its own process, JUnit output
 #   variants     the _tour flow under dark mode, 200% font and landscape (screenshots)
-#   jank         scroll the longest list and read dumpsys gfxinfo janky-frame percentage
 #   monkey       1,500 random events, must not crash
+#   jank         benchmark build (R8, profile compiled) with the long-list seed: fling the 200-row list and read
+#                dumpsys gfxinfo janky-frame percentage; under 100 frames it reports not measurable
 #   release      release APK installs and launches (signed with a throwaway key if unsigned); then its
 #                baseline profile is compiled as a Play install would and cold start is measured on it
 #   logcat       FATAL EXCEPTION / ANR / StrictMode scan for the package
@@ -193,29 +194,57 @@ fi
 # collect any screenshots flows left in the maestro dir
 for s in "$OUT"/maestro/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/"; done
 
-# ------------------------------------------------------------------- jank
-for a in $PER_APP; do
-  p=$(pkg_of "$a")
-  adb shell dumpsys gfxinfo "$p" reset >/dev/null 2>&1
-  adb shell am start -n "$p/.MainActivity" >/dev/null 2>&1; sleep 2
-  for i in 1 2 3 4 5 6; do adb shell input swipe 540 1600 540 600 200 >/dev/null 2>&1; done
-  for i in 1 2 3; do adb shell input swipe 540 600 540 1600 200 >/dev/null 2>&1; done
-  g=$(adb shell dumpsys gfxinfo "$p" 2>/dev/null | tr -d '\r')
-  total=$(echo "$g" | sed -n 's/^Total frames rendered: *//p' | head -n 1); janky=$(echo "$g" | sed -n 's/^Janky frames: *\([0-9]*\).*/\1/p' | head -n 1)
-  if [ -n "$total" ] && [ "$total" -gt 0 ]; then
-    pct=$((janky*100/total)); echo "{\"app\":\"$a\",\"frames\":$total,\"janky\":$janky,\"jankPercent\":$pct}" > "$OUT/jank-$a.json"
-    [ "$pct" -le 10 ] && record "jank:$a" pass "$pct% janky of $total frames" || record "jank:$a" fail "$pct% janky frames of $total (AC-U11)"
-  else
-    record "jank:$a" skip "gfxinfo reported no frames"
-  fi
-done
-
 # ----------------------------------------------------------------- monkey
 for a in $PER_APP; do
   p=$(pkg_of "$a")
   adb shell monkey -p "$p" --throttle 40 --pct-syskeys 0 --pct-anyevent 0 -s 42 -v 1500 > "$OUT/logs/monkey-$a.txt" 2>&1
   if grep -q "// CRASH\|// NOT RESPONDING" "$OUT/logs/monkey-$a.txt"; then record "monkey:$a" fail "crash or ANR during monkey (logs/monkey-$a.txt)"; else record "monkey:$a" pass "1500 events, no crash"; fi
   shot "$a-after-monkey"
+done
+
+# ------------------------------------------------------------------- jank
+# AC-U11 / S7 "200-row lists scroll without jank", measured the way people get the app: the benchmark build (release
+# code with R8, signed with the debug key, its baseline profile compiled as a Play install would) with the long-list
+# seed, flinging the app's longest list (House Manual Items, Field Log Jobs; qa/flows/<app>/_jank.yaml opens it).
+# Under 100 rendered frames the percentage says nothing about scrolling ([judge:qa-jank-no-list]), so the stage
+# reports "not measurable" instead of a number.
+for a in $PER_APP; do
+  p=$(pkg_of "$a"); bench="$APK/$a-benchmark.apk"; flow="qa/flows/$a/_jank.yaml"
+  if [ ! -f "$bench" ]; then record "jank:$a" skip "not measurable: no benchmark apk"; continue; fi
+  if [ ! -f "$flow" ]; then record "jank:$a" skip "not measurable: no $flow"; continue; fi
+  adb uninstall "$p" >/dev/null 2>&1 || true
+  if adb install -r -g "$bench" > "$OUT/logs/install-benchmark-$a.txt" 2>&1; then
+    adb shell am broadcast -a androidx.profileinstaller.action.INSTALL_PROFILE "$p/androidx.profileinstaller.ProfileInstallReceiver" > "$OUT/logs/profile-benchmark-$a.txt" 2>&1
+    adb shell am force-stop "$p"
+    adb shell cmd package compile -f -m speed-profile "$p" >> "$OUT/logs/profile-benchmark-$a.txt" 2>&1
+    r=$(adb shell am broadcast -a "$p.qa.SEED" -p "$p" --es scenario long-list 2>/dev/null | tr -d '\r')
+    if ! echo "$r" | grep -q "result=1"; then
+      record "jank:$a" skip "not measurable: long-list seed failed ($r)"
+    elif ! run_flow "$flow" "jank-$a"; then
+      record "jank:$a" skip "not measurable: the list did not open (maestro/jank-$a.log)"
+    else
+      size=$(adb shell wm size 2>/dev/null | tr -d '\r' | sed -n 's/.*: *\([0-9]*\)x\([0-9]*\).*/\1 \2/p' | tail -n 1)
+      w=${size%% *}; h=${size##* }; [ -n "$w" ] && [ -n "$h" ] && [ "$w" -gt 0 ] 2>/dev/null || { w=1080; h=2400; }
+      x=$((w / 2)); low=$((h * 3 / 4)); high=$((h / 4))
+      adb shell dumpsys gfxinfo "$p" reset >/dev/null 2>&1
+      for i in 1 2 3 4 5 6 7 8; do adb shell input swipe "$x" "$low" "$x" "$high" 150 >/dev/null 2>&1; done
+      for i in 1 2 3 4 5 6 7 8; do adb shell input swipe "$x" "$high" "$x" "$low" 150 >/dev/null 2>&1; done
+      g=$(adb shell dumpsys gfxinfo "$p" 2>/dev/null | tr -d '\r'); echo "$g" > "$OUT/logs/gfxinfo-$a.txt"
+      shot "$a-jank-list"
+      total=$(echo "$g" | sed -n 's/^Total frames rendered: *//p' | head -n 1); janky=$(echo "$g" | sed -n 's/^Janky frames: *\([0-9]*\).*/\1/p' | head -n 1)
+      total=${total:-0}; janky=${janky:-0}
+      if [ "$total" -lt 100 ]; then
+        record "jank:$a" skip "not measurable: $total frames rendered while flinging the 200-row list (need 100)"
+      else
+        pct=$((janky*100/total)); echo "{\"app\":\"$a\",\"build\":\"benchmark\",\"rows\":200,\"frames\":$total,\"janky\":$janky,\"jankPercent\":$pct}" > "$OUT/jank-$a.json"
+        [ "$pct" -le 10 ] && record "jank:$a" pass "$pct% janky of $total frames (200-row list, benchmark build)" || record "jank:$a" fail "$pct% janky frames of $total (AC-U11, 200-row list, benchmark build)"
+      fi
+    fi
+  else
+    record "jank:$a" skip "not measurable: $(tail -n 1 "$OUT/logs/install-benchmark-$a.txt")"
+  fi
+  adb uninstall "$p" >/dev/null 2>&1 || true
+  [ -f "$APK/$a-debug.apk" ] && adb install -r -g "$APK/$a-debug.apk" >/dev/null 2>&1 || true
 done
 
 # ---------------------------------------------------------------- release

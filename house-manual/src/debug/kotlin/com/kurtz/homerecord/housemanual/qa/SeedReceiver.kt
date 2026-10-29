@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * Debug-only: `adb shell am broadcast -a com.kurtz.homerecord.housemanual.qa.SEED -p <pkg> --es scenario regression|reset`.
+ * Debug-only: `adb shell am broadcast -a com.kurtz.homerecord.housemanual.qa.SEED -p <pkg> --es scenario regression|long-list|reset`.
  * Result code 1 means done; the device suite greps for `result=1`.
  */
 class SeedReceiver : BroadcastReceiver() {
@@ -24,6 +24,12 @@ class SeedReceiver : BroadcastReceiver() {
                     "regression" -> {
                         val pdf = context.assets.open("qa/sample.pdf").use { it.readBytes() }
                         RegressionSeed.seed(container.db, container.homes, documentsDir = File(context.filesDir, "documents"), pdf = pdf)
+                        true
+                    }
+                    // AC-U11 scroll jank: the regression home with 200 items on Items
+                    "long-list" -> {
+                        val pdf = context.assets.open("qa/sample.pdf").use { it.readBytes() }
+                        RegressionSeed.seedLongList(container.db, container.homes, documentsDir = File(context.filesDir, "documents"), pdf = pdf)
                         true
                     }
                     "reset" -> {

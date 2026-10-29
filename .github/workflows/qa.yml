@@ -144,7 +144,8 @@ jobs:
           set +e
           ./gradlew --no-daemon --console=plain :house-manual:assembleDebug :field-log:assembleDebug \
             :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
-            :house-manual:assembleRelease :field-log:assembleRelease --continue > qa-out/apk/gradle.log 2>&1
+            :house-manual:assembleRelease :field-log:assembleRelease \
+            :house-manual:assembleBenchmark :field-log:assembleBenchmark --continue > qa-out/apk/gradle.log 2>&1
           rc=$?
           if [ $rc -ne 0 ]; then
             # packageDebug has failed once on a shared runner (disk or parallel packaging); free space and retry serially
@@ -152,7 +153,8 @@ jobs:
             rm -rf build/reports ./*/build/reports ./*/build/intermediates/lint* 2>/dev/null
             ./gradlew --no-daemon --console=plain --max-workers=1 :house-manual:assembleDebug :field-log:assembleDebug \
               :house-manual:assembleDebugAndroidTest :field-log:assembleDebugAndroidTest \
-              :house-manual:assembleRelease :field-log:assembleRelease --continue >> qa-out/apk/gradle.log 2>&1
+              :house-manual:assembleRelease :field-log:assembleRelease \
+            :house-manual:assembleBenchmark :field-log:assembleBenchmark --continue >> qa-out/apk/gradle.log 2>&1
             rc=$?
           fi
           echo $rc > qa-out/apk/exit-code
@@ -162,6 +164,8 @@ jobs:
             cp $app/build/outputs/apk/androidTest/debug/$app-debug-androidTest.apk qa-out/apk/ 2>/dev/null || echo "no androidTest apk for $app (crawler not built yet)"
             rel=$(ls $app/build/outputs/apk/release/$app-release*.apk 2>/dev/null | head -n 1)
             [ -n "$rel" ] && cp "$rel" qa-out/apk/$app-release.apk || echo "no release apk for $app"
+            # jank stage (AC-U11): release code plus the debug seed, signed with the debug key
+            cp $app/build/outputs/apk/benchmark/$app-benchmark.apk qa-out/apk/ 2>/dev/null || echo "no benchmark apk for $app"
           done
           ls -la qa-out/apk
 

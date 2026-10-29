@@ -1,0 +1,16 @@
+# Helper, not a walkthrough step: the device suite's jank stage (AC-U11, S7) runs it on the benchmark build after
+# the long-list seed (QA Electric with 200 jobs). It opens Jobs and waits for the first seeded job; the suite then
+# scrolls with adb and reads dumpsys gfxinfo, so nothing here scrolls.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "fl_tab_jobs"
+    timeout: 30000
+- tapOn:
+    id: "fl_tab_jobs"
+- extendedWaitUntil:
+    visible:
+      id: "fl_jobs_row_qa-long-job-1"
+    timeout: 20000

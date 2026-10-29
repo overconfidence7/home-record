@@ -166,5 +166,51 @@ object RegressionSeed {
         }
     }
 
+    /** What every room of a well-documented home records: finishes with their colors, alarms and network gear. */
+    private val perRoom = listOf(
+        SeedItem("paint", "Wall paint", "", "Sherwin-Williams", "SW 7008 Alabaster"),
+        SeedItem("paint", "Ceiling paint", "", "Benjamin Moore", "Ceiling White 508"),
+        SeedItem("paint", "Trim paint", "", "Sherwin-Williams", "SW 7006 Extra White"),
+        SeedItem("flooring", "Flooring", "", "Shaw", "Repel Oak"),
+        SeedItem("trim", "Baseboard", "", "Metrie", "MDF 5-1/4 in"),
+        SeedItem("trim", "Door casing", "", "Metrie", "Colonial 2-1/4 in"),
+        SeedItem("windows", "Window", "", "Andersen", "400 Series"),
+        SeedItem("smoke_detector", "Smoke alarm", "", "First Alert", "SC9120B"),
+        SeedItem("co_detector", "CO alarm", "", "Kidde", "KN-COB-DCR-CA"),
+        SeedItem("mesh_node", "Mesh node", "", "eero", "Pro 6E"),
+        SeedItem("lock", "Door lock", "", "Schlage", "BE469ZP"),
+        SeedItem("camera", "Camera", "", "Wyze", "Cam v3"),
+        SeedItem("fixture_shutoff", "Light switch", "", "Lutron", "Caseta PD-6WCL"),
+        SeedItem("surge_protector", "Surge protector", "", "APC", "P11VNT3"),
+        SeedItem("cabinets", "Built-in shelving", ""),
+    )
+
+    /**
+     * The regression home grown to [total] items for the AC-U11 scroll measurement (S7: "200-row lists scroll
+     * without jank"): the regression items, then each room's finishes and devices, room by room.
+     */
+    suspend fun seedLongList(
+        db: HomeRecordDatabase,
+        repo: HomeRepository,
+        total: Int = LONG_LIST_ITEMS,
+        today: LocalDate = LocalDate.now(),
+        documentsDir: File? = null,
+        pdf: ByteArray? = null,
+        now: Long = System.currentTimeMillis(),
+    ): String {
+        val homeId = seed(db, repo, today, documentsDir, pdf, now)
+        var clock = now + items.size
+        val itemRepo = ItemRepository(db, now = { clock++ }, today = { today })
+        val rooms = mainFloor + upperFloor + basement
+        val extra = rooms.flatMap { room -> perRoom.map { it.copy(name = "${it.name}, ${room.name}", roomId = room.id) } }
+        extra.take((total - items.size).coerceAtLeast(0)).forEach { seed ->
+            val draft = ItemDraft(subtypeId = seed.subtype, roomId = seed.roomId, name = seed.name, make = seed.make, model = seed.model)
+            checkNotNull(itemRepo.save(homeId, draft)) { "seed item ${seed.name} did not save" }
+        }
+        return homeId
+    }
+
+    const val LONG_LIST_ITEMS = 200
+
     suspend fun reset(db: HomeRecordDatabase) = db.clearAllTables()
 }
