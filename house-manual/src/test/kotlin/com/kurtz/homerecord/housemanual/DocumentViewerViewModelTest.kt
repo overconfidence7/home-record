@@ -74,7 +74,7 @@ class DocumentViewerViewModelTest {
 
     @AcceptanceCriterion("AC-C37")
     @Test fun opensStoredDocumentAsPages() {
-        val id = runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") }!!
+        val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") })
         val s = vm(id) { _, _ -> TwoPages() }.await { !it.loading }
         assertThat(s.missing).isFalse()
         assertThat(s.name).isEqualTo("Furnace manual.pdf")
@@ -84,7 +84,7 @@ class DocumentViewerViewModelTest {
 
     @AcceptanceCriterion("AC-C37")
     @Test fun missingFileOrRecordShowsMissingState() {
-        val id = runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") }!!
+        val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") })
         assertThat(vm(id) { _, _ -> null }.await { !it.loading }.missing).isTrue()
         assertThat(vm("nope") { _, _ -> TwoPages() }.await { !it.loading }.missing).isTrue()
     }

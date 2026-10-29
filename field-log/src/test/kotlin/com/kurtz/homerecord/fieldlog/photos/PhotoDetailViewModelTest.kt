@@ -84,7 +84,7 @@ class PhotoDetailViewModelTest {
         row { it?.caption == "Panel, labeled" }
         v.onEvent(PhotoDetailEvent.Room("r1"))
         v.onEvent(PhotoDetailEvent.Phase("Finish"))
-        val row = row { it?.roomId == "r1" && it.stage == "Finish" }!!
+        val row = checkNotNull(row { it?.roomId == "r1" && it.stage == "Finish" })
         assertThat(row.caption).isEqualTo("Panel, labeled")
         assertThat(row.roomId).isEqualTo("r1")
         assertThat(row.stage).isEqualTo("Finish")

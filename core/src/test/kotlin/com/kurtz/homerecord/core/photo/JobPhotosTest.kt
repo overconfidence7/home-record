@@ -38,8 +38,8 @@ class JobPhotosTest {
     @After fun tearDown() = db.close()
 
     @Test fun shutterSavesTagsFixAndQueuesUpload() = runBlocking<Unit> {
-        val id = photos.save("/media/a.jpg", CaptureTags("j1", "r1", "Rough-in"), GeoFix(34.0, -118.0, 5f))!!
-        val row = db.photoDao().get(id)!!
+        val id = checkNotNull(photos.save("/media/a.jpg", CaptureTags("j1", "r1", "Rough-in"), GeoFix(34.0, -118.0, 5f)))
+        val row = checkNotNull(db.photoDao().get(id))
         assertThat(row.jobId).isEqualTo("j1")
         assertThat(row.roomId).isEqualTo("r1")
         assertThat(row.stage).isEqualTo("Rough-in")
@@ -51,25 +51,25 @@ class JobPhotosTest {
     }
 
     @Test fun noPermissionStillSavesWithoutGps() = runBlocking<Unit> {
-        val id = photos.save("/media/b.jpg", CaptureTags("j1"), null)!!
-        assertThat(db.photoDao().get(id)!!.lat).isNull()
+        val id = checkNotNull(photos.save("/media/b.jpg", CaptureTags("j1"), null))
+        assertThat(checkNotNull(db.photoDao().get(id)).lat).isNull()
     }
 
     // AC-F24: the fix found after the row was written is added without touching tags edited meanwhile.
     @Test fun lateFixFillsOnlyMissingLocationAndKeepsOtherEdits() = runBlocking<Unit> {
-        val id = photos.save("/media/late.jpg", CaptureTags("j1", "r1"), null)!!
-        db.photoDao().upsert(db.photoDao().get(id)!!.copy(stage = "Rough-in", pairRole = PhotoEdits.BEFORE))
-        val located = photos.save("/media/had.jpg", CaptureTags("j1"), GeoFix(1.0, 2.0, 5f))!!
+        val id = checkNotNull(photos.save("/media/late.jpg", CaptureTags("j1", "r1"), null))
+        db.photoDao().upsert(checkNotNull(db.photoDao().get(id)).copy(stage = "Rough-in", pairRole = PhotoEdits.BEFORE))
+        val located = checkNotNull(photos.save("/media/had.jpg", CaptureTags("j1"), GeoFix(1.0, 2.0, 5f)))
         changes.clear()
         clock = 6_000_000L
         photos.addFix(listOf(id, located), GeoFix(34.0, -118.0, 5f))
-        val row = db.photoDao().get(id)!!
+        val row = checkNotNull(db.photoDao().get(id))
         assertThat(row.lat).isEqualTo(34.0)
         assertThat(row.lng).isEqualTo(-118.0)
         assertThat(row.stage).isEqualTo("Rough-in")
         assertThat(row.pairRole).isEqualTo(PhotoEdits.BEFORE)
         assertThat(row.updatedAt).isEqualTo(6_000_000L)
-        assertThat(db.photoDao().get(located)!!.lat).isEqualTo(1.0)
+        assertThat(checkNotNull(db.photoDao().get(located)).lat).isEqualTo(1.0)
         assertThat(changes).containsExactly("photo" to id)
     }
 
@@ -79,9 +79,9 @@ class JobPhotosTest {
     }
 
     @Test fun afterPhotoLinksToBefore() = runBlocking<Unit> {
-        val before = photos.save("/media/d.jpg", CaptureTags("j1"), null)!!
-        val after = photos.save("/media/e.jpg", CaptureTags("j1"), null, beforeOf = before)!!
-        assertThat(db.photoDao().get(after)!!.beforeOfPhotoId).isEqualTo(before)
+        val before = checkNotNull(photos.save("/media/d.jpg", CaptureTags("j1"), null))
+        val after = checkNotNull(photos.save("/media/e.jpg", CaptureTags("j1"), null, beforeOf = before))
+        assertThat(checkNotNull(db.photoDao().get(after)).beforeOfPhotoId).isEqualTo(before)
     }
 
     @Test fun signedOutKeepsPhotoButQueuesNoUpload() = runBlocking<Unit> {

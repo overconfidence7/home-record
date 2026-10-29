@@ -74,6 +74,8 @@ class AppContainer(app: Application) {
         prepare = homeRegistrar::ensure,
     )
 
+    private val connectivity = AndroidConnectivityMonitor(app)
+
     private val homeTenant = db.homeDao().observeAll().map { it.firstOrNull()?.let { h -> TenantRef(TenantKind.Home, h.id) } }
 
     val syncCoordinator = SyncCoordinator(
@@ -85,7 +87,7 @@ class AppContainer(app: Application) {
         },
         auth.state.map { it is AuthState.SignedIn },
         homeTenant,
-        AndroidConnectivityMonitor(app),
+        connectivity,
     )
 
     init {
@@ -94,7 +96,7 @@ class AppContainer(app: Application) {
     }
 
     /** Every write goes to the outbox against the device's home, signed in or not; the coordinator sends it. */
-    val homes = HomeRepository(db) { entity, id ->
+    private suspend fun recordHomeChange(entity: String, id: String) {
         val homeId = if (entity == "home") id else db.homeDao().observeAll().first().firstOrNull()?.id
         if (homeId != null) {
             syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
@@ -102,47 +104,25 @@ class AppContainer(app: Application) {
         }
     }
 
-    val items = ItemRepository(db) { entity, id ->
-        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
-        if (homeId != null) {
-            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
-            syncCoordinator.requestSync()
-        }
-    }
+    val homes = HomeRepository(db) { entity, id -> recordHomeChange(entity, id) }
+
+    val items = ItemRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
     val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db)
 
-    val upkeep = UpkeepRepository(db) { entity, id ->
-        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
-        if (homeId != null) {
-            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
-            syncCoordinator.requestSync()
-        }
-    }
+    val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
     /** Data plate vision fallback (AC-B11) and recalls (AC-B12). */
     val lookupApi = com.kurtz.homerecord.core.lookup.RetrofitLookupApi.create(BuildConfig.API_BASE_URL, http, com.kurtz.homerecord.core.lookup.PlateImageEncoder::encode)
 
-    val warrantyLookup = WarrantyLookupRepository(db, RetrofitWarrantyLookupApi.create(BuildConfig.API_BASE_URL, http)) { entity, id ->
-        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
-        if (homeId != null) {
-            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
-            syncCoordinator.requestSync()
-        }
-    }
+    val warrantyLookup = WarrantyLookupRepository(db, RetrofitWarrantyLookupApi.create(BuildConfig.API_BASE_URL, http)) { entity, id -> recordHomeChange(entity, id) }
 
     /** The automatic warranty attempt after an item is first saved (AC-C34); runs past the form closing. */
     fun autoLookupWarranty(itemId: String) {
         scope.launch { warrantyLookup.autoLookup(itemId) }
     }
 
-    val documents = DocumentRepository(db, AndroidDocumentFiles(app)) { entity, id ->
-        val homeId = db.homeDao().observeAll().first().firstOrNull()?.id
-        if (homeId != null) {
-            syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
-            syncCoordinator.requestSync()
-        }
-    }
+    val documents = DocumentRepository(db, AndroidDocumentFiles(app)) { entity, id -> recordHomeChange(entity, id) }
 
     val media: MediaFiles = AndroidMediaFiles(app)
     val textRecognizer: TextRecognizer = MlKitTextRecognizer(app)
@@ -160,7 +140,7 @@ class AppContainer(app: Application) {
         syncCoordinator.start()
         (billing as? com.kurtz.homerecord.housemanual.billing.RevenueCatBilling)?.let { rc -> scope.launch { rc.refresh() } }
         // Queued warranty lookups run when connectivity returns (AC-C34).
-        scope.launch { AndroidConnectivityMonitor(app).online.collect { if (it) warrantyLookup.runPending() } }
+        scope.launch { connectivity.online.collect { if (it) warrantyLookup.runPending() } }
     }
 }
 

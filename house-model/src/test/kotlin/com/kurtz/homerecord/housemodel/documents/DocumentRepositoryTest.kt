@@ -71,8 +71,8 @@ class DocumentRepositoryTest {
 
     @AcceptanceCriterion("AC-C37")
     @Test fun foldersGroupRenameMoveAttachAndDelete() = runTest {
-        val a = repo.add("h1", DocumentScope.Home, "u/manual.pdf", folder = "Manuals")!!
-        val b = repo.add("h1", DocumentScope.Home, "u/receipt.jpg")!!
+        val a = checkNotNull(repo.add("h1", DocumentScope.Home, "u/manual.pdf", folder = "Manuals"))
+        val b = checkNotNull(repo.add("h1", DocumentScope.Home, "u/receipt.jpg"))
         var folders = repo.observeFolders("h1").first()
         assertThat(folders.map { it.name }).containsExactly("", "Manuals").inOrder()
 

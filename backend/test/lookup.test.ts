@@ -101,7 +101,8 @@ describe("AC-B10 POST /lookup/warranty", () => {
     expect(log.results).toEqual([{ kind: "warranty", i: 800, o: 20, s: 3 }]);
     expect(await env.CACHE.get(warrantyCacheKey("Acme", "Z2"))).toBeNull();
     const day = new Date().toISOString().slice(0, 10);
-    expect(await env.CACHE.get(`quota:lookup:lu4:${day}`)).toBe("0");
+    const quota = await env.DB.prepare("SELECT used FROM lookup_quota WHERE user_id = 'lu4' AND day = ?").bind(day).first<{ used: number }>();
+    expect(quota?.used).toBe(0);
   });
 
   it("failed lookups do not use up the daily limit", async () => { // AC-B10

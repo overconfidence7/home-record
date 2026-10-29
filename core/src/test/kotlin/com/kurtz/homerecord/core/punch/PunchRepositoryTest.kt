@@ -38,7 +38,7 @@ class PunchRepositoryTest {
 
     @Test fun clockInSavesFixAndQueuesForSync() = runBlocking<Unit> {
         val id = repo.record(punch(PunchKind.IN, 1_000, GeoFix(34.05, -118.25, 8f)))
-        val row = db.punchDao().get(id)!!
+        val row = checkNotNull(db.punchDao().get(id))
         assertThat(row.lat).isEqualTo(34.05)
         assertThat(row.accuracyM).isEqualTo(8f)
         assertThat(changes).containsExactly("punch" to id)
@@ -46,7 +46,7 @@ class PunchRepositoryTest {
 
     @Test fun noLocationPunchStillSaves() = runBlocking<Unit> {
         val id = repo.record(punch(PunchKind.IN, 1_000))
-        assertThat(db.punchDao().get(id)!!.lat).isNull()
+        assertThat(checkNotNull(db.punchDao().get(id)).lat).isNull()
     }
 
     @Test fun openShiftThenClockOutClosesIt() = runBlocking<Unit> {
@@ -68,7 +68,7 @@ class PunchRepositoryTest {
         val id = repo.record(punch(PunchKind.IN, 1_000))
         changes.clear()
         assertThat(repo.edit(id, "o1", "Owner", 2_000, "j1", "  ")).isFalse()
-        assertThat(db.punchDao().get(id)!!.at).isEqualTo(1_000L)
+        assertThat(checkNotNull(db.punchDao().get(id)).at).isEqualTo(1_000L)
         assertThat(changes).isEmpty()
     }
 
@@ -77,7 +77,7 @@ class PunchRepositoryTest {
         repo.record(punch(PunchKind.OUT, 5_000_000))
         clock = 9_000_000L
         assertThat(repo.edit(inId, "o1", "Owner", 1_500_000, "j2", "Forgot to clock in")).isTrue()
-        val row = db.punchDao().get(inId)!!
+        val row = checkNotNull(db.punchDao().get(inId))
         val audit = repo.auditOf(row).single()
         assertThat(audit.by).isEqualTo("o1")
         assertThat(audit.reason).isEqualTo("Forgot to clock in")

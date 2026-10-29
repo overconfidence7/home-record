@@ -17,14 +17,14 @@ class BlueprintPdfTest {
 
     // AC-C16
     @Test fun smallHouseGetsTheLargestScaleThatFits() {
-        val layout = BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 12 * 12, 10 * 12)))!!
+        val layout = checkNotNull(BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 12 * 12, 10 * 12))))
         assertThat(layout.scale.label).isEqualTo("1/2\" = 1'")
     }
 
     // AC-C16
     @Test fun bigHouseDropsToASmallerScaleAndStaysInsideTheMargins() {
         val spec = PdfPageSpec()
-        val layout = BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 60 * 12, 40 * 12)), spec)!!
+        val layout = checkNotNull(BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 60 * 12, 40 * 12)), spec))
         assertThat(layout.ptPerPlanInch).isLessThan(0.5f * 72f / 12f)
         assertThat(layout.x(0)).isAtLeast(spec.marginPt)
         assertThat(layout.x(60 * 12)).isAtMost(spec.widthPt - spec.marginPt)
@@ -33,7 +33,7 @@ class BlueprintPdfTest {
 
     // AC-C16
     @Test fun scaleBarIsAWholeNumberOfFeetAtTheDrawnScale() {
-        val layout = BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 30 * 12, 20 * 12)))!!
+        val layout = checkNotNull(BlueprintPageLayout.forRooms(listOf(rect("a", 0, 0, 30 * 12, 20 * 12))))
         assertThat(layout.scaleBarFeet).isIn(listOf(1, 2, 5, 10, 20, 50))
         assertThat(layout.scaleBarLengthPt).isWithin(0.01f).of(layout.scaleBarFeet * 12 * layout.ptPerPlanInch)
     }

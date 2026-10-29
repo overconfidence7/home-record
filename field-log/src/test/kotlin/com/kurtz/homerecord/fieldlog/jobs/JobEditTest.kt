@@ -84,7 +84,7 @@ class JobEditTest {
         assertThat(job.name).isEqualTo("Panel upgrade")
         assertThat(job.budgetHours).isEqualTo(40)
         assertThat(job.lat).isNull()
-        assertThat(db.clientDao().get(job.clientId!!)?.name).isEqualTo("Rivera family")
+        assertThat(db.clientDao().get(checkNotNull(job.clientId))?.name).isEqualTo("Rivera family")
         assertThat(changes.map { it.first }).containsExactly("client", "job").inOrder()
     }
 
@@ -105,7 +105,7 @@ class JobEditTest {
         first.onEvent(JobEditEvent.Address("1 Elm"))
         first.save()
         val id = db.jobDao().listFor("c1").single().id
-        db.jobDao().upsert(db.jobDao().get(id)!!.copy(lat = 39.7, lng = -84.2))
+        db.jobDao().upsert(checkNotNull(db.jobDao().get(id)).copy(lat = 39.7, lng = -84.2))
 
         val same = vm(id)
         same.onEvent(JobEditEvent.Notes("Bring ladder"))
@@ -125,7 +125,7 @@ class JobEditTest {
         first.save()
         assertThat(first.state.value.mapPoint).isNull()
         val id = db.jobDao().listFor("c1").single().id
-        db.jobDao().upsert(db.jobDao().get(id)!!.copy(lat = 39.7, lng = -84.2))
+        db.jobDao().upsert(checkNotNull(db.jobDao().get(id)).copy(lat = 39.7, lng = -84.2))
 
         val again = vm(id)
         assertThat(again.state.value.mapPoint).isEqualTo(39.7 to -84.2)
@@ -221,7 +221,7 @@ class JobEditTest {
         assertThat(vm.state.value.draft.rooms).containsExactly("Kitchen", "Pantry").inOrder()
         vm.save()
         val job = db.jobDao().listFor("c1").single()
-        val floor = db.floorDao().listFor(job.homeId!!).single()
+        val floor = db.floorDao().listFor(checkNotNull(job.homeId)).single()
         val rooms = db.roomDao().listFor(floor.id)
         assertThat(rooms.map { it.name }).containsExactly("Kitchen", "Pantry")
         assertThat(rooms.map { it.polygonJson }.distinct()).containsExactly("[]")
@@ -253,10 +253,10 @@ class JobEditTest {
         vm.onEvent(JobEditEvent.AddRoom("Pantry"))
         vm.save()
         val job = db.jobDao().listFor("c1").single()
-        val kitchen = db.roomDao().listForHome(job.homeId!!).first { it.name == "Kitchen" }
+        val kitchen = db.roomDao().listForHome(checkNotNull(job.homeId)).first { it.name == "Kitchen" }
         db.roomDao().upsert(kitchen.copy(polygonJson = """[{"x":0,"y":0},{"x":144,"y":0},{"x":144,"y":120},{"x":0,"y":120}]"""))
         repeat(2) { n ->
-            db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p$n", homeId = job.homeId!!, roomId = kitchen.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
+            db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p$n", homeId = checkNotNull(job.homeId), roomId = kitchen.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
         }
         db.taskDao().upsert(com.kurtz.homerecord.core.data.TaskEntity(id = "t1", jobId = job.id, title = "Patch drywall", roomId = kitchen.id, createdAt = 1, updatedAt = 1))
 
@@ -277,8 +277,8 @@ class JobEditTest {
         vm.onEvent(JobEditEvent.AddRoom("Hall bath"))
         vm.save()
         val job = db.jobDao().listFor("c1").single()
-        val bath = db.roomDao().listForHome(job.homeId!!).single()
-        db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = job.homeId!!, roomId = bath.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
+        val bath = db.roomDao().listForHome(checkNotNull(job.homeId)).single()
+        db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = checkNotNull(job.homeId), roomId = bath.id, jobId = job.id, path = "", takenAt = 1, createdAt = 1, updatedAt = 1))
 
         val edit = vm(job.id)
         edit.onEvent(JobEditEvent.RemoveRoom("Hall bath"))
@@ -289,7 +289,7 @@ class JobEditTest {
         assertThat(edit.state.value.removing).isNull()
         assertThat(edit.state.value.draft.rooms).isEmpty()
         edit.save()
-        assertThat(db.roomDao().listForHome(job.homeId!!)).isEmpty()
+        assertThat(db.roomDao().listForHome(checkNotNull(job.homeId))).isEmpty()
         assertThat(changes.last { it.first == "room" }.second).isEqualTo(bath.id)
     }
 

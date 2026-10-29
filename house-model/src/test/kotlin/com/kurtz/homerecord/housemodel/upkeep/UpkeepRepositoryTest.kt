@@ -44,7 +44,7 @@ class UpkeepRepositoryTest {
 
     @AcceptanceCriterion("AC-C35")
     @Test fun consumableSavesEditsAndDeletes() = runTest {
-        val id = repo.saveConsumable("i1", ConsumableDraft(kind = ConsumableKind.FILTER, spec = " 16x25x1 MERV 8 ", quantity = "2"))!!
+        val id = checkNotNull(repo.saveConsumable("i1", ConsumableDraft(kind = ConsumableKind.FILTER, spec = " 16x25x1 MERV 8 ", quantity = "2")))
         val row = repo.observeConsumables("i1").first().single()
         assertThat(row.spec).isEqualTo("16x25x1 MERV 8")
         assertThat(row.quantity).isEqualTo(2)
@@ -74,7 +74,7 @@ class UpkeepRepositoryTest {
 
     @AcceptanceCriterion("AC-C39")
     @Test fun contactsLinkToServiceAndSurviveUnlink() = runTest {
-        val cid = repo.saveContact("h1", ContactDraft(name = "Zed Plumbing", phone = " 555-0100 ", email = "zed@example.com"))!!
+        val cid = checkNotNull(repo.saveContact("h1", ContactDraft(name = "Zed Plumbing", phone = " 555-0100 ", email = "zed@example.com")))
         repo.saveContact("h1", ContactDraft(name = "alpha HVAC", trade = "HVAC"))
         repo.saveService("i1", ServiceDraft(date = "2026-09-12", description = "Igniter", contactId = cid))
         val rows = repo.observeContacts("h1").first()

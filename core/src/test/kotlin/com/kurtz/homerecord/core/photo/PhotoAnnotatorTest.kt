@@ -48,14 +48,14 @@ class PhotoAnnotatorTest {
     @After fun tearDown() = db.close()
 
     @Test fun copyKeepsOriginalAndTagsAndCarriesMarks() = runBlocking<Unit> {
-        val id = annotator.saveCopy("p1", listOf(arrow))!!
-        val copy = db.photoDao().get(id)!!
+        val id = checkNotNull(annotator.saveCopy("p1", listOf(arrow)))
+        val copy = checkNotNull(db.photoDao().get(id))
         assertThat(copy.path).isEqualTo("/m/$id.jpg")
         assertThat(copy.jobId).isEqualTo("j1")
         assertThat(copy.roomId).isEqualTo("r1")
         assertThat(copy.stage).isEqualTo("Rough-in")
         assertThat(AnnotationCodec.decode(copy.annotationsJson)).containsExactly(arrow)
-        val original = db.photoDao().get("p1")!!
+        val original = checkNotNull(db.photoDao().get("p1"))
         assertThat(original.path).isEqualTo("/m/p1.jpg")
         assertThat(original.annotationsJson).isNotEqualTo(copy.annotationsJson)
         assertThat(rendered).containsExactly(Triple("/m/p1.jpg", 1, "/m/$id.jpg"))

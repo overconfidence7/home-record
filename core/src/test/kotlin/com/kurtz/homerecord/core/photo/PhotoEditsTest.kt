@@ -34,29 +34,29 @@ class PhotoEditsTest {
 
     @Test fun captionIsTrimmedAndBlankClearsIt() = runBlocking<Unit> {
         assertThat(edits.setCaption("p1", "  Pipe under sink ")).isTrue()
-        assertThat(db.photoDao().get("p1")!!.caption).isEqualTo("Pipe under sink")
+        assertThat(checkNotNull(db.photoDao().get("p1")).caption).isEqualTo("Pipe under sink")
         edits.setCaption("p1", "   ")
-        assertThat(db.photoDao().get("p1")!!.caption).isNull()
-        assertThat(db.photoDao().get("p1")!!.updatedAt).isEqualTo(9_000L)
+        assertThat(checkNotNull(db.photoDao().get("p1")).caption).isNull()
+        assertThat(checkNotNull(db.photoDao().get("p1")).updatedAt).isEqualTo(9_000L)
         assertThat(changes).containsExactly("photo" to "p1", "photo" to "p1")
     }
 
     // AC-F25, cr:fl-before-phase: room, phase and the Before mark are separate tags.
     @Test fun beforeMarkKeepsThePhaseAndCanBeTakenOff() = runBlocking<Unit> {
         edits.setTags("p1", "r1", "Rough-in")
-        assertThat(db.photoDao().get("p1")!!.roomId).isEqualTo("r1")
+        assertThat(checkNotNull(db.photoDao().get("p1")).roomId).isEqualTo("r1")
         edits.setBefore("p1", true)
-        db.photoDao().get("p1")!!.let {
+        checkNotNull(db.photoDao().get("p1")).let {
             assertThat(it.pairRole).isEqualTo(PhotoEdits.BEFORE)
             assertThat(it.stage).isEqualTo("Rough-in")
         }
         edits.setTags("p1", "r1", "Finish")
-        db.photoDao().get("p1")!!.let {
+        checkNotNull(db.photoDao().get("p1")).let {
             assertThat(it.pairRole).isEqualTo(PhotoEdits.BEFORE)
             assertThat(it.stage).isEqualTo("Finish")
         }
         edits.setBefore("p1", false)
-        db.photoDao().get("p1")!!.let {
+        checkNotNull(db.photoDao().get("p1")).let {
             assertThat(it.pairRole).isNull()
             assertThat(it.stage).isEqualTo("Finish")
         }

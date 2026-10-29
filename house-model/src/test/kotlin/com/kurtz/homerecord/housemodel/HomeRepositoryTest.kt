@@ -44,7 +44,7 @@ class HomeRepositoryTest {
     @AcceptanceCriterion("AC-C1")
     @Test fun createHomeSeedsFloorsFromTemplateAndTrimsName() = runTest {
         val id = colonial()
-        val home = repo.observeHome().first()!!
+        val home = checkNotNull(repo.observeHome().first())
         assertThat(home.id).isEqualTo(id)
         assertThat(home.name).isEqualTo("Maple St")
         assertThat(home.address).isNull()
@@ -86,7 +86,7 @@ class HomeRepositoryTest {
         repo.updateFloor(attic, " Loft ", 84)
         assertThat(db.floorDao().get(attic)?.name).isEqualTo("Loft")
         assertThat(db.floorDao().get(attic)?.ceilingHeightIn).isEqualTo(84)
-        assertThat(db.floorDao().get(attic)!!.elevationIn).isGreaterThan(db.floorDao().listFor(id).first { it.name == "Upper" }.elevationIn)
+        assertThat(checkNotNull(db.floorDao().get(attic)).elevationIn).isGreaterThan(db.floorDao().listFor(id).first { it.name == "Upper" }.elevationIn)
     }
 
     @AcceptanceCriterion("AC-C3")
@@ -133,10 +133,10 @@ class HomeRepositoryTest {
         assertThat(db.wallDao().listFor("h1")).isEmpty()
         assertThat(db.openingDao().listFor(wallId)).isEmpty()
         assertThat(db.stairDao().listFor("h1")).isEmpty()
-        val light = db.itemDao().get("i1")!!
+        val light = checkNotNull(db.itemDao().get("i1"))
         assertThat(light.roomId).isEqualTo(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE)
         assertThat(light.wallId).isNull()
-        assertThat(db.photoDao().get("p1")!!.roomId).isNull()
+        assertThat(checkNotNull(db.photoDao().get("p1")).roomId).isNull()
         assertThat(changes).containsAtLeast("room/h1", "wall/$wallId", "opening/o1", "stair/s1", "item/i1", "photo/p1")
         assertThat(repo.loadPlan(main.id).placed.map { it.id }).containsExactly("d1")
     }
@@ -158,8 +158,8 @@ class HomeRepositoryTest {
         assertThat(db.roomDao().listFor(upper.id)).isEmpty()
         assertThat(db.wallDao().listFor("b1")).isEmpty()
         assertThat(db.openingDao().listFor(wallId)).isEmpty()
-        assertThat(db.itemDao().get("i2")!!.roomId).isEqualTo(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE)
-        assertThat(db.stairDao().get("s1")!!.toFloorId).isNull()
+        assertThat(checkNotNull(db.itemDao().get("i2")).roomId).isEqualTo(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE)
+        assertThat(checkNotNull(db.stairDao().get("s1")).toFloorId).isNull()
         assertThat(changes).containsAtLeast("floor/${upper.id}", "room/b1", "wall/$wallId", "opening/o9", "item/i2", "stair/s1")
     }
 
@@ -228,14 +228,14 @@ class HomeRepositoryTest {
         assertThat(after[2]).isEqualTo(before[1])
         assertThat(after[4]).isEqualTo(before[3])
         assertThat(db.wallPhotoDao().listFor(before.getValue(2)).map { it.id }).containsExactly("wp1")
-        assertThat(db.openingDao().get("o1")!!.wallId).isEqualTo(before[2])
+        assertThat(checkNotNull(db.openingDao().get("o1")).wallId).isEqualTo(before[2])
         assertThat(repo.loadPlan(main.id).placed.single().openings.single().edgeIndex).isEqualTo(notched.openings.single().edgeIndex)
 
         // Dragging the east side out keeps every wall and updates its length.
         changes.clear()
         repo.savePlan(main.id, listOf(notched.resizedEdge(2, 168)))
         assertThat(db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }).isEqualTo(after)
-        assertThat(db.wallDao().get(after.getValue(3))!!.lengthIn).isEqualTo(168)
+        assertThat(checkNotNull(db.wallDao().get(after.getValue(3))).lengthIn).isEqualTo(168)
         assertThat(changes.filter { it.startsWith("wall/") }).isNotEmpty()
     }
 
@@ -264,13 +264,13 @@ class HomeRepositoryTest {
         assertThat(gone).hasSize(2)
         gone.forEach { lost ->
             assertThat(db.wallPhotoDao().listFor(lost)).isEmpty()
-            assertThat(db.itemDao().get("i-$lost")!!.wallId).isNull()
-            assertThat(db.itemDao().get("i-$lost")!!.roomId).isEqualTo("d1")
+            assertThat(checkNotNull(db.itemDao().get("i-$lost")).wallId).isNull()
+            assertThat(checkNotNull(db.itemDao().get("i-$lost")).roomId).isEqualTo("d1")
             assertThat(changes).containsAtLeast("wall/$lost", "wall_photo/p-$lost", "item/i-$lost")
         }
         kept.forEach { w ->
             assertThat(db.wallPhotoDao().listFor(w)).hasSize(1)
-            assertThat(db.itemDao().get("i-$w")!!.wallId).isEqualTo(w)
+            assertThat(checkNotNull(db.itemDao().get("i-$w")).wallId).isEqualTo(w)
         }
     }
 

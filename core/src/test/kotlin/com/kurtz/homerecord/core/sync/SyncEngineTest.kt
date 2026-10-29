@@ -137,11 +137,11 @@ class SyncEngineTest {
     @Test fun editsToDifferentFieldsOnTwoDevicesBothSurvive() = runTest {
         save(dbA, a, task("Base", 10))
         a.sync(tenant); b.sync(tenant)
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Renamed", updatedAt = 30))
-        save(dbB, b, dbB.taskDao().get("t1")!!.copy(done = true, updatedAt = 20))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Renamed", updatedAt = 30))
+        save(dbB, b, checkNotNull(dbB.taskDao().get("t1")).copy(done = true, updatedAt = 20))
         a.sync(tenant); b.sync(tenant); a.sync(tenant)
         for (db in listOf(dbA, dbB)) {
-            val t = db.taskDao().get("t1")!!
+            val t = checkNotNull(db.taskDao().get("t1"))
             assertThat(t.title).isEqualTo("Renamed")
             assertThat(t.done).isTrue()
         }
@@ -150,8 +150,8 @@ class SyncEngineTest {
     @Test fun sameFieldEditedOnTwoDevicesLatestWriteWins() = runTest {
         save(dbA, a, task("Base", 10))
         a.sync(tenant); b.sync(tenant)
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "From A", updatedAt = 30))
-        save(dbB, b, dbB.taskDao().get("t1")!!.copy(title = "From B", updatedAt = 20))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "From A", updatedAt = 30))
+        save(dbB, b, checkNotNull(dbB.taskDao().get("t1")).copy(title = "From B", updatedAt = 20))
         b.sync(tenant); a.sync(tenant); b.sync(tenant)
         assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("From A")
         assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("From A")
@@ -160,10 +160,10 @@ class SyncEngineTest {
     @Test fun unsentLocalEditNewerThanServerSurvivesAPull() = runTest {
         save(dbA, a, task("Base", 10))
         a.sync(tenant); b.sync(tenant)
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Server side", updatedAt = 20))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Server side", updatedAt = 20))
         a.sync(tenant)
         server.online = true
-        save(dbB, b, dbB.taskDao().get("t1")!!.copy(title = "Newer local", updatedAt = 50))
+        save(dbB, b, checkNotNull(dbB.taskDao().get("t1")).copy(title = "Newer local", updatedAt = 50))
         b.sync(tenant)
         a.sync(tenant)
         assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Newer local")
@@ -206,13 +206,13 @@ class SyncEngineTest {
         saveRoom(dbA, a, room(moved, "Kitchen", 20))
         a.sync(tenant)
         // B renamed the room while A moved it and was offline for one pass; both edits land on both phones.
-        saveRoom(dbB, b, dbB.roomDao().get("r1")!!.copy(name = "Galley kitchen", updatedAt = 30))
+        saveRoom(dbB, b, checkNotNull(dbB.roomDao().get("r1")).copy(name = "Galley kitchen", updatedAt = 30))
         server.online = false
         b.sync(tenant)
         server.online = true
         b.sync(tenant); a.sync(tenant)
         for (db in listOf(dbA, dbB)) {
-            val r = db.roomDao().get("r1")!!
+            val r = checkNotNull(db.roomDao().get("r1"))
             assertThat(r.polygonJson).isEqualTo(moved)
             assertThat(r.name).isEqualTo("Galley kitchen")
         }
@@ -259,7 +259,7 @@ class SyncEngineTest {
         assertThat(a.pendingCount.first()).isEqualTo(0)
         assertThat(a.refusedCount.first()).isEqualTo(1)
         assertThat(a.phase.value).isEqualTo(SyncPhase.Idle)
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Next edit", updatedAt = 12))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Next edit", updatedAt = 12))
         a.sync(tenant); b.sync(tenant)
         assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Next edit")
         assertThat(dbB.roomDao().get("r1")).isNull()
@@ -330,7 +330,7 @@ class SyncEngineTest {
         assertThat(outboxRows(dbA).map { it.second }).containsExactly(SyncEngine.REFUSED)
         assertThat(a.refusedCount.first()).isEqualTo(1)
         server.online = false
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Offline edit", updatedAt = 12))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Offline edit", updatedAt = 12))
         a.sync(tenant)
         assertThat(outboxRows(dbA)).hasSize(2)
         assertThat(a.pendingCount.first()).isEqualTo(1)
@@ -345,7 +345,7 @@ class SyncEngineTest {
         save(dbA, a, task("Patch drywall", 10))
         a.sync(tenant)
         assertThat(outboxRows(dbA)).isEmpty()
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Second coat", updatedAt = 11))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Second coat", updatedAt = 11))
         assertThat(outboxRows(dbA).single().first).isEqualTo(2L)
         a.sync(tenant); b.sync(tenant)
         assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Second coat")
@@ -408,7 +408,7 @@ class SyncEngineTest {
         a.sync(tenant)
         assertThat(server.pullsSince.first()).isEqualTo("c1" to 0L)
         a.forgetTenant(tenant)
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "After rejoining", updatedAt = 20))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "After rejoining", updatedAt = 20))
         val payload = dbA.outboxDao().pending().single().payload
         assertThat(payload).contains("jobId")
     }
@@ -423,17 +423,17 @@ class SyncEngineTest {
     @Test fun pullWhileAnEditIsPendingKeepsOnlyTheEditedField() = runTest {
         save(dbA, a, task("Base", 10))
         a.sync(tenant); b.sync(tenant)
-        save(dbB, b, dbB.taskDao().get("t1")!!.copy(done = true, updatedAt = 20))
+        save(dbB, b, checkNotNull(dbB.taskDao().get("t1")).copy(done = true, updatedAt = 20))
         b.sync(tenant)
         // A edits the title offline; its row still says not done, written later than B's done.
-        save(dbA, a, dbA.taskDao().get("t1")!!.copy(title = "Renamed on A", updatedAt = 50))
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Renamed on A", updatedAt = 50))
         server.online = false
         a.sync(tenant)
         server.online = true
         assertThat(dbA.outboxDao().pending().single().payload).doesNotContain("\"done\"")
         a.sync(tenant); b.sync(tenant)
         for (db in listOf(dbA, dbB)) {
-            val t = db.taskDao().get("t1")!!
+            val t = checkNotNull(db.taskDao().get("t1"))
             assertThat(t.title).isEqualTo("Renamed on A")
             assertThat(t.done).isTrue()
         }
@@ -457,7 +457,7 @@ class SyncEngineTest {
         assertThat(payload).doesNotContain("/data/a")
         assertThat(payload).contains("r2Key")
         a.sync(tenant); b.sync(tenant)
-        val onB = dbB.photoDao().get("p1")!!
+        val onB = checkNotNull(dbB.photoDao().get("p1"))
         assertThat(onB.path).isEmpty()
         assertThat(onB.thumbPath).isNull()
         assertThat(onB.r2Key).isEqualTo("c1/photo/p1/p1.jpg")
@@ -470,11 +470,11 @@ class SyncEngineTest {
         a.recordChange(tenant, "job_file", "f1")
         a.sync(tenant); b.sync(tenant)
         assertThat(dbB.jobFileDao().get("f1")?.path).isNull()
-        dbB.jobFileDao().upsert(dbB.jobFileDao().get("f1")!!.copy(path = "/b/offline/Plans.pdf", offline = true))
-        dbA.jobFileDao().upsert(dbA.jobFileDao().get("f1")!!.copy(name = "Plans rev B.pdf", updatedAt = 30))
+        dbB.jobFileDao().upsert(checkNotNull(dbB.jobFileDao().get("f1")).copy(path = "/b/offline/Plans.pdf", offline = true))
+        dbA.jobFileDao().upsert(checkNotNull(dbA.jobFileDao().get("f1")).copy(name = "Plans rev B.pdf", updatedAt = 30))
         a.recordChange(tenant, "job_file", "f1")
         a.sync(tenant); b.sync(tenant)
-        val onB = dbB.jobFileDao().get("f1")!!
+        val onB = checkNotNull(dbB.jobFileDao().get("f1"))
         assertThat(onB.name).isEqualTo("Plans rev B.pdf")
         assertThat(onB.path).isEqualTo("/b/offline/Plans.pdf")
         assertThat(onB.offline).isTrue()
@@ -496,7 +496,7 @@ class SyncEngineTest {
             serverSeq = 1,
         )
         b.sync(tenant)
-        val onB = dbB.jobFileDao().get("f2")!!
+        val onB = checkNotNull(dbB.jobFileDao().get("f2"))
         assertThat(onB.name).isEqualTo("Permit signed.pdf")
         assertThat(onB.path).isEqualTo("/b/Permit.pdf")
         assertThat(onB.offline).isFalse()

@@ -71,7 +71,7 @@ class MediaDownloadsTest {
     @Test fun pulledPhotoDownloadsByKeyAndKeepsUpdatedAt() = runBlocking<Unit> {
         pulledPhoto()
         assertThat(downloads.photo("p1")).isEqualTo(OnPhone.Ready)
-        val row = db.photoDao().get("p1")!!
+        val row = checkNotNull(db.photoDao().get("p1"))
         assertThat(File(row.path).readText()).isEqualTo("jpeg-bytes")
         assertThat(net.downloads).containsExactly("https://r2/get/c1/photo/p1/IMG_1.jpg")
         // A device-local column: the shared record did not change, so nothing is sent back.
@@ -84,7 +84,7 @@ class MediaDownloadsTest {
         db.photoDao().upsert(PhotoEntity(id = "p1", homeId = "j1", path = local.absolutePath, r2Key = "k", takenAt = 1, createdAt = 1, updatedAt = 1))
         assertThat(downloads.photo("p1")).isEqualTo(OnPhone.Ready)
         assertThat(net.downloads).isEmpty()
-        assertThat(db.photoDao().get("p1")!!.path).isEqualTo(local.absolutePath)
+        assertThat(checkNotNull(db.photoDao().get("p1")).path).isEqualTo(local.absolutePath)
     }
 
     @Test fun twoAsksForTheSamePhotoFetchItOnce() = runBlocking<Unit> {
@@ -98,7 +98,7 @@ class MediaDownloadsTest {
         pulledPhoto()
         downloads.photo("p1")
         cache.freeUp()
-        assertThat(downloads.missing(listOf(db.photoDao().get("p1")!!.path))).hasSize(1)
+        assertThat(downloads.missing(listOf(checkNotNull(db.photoDao().get("p1")).path))).hasSize(1)
         assertThat(downloads.photo("p1")).isEqualTo(OnPhone.Ready)
         assertThat(net.downloads).hasSize(2)
     }
@@ -115,14 +115,14 @@ class MediaDownloadsTest {
         signedIn = null
         assertThat(downloads.photo("p2")).isEqualTo(OnPhone.NoNetwork)
         assertThat(downloads.photo("gone")).isEqualTo(OnPhone.Failed)
-        assertThat(db.photoDao().get("p2")!!.path).isEmpty()
+        assertThat(checkNotNull(db.photoDao().get("p2")).path).isEmpty()
         assertThat(net.downloads).isEmpty()
     }
 
     @Test fun pulledVoiceMemoDownloadsByKey() = runBlocking<Unit> {
         db.noteDao().upsert(NoteEntity(id = "n1", jobId = "j1", day = "2026-10-28", r2Key = "c1/note/n1/memo.m4a", createdAt = 1, updatedAt = 3))
         assertThat(downloads.voiceMemo("n1")).isEqualTo(OnPhone.Ready)
-        val row = db.noteDao().get("n1")!!
+        val row = checkNotNull(db.noteDao().get("n1"))
         assertThat(row.voicePath?.let { File(it).isFile }).isTrue()
         assertThat(row.updatedAt).isEqualTo(3)
         assertThat(downloads.voiceMemo("n1")).isEqualTo(OnPhone.Ready)

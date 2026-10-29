@@ -75,11 +75,11 @@ class CompanyViewModelTest {
         vm.onEvent(CompanyEvent.PunchDistance("250"))
         vm.onEvent(CompanyEvent.PhotoOnPunch(true))
         vm.onEvent(CompanyEvent.Save)
-        val sent = api.lastUpdate!!
+        val sent = checkNotNull(api.lastUpdate)
         assertThat(sent.name).isEqualTo("Kurtz Electric LLC")
-        assertThat(sent.settings!!.overtimeRule).isEqualTo(OvertimeRule.Weekly40)
-        assertThat(sent.settings!!.punchDistanceFt).isEqualTo(250)
-        assertThat(sent.settings!!.photoOnPunch).isTrue()
+        assertThat(checkNotNull(sent.settings).overtimeRule).isEqualTo(OvertimeRule.Weekly40)
+        assertThat(checkNotNull(sent.settings).punchDistanceFt).isEqualTo(250)
+        assertThat(checkNotNull(sent.settings).photoOnPunch).isTrue()
         assertThat(vm.state.value.saved).isTrue()
         assertThat(savedName).isEqualTo("Kurtz Electric LLC")
     }

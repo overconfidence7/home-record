@@ -30,13 +30,13 @@ class ItemCategoryTest {
     }
 
     @Test fun furnaceDefaultsFilterAndServiceReminders() {
-        val furnace = ItemCategory.subtype("furnace")!!
+        val furnace = checkNotNull(ItemCategory.subtype("furnace"))
         assertThat(furnace.consumables.map { it.kind }).containsExactly(ConsumableKind.FILTER)
         assertThat(furnace.reminders.map { it.intervalMonths }).containsExactly(3, 12).inOrder()
     }
 
     @Test fun maintenanceDefaultsMatchSpec() {
-        fun months(id: String) = ItemCategory.subtype(id)!!.reminders.map { it.intervalMonths }
+        fun months(id: String) = checkNotNull(ItemCategory.subtype(id)).reminders.map { it.intervalMonths }
         assertThat(months("water_heater")).containsExactly(12)
         assertThat(months("water_softener")).containsExactly(2)
         assertThat(months("smoke_detector")).containsExactly(12)
@@ -46,7 +46,7 @@ class ItemCategoryTest {
     }
 
     @Test fun lookupAcrossCategories() {
-        assertThat(ItemCategory.subtype("water_main")!!.category).isEqualTo(ItemCategory.SHUTOFFS)
+        assertThat(checkNotNull(ItemCategory.subtype("water_main")).category).isEqualTo(ItemCategory.SHUTOFFS)
         assertThat(ItemCategory.subtype("nope")).isNull()
     }
 }

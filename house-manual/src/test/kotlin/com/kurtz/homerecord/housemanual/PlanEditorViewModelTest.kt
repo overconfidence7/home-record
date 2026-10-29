@@ -82,10 +82,10 @@ class PlanEditorViewModelTest {
     /** Room runs queries on its own threads, so saves land a moment after the event. */
     private suspend fun savedPlan(vm: PlanEditorViewModel, until: (FloorPlan) -> Boolean): FloorPlan = withContext(Dispatchers.Default) {
         withTimeout(10_000) {
-            var plan = repo.loadPlan(vm.state.value.floorId!!)
+            var plan = repo.loadPlan(checkNotNull(vm.state.value.floorId))
             while (!until(plan)) {
                 delay(20)
-                plan = repo.loadPlan(vm.state.value.floorId!!)
+                plan = repo.loadPlan(checkNotNull(vm.state.value.floorId))
             }
             plan
         }
@@ -186,14 +186,14 @@ class PlanEditorViewModelTest {
     @Test fun dragMoveIsOneUndoStepAndSavesOnDragEnd() = test {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
-        val id = vm.state.value.selectedId!!
-        val startX = vm.state.value.selected!!.minX
+        val id = checkNotNull(vm.state.value.selectedId)
+        val startX = checkNotNull(vm.state.value.selected).minX
         vm.onEvent(PlanEditorEvent.DragMove(id, 30, 0))
         vm.onEvent(PlanEditorEvent.DragMove(id, 60, 0))
         vm.onEvent(PlanEditorEvent.DragEnd)
-        assertThat(vm.state.value.selected!!.minX).isEqualTo(startX + 60)
+        assertThat(checkNotNull(vm.state.value.selected).minX).isEqualTo(startX + 60)
         vm.onEvent(PlanEditorEvent.Undo)
-        assertThat(vm.state.value.selected!!.minX).isEqualTo(startX)
+        assertThat(checkNotNull(vm.state.value.selected).minX).isEqualTo(startX)
     }
 
     @Test fun tapAWallThenAddDoorSelectsItAndSaves() = test {
@@ -203,7 +203,7 @@ class PlanEditorViewModelTest {
         assertThat(vm.state.value.selectedWall).isEqualTo(0)
         vm.onEvent(PlanEditorEvent.AddOpening(OpeningKind.DOOR))
         val s = vm.state.value
-        assertThat(s.selected!!.openings).hasSize(1)
+        assertThat(checkNotNull(s.selected).openings).hasSize(1)
         assertThat(s.selectedOpening?.kind).isEqualTo(OpeningKind.DOOR)
         assertThat(s.selectedWall).isNull()
         assertThat(savedPlan(vm) { it.placed.singleOrNull()?.openings?.size == 1 }.placed.single().openings).hasSize(1)
@@ -212,34 +212,34 @@ class PlanEditorViewModelTest {
     @Test fun dragOpeningWidthDeleteAndUndo() = test {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
-        val room = vm.state.value.selected!!
+        val room = checkNotNull(vm.state.value.selected)
         vm.onEvent(PlanEditorEvent.SelectWall(0, Pt(room.minX + 72, room.minY)))
         vm.onEvent(PlanEditorEvent.AddOpening(OpeningKind.WINDOW))
-        val id = vm.state.value.selectedOpeningId!!
+        val id = checkNotNull(vm.state.value.selectedOpeningId)
         vm.onEvent(PlanEditorEvent.DragOpening(id, Pt(room.minX + 120, room.minY)))
         vm.onEvent(PlanEditorEvent.DragEnd)
-        assertThat(vm.state.value.selectedOpening!!.offsetIn).isEqualTo(102)
+        assertThat(checkNotNull(vm.state.value.selectedOpening).offsetIn).isEqualTo(102)
         vm.onEvent(PlanEditorEvent.SetOpeningWidth(48))
-        assertThat(vm.state.value.selectedOpening!!.widthIn).isEqualTo(48)
+        assertThat(checkNotNull(vm.state.value.selectedOpening).widthIn).isEqualTo(48)
         vm.onEvent(PlanEditorEvent.DeleteOpening)
-        assertThat(vm.state.value.selected!!.openings).isEmpty()
+        assertThat(checkNotNull(vm.state.value.selected).openings).isEmpty()
         vm.onEvent(PlanEditorEvent.Undo)
-        assertThat(vm.state.value.selected!!.openings).hasSize(1)
+        assertThat(checkNotNull(vm.state.value.selected).openings).hasSize(1)
     }
 
     @Test fun stairsLinkToTheFloorAboveAndCanBeRelinked() = test {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
         vm.onEvent(PlanEditorEvent.AddStair)
-        val stair = vm.state.value.selected!!.stairs.single()
+        val stair = checkNotNull(vm.state.value.selected).stairs.single()
         val floors = vm.state.value.floors
         val here = floors.indexOfFirst { it.id == vm.state.value.floorId }
         assertThat(stair.toFloorId).isEqualTo(floors[here + 1].id)
         vm.onEvent(PlanEditorEvent.LinkStair(stair.id, floors[here - 1].id))
-        assertThat(vm.state.value.selected!!.stairs.single().toFloorId).isEqualTo(floors[here - 1].id)
+        assertThat(checkNotNull(vm.state.value.selected).stairs.single().toFloorId).isEqualTo(floors[here - 1].id)
         assertThat(savedPlan(vm) { it.placed.singleOrNull()?.stairs?.singleOrNull()?.toFloorId == floors[here - 1].id }.placed).hasSize(1)
         vm.onEvent(PlanEditorEvent.DeleteStair(stair.id))
-        assertThat(vm.state.value.selected!!.stairs).isEmpty()
+        assertThat(checkNotNull(vm.state.value.selected).stairs).isEmpty()
     }
 
     @Test fun deleteRemovesRoomAndClearsSelection() = test {
@@ -270,7 +270,7 @@ class PlanEditorViewModelTest {
         val first = vm()
         first.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
         savedPlan(first) { it.placed.size == 1 }
-        val homeId = repo.observeHome().first()!!.id
+        val homeId = checkNotNull(repo.observeHome().first()).id
         val seen = java.util.Collections.synchronizedList(mutableListOf<Pair<Boolean, Int>>())
         val second = PlanEditorViewModel(repo, homeId, SavedStateHandle(), newId = { "room-${ids++}" }).also { made += it }
         val recorder = launch(Dispatchers.Unconfined) { second.state.collect { seen += it.loading to it.rooms.size } }
@@ -325,15 +325,15 @@ class PlanEditorViewModelTest {
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
         vm.onEvent(PlanEditorEvent.SetEditShape(true))
         assertThat(vm.state.value.editShape).isTrue()
-        val east = vm.state.value.selected!!.let { Pt(it.maxX, (it.minY + it.maxY) / 2) }
+        val east = checkNotNull(vm.state.value.selected).let { Pt(it.maxX, (it.minY + it.maxY) / 2) }
         vm.onEvent(PlanEditorEvent.AddCorner(1, east))
-        assertThat(vm.state.value.selected!!.points).hasSize(5)
+        assertThat(checkNotNull(vm.state.value.selected).points).hasSize(5)
         vm.onEvent(PlanEditorEvent.DragCorner(2, -72, 0))
         vm.onEvent(PlanEditorEvent.DragEnd)
-        assertThat(vm.state.value.selected!!.points[2].x).isEqualTo(east.x - 72)
+        assertThat(checkNotNull(vm.state.value.selected).points[2].x).isEqualTo(east.x - 72)
         savedPlan(vm) { it.placed.singleOrNull()?.points?.size == 5 }
         vm.onEvent(PlanEditorEvent.DeleteCorner(2))
-        assertThat(vm.state.value.selected!!.points).hasSize(4)
+        assertThat(checkNotNull(vm.state.value.selected).points).hasSize(4)
         vm.onEvent(PlanEditorEvent.Select(null))
         assertThat(vm.state.value.editShape).isFalse()
     }

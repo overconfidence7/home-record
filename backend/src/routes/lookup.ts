@@ -24,21 +24,34 @@ async function dailyLimit(db: D1Database, userId: string): Promise<number> {
   return pro ? PRO_DAILY_LIMIT : FREE_DAILY_LIMIT;
 }
 
-/** Counts every request against the account's UTC-day bucket, cached or not, so the cap is predictable. */
+/** Counts every request against the account's UTC-day bucket, cached or not, so the cap is predictable. One atomic upsert:
+ * the row is bumped only while under the limit, so a burst cannot overshoot it (cr:quota-race). */
 async function takeQuota(env: AppEnv["Bindings"], userId: string): Promise<boolean> {
-  const day = new Date().toISOString().slice(0, 10);
-  const key = `quota:lookup:${userId}:${day}`;
-  const used = Number((await env.CACHE.get(key)) ?? "0");
-  if (used >= (await dailyLimit(env.DB, userId))) return false;
-  await env.CACHE.put(key, String(used + 1), { expirationTtl: 2 * 86400 });
-  return true;
+  const limit = await dailyLimit(env.DB, userId);
+  const row = await env.DB
+    .prepare(
+      "INSERT INTO lookup_quota (user_id, day, used) VALUES (?, ?, 1) " +
+        "ON CONFLICT (user_id, day) DO UPDATE SET used = used + 1 WHERE used < ? RETURNING used",
+    )
+    .bind(userId, utcDay(), limit)
+    .first<{ used: number }>();
+  return row !== null;
 }
 
 /** Gives back the request taken by [takeQuota] when the lookup could not answer (502/503), so failures cost nothing. */
 async function refundQuota(env: AppEnv["Bindings"], userId: string): Promise<void> {
-  const key = `quota:lookup:${userId}:${new Date().toISOString().slice(0, 10)}`;
-  const used = Number((await env.CACHE.get(key)) ?? "0");
-  if (used > 0) await env.CACHE.put(key, String(used - 1), { expirationTtl: 2 * 86400 });
+  await env.DB.prepare("UPDATE lookup_quota SET used = used - 1 WHERE user_id = ? AND day = ? AND used > 0")
+    .bind(userId, utcDay())
+    .run();
+}
+
+function utcDay(now = Date.now()): string {
+  return new Date(now).toISOString().slice(0, 10);
+}
+
+/** Daily cron: quota rows of days before yesterday are no longer read. */
+export async function pruneLookupQuota(db: D1Database, now = Date.now()): Promise<void> {
+  await db.prepare("DELETE FROM lookup_quota WHERE day < ?").bind(utcDay(now - 86_400_000)).run();
 }
 
 /** AC-B10: one cost row per billed upstream call, whether or not its answer parsed. */

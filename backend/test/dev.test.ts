@@ -32,10 +32,11 @@ describe("AC-B2 dev routes", () => {
       "INSERT INTO lookup_log (id, user_id, kind, cache_key, input_tokens, output_tokens, searches, created_at) VALUES ('l1', 'u', 'warranty', '', 1, 1, 0, 1)",
     ).run();
     await env.CACHE.put("quota:lookup:u:2026-10-27", "3");
+    await env.DB.prepare("INSERT INTO lookup_quota (user_id, day, used) VALUES ('u', '2026-10-27', 3)").run();
     await env.CACHE.put("warranty:keep", "{}");
     await env.MEDIA.put("co/photo/p/a.jpg", "x");
     expect((await post("/dev/reset", {})).status).toBe(200);
-    for (const t of ["media_objects", "lookup_log"]) {
+    for (const t of ["media_objects", "lookup_log", "lookup_quota"]) {
       expect((await env.DB.prepare(`SELECT COUNT(*) AS n FROM ${t}`).first<{ n: number }>())?.n).toBe(0);
     }
     expect(await env.CACHE.get("quota:lookup:u:2026-10-27")).toBeNull();

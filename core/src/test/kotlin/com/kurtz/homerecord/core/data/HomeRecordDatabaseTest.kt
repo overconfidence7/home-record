@@ -38,6 +38,11 @@ class HomeRecordDatabaseTest {
         db.homeDao().softDelete("h1", at = 99)
         assertThat(db.homeDao().get("h1")).isNull()
         assertThat(db.homeDao().observeAll().first()).isEmpty()
+        db.openHelper.readableDatabase.query("SELECT deletedAt, updatedAt FROM home WHERE id = 'h1'").use {
+            assertThat(it.moveToFirst()).isTrue()
+            assertThat(it.getLong(0)).isEqualTo(99)
+            assertThat(it.getLong(1)).isEqualTo(99)
+        }
     }
 
     @Test fun floorsListInOrder() = runTest {

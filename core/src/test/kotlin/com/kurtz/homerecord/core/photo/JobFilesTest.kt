@@ -57,7 +57,7 @@ class JobFilesTest {
         assertThat(files.rename(f.id, " Plan v2.pdf ")).isTrue()
         assertThat(files.rename(f.id, " ")).isFalse()
         assertThat(files.move(f.id, "/Permits/")).isTrue()
-        val row = db.jobFileDao().get(f.id)!!
+        val row = checkNotNull(db.jobFileDao().get(f.id))
         assertThat(row.name).isEqualTo("Plan v2.pdf")
         assertThat(row.folder).isEqualTo("Permits")
         assertThat(changes).hasSize(2)
@@ -73,9 +73,9 @@ class JobFilesTest {
     @Test fun offlineOffClearsLocalPathAndDeleteHidesFile() = runBlocking<Unit> {
         val f = add("Plan.pdf")
         files.setOffline(f.id, false)
-        assertThat(db.jobFileDao().get(f.id)!!.path).isNull()
+        assertThat(checkNotNull(db.jobFileDao().get(f.id)).path).isNull()
         files.setOffline(f.id, true, "/m/new.pdf")
-        assertThat(db.jobFileDao().get(f.id)!!.path).isEqualTo("/m/new.pdf")
+        assertThat(checkNotNull(db.jobFileDao().get(f.id)).path).isEqualTo("/m/new.pdf")
         // cr:sync-local-columns: where the bytes sit and Available offline are this phone's own, never queued for sync
         assertThat(changes).containsExactly(f.id)
         assertThat(files.delete(f.id)).isTrue()

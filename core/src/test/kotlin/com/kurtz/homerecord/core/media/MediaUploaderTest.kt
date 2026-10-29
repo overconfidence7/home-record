@@ -105,7 +105,7 @@ class MediaUploaderTest {
         // Not due yet: nothing happens.
         assertThat(uploader.runPending().uploaded).isEqualTo(0)
         assertThat(net.puts).hasSize(1)
-        clock = first.retryAt!!
+        clock = checkNotNull(first.retryAt)
         assertThat(uploader.runPending().uploaded).isEqualTo(1)
         // The signed URL from the first try is reused, not asked for again.
         assertThat(net.presigns).isEqualTo(1)
@@ -114,7 +114,7 @@ class MediaUploaderTest {
 
     @Test fun queueSurvivesProcessDeathMidUpload() = runBlocking<Unit> {
         val id = enqueue()
-        db.mediaUploadDao().save(db.mediaUploadDao().get(id)!!.copy(state = "uploading"))
+        db.mediaUploadDao().save(checkNotNull(db.mediaUploadDao().get(id)).copy(state = "uploading"))
         // New process: a fresh uploader over the same database.
         val restarted = MediaUploader(db.mediaUploadDao(), net, { clock })
         restarted.recover()
@@ -217,9 +217,9 @@ class MediaUploaderTest {
             get() = cap
             set(v) { cap = v } }
         val cache = MediaCache(tmp.newFolder("cache"), settings, net)
-        val a = cache.open("c1/p/a.jpg") { "https://r2/get/a" }!!
+        val a = checkNotNull(cache.open("c1/p/a.jpg") { "https://r2/get/a" })
         a.setLastModified(1_000)
-        val b = cache.open("c1/p/b.jpg") { "https://r2/get/b" }!!
+        val b = checkNotNull(cache.open("c1/p/b.jpg") { "https://r2/get/b" })
         b.setLastModified(2_000)
         assertThat(cache.open("c1/p/b.jpg") { error("cached") }).isEqualTo(b)
         assertThat(net.downloads).hasSize(2)

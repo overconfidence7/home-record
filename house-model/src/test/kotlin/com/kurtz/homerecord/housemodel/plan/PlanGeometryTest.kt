@@ -223,7 +223,7 @@ class PlanModelTest {
 
     @Test fun moveAndRemove() {
         val m = PlanModel().add(rect("a", 0, 0, 10, 10)).add(rect("b", 20, 0, 10, 10))
-        assertThat(m.update(m.room("a")!!.moved(5, 5)).room("a")!!.minX).isEqualTo(5)
+        assertThat(checkNotNull(m.update(checkNotNull(m.room("a")).moved(5, 5)).room("a")).minX).isEqualTo(5)
         assertThat(m.remove("a").rooms.map { it.id }).containsExactly("b")
     }
 }

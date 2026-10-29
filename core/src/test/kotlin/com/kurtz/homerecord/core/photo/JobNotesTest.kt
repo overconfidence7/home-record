@@ -39,8 +39,8 @@ class JobNotesTest {
     @After fun tearDown() = db.close()
 
     @Test fun typedNoteAttachesToJobAndDay() = runBlocking<Unit> {
-        val id = notes.addText("j1", "  Homeowner wants the island moved  ")!!
-        val row = db.noteDao().get(id)!!
+        val id = checkNotNull(notes.addText("j1", "  Homeowner wants the island moved  "))
+        val row = checkNotNull(db.noteDao().get(id))
         assertThat(row.jobId).isEqualTo("j1")
         assertThat(row.day).isEqualTo("2025-10-09")
         assertThat(row.text).isEqualTo("Homeowner wants the island moved")
@@ -54,8 +54,8 @@ class JobNotesTest {
     }
 
     @Test fun voiceMemoIsTranscribedAndQueuedForUpload() = runBlocking<Unit> {
-        val id = notes.addVoice("j1", "/media/memo.m4a")!!
-        val row = db.noteDao().get(id)!!
+        val id = checkNotNull(notes.addVoice("j1", "/media/memo.m4a"))
+        val row = checkNotNull(db.noteDao().get(id))
         assertThat(row.voicePath).isEqualTo("/media/memo.m4a")
         assertThat(row.transcript).isEqualTo("Rough-in done in the kitchen")
         assertThat(uploads).containsExactly("note/$id/memo.m4a")
@@ -63,25 +63,25 @@ class JobNotesTest {
 
     @Test fun voiceMemoKeptWhenDeviceCannotTranscribe() = runBlocking<Unit> {
         heard = null
-        val id = notes.addVoice("j1", "/media/memo2.m4a")!!
-        val row = db.noteDao().get(id)!!
+        val id = checkNotNull(notes.addVoice("j1", "/media/memo2.m4a"))
+        val row = checkNotNull(db.noteDao().get(id))
         assertThat(row.voicePath).isEqualTo("/media/memo2.m4a")
         assertThat(row.transcript).isNull()
     }
 
     @Test fun transcriptCanBeEdited() = runBlocking<Unit> {
-        val voice = notes.addVoice("j1", "/media/memo3.m4a")!!
+        val voice = checkNotNull(notes.addVoice("j1", "/media/memo3.m4a"))
         notes.setTranscript(voice, " Rough-in done in the bath ")
-        assertThat(db.noteDao().get(voice)!!.transcript).isEqualTo("Rough-in done in the bath")
-        val typed = notes.addText("j1", "old")!!
+        assertThat(checkNotNull(db.noteDao().get(voice)).transcript).isEqualTo("Rough-in done in the bath")
+        val typed = checkNotNull(notes.addText("j1", "old"))
         notes.setTranscript(typed, "new")
-        assertThat(db.noteDao().get(typed)!!.text).isEqualTo("new")
+        assertThat(checkNotNull(db.noteDao().get(typed)).text).isEqualTo("new")
     }
 
     @Test fun missingJobSavesNothingAndDeleteHidesNote() = runBlocking<Unit> {
         assertThat(notes.addText("gone", "x")).isNull()
         assertThat(notes.addVoice("gone", "/media/x.m4a")).isNull()
-        val id = notes.addText("j1", "bye")!!
+        val id = checkNotNull(notes.addText("j1", "bye"))
         notes.delete(id)
         assertThat(db.noteDao().listFor("j1")).isEmpty()
         assertThat(JobNotes.MAX_VOICE_MS).isEqualTo(180_000L)

@@ -60,7 +60,7 @@ class HoursReportTest {
 
     // AC-F46
     @Test fun totalsMatchTheTimesheetForTheSameWeek() {
-        val shifts = week42() + week42("b").map { it.copy(segments = listOf(JobSegment("j2", it.startAt, it.endAt!!))) }
+        val shifts = week42() + week42("b").map { it.copy(segments = listOf(JobSegment("j2", it.startAt, checkNotNull(it.endAt)))) }
         val r = HoursReport.build(shifts, listOf(MONDAY), names, jobs, weekly, UTC, now)
         val sheet = TimesheetMath.week(shifts.filter { it.memberId == "a" }, weekly, UTC, now)
         assertEquals(sheet.workedMillis, r.byPerson.first { it.id == "a" }.workedMillis)

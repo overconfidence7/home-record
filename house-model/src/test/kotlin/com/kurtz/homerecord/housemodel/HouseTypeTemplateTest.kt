@@ -56,13 +56,13 @@ class HouseTypeTemplateTest {
 
     @Test fun garageGoesOnMainFloor() {
         val t = HouseTypeTemplate.forHome(HouseType.TWO_STORY, Foundation.BASEMENT, true)
-        assertThat(t.floors[t.garageFloorIndex!!].name).isEqualTo("Main")
+        assertThat(t.floors[checkNotNull(t.garageFloorIndex)].name).isEqualTo("Main")
         assertThat(HouseTypeTemplate.forHome(HouseType.TWO_STORY, Foundation.BASEMENT, false).garageFloorIndex).isNull()
     }
 
     @Test fun garageFallsBackToLowerWhenThereIsNoMain() {
         val t = HouseTypeTemplate.forHome(HouseType.RAISED_RANCH, Foundation.SLAB, true)
-        assertThat(t.floors[t.garageFloorIndex!!].name).isEqualTo("Lower")
+        assertThat(t.floors[checkNotNull(t.garageFloorIndex)].name).isEqualTo("Lower")
     }
 
     @Test fun ceilingsDefaultToEightFeetAndFloorsRiseInOrder() {

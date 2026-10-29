@@ -58,7 +58,8 @@ describe("AC-B11 POST /lookup/dataplate", () => {
     const log = await env.DB.prepare("SELECT kind, input_tokens AS i FROM lookup_log WHERE user_id = 'dp3'").all();
     expect(log.results).toEqual([{ kind: "dataplate", i: 700 }]);
     const day = new Date().toISOString().slice(0, 10);
-    expect(await env.CACHE.get(`quota:lookup:dp3:${day}`)).toBe("0");
+    const quota = await env.DB.prepare("SELECT used FROM lookup_quota WHERE user_id = 'dp3' AND day = ?").bind(day).first<{ used: number }>();
+    expect(quota?.used).toBe(0);
   });
   it("parses fenced JSON and drops bad dates", () => {
     expect(parseDataPlateJson('```{"make":"GE","model":null,"serial":"S1","manufacturedOn":"June 2020"}```')).toEqual({

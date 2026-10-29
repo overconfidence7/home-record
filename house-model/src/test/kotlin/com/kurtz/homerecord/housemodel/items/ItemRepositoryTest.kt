@@ -49,18 +49,18 @@ class ItemRepositoryTest {
 
     @AcceptanceCriterion("AC-C30")
     @Test fun saveTrimsAndRoundTripsThroughDraft() = runTest {
-        val id = repo.save("h1", furnace())!!
-        val row = repo.get(id)!!
+        val id = checkNotNull(repo.save("h1", furnace()))
+        val row = checkNotNull(repo.get(id))
         assertThat(row.name).isEqualTo("Basement furnace")
         assertThat(row.model).isNull()
         assertThat(row.category).isEqualTo("HEATING_COOLING")
         assertThat(row.priceCents).isEqualTo(129_950L)
-        assertThat(repo.draftFor(id)!!.price).isEqualTo("1299.50")
+        assertThat(checkNotNull(repo.draftFor(id)).price).isEqualTo("1299.50")
     }
 
     @AcceptanceCriterion("AC-C35")
     @Test fun newItemSeedsConsumablesAndRemindersFromSubtype() = runTest {
-        val id = repo.save("h1", furnace())!!
+        val id = checkNotNull(repo.save("h1", furnace()))
         assertThat(db.consumableDao().listFor(id).map { it.spec }).containsExactly("Furnace filter")
         val tasks = db.maintenanceTaskDao().listFor("h1")
         val task = tasks.single { it.title == "HVAC service" }
@@ -71,10 +71,10 @@ class ItemRepositoryTest {
 
     @AcceptanceCriterion("AC-C30")
     @Test fun editingKeepsDefaultsAndCreatedAt() = runTest {
-        val id = repo.save("h1", furnace())!!
-        repo.save("h1", repo.draftFor(id)!!.copy(name = "Furnace"))
+        val id = checkNotNull(repo.save("h1", furnace()))
+        repo.save("h1", checkNotNull(repo.draftFor(id)).copy(name = "Furnace"))
         assertThat(db.consumableDao().listFor(id)).hasSize(1)
-        assertThat(repo.get(id)!!.name).isEqualTo("Furnace")
+        assertThat(checkNotNull(repo.get(id)).name).isEqualTo("Furnace")
     }
 
     @Test fun invalidDraftSavesNothing() = runTest {
@@ -84,11 +84,11 @@ class ItemRepositoryTest {
 
     @AcceptanceCriterion("AC-H7")
     @Test fun detailCombinesItemRoomWarrantyAndPhotos() = runTest {
-        val id = repo.save("h1", furnace().copy(manufacturedOn = "2016-04-18"))!!
+        val id = checkNotNull(repo.save("h1", furnace().copy(manufacturedOn = "2016-04-18")))
         db.warrantyDao().upsert(
             com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, endsOn = "2026-12-01", createdAt = 1, updatedAt = 1),
         )
-        val d = repo.observeDetail(id, "h1", mapOf(PseudoRooms.WHOLE_HOUSE to "Whole house")).first()!!
+        val d = checkNotNull(repo.observeDetail(id, "h1", mapOf(PseudoRooms.WHOLE_HOUSE to "Whole house")).first())
         assertThat(d.roomName).isEqualTo("Whole house")
         assertThat(d.categoryLabel).isEqualTo("Heating and cooling")
         assertThat(d.subtypeLabel).isEqualTo("Furnace")
@@ -99,32 +99,32 @@ class ItemRepositoryTest {
 
     @AcceptanceCriterion("AC-H7")
     @Test fun duplicateCopiesDetailsWithoutPhotos() = runTest {
-        val id = repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM))))!!
-        val copy = repo.duplicate(id, "(copy)")!!
+        val id = checkNotNull(repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM)))))
+        val copy = checkNotNull(repo.duplicate(id, "(copy)"))
         assertThat(copy).isNotEqualTo(id)
-        assertThat(repo.get(copy)!!.name).isEqualTo("Basement furnace (copy)")
-        assertThat(repo.get(copy)!!.priceCents).isEqualTo(129_950L)
+        assertThat(checkNotNull(repo.get(copy)).name).isEqualTo("Basement furnace (copy)")
+        assertThat(checkNotNull(repo.get(copy)).priceCents).isEqualTo(129_950L)
         assertThat(db.photoDao().listForItem(copy)).isEmpty()
         assertThat(db.photoDao().listForItem(id)).hasSize(1)
     }
 
     @AcceptanceCriterion("AC-C33")
     @Test fun registeredToggleUpdatesWarrantyAndQueuesSync() = runTest {
-        val id = repo.save("h1", furnace())!!
+        val id = checkNotNull(repo.save("h1", furnace()))
         repo.setRegistered(id, true) // no warranty yet: nothing to do
         assertThat(changes).doesNotContain("warranty/w1")
         db.warrantyDao().upsert(com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, createdAt = 1, updatedAt = 1))
         repo.setRegistered(id, true)
-        assertThat(db.warrantyDao().get("w1")!!.registered).isTrue()
+        assertThat(checkNotNull(db.warrantyDao().get("w1")).registered).isTrue()
         assertThat(changes).contains("warranty/w1")
     }
 
     // cr:item-delete-cascade: the delete dialog says "Its photos, reminders and warranty go with it".
     @AcceptanceCriterion("AC-H2")
     @Test fun deleteTakesWarrantyRemindersConsumablesAndPhotosWithIt() = runTest {
-        val id = repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM))))!!
-        val other = repo.save("h1", furnace().copy(name = "Water heater"))!!
-        db.itemDao().upsert(repo.get(other)!!.copy(shutoffItemId = id))
+        val id = checkNotNull(repo.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/a.jpg", PhotoKind.ITEM)))))
+        val other = checkNotNull(repo.save("h1", furnace().copy(name = "Water heater")))
+        db.itemDao().upsert(checkNotNull(repo.get(other)).copy(shutoffItemId = id))
         db.warrantyDao().upsert(com.kurtz.homerecord.core.data.WarrantyEntity(id = "w1", itemId = id, endsOn = "2026-11-01", createdAt = 1, updatedAt = 1))
         db.serviceRecordDao().upsert(com.kurtz.homerecord.core.data.ServiceRecordEntity(id = "s1", itemId = id, date = "2026-01-04", description = "Tune-up", createdAt = 1, updatedAt = 1))
         db.documentDao().upsert(com.kurtz.homerecord.core.data.DocumentEntity(id = "d1", homeId = "h1", itemId = id, name = "Manual", path = "/m/d.pdf", mime = "application/pdf", createdAt = 1, updatedAt = 1))
@@ -142,8 +142,8 @@ class ItemRepositoryTest {
         assertThat(db.serviceRecordDao().listFor(id)).isEmpty()
         assertThat(db.maintenanceTaskDao().listForItem(id)).isEmpty()
         assertThat(db.photoDao().listForItem(id)).isEmpty()
-        assertThat(db.documentDao().get("d1")!!.itemId).isNull()
-        assertThat(repo.get(other)!!.shutoffItemId).isNull()
+        assertThat(checkNotNull(db.documentDao().get("d1")).itemId).isNull()
+        assertThat(checkNotNull(repo.get(other)).shutoffItemId).isNull()
         assertThat(changes).containsAtLeast("item/$id", "warranty/w1", "service_record/s1", "photo/$photoId", "consumable/$consumableId", "document/d1", "item/$other")
         taskIds.forEach { assertThat(changes).contains("maintenance_task/$it") }
         // Needs attention no longer lists the deleted furnace's warranty or reminders.

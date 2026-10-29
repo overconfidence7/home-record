@@ -226,6 +226,13 @@ class ItemEditViewModel(
         _state.update { it.copy(draft = draft, dirty = draft != original) }
     }
 
+    /** The form closed for good (not rotation or process death): files of photos that were never saved go too (cr:orphan-media). */
+    override fun onCleared() {
+        val current = _state.value
+        if (current.saving || current.savedItemId != null) return
+        current.draft.photos.filter { it.id == null }.forEach { media.discard(it.path) }
+    }
+
     private fun save() {
         val current = _state.value
         if (current.saving) return

@@ -3,7 +3,7 @@ import type { AppEnv } from "./env";
 import { auth } from "./routes/auth";
 import { dev } from "./routes/dev";
 import { company } from "./routes/company";
-import { lookup } from "./routes/lookup";
+import { lookup, pruneLookupQuota } from "./routes/lookup";
 import { media, removeOrphanedMedia } from "./routes/media";
 import { pruneLimits } from "./auth/rateLimit";
 import { me } from "./routes/me";
@@ -35,5 +35,6 @@ export default Object.assign(app, {
     ctx.waitUntil(removeOrphanedMedia(env));
     ctx.waitUntil(pruneLimits(env.DB));
     ctx.waitUntil(pruneSync(env.DB));
+    ctx.waitUntil(pruneLookupQuota(env.DB));
   },
 });

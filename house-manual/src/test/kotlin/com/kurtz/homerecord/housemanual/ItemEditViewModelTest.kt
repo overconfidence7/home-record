@@ -19,7 +19,11 @@ import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.ui.ItemEditEvent
 import com.kurtz.homerecord.housemodel.ui.ItemEditViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -95,7 +99,7 @@ class ItemEditViewModelTest {
         vm.onEvent(ItemEditEvent.Save)
         val id = vm.state.first { it.savedItemId != null }.savedItemId
         assertThat(id).isNotNull()
-        assertThat(items.get(id!!)?.subtype).isEqualTo("furnace")
+        assertThat(items.get(checkNotNull(id))?.subtype).isEqualTo("furnace")
     }
 
     @AcceptanceCriterion("AC-H2")
@@ -132,7 +136,7 @@ class ItemEditViewModelTest {
     @AcceptanceCriterion("AC-C30")
     @Test fun editingAnItemLoadsItsDraftAndMissingItemsAreReported() = runTest {
         home()
-        val id = items.save(homeId, com.kurtz.homerecord.housemodel.items.ItemDraft(subtypeId = "range", roomId = PseudoRooms.EXTERIOR, name = "Range"))!!
+        val id = checkNotNull(items.save(homeId, com.kurtz.homerecord.housemodel.items.ItemDraft(subtypeId = "range", roomId = PseudoRooms.EXTERIOR, name = "Range")))
         val vm = made(items, homes, homeId, id, SavedStateHandle())
         vm.state.first { !it.loading }
         assertThat(vm.state.value.draft.name).isEqualTo("Range")
@@ -148,10 +152,10 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         media.files += path
         vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
-        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        val scan = checkNotNull(vm.state.first { it.plateScan != null }.plateScan)
         assertThat(scan.make).isEqualTo("Rheem")
         assertThat(scan.model).isEqualTo("XG50T06EC36U1")
         assertThat(scan.lines).contains("50 GAL")
@@ -193,10 +197,10 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         media.files += path
         vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
-        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        val scan = checkNotNull(vm.state.first { it.plateScan != null }.plateScan)
         assertThat(scan.make).isEqualTo("Rheem")
         assertThat(scan.model).isEqualTo("XG50T06")
         assertThat(scan.target).isEqualTo(com.kurtz.homerecord.core.model.PlateField.SERIAL)
@@ -209,10 +213,10 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         media.files += path
         vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
-        val scan = vm.state.first { it.plateScan != null }.plateScan!!
+        val scan = checkNotNull(vm.state.first { it.plateScan != null }.plateScan)
         assertThat(scan.model).isEmpty()
         assertThat(scan.lines).containsExactly("50 GAL")
     }
@@ -224,7 +228,7 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, SavedStateHandle())
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         media.files += path
         vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, path))
         assertThat(vm.state.value.plateScan).isNull()
@@ -241,12 +245,12 @@ class ItemEditViewModelTest {
         vm.onEvent(ItemEditEvent.PickRoom(PseudoRooms.WHOLE_HOUSE))
 
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val launch = vm.state.value.photoLaunch!!
+        val launch = checkNotNull(vm.state.value.photoLaunch)
         assertThat(launch.target).isNotNull()
         vm.onEvent(ItemEditEvent.PhotoLaunchHandled)
         assertThat(vm.state.value.photoLaunch).isNull()
-        media.files += launch.target!!.path
-        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, launch.target!!.path))
+        media.files += checkNotNull(launch.target).path
+        vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.DATA_PLATE, checkNotNull(launch.target).path))
         // A cancelled camera leaves no file, so no photo is added.
         vm.onEvent(ItemEditEvent.PhotoCaptured(PhotoKind.ITEM, "/media/none.jpg"))
         vm.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/1"))
@@ -259,7 +263,7 @@ class ItemEditViewModelTest {
         assertThat(revived.state.value.draft.photos).hasSize(2)
 
         vm.onEvent(ItemEditEvent.Save)
-        val id = vm.state.first { it.savedItemId != null }.savedItemId!!
+        val id = checkNotNull(vm.state.first { it.savedItemId != null }.savedItemId)
         assertThat(db.photoDao().listForItem(id).map { PhotoKind.fromTagsJson(it.tagsJson) })
             .containsExactly(PhotoKind.DATA_PLATE, PhotoKind.ITEM)
 
@@ -285,6 +289,41 @@ class ItemEditViewModelTest {
         assertThat(vm.state.value.draft.photos).isEmpty()
     }
 
+    @AcceptanceCriterion("AC-C30")
+    @Test
+    fun closingWithoutSavingDeletesOnlyTheUnsavedPhotoFiles() = runTest {
+        home()
+        val store = ViewModelStore()
+        val vm = provide(store, null)
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/1"))
+        val draftPhoto = vm.state.value.draft.photos.single().path
+        store.clear()
+        assertThat(media.files).doesNotContain(draftPhoto)
+
+        // A saved item keeps its photos when its form closes, and an edit that adds one and walks away loses only the new file.
+        val saved = provide(ViewModelStore(), null)
+        saved.state.first { !it.loading }
+        saved.onEvent(ItemEditEvent.PickSubtype("furnace"))
+        saved.onEvent(ItemEditEvent.PickRoom(PseudoRooms.WHOLE_HOUSE))
+        saved.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/2"))
+        val kept = saved.state.value.draft.photos.single().path
+        saved.onEvent(ItemEditEvent.Save)
+        val id = checkNotNull(saved.state.first { it.savedItemId != null }.savedItemId)
+
+        val editStore = ViewModelStore()
+        val edit = provide(editStore, id)
+        edit.state.first { !it.loading }
+        edit.onEvent(ItemEditEvent.PhotoPicked(PhotoKind.ITEM, "content://picked/3"))
+        val added = edit.state.value.draft.photos.last().path
+        editStore.clear()
+        assertThat(media.files).contains(kept)
+        assertThat(media.files).doesNotContain(added)
+    }
+
+    private fun provide(store: ViewModelStore, itemId: String?): ItemEditViewModel =
+        ViewModelProvider.create(store, viewModelFactory { initializer { made(items, homes, homeId, itemId, SavedStateHandle()) } })[ItemEditViewModel::class]
+
     // AC-C31: a data plate shot whose result lands after process death is still filed as a plate and read (cr:photo-pending-remember).
     @AcceptanceCriterion("AC-C31")
     @Test fun cameraResultAfterProcessDeathKeepsThePlateKindAndScans() = runTest {
@@ -293,7 +332,7 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, handle)
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.DATA_PLATE))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         vm.onEvent(ItemEditEvent.PhotoLaunchHandled)
         media.files += path
 
@@ -301,7 +340,7 @@ class ItemEditViewModelTest {
         revived.state.first { !it.loading }
         revived.onEvent(ItemEditEvent.CameraResult(ok = true))
         assertThat(revived.state.value.draft.photos.map { it.kind to it.path }).containsExactly(PhotoKind.DATA_PLATE to path)
-        assertThat(revived.state.first { it.plateScan != null }.plateScan!!.model).isEqualTo("XG50T06EC36U1")
+        assertThat(checkNotNull(revived.state.first { it.plateScan != null }.plateScan).model).isEqualTo("XG50T06EC36U1")
         // The request is answered once; a stray second result adds nothing.
         revived.onEvent(ItemEditEvent.CameraResult(ok = true))
         assertThat(revived.state.value.draft.photos).hasSize(1)
@@ -314,7 +353,7 @@ class ItemEditViewModelTest {
         val vm = made(items, homes, homeId, null, handle)
         vm.state.first { !it.loading }
         vm.onEvent(ItemEditEvent.TakePhoto(PhotoKind.ITEM))
-        val path = vm.state.value.photoLaunch!!.target!!.path
+        val path = checkNotNull(checkNotNull(vm.state.value.photoLaunch).target).path
         media.files += path
         vm.onEvent(ItemEditEvent.CameraResult(ok = false))
         assertThat(media.files).doesNotContain(path)

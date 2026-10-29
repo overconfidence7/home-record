@@ -85,7 +85,7 @@ class JobFileTransfersTest {
         assertThat(transfers.ensureOnPhone(id)).isEqualTo(OnPhone.Ready)
         assertThat(net.downloads).containsExactly("https://r2/get/Plans.pdf")
         val path = db.jobFileDao().get(id)?.path
-        assertThat(File(path!!).readText()).isEqualTo("pdf-bytes")
+        assertThat(File(checkNotNull(path)).readText()).isEqualTo("pdf-bytes")
     }
 
     @Test fun offlineWithoutNetworkAsksToDownloadLater() = runBlocking<Unit> {
@@ -111,12 +111,12 @@ class JobFileTransfersTest {
     @Test fun availableOfflineKeepsTheFileThroughFreeUp() = runBlocking<Unit> {
         val id = remote()
         assertThat(transfers.setAvailableOffline(id, true)).isEqualTo(OnPhone.Ready)
-        val row = db.jobFileDao().get(id)!!
+        val row = checkNotNull(db.jobFileDao().get(id))
         assertThat(row.offline).isTrue()
-        assertThat(File(row.path!!).parentFile).isEqualTo(offlineDir)
+        assertThat(File(checkNotNull(row.path)).parentFile).isEqualTo(offlineDir)
         assertThat(transfers.storage().offlineBytes).isEqualTo(9)
         transfers.freeUp()
-        assertThat(File(db.jobFileDao().get(id)!!.path!!).isFile).isTrue()
+        assertThat(File(checkNotNull(checkNotNull(db.jobFileDao().get(id)).path)).isFile).isTrue()
     }
 
     @Test fun freeUpDropsDownloadsAndTheNextOpenDownloadsAgain() = runBlocking<Unit> {
