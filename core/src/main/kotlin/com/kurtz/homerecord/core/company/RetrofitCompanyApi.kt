@@ -101,6 +101,7 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
         val code = e.response()?.errorBody()?.string()?.let { runCatching { json.decodeFromString<com.kurtz.homerecord.core.auth.ErrorBody>(it).error }.getOrNull() }
         return when {
             code == "invalid_code" -> ApiFailure.InvalidCode
+            code == "already_in_company" -> ApiFailure.AlreadyInCompany
             e.code() == 404 -> ApiFailure.NotFound
             e.code() == 403 -> ApiFailure.Forbidden
             e.code() == 400 -> ApiFailure.Invalid

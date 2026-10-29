@@ -59,6 +59,11 @@ class RetrofitCompanyApiTest {
         assertThat(r.api().join("ZZZZZZZZ")).isEqualTo(ApiResult.Err(ApiFailure.InvalidCode))
     }
 
+    @Test fun secondCompanyMapsToAlreadyInCompany() = runTest {
+        val r = Recorder(409, """{"error":"already_in_company"}""")
+        assertThat(r.api().join("ABCDEFGH")).isEqualTo(ApiResult.Err(ApiFailure.AlreadyInCompany))
+    }
+
     @Test fun statusCodesMap() = runTest {
         assertThat(Recorder(404, """{"error":"not_found"}""").api().members("c")).isEqualTo(ApiResult.Err(ApiFailure.NotFound))
         assertThat(Recorder(403, """{"error":"forbidden"}""").api().remove("c", "u")).isEqualTo(ApiResult.Err(ApiFailure.Forbidden))

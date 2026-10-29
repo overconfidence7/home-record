@@ -2,14 +2,37 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { membershipFor, notFound, requireSession, requireTenant } from "../tenancy";
+import { DEFAULT_SETTINGS } from "./company";
 
 export const tenants = new Hono<AppEnv>();
 
-/** Basic tenant lookup; also the reference for how every tenant-scoped route is guarded (AC-B2). */
+// Columns every member may read, and the ones only Owner/Office (company) or the owner (home) see (AC-B3, AC-F3).
+// Pay-sensitive and billing fields never go to Crew/Sub/Lead; settings are the clock rules every phone applies.
+const COMPANY_MEMBER = "id, name, trade, phone, settings";
+const COMPANY_ADMIN = `${COMPANY_MEMBER}, email, address, logo_key, trial_ends_at, entitlement, created_at`;
+const HOME_MEMBER = "id, name";
+const HOME_OWNER = `${HOME_MEMBER}, entitlement, created_at`;
+
+/** Tenant lookup with an explicit column list per role; also the reference for how every tenant-scoped route is guarded (AC-B2). */
 tenants.get("/:kind{companies|homes}/:tenantId", requireSession, requireTenant(), async (c) => {
-  const table = c.req.param("kind") === "companies" ? "companies" : "homes";
-  const row = await c.env.DB.prepare(`SELECT * FROM ${table} WHERE id = ?`).bind(c.req.param("tenantId")).first();
-  return row ? c.json(row) : notFound(c);
+  const isCompany = c.req.param("kind") === "companies";
+  const id = c.req.param("tenantId");
+  const role = membershipFor(c.get("session"), isCompany ? "company" : "home", id)?.role;
+  const columns = isCompany
+    ? (role === "owner" || role === "office" ? COMPANY_ADMIN : COMPANY_MEMBER)
+    : (role === "owner" ? HOME_OWNER : HOME_MEMBER);
+  const row = await c.env.DB.prepare(`SELECT ${columns} FROM ${isCompany ? "companies" : "homes"} WHERE id = ?`)
+    .bind(id)
+    .first<Record<string, unknown>>();
+  if (!row) return notFound(c);
+  const { settings, logo_key, trial_ends_at, created_at, ...rest } = row;
+  return c.json({
+    ...rest,
+    ...(settings !== undefined && { settings: { ...DEFAULT_SETTINGS, ...JSON.parse(String(settings)) } }),
+    ...(logo_key !== undefined && { logoKey: logo_key }),
+    ...(trial_ends_at !== undefined && { trialEndsAt: trial_ends_at }),
+    ...(created_at !== undefined && { createdAt: created_at }),
+  });
 });
 
 const homeBody = z.object({ name: z.string().trim().min(1).max(120) });

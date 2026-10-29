@@ -62,7 +62,10 @@ company.post("/companies", requireSession, async (c) => {
   return c.json({ id, role: "owner" }, 201);
 });
 
-/** AC-F2: join with the 8-character code; joining twice is a no-op and keeps the existing role. */
+/**
+ * AC-F2: join with the 8-character code; joining twice is a no-op and keeps the existing role.
+ * One company per account (BLOCKERS T009): a member of another company gets 409 `already_in_company`.
+ */
 company.post("/companies/join", requireSession, async (c) => {
   const body = z.object({ code: z.string().min(1).max(32) }).safeParse(await c.req.json().catch(() => null));
   if (!body.success) return c.json({ error: "invalid" }, 400);
@@ -73,6 +76,7 @@ company.post("/companies/join", requireSession, async (c) => {
   const session = c.get("session");
   const existing = membershipFor(session, "company", row.company_id);
   if (existing) return c.json({ id: row.company_id, role: existing.role });
+  if (session.memberships.some((m) => m.tenantKind === "company")) return c.json({ error: "already_in_company" }, 409);
   await c.env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at) VALUES (?, ?, 'company', ?, 'crew', ?)")
     .bind(crypto.randomUUID(), session.userId, row.company_id, Date.now())
     .run();

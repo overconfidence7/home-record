@@ -103,7 +103,7 @@ data class CompanyProfileUpdate(
     val settings: CompanySettings? = null,
 )
 
-enum class ApiFailure { Offline, NotFound, Forbidden, Invalid, InvalidCode, Failed }
+enum class ApiFailure { Offline, NotFound, Forbidden, Invalid, InvalidCode, AlreadyInCompany, Failed }
 
 sealed interface ApiResult<out T> {
     data class Ok<T>(val value: T) : ApiResult<T>

@@ -191,3 +191,48 @@ describe("invite landing page", () => {
     expect((await app.request("/join/%3Cscript%3E", {}, env)).status).toBe(404);
   });
 });
+
+describe("one company per account on join (BLOCKERS T009)", () => {
+  it("a member of another company gets 409 already_in_company and no second membership", async () => {
+    const first = await setup("one-a");
+    const second = await setup("one-b");
+    const { token, res } = await joinAs("one", first.code);
+    expect(res.status).toBe(201);
+    const again = await call("POST", "/companies/join", token, { code: second.code });
+    expect(again.status).toBe(409);
+    expect(await json(again)).toEqual({ error: "already_in_company" });
+    expect((await json(await call("GET", "/me", token))).memberships.map((m: any) => m.id)).toEqual([first.id]);
+  });
+  it("an owner cannot join another company as crew", async () => {
+    const mine = await setup("one-owner");
+    const other = await setup("one-other");
+    const res = await call("POST", "/companies/join", mine.owner, { code: other.code });
+    expect(res.status).toBe(409);
+  });
+  it("re-entering the code of one's own company still answers the role", async () => {
+    const { id, code } = await setup("one-same");
+    const { token } = await joinAs("one-same", code);
+    expect(await json(await call("POST", "/companies/join", token, { code }))).toEqual({ id, role: "crew" });
+  });
+});
+
+describe("AC-B3 GET /companies/:id column list per role", () => {
+  it("Owner and Office see billing and contact fields; Crew, Lead and Sub see only name, trade, phone and clock settings", async () => {
+    const { owner, id, code } = await setup("cols");
+    await call("PATCH", `/companies/${id}/profile`, owner, { email: "office@kurtz.com", address: "12 Elm St", settings: { requireGps: true } });
+    const office = await joinAs("cols-office", code);
+    const crew = await joinAs("cols-crew", code);
+    await call("PATCH", `/companies/${id}/members/${office.userId}`, owner, { role: "office" });
+    const settings = { otRule: "none", breakRule: false, requireGps: true, punchDistanceFt: 500, photoOnPunch: false };
+    for (const token of [owner, office.token]) {
+      const body = await json(await call("GET", `/companies/${id}`, token));
+      expect(body).toMatchObject({ id, name: "Kurtz Builders", trade: "Remodeling", phone: "555-0100", email: "office@kurtz.com", address: "12 Elm St", settings, entitlement: null });
+      expect(typeof body.trialEndsAt).toBe("number");
+    }
+    for (const role of ["crew", "lead", "sub"]) {
+      await call("PATCH", `/companies/${id}/members/${crew.userId}`, owner, { role });
+      const body = await json(await call("GET", `/companies/${id}`, crew.token));
+      expect(body).toEqual({ id, name: "Kurtz Builders", trade: "Remodeling", phone: "555-0100", settings });
+    }
+  });
+});

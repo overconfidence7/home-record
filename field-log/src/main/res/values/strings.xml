@@ -27,6 +27,7 @@
     <string name="invite_code_helper">8 letters and numbers. Dashes and spaces are fine.</string>
 
     <string name="company_err_offline">Can\'t reach the server. Check your connection and try again.</string>
+    <string name="company_err_already_in_company">This account is already on a company. Field Log works with one company per account, so sign in with another account to join this one.</string>
     <string name="company_err_invalid_code">That code doesn\'t match a company. Check it with your boss, or ask for a new one.</string>
     <string name="company_err_invalid">Some of that couldn\'t be saved. Check the fields and try again.</string>
     <string name="company_err_forbidden">Your role can\'t do that.</string>
