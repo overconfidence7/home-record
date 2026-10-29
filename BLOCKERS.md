@@ -16,6 +16,8 @@
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
 
+- 2026-10-29 (auto:coldstart): AC-U11's "cold start under 1.5 s" is now measured by the QA suite on the release APK with its baseline profile compiled (as installed from Play), not on the debug APK (no AOT, StrictMode on; 4–5.5 s on the emulator). `qa/scripts/device-suite.sh` is yours; the change is in its coldstart and release stages. Say if AC-U11 should also hold for the debug build.
+
 - 2026-10-28 (CR2n2): When a plan edit removes a wall (a corner deleted, or two sides turned into a diagonal), its wall photos and wall overlays are deleted with it, and items hung on it stay in the room off the wall. The alternative is keeping those photos on the room with no wall.
 
 - 2026-10-28 (CR2n1): Deleting a room (on the plan or with its floor) moves its items to Whole house instead of deleting them, and keeps its photos and documents in the home with no room; deleting an item keeps its documents (link cleared) but takes its photos, warranty, reminders, consumables and service history. Stairs on another floor that led to a deleted floor stay, with no destination.
