@@ -1898,3 +1898,17 @@ Auto entry review (0 new, 8 still open): all eight are AC-U11 performance, none 
 Coverage note: the auto entry reports 117/117 claimed ACs covered across 45 ticked tasks (0 gaps).
 
 Judged: 678 screenshots (all 572 House Manual and Field Log crawler shots in every variant, 100 device flow and tour shots, 6 suite launch shots; the 564 handoff crawler duplicates were not reopened), 19 walkthrough steps. New issues: 3. Product gaps: 1.
+
+## QA auto 2026-10-29 (commit caf64df)
+
+Automated suite run at 2026-10-29 03:33 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+No new automated findings.
+
+Still open from earlier runs: [auto:coldstart:field-log:field-log], [auto:jank:field-log:field-log], [auto:coldstart:handoff:field-log], [auto:coldstart:handoff:house-manual], [auto:jank:handoff:field-log], [auto:jank:handoff:house-manual], [auto:coldstart:house-manual:house-manual], [auto:jank:house-manual:house-manual]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F08 Pass, field-log F15 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004)); handoff variants (no _tour.yaml for handoff)
+
+Tested: 71 device stages, 790 unit tests, 108 backend tests, coverage 214/214 ACs. Passed: 61. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
