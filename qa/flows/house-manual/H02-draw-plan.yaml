@@ -44,6 +44,8 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_plan_room_name"
 - assertVisible: "Living room"
+# The rotation keeps the name field focused with the keyboard open over Done
+- hideKeyboard
 - tapOn: "Done"
 - takeScreenshot: H02-plan-two-rooms
 # Undo removes the last room, redo brings it back (AC-C10)

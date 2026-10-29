@@ -160,8 +160,9 @@ class FilesAndMediaAcceptanceTest {
         val cache = MediaCache(File(dir, "media-cache"), settings, net)
         val a = cache.open("c1/file/a.pdf") { "https://r2.test/get/a" }
         assertThat(a).isNotNull()
-        a?.setLastModified(1_000)
         assertThat(cache.open("c1/file/a.pdf") { error("already cached") }).isEqualTo(a)
+        // A hit touches the file, so age it afterwards: a is then the least recently used.
+        a?.setLastModified(1_000)
         cache.open("c1/file/b.pdf") { "https://r2.test/get/b" }
         cache.open("c1/file/c.pdf") { "https://r2.test/get/c" }
         assertThat(net.downloads).hasSize(3)
