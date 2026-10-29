@@ -523,6 +523,15 @@ private fun androidx.compose.ui.Modifier.androidx_background() =
 @Composable
 fun CaptureReadyPreview() = CaptureFrame(captureReady)
 
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Preview(name = "Landscape 200%", device = "spec:width=891dp,height=411dp", fontScale = 2f)
+@Composable
+fun CaptureReadyLandscapePreview() = CaptureFrame(captureReady)
+
+@Preview(name = "Landscape dark", device = "spec:width=891dp,height=411dp", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CaptureGhostLandscapePreview() = CaptureFrame(captureReady.copy(ghost = com.kurtz.homerecord.fieldlog.capture.GhostShot("b1", "/none/b1.jpg"), ghostOn = true, recording = true, recordedSeconds = 74))
+
 @ThemePreviews
 @Composable
 fun CaptureDeniedPreview() = CaptureFrame(captureReady.copy(access = com.kurtz.homerecord.fieldlog.capture.CameraAccess.Denied))

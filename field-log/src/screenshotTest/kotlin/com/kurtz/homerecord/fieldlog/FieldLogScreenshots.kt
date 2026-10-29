@@ -237,6 +237,17 @@ fun ReportsLoadingScreenshot() = ReportsLoadingPreview()
 fun CaptureReadyScreenshot() = CaptureReadyPreview()
 
 @PreviewTest
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape 200%", device = "spec:width=891dp,height=411dp", fontScale = 2f)
+@Composable
+fun CaptureReadyLandscapeScreenshot() = CaptureReadyLandscapePreview()
+
+@PreviewTest
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape dark", device = "spec:width=891dp,height=411dp", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun CaptureGhostLandscapeScreenshot() = CaptureGhostLandscapePreview()
+
+@PreviewTest
 @ThemePreviews
 @Composable
 fun CaptureGhostScreenshot() = CaptureGhostPreview()
