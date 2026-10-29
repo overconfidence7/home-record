@@ -70,7 +70,7 @@ The builder moved from Sonnet 5.5 to Opus 5.5 on 2026-10-26. Everything on `buil
     - [x] CR2s3: JobEdit client phone and email, saved on the client row and reloaded, validated, kept through process death (cr:fl-jobedit-client-contact)
     - [x] CR2s4: JobEdit room removal deletes only unplaced, empty rooms, or confirms and names what goes (cr:fl-jobedit-room-delete)
     - [x] CR2s5: Today pull to refresh, Photos grid and FAB (cr:fl-today-pull, cr:fl-photos-grid)
-  - [ ] CR2t: House Manual debug seed with items, warranties, consumables, an overdue task, contacts and a PDF (cr:seed-items)
+  - [x] CR2t: House Manual debug seed with items, warranties, consumables, an overdue task, contacts and a PDF (cr:seed-items)
   - [ ] CR2u: Minor sweep: the remaining Minor [cr:*] items in REVIEW.md, several per run, oldest first
 
 ## M0 Foundation
