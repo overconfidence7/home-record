@@ -40,6 +40,10 @@ For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT
 
 Tokens are HS256 JWTs (30 days, refreshed on every signed-in request through `X-Refreshed-Token`). Each carries the user's `token_version` (`users.token_version`, migration 0008) as `ver`; `requireSession` refuses any other version. `POST /auth/revoke` bumps it, which signs out every phone of that account at once (204); signing in again issues a token at the new version. Email codes are stored as an HMAC-SHA256 under `JWT_SECRET`, so a copy of `email_codes` alone does not give the codes away.
 
+## Sync limits
+
+`POST /…/sync/push` takes at most 2 MiB (413 `{"error":"too_large"}` above it) and 200 ops; an op whose payload is over 256,000 characters is refused on its own (`rejected` reason `too_large`) and the rest of the batch applies. The apps size their batches to 1 MiB and set an oversized change aside without sending it. The daily cron deletes `sync_applied` idempotency records (`applied_at`, migration 0009) and `sync_conflicts` rows older than 90 days; `sync_rows` is never pruned.
+
 ## Media (R2)
 
 One bucket, `homerecord-media`: the `MEDIA` binding in `wrangler.toml` (the orphan cron deletes through it) and `MEDIA_BUCKET` in `src/media/presign.ts` (presigned URLs point at it) must name the same bucket; a test holds them together. Presigning needs the secrets `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` (an R2 API token for that bucket); without them both routes answer 503.

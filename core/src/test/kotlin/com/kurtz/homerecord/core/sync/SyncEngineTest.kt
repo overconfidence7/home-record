@@ -29,6 +29,8 @@ import org.robolectric.annotation.Config
 private class FakeServer : SyncApi {
     var online = true
     var pushCalls = 0
+    /** Encoded size of each push's ops, as the Worker's body limit sees them. */
+    val pushBytes = mutableListOf<Int>()
     val pullsSince = mutableListOf<Pair<String, Long>>()
     /** Entities this tenant refuses, as the Worker does for a row outside the tenant's list. */
     var refused = emptySet<String>()
@@ -41,6 +43,7 @@ private class FakeServer : SyncApi {
     override suspend fun push(tenant: TenantRef, deviceId: String, ops: List<PushOp>): ApiResult<PushResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
         pushCalls++
+        pushBytes += ops.sumOf { PushBatches.encodedSize(it) }
         val rows = tenants.getOrPut(tenant.key) { LinkedHashMap() }
         val rejected = ops.filter { it.entity in refused }.map { Rejected(it.outboxId, "entity") }
         val accepted = ops.filter { it.entity !in refused }.map { op ->
@@ -278,6 +281,38 @@ class SyncEngineTest {
         // The record itself stays on this phone; only the list is cleared.
         assertThat(dbA.roomDao().get("r1")?.name).isEqualTo("Kitchen and dining")
         assertThat(a.pendingCount.first()).isEqualTo(0)
+    }
+
+    // AC-F53, cr:sync-limits: a big outbox goes out in several pushes, each under the Worker's body limit, in order
+    @Test fun largeOutboxIsSplitIntoPushesThatFitTheBodyLimit() = runTest {
+        val note = "Moisture reading by the sill. ".repeat(4_000) // ~120 KB per task
+        repeat(20) { i ->
+            val t = TaskEntity(id = "t$i", jobId = "j1", title = "Task $i", note = note, createdAt = 1, updatedAt = 10L + i)
+            dbA.taskDao().upsert(t)
+            a.recordChange(tenant, "task", t.id)
+        }
+        assertThat(a.sync(tenant)).isInstanceOf(ApiResult.Ok::class.java)
+        assertThat(server.pushCalls).isGreaterThan(1)
+        assertThat(server.pushBytes.max()).isAtMost(PushBatches.BUDGET_BYTES)
+        assertThat(a.pendingCount.first()).isEqualTo(0)
+        b.sync(tenant)
+        assertThat((0 until 20).mapNotNull { dbB.taskDao().get("t$it")?.title }).hasSize(20)
+    }
+
+    // AC-F53, cr:sync-limits: an op too large for the Worker is set aside on the phone, never sent, and does not block
+    @Test fun oversizedChangeIsSetAsideWithoutBlockingTheRest() = runTest {
+        val huge = TaskEntity(id = "big", jobId = "j1", title = "Huge", note = "x".repeat(PushBatches.MAX_PAYLOAD), createdAt = 1, updatedAt = 10)
+        dbA.taskDao().upsert(huge)
+        a.recordChange(tenant, "task", huge.id)
+        save(dbA, a, task("Patch drywall", 11))
+        val result = a.sync(tenant) as ApiResult.Ok
+        assertThat(result.value.conflicts.map { it.entityId to it.reason }).containsExactly("big" to "refused:too_large")
+        assertThat(result.value.pushed).isEqualTo(1)
+        assertThat(a.refused.first()).containsExactly(RefusedChange("task", "big", 10))
+        assertThat(a.pendingCount.first()).isEqualTo(0)
+        b.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.title).isEqualTo("Patch drywall")
+        assertThat(dbB.taskDao().get("big")).isNull()
     }
 
     private fun outboxRows(db: HomeRecordDatabase): List<Pair<Long, Long?>> =

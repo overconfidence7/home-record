@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
 import type { AppEnv, TenantKind } from "../env";
 import { membershipFor, requireSession, requireTenant } from "../tenancy";
@@ -26,6 +27,12 @@ const ENTITIES: Record<TenantKind, Set<string>> = {
 // Home tenants have no per-role gate; every home member edits the whole home.
 const OPEN_ACCESS = (userId: string): Access => ({ role: "owner", userId, leadJobs: new Set() });
 const PAGE = 500;
+/** Largest push body (cr:sync-limits); the phones size their batches to half of it (SyncEngine.PUSH_BUDGET_BYTES). */
+export const PUSH_MAX_BYTES = 2 * 1024 * 1024;
+/** Largest payload of one op, in characters; a longer one is refused on its own so it never blocks the batch. */
+export const OP_MAX_PAYLOAD = 256_000;
+/** How long idempotency records and the conflict log are kept. A retry older than this is merged again, not deduped. */
+export const SYNC_RETENTION_MS = 90 * 24 * 60 * 60 * 1000;
 
 const PushBody = z.object({
   deviceId: z.string().min(1).max(64),
@@ -36,7 +43,7 @@ const PushBody = z.object({
         entity: z.string(),
         entityId: z.string().min(1).max(64),
         op: z.enum(["upsert", "delete"]),
-        payload: z.string().max(256_000),
+        payload: z.string(),
         updatedAt: z.number().int(),
       }),
     )
@@ -97,9 +104,9 @@ async function applyOp(
     const results = await db.batch([
       db.prepare("INSERT OR IGNORE INTO sync_counters (tenant_kind, tenant_id, seq) VALUES (?, ?, 0)").bind(kind, tenantId),
       db.prepare(
-        `INSERT OR IGNORE INTO sync_applied (tenant_kind, tenant_id, device_id, outbox_id, server_seq)
-         SELECT ?1, ?2, ?3, ?4, seq + 1 FROM sync_counters WHERE tenant_kind = ?1 AND tenant_id = ?2 AND ${ROW_VERSION} = ?7`,
-      ).bind(...key),
+        `INSERT OR IGNORE INTO sync_applied (tenant_kind, tenant_id, device_id, outbox_id, server_seq, applied_at)
+         SELECT ?1, ?2, ?3, ?4, seq + 1, ?8 FROM sync_counters WHERE tenant_kind = ?1 AND tenant_id = ?2 AND ${ROW_VERSION} = ?7`,
+      ).bind(...key, Date.now()),
       db.prepare(
         `UPDATE sync_counters SET seq = seq + 1 WHERE tenant_kind = ?1 AND tenant_id = ?2 AND EXISTS (SELECT 1 FROM sync_applied a
            WHERE a.tenant_kind = ?1 AND a.tenant_id = ?2 AND a.device_id = ?3 AND a.outbox_id = ?4 AND a.server_seq = sync_counters.seq + 1)
@@ -128,7 +135,9 @@ async function applyOp(
 
 const kindOf = (param: string): TenantKind => (param === "companies" ? "company" : "home");
 
-sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, requireTenant(), async (c) => {
+const pushLimit = bodyLimit({ maxSize: PUSH_MAX_BYTES, onError: (c) => c.json({ error: "too_large" }, 413) });
+
+sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, requireTenant(), pushLimit, async (c) => {
   const kind = kindOf(c.req.param("kind"));
   const tenantId = c.req.param("tenantId");
   const role = membershipFor(c.get("session"), kind, tenantId)?.role ?? "";
@@ -139,7 +148,7 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const accepted: { outboxId: number; serverSeq: number }[] = [];
   const conflicts: { entity: string; entityId: string; field: string; reason: string }[] = [];
   // A refused op is answered on its own and the rest of the batch still applies, so one bad row never blocks a phone.
-  const rejected: { outboxId: number; reason: "entity" | "payload" | "role" }[] = [];
+  const rejected: { outboxId: number; reason: "entity" | "payload" | "too_large" | "role" }[] = [];
   const authoritative = ADMIN_ROLES.has(role);
   const userId = c.get("session").userId;
   const access = kind === "company" ? await accessFor(db, tenantId, userId, role) : OPEN_ACCESS(userId);
@@ -147,6 +156,10 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   for (const op of ops) {
     if (!ENTITIES[kind].has(op.entity)) {
       rejected.push({ outboxId: op.outboxId, reason: "entity" });
+      continue;
+    }
+    if (op.payload.length > OP_MAX_PAYLOAD) {
+      rejected.push({ outboxId: op.outboxId, reason: "too_large" });
       continue;
     }
     let incoming: Row;
@@ -198,3 +211,12 @@ sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireT
   return c.json({ rows, serverSeq: page.length ? page[page.length - 1].server_seq : since, more });
 });
 
+
+/** Daily cron (cr:sync-limits): drops idempotency records and conflict log rows older than [SYNC_RETENTION_MS]. */
+export async function pruneSync(db: D1Database, now = Date.now()): Promise<void> {
+  const before = now - SYNC_RETENTION_MS;
+  await db.batch([
+    db.prepare("DELETE FROM sync_applied WHERE applied_at < ?").bind(before),
+    db.prepare("DELETE FROM sync_conflicts WHERE at < ?").bind(before),
+  ]);
+}

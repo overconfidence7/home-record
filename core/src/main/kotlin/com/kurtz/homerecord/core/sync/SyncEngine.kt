@@ -21,7 +21,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Local-first sync (AC-F53, AC-B20). Every local write calls [recordChange], which appends the row to the
- * outbox. [sync] pushes pending rows in order, then pulls everything after the tenant's last `serverSeq` (one cursor
+ * outbox. [sync] pushes pending rows in order, in batches [PushBatches] sizes to the Worker's limits, then pulls everything after the tenant's last `serverSeq` (one cursor
  * per tenant, since the server counts per tenant) and applies each row in a transaction.
  * One sync runs at a time; a failed pass leaves the outbox untouched so the next one retries without duplicates
  * (the server dedupes by `(deviceId, outboxId)`). An op the server refuses on its own is set aside
@@ -97,9 +97,21 @@ class SyncEngine(
         try {
             prepare(tenant).let { if (it is ApiResult.Err) return@withLock fail(it.failure) }
             while (true) {
-                val batch = outbox.pendingFor(tenant.kind.wire, tenant.id, BATCH)
-                if (batch.isEmpty()) break
-                val ops = batch.map { PushOp(it.seq, it.entity, it.entityId, it.op, it.payload, it.updatedAt) }
+                val pending = outbox.pendingFor(tenant.kind.wire, tenant.id, PushBatches.MAX_OPS)
+                if (pending.isEmpty()) break
+                // The Worker refuses an oversized op on its own; set it aside here instead of sending it (cr:sync-limits).
+                val oversized = pending.filter { PushBatches.tooLarge(it.payload) }
+                if (oversized.isNotEmpty()) {
+                    oversized.forEach {
+                        outbox.markSent(it.seq, REFUSED)
+                        conflicts += ConflictNote(it.entity, it.entityId, "", "refused:too_large")
+                    }
+                    continue
+                }
+                val all = pending.map { PushOp(it.seq, it.entity, it.entityId, it.op, it.payload, it.updatedAt) }
+                val fits = PushBatches.fit(all)
+                val batch = pending.take(fits)
+                val ops = all.take(fits)
                 when (val res = api.push(tenant, deviceId, ops)) {
                     is ApiResult.Err -> return@withLock fail(res.failure)
                     is ApiResult.Ok -> {
@@ -181,8 +193,6 @@ class SyncEngine(
     }
 
     companion object {
-        private const val BATCH = 200
-
         /** `serverSeq` of an outbox row the server refused: marked sent so it stops blocking, kept for the log. */
         const val REFUSED = -1L
     }
