@@ -2,6 +2,8 @@ package com.kurtz.homerecord.housemanual
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
+import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.auth.AuthRepository
 import com.kurtz.homerecord.core.auth.CredentialManagerGoogleSource
 import com.kurtz.homerecord.core.auth.EncryptedTokenStore
@@ -24,6 +26,8 @@ import com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.sync.AndroidConnectivityMonitor
 import com.kurtz.homerecord.core.sync.DeviceIdStore
+import com.kurtz.homerecord.core.sync.HomeRegistrar
+import com.kurtz.homerecord.core.sync.RetrofitHomeRegistrationApi
 import com.kurtz.homerecord.core.sync.RetrofitSyncApi
 import com.kurtz.homerecord.core.sync.RoomRowStore
 import com.kurtz.homerecord.core.sync.SyncCoordinator
@@ -56,6 +60,10 @@ class AppContainer(app: Application) {
     /** Client for authenticated calls (sync): adds the bearer token and handles refresh and 401. */
     val http: Call.Factory = LazyCallFactory { OkHttpClient.Builder().addInterceptor(SessionInterceptor(auth, tokens)).build() }
 
+    /** The home is made offline; the first pass after sign-in creates it on the server (AC-H15). */
+    private val homeRegistrar = HomeRegistrar(RetrofitHomeRegistrationApi.create(BuildConfig.API_BASE_URL, http), { db.homeDao().get(it)?.name })
+        .also { registrar -> auth.addSignOutListener(registrar::reset) }
+
     val syncEngine = SyncEngine(
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
         RoomRowStore(db),
@@ -63,13 +71,18 @@ class AppContainer(app: Application) {
         db.syncCursorDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
+        prepare = homeRegistrar::ensure,
     )
 
     private val homeTenant = db.homeDao().observeAll().map { it.firstOrNull()?.let { h -> TenantRef(TenantKind.Home, h.id) } }
 
     val syncCoordinator = SyncCoordinator(
         scope,
-        { tenant -> syncEngine.sync(tenant) },
+        { tenant ->
+            syncEngine.sync(tenant).also { result ->
+                if (result is ApiResult.Err) Log.w(SYNC_LOG_TAG, "Sync of ${tenant.key} failed: ${result.failure}")
+            }
+        },
         auth.state.map { it is AuthState.SignedIn },
         homeTenant,
         AndroidConnectivityMonitor(app),
@@ -150,6 +163,9 @@ class AppContainer(app: Application) {
         scope.launch { AndroidConnectivityMonitor(app).online.collect { if (it) warrantyLookup.runPending() } }
     }
 }
+
+/** Logcat tag for sync failures, so a "Sync failed" chip has a cause in the device log. */
+private const val SYNC_LOG_TAG = "HomeRecordSync"
 
 class HomeRecordApplication : Application() {
     lateinit var container: AppContainer

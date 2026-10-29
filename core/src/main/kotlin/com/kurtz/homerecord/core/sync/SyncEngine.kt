@@ -36,6 +36,8 @@ class SyncEngine(
     private val base: SyncBaseDao,
     val deviceId: String,
     private val now: () -> Long = System::currentTimeMillis,
+    /** Runs before each pass; House Manual registers its offline-made home here (AC-H15). An error ends the pass. */
+    private val prepare: suspend (TenantRef) -> ApiResult<Unit> = { ApiResult.Ok(Unit) },
 ) {
     private val lock = Mutex()
     private val _phase = MutableStateFlow(SyncPhase.Idle)
@@ -93,6 +95,7 @@ class SyncEngine(
         var pulled = 0
         val conflicts = mutableListOf<ConflictNote>()
         try {
+            prepare(tenant).let { if (it is ApiResult.Err) return@withLock fail(it.failure) }
             while (true) {
                 val batch = outbox.pendingFor(tenant.kind.wire, tenant.id, BATCH)
                 if (batch.isEmpty()) break
