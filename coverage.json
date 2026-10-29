@@ -1,18 +1,8 @@
 {
  "ticked_tasks": 116,
  "acs_claimed": 215,
- "acs_missing": 1,
+ "acs_missing": 0,
  "unit_test_files": 143,
- "device_test_files": 36,
- "tasks": [
-  {
-   "task": "CR2b3",
-   "acs": [
-    "AC-F55"
-   ],
-   "missing": [
-    "AC-F55"
-   ]
-  }
- ]
+ "device_test_files": 37,
+ "tasks": []
 }
