@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemodel.home
 
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemodel.items.ItemRow
@@ -11,8 +12,8 @@ import org.junit.Test
 class HomeSummaryBuilderTest {
     private val today = LocalDate.parse("2026-10-24")
 
-    private fun row(id: String, name: String, make: String? = "Rheem", model: String? = "XE50", cat: String = "Water", w: WarrantyStatus = WarrantyStatus.Unknown, at: Long = 0) =
-        ItemRow(id, name, make, model, cat, 0, "x", "r", "Basement", w, at)
+    private fun row(id: String, name: String, make: String? = "Rheem", model: String? = "XE50", cat: ItemCategory = ItemCategory.WATER, w: WarrantyStatus = WarrantyStatus.Unknown, at: Long = 0) =
+        ItemRow(id, name, make, model, cat, "x", "r", "Basement", w, at)
 
     private fun task(id: String, due: String, item: String? = null, snoozed: String? = null) =
         MaintenanceTaskEntity(id = id, homeId = "h", itemId = item, title = "Task $id", dueOn = due, snoozedUntil = snoozed, createdAt = 0, updatedAt = 0)
@@ -43,7 +44,7 @@ class HomeSummaryBuilderTest {
 
     @Test @AcceptanceCriterion("AC-H1")
     fun countsShutoffsAndKeepsFiveNewestItems() {
-        val items = (1..7).map { row("$it", "Item $it", cat = if (it <= 2) "Shutoffs" else "Water", at = it.toLong()) }
+        val items = (1..7).map { row("$it", "Item $it", cat = if (it <= 2) ItemCategory.SHUTOFFS else ItemCategory.WATER, at = it.toLong()) }
         val s = HomeSummaryBuilder.build(items, emptyList(), today)
         assertThat(s.shutoffCount).isEqualTo(2)
         assertThat(s.recent.map { it.id }).containsExactly("7", "6", "5", "4", "3").inOrder()

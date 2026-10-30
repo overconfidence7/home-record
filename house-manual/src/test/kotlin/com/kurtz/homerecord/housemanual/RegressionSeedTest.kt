@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.qa.RegressionSeed
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.home.AttentionKind
@@ -16,6 +17,7 @@ import com.kurtz.homerecord.housemodel.items.ItemListBuilder
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.items.WarrantyFilter
+import com.kurtz.homerecord.housemodel.items.labelRes
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import java.io.File
 import java.time.LocalDate
@@ -95,13 +97,16 @@ class RegressionSeedTest {
         val homeId = RegressionSeed.seed(db, repo, today = today)
         val rows = ItemRepository(db, today = { today }).observeRows(homeId, mapOf(PseudoRooms.EXTERIOR to "Exterior")).first()
 
-        assertThat(ItemListBuilder.build(rows, ItemGrouping.CATEGORY).map { it.title }).contains("Appliances")
-        val kitchen = ItemListBuilder.build(rows, ItemGrouping.ROOM).single { it.title == "Kitchen" }
+        val res = ApplicationProvider.getApplicationContext<Context>().resources
+        val name: (ItemCategory) -> String = { res.getString(it.labelRes) }
+        val groups = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, categoryName = name)
+        assertThat(groups.map { it.category?.let(name) }).contains("Appliances")
+        val kitchen = ItemListBuilder.build(rows, ItemGrouping.ROOM, categoryName = name).single { it.title == "Kitchen" }
         assertThat(kitchen.count).isEqualTo(5)
         assertThat(kitchen.items.map { it.name }).contains("Refrigerator")
-        val expired = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(warranty = WarrantyFilter.EXPIRED))
+        val expired = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(warranty = WarrantyFilter.EXPIRED), name)
         assertThat(expired.flatMap { it.items }.map { it.name }).containsExactly("AC condenser", "Gas range")
-        val byModel = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(query = "JGB735"))
+        val byModel = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(query = "JGB735"), name)
         assertThat(byModel.flatMap { it.items }.map { it.name }).containsExactly("Gas range")
     }
 

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.housemodel.items.ItemFilter
 import com.kurtz.homerecord.housemodel.items.ItemGroup
 import com.kurtz.homerecord.housemodel.items.ItemGrouping
@@ -13,7 +14,7 @@ data class ItemsUiState(
     val grouping: ItemGrouping = ItemGrouping.CATEGORY,
     val filter: ItemFilter = ItemFilter(),
     val groups: List<ItemGroup> = emptyList(),
-    val categoryOptions: List<String> = emptyList(),
+    val categoryOptions: List<ItemCategory> = emptyList(),
     val roomOptions: List<RoomOption> = emptyList(),
     /** Keys of the groups the owner folded away; a search shows every group open so no match hides. */
     val collapsed: Set<String> = emptySet(),
@@ -26,7 +27,7 @@ data class ItemsUiState(
 sealed interface ItemsEvent {
     data class SetGrouping(val grouping: ItemGrouping) : ItemsEvent
     data class SetQuery(val query: String) : ItemsEvent
-    data class SetCategory(val label: String?) : ItemsEvent
+    data class SetCategory(val category: ItemCategory?) : ItemsEvent
     data class SetRoom(val roomId: String?) : ItemsEvent
     data class SetWarranty(val filter: WarrantyFilter?) : ItemsEvent
     data object ClearFilters : ItemsEvent

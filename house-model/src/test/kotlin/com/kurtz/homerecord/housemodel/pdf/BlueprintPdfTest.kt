@@ -47,7 +47,11 @@ class BlueprintPdfTest {
     @Test fun aPageDrawsRoomsAndAScaleBarWithoutThrowing() {
         val bitmap = android.graphics.Bitmap.createBitmap(612, 792, android.graphics.Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(bitmap)
-        BlueprintPdfWriter().drawPage(canvas, "Maple House", PdfFloor("Main", listOf(rect("Kitchen", 0, 0, 144, 120))))
-        BlueprintPdfWriter().drawPage(canvas, "Maple House", PdfFloor("Upper", emptyList()))
+        val bar = mutableListOf<Int>()
+        val writer = BlueprintPdfWriter({ feet -> bar += feet; "$feet ft" })
+        writer.drawPage(canvas, "Maple House", PdfFloor("Main", listOf(rect("Kitchen", 0, 0, 144, 120))))
+        writer.drawPage(canvas, "Maple House", PdfFloor("Upper", emptyList()))
+        // The scale bar is worded through the resource-backed formatter, once, for the floor with rooms.
+        assertThat(bar).hasSize(1)
     }
 }

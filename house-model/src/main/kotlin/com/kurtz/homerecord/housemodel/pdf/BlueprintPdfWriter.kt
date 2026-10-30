@@ -10,8 +10,11 @@ import java.io.OutputStream
 /** One floor of the export: its name and placed rooms. */
 data class PdfFloor(val name: String, val rooms: List<PlanRoom>)
 
-/** Writes one page per floor, to scale, with the home name, floor name, paper scale and a scale bar (AC-C16). */
-class BlueprintPdfWriter(private val spec: PdfPageSpec = PdfPageSpec()) {
+/**
+ * Writes one page per floor, to scale, with the home name, floor name, paper scale and a scale bar (AC-C16).
+ * [scaleBarText] words the bar's length ("8 ft") from a string resource.
+ */
+class BlueprintPdfWriter(private val scaleBarText: (feet: Int) -> String, private val spec: PdfPageSpec = PdfPageSpec()) {
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1.5f; color = BLACK }
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = LIGHT }
     private val title = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 20f; color = BLACK; isFakeBoldText = true }
@@ -59,7 +62,7 @@ class BlueprintPdfWriter(private val spec: PdfPageSpec = PdfPageSpec()) {
         c.drawLine(x0, barY, x0 + layout.scaleBarLengthPt, barY, line)
         c.drawLine(x0, barY - 4f, x0, barY + 4f, line)
         c.drawLine(x0 + layout.scaleBarLengthPt, barY - 4f, x0 + layout.scaleBarLengthPt, barY + 4f, line)
-        c.drawText("${layout.scaleBarFeet} ft", x0, barY + 16f, sub)
+        c.drawText(scaleBarText(layout.scaleBarFeet), x0, barY + 16f, sub)
         c.drawText(layout.scale.label, x0 + layout.scaleBarLengthPt + 12f, barY + 4f, sub)
     }
 

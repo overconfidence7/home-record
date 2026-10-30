@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.ImeAction
 import com.kurtz.homerecord.housemodel.items.SubtypeSearch
+import com.kurtz.homerecord.housemodel.items.labelRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -57,6 +58,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -102,7 +104,7 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
     ) {
         PickerField(
             label = stringResource(R.string.item_type),
-            value = subtype?.let { "${it.category.label}, ${it.label}" }.orEmpty(),
+            value = subtype?.let { stringResource(R.string.item_type_value, stringResource(it.category.labelRes), it.label) }.orEmpty(),
             error = if (ItemField.SUBTYPE in errors) stringResource(R.string.item_type_error) else null,
             tag = "${LocalTagPrefix.current}_item_type",
             onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.SUBTYPE)) },
@@ -270,7 +272,8 @@ private fun SubtypeSheet(selectedId: String?, onDismiss: () -> Unit, onPick: (St
 /** The sheet's content, separate so previews can draw it (a modal sheet does not render in screenshot tests). */
 @Composable
 fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "", onQueryChange: (String) -> Unit = {}) {
-    val groups = remember(query) { SubtypeSearch.matching(query) }
+    val resources = LocalResources.current
+    val groups = remember(query, resources) { SubtypeSearch.matching(query) { resources.getString(it.labelRes) } }
     Column(Modifier.widthIn(max = 640.dp).navigationBarsPadding().imePadding()) {
         OutlinedTextField(
             value = query,
@@ -299,7 +302,7 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "
             groups.forEach { (category, subtypes) ->
                 item(key = "h_${category.name}") {
                     ListItem(
-                        headlineContent = { Text(category.label, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) },
+                        headlineContent = { Text(stringResource(category.labelRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) },
                         leadingContent = { Icon(itemIcon(category.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                     )
                 }

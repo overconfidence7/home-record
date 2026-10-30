@@ -1,13 +1,14 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import org.junit.Test
 
 class RoomItemsTest {
     private fun row(id: String, name: String, room: String?, make: String? = null, model: String? = null) = ItemRow(
-        id = id, name = name, make = make, model = model, categoryLabel = "Appliances", categoryOrder = 0,
+        id = id, name = name, make = make, model = model, category = ItemCategory.APPLIANCES,
         subtypeId = "dishwasher", roomId = room, roomName = "", warranty = WarrantyStatus.Unknown,
     )
 
@@ -17,7 +18,8 @@ class RoomItemsTest {
         val out = roomItemsFor(rows, "k")
         assertThat(out.map { it.name }).containsExactly("Dishwasher", "Range").inOrder()
         assertThat(out[0].detail).isEqualTo("Bosch SHP")
-        assertThat(out[1].detail).isEqualTo("Appliances")
+        assertThat(out[1].detail).isEmpty()
+        assertThat(out[1].category).isEqualTo(ItemCategory.APPLIANCES)
     }
 
     // AC-H10: rows carry the subtype icon and the warranty status the Items tab shows

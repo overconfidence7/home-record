@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemodel.ui
 
 import android.content.Context
 import androidx.core.content.FileProvider
+import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.pdf.BlueprintPdfWriter
 import com.kurtz.homerecord.housemodel.pdf.PdfFloor
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,7 @@ class PdfFileExporter(private val context: Context) : BlueprintExporter {
             val dir = File(context.cacheDir, "exports").apply { mkdirs() }
             val safe = homeName.replace(Regex("[^A-Za-z0-9]+"), "-").trim('-').ifEmpty { "home" }
             val file = File(dir, "$safe-blueprint.pdf")
-            file.outputStream().use { BlueprintPdfWriter().write(homeName, floors, it) }
+            file.outputStream().use { BlueprintPdfWriter({ feet -> context.getString(R.string.blueprint_pdf_scale_feet, feet) }).write(homeName, floors, it) }
             FileProvider.getUriForFile(context, "${context.packageName}.files", file).toString()
         } catch (e: java.io.IOException) {
             null

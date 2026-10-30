@@ -24,6 +24,7 @@ data class RoomItem(
     val detail: String,
     val iconName: String = "Category",
     val warranty: WarrantyStatus = WarrantyStatus.Unknown,
+    val category: ItemCategory = ItemCategory.OTHER,
 )
 
 sealed interface RoomEvent {
@@ -32,13 +33,14 @@ sealed interface RoomEvent {
     data object AddItem : RoomEvent
 }
 
-/** The room's items by name; detail is make and model, or the category when neither is set (AC-H10). */
+/** The room's items by name; detail is make and model (the screen shows [RoomItem.category] when neither is set, AC-H10). */
 fun roomItemsFor(rows: List<ItemRow>, roomId: String): List<RoomItem> =
     rows.filter { it.roomId == roomId }.sortedBy { it.name.lowercase() }.map {
         RoomItem(
             id = it.id,
             name = it.name,
-            detail = listOfNotNull(it.make, it.model).joinToString(" ").ifBlank { it.categoryLabel },
+            detail = listOfNotNull(it.make, it.model).joinToString(" "),
+            category = it.category,
             iconName = ItemCategory.subtype(it.subtypeId)?.iconName ?: "Category",
             warranty = it.warranty,
         )

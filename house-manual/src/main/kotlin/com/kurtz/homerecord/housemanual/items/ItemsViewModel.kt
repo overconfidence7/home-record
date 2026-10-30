@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.items
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.housemodel.items.ItemFilter
 import com.kurtz.homerecord.housemodel.items.ItemGrouping
 import com.kurtz.homerecord.housemodel.items.ItemListBuilder
@@ -17,14 +18,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /** Items tab (AC-H6): grouping, filters and folded groups live in [SavedStateHandle] so they survive process death. */
-class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
-    constructor(repo: ItemRepository, homeId: String, pseudoNames: Map<String, String>, saved: SavedStateHandle) :
-        this(repo.observeRows(homeId, pseudoNames), saved)
+class ItemsViewModel(
+    rows: Flow<List<ItemRow>>,
+    private val saved: SavedStateHandle = SavedStateHandle(),
+    /** The category's display name, so a search for "heating" finds the furnace. */
+    private val categoryName: (ItemCategory) -> String,
+) : ViewModel() {
+    constructor(
+        repo: ItemRepository,
+        homeId: String,
+        pseudoNames: Map<String, String>,
+        saved: SavedStateHandle,
+        categoryName: (ItemCategory) -> String,
+    ) : this(repo.observeRows(homeId, pseudoNames), saved, categoryName)
 
     private val grouping = MutableStateFlow(saved.get<String>(GROUPING)?.let { runCatching { ItemGrouping.valueOf(it) }.getOrNull() } ?: ItemGrouping.CATEGORY)
     private val filter = MutableStateFlow(
         ItemFilter(
-            categoryLabel = saved[CATEGORY], roomId = saved[ROOM], query = saved[QUERY] ?: "",
+            category = saved.get<String>(CATEGORY)?.let(ItemCategory::fromId), roomId = saved[ROOM], query = saved[QUERY] ?: "",
             warranty = saved.get<String>(WARRANTY)?.let { runCatching { WarrantyFilter.valueOf(it) }.getOrNull() },
         ),
     )
@@ -35,8 +46,8 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
         ItemsUiState(
             collapsed = c,
             loading = false, totalCount = all.size, grouping = g, filter = f,
-            groups = ItemListBuilder.build(all, g, f),
-            categoryOptions = all.map { it.categoryLabel }.distinct().sortedBy(ItemListBuilder::categoryOrder),
+            groups = ItemListBuilder.build(all, g, f, categoryName),
+            categoryOptions = all.map { it.category }.distinct().sorted(),
             roomOptions = all.filter { it.roomId != null }.map { RoomOption(it.roomId.orEmpty(), it.roomName) }.distinct().sortedBy { it.name.lowercase() },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsUiState())
@@ -45,7 +56,7 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
         when (e) {
             is ItemsEvent.SetGrouping -> { grouping.value = e.grouping; saved[GROUPING] = e.grouping.name }
             is ItemsEvent.SetQuery -> update { copy(query = e.query) }
-            is ItemsEvent.SetCategory -> update { copy(categoryLabel = e.label) }
+            is ItemsEvent.SetCategory -> update { copy(category = e.category) }
             is ItemsEvent.SetRoom -> update { copy(roomId = e.roomId) }
             is ItemsEvent.SetWarranty -> update { copy(warranty = e.filter) }
             ItemsEvent.ClearFilters -> update { ItemFilter() }
@@ -61,7 +72,7 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
     private fun update(change: ItemFilter.() -> ItemFilter) {
         val f = filter.value.change()
         filter.value = f
-        saved[CATEGORY] = f.categoryLabel; saved[ROOM] = f.roomId; saved[QUERY] = f.query; saved[WARRANTY] = f.warranty?.name
+        saved[CATEGORY] = f.category?.name; saved[ROOM] = f.roomId; saved[QUERY] = f.query; saved[WARRANTY] = f.warranty?.name
     }
 
     private companion object {

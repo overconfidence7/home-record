@@ -298,20 +298,21 @@ private val furnaceDraft = ItemDraft(
 @Composable
 fun ItemsEmptyPreview() = Frame { ItemsScreen(ItemsUiState(loading = false), {}) }
 
-private fun itemRow(id: String, name: String, make: String?, model: String?, cat: String, sub: String, room: String, w: WarrantyStatus) =
-    ItemRow(id, name, make, model, cat, ItemListBuilder.categoryOrder(cat), sub, "r-$room", room, w)
+private fun itemRow(id: String, name: String, make: String?, model: String?, cat: ItemCategory, sub: String, room: String, w: WarrantyStatus) =
+    ItemRow(id, name, make, model, cat, sub, "r-$room", room, w)
 
 private val sampleItems = listOf(
-    itemRow("i1", "Basement furnace", "Carrier", "59TP6A060S17", "Heating and cooling", "furnace", "Basement", WarrantyStatus.Expired("2026-04-18")),
-    itemRow("i2", "Water heater", "Rheem", "XE50T10HD50U1", "Water", "water_heater", "Basement", WarrantyStatus.Expiring("2026-12-02", 40)),
-    itemRow("i3", "Dishwasher", "Bosch", "SHPM65Z55N", "Appliances", "dishwasher", "Kitchen", WarrantyStatus.Active("2028-03-14")),
-    itemRow("i4", "Refrigerator", "Whirlpool", null, "Appliances", "refrigerator", "Kitchen", WarrantyStatus.Unknown),
+    itemRow("i1", "Basement furnace", "Carrier", "59TP6A060S17", ItemCategory.HEATING_COOLING, "furnace", "Basement", WarrantyStatus.Expired("2026-04-18")),
+    itemRow("i2", "Water heater", "Rheem", "XE50T10HD50U1", ItemCategory.WATER, "water_heater", "Basement", WarrantyStatus.Expiring("2026-12-02", 40)),
+    itemRow("i3", "Dishwasher", "Bosch", "SHPM65Z55N", ItemCategory.APPLIANCES, "dishwasher", "Kitchen", WarrantyStatus.Active("2028-03-14")),
+    itemRow("i4", "Refrigerator", "Whirlpool", null, ItemCategory.APPLIANCES, "refrigerator", "Kitchen", WarrantyStatus.Unknown),
 )
 
 private fun itemsState(grouping: ItemGrouping = ItemGrouping.CATEGORY, filter: ItemFilter = ItemFilter()) = ItemsUiState(
     loading = false, totalCount = sampleItems.size, grouping = grouping, filter = filter,
-    groups = ItemListBuilder.build(sampleItems, grouping, filter),
-    categoryOptions = sampleItems.map { it.categoryLabel }.distinct(),
+    // No preview searches, so the category name the search would match is never read.
+    groups = ItemListBuilder.build(sampleItems, grouping, filter) { it.name },
+    categoryOptions = sampleItems.map { it.category }.distinct().sorted(),
     roomOptions = listOf(RoomOption("r-Basement", "Basement"), RoomOption("r-Kitchen", "Kitchen")),
 )
 
@@ -387,7 +388,7 @@ private val furnaceWarranty = com.kurtz.homerecord.core.data.WarrantyEntity(
 )
 
 private fun furnaceDetail(withWarranty: Boolean = true) = com.kurtz.homerecord.housemodel.items.ItemDetail(
-    item = furnaceEntity, categoryLabel = "Heating and cooling", subtypeLabel = "Furnace", roomName = "Utility room",
+    item = furnaceEntity, category = ItemCategory.HEATING_COOLING, subtypeLabel = "Furnace", roomName = "Utility room",
     warranty = furnaceWarranty.takeIf { withWarranty },
     status = if (withWarranty) WarrantyStatus.Expired("2026-09-20") else WarrantyStatus.Unknown, photos = emptyList(),
 )

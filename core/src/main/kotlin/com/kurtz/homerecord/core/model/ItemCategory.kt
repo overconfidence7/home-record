@@ -20,9 +20,10 @@ data class ItemSubtype(
     val iconName: String get() = icon ?: category.icon
 }
 
-enum class ItemCategory(val label: String, val icon: String, subtypes: List<SubtypeSpec>) {
+/** Display names live in string resources (house-model `ItemCategoryLabels`); code keys on the enum, never on a label. */
+enum class ItemCategory(val icon: String, subtypes: List<SubtypeSpec>) {
     APPLIANCES(
-        "Appliances", "Kitchen",
+        "Kitchen",
         listOf(
             s("refrigerator", "Refrigerator", filter = "Water filter" to 6),
             s("freezer", "Freezer"), s("range", "Range"), s("oven", "Oven"), s("cooktop", "Cooktop"),
@@ -33,7 +34,7 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     HEATING_COOLING(
-        "Heating and cooling", "Thermostat",
+        "Thermostat",
         listOf(
             s("furnace", "Furnace", filter = "Furnace filter" to 3, reminder = "HVAC service" to 12),
             s("boiler", "Boiler", reminder = "HVAC service" to 12),
@@ -48,7 +49,7 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     WATER(
-        "Water", "WaterDrop",
+        "WaterDrop",
         listOf(
             s("water_heater", "Water heater", reminder = "Flush water heater" to 12),
             s("tankless_heater", "Tankless heater", reminder = "Flush tankless heater" to 12),
@@ -62,7 +63,7 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     ELECTRICAL(
-        "Electrical", "ElectricalServices",
+        "ElectricalServices",
         listOf(
             s("breaker_panel", "Breaker panel"), s("sub_panel", "Sub-panel"), s("generator", "Generator"),
             s("transfer_switch", "Transfer switch"), s("ev_charger", "EV charger"),
@@ -70,7 +71,7 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     SHUTOFFS(
-        "Shutoffs", "PowerOff",
+        "PowerOff",
         listOf(
             s("water_main", "Water main"), s("gas_main", "Gas main"), s("electrical_main", "Electrical main"),
             s("hvac_disconnect", "HVAC disconnect"), s("fixture_shutoff", "Fixture shutoff"),
@@ -79,7 +80,7 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     SAFETY(
-        "Safety", "HealthAndSafety",
+        "HealthAndSafety",
         listOf(
             s("smoke_detector", "Smoke detector", reminder = "Replace smoke detector battery" to 12, battery = true),
             s("co_detector", "CO detector", reminder = "Replace CO detector battery" to 12, battery = true),
@@ -88,21 +89,21 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     FIXTURES(
-        "Fixtures", "Plumbing",
+        "Plumbing",
         listOf(
             s("faucet", "Faucet"), s("toilet", "Toilet"), s("shower_valve", "Shower valve"),
             s("tub", "Tub"), s("sink", "Sink"), s("garbage_disposal", "Garbage disposal"),
         ),
     ),
     DOORS_OPENERS(
-        "Doors and openers", "Garage",
+        "Garage",
         listOf(
             s("garage_door_opener", "Garage door opener"), s("garage_door", "Garage door"),
             s("entry_door", "Entry door"), s("lock", "Lock", battery = true), s("gate", "Gate"),
         ),
     ),
     EXTERIOR(
-        "Exterior", "Home",
+        "Home",
         listOf(
             s("roof", "Roof"), s("gutters", "Gutters", reminder = "Clean gutters" to 6),
             s("siding", "Siding"), s("windows", "Windows"), s("deck", "Deck"), s("fence", "Fence"),
@@ -110,20 +111,20 @@ enum class ItemCategory(val label: String, val icon: String, subtypes: List<Subt
         ),
     ),
     FINISHES(
-        "Finishes", "FormatPaint",
+        "FormatPaint",
         listOf(
             s("paint", "Paint"), s("flooring", "Flooring"), s("tile", "Tile"),
             s("countertop", "Countertop"), s("cabinets", "Cabinets"), s("trim", "Trim"),
         ),
     ),
     NETWORKING(
-        "Networking and smart home", "Router",
+        "Router",
         listOf(
             s("router", "Router"), s("modem", "Modem"), s("mesh_node", "Mesh node"),
             s("network_switch", "Switch"), s("hub", "Hub"), s("nvr", "NVR"),
         ),
     ),
-    OTHER("Other", "Category", listOf(s("other", "Other")));
+    OTHER("Category", listOf(s("other", "Other")));
 
     val subtypes: List<ItemSubtype> = subtypes.map { it.build(this) }
 

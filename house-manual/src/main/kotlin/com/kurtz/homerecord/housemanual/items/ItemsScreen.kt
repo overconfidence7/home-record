@@ -55,6 +55,7 @@ import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemodel.items.ItemGrouping
 import com.kurtz.homerecord.housemodel.items.WarrantyFilter
+import com.kurtz.homerecord.housemodel.items.labelRes
 import com.kurtz.homerecord.housemodel.ui.itemIcon
 
 /** Items tab (AC-H6): grouped by category or room, filtered by category, room and warranty status, one tap to open. */
@@ -98,7 +99,11 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                     val folded = state.isCollapsed(g.key)
                     item(key = "h:${g.key}") {
                         GroupHeader(
-                            title = stringResource(R.string.items_group_header, g.title.ifEmpty { stringResource(R.string.items_no_room) }, g.count),
+                            title = stringResource(
+                                R.string.items_group_header,
+                                g.category?.let { stringResource(it.labelRes) } ?: g.title.ifEmpty { stringResource(R.string.items_no_room) },
+                                g.count,
+                            ),
                             expanded = !folded,
                             onToggle = { onEvent(ItemsEvent.ToggleGroup(g.key)) },
                             modifier = Modifier.testTag("hm_items_group_${g.key}"),
@@ -172,10 +177,10 @@ private fun Controls(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit) {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 MenuChip(
-                    label = state.filter.categoryLabel ?: stringResource(R.string.items_filter_category),
-                    selected = state.filter.categoryLabel != null,
-                    options = state.categoryOptions.map { it to it },
-                    onPick = { onEvent(ItemsEvent.SetCategory(it)) },
+                    label = state.filter.category?.let { stringResource(it.labelRes) } ?: stringResource(R.string.items_filter_category),
+                    selected = state.filter.category != null,
+                    options = state.categoryOptions.map { it.name to stringResource(it.labelRes) },
+                    onPick = { onEvent(ItemsEvent.SetCategory(it?.let(ItemCategory::fromId))) },
                     tag = "hm_items_filter_category",
                 )
             }

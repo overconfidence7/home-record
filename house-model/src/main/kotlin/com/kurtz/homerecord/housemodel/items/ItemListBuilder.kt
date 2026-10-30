@@ -9,8 +9,7 @@ data class ItemRow(
     val name: String,
     val make: String?,
     val model: String?,
-    val categoryLabel: String,
-    val categoryOrder: Int,
+    val category: ItemCategory,
     val subtypeId: String,
     val roomId: String?,
     val roomName: String,
@@ -30,31 +29,35 @@ enum class WarrantyFilter { ACTIVE, EXPIRING, EXPIRED, UNKNOWN;
 enum class ItemGrouping { CATEGORY, ROOM }
 
 data class ItemFilter(
-    val categoryLabel: String? = null,
+    val category: ItemCategory? = null,
     val roomId: String? = null,
     val warranty: WarrantyFilter? = null,
     val query: String = "",
 )
 
-data class ItemGroup(val key: String, val title: String, val count: Int, val items: List<ItemRow>)
+/** A category group has [category] set and an empty [title] (the screen names it from resources); a room group has its room name. */
+data class ItemGroup(val key: String, val title: String, val count: Int, val items: List<ItemRow>, val category: ItemCategory? = null)
 
-/** Groups, filters and orders the Items list (AC-H6). Pure; no Android types. */
+/** Groups, filters and orders the Items list (AC-H6). Pure; no Android types. A search also matches [categoryName]. */
 object ItemListBuilder {
-    fun categoryOrder(label: String) = ItemCategory.entries.indexOfFirst { it.label == label }.let { if (it < 0) Int.MAX_VALUE else it }
-
-    fun build(rows: List<ItemRow>, grouping: ItemGrouping, filter: ItemFilter = ItemFilter()): List<ItemGroup> {
+    fun build(
+        rows: List<ItemRow>,
+        grouping: ItemGrouping,
+        filter: ItemFilter = ItemFilter(),
+        categoryName: (ItemCategory) -> String,
+    ): List<ItemGroup> {
         val tokens = filter.query.trim().lowercase().split(Regex("\\s+")).filter { it.isNotEmpty() }
         val kept = rows.filter { r ->
-            (filter.categoryLabel == null || r.categoryLabel == filter.categoryLabel) &&
+            (filter.category == null || r.category == filter.category) &&
                 (filter.roomId == null || r.roomId == filter.roomId) &&
                 (filter.warranty == null || filter.warranty.matches(r.warranty)) &&
-                tokens.all { t -> listOfNotNull(r.name, r.make, r.model, r.roomName, r.categoryLabel).any { it.lowercase().contains(t) } }
+                tokens.all { t -> listOfNotNull(r.name, r.make, r.model, r.roomName, categoryName(r.category)).any { it.lowercase().contains(t) } }
         }
         val byName = compareBy<ItemRow>({ it.name.lowercase() }, { it.id })
         return when (grouping) {
-            ItemGrouping.CATEGORY -> kept.groupBy { it.categoryLabel }.entries
-                .sortedWith(compareBy({ categoryOrder(it.key) }, { it.key }))
-                .map { (k, v) -> ItemGroup(k, k, v.size, v.sortedWith(byName)) }
+            ItemGrouping.CATEGORY -> kept.groupBy { it.category }.entries
+                .sortedBy { it.key.ordinal }
+                .map { (c, v) -> ItemGroup(c.name, "", v.size, v.sortedWith(byName), c) }
             ItemGrouping.ROOM -> kept.groupBy { it.roomId.orEmpty() to it.roomName }.entries
                 .sortedBy { it.key.second.lowercase() }
                 .map { (k, v) -> ItemGroup(k.first, k.second, v.size, v.sortedWith(byName)) }

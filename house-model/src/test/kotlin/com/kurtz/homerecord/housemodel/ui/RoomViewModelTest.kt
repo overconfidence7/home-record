@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemodel.Foundation
@@ -69,7 +70,7 @@ class RoomViewModelTest {
     }
 
     private fun row(id: String, name: String, roomId: String?, warranty: WarrantyStatus = WarrantyStatus.Unknown) = ItemRow(
-        id = id, name = name, make = null, model = null, categoryLabel = "Appliances", categoryOrder = 0,
+        id = id, name = name, make = null, model = null, category = ItemCategory.APPLIANCES,
         subtypeId = "dishwasher", roomId = roomId, roomName = "", warranty = warranty,
     )
 

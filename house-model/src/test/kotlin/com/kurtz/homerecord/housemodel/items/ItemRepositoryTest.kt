@@ -91,7 +91,7 @@ class ItemRepositoryTest {
         )
         val d = checkNotNull(repo.observeDetail(id, "h1", mapOf(PseudoRooms.WHOLE_HOUSE to "Whole house")).first())
         assertThat(d.roomName).isEqualTo("Whole house")
-        assertThat(d.categoryLabel).isEqualTo("Heating and cooling")
+        assertThat(d.category).isEqualTo(com.kurtz.homerecord.core.model.ItemCategory.HEATING_COOLING)
         assertThat(d.subtypeLabel).isEqualTo("Furnace")
         assertThat(d.status).isInstanceOf(com.kurtz.homerecord.core.model.WarrantyStatus.Expiring::class.java)
         repo.delete(id)

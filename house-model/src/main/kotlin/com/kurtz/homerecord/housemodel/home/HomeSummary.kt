@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.home
 
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
+import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import java.time.LocalDate
@@ -20,7 +21,6 @@ data class HomeSummary(
 /** Rules behind HM-Home (AC-H2): what needs attention and what is recent. */
 object HomeSummaryBuilder {
     const val RECENT_LIMIT = 5
-    const val SHUTOFF_CATEGORY = "Shutoffs"
 
     fun build(items: List<ItemRow>, tasks: List<MaintenanceTaskEntity>, today: LocalDate): HomeSummary {
         val names = items.associate { it.id to it.name }
@@ -33,11 +33,11 @@ object HomeSummaryBuilder {
             AttentionRow(AttentionKind.REMINDER_OVERDUE, it.id, it.itemId?.takeIf { id -> id in names }, it.title, it.dueOn)
         }
         val missing = items.filter { it.make.isNullOrBlank() || it.model.isNullOrBlank() }
-            .filter { it.categoryLabel != SHUTOFF_CATEGORY }
+            .filter { it.category != ItemCategory.SHUTOFFS }
             .sortedBy { it.name.lowercase() }
             .map { AttentionRow(AttentionKind.MISSING_MAKE_MODEL, it.id, it.id, it.name, "") }
         return HomeSummary(
-            shutoffCount = items.count { it.categoryLabel == SHUTOFF_CATEGORY },
+            shutoffCount = items.count { it.category == ItemCategory.SHUTOFFS },
             attention = overdue + warranties + missing,
             recent = items.sortedByDescending { it.createdAt }.take(RECENT_LIMIT),
             itemCount = items.size,

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import com.kurtz.homerecord.housemodel.items.labelRes
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
 import com.kurtz.homerecord.coreui.components.EmptyState
@@ -125,7 +126,7 @@ private fun RoomItemsCard(items: List<RoomItem>, canAdd: Boolean, onEvent: (Room
                 Column(Modifier.testTag("${prefix}_room_item_${item.id}")) {
                     RecordListItem(
                         headline = item.name,
-                        supporting = item.detail,
+                        supporting = item.detail.ifBlank { stringResource(item.category.labelRes) },
                         leading = { Icon(itemIcon(item.iconName), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         onClick = { onEvent(RoomEvent.OpenItem(item.id)) },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),

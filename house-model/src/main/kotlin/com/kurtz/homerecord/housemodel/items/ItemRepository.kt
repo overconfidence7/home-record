@@ -72,7 +72,7 @@ internal fun isIsoDate(s: String) = runCatching { LocalDate.parse(s) }.isSuccess
 /** Everything the item page shows; [warranty] is null until one is looked up or entered (AC-H7). */
 data class ItemDetail(
     val item: ItemEntity,
-    val categoryLabel: String,
+    val category: ItemCategory,
     val subtypeLabel: String,
     val roomName: String,
     val warranty: WarrantyEntity?,
@@ -102,11 +102,9 @@ class ItemRepository(
             val endsOn = warranties.associate { it.itemId to it.endsOn }
             val todayIso = today().toString()
             items.map { i ->
-                val cat = runCatching { ItemCategory.valueOf(i.category) }.getOrNull()
-                val label = cat?.label ?: i.category
                 ItemRow(
-                    id = i.id, name = i.name, make = i.make, model = i.model, categoryLabel = label,
-                    categoryOrder = ItemListBuilder.categoryOrder(label), subtypeId = i.subtype, roomId = i.roomId,
+                    id = i.id, name = i.name, make = i.make, model = i.model, category = ItemCategory.orOther(i.category),
+                    subtypeId = i.subtype, roomId = i.roomId,
                     roomName = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }.orEmpty(),
                     warranty = WarrantyStatus.of(endsOn[i.id], todayIso), createdAt = i.createdAt,
                 )
@@ -128,9 +126,8 @@ class ItemRepository(
             item ?: return@combine null
             val warranty = warranties.firstOrNull()
             val subtype = ItemCategory.subtype(item.subtype)
-            val cat = runCatching { ItemCategory.valueOf(item.category) }.getOrNull()
             ItemDetail(
-                item = item, categoryLabel = cat?.label ?: item.category, subtypeLabel = subtype?.label ?: item.subtype,
+                item = item, category = ItemCategory.orOther(item.category), subtypeLabel = subtype?.label ?: item.subtype,
                 roomName = item.roomId?.let { rid -> rooms.firstOrNull { it.id == rid }?.name ?: pseudoNames[rid] }.orEmpty(),
                 warranty = warranty, status = WarrantyStatus.of(warranty?.endsOn, today().toString()), photos = photos,
             )

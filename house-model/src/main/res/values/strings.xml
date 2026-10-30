@@ -171,4 +171,18 @@
     <string name="item_photo_take">Take photo</string>
     <string name="item_photo_choose">Choose from gallery</string>
     <string name="item_photo_remove">Remove %1$s photo</string>
+    <string name="item_category_appliances">Appliances</string>
+    <string name="item_category_heating_cooling">Heating and cooling</string>
+    <string name="item_category_water">Water</string>
+    <string name="item_category_electrical">Electrical</string>
+    <string name="item_category_shutoffs">Shutoffs</string>
+    <string name="item_category_safety">Safety</string>
+    <string name="item_category_fixtures">Fixtures</string>
+    <string name="item_category_doors_openers">Doors and openers</string>
+    <string name="item_category_exterior">Exterior</string>
+    <string name="item_category_finishes">Finishes</string>
+    <string name="item_category_networking">Networking and smart home</string>
+    <string name="item_category_other">Other</string>
+    <string name="item_type_value">%1$s, %2$s</string>
+    <string name="blueprint_pdf_scale_feet">%1$d ft</string>
 </resources>
