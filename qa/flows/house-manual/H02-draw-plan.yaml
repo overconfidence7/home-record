@@ -3,7 +3,8 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: H01-onboarding.yaml
-- tapOn: "House"
+- tapOn:
+    id: "hm_tab_house"
 - takeScreenshot: H02-house-tab
 - tapOn:
     id: "hm_house_edit_plan"
@@ -14,7 +15,8 @@ appId: com.kurtz.homerecord.housemanual
 - takeScreenshot: H02-plan-empty
 - tapOn:
     id: "hm_plan_add_room"
-- assertVisible: "Room name"
+- assertVisible:
+    id: "hm_plan_room_name"
 # Fields are tapped by id (the middle of the box), not by their floated label: the label sits on the
 # field's top border and, with the panel still sliding down after the keyboard closes, a tap on it can
 # miss the field and the typed length goes nowhere (QA auto 0ec9040, H03 read 14' by 12').
@@ -36,7 +38,8 @@ appId: com.kurtz.homerecord.housemanual
 # AC-C4: the length field holds what was typed before Done commits it (H03 reads it back as 12' 6")
 - assertVisible: "12'6\""
 - hideKeyboard
-- tapOn: "Done"
+- tapOn:
+    id: "hm_plan_done"
 - takeScreenshot: H02-plan-one-room
 - tapOn:
     id: "hm_plan_add_room"
@@ -56,13 +59,17 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Living room"
 # The rotation keeps the name field focused with the keyboard open over Done
 - hideKeyboard
-- tapOn: "Done"
+- tapOn:
+    id: "hm_plan_done"
 - takeScreenshot: H02-plan-two-rooms
 # Undo removes the last room, redo brings it back (AC-C10)
-- tapOn: "Undo"
-- tapOn: "Redo"
+- tapOn:
+    id: "hm_plan_undo"
+- tapOn:
+    id: "hm_plan_redo"
 # Leaving the editor autosaves; the blueprint shows both rooms (AC-C13, AC-H4)
-- tapOn: "Back"
+- tapOn:
+    id: "hm_back"
 - assertVisible: "Kitchen"
 - assertVisible: "Living room"
 - takeScreenshot: H02-blueprint-after-edit
@@ -70,4 +77,5 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_house_edit_plan"
 - back
-- assertVisible: "Edit plan"
+- assertVisible:
+    id: "hm_house_edit_plan"

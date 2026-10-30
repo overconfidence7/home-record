@@ -1,0 +1,28 @@
+# Subflow: sign in with the email code from the dev backend, create the company "QA Electric" (Electrical)
+# and wait for Today. Needs env EMAIL; the calling flow does its own launchApp (clearState, permissions).
+appId: com.kurtz.homerecord.fieldlog
+---
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: ${EMAIL}
+- extendedWaitUntil:
+    visible:
+      id: "fl_welcome_mode_create"
+    timeout: 15000
+- tapOn:
+    id: "fl_welcome_mode_create"
+- tapOn:
+    id: "fl_welcome_name"
+- inputText: "QA Electric"
+- hideKeyboard
+- tapOn:
+    id: "fl_welcome_trade"
+- inputText: "Electrical"
+- hideKeyboard
+- tapOn:
+    id: "fl_welcome_submit"
+- extendedWaitUntil:
+    visible:
+      id: "fl_tab_today"
+    timeout: 15000

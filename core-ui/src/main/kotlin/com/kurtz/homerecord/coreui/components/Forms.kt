@@ -320,6 +320,7 @@ fun <T> EnumPicker(
     onSelect: (T) -> Unit,
     labelOf: @Composable (T) -> String,
     modifier: Modifier = Modifier,
+    tagOf: ((T) -> String)? = null,
 ) {
     require(options.size <= 4) { "EnumPicker holds at most 4 options; use OptionsSheet" }
     SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
@@ -328,7 +329,7 @@ fun <T> EnumPicker(
                 selected = option == selected,
                 onClick = { onSelect(option) },
                 shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                modifier = Modifier.heightIn(min = 48.dp),
+                modifier = Modifier.heightIn(min = 48.dp).then(tagOf?.let { Modifier.testTag(it(option)) } ?: Modifier),
             ) { Text(labelOf(option)) }
         }
     }

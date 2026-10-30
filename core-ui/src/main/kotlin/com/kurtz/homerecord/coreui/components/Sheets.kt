@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -107,7 +108,7 @@ fun OptionsSheetContent(title: String?, options: List<SheetOption>, onPick: (She
             ListItem(
                 headlineContent = { Text(option.label) },
                 leadingContent = option.icon?.let { { Icon(it, contentDescription = null) } },
-                modifier = Modifier.clickable { onPick(option) },
+                modifier = Modifier.clickable { onPick(option) }.testTag("${LocalTagPrefix.current}_sheet_${option.id}"),
             )
         }
     }

@@ -7,25 +7,9 @@ appId: com.kurtz.homerecord.fieldlog
     permissions:
       location: deny
 - runFlow:
-    file: _sign-in.yaml
+    file: _owner-company.yaml
     env:
       EMAIL: "qa-owner-f04c@example.test"
-- extendedWaitUntil:
-    visible: "Set up your company"
-    timeout: 15000
-- tapOn: "Create"
-- tapOn:
-    id: "fl_welcome_name"
-- inputText: "QA Electric"
-- hideKeyboard
-- tapOn:
-    id: "fl_welcome_trade"
-- inputText: "Electrical"
-- hideKeyboard
-- tapOn: "Create company"
-- extendedWaitUntil:
-    visible: "Today"
-    timeout: 15000
 - assertVisible:
     id: fl_today_add_job
 - tapOn: "Jobs"

@@ -12,10 +12,12 @@ appId: com.kurtz.homerecord.fieldlog
 # Focus guard: Field Log never shows House Manual concepts on its first screen
 - assertNotVisible: "Reminders"
 - assertNotVisible: "Set up your home"
-- tapOn: "Email"
+- tapOn:
+    id: "fl_sign_in_email"
 - inputText: "qa-owner@example.test"
 - hideKeyboard
-- tapOn: "Send code"
+- tapOn:
+    id: "fl_sign_in_send"
 # With wrangler dev running, the backend accepts the request and logs the code.
 - extendedWaitUntil:
     visible: "Code"
@@ -28,7 +30,8 @@ appId: com.kurtz.homerecord.fieldlog
       EMAIL: "qa-owner@example.test"
 # No code means the dev backend never answered: that is a failure, not a skip
 - assertTrue: ${output.devCode != null && output.devCode != ''}
-- tapOn: "Code"
+- tapOn:
+    id: "fl_sign_in_code"
 - inputText: ${output.devCode}
 - hideKeyboard
 - tapOn:
@@ -37,7 +40,8 @@ appId: com.kurtz.homerecord.fieldlog
     visible: "Set up your company"
     timeout: 15000
 - takeScreenshot: F01-welcome
-- tapOn: "Create"
+- tapOn:
+    id: "fl_welcome_mode_create"
 - tapOn:
     id: "fl_welcome_name"
 - inputText: "QA Electric"
@@ -47,7 +51,8 @@ appId: com.kurtz.homerecord.fieldlog
 - inputText: "Electrical"
 - hideKeyboard
 # AC-F1: creating a company lands the Owner on Today, whose empty state says to add a job or invite the crew
-- tapOn: "Create company"
+- tapOn:
+    id: "fl_welcome_submit"
 - extendedWaitUntil:
     visible: "Today"
     timeout: 15000

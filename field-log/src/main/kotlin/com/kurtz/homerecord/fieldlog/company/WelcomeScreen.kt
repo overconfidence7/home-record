@@ -40,6 +40,7 @@ fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifi
             labelOf = {
                 stringResource(if (it == WelcomeMode.Create) R.string.welcome_mode_create else R.string.welcome_mode_join)
             },
+            tagOf = { "fl_welcome_mode_${it.name.lowercase()}" },
         )
         val error = state.error?.let { failureText(it) }
         when (state.mode) {

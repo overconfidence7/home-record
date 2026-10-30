@@ -163,21 +163,26 @@ private fun FloorRow(floor: FloorSummary, canMoveUp: Boolean, canMoveDown: Boole
 private fun FloorDialog(floor: FloorSummary?, system: UnitSystem, onDismiss: () -> Unit, onConfirm: (name: String, ceilingIn: Int) -> Unit) {
     var name by rememberSaveable { mutableStateOf(floor?.name.orEmpty()) }
     var ceiling by rememberSaveable { mutableStateOf<Int?>(floor?.ceilingHeightIn ?: 96) }
+    val tag = LocalTagPrefix.current
     AlertDialog(
         modifier = Modifier.windowTestTags(),
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (floor == null) R.string.floor_add_title else R.string.floor_edit_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                LabeledField(stringResource(R.string.floor_name), name, { name = it }, required = true)
-                LengthField(stringResource(R.string.floor_ceiling), ceiling, { ceiling = it }, system)
+                LabeledField(stringResource(R.string.floor_name), name, { name = it }, Modifier.testTag("${tag}_floors_name"), required = true)
+                LengthField(stringResource(R.string.floor_ceiling), ceiling, { ceiling = it }, system, Modifier.testTag("${tag}_floors_ceiling"))
             }
         },
         confirmButton = {
-            TextButton(onClick = { ceiling?.let { onConfirm(name, it) } }, enabled = name.isNotBlank() && ceiling != null) {
+            TextButton(
+                onClick = { ceiling?.let { onConfirm(name, it) } },
+                enabled = name.isNotBlank() && ceiling != null,
+                modifier = Modifier.testTag("${tag}_floors_save"),
+            ) {
                 Text(stringResource(R.string.save_floor))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.testTag("${tag}_floors_cancel")) { Text(stringResource(R.string.cancel)) } },
     )
 }

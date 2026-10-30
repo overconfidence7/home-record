@@ -3,45 +3,60 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: H02-draw-plan.yaml
-- tapOn: "House"
+- tapOn:
+    id: "hm_tab_house"
 - assertVisible: "Tap a room to open it. Press and hold for more."
 - tapOn: "Kitchen"
 - takeScreenshot: H03-room-kitchen
 # Room page is a non-root screen: it has the back arrow and names the room (AC-U2, ui rule 7)
-- assertVisible: "Back"
+- assertVisible:
+    id: "hm_back"
 - assertVisible: "Kitchen"
 # AC-C4: the length H02 typed as 12'6" reads back as 12' 6"
 - assertVisible: '14'' by 12'' 6".*'
 # Room page sections are present as the T017 shell of AC-H10 (items list arrives with T021+)
 - assertVisible:
     id: "hm_room_items"
-- tapOn: "Back"
+- tapOn:
+    id: "hm_back"
 - longPressOn: "Kitchen"
-- assertVisible: "Rename"
-- assertVisible: "Delete"
+- assertVisible:
+    id: "hm_sheet_rename"
+- assertVisible:
+    id: "hm_sheet_delete"
 - takeScreenshot: H03-room-long-press
 - back
 # Layer chips toggle overlays and stay set after a restart (AC-C15)
-- tapOn: "Electrical"
+- tapOn:
+    id: "hm_layer_electrical"
 - takeScreenshot: H03-layer-electrical
 - stopApp
 - launchApp
-- tapOn: "House"
-- assertVisible: "Electrical"
+- tapOn:
+    id: "hm_tab_house"
+- assertVisible:
+    id: "hm_layer_electrical"
 # Floors screen: add a floor, see it listed (AC-C3)
-- tapOn: "Floors"
-- assertVisible: "Add floor"
-- tapOn: "Add floor"
-- tapOn: "Floor name.*"
+- tapOn:
+    id: "hm_house_floors"
+- assertVisible:
+    id: "hm_floors_fab"
+- tapOn:
+    id: "hm_floors_fab"
+- tapOn:
+    id: "hm_floors_name"
 - eraseText: 20
 - inputText: "Attic"
 - hideKeyboard
-- tapOn: "Save"
+- tapOn:
+    id: "hm_floors_save"
 - assertVisible: "Attic"
 - takeScreenshot: H03-floors
-- tapOn: "Back"
+- tapOn:
+    id: "hm_back"
 # Export PDF is offered on the House tab; the share sheet itself is not driven (AC-C16)
-- tapOn: "House"
+- tapOn:
+    id: "hm_tab_house"
 - scrollUntilVisible:
     element:
       id: "hm_house_export"

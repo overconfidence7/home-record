@@ -6,31 +6,19 @@ appId: com.kurtz.homerecord.fieldlog
 - launchApp:
     clearState: true
 - runFlow:
-    file: _sign-in.yaml
+    file: _owner-company.yaml
     env:
       EMAIL: "qa-owner-f02@example.test"
-- extendedWaitUntil:
-    visible: "Set up your company"
-    timeout: 15000
-- tapOn: "Create"
-- tapOn:
-    id: "fl_welcome_name"
-- inputText: "QA Electric"
-- hideKeyboard
-- tapOn:
-    id: "fl_welcome_trade"
-- inputText: "Electrical"
-- hideKeyboard
-- tapOn: "Create company"
-- extendedWaitUntil:
-    visible: "Today"
-    timeout: 15000
 # Owner sees Team and Company on More (AC-F3)
-- tapOn: "More"
-- assertVisible: "Team"
-- assertVisible: "Company"
+- tapOn:
+    id: "fl_tab_more"
+- assertVisible:
+    id: "fl_more_team"
+- assertVisible:
+    id: "fl_more_company"
 # AC-F2: the Owner's Team page shows the invite code to share
-- tapOn: "Team"
+- tapOn:
+    id: "fl_more_team"
 - assertVisible: "Invite code"
 - assertVisible:
     id: "fl_team_code"
@@ -42,28 +30,41 @@ appId: com.kurtz.homerecord.fieldlog
 # Sign-in survives a restart (AC-F4)
 - stopApp
 - launchApp
-- assertVisible: "Today"
+- extendedWaitUntil:
+    visible:
+      id: "fl_tab_today"
+    timeout: 15000
 # Sign out asks first, then clears the company (AC-F4)
-- tapOn: "More"
-- tapOn: "Sign out"
-- assertVisible: "Sign out?"
-- tapOn: "Sign out"
-- assertVisible: "Email"
+- tapOn:
+    id: "fl_tab_more"
+- tapOn:
+    id: "fl_more_sign_out"
+- assertVisible:
+    id: "fl_more_sign_out_body"
+- tapOn:
+    id: "fl_more_sign_out_confirm"
+- assertVisible:
+    id: "fl_sign_in_email"
 # AC-F2 (join part): a second account joins with the code and lands on Today
 - runFlow:
     file: _sign-in.yaml
     env:
       EMAIL: "qa-crew-f02@example.test"
 - extendedWaitUntil:
-    visible: "Set up your company"
+    visible:
+      id: "fl_welcome_mode_join"
     timeout: 15000
-- tapOn: "Join"
-- tapOn: "Invite code"
+- tapOn:
+    id: "fl_welcome_mode_join"
+- tapOn:
+    id: "fl_welcome_code"
 - pasteText
 - hideKeyboard
-- tapOn: "Join company"
+- tapOn:
+    id: "fl_welcome_submit"
 - extendedWaitUntil:
-    visible: "Today"
+    visible:
+      id: "fl_tab_today"
     timeout: 15000
 # Crew cannot add a job (AC-F3: no New job button at all)
 - tapOn:
@@ -74,7 +75,14 @@ appId: com.kurtz.homerecord.fieldlog
 - assertNotVisible:
     id: "fl_jobs_new"
 # Crew cannot see Team or Company (AC-F3: hidden, not greyed out)
-- tapOn: "More"
-- assertNotVisible: "Team"
-- assertNotVisible: "Company"
+- tapOn:
+    id: "fl_tab_more"
+- extendedWaitUntil:
+    visible:
+      id: "fl_more_sign_out"
+    timeout: 10000
+- assertNotVisible:
+    id: "fl_more_team"
+- assertNotVisible:
+    id: "fl_more_company"
 - takeScreenshot: F02-more-crew

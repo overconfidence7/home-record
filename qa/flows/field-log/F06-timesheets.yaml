@@ -4,24 +4,9 @@ appId: com.kurtz.homerecord.fieldlog
 - launchApp:
     clearState: true
 - runFlow:
-    file: _sign-in.yaml
+    file: _owner-company.yaml
     env:
       EMAIL: "qa-owner-f06@example.test"
-- extendedWaitUntil:
-    visible: "Set up your company"
-    timeout: 15000
-- tapOn: "Create"
-- tapOn:
-    id: "fl_welcome_name"
-- inputText: "QA Electric"
-- hideKeyboard
-- tapOn:
-    id: "fl_welcome_trade"
-- inputText: "Electrical"
-- hideKeyboard
-- tapOn: "Create company"
-- extendedWaitUntil:
-    visible: "Today"
 # AC-F14 (week view part): Timesheets opens on a week; an empty week says so and the week picker moves
 - tapOn: "More"
 - tapOn:
