@@ -32,12 +32,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.input.ImeAction
 import com.kurtz.homerecord.coreui.components.FormScaffold
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.TimeField
-import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -239,48 +237,46 @@ private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEven
 private fun PunchEditScreen(sheet: PunchEditSheet, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
     // Back with nothing changed closes the form; with changes, FormScaffold's own handler asks first.
     BackHandler { onEvent(TimesheetsEvent.CancelEdit) }
-    CompositionLocalProvider(LocalTagPrefix provides "fl_timesheets_edit") {
-        FormScaffold(
-            title = stringResource(R.string.ts_edit_title),
-            dirty = sheet.dirty,
-            saveEnabled = true,
-            onClose = { onEvent(TimesheetsEvent.CancelEdit) },
-            onSave = { onEvent(TimesheetsEvent.SaveEdit) },
-            modifier = Modifier.testTag("fl_timesheets_edit"),
-        ) {
-            Text(
-                stringResource(R.string.ts_edit_subtitle, sheet.personName, stringResource(kindLabel(sheet.kind)), sheet.dateLabel),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            TimeField(stringResource(R.string.ts_edit_time), sheet.time, { onEvent(TimesheetsEvent.EditTime(it)) }, Modifier.testTag("fl_timesheets_edit_time"))
-            if (sheet.jobs.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.ts_edit_job), style = MaterialTheme.typography.labelLarge)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        sheet.jobs.forEach { job ->
-                            FilterChip(
-                                selected = sheet.jobId == job.id, onClick = { onEvent(TimesheetsEvent.EditJob(job.id)) },
-                                label = { Text(job.name) }, modifier = Modifier.heightIn(min = 48.dp).testTag("fl_timesheets_edit_job_${job.id}"),
-                            )
-                        }
+    FormScaffold(
+        title = stringResource(R.string.ts_edit_title),
+        dirty = sheet.dirty,
+        saveEnabled = true,
+        onClose = { onEvent(TimesheetsEvent.CancelEdit) },
+        onSave = { onEvent(TimesheetsEvent.SaveEdit) },
+        modifier = Modifier.testTag("fl_timesheets_edit"),
+    ) {
+        Text(
+            stringResource(R.string.ts_edit_subtitle, sheet.personName, stringResource(kindLabel(sheet.kind)), sheet.dateLabel),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        TimeField(stringResource(R.string.ts_edit_time), sheet.time, { onEvent(TimesheetsEvent.EditTime(it)) }, Modifier.testTag("fl_timesheets_edit_time"))
+        if (sheet.jobs.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.ts_edit_job), style = MaterialTheme.typography.labelLarge)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    sheet.jobs.forEach { job ->
+                        FilterChip(
+                            selected = sheet.jobId == job.id, onClick = { onEvent(TimesheetsEvent.EditJob(job.id)) },
+                            label = { Text(job.name) }, modifier = Modifier.heightIn(min = 48.dp).testTag("fl_timesheets_edit_job_${job.id}"),
+                        )
                     }
                 }
             }
-            LabeledField(
-                stringResource(R.string.ts_edit_reason), sheet.reason, { onEvent(TimesheetsEvent.EditReason(it)) },
-                Modifier.testTag("fl_timesheets_edit_reason"), required = true,
-                helper = stringResource(R.string.ts_edit_reason_helper),
-                error = if (sheet.error == EditError.ReasonRequired) stringResource(R.string.ts_edit_reason_required) else null,
-                singleLine = false, imeAction = ImeAction.Default,
-            )
-            if (sheet.error == EditError.Locked) {
-                Text(stringResource(R.string.ts_edit_locked), Modifier.testTag("fl_timesheets_edit_locked"), color = MaterialTheme.colorScheme.error)
-            }
-            if (sheet.audit.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.ts_audit_title), style = MaterialTheme.typography.labelLarge)
-                    AuditLines(sheet.audit, zone)
-                }
+        }
+        LabeledField(
+            stringResource(R.string.ts_edit_reason), sheet.reason, { onEvent(TimesheetsEvent.EditReason(it)) },
+            Modifier.testTag("fl_timesheets_edit_reason"), required = true,
+            helper = stringResource(R.string.ts_edit_reason_helper),
+            error = if (sheet.error == EditError.ReasonRequired) stringResource(R.string.ts_edit_reason_required) else null,
+            singleLine = false, imeAction = ImeAction.Default,
+        )
+        if (sheet.error == EditError.Locked) {
+            Text(stringResource(R.string.ts_edit_locked), Modifier.testTag("fl_timesheets_edit_locked"), color = MaterialTheme.colorScheme.error)
+        }
+        if (sheet.audit.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.ts_audit_title), style = MaterialTheme.typography.labelLarge)
+                AuditLines(sheet.audit, zone)
             }
         }
     }

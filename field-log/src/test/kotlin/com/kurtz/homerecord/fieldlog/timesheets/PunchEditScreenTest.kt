@@ -51,8 +51,8 @@ class PunchEditScreenTest {
         rule.onNodeWithTag("fl_timesheets_edit").assertExists()
         rule.onNodeWithTag("fl_timesheets_list").assertDoesNotExist()
         rule.onNodeWithText("Edit punch").assertExists()
-        rule.onNodeWithTag("fl_timesheets_edit_save").performClick()
-        rule.onNodeWithTag("fl_timesheets_edit_close").performClick()
+        rule.onNodeWithTag("fl_save").performClick()
+        rule.onNodeWithTag("fl_close").performClick()
         assertThat(events).containsExactly(TimesheetsEvent.SaveEdit, TimesheetsEvent.CancelEdit).inOrder()
     }
 
@@ -60,9 +60,9 @@ class PunchEditScreenTest {
         val events = mutableListOf<TimesheetsEvent>()
         screen(sheet) { events += it }
         rule.onNodeWithText(LocalTime.of(7, 30).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))).assertExists()
-        rule.onNodeWithTag("fl_timesheets_edit_pick_time").performClick()
+        rule.onNodeWithTag("fl_pick_time").performClick()
         rule.onNode(isDialog()).assertExists()
-        rule.onNodeWithTag("fl_timesheets_edit_pick_time_ok").performClick()
+        rule.onNodeWithTag("fl_pick_time_ok").performClick()
         rule.onNode(isDialog()).assertDoesNotExist()
         assertThat(events).containsExactly(TimesheetsEvent.EditTime(LocalTime.of(7, 30)))
     }
@@ -70,12 +70,12 @@ class PunchEditScreenTest {
     @Test fun closeAfterAChangeAsksFirst() {
         val events = mutableListOf<TimesheetsEvent>()
         screen(sheet.copy(reason = "Forgot to clock in")) { events += it }
-        rule.onNodeWithTag("fl_timesheets_edit_close").performClick()
+        rule.onNodeWithTag("fl_close").performClick()
         rule.onNodeWithText("Discard changes?").assertExists()
-        rule.onNodeWithTag("fl_timesheets_edit_keep_editing").performClick()
+        rule.onNodeWithTag("fl_keep_editing").performClick()
         assertThat(events).isEmpty()
-        rule.onNodeWithTag("fl_timesheets_edit_close").performClick()
-        rule.onNodeWithTag("fl_timesheets_edit_discard").performClick()
+        rule.onNodeWithTag("fl_close").performClick()
+        rule.onNodeWithTag("fl_discard").performClick()
         assertThat(events).containsExactly(TimesheetsEvent.CancelEdit)
     }
 
