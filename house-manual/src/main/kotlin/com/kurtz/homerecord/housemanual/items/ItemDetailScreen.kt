@@ -87,7 +87,12 @@ import java.util.Locale
 fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit, modifier: Modifier = Modifier) {
     val detail = state.detail
     ScreenScaffold(
-        title = detail?.item?.name ?: stringResource(R.string.item_detail_missing_title),
+        // Rule 2: the bar names the record, stays blank while loading, and says "not found" only once loading is over.
+        title = when {
+            detail != null -> detail.item.name
+            state.loading -> ""
+            else -> stringResource(R.string.item_detail_missing_title)
+        },
         subtitle = detail?.let { listOf(it.subtypeLabel, it.roomName).filter(String::isNotBlank).joinToString(", ") },
         onBack = { onEvent(ItemDetailEvent.Back) },
         actions = {
