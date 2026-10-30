@@ -263,25 +263,23 @@ class AppContainer(private val app: Application) {
     }
 
     val approvals by lazy { com.kurtz.homerecord.core.punch.TimesheetApprovals(db, onChange = ::recordChange) }
-    val crewClock by lazy {
-        val loc = com.kurtz.homerecord.core.location.FusedLocationProvider(app)
-        com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, loc), loc)
-    }
+    /** The widget's clock; FL-Clock builds its own in [clockDeps] around the screen's location provider. */
     val clock by lazy { com.kurtz.homerecord.core.punch.ClockController(punches, com.kurtz.homerecord.core.location.FusedLocationProvider(app)) }
 
     /** What FL-Clock needs; the clock rules come with the cached membership, so every role has them offline too. */
     fun clockDeps(context: Context, membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String): com.kurtz.homerecord.fieldlog.clock.ClockDeps {
         val prefs = context.getSharedPreferences("clock", Context.MODE_PRIVATE)
         val location = com.kurtz.homerecord.core.location.FusedLocationProvider(context)
+        val controller = com.kurtz.homerecord.core.punch.ClockController(punches, location)
         return com.kurtz.homerecord.fieldlog.clock.ClockDeps(
             companyId = membership.companyId, memberId = memberId,
-            controller = com.kurtz.homerecord.core.punch.ClockController(punches, location), punches = punches,
+            controller = controller, punches = punches,
             jobs = db.jobDao(), location = location,
             settings = company.settings,
             permissionAsked = { prefs.getBoolean("location_asked", false) },
             markPermissionAsked = { prefs.edit().putBoolean("location_asked", true).apply() },
             role = membership.role,
-            crewClock = com.kurtz.homerecord.core.punch.CrewClock(punches, com.kurtz.homerecord.core.punch.ClockController(punches, location), location),
+            crewClock = com.kurtz.homerecord.core.punch.CrewClock(punches, controller, location),
             members = db.memberDao().observeFor(membership.companyId),
             approvals = db.timesheetApprovalDao().observeFor(memberId),
             gates = roleGates,

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.coreui.components.MoneyField
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -261,9 +262,9 @@ fun ServiceFormContent(draft: ServiceDraft, contacts: List<ContactEntity>, showE
                 }
             }
         }
-        LabeledField(
-            label = stringResource(R.string.item_detail_service_cost), value = draft.cost,
-            onValueChange = { onEvent(ItemDetailEvent.ChangeService(draft.copy(cost = it))) }, keyboardType = KeyboardType.Decimal,
+        MoneyField(
+            label = stringResource(R.string.item_detail_service_cost), text = draft.cost,
+            onTextChange = { onEvent(ItemDetailEvent.ChangeService(draft.copy(cost = it))) },
             error = if (ServiceField.COST in errors) stringResource(R.string.item_detail_service_cost_error) else null,
             modifier = Modifier.testTag("hm_item_detail_service_cost"),
         )

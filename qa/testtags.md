@@ -13,6 +13,7 @@ Format `<app>_<screen>_<element>`; `hm` = House Manual, `fl` = Field Log. Both a
 | `<app>_layer_<wire>` | Blueprint layer chips (`hm_layer_walls`...) |
 | `hm_plan_{fit,undo,redo,add_room,canvas,room_name,room_kind,room_width,room_length,done,edit_shape,add_stairs,delete_room,add_door,add_window,opening_width,delete_opening}`, `hm_plan_floor_<floorId>` | Plan editor |
 | `<app>_sign_in_{email,send,google,code,verify,change_email}` | Shared sign-in (`fl_sign_in_email`) |
+| `hm_account_sign_out` | HM More account card, Sign out (shared AccountRoute, app prefix) |
 | `fl_welcome_{name,trade,phone,code,submit,sign_out}` | FL-Welcome |
 | `fl_team_{share,new_code,remove_confirm}` | FL-Team |
 | `fl_company_{name,trade,phone,email,address,distance,ot_<rule>}` | FL-Company |

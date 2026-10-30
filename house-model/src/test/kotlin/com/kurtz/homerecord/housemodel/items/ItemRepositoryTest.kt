@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.items
 
+import com.kurtz.homerecord.core.units.Money
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -42,9 +43,9 @@ class ItemRepositoryTest {
 
     @AcceptanceCriterion("AC-C30")
     @Test fun priceParsesToCents() {
-        assertThat(parsePriceCents("$1,299.5")).isEqualTo(129_950L)
-        assertThat(parsePriceCents("42")).isEqualTo(4_200L)
-        assertThat(parsePriceCents("-1")).isNull()
+        assertThat(Money.parseCents("$1,299.5")).isEqualTo(129_950L)
+        assertThat(Money.parseCents("42")).isEqualTo(4_200L)
+        assertThat(Money.parseCents("-1")).isNull()
     }
 
     @AcceptanceCriterion("AC-C30")

@@ -2,7 +2,9 @@
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../src/index";
-import { FREE_DAILY_LIMIT, parseWarrantyJson, warrantyCacheKey } from "../src/lookup/warranty";
+import {
+  FREE_DAILY_LIMIT, REPORT_TOOL, parseWarrantyJson, parseWarrantyToolInput, warrantyCacheKey,
+} from "../src/lookup/warranty";
 import { seedUser } from "./helpers";
 
 const recorded = {
@@ -35,6 +37,22 @@ describe("AC-B10 normalization", () => {
     expect(parseWarrantyJson("Here: " + JSON.stringify({ partsYears: 5, confidence: "weird" }))?.confidence).toBe("low");
     expect(parseWarrantyJson("no idea")).toBeNull();
   });
+  it("reads the strict report_warranty tool call and checks its ranges", () => { // AC-B10 structured output
+    const input = {
+      partsYears: 10, laborYears: null, specialTerms: [], registrationRequired: false, registrationUrl: null,
+      manualUrl: "https://www.trane.com/manual.pdf", sourceUrl: "https://www.trane.com/warranty", confidence: "medium",
+      summary: "10 years parts.",
+    };
+    const call = (i: unknown) => [{ type: "text", text: "Found it." }, { type: "tool_use", name: "report_warranty", input: i }];
+    expect(parseWarrantyToolInput(call(input))).toEqual(input);
+    expect(parseWarrantyToolInput(call({ ...input, partsYears: 500 }))?.partsYears).toBeNull();
+    expect(parseWarrantyToolInput([{ type: "tool_use", name: "other", input }])).toBeNull();
+    expect(parseWarrantyToolInput([{ type: "text", text: JSON.stringify(input) }])).toBeNull();
+    const schema = REPORT_TOOL.input_schema;
+    expect(REPORT_TOOL.strict).toBe(true);
+    expect(schema.additionalProperties).toBe(false);
+    expect([...schema.required].sort()).toEqual(Object.keys(schema.properties).sort());
+  });
 });
 
 describe("AC-B10 POST /lookup/warranty", () => {
@@ -44,6 +62,34 @@ describe("AC-B10 POST /lookup/warranty", () => {
     vi.stubGlobal("fetch", upstream);
   });
   afterEach(() => vi.unstubAllGlobals());
+
+  it("asks for the answer through the strict tool and stores what it reports", async () => { // AC-B10
+    upstream.mockResolvedValue(new Response(JSON.stringify({
+      content: [
+        { type: "server_tool_use", name: "web_search" },
+        { type: "text", text: "The Trane page lists the terms." },
+        {
+          type: "tool_use", id: "t1", name: "report_warranty",
+          input: {
+            partsYears: 10, laborYears: 1, specialTerms: ["compressor 12 years"], registrationRequired: true,
+            registrationUrl: "https://www.trane.com/register", manualUrl: null, sourceUrl: "https://www.trane.com/warranty",
+            confidence: "high", summary: "10 years parts, 1 year labor.",
+          },
+        },
+      ],
+      stop_reason: "tool_use",
+      usage: { input_tokens: 900, output_tokens: 120, server_tool_use: { web_search_requests: 1 } },
+    }), { status: 200 }));
+    const token = await seedUser("lu7", "lu7@example.com");
+    const res = await post(token, { make: "Trane", model: "XR14" });
+    expect(res.status).toBe(200);
+    const body = await res.json() as { partsYears: number; specialTerms: string[] };
+    expect(body.partsYears).toBe(10);
+    expect(body.specialTerms).toEqual(["compressor 12 years"]);
+    const sent = JSON.parse(upstream.mock.calls[0][1].body as string) as { tools: { name: string; strict?: boolean }[] };
+    expect(sent.tools.map((t) => t.name)).toEqual(["web_search", "report_warranty"]);
+    expect(sent.tools[1].strict).toBe(true);
+  });
 
   it("requires a session", async () => {
     const res = await app.request("/lookup/warranty", { method: "POST", body: "{}" }, env);

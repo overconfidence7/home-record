@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.upkeep
 
+import com.kurtz.homerecord.core.units.Money
 import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.ContactEntity
@@ -7,7 +8,6 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.core.model.ConsumableKind
 import com.kurtz.homerecord.housemodel.items.isIsoDate
-import com.kurtz.homerecord.housemodel.items.parsePriceCents
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -43,7 +43,7 @@ data class ServiceDraft(
     fun errors(): Set<ServiceField> = buildSet {
         if (!isIsoDate(date)) add(ServiceField.DATE)
         if (description.isBlank()) add(ServiceField.DESCRIPTION)
-        if (cost.isNotBlank() && parsePriceCents(cost) == null) add(ServiceField.COST)
+        if (cost.isNotBlank() && Money.parseCents(cost) == null) add(ServiceField.COST)
     }
 }
 
@@ -107,7 +107,7 @@ class UpkeepRepository(
         db.serviceRecordDao().upsert(
             ServiceRecordEntity(
                 id = id, itemId = itemId, date = draft.date, contactId = draft.contactId, description = draft.description.trim(),
-                costCents = parsePriceCents(draft.cost), createdAt = existing?.createdAt ?: at, updatedAt = at,
+                costCents = Money.parseCents(draft.cost), createdAt = existing?.createdAt ?: at, updatedAt = at,
             ),
         )
         onChange("service_record", id)

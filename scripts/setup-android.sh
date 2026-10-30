@@ -208,8 +208,11 @@ fi
 
 # --------------------------------------------------------- local.properties
 if [ -f "$PROJECT_DIR/settings.gradle.kts" ] || [ -f "$PROJECT_DIR/settings.gradle" ]; then
-  log "Writing $PROJECT_DIR/local.properties"
-  printf 'sdk.dir=%s\n' "$ANDROID_HOME" > "$PROJECT_DIR/local.properties"
+  # Replace only the sdk.dir line: local.properties also holds api.baseUrl and the signing keys.
+  props="$PROJECT_DIR/local.properties"
+  log "Setting sdk.dir in $props"
+  { printf 'sdk.dir=%s\n' "$ANDROID_HOME"; if [ -f "$props" ]; then grep -v '^sdk\.dir=' "$props" || true; fi; } > "$props.new"
+  mv "$props.new" "$props"
 else
   log "No Gradle project at $PROJECT_DIR; skipping local.properties (Gradle will use ANDROID_HOME)"
 fi

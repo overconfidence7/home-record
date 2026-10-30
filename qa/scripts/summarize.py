@@ -106,8 +106,11 @@ def main():
         try:
             for issue in ET.parse(x).getroot().iter("issue"):
                 if issue.get("severity") == "Error":
-                    loc = issue.find("location"); where = f"{loc.get('file','?').split('/')[-1]}:{loc.get('line','?')}" if loc is not None else "?"
-                    add(f"auto:lint:{mod}:{issue.get('id')}:{where}", MAJOR, f"Lint error {issue.get('id')} in {mod} ({where})", "lintDebug has no errors (S1)", (issue.get("message") or "")[:200])
+                    loc = issue.find("location")
+                    file = loc.get('file', '?').split('/')[-1] if loc is not None else "?"
+                    where = f"{file}:{loc.get('line', '?')}" if loc is not None else "?"
+                    # the id names the file, not the line, so an issue that moves within its file is not filed again
+                    add(f"auto:lint:{mod}:{issue.get('id')}:{file}", MAJOR, f"Lint error {issue.get('id')} in {mod} ({where})", "lintDebug has no errors (S1)", (issue.get("message") or "")[:200])
         except Exception:
             pass
     glog = read(os.path.join(jvm, "gradle.log"))

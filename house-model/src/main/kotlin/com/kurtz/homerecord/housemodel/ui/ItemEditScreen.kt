@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.components.MoneyField
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.clickable
@@ -136,9 +137,9 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
             stringResource(R.string.item_in_service), d.inServiceOn.ifBlank { null },
             { onEvent(ItemEditEvent.Change(d.copy(inServiceOn = it.orEmpty()))) }, Modifier.testTag("${LocalTagPrefix.current}_item_in_service"),
         )
-        LabeledField(
+        MoneyField(
             stringResource(R.string.item_price), d.price, { onEvent(ItemEditEvent.Change(d.copy(price = it))) },
-            Modifier.testTag("${LocalTagPrefix.current}_item_price"), keyboardType = KeyboardType.Decimal,
+            Modifier.testTag("${LocalTagPrefix.current}_item_price"),
             error = if (ItemField.PRICE in errors) stringResource(R.string.item_price_error) else null,
         )
         LabeledField(stringResource(R.string.item_vendor), d.vendor, { onEvent(ItemEditEvent.Change(d.copy(vendor = it))) }, Modifier.testTag("${LocalTagPrefix.current}_item_vendor"))

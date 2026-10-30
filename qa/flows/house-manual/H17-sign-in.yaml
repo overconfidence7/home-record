@@ -33,7 +33,8 @@ env:
 - tapOn:
     id: "hm_sign_in_verify"
 - extendedWaitUntil:
-    visible: "Sign out"
+    visible:
+      id: "hm_account_sign_out"
     timeout: 15000
 # AC-H15: signing in uploads the home; the first pass registers it on the server and ends synced
 # (judge:hm-signin-sync-failed)
@@ -43,7 +44,8 @@ env:
 - assertNotVisible: "Sync failed. Tap to retry"
 - takeScreenshot: H17-signed-in
 # Signing out keeps the local copy (AC-H15)
-- tapOn: "Sign out"
+- tapOn:
+    id: "hm_account_sign_out"
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 10000

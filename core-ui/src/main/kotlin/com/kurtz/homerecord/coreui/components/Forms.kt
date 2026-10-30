@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.coreui.components
 
+import com.kurtz.homerecord.core.units.Money
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -184,27 +185,36 @@ fun MoneyField(
     modifier: Modifier = Modifier,
     required: Boolean = false,
 ) {
-    var text by rememberSaveable { mutableStateOf(cents?.let { formatCents(it) }.orEmpty()) }
-    val invalid = text.isNotBlank() && parseCents(text) == null
+    var text by rememberSaveable { mutableStateOf(cents?.let { Money.format(it) }.orEmpty()) }
+    MoneyField(label, text, { text = it; onCentsChange(Money.parseCents(it)) }, modifier, required)
+}
+
+/**
+ * Money input over a typed draft (forms that keep the text in SavedStateHandle and parse on save with
+ * [Money.parseCents]); shows [error], or the standard money error when the text is not an amount.
+ */
+@Composable
+fun MoneyField(
+    label: String,
+    text: String,
+    onTextChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    required: Boolean = false,
+    error: String? = null,
+    imeAction: ImeAction = ImeAction.Next,
+) {
+    val invalid = text.isNotBlank() && Money.parseCents(text) == null
     LabeledField(
         label = label,
         value = text,
-        onValueChange = { text = it; onCentsChange(parseCents(it)) },
+        onValueChange = onTextChange,
         modifier = modifier,
         required = required,
-        error = if (invalid) stringResource(R.string.money_error) else null,
+        error = error ?: if (invalid) stringResource(R.string.money_error) else null,
         keyboardType = KeyboardType.Decimal,
+        imeAction = imeAction,
     )
 }
-
-internal fun parseCents(input: String): Long? {
-    val cleaned = input.trim().removePrefix("$").replace(",", "")
-    if (!Regex("""\d+(\.\d{1,2})?""").matches(cleaned)) return null
-    val (whole, frac) = cleaned.split('.').let { it[0] to (it.getOrNull(1) ?: "") }
-    return whole.toLong() * 100 + frac.padEnd(2, '0').toLong()
-}
-
-internal fun formatCents(cents: Long): String = "%d.%02d".format(cents / 100, cents % 100)
 
 /** ISO `yyyy-MM-dd` date field backed by the Material date picker. */
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.items
 
+import com.kurtz.homerecord.core.units.Money
 import androidx.room.withTransaction
 import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.ConsumableEntity
@@ -51,7 +52,7 @@ data class ItemDraft(
     val photos: List<DraftPhoto> = emptyList(),
 ) {
     /** Price in cents, or null when blank or not a number. */
-    val priceCents: Long? get() = parsePriceCents(price)
+    val priceCents: Long? get() = Money.parseCents(price)
 
     fun errors(): Set<ItemField> = buildSet {
         if (subtypeId == null || ItemCategory.subtype(subtypeId) == null) add(ItemField.SUBTYPE)
@@ -66,14 +67,6 @@ data class ItemDraft(
 enum class ItemField { SUBTYPE, ROOM, NAME, PRICE, MANUFACTURED, PURCHASED, IN_SERVICE }
 
 internal fun isIsoDate(s: String) = runCatching { LocalDate.parse(s) }.isSuccess
-
-/** "1,299.50" or "$1299" to cents; null when it isn't a non-negative amount. */
-internal fun parsePriceCents(raw: String): Long? {
-    val t = raw.trim().removePrefix("$").replace(",", "")
-    if (!Regex("""\d+(\.\d{1,2})?""").matches(t)) return null
-    val (whole, frac) = t.split('.').let { it[0] to (it.getOrNull(1) ?: "") }
-    return whole.toLong() * 100 + frac.padEnd(2, '0').toLong()
-}
 
 /** Everything the item page shows; [warranty] is null until one is looked up or entered (AC-H7). */
 data class ItemDetail(

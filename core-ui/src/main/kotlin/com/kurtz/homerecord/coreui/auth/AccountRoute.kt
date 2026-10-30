@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.initializer
@@ -21,6 +22,7 @@ import com.kurtz.homerecord.core.auth.AuthRepository
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.coreui.R
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 
 /**
  * Sign-in when signed out, account summary with sign out when signed in. [syncStatus] shows under the summary while
@@ -36,7 +38,10 @@ fun AccountRoute(repo: AuthRepository, modifier: Modifier = Modifier, syncStatus
             Text(stringResource(R.string.account_signed_in), style = MaterialTheme.typography.titleMedium)
             syncStatus()
             Text(stringResource(R.string.account_sign_out_note), style = MaterialTheme.typography.bodyMedium)
-            OutlinedButton(onClick = repo::signOut, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            OutlinedButton(
+                onClick = repo::signOut,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_account_sign_out"),
+            ) {
                 Text(stringResource(R.string.account_sign_out))
             }
         }

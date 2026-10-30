@@ -46,7 +46,46 @@ export function warrantyCacheKey(make: string, model: string): string {
   return `warranty:${norm(make)}:${norm(model)}`;
 }
 
-/** Pulls the first JSON object out of model text, tolerating code fences and prose. */
+/**
+ * The tool the model reports its answer through (AC-B10 structured output). `strict` makes the API hold the input
+ * to this schema; a client tool is used rather than `output_config.format` because web search answers carry
+ * citations, which JSON output mode refuses. Ranges the API schema cannot express are checked by `resultSchema`.
+ */
+const nullable = (type: string) => ({ type: [type, "null"] });
+export const REPORT_TOOL = {
+  name: "report_warranty",
+  description: "Report the warranty terms found for the product. Call this exactly once, after searching.",
+  strict: true,
+  input_schema: {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "partsYears", "laborYears", "specialTerms", "registrationRequired", "registrationUrl", "manualUrl", "sourceUrl",
+      "confidence", "summary",
+    ],
+    properties: {
+      partsYears: { ...nullable("number"), description: "Years of parts coverage, null when unknown" },
+      laborYears: { ...nullable("number"), description: "Years of labor coverage, null when unknown" },
+      specialTerms: { type: "array", items: { type: "string" }, description: "For example 'tank 12 years'" },
+      registrationRequired: { type: "boolean" },
+      registrationUrl: nullable("string"),
+      manualUrl: nullable("string"),
+      sourceUrl: { ...nullable("string"), description: "The page the terms came from" },
+      confidence: { type: "string", enum: ["high", "medium", "low"] },
+      summary: { type: "string", description: "One plain sentence" },
+    },
+  },
+} as const;
+
+/** The input of the model's `report_warranty` call, held to `resultSchema`; null when it made none or it is invalid. */
+export function parseWarrantyToolInput(blocks: ContentBlock[]): WarrantyResult | null {
+  const call = blocks.find((b) => b.type === "tool_use" && b.name === REPORT_TOOL.name);
+  if (!call) return null;
+  const parsed = resultSchema.safeParse(call.input);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Pulls the first JSON object out of model text, tolerating code fences and prose (fallback when no tool call). */
 export function parseWarrantyJson(text: string): WarrantyResult | null {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
@@ -57,6 +96,13 @@ export function parseWarrantyJson(text: string): WarrantyResult | null {
   } catch {
     return null;
   }
+}
+
+export interface ContentBlock {
+  type: string;
+  text?: string;
+  name?: string;
+  input?: unknown;
 }
 
 export interface UpstreamUsage {
@@ -80,7 +126,7 @@ export async function callMessages(
   apiKey: string,
   payload: unknown,
   fetchFn: typeof fetch,
-): Promise<{ text: string; usage: UpstreamUsage } | null> {
+): Promise<{ text: string; blocks: ContentBlock[]; usage: UpstreamUsage } | null> {
   let res: Response;
   try {
     res = await fetchFn("https://api.anthropic.com/v1/messages", {
@@ -93,11 +139,13 @@ export async function callMessages(
   }
   if (!res.ok) return null;
   const body = (await res.json().catch(() => ({}))) as {
-    content?: { type: string; text?: string }[];
+    content?: ContentBlock[];
     usage?: { input_tokens?: number; output_tokens?: number; server_tool_use?: { web_search_requests?: number } };
   };
+  const blocks = Array.isArray(body.content) ? body.content : [];
   return {
-    text: (body.content ?? []).filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n"),
+    blocks,
+    text: blocks.filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n"),
     usage: {
       inputTokens: body.usage?.input_tokens ?? 0,
       outputTokens: body.usage?.output_tokens ?? 0,
@@ -108,10 +156,7 @@ export async function callMessages(
 
 const PROMPT =
   "Find the manufacturer's residential warranty for this product using web search on the manufacturer's own site first. " +
-  "Reply with ONE JSON object and nothing else, with keys: partsYears (number|null), laborYears (number|null), " +
-  "specialTerms (string[], e.g. 'tank 12 years'), registrationRequired (boolean), registrationUrl (string|null), " +
-  "manualUrl (string|null), sourceUrl (string|null, the page the terms came from), confidence ('high'|'medium'|'low'), " +
-  "summary (one plain sentence). Use null when unknown; never guess.";
+  `Then report what you found by calling the ${REPORT_TOOL.name} tool once. Use null when unknown; never guess.`;
 
 export async function askClaude(
   apiKey: string,
@@ -122,8 +167,14 @@ export async function askClaude(
   const answer = await callMessages(apiKey, {
     model: MODEL,
     max_tokens: 1024,
-    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES, allowed_domains: ALLOWED_DOMAINS }],
+    tools: [
+      { type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES, allowed_domains: ALLOWED_DOMAINS },
+      REPORT_TOOL,
+    ],
     messages: [{ role: "user", content: `${PROMPT}\n\nProduct: ${product}` }],
   }, fetchFn);
-  return answer && { result: parseWarrantyJson(answer.text), usage: answer.usage };
+  return answer && {
+    result: parseWarrantyToolInput(answer.blocks) ?? parseWarrantyJson(answer.text),
+    usage: answer.usage,
+  };
 }
