@@ -2015,3 +2015,57 @@ Broadcast completed: result=0)); house-manual jank:house-manual (not measurable:
 Broadcast completed: result=0))
 
 Tested: 50 device stages, 849 unit tests, 129 backend tests, coverage 217/217 ACs. Passed: 37. New issues: 11. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-10-30 (commit 9d87512)
+
+Judged the suite results for 9d87512 (run of 2026-10-29 22:52 UTC, 50 stages, 37 passed). `build` HEAD 3e0fa82 is eight commits ahead (0bfc2e9 fixes the H02 landscape failure and resets rotation in device-suite.sh; the rest are CR2u Minor sweeps); the suite has not tested it yet. Since 82c76a0 the visible changes are: the plan editor's selection panel (pinned Done / Edit shape / Delete row, wall-only and door-only inspectors), F08b's shutter waiting for the camera, House Manual registering its home before syncing, and the crew's "Changes to your punches" list on Clock. No PLAN task was newly ticked.
+
+Verdict: House Manual: the plan editor's panel is finally tidy in portrait (tap a wall and you get "Wall, 12' long / Add door / Add window / Done", nothing else), but turning the phone sideways while naming a room wipes the plan off the screen, and that one bug took every later House Manual flow and all three tours down with it, so sign-in sync (the fix for last run's "Sync failed") is still unseen on a device. The biggest gap is unchanged: the house stops at a 2D outline with no wall photos, shutoffs, panel or 3D. / Field Log: the shutter works on a device for the first time: one tap, the counter reads 1 and the photo is on the job's Photos tab under today. What Nate would hit next is that every other photo screen (detail, mark up, before/after) still has never shown a real picture, and Schedule is still the "Open a detail screen" placeholder.
+
+- [ ] [UI] Major: in phone landscape with the keyboard up, the House Manual navigation rail is pushed up under the status bar (the Home item's icon sits on the "10:32" clock) and the plan editor has no plan left: the screen is the top bar, the floor chips, the clipped action row ("Done" and "Edit shape" cut in half) and the keyboard; the canvas and the Room name field have zero height. 0bfc2e9 gives the name field room again, but nothing there keeps the rail inside the status-bar inset or leaves any of the plan visible [judge:hm-rail-ime-status-bar] - steps: House → Edit plan → Add room → tap Room name → rotate to landscape (flow H02 step 53) - expected: rule 28 (nothing interactive under the status bar; insets from Scaffold), rule 23 (keyboard never covers the focused field) - actual: rail item drawn over the clock, canvas gone, action row cut - screenshot: qa-results:latest/house-manual/maestro/qa-out/device/house-manual/maestro/out-H02-draw-plan/2026-10-29_223051/H02-draw-plan/screenshots/step-053-assertCondition-hm_plan_room_name.png
+
+Auto entry review (11 new): not flow errors. [auto:flow:house-manual:H02-draw-plan] is a real app failure (step 53: `hm_plan_room_name` has no height in landscape with the keyboard; the screenshot agrees with the builder's diagnosis in 0bfc2e9). The other ten (H02b, H03, H04, H17, H19, x-contacts, x-documents, tours dark/font200/landscape) are a suite cascade, not the app: each stopped at `hm_onboarding_skip` with the emulator still landscape after H02 (step-018 / step-012 shots are the onboarding form at 2400×1080). The rotation reset now in device-suite.sh is the right fix; nothing in those flows needs changing.
+
+Confirmed on device or in the crawler this run (builder may close): [auto:flow:field-log:F08b-capture-photo] fix d7eed21 (`F08b-capture-one-photo.png` counter 1, `F08b-photos-today.png` the photo under "Thursday, October 29, 2026"); [judge:hm-plan-inspector-clipped] in portrait (catalog `plan-selected`, `plan-wall`, `plan-door`, `plan-stairs`, `plan-overlap`: Done, Edit shape and the delete icon always on the pinned row; landscape is the new finding above); [judge:hm-room-missing-title] (`room-missing-light.png` titled "Room").
+
+Still open and seen again this run: [judge:qa-fl-photo-catalog-no-image] (`photo-detail-light.png` "Couldn't open this photo", `photos-tab-light.png` grey tiles), [judge:fl-capture-save-error] (unchanged in code; the shutter just did not fail this time), [judge:hm-plan-editor-fit] (catalog plans pinned top-left with the lower half empty), [judge:hm-room-item-rows] (`room-page-light.png`: Walls, Photos, Overlays, Breakers still grey cards), [judge:hm-documents-three-adds], [judge:hm-item-loading-title-not-found], [judge:hm-item-hero-icon-too-tall] (worst in `item-detail-landscape.png`), [judge:hm-layer-chips-no-icons], [judge:hm-house-actions-wrap] ("Edit / plan", "Export / PDF"), [judge:fl-reports-cards-empty], [judge:fl-today-cards-as-list], [judge:fl-edit-punch-dialog], [judge:fl-clock-solo-owner-noise] ("Clock in 0 people" on every tour), [judge:fl-schedule-placeholder-button], [judge:qa-crawler-job-tab-insets] (`photos-tab-*`: the day header through the clock), [judge:qa-catalog-sheets-no-container] (`item-edit-plate-sheet`, `item-edit-type-sheet`, `document-form`), [judge:qa-crawler-blank-shots] (about 25 non-loading shots are blank, including `house-blueprint-light`, `plan-empty-light`, `items-by-category-light`, `room-page-dark`, `clock-break-light`, `files-search-light`), and the open 200% nav-label item at the top of this file ("Sched / ule" on every Field Log font200 tour shot).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Maple St, two-story, basement → Home with search, Add item, Scan data plate, Emergency "Add a shutoff" | qa-results:latest/house-manual/maestro/qa-out/device/house-manual/maestro/out-H01-onboarding/2026-10-29_222939/H01-onboarding/takeScreenshot/H01-home-after-onboarding.png |
+| H2 | Clunky | First room drops and names fine in portrait; rotating while typing blanks the plan and fails the flow ([judge:hm-rail-ime-status-bar]); catalog panel is clean now | qa-results:latest/house-manual/maestro/qa-out/device/house-manual/maestro/out-H02-draw-plan/2026-10-29_223051/H02-draw-plan/screenshots/step-053-assertCondition-hm_plan_room_name.png |
+| H3 | Clunky | Not reached on device (cascade). Catalog: blueprint with dimensions, north arrow, door and stairs; Kitchen page items as rows, then four grey "nothing yet" cards | qa-results:latest/house-manual/crawler/house-manual/room-page-light.png |
+| H4 | Clunky | Not reached on device (cascade). Catalog: Add item with required markers, "Fill in from the data plate" chips, searchable type sheet drawn without its container | qa-results:latest/house-manual/crawler/house-manual/item-edit-plate-sheet-light.png |
+| H5 | Clunky | No flow adds more than one item; the seeded house reads well in Items and Home "Recent" | qa-results:latest/house-manual/crawler/house-manual/home-full-light.png |
+| H6 | Pass | By category / by room, filter chips, warranty line under each row, "No items match" with Clear filters | qa-results:latest/house-manual/crawler/house-manual/items-by-room-light.png |
+| H7 | Clunky | Warranty line, Details, Open manual, Warranty terms; hero is a lone thermometer icon over 40% of the screen; no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown with no spinner or error (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-no-warranty-light.png |
+| H17 | Clunky | Not reached on device (cascade), so the sync fix 7324c17 is unverified; the second-phone half is not exercised | qa-results:latest/house-manual/maestro/qa-out/device/house-manual/maestro/out-H17-sign-in/2026-10-29_223448/H17-sign-in/screenshots/step-014-tapOnElement-hm_onboarding_skip.png |
+| H19 | Clunky | Not reached on device (cascade). Catalog: "The free tier holds 15 items", Annual $24.99 / Lifetime $59.00, Restore purchases; failed state has Retry | qa-results:latest/house-manual/crawler/house-manual/paywall-items-light.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder; H15 Home report T073, H16 T074, H18 import T063).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → Set up your company → Today "No jobs yet at QA Electric" with Add a job and "Everything is synced" | qa-results:latest/field-log/maestro/qa-out/device/field-log/maestro/out-F01-welcome/2026-10-29_223125/F01-welcome/takeScreenshot/F01-today-empty.png |
+| F2 | Pass | Team shows the code and Share invite; second account joins, More shows "QA Electric · Crew" | qa-results:latest/field-log/maestro/qa-out/device/field-log/maestro/out-F02-invite-join/2026-10-29_223225/F02-invite-join/takeScreenshot/F02-more-crew.png |
+| F3 | Clunky | Overview with address, Open in Maps, stat tiles, Edit job; eight scrolling tabs where Log and Tasks lead nowhere yet | qa-results:latest/field-log/maestro/qa-out/device/field-log/maestro/out-F03-jobs/2026-10-29_223416/F03-jobs/takeScreenshot/F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass (clock in, location allow, far-from-job reason, from Today) | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out; crew now sees "Changes to your punches" with who, when and why | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Clunky | F06 passes; per-person week with flags, Approve all confirm; edit punch still a dialog | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Clunky | F07 and F07b pass (folders, search, offline, viewer, storage); markup (T042) not built; three icon buttons per row | qa-results:latest/field-log/crawler/field-log/files-tab-light.png |
+| F8 | Clunky | Shutter saves on device and the photo lands on Photos under today (was Blocked); photo detail, mark up and before/after still never show a real picture; volume key not exercised | qa-results:latest/field-log/maestro/qa-out/device/field-log/maestro/out-F08b-capture-photo/2026-10-29_224644/F08b-capture-photo/takeScreenshot/F08b-photos-today.png |
+| F15 | Pass | F15 passes: ranges, totals by person and job, CSV and QuickBooks export | qa-results:latest/field-log/crawler/field-log/reports-week-light.png |
+| F18 | Clunky | More, Team, Company, Reports in light, dark, 200% and landscape (rail, rotates); Schedule tab is the placeholder; "Sched / ule" at 200% | qa-results:latest/field-log/maestro/qa-out/device/field-log/maestro/out-tour-font200/2026-10-29_225000/_tour/takeScreenshot/tour-font200-schedule.png |
+
+Not built yet: F9–F14, F16, F17 (daily log T043, tasks T044, behind-the-wall T054).
+
+Focus check: nothing wrong. House Manual stays homeowner ("Save the plumber, the electrician and the HVAC company"), Field Log stays crew ("Your boss adds you to a job"); the shared plan editor and sync chip read fine in both.
+
+Coverage note: the auto entry reports 217/217 claimed ACs covered across 118 ticked tasks and subtasks (0 gaps).
+
+Judged: 276 screenshots opened (all 73 device flow and tour shots, 6 suite launch shots, all 147 light crawler shots, 49 dark/200%/landscape crawler shots, 1 zoomed crop); the other 390 crawler variants checked by script for blank frames. 20 walkthrough steps. New issues: 1. Product gaps: 0.
