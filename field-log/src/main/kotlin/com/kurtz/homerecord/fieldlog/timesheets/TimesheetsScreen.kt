@@ -165,13 +165,13 @@ private fun PersonSection(person: PersonWeek, expanded: Boolean, onEvent: (Times
                         Icon(Icons.Rounded.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(stringResource(R.string.ts_locked), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+                } else if (person.punches.isNotEmpty()) {
+                    // Approve one person lives inside the opened row; Approve all in the top bar is the screen's action (rules 7, 13).
+                    OutlinedButton(
+                        { onEvent(TimesheetsEvent.Approve(person.memberId)) },
+                        Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_timesheets_approve_${person.memberId}"),
+                    ) { Text(stringResource(R.string.ts_approve_person, person.name)) }
                 }
-            }
-            if (!person.approved && person.punches.isNotEmpty()) {
-                OutlinedButton(
-                    { onEvent(TimesheetsEvent.Approve(person.memberId)) },
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_timesheets_approve_${person.memberId}"),
-                ) { Text(stringResource(R.string.ts_approve_person, person.name)) }
             }
         }
         HorizontalDivider()
