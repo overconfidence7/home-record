@@ -7,7 +7,7 @@ import org.junit.Test
 // AC-C30: the Type sheet's search over category and subtype (ui-standards rule 11)
 class SubtypeSearchTest {
     private val names = mapOf(ItemCategory.HEATING_COOLING to "Heating and cooling")
-    private fun matching(q: String) = SubtypeSearch.matching(q) { names[it] ?: it.name }
+    private fun matching(q: String) = SubtypeSearch.matching(q, { it.id.replace('_', ' ') }) { names[it] ?: it.name }
 
     @Test fun blankQueryListsEveryCategoryInOrder() {
         val out = matching("  ")

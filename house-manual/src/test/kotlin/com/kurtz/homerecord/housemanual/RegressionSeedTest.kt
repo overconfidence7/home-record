@@ -35,6 +35,7 @@ import org.robolectric.annotation.Config
 class RegressionSeedTest {
     private lateinit var db: HomeRecordDatabase
     private lateinit var repo: HomeRepository
+    private val strings: (Int) -> String = ApplicationProvider.getApplicationContext<Context>().resources::getString
 
     @Before fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -47,7 +48,7 @@ class RegressionSeedTest {
     // AC-C1
     @AcceptanceCriterion("AC-C1")
     @Test fun regressionSeedBuildsThreeFloorsWithTwelveRooms() = runTest {
-        val homeId = RegressionSeed.seed(db, repo)
+        val homeId = RegressionSeed.seed(db, repo, strings)
         val floors = repo.observeFloors(homeId).first()
         assertThat(floors).hasSize(3)
         assertThat(floors.sumOf { it.roomCount }).isEqualTo(12)
@@ -61,9 +62,9 @@ class RegressionSeedTest {
     @Test fun regressionSeedFillsItemsWarrantiesRemindersContactsAndDocuments() = runTest {
         val today = LocalDate.of(2026, 10, 29)
         val dir = File(ApplicationProvider.getApplicationContext<Context>().cacheDir, "seed-docs").apply { deleteRecursively() }
-        val homeId = RegressionSeed.seed(db, repo, today = today, documentsDir = dir, pdf = "%PDF-1.4".toByteArray())
+        val homeId = RegressionSeed.seed(db, repo, strings, today = today, documentsDir = dir, pdf = "%PDF-1.4".toByteArray())
 
-        val items = ItemRepository(db, today = { today })
+        val items = ItemRepository(db, strings, today = { today })
         val rows = items.observeRows(homeId, mapOf(PseudoRooms.EXTERIOR to "Exterior", PseudoRooms.WHOLE_HOUSE to "Whole house")).first()
         assertThat(rows.size).isAtLeast(20)
         assertThat(rows.map { it.roomName }.toSet()).containsAtLeast("Kitchen", "Utility room", "Laundry", "Exterior", "Whole house")
@@ -94,8 +95,8 @@ class RegressionSeedTest {
     @AcceptanceCriterion("AC-H6")
     @Test fun seededItemsGiveTheH06FlowItsGroupsFilterAndSearch() = runTest {
         val today = LocalDate.of(2026, 10, 29)
-        val homeId = RegressionSeed.seed(db, repo, today = today)
-        val rows = ItemRepository(db, today = { today }).observeRows(homeId, mapOf(PseudoRooms.EXTERIOR to "Exterior")).first()
+        val homeId = RegressionSeed.seed(db, repo, strings, today = today)
+        val rows = ItemRepository(db, strings, today = { today }).observeRows(homeId, mapOf(PseudoRooms.EXTERIOR to "Exterior")).first()
 
         val res = ApplicationProvider.getApplicationContext<Context>().resources
         val name: (ItemCategory) -> String = { res.getString(it.labelRes) }
@@ -111,8 +112,8 @@ class RegressionSeedTest {
     }
 
     @Test fun seedingTwiceReplacesTheHomeAndResetEmptiesIt() = runTest {
-        RegressionSeed.seed(db, repo)
-        val homeId = RegressionSeed.seed(db, repo)
+        RegressionSeed.seed(db, repo, strings)
+        val homeId = RegressionSeed.seed(db, repo, strings)
         assertThat(db.homeDao().observeAll().first()).hasSize(1)
         assertThat(db.itemDao().observeFor(homeId).first().map { it.homeId }.toSet()).containsExactly(homeId)
         RegressionSeed.reset(db)
@@ -122,8 +123,8 @@ class RegressionSeedTest {
     // AC-U11: the jank stage scrolls a 200-row Items list (S7)
     @Test fun longListSeedGivesItemsTwoHundredRowsWithDistinctNames() = runTest {
         val today = LocalDate.of(2026, 10, 29)
-        val homeId = RegressionSeed.seedLongList(db, repo, today = today)
-        val rows = ItemRepository(db, today = { today }).observeRows(homeId, emptyMap()).first()
+        val homeId = RegressionSeed.seedLongList(db, repo, strings, today = today)
+        val rows = ItemRepository(db, strings, today = { today }).observeRows(homeId, emptyMap()).first()
         assertThat(rows).hasSize(RegressionSeed.LONG_LIST_ITEMS)
         assertThat(rows.map { it.name }.toSet()).hasSize(RegressionSeed.LONG_LIST_ITEMS)
         assertThat(rows.map { it.name }).containsAtLeast("Furnace", "Wall paint, Kitchen", "Smoke alarm, Bedroom 2")

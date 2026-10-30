@@ -20,9 +20,15 @@ class SearchIndexBuilderTest {
     private val consumables = listOf(ConsumableEntity("c1", "i1", "Filter", "16x25x1 MERV 11", createdAt = 0, updatedAt = 0))
     private val contacts = listOf(ContactEntity("k1", "h", "Maria Soto", trade = "Plumber", createdAt = 0, updatedAt = 0))
     private val documents = listOf(DocumentEntity("d1", "h", name = "Furnace manual", path = "p", mime = "application/pdf", createdAt = 0, updatedAt = 0))
-    private val index = SearchIndexBuilder.build(items, rooms, consumables, contacts, documents, mapOf("pseudo:exterior" to "Exterior"))
+    private val index = SearchIndexBuilder.build(items, rooms, consumables, contacts, documents, mapOf("pseudo:exterior" to "Exterior")) { if (it == "furnace") "Gas furnace" else null }
 
     private fun ids(q: String) = SearchEngine.search(index, q).map { it.document.kind to it.document.id }
+
+    // cr:seed-strings: the type's name comes from the resolver (string resources in the app), not from :core
+    @Test @AcceptanceCriterion("AC-H3")
+    fun findsAnItemByItsTypeName() {
+        assertThat(ids("gas")).containsExactly(SearchKind.ITEM to "i1", SearchKind.ITEM to "i2")
+    }
 
     @Test @AcceptanceCriterion("AC-H3")
     fun findsAnItemByModelNumberAndByConsumableSpec() {

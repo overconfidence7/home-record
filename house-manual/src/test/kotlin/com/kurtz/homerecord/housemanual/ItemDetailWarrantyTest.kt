@@ -60,7 +60,7 @@ class ItemDetailWarrantyTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
-        items = ItemRepository(db, today = { LocalDate.of(2026, 10, 24) })
+        items = ItemRepository(db, ApplicationProvider.getApplicationContext<Context>().resources::getString, today = { LocalDate.of(2026, 10, 24) })
         docs = com.kurtz.homerecord.housemodel.documents.DocumentRepository(
             db,
             object : com.kurtz.homerecord.core.media.DocumentFiles {

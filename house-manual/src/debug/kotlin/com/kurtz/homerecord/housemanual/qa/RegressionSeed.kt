@@ -99,6 +99,7 @@ object RegressionSeed {
     suspend fun seed(
         db: HomeRecordDatabase,
         repo: HomeRepository,
+        strings: (Int) -> String,
         today: LocalDate = LocalDate.now(),
         documentsDir: File? = null,
         pdf: ByteArray? = null,
@@ -111,15 +112,15 @@ object RegressionSeed {
         repo.savePlan(floors[0].id, basement)
         repo.savePlan(floors[1].id, mainFloor)
         repo.savePlan(floors[2].id, upperFloor)
-        seedRecords(db, homeId, today, documentsDir, pdf, now)
+        seedRecords(db, homeId, strings, today, documentsDir, pdf, now)
         return homeId
     }
 
-    private suspend fun seedRecords(db: HomeRecordDatabase, homeId: String, today: LocalDate, documentsDir: File?, pdf: ByteArray?, now: Long) {
+    private suspend fun seedRecords(db: HomeRecordDatabase, homeId: String, strings: (Int) -> String, today: LocalDate, documentsDir: File?, pdf: ByteArray?, now: Long) {
         // Through the repository so each type gets the consumables and reminders it seeds for a real user
         // One millisecond apart so Recently added has a stable order
         var clock = now
-        val itemRepo = ItemRepository(db, now = { clock++ }, today = { today })
+        val itemRepo = ItemRepository(db, strings, now = { clock++ }, today = { today })
         val ids = items.associate { seed ->
             val draft = ItemDraft(subtypeId = seed.subtype, roomId = seed.roomId, name = seed.name, make = seed.make, model = seed.model)
             seed.name to checkNotNull(itemRepo.save(homeId, draft)) { "seed item ${seed.name} did not save" }
@@ -192,15 +193,16 @@ object RegressionSeed {
     suspend fun seedLongList(
         db: HomeRecordDatabase,
         repo: HomeRepository,
+        strings: (Int) -> String,
         total: Int = LONG_LIST_ITEMS,
         today: LocalDate = LocalDate.now(),
         documentsDir: File? = null,
         pdf: ByteArray? = null,
         now: Long = System.currentTimeMillis(),
     ): String {
-        val homeId = seed(db, repo, today, documentsDir, pdf, now)
+        val homeId = seed(db, repo, strings, today, documentsDir, pdf, now)
         var clock = now + items.size
-        val itemRepo = ItemRepository(db, now = { clock++ }, today = { today })
+        val itemRepo = ItemRepository(db, strings, now = { clock++ }, today = { today })
         val rooms = mainFloor + upperFloor + basement
         val extra = rooms.flatMap { room -> perRoom.map { it.copy(name = "${it.name}, ${room.name}", roomId = room.id) } }
         extra.take((total - items.size).coerceAtLeast(0)).forEach { seed ->

@@ -27,7 +27,7 @@ class ItemRepositoryTest {
     @Before fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, HomeRecordDatabase::class.java).allowMainThreadQueries().build()
-        repo = ItemRepository(db, now = { 5_000L }, today = { LocalDate.of(2026, 10, 23) }, onChange = { e, id -> changes += "$e/$id" })
+        repo = ItemRepository(db, context.resources::getString, now = { 5_000L }, today = { LocalDate.of(2026, 10, 23) }, onChange = { e, id -> changes += "$e/$id" })
     }
 
     @After fun tearDown() = db.close()

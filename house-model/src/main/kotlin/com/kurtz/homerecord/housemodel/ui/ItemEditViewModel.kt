@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.core.model.DataPlateParser
-import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.PlateField
 import com.kurtz.homerecord.core.model.SerialAgeDecoder
 import com.kurtz.homerecord.core.ocr.TextRecognizer
@@ -42,7 +41,7 @@ class ItemEditViewModel(
     private var original = ItemDraft(
         roomId = initialRoomId,
         subtypeId = initialSubtypeId ?: ItemDraft().subtypeId,
-        name = initialSubtypeId?.let { ItemCategory.subtype(it)?.label }.orEmpty(),
+        name = initialSubtypeId?.let { items.subtypeName(it) }.orEmpty(),
     )
 
     private val _state = MutableStateFlow(
@@ -71,9 +70,8 @@ class ItemEditViewModel(
             is ItemEditEvent.Change -> change(event.draft)
             is ItemEditEvent.PickSubtype -> {
                 val draft = _state.value.draft
-                val subtype = ItemCategory.subtype(event.subtypeId)
                 // A blank name starts as the subtype's own, which the homeowner usually refines ("Basement furnace").
-                val name = if (draft.name.isBlank() && subtype != null) subtype.label else draft.name
+                val name = draft.name.ifBlank { items.subtypeName(event.subtypeId).orEmpty() }
                 setDraft(draft.copy(subtypeId = event.subtypeId, name = name))
                 _state.update { it.copy(picker = null) }
             }

@@ -106,9 +106,9 @@ class AppContainer(app: Application) {
 
     val homes = HomeRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
-    val items = ItemRepository(db) { entity, id -> recordHomeChange(entity, id) }
+    val items = ItemRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
-    val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db)
+    val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db, items::subtypeName)
 
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 

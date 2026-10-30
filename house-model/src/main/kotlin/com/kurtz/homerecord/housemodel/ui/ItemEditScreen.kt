@@ -104,7 +104,7 @@ fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onC
     ) {
         PickerField(
             label = stringResource(R.string.item_type),
-            value = subtype?.let { stringResource(R.string.item_type_value, stringResource(it.category.labelRes), it.label) }.orEmpty(),
+            value = subtype?.let { stringResource(R.string.item_type_value, stringResource(it.category.labelRes), stringResource(it.labelRes)) }.orEmpty(),
             error = if (ItemField.SUBTYPE in errors) stringResource(R.string.item_type_error) else null,
             tag = "${LocalTagPrefix.current}_item_type",
             onClick = { onEvent(ItemEditEvent.OpenPicker(ItemPicker.SUBTYPE)) },
@@ -273,7 +273,7 @@ private fun SubtypeSheet(selectedId: String?, onDismiss: () -> Unit, onPick: (St
 @Composable
 fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "", onQueryChange: (String) -> Unit = {}) {
     val resources = LocalResources.current
-    val groups = remember(query, resources) { SubtypeSearch.matching(query) { resources.getString(it.labelRes) } }
+    val groups = remember(query, resources) { SubtypeSearch.matching(query, { resources.getString(it.labelRes) }) { resources.getString(it.labelRes) } }
     Column(Modifier.widthIn(max = 640.dp).navigationBarsPadding().imePadding()) {
         OutlinedTextField(
             value = query,
@@ -308,7 +308,7 @@ fun SubtypeList(selectedId: String?, onPick: (String) -> Unit, query: String = "
                 }
                 items(subtypes, key = { it.id }) { subtype ->
                     ListItem(
-                        headlineContent = { Text(subtype.label) },
+                        headlineContent = { Text(stringResource(subtype.labelRes)) },
                         trailingContent = if (subtype.id == selectedId) { { Text(stringResource(R.string.item_type_selected)) } } else null,
                         modifier = Modifier.clickable { onPick(subtype.id) }.padding(start = 40.dp).testTag("${LocalTagPrefix.current}_item_type_${subtype.id}"),
                     )

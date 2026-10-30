@@ -9,10 +9,10 @@ import com.kurtz.homerecord.core.model.ItemSubtype
  * Categories with no match are left out; a blank query returns every category in order.
  */
 object SubtypeSearch {
-    fun matching(query: String, categoryName: (ItemCategory) -> String): List<Pair<ItemCategory, List<ItemSubtype>>> {
+    fun matching(query: String, subtypeName: (ItemSubtype) -> String, categoryName: (ItemCategory) -> String): List<Pair<ItemCategory, List<ItemSubtype>>> {
         val terms = words(query)
         return ItemCategory.entries.mapNotNull { category ->
-            val subtypes = category.subtypes.filter { terms.isEmpty() || matches(terms, words(it.label) + words(categoryName(category))) }
+            val subtypes = category.subtypes.filter { terms.isEmpty() || matches(terms, words(subtypeName(it)) + words(categoryName(category))) }
             if (subtypes.isEmpty()) null else category to subtypes
         }
     }

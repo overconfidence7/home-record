@@ -12,12 +12,12 @@ object QaSeeder {
         val documents = File(context.filesDir, "documents")
         return when (scenario) {
             "regression" -> {
-                RegressionSeed.seed(container.db, container.homes, documentsDir = documents, pdf = samplePdf(context))
+                RegressionSeed.seed(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
                 true
             }
             // AC-U11 scroll jank: the regression home with 200 items on Items
             "long-list" -> {
-                RegressionSeed.seedLongList(container.db, container.homes, documentsDir = documents, pdf = samplePdf(context))
+                RegressionSeed.seedLongList(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
                 true
             }
             "reset" -> {

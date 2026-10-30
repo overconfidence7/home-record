@@ -84,13 +84,18 @@ data class ItemDetail(
  * Items for a home. Creating one seeds the consumables and reminders its subtype calls for (AC-C30, AC-C35).
  * [onChange] is called with the entity name and id after every write so the sync outbox can pick it up.
  */
+/** [strings] resolves a string resource (Resources::getString): item type names and seeded upkeep text (cr:seed-strings). */
 class ItemRepository(
     private val db: HomeRecordDatabase,
+    private val strings: (Int) -> String,
     private val now: () -> Long = System::currentTimeMillis,
     private val today: () -> LocalDate = LocalDate::now,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun get(id: String): ItemEntity? = db.itemDao().get(id)
+
+    /** The type's display name, which a new item takes as its name until the homeowner writes one. */
+    fun subtypeName(subtypeId: String): String? = ItemCategory.subtype(subtypeId)?.let { strings(it.labelRes) }
 
     /** Items the home holds now (not deleted); the free tier's limit counts these. */
     suspend fun count(homeId: String): Int = db.itemDao().observeFor(homeId).first().size
@@ -127,7 +132,7 @@ class ItemRepository(
             val warranty = warranties.firstOrNull()
             val subtype = ItemCategory.subtype(item.subtype)
             ItemDetail(
-                item = item, category = ItemCategory.orOther(item.category), subtypeLabel = subtype?.label ?: item.subtype,
+                item = item, category = ItemCategory.orOther(item.category), subtypeLabel = subtype?.let { strings(it.labelRes) } ?: item.subtype,
                 roomName = item.roomId?.let { rid -> rooms.firstOrNull { it.id == rid }?.name ?: pseudoNames[rid] }.orEmpty(),
                 warranty = warranty, status = WarrantyStatus.of(warranty?.endsOn, today().toString()), photos = photos,
             )
@@ -206,14 +211,14 @@ class ItemRepository(
     private suspend fun seedDefaults(homeId: String, itemId: String, subtype: com.kurtz.homerecord.core.model.ItemSubtype, at: Long) {
         subtype.consumables.forEach {
             val cid = Ids.newId()
-            db.consumableDao().upsert(ConsumableEntity(id = cid, itemId = itemId, kind = it.kind.name, spec = it.spec, createdAt = at, updatedAt = at))
+            db.consumableDao().upsert(ConsumableEntity(id = cid, itemId = itemId, kind = it.kind.name, spec = strings(it.specRes), createdAt = at, updatedAt = at))
             onChange("consumable", cid)
         }
         subtype.reminders.forEach {
             val tid = Ids.newId()
             db.maintenanceTaskDao().upsert(
                 MaintenanceTaskEntity(
-                    id = tid, homeId = homeId, itemId = itemId, title = it.title, intervalMonths = it.intervalMonths,
+                    id = tid, homeId = homeId, itemId = itemId, title = strings(it.titleRes), intervalMonths = it.intervalMonths,
                     dueOn = today().plusMonths(it.intervalMonths.toLong()).toString(), createdAt = at, updatedAt = at,
                 ),
             )

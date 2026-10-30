@@ -5,7 +5,6 @@ import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.core.data.ItemEntity
 import com.kurtz.homerecord.core.data.RoomEntity
-import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.SearchDocument
 import com.kurtz.homerecord.core.model.SearchKind
 
@@ -18,12 +17,13 @@ object SearchIndexBuilder {
         contacts: List<ContactEntity>,
         documents: List<DocumentEntity>,
         pseudoNames: Map<String, String>,
+        subtypeName: (String) -> String?,
     ): List<SearchDocument> {
         val roomNames = rooms.associate { it.id to it.name }
         val specsByItem = consumables.groupBy { it.itemId }
         val itemDocs = items.map { i ->
             val room = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }
-            val subtype = ItemCategory.subtype(i.subtype)?.label
+            val subtype = subtypeName(i.subtype)
             val specs = specsByItem[i.id].orEmpty().flatMap { listOf(it.spec, it.kind) }
             SearchDocument(
                 SearchKind.ITEM, i.id, i.name,

@@ -55,7 +55,7 @@ class ItemEditViewModelTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
         homes = HomeRepository(db)
-        items = ItemRepository(db)
+        items = ItemRepository(db, ApplicationProvider.getApplicationContext<Context>().resources::getString)
     }
 
     @After fun tearDown() {
