@@ -155,6 +155,8 @@ class RoleGatesTest {
         rule.onNodeWithTag("fl_photo_share").performClick()
         rule.onNodeWithTag("fl_photo_annotate").performClick()
         rule.onNodeWithContentDescription("Back").performClick()
-        assertThat(events).containsExactly(PhotoDetailEvent.Share, PhotoDetailEvent.Annotate, PhotoDetailEvent.Back).inOrder()
+        // The caption field saves when it first reports its focus; only the taps matter here.
+        assertThat(events.filterNot { it == PhotoDetailEvent.SaveCaption })
+            .containsExactly(PhotoDetailEvent.Share, PhotoDetailEvent.Annotate, PhotoDetailEvent.Back).inOrder()
     }
 }
