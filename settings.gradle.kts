@@ -1,4 +1,6 @@
 pluginManagement {
+    // Convention plugins (homerecord.android.*): SDK, Java, test, release, R8 and signing config set once.
+    includeBuild("build-logic")
     repositories {
         google()
         maven("https://maven-central.storage-download.googleapis.com/maven2")

@@ -1,27 +1,16 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("homerecord.android.library")
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-
 }
 
 android {
     namespace = "com.kurtz.homerecord.core"
-    compileSdk = 37
-    defaultConfig { minSdk = 26 }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    testOptions { unitTests.isIncludeAndroidResources = true }
     // Exported Room schemas, for the migration tests.
     sourceSets { getByName("test") { assets.directories.add("$projectDir/schemas") } }
 }
 
-
 dependencies {
-
     api(libs.kotlinx.coroutines.core)
     api(libs.room.runtime)
     api(libs.room.ktx)
@@ -37,11 +26,6 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.googleid)
     ksp(libs.room.compiler)
-    testImplementation(libs.junit)
-    testImplementation(libs.truth)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.room.testing)
 }
 

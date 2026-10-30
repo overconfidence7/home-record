@@ -1,106 +1,30 @@
-import java.util.Properties
-
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    id("homerecord.android.application")
+    id("homerecord.android.compose")
+    id("homerecord.android.screenshot")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.screenshot)
 }
 
 android {
     namespace = "com.kurtz.homerecord.housemanual"
-    compileSdk = 37
     defaultConfig {
         applicationId = "com.kurtz.homerecord.housemanual"
-        minSdk = 26
-        targetSdk = 37
-        versionCode = 1
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionName = "0.1.0"
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
-    }
-    // Release key from local.properties (homerecord.storeFile, storePassword, keyAlias, keyPassword); the
-    // testing-apks workflow writes its testing key there, a store build puts the upload key there. Without
-    // them the release APK comes out unsigned.
-    signingConfigs {
-        val storeFile = localProp("homerecord.storeFile", "")
-        if (storeFile.isNotEmpty()) {
-            create("release") {
-                this.storeFile = file(storeFile)
-                storePassword = localProp("homerecord.storePassword", "")
-                keyAlias = localProp("homerecord.keyAlias", "")
-                keyPassword = localProp("homerecord.keyPassword", "")
-            }
-        }
     }
     buildTypes {
         // Keys per docs/billing.md; blank means the free tier with a Retry paywall.
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
             buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.testApiKey", "REVENUECAT_TEST_API_KEY").ifEmpty { revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY") }}\"")
         }
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.findByName("release")
-            buildConfigField("String", "API_BASE_URL", "\"${releaseApiBaseUrl()}\"")
-            buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"")
-        }
-        // QA only (AC-U11 scroll jank, qa/scripts/device-suite.sh): the release code with R8 and the baseline
-        // profile, signed with the debug key, plus the debug seed receiver and the dev backend so the suite can
-        // fill a 200-row list. Never shipped; `release` stays free of debug code.
-        create("benchmark") {
-            initWith(getByName("release"))
-            signingConfig = signingConfigs.getByName("debug")
-            matchingFallbacks += listOf("release")
-            buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl()}\"")
+        for (name in listOf("release", "benchmark")) {
+            getByName(name) {
+                buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.apiKey", "REVENUECAT_API_KEY")}\"")
+            }
         }
     }
-    sourceSets.getByName("benchmark") {
-        kotlin.srcDir("src/debug/kotlin")
-        assets.srcDir("src/debug/assets")
-        res.srcDir("src/debug/res")
-        manifest.srcFile("src/debug/AndroidManifest.xml")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-    testOptions { unitTests.isIncludeAndroidResources = true }
-    experimentalProperties["android.experimental.enableScreenshotTest"] = true
-}
-
-
-fun localProp(key: String, default: String): String {
-    val f = rootProject.file("local.properties")
-    val p = Properties()
-    if (f.exists()) f.inputStream().use { p.load(it) }
-    return p.getProperty(key, default)
 }
 
 fun revenueCatKey(prop: String, env: String): String =
     localProp(prop, "").ifEmpty { System.getenv(env).orEmpty() }
-
-fun apiBaseUrl(): String {
-    val f = rootProject.file("local.properties")
-    val p = Properties()
-    if (f.exists()) f.inputStream().use { p.load(it) }
-    return p.getProperty("api.baseUrl", "http://10.0.2.2:8787")
-}
-
-// Release builds talk to the production Worker over HTTPS only; `api.baseUrl` (the emulator
-// host) never reaches them. Override with `api.releaseBaseUrl` or API_RELEASE_BASE_URL.
-fun releaseApiBaseUrl(): String {
-    val url = localProp("api.releaseBaseUrl", "").ifEmpty { System.getenv("API_RELEASE_BASE_URL").orEmpty() }
-        .ifEmpty { "https://api.homerecord.app" }
-    require(url.startsWith("https://")) { "release API base URL must be https: $url" }
-    return url
-}
 
 dependencies {
     implementation(project(":core"))
@@ -116,20 +40,6 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
-    testImplementation(libs.junit)
-    testImplementation(libs.truth)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.compose.ui.test.junit4)
-    androidTestImplementation(libs.truth)
-    screenshotTestImplementation(libs.compose.ui.tooling)
-    screenshotTestImplementation(libs.screenshot.validation.api)
 }

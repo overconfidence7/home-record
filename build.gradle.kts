@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.screenshot) apply false
 }
 
 // Maven Central through the cloud proxy is unreliable; point Robolectric's downloader at Google's mirror.

@@ -1,23 +1,13 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    id("homerecord.android.library")
+    id("homerecord.android.compose")
+    id("homerecord.android.screenshot")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.screenshot)
 }
 
 android {
     namespace = "com.kurtz.homerecord.coreui"
-    compileSdk = 37
-    defaultConfig { minSdk = 26 }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures { compose = true }
-    testOptions { unitTests.isIncludeAndroidResources = true }
-    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
-
 
 dependencies {
     implementation(platform(libs.compose.bom))
@@ -36,14 +26,7 @@ dependencies {
     api(libs.lifecycle.viewmodel.compose)
     api(libs.kotlinx.serialization.json)
     implementation(libs.mlkit.document.scanner)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
-    testImplementation(libs.junit)
-    testImplementation(libs.truth)
-    testImplementation(libs.kotlinx.coroutines.test)
-    screenshotTestImplementation(libs.compose.ui.tooling)
-    screenshotTestImplementation(libs.screenshot.validation.api)
 }
