@@ -3,6 +3,10 @@ appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
     clearState: true
+    # AC-F29 needs the camera not yet allowed; the suite grants CAMERA after install and Maestro's launchApp
+    # grants by default, so say so instead of trusting clearState (as F04 does for location).
+    permissions:
+      camera: deny
 - runFlow:
     file: _sign-in.yaml
     env:
