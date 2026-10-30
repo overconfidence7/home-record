@@ -1,7 +1,11 @@
 # Subflow: sign in with the email code from the dev backend, create the company "QA Electric" (Electrical)
 # and wait for Today. Needs env EMAIL; the calling flow does its own launchApp (clearState, permissions).
+# It first wipes the dev backend (/dev/reset) so the flow's accounts are new on every run, also when rerun
+# locally against the same `wrangler dev`; call it once per flow, before any other sign-in.
 appId: com.kurtz.homerecord.fieldlog
 ---
+- runScript:
+    file: ../_scripts/reset-dev-backend.js
 - runFlow:
     file: _sign-in.yaml
     env:

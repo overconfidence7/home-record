@@ -26,6 +26,9 @@
 set -uo pipefail
 
 APP="${1:?app}"; ROOT="${2:?qa-out dir}"
+# Absolute, because run_flow cds into $OUT/maestro: a relative --test-output-dir landed in
+# maestro/qa-out/device/<app>/maestro/out-<label> and its failure shots were never collected
+mkdir -p "$ROOT"; ROOT="$(cd "$ROOT" && pwd)"
 OUT="$ROOT/device/$APP"; APK="$ROOT/apk"
 mkdir -p "$OUT/screenshots" "$OUT/logs" "$OUT/maestro" "$OUT/instrumented" "$OUT/crawler"
 export MAESTRO_CLI_NO_ANALYTICS=1
@@ -158,11 +161,13 @@ done
 run_flow() { # file label [variant]
   local f="$1" label="$2" variant="${3:-light}" rc
   ( cd "$OUT/maestro" && timeout 600 maestro test -e QA_VARIANT="$variant" -e QA_BACKEND="http://127.0.0.1:8787" --format junit --output "$label.xml" --test-output-dir "$OUT/maestro/out-$label" "$OLDPWD/$f" > "$label.log" 2>&1 ); rc=$?
-  # Current Maestro writes takeScreenshot and failure captures into --test-output-dir, older ones into the cwd;
-  # collect both and keep them with a stable name
-  # tour shots keep their own tour-<variant>-<screen> names; failure captures of other flows get a flow- prefix
+  # Current Maestro writes takeScreenshot and failure captures into --test-output-dir (in a dated subfolder per
+  # run), older ones into the cwd; collect both, at any depth, and keep them with a stable name.
+  # Tour shots keep their own tour-<variant>-<screen> names; failure captures of other flows get a flow- prefix
+  # so summarize.py can attach them to the flow's finding
   local prefix="flow-$label-"; case "$label" in tour-*) prefix="" ;; esac
-  for s in "$OUT"/maestro/*.png "$OUT/maestro/out-$label"/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/$prefix$(basename "$s")"; done
+  { find "$OUT/maestro" -maxdepth 1 -name '*.png' -type f; [ -d "$OUT/maestro/out-$label" ] && find "$OUT/maestro/out-$label" -name '*.png' -type f; } 2>/dev/null |
+    while IFS= read -r s; do mv "$s" "$OUT/screenshots/$prefix$(basename "$s")"; done
   # A flow that fails after setOrientation leaves the device rotated; put it back so the next flow starts portrait
   # (the landscape variant sets its rotation again before each tour run)
   adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
@@ -298,14 +303,21 @@ done
 
 # ----------------------------------------------------------------- logcat
 sleep 1; kill $LOGCAT_PID >/dev/null 2>&1 || true
+: > "$OUT/logs/crashes.txt"; : > "$OUT/logs/strictmode.txt"
+# pid of a `-v time` line: "10-30 12:00:00.000 E/Tag( 1234): msg" (the pid is padded, so not a fixed awk field)
+PID_AWK='function pidof_line(l) { if (match(l, /\( *[0-9]+\):/)) { v = substr(l, RSTART + 1, RLENGTH - 3); gsub(/ /, "", v); return v } return "" }'
 for p in $PKGS; do
-  crashes=$(grep -c "FATAL EXCEPTION" "$OUT/logs/logcat.txt" || true)
-  anrs=$(grep -c "ANR in $p" "$OUT/logs/logcat.txt" || true)
-  # StrictMode lines from other processes (Google app, Messages) are not ours: keep only this package's pids.
+  # Lines from other processes (system UI, Google app, the other app in handoff) are not ours: keep only this
+  # package's pids. A crash is ours when the line after FATAL EXCEPTION names the package ("Process: <pkg>, PID: n").
   pids=$(sed -n "s/.*Start proc \([0-9][0-9]*\):$p[\/:].*/\1/p" "$OUT/logs/logcat.txt" | sort -u | tr '\n' ' ')
-  awk -v pids=" $pids" '$3 != "" && index(pids, " " $3 " ") && /StrictMode policy violation/' "$OUT/logs/logcat.txt" > "$OUT/logs/strictmode-$p.txt" 2>/dev/null || true
+  awk -v pkg="$p" '/FATAL EXCEPTION/ { hold = $0; n = NR; next } n && NR == n + 1 { if (index($0, "Process: " pkg ",")) { print hold; print; keep = 12 } n = 0; next } keep > 0 { print; keep-- }' \
+    "$OUT/logs/logcat.txt" > "$OUT/logs/crashes-$p.txt" 2>/dev/null || true
+  crashes=$(grep -c "FATAL EXCEPTION" "$OUT/logs/crashes-$p.txt" || true)
+  anrs=$(grep -c "ANR in $p" "$OUT/logs/logcat.txt" || true)
+  awk -v pids=" $pids " "$PID_AWK"' /StrictMode policy violation/ { q = pidof_line($0); if (q != "" && index(pids, " " q " ")) print }' \
+    "$OUT/logs/logcat.txt" > "$OUT/logs/strictmode-$p.txt" 2>/dev/null || true
   strict=$(wc -l < "$OUT/logs/strictmode-$p.txt" | tr -d ' ')
-  grep -n -A 12 "FATAL EXCEPTION" "$OUT/logs/logcat.txt" > "$OUT/logs/crashes.txt" 2>/dev/null || true
+  cat "$OUT/logs/crashes-$p.txt" >> "$OUT/logs/crashes.txt" 2>/dev/null || true
   cat "$OUT/logs/strictmode-$p.txt" >> "$OUT/logs/strictmode.txt" 2>/dev/null || true
   details="$crashes crashes, $anrs ANRs, $strict StrictMode violations"
   if [ "$crashes" != "0" ] || [ "$anrs" != "0" ]; then record "logcat:$p" fail "$details"; elif [ "$strict" != "0" ]; then record "logcat:$p" warn "$details"; else record "logcat:$p" pass "$details"; fi

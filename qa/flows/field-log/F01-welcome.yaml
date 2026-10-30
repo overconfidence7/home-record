@@ -5,6 +5,9 @@ appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
     clearState: true
+# A new account on every run, also on a backend an earlier run already signed qa-owner into
+- runScript:
+    file: ../_scripts/reset-dev-backend.js
 - assertVisible: "Sign in"
 - assertVisible: "Email"
 - assertVisible: "Continue with Google"

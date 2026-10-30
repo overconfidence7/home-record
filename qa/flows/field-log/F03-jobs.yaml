@@ -56,9 +56,20 @@ appId: com.kurtz.homerecord.fieldlog
     element:
       id: fl_job_crew
 - takeScreenshot: F03-job-overview
-- swipe:
-    start: 85%, 15%
-    end: 10%, 15%
+# The sub-tab row scrolls and keeps the selected tab in view, so step along it by id (Files, then Time)
+# instead of swiping at fixed coordinates; Files is the fourth tab and fits on the narrowest phone
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
 # AC-F48: the job's House tab starts the same plan editor House Manual uses
 - tapOn:
     id: fl_job_tab_house
