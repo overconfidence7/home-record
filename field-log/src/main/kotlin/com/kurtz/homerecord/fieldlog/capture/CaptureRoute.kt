@@ -2,10 +2,8 @@ package com.kurtz.homerecord.fieldlog.capture
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -23,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
@@ -35,11 +32,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.photo.LensChoice
+import com.kurtz.homerecord.coreui.platform.Intents
+import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.UUID
 
 @Composable
 fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Unit) {
@@ -77,10 +75,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
             CaptureEvent.VoiceTap ->
                 if (state.recording || context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) vm.onEvent(event)
                 else mic.launch(Manifest.permission.RECORD_AUDIO)
-            CaptureEvent.OpenSettings -> context.startActivity(
-                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            )
+            CaptureEvent.OpenSettings -> Intents.openAppSettings(context)
             else -> vm.onEvent(event)
         }
     }

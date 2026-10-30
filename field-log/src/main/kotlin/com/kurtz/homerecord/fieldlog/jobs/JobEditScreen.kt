@@ -1,38 +1,36 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import com.kurtz.homerecord.coreui.components.LinkChip
-import com.kurtz.homerecord.coreui.components.LinkChipRow
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.DateField
 import com.kurtz.homerecord.coreui.components.FormScaffold
 import com.kurtz.homerecord.coreui.components.LabeledField
+import com.kurtz.homerecord.coreui.components.LinkChip
+import com.kurtz.homerecord.coreui.components.LinkChipRow
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.windowTestTags
+import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.fieldlog.R
 
 /** FL-JobEdit. Client name, phone and email, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
@@ -65,10 +63,7 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
         state.mapPoint?.let { (lat, lng) ->
             val context = LocalContext.current
             OutlinedButton(
-                onClick = {
-                    val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(d.name.ifBlank { d.address })})")
-                    try { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) } catch (_: ActivityNotFoundException) { }
-                },
+                onClick = { Intents.openMap(context, lat, lng, d.name.ifBlank { d.address }) },
                 modifier = Modifier.heightIn(min = 56.dp).testTag("fl_jobedit_map"),
             ) { Text(stringResource(R.string.job_map_link)) }
         }

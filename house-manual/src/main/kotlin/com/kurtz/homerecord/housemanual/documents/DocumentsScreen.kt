@@ -1,6 +1,6 @@
 package com.kurtz.homerecord.housemanual.documents
 
-import com.kurtz.homerecord.coreui.components.windowTestTags
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,44 +14,43 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.DocumentScanner
-import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.UploadFile
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButtonMenu
-import androidx.compose.material3.FloatingActionButtonMenuItem
-import androidx.compose.material3.ToggleFloatingActionButton
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.PictureAsPdf
+import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.data.DocumentEntity
+import com.kurtz.homerecord.core.media.ByteSize
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
 
@@ -173,7 +172,7 @@ private fun DocumentsAddMenu(open: Boolean, onEvent: (DocumentsEvent) -> Unit) {
 private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit, modifier: Modifier = Modifier) {
     RecordListItem(
         headline = doc.name,
-        supporting = formatSize(doc.size),
+        supporting = ByteSize.label(doc.size),
         leading = { Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null) },
         trailing = {
             IconButton(onClick = { onEvent(DocumentsEvent.OpenForm(doc.id)) }, modifier = Modifier.testTag("hm_documents_edit")) {
@@ -183,12 +182,6 @@ private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit, 
         onClick = { onEvent(DocumentsEvent.Open(doc.id)) },
         modifier = modifier.testTag("hm_documents_row"),
     )
-}
-
-private fun formatSize(bytes: Long): String = when {
-    bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
-    bytes >= 1_024 -> "${bytes / 1_024} KB"
-    else -> "$bytes B"
 }
 
 /** The rename and move form as sheet content; previewed directly because sheets don't render in screenshot tests. */

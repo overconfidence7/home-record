@@ -25,14 +25,29 @@ class JobHomeProvisioner(
         val job = jobs.get(jobId) ?: return null
         job.homeId?.let { return it }
         val now = clock()
-        val homeId = newId()
-        homes.upsert(HomeEntity(id = homeId, name = job.name, address = job.address, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
-        recordChange("home", homeId)
-        val floor = FloorEntity(id = newId(), homeId = homeId, sortOrder = 0, name = "Main", createdAt = now, updatedAt = now, source = Sources.FIELD_LOG)
-        floors.upsert(floor)
-        recordChange("floor", floor.id)
+        val homeId = newHome(job.name, job.address, now)
         jobs.upsert(job.copy(homeId = homeId, updatedAt = now))
         recordChange("job", jobId)
         return homeId
+    }
+
+    /** Creates a job's home with its Main floor and queues both; the caller links it to the job. */
+    suspend fun newHome(name: String, address: String?, now: Long = clock()): String {
+        val homeId = newId()
+        homes.upsert(HomeEntity(id = homeId, name = name, address = address, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
+        recordChange("home", homeId)
+        mainFloor(homeId, now)
+        return homeId
+    }
+
+    /** The home's first floor, created as Main when the home has none. */
+    suspend fun mainFloor(homeId: String, now: Long = clock()): FloorEntity =
+        floors.listFor(homeId).firstOrNull() ?: FloorEntity(
+            id = newId(), homeId = homeId, sortOrder = 0, name = DEFAULT_FLOOR, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG,
+        ).also { floors.upsert(it); recordChange("floor", it.id) }
+
+    companion object {
+        /** Stored floor name, the same one House Manual's templates use for the ground floor. */
+        const val DEFAULT_FLOOR = "Main"
     }
 }

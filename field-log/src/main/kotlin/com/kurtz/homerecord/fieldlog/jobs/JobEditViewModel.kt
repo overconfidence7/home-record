@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.ClientDao
 import com.kurtz.homerecord.core.data.FloorDao
-import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeDao
-import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.core.data.JobCrewDao
 import com.kurtz.homerecord.core.data.JobCrewEntity
 import com.kurtz.homerecord.core.data.JobDao
@@ -89,6 +87,7 @@ class JobEditViewModel(
     private val todayProvider: () -> String = { LocalDate.now().toString() },
     private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
+    private val provisioner = JobHomeProvisioner(jobs, homes, floors, recordChange, clock)
     private val _state = MutableStateFlow(JobEditUiState())
     val state: StateFlow<JobEditUiState> = _state.asStateFlow()
     private val newId = saved.get<String>(NEW_ID) ?: UUID.randomUUID().toString().also { saved[NEW_ID] = it }
@@ -199,26 +198,20 @@ class JobEditViewModel(
      * rooms (empty polygon) until they are dragged onto the plan (AC-F48). Returns the job's homeId.
      */
     private suspend fun syncRooms(existing: com.kurtz.homerecord.core.data.JobEntity?, draft: JobDraft, now: Long): String? {
-        var homeId = existing?.homeId
+        val homeId = existing?.homeId
         val current = homeId?.let { jobRooms(it) }.orEmpty()
         val wanted = draft.rooms
         current.filter { r -> wanted.none { it.equals(r.name, ignoreCase = true) } }.forEach { rooms.softDelete(it.id, now); recordChange("room", it.id) }
         val toAdd = wanted.filter { n -> current.none { it.name.equals(n, ignoreCase = true) } }
         if (toAdd.isEmpty()) return homeId
-        if (homeId == null) {
-            homeId = UUID.randomUUID().toString()
-            homes.upsert(HomeEntity(id = homeId, name = draft.name.trim(), address = draft.address.trim().ifBlank { null }, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
-            recordChange("home", homeId)
-        }
-        val floor = floors.listFor(homeId).firstOrNull() ?: FloorEntity(
-            id = UUID.randomUUID().toString(), homeId = homeId, sortOrder = 0, name = "Main", createdAt = now, updatedAt = now, source = Sources.FIELD_LOG,
-        ).also { floors.upsert(it); recordChange("floor", it.id) }
+        val home = homeId ?: provisioner.newHome(draft.name.trim(), draft.address.trim().ifBlank { null }, now)
+        val floor = provisioner.mainFloor(home, now)
         toAdd.forEach { n ->
             val roomId = UUID.randomUUID().toString()
             rooms.upsert(RoomEntity(id = roomId, floorId = floor.id, name = n, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG))
             recordChange("room", roomId)
         }
-        return homeId
+        return home
     }
 
     // Fields are joined with the unit separator; none of them can type it on a phone keyboard.

@@ -1,7 +1,7 @@
 package com.kurtz.homerecord.fieldlog.more
 
-import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -13,9 +13,6 @@ import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.foundation.layout.heightIn
-import com.kurtz.homerecord.core.photo.FileStorage
-import com.kurtz.homerecord.fieldlog.files.sizeLabel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +29,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.company.CompanyRole
+import com.kurtz.homerecord.core.media.ByteSize
+import com.kurtz.homerecord.core.photo.FileStorage
 import com.kurtz.homerecord.coreui.components.RecordListItem
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.company.roleLabel
 
@@ -92,7 +92,7 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
         state.storage?.let { s ->
             RecordListItem(
                 headline = stringResource(R.string.more_storage),
-                supporting = stringResource(R.string.more_storage_detail, sizeLabel(s.totalBytes), sizeLabel(s.offlineBytes)),
+                supporting = stringResource(R.string.more_storage_detail, ByteSize.label(s.totalBytes), ByteSize.label(s.offlineBytes)),
                 leading = { Icon(Icons.Rounded.Storage, contentDescription = null) },
                 trailing = {
                     TextButton({ onEvent(MoreEvent.FreeUp) }, Modifier.heightIn(min = 48.dp).testTag("fl_more_free_up"), enabled = s.cachedBytes > 0) {

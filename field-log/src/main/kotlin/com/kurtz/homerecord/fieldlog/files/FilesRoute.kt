@@ -2,7 +2,6 @@ package com.kurtz.homerecord.fieldlog.files
 
 import android.content.Context
 import android.net.Uri
-import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,11 +14,12 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.coreui.platform.ContentFiles
+import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.UUID
 
 @Composable
 fun FilesRoute(deps: FilesDeps, onOpenFile: (String) -> Unit, modifier: Modifier = Modifier) {
@@ -46,15 +46,11 @@ fun FilesRoute(deps: FilesDeps, onOpenFile: (String) -> Unit, modifier: Modifier
 }
 
 /** Copies a picked document into `filesDir/media/<uuid>.<ext>` so it survives the picker's grant. Null when it can't be read. */
-private fun importFile(context: Context, uri: Uri): ImportedFile? = runCatching {
-    val resolver = context.contentResolver
-    val name = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
-        ?: uri.lastPathSegment ?: "File"
-    val mime = resolver.getType(uri) ?: "application/octet-stream"
+private fun importFile(context: Context, uri: Uri): ImportedFile? {
+    val name = ContentFiles.displayName(context, uri) ?: uri.lastPathSegment ?: "File"
+    val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
     val ext = name.substringAfterLast('.', "").ifEmpty { MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "bin" }
-    val dir = File(context.filesDir, "media").apply { mkdirs() }
-    val out = File(dir, "${UUID.randomUUID()}.$ext")
-    val input = resolver.openInputStream(uri) ?: return@runCatching null
-    input.use { src -> out.outputStream().use { src.copyTo(it) } }
-    ImportedFile(name, out.absolutePath, mime, out.length())
-}.getOrNull()
+    val out = File(File(context.filesDir, "media"), "${UUID.randomUUID()}.$ext")
+    if (!ContentFiles.copy(context, uri, out)) return null
+    return ImportedFile(name, out.absolutePath, mime, out.length())
+}

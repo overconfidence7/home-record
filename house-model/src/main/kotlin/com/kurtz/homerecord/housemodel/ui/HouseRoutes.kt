@@ -1,6 +1,5 @@
 package com.kurtz.homerecord.housemodel.ui
 
-import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.Composable
@@ -13,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
@@ -49,12 +49,7 @@ fun HouseRoute(
     LaunchedEffect(state.shareUri, state.exportFailed) {
         val uri = state.shareUri
         if (uri != null) {
-            val send = Intent(Intent.ACTION_SEND).apply {
-                type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, Uri.parse(uri))
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            activity.startActivity(Intent.createChooser(send, shareTitle))
+            Intents.shareUri(activity, Uri.parse(uri), "application/pdf", shareTitle)
             vm.onEvent(HouseEvent.ExportHandled)
         } else if (state.exportFailed) {
             Toast.makeText(activity, R.string.house_export_failed, Toast.LENGTH_LONG).show()

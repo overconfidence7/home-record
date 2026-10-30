@@ -1,9 +1,6 @@
 package com.kurtz.homerecord.fieldlog.clock
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -11,13 +8,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.kurtz.homerecord.core.location.LocationPermissions
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.kurtz.homerecord.core.location.LocationPermissions
+import com.kurtz.homerecord.coreui.platform.Intents
 
 @Composable
 fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier) {
@@ -38,10 +36,7 @@ fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier) {
         { event ->
             if (event == ClockEvent.OpenSettings) {
                 vm.onEvent(ClockEvent.OpenSettings)
-                context.startActivity(
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                )
+                Intents.openAppSettings(context)
             } else vm.onEvent(event)
         },
         modifier,

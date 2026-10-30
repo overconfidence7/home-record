@@ -1,7 +1,6 @@
 package com.kurtz.homerecord.fieldlog.company
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,6 +17,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.company.CompanyApi
 import com.kurtz.homerecord.core.company.CompanyMembership
 import com.kurtz.homerecord.core.company.CompanyRepository
+import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.fieldlog.R
 import kotlinx.coroutines.delay
 
@@ -66,7 +66,6 @@ fun CompanyRoute(api: CompanyApi, membership: CompanyMembership, onSaved: (Strin
 
 private fun shareInvite(context: Context, company: String, code: String, link: String, chooserTitle: String) {
     val text = context.getString(R.string.team_invite_message, company, code, link)
-    val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
-    context.startActivity(Intent.createChooser(send, chooserTitle))
+    Intents.shareText(context, text, chooserTitle)
 }
 

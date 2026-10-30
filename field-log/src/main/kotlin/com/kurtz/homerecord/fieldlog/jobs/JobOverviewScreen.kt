@@ -1,8 +1,6 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +21,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.JobStatus
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.fieldlog.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -75,10 +73,7 @@ private fun Facts(state: JobOverviewUiState, onEvent: (JobOverviewEvent) -> Unit
         if (lat != null && lng != null) {
             val context = LocalContext.current
             OutlinedButton(
-                onClick = {
-                    val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(state.name)})")
-                    try { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) } catch (_: ActivityNotFoundException) { }
-                },
+                onClick = { Intents.openMap(context, lat, lng, state.name) },
                 modifier = Modifier.heightIn(min = 48.dp).testTag("fl_job_map"),
             ) { Text(stringResource(R.string.job_map_link)) }
         }
