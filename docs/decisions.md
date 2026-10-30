@@ -288,3 +288,7 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 ## 2026-10-30 — House Manual sign-out asks first; previews live in debug
 - Sign out in House Manual opens a "Sign out?" dialog (matching Field Log's More) because one tap ended backup with no warning (cr:route-logic). State in AccountViewModel (:core-ui), shared by both apps' AccountRoute.
 - House Manual `Previews.kt` moved from `src/main` to `src/debug`: debug, benchmark (which reuses src/debug) and screenshot tests still compile against it; release no longer ships 600+ lines of fake data (cr:previews-main). `MoreScreen` takes the account panel as a slot instead of a state object, since its only state is the account's own.
+
+## 2026-10-30 — Field Log More and job house start move into ViewModels
+- FL-More gets a MoreViewModel fed by `MoreDeps` (lambdas for storage and Free up, the outbox count) so the composables only render and route; the storage total is recounted each time More is shown, as before, because downloads on other screens change it (cr:fl-logic-in-ui).
+- The geocode after saving a job runs on the AppContainer's own scope (`geocodePending`), not a composable scope, so it finishes even if the person leaves right away.
