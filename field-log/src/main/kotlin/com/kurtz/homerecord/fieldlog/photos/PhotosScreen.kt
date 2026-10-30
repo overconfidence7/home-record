@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -65,11 +66,14 @@ fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier:
             else -> PhotoGrid(state, onEvent)
         }
         if (!state.loading) {
+            val takePhotoLabel = stringResource(R.string.photos_take)
             ExtendedFloatingActionButton(
                 onClick = { onEvent(PhotosEvent.Capture) },
                 icon = { Icon(Icons.Rounded.PhotoCamera, contentDescription = null) },
-                text = { Text(stringResource(R.string.photos_take)) },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_photos_fab"),
+                text = { Text(takePhotoLabel) },
+                // The clickable container carries the label itself so TalkBack and uiautomator name it.
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp)
+                    .semantics { contentDescription = takePhotoLabel }.testTag("fl_photos_fab"),
             )
         }
     }

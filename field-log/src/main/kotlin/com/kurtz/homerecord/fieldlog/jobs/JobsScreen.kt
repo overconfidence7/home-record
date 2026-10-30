@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.LoadingState
@@ -51,11 +53,14 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
         }
     }
     if (state.canAddJob) {
+        val newJobLabel = stringResource(R.string.jobs_new)
         ExtendedFloatingActionButton(
             onClick = { onEvent(JobsEvent.New) },
             icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-            text = { Text(stringResource(R.string.jobs_new)) },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp).testTag("fl_jobs_new"),
+            text = { Text(newJobLabel) },
+            // The clickable container carries the label itself so TalkBack and uiautomator name it.
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp)
+                .semantics { contentDescription = newJobLabel }.testTag("fl_jobs_new"),
         )
     }
     }
