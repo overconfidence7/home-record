@@ -36,7 +36,7 @@ fun FilesRoute(deps: FilesDeps, onOpenFile: (String) -> Unit, modifier: Modifier
         vm.state.collectAsState().value,
         { e ->
             when (e) {
-                FilesEvent.AddFile -> if (vm.state.value.canManage) picker.launch(arrayOf("*/*"))
+                FilesEvent.AddFile -> if (vm.state.value.canManage) { vm.onEvent(e); picker.launch(arrayOf("*/*")) }
                 is FilesEvent.OpenFile -> onOpenFile(e.id)
                 else -> vm.onEvent(e)
             }

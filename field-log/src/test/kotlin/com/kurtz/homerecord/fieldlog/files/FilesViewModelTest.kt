@@ -140,6 +140,7 @@ class FilesViewModelTest {
         assertThat(s.canManage).isFalse()
         val id = s.files.single().id
         crew.added(ImportedFile("extra.pdf", "/media/extra.pdf", "application/pdf", 1))
+        crew.onEvent(FilesEvent.SetAddMenu(true))
         crew.onEvent(FilesEvent.CreateFolder("Permits"))
         crew.onEvent(FilesEvent.AskRename(id))
         crew.onEvent(FilesEvent.Rename(id, "Renamed.pdf"))
@@ -149,6 +150,21 @@ class FilesViewModelTest {
         val rows = runBlocking { db.jobFileDao().listFor("j3") }
         assertThat(rows.map { it.name }).containsExactly("plan.pdf")
         assertThat(crew.state.value.dialog).isNull()
+        assertThat(crew.state.value.addMenuOpen).isFalse()
         assertThat(uploaded).isEmpty()
+    }
+
+    // rule 13: Add file and New folder close the FAB menu they were picked from
+    @Test fun addMenuOpensAndClosesOnEitherChoice() {
+        vm.onEvent(FilesEvent.SetAddMenu(true))
+        assertThat(current { it.canManage && it.addMenuOpen }.addMenuOpen).isTrue()
+        vm.onEvent(FilesEvent.NewFolder)
+        val folder = current { !it.addMenuOpen }
+        assertThat(folder.dialog).isEqualTo(FilesDialog.NewFolder)
+        vm.onEvent(FilesEvent.DismissDialog)
+        vm.onEvent(FilesEvent.SetAddMenu(true))
+        current { it.addMenuOpen }
+        vm.onEvent(FilesEvent.AddFile)
+        assertThat(current { !it.addMenuOpen }.dialog).isNull()
     }
 }

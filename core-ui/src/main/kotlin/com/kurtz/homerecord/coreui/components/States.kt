@@ -27,13 +27,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudOff
 import com.kurtz.homerecord.coreui.R
 
-/** Empty list: icon, one headline, one sentence, one action (AC-U4). */
+/** Empty list: icon, one headline, one sentence, one action (AC-U4). No action for someone who may only view (AC-F3). */
 @Composable
 fun EmptyState(
     icon: ImageVector,
     headline: String,
     body: String,
-    actionLabel: String,
+    actionLabel: String?,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     actionModifier: Modifier = Modifier,
@@ -42,8 +42,10 @@ fun EmptyState(
         Icon(icon, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
         Text(headline, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(8.dp))
-        Button(onClick = onAction, modifier = actionModifier) { Text(actionLabel) }
+        if (actionLabel != null) {
+            Spacer(Modifier.height(8.dp))
+            Button(onClick = onAction, modifier = actionModifier) { Text(actionLabel) }
+        }
     }
 }
 

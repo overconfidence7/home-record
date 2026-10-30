@@ -31,11 +31,14 @@ data class FilesUiState(
     val notice: FilesNotice? = null,
     /** Add, new folder, rename and delete: Owner, Office and the job's Lead; Crew and Sub only view (AC-F3). */
     val canManage: Boolean = true,
+    /** The FAB menu (Add file, New folder) is open; only for people who [canManage] (rule 13). */
+    val addMenuOpen: Boolean = false,
 )
 
 enum class FilesNotice { FolderExists, AddFailed, DownloadFailed }
 
 sealed interface FilesEvent {
+    data class SetAddMenu(val open: Boolean) : FilesEvent
     data object AddFile : FilesEvent
     data object NewFolder : FilesEvent
     data class CreateFolder(val name: String) : FilesEvent

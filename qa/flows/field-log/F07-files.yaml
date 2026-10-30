@@ -39,6 +39,12 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_files_empty
     timeout: 10000
+# rule 10/13: the empty state's one action opens the same FAB menu as the + button
+- assertVisible: "No files yet"
+- tapOn:
+    id: fl_files_empty_add
+- assertVisible:
+    id: fl_files_add
 # AC-F23: a new folder is listed and opens with a way back up
 - tapOn:
     id: fl_files_new_folder

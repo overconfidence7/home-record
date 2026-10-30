@@ -1,6 +1,18 @@
 package com.kurtz.homerecord.fieldlog.files
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.FolderOpen
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.kurtz.homerecord.coreui.components.EmptyState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,11 +35,8 @@ import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,71 +56,77 @@ import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
 
-/** The Files tab of FL-Job: folders first, then files, search across all folders (AC-F19, AC-F23). */
+/**
+ * The Files tab of FL-Job: folders first, then files, search across all folders (AC-F19, AC-F23). The one create
+ * action is a FAB menu with Add file and New folder (rule 13); people who only view get no FAB (AC-F3).
+ */
 @Composable
 fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Modifier = Modifier) {
     if (state.loading) { LoadingState(modifier); return }
-    Column(modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = state.query, onValueChange = { onEvent(FilesEvent.Query(it)) }, singleLine = true,
-            leadingIcon = { Icon(Icons.Rounded.Search, null) },
-            placeholder = { Text(stringResource(R.string.files_search)) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("fl_files_search"),
-        )
-        if (state.canManage) Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { onEvent(FilesEvent.AddFile) }, Modifier.heightIn(min = 56.dp).testTag("fl_files_add")) {
-                Icon(Icons.Rounded.FileUpload, null); Text(stringResource(R.string.files_add), Modifier.padding(start = 8.dp))
-            }
-            OutlinedButton(onClick = { onEvent(FilesEvent.NewFolder) }, Modifier.heightIn(min = 56.dp).testTag("fl_files_new_folder")) {
-                Icon(Icons.Rounded.CreateNewFolder, null); Text(stringResource(R.string.files_new_folder), Modifier.padding(start = 8.dp))
-            }
-        }
-        if (state.query.isBlank() && state.folder.isNotEmpty()) {
-            TextButton(onClick = { onEvent(FilesEvent.Up) }, Modifier.heightIn(min = 48.dp).padding(horizontal = 8.dp).testTag("fl_files_up")) {
-                Text(stringResource(R.string.files_in_folder, state.folder))
-            }
-        }
-        val searching = state.query.isNotBlank()
-        val rows = if (searching) state.results else state.files
-        when {
-            searching && rows.isEmpty() -> Text(stringResource(R.string.files_no_match, state.query.trim()), Modifier.padding(24.dp).testTag("fl_files_no_match"))
-            !searching && rows.isEmpty() && state.folders.isEmpty() -> Text(
-                stringResource(R.string.files_empty), Modifier.padding(24.dp).testTag("fl_files_empty"), style = MaterialTheme.typography.bodyLarge,
+    val searching = state.query.isNotBlank()
+    val rows = if (searching) state.results else state.files
+    val empty = !searching && rows.isEmpty() && state.folders.isEmpty()
+    Box(modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            // Nothing to search on an empty job; the field comes back with the first file or folder.
+            if (!empty || state.folder.isNotEmpty()) OutlinedTextField(
+                value = state.query, onValueChange = { onEvent(FilesEvent.Query(it)) }, singleLine = true,
+                leadingIcon = { Icon(Icons.Rounded.Search, null) },
+                placeholder = { Text(stringResource(R.string.files_search)) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("fl_files_search"),
             )
-            else -> LazyColumn(Modifier.fillMaxSize().testTag("fl_files_list")) {
-                if (!searching) items(state.folders, key = { "f-$it" }) { name ->
-                    RecordListItem(
-                        headline = name, leading = { Icon(Icons.Rounded.Folder, null) },
-                        onClick = { onEvent(FilesEvent.OpenFolder(name)) }, modifier = Modifier.testTag("fl_files_folder_$name"),
-                    )
+            if (!searching && state.folder.isNotEmpty()) {
+                TextButton(onClick = { onEvent(FilesEvent.Up) }, Modifier.heightIn(min = 48.dp).padding(horizontal = 8.dp).testTag("fl_files_up")) {
+                    Text(stringResource(R.string.files_in_folder, state.folder))
                 }
-                items(rows, key = { it.id }) { f ->
-                    RecordListItem(
-                        headline = f.name, supporting = supporting(f, searching),
-                        leading = { Icon(f.icon(), null) },
-                        trailing = {
-                            Row {
-                                IconButton({ onEvent(FilesEvent.ToggleOffline(f.id, !f.offline)) }, Modifier.testTag("fl_files_offline_${f.id}")) {
-                                    Icon(
-                                        if (f.offline) Icons.Rounded.CloudDone else Icons.Rounded.CloudDownload,
-                                        stringResource(if (f.offline) R.string.files_offline_off else R.string.files_offline_on),
-                                    )
-                                }
-                                if (state.canManage) {
-                                    IconButton({ onEvent(FilesEvent.AskRename(f.id)) }, Modifier.testTag("fl_files_rename_${f.id}")) {
-                                        Icon(Icons.Rounded.Edit, stringResource(R.string.files_rename))
+            }
+            when {
+                searching && rows.isEmpty() -> Text(stringResource(R.string.files_no_match, state.query.trim()), Modifier.padding(24.dp).testTag("fl_files_no_match"))
+                empty -> EmptyState(
+                    icon = Icons.Rounded.FolderOpen,
+                    headline = stringResource(if (state.folder.isEmpty()) R.string.files_empty_title else R.string.files_empty_folder_title),
+                    body = stringResource(if (state.canManage) R.string.files_empty else R.string.files_empty_crew),
+                    actionLabel = if (state.canManage) stringResource(R.string.files_add) else null,
+                    onAction = { onEvent(FilesEvent.SetAddMenu(true)) },
+                    modifier = Modifier.padding(bottom = 88.dp).testTag("fl_files_empty"),
+                    actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_files_empty_add"),
+                )
+                else -> LazyColumn(Modifier.fillMaxSize().testTag("fl_files_list"), contentPadding = PaddingValues(bottom = 88.dp)) {
+                    if (!searching) items(state.folders, key = { "f-$it" }) { name ->
+                        RecordListItem(
+                            headline = name, leading = { Icon(Icons.Rounded.Folder, null) },
+                            onClick = { onEvent(FilesEvent.OpenFolder(name)) }, modifier = Modifier.testTag("fl_files_folder_$name"),
+                        )
+                    }
+                    items(rows, key = { it.id }) { f ->
+                        RecordListItem(
+                            headline = f.name, supporting = supporting(f, searching),
+                            leading = { Icon(f.icon(), null) },
+                            trailing = {
+                                Row {
+                                    IconButton({ onEvent(FilesEvent.ToggleOffline(f.id, !f.offline)) }, Modifier.testTag("fl_files_offline_${f.id}")) {
+                                        Icon(
+                                            if (f.offline) Icons.Rounded.CloudDone else Icons.Rounded.CloudDownload,
+                                            stringResource(if (f.offline) R.string.files_offline_off else R.string.files_offline_on),
+                                        )
                                     }
-                                    IconButton({ onEvent(FilesEvent.AskDelete(f.id)) }, Modifier.testTag("fl_files_delete_${f.id}")) {
-                                        Icon(Icons.Rounded.Delete, stringResource(R.string.files_delete))
+                                    if (state.canManage) {
+                                        IconButton({ onEvent(FilesEvent.AskRename(f.id)) }, Modifier.testTag("fl_files_rename_${f.id}")) {
+                                            Icon(Icons.Rounded.Edit, stringResource(R.string.files_rename))
+                                        }
+                                        IconButton({ onEvent(FilesEvent.AskDelete(f.id)) }, Modifier.testTag("fl_files_delete_${f.id}")) {
+                                            Icon(Icons.Rounded.Delete, stringResource(R.string.files_delete))
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        onClick = { onEvent(FilesEvent.OpenFile(f.id)) }, modifier = Modifier.testTag("fl_files_row_${f.id}"),
-                    )
+                            },
+                            onClick = { onEvent(FilesEvent.OpenFile(f.id)) }, modifier = Modifier.testTag("fl_files_row_${f.id}"),
+                        )
+                    }
                 }
             }
         }
+        if (state.canManage) FilesAddMenu(state.addMenuOpen, onEvent, Modifier.align(Alignment.BottomEnd))
     }
     when (val dlg = state.dialog) {
         FilesDialog.NewFolder -> NameDialog(R.string.files_new_folder, "", R.string.files_create, onDismiss = { onEvent(FilesEvent.DismissDialog) }) { onEvent(FilesEvent.CreateFolder(it)) }
@@ -132,6 +147,40 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
             text = { Text(stringResource(when (n) { FilesNotice.FolderExists -> R.string.files_folder_exists; FilesNotice.AddFailed -> R.string.files_add_failed; FilesNotice.DownloadFailed -> R.string.files_download_failed })) },
             confirmButton = { TextButton({ onEvent(FilesEvent.DismissNotice) }, Modifier.heightIn(min = 48.dp).testTag("fl_files_notice_ok")) { Text(stringResource(R.string.files_ok)) } },
             modifier = Modifier.windowTestTags(),
+        )
+    }
+}
+
+/** Add file and New folder behind one FAB (rule 13); the empty state's Add file opens the same menu (rule 10). */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun FilesAddMenu(open: Boolean, onEvent: (FilesEvent) -> Unit, modifier: Modifier = Modifier) {
+    BackHandler(enabled = open) { onEvent(FilesEvent.SetAddMenu(false)) }
+    val label = stringResource(R.string.files_add_menu)
+    FloatingActionButtonMenu(
+        expanded = open,
+        modifier = modifier,
+        button = {
+            ToggleFloatingActionButton(
+                checked = open,
+                onCheckedChange = { onEvent(FilesEvent.SetAddMenu(it)) },
+                modifier = Modifier.semantics { contentDescription = label }.testTag("fl_files_fab"),
+            ) {
+                Icon(if (checkedProgress > 0.5f) Icons.Rounded.Close else Icons.Rounded.Add, contentDescription = null)
+            }
+        },
+    ) {
+        FloatingActionButtonMenuItem(
+            onClick = { onEvent(FilesEvent.AddFile) },
+            text = { Text(stringResource(R.string.files_add)) },
+            icon = { Icon(Icons.Rounded.FileUpload, contentDescription = null) },
+            modifier = Modifier.testTag("fl_files_add"),
+        )
+        FloatingActionButtonMenuItem(
+            onClick = { onEvent(FilesEvent.NewFolder) },
+            text = { Text(stringResource(R.string.files_new_folder)) },
+            icon = { Icon(Icons.Rounded.CreateNewFolder, contentDescription = null) },
+            modifier = Modifier.testTag("fl_files_new_folder"),
         )
     }
 }
