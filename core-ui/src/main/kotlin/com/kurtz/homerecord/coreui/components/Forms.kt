@@ -58,6 +58,7 @@ import java.time.ZoneOffset
 
 /**
  * Full-screen editor with Close and Save (AC-U6). When [dirty], Close and back ask before discarding.
+ * A [placeholder] (loading or error state) replaces the body under the same bar, Close and a disabled Save, so the icon never flips once the form arrives (rule 3).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +69,7 @@ fun FormScaffold(
     onClose: () -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
+    placeholder: (@Composable (Modifier) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
@@ -84,11 +86,15 @@ fun FormScaffold(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onSave, enabled = saveEnabled, modifier = Modifier.testTag("${LocalTagPrefix.current}_save")) { Text(stringResource(R.string.save)) }
+                    TextButton(onClick = onSave, enabled = saveEnabled && placeholder == null, modifier = Modifier.testTag("${LocalTagPrefix.current}_save")) { Text(stringResource(R.string.save)) }
                 },
             )
         },
     ) { padding ->
+        if (placeholder != null) {
+            placeholder(Modifier.padding(padding))
+            return@Scaffold
+        }
         Column(
             Modifier
                 .padding(padding)

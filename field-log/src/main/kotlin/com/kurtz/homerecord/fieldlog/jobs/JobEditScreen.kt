@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,10 +35,6 @@ import com.kurtz.homerecord.fieldlog.R
 /** FL-JobEdit. Client name, phone and email, address, dates, budget hours and notes; rooms chips; crew and phases follow (T018c2). */
 @Composable
 fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClose: () -> Unit) {
-    if (state.loading) {
-        Scaffold { LoadingState(Modifier.padding(it)) }
-        return
-    }
     val d = state.draft
     FormScaffold(
         title = stringResource(if (state.isNew) R.string.job_edit_new else R.string.job_edit_title),
@@ -47,6 +42,7 @@ fun JobEditScreen(state: JobEditUiState, onEvent: (JobEditEvent) -> Unit, onClos
         saveEnabled = state.canSave,
         onClose = onClose,
         onSave = { onEvent(JobEditEvent.Save) },
+        placeholder = if (state.loading) { { LoadingState(it) } } else null,
     ) {
         LabeledField(stringResource(R.string.job_name), d.name, { onEvent(JobEditEvent.Name(it)) }, Modifier.testTag("fl_jobedit_name"), required = true)
         LabeledField(stringResource(R.string.job_client), d.clientName, { onEvent(JobEditEvent.Client(it)) }, Modifier.testTag("fl_jobedit_client"))

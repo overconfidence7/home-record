@@ -12,7 +12,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,10 +35,10 @@ import com.kurtz.homerecord.fieldlog.R
 @Composable
 fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClose: () -> Unit) {
     when (state.status) {
-        TeamStatus.Loading -> Scaffold { LoadingState(Modifier.padding(it)) }
-        TeamStatus.Failed -> Scaffold {
-            ErrorState(state.failure?.let { f -> failureText(f) }.orEmpty(), { onEvent(CompanyEvent.Retry) }, Modifier.padding(it))
-        }
+        TeamStatus.Loading -> FormScaffold(stringResource(R.string.company_title), dirty = false, saveEnabled = false, onClose = onClose, onSave = {}, placeholder = { LoadingState(it) }) {}
+        TeamStatus.Failed -> FormScaffold(stringResource(R.string.company_title), dirty = false, saveEnabled = false, onClose = onClose, onSave = {}, placeholder = { m ->
+            ErrorState(state.failure?.let { f -> failureText(f) }.orEmpty(), { onEvent(CompanyEvent.Retry) }, m)
+        }) {}
         TeamStatus.Ready -> FormScaffold(
             title = stringResource(R.string.company_title),
             dirty = state.dirty,

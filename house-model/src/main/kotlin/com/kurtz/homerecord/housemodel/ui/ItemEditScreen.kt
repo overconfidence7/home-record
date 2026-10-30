@@ -79,10 +79,13 @@ import com.kurtz.homerecord.housemodel.items.PseudoRooms
 /** HM-ItemEdit: category and subtype first, then room, details and photos (AC-C30). Data plate scan arrives in T022. */
 @Composable
 fun ItemEditScreen(state: ItemEditUiState, onEvent: (ItemEditEvent) -> Unit, onClose: () -> Unit) {
-    if (state.loading || state.missing) {
+    if (state.loading) {
+        FormScaffold(stringResource(R.string.item_edit_title_edit), dirty = false, saveEnabled = false, onClose = onClose, onSave = {}, placeholder = { LoadingState(it) }) {}
+        return
+    }
+    if (state.missing) {
         ScreenScaffold(title = stringResource(R.string.item_edit_title_edit), onBack = onClose) { padding ->
-            if (state.loading) LoadingState(Modifier.padding(padding))
-            else Text(stringResource(R.string.item_missing), Modifier.padding(padding).padding(16.dp))
+            Text(stringResource(R.string.item_missing), Modifier.padding(padding).padding(16.dp))
         }
         return
     }
