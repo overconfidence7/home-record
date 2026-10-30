@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.kurtz.homerecord.housemanual.R
-import com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.createSavedStateHandle
@@ -27,13 +26,7 @@ fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawP
         factory = viewModelFactory { initializer { OnboardingViewModel(repo, createSavedStateHandle()) } },
     )
     val state = vm.state.collectAsState().value
-    OnboardingScreen(
-        state,
-        { event ->
-            // Only a valid form creates the home, so only then should the editor open.
-            if (event == OnboardingEvent.DrawPlan && state.name.isNotBlank() && state.type != null) onDrawPlan()
-            vm.onEvent(event)
-        },
-        modifier,
-    )
+    // The ViewModel sets openEditor only when a valid form starts creating the home.
+    LaunchedEffect(state.openEditor) { if (state.openEditor) onDrawPlan() }
+    OnboardingScreen(state, vm::onEvent, modifier)
 }

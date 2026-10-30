@@ -43,9 +43,16 @@ env:
     timeout: 30000
 - assertNotVisible: "Sync failed. Tap to retry"
 - takeScreenshot: H17-signed-in
-# Signing out keeps the local copy (AC-H15)
+# Signing out asks first, then keeps the local copy (AC-H15)
 - tapOn:
     id: "hm_account_sign_out"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_sign_out_confirm"
+    timeout: 5000
+- assertVisible: "Sign out?"
+- tapOn:
+    id: "hm_account_sign_out_confirm"
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 10000

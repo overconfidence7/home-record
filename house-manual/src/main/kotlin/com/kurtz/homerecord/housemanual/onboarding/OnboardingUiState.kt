@@ -12,6 +12,8 @@ data class OnboardingUiState(
     val busy: Boolean = false,
     /** Set once the user pressed a button with required fields empty, so errors show then and not before. */
     val showErrors: Boolean = false,
+    /** Set when "Draw your floor plan" passed validation, so the new home opens on the plan editor. */
+    val openEditor: Boolean = false,
 ) {
     val canSubmit: Boolean get() = name.isNotBlank() && type != null && !busy
 }

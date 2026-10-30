@@ -39,6 +39,8 @@
     <string name="account_signed_in">You are signed in.</string>
     <string name="account_sign_out_note">Signing out keeps your records on this phone.</string>
     <string name="account_sign_out">Sign out</string>
+    <string name="account_sign_out_title">Sign out?</string>
+    <string name="account_sign_out_body">Your records stay on this phone. They stop backing up until you sign in again.</string>
     <string name="sync_syncing">Syncing…</string>
     <string name="sync_up_to_date">Everything is synced</string>
     <string name="sync_offline">Offline</string>

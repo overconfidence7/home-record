@@ -4,20 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
 import com.kurtz.homerecord.housemanual.paywall.PaywallRoute
-import com.kurtz.homerecord.core.billing.LimitGate
-import com.kurtz.homerecord.core.billing.LimitedFeature
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerRoute
@@ -49,6 +38,8 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemanual.house.OnboardingRoute
 import com.kurtz.homerecord.coreui.auth.AccountRoute
+import com.kurtz.homerecord.housemanual.more.MoreEvent
+import com.kurtz.homerecord.housemanual.more.MoreScreen
 import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
@@ -155,36 +146,24 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             if (key.depth == 0 && key.title == "more") {
-                Scaffold {
-                    Column(Modifier.padding(it)) {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.more_pro)) },
-                            supportingContent = { Text(stringResource(R.string.more_pro_supporting)) },
-                            leadingContent = { Icon(Icons.Outlined.WorkspacePremium, contentDescription = null) },
-                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(PaywallKey()) }.testTag("hm_more_pro"),
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.more_contacts)) },
-                            supportingContent = { Text(stringResource(R.string.more_contacts_supporting)) },
-                            leadingContent = { Icon(Icons.Outlined.Contacts, contentDescription = null) },
-                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(ContactsKey) }.testTag("hm_more_contacts"),
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.more_documents)) },
-                            supportingContent = { Text(stringResource(R.string.more_documents_supporting)) },
-                            leadingContent = { Icon(Icons.Outlined.Description, contentDescription = null) },
-                            modifier = Modifier.heightIn(min = 56.dp).clickable { nav.push(DocumentsKey) }.testTag("hm_more_documents"),
-                        )
-                        AccountRoute(container.auth, Modifier.weight(1f)) {
-                            val phase by container.syncEngine.phase.collectAsState()
-                            val pending by container.syncEngine.pendingCount.collectAsState(0)
-                            val refused by container.syncEngine.refused.collectAsState(emptyList())
-                            SyncStatus(
-                                phase, pending, refused,
-                                onSyncNow = container.syncCoordinator::requestSync,
-                                onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
-                            )
+                MoreScreen(
+                    onEvent = { event ->
+                        when (event) {
+                            MoreEvent.OpenPro -> nav.push(PaywallKey())
+                            MoreEvent.OpenContacts -> nav.push(ContactsKey)
+                            MoreEvent.OpenDocuments -> nav.push(DocumentsKey)
                         }
+                    },
+                ) { accountModifier ->
+                    AccountRoute(container.auth, accountModifier) {
+                        val phase by container.syncEngine.phase.collectAsState()
+                        val pending by container.syncEngine.pendingCount.collectAsState(0)
+                        val refused by container.syncEngine.refused.collectAsState(emptyList())
+                        SyncStatus(
+                            phase, pending, refused,
+                            onSyncNow = container.syncCoordinator::requestSync,
+                            onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
+                        )
                     }
                 }
             } else if (key.depth == 0) {
@@ -196,11 +175,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
     })
 }
 
-/** The 16th free item opens HM-Paywall instead of the form (AC-H18); Pro adds without a limit. */
+/** The 16th free item opens HM-Paywall instead of the form (AC-H18); [AddItemGate] decides. */
 private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null, subtypeId: String? = null, scanPlate: Boolean = false) {
-    scope.launch {
-        val count = container.db.itemDao().observeFor(homeId).first().size
-        if (LimitGate.blocked(container.billing, LimitedFeature.SixteenthItem, count)) nav.push(PaywallKey(LimitedFeature.SixteenthItem))
-        else nav.push(ItemEditKey(roomId = roomId, subtypeId = subtypeId, scanPlate = scanPlate))
-    }
+    scope.launch { nav.push(container.addItemGate.destination(homeId, roomId, subtypeId, scanPlate)) }
 }

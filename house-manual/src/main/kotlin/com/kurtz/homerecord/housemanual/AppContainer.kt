@@ -134,6 +134,8 @@ class AppContainer(app: Application) {
         if (BuildConfig.REVENUECAT_API_KEY.isEmpty()) com.kurtz.homerecord.core.billing.UnavailableBilling
         else com.kurtz.homerecord.housemanual.billing.RevenueCatBilling(app, BuildConfig.REVENUECAT_API_KEY) { activityContext }
 
+    val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing)
+
     init {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }

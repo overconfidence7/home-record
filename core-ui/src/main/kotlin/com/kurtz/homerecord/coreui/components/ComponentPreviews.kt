@@ -97,6 +97,15 @@ fun SignInEmailPreview() = Frame {
 
 @ThemePreviews
 @Composable
+fun AccountSignedInPreview() = Frame {
+    com.kurtz.homerecord.coreui.auth.AccountScreen(
+        com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn),
+        {},
+    ) { SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }
+}
+
+@ThemePreviews
+@Composable
 fun SignInCodePreview() = Frame {
     com.kurtz.homerecord.coreui.auth.SignInScreen(
         com.kurtz.homerecord.coreui.auth.SignInUiState(

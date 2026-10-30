@@ -687,3 +687,35 @@ fun PaywallFailedPreview() = Frame {
 @ThemePreviews
 @Composable
 fun PaywallLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.paywall.PaywallScreen(com.kurtz.homerecord.housemanual.paywall.PaywallUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun MoreSignedInPreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+        com.kurtz.homerecord.coreui.auth.AccountScreen(
+            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn),
+            {},
+            modifier,
+        ) { com.kurtz.homerecord.coreui.components.SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }
+    }
+}
+
+@ThemePreviews
+@Composable
+fun MoreSignedOutPreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.whitfield@gmail.com"), {}, modifier)
+    }
+}
+
+@ThemePreviews
+@Composable
+fun MoreSignOutConfirmPreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+        com.kurtz.homerecord.coreui.auth.AccountScreen(
+            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, confirmSignOut = true),
+            {},
+            modifier,
+        )
+    }
+}

@@ -369,3 +369,18 @@ fun PaywallFailedScreenshot() = PaywallFailedPreview()
 @ThemePreviews
 @Composable
 fun PaywallLoadingScreenshot() = PaywallLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreSignedInScreenshot() = MoreSignedInPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreSignedOutScreenshot() = MoreSignedOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreSignOutConfirmScreenshot() = MoreSignOutConfirmPreview()

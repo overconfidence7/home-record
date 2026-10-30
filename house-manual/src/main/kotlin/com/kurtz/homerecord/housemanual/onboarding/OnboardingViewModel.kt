@@ -49,7 +49,7 @@ class OnboardingViewModel(
             update { copy(showErrors = true) }
             return
         }
-        update { copy(busy = true) }
+        update { copy(busy = true, openEditor = seedFromTemplate) }
         viewModelScope.launch {
             repo.createHome(NewHome(s.name, s.address, type, s.foundation, s.attachedGarage, seedFromTemplate))
         }

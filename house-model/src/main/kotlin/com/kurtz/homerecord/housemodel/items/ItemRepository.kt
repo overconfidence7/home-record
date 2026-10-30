@@ -12,6 +12,7 @@ import com.kurtz.homerecord.core.data.WarrantyEntity
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
@@ -90,6 +91,9 @@ class ItemRepository(
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun get(id: String): ItemEntity? = db.itemDao().get(id)
+
+    /** Items the home holds now (not deleted); the free tier's limit counts these. */
+    suspend fun count(homeId: String): Int = db.itemDao().observeFor(homeId).first().size
 
     /** Every live item of the home as list rows; warranty status is as of today. [pseudoNames] labels Exterior and Whole house. */
     fun observeRows(homeId: String, pseudoNames: Map<String, String>): Flow<List<ItemRow>> =

@@ -58,6 +58,7 @@ class HomeViewModelsTest {
         val vm = OnboardingViewModel(repo).also { vms += it }
         vm.onEvent(OnboardingEvent.DrawPlan)
         assertThat(vm.state.value.showErrors).isTrue()
+        assertThat(vm.state.value.openEditor).isFalse()
         assertThat(repo.observeHome().first()).isNull()
     }
 
@@ -67,6 +68,8 @@ class HomeViewModelsTest {
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.CAPE_COD))
         vm.onEvent(OnboardingEvent.FoundationChanged(Foundation.SLAB))
         vm.onEvent(OnboardingEvent.DrawPlan)
+        // AC-C1: only a valid "Draw your floor plan" opens the editor on the new home.
+        assertThat(vm.state.value.openEditor).isTrue()
         val home = checkNotNull(repo.observeHome().first { it != null })
         assertThat(home.houseType).isEqualTo("CAPE_COD")
         assertThat(repo.observeFloors(home.id).first { it.size == 2 }.map { it.name }).containsExactly("Main", "Upper").inOrder()
@@ -77,6 +80,7 @@ class HomeViewModelsTest {
         vm.onEvent(OnboardingEvent.NameChanged("Cabin"))
         vm.onEvent(OnboardingEvent.TypeChanged(HouseType.TWO_STORY))
         vm.onEvent(OnboardingEvent.Skip)
+        assertThat(vm.state.value.openEditor).isFalse()
         val home = checkNotNull(repo.observeHome().first { it != null })
         assertThat(repo.observeFloors(home.id).first { it.size == 3 }.map { it.name }).containsExactly("Basement", "Main", "Upper").inOrder()
     }
