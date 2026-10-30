@@ -15,23 +15,33 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_plan_add_room"
 - assertVisible: "Room name"
-- tapOn: "Room name"
+# Fields are tapped by id (the middle of the box), not by their floated label: the label sits on the
+# field's top border and, with the panel still sliding down after the keyboard closes, a tap on it can
+# miss the field and the typed length goes nowhere (QA auto 0ec9040, H03 read 14' by 12').
+- tapOn:
+    id: "hm_plan_room_name"
 - eraseText: 20
 - inputText: "Kitchen"
 - hideKeyboard
-- tapOn: "Width"
+- tapOn:
+    id: "hm_plan_room_width"
 - eraseText: 10
 - inputText: "14"
+- assertVisible: "14"
 - hideKeyboard
-- tapOn: "Length"
+- tapOn:
+    id: "hm_plan_room_length"
 - eraseText: 10
 - inputText: "12'6\""
+# AC-C4: the length field holds what was typed before Done commits it (H03 reads it back as 12' 6")
+- assertVisible: "12'6\""
 - hideKeyboard
 - tapOn: "Done"
 - takeScreenshot: H02-plan-one-room
 - tapOn:
     id: "hm_plan_add_room"
-- tapOn: "Room name"
+- tapOn:
+    id: "hm_plan_room_name"
 - eraseText: 20
 - inputText: "Living room"
 - hideKeyboard

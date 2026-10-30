@@ -5,6 +5,9 @@ import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
@@ -107,5 +110,21 @@ class PlanEditorInspectorTest {
     @Test fun tallWindowKeepsTheFloorChips() {
         show(state)
         rule.onNodeWithTag("hm_plan_floor_f1").assertIsDisplayed()
+    }
+
+    // AC-C4: the H02 flow's sequence (width 14, then length 12'6", IME Done) reaches the ViewModel as 14' by 12' 6"
+    @AcceptanceCriterion("AC-C4")
+    @Test fun typedWidthThenLengthCommitsFeetAndInches() {
+        val events = mutableListOf<PlanEditorEvent>()
+        show(state.copy(rooms = listOf(kitchen.copy(points = listOf(Pt(0, 0), Pt(144, 0), Pt(144, 144), Pt(0, 144)), openings = emptyList(), stairs = emptyList()))), events)
+        rule.onNodeWithTag("hm_plan_room_width").performClick()
+        rule.onNodeWithTag("hm_plan_room_width").performTextClearance()
+        rule.onNodeWithTag("hm_plan_room_width").performTextInput("14")
+        rule.onNodeWithTag("hm_plan_room_length").performClick()
+        rule.onNodeWithTag("hm_plan_room_length").performTextClearance()
+        rule.onNodeWithTag("hm_plan_room_length").performTextInput("12'6\"")
+        rule.onNodeWithTag("hm_plan_room_length").performImeAction()
+        assertThat(events.filterIsInstance<PlanEditorEvent.SetSize>().last()).isEqualTo(PlanEditorEvent.SetSize(168, 150))
+        assertThat(events.last()).isEqualTo(PlanEditorEvent.CommitFields)
     }
 }
