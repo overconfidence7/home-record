@@ -344,6 +344,15 @@ class AppContainer(private val app: Application) {
 
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
 
+    /** Looks up coordinates for addresses just saved; runs on the app scope so leaving the form does not cancel it (AC-F5). */
+    fun geocodePending(companyId: String) {
+        scope.launch(Dispatchers.IO) { jobGeocoder.resolvePending(companyId) }
+    }
+
+    fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(
+        membership.companyName, membership.role, syncEngine.pendingCount, jobFileTransfers::storage, { jobFileTransfers.freeUp() },
+    )
+
     init {
         com.kurtz.homerecord.core.media.MediaUploadWorker.provider = { mediaUploader }
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.

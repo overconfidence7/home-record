@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
@@ -29,7 +30,7 @@ import java.time.temporal.TemporalAdjusters
 @OptIn(ExperimentalCoroutinesApi::class)
 class JobOverviewViewModel(
     private val companyId: String,
-    jobId: String,
+    private val jobId: String,
     jobs: JobDao,
     clients: ClientDao,
     crew: JobCrewDao,
@@ -39,6 +40,7 @@ class JobOverviewViewModel(
     punches: PunchDao,
     photos: PhotoDao,
     gates: Flow<com.kurtz.homerecord.core.company.RoleGates>,
+    private val provisionHouse: suspend (jobId: String) -> String? = { null },
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
@@ -64,4 +66,19 @@ class JobOverviewViewModel(
             }
         }
     }, gates) { s, g -> s.copy(canEdit = g.canEditJobs) }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState(canEdit = false))
+
+    private var startingHouse = false
+
+    /** House tab "Start the house": creates the job's home with a Main floor once; a second tap while it runs does nothing (AC-F48). */
+    fun startHouse() {
+        if (startingHouse || state.value.homeId != null) return
+        startingHouse = true
+        viewModelScope.launch {
+            try {
+                provisionHouse(jobId)
+            } finally {
+                startingHouse = false
+            }
+        }
+    }
 }

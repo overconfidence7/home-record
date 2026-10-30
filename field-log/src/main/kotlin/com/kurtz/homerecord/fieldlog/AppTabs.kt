@@ -12,11 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.kurtz.homerecord.core.auth.AuthState
@@ -30,9 +25,7 @@ import com.kurtz.homerecord.fieldlog.company.TeamRoute
 import com.kurtz.homerecord.fieldlog.company.WelcomeRoute
 import com.kurtz.homerecord.fieldlog.company.failureText
 import com.kurtz.homerecord.fieldlog.jobs.JobsRoute
-import com.kurtz.homerecord.fieldlog.more.MoreEvent
-import com.kurtz.homerecord.fieldlog.more.MoreScreen
-import com.kurtz.homerecord.fieldlog.more.MoreUiState
+import com.kurtz.homerecord.fieldlog.more.MoreRoute
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
 import com.kurtz.homerecord.fieldlog.today.TodayUiState
 import kotlinx.coroutines.launch
@@ -122,28 +115,14 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         )
                     }
                 }
-                key.depth == 0 && key.title == "more" -> {
-                    var storage by remember { mutableStateOf<com.kurtz.homerecord.core.photo.FileStorage?>(null) }
-                    val scope = rememberCoroutineScope()
-                    val unsynced by container.syncEngine.pendingCount.collectAsState(0)
-                    LaunchedEffect(Unit) { storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() } }
-                    MoreScreen(
-                    MoreUiState(membership.companyName, membership.role, storage, unsynced),
-                    onEvent = { event ->
-                        when (event) {
-                            MoreEvent.OpenTeam -> nav.push(TeamKey)
-                            MoreEvent.OpenTimesheets -> nav.push(TimesheetsKey)
-                            MoreEvent.OpenReports -> nav.push(ReportsKey)
-                            MoreEvent.OpenCompany -> nav.push(CompanyKey)
-                            MoreEvent.FreeUp -> scope.launch {
-                                withContext(Dispatchers.IO) { container.jobFileTransfers.freeUp() }
-                                storage = withContext(Dispatchers.IO) { container.jobFileTransfers.storage() }
-                            }
-                            MoreEvent.SignOut -> container.signOut()
-                        }
-                    },
-                    )
-                }
+                key.depth == 0 && key.title == "more" -> MoreRoute(
+                    deps = { container.moreDeps(membership) },
+                    onOpenTeam = { nav.push(TeamKey) },
+                    onOpenTimesheets = { nav.push(TimesheetsKey) },
+                    onOpenReports = { nav.push(ReportsKey) },
+                    onOpenCompany = { nav.push(CompanyKey) },
+                    onSignOut = container::signOut,
+                )
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
                     membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(), container.roleGates,
                     onEditJob = { if (it == null) nav.push(JobEditKey(null)) else nav.push(JobKey(it)) },
@@ -212,7 +191,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 membership.companyId, key.jobId, container.db.jobDao(), container.db.clientDao(), container.db.homeDao(), container.db.floorDao(), container.db.roomDao(),
                 container.db.jobCrewDao(), container.db.memberDao(), { container.refreshMembers(membership.companyId) },
                 container::recordChange, onClose = nav::pop,
-                onSaved = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { container.jobGeocoder.resolvePending(membership.companyId) } },
+                onSaved = { container.geocodePending(membership.companyId) },
             )
         }
         entry<TimesheetsKey> {
