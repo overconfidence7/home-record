@@ -2016,6 +2016,7 @@ Broadcast completed: result=0))
 
 Tested: 50 device stages, 849 unit tests, 129 backend tests, coverage 217/217 ACs. Passed: 37. New issues: 11. Critical: 0. Product gaps: n/a (judge entry follows).
 
+
 ## QA judge 2026-10-30 (commit 9d87512)
 
 Judged the suite results for 9d87512 (run of 2026-10-29 22:52 UTC, 50 stages, 37 passed). `build` HEAD 3e0fa82 is eight commits ahead (0bfc2e9 fixes the H02 landscape failure and resets rotation in device-suite.sh; the rest are CR2u Minor sweeps); the suite has not tested it yet. Since 82c76a0 the visible changes are: the plan editor's selection panel (pinned Done / Edit shape / Delete row, wall-only and door-only inspectors), F08b's shutter waiting for the camera, House Manual registering its home before syncing, and the crew's "Changes to your punches" list on Clock. No PLAN task was newly ticked.
@@ -2069,3 +2070,70 @@ Focus check: nothing wrong. House Manual stays homeowner ("Save the plumber, the
 Coverage note: the auto entry reports 217/217 claimed ACs covered across 118 ticked tasks and subtasks (0 gaps).
 
 Judged: 276 screenshots opened (all 73 device flow and tour shots, 6 suite launch shots, all 147 light crawler shots, 49 dark/200%/landscape crawler shots, 1 zoomed crop); the other 390 crawler variants checked by script for blank frames. 20 walkthrough steps. New issues: 1. Product gaps: 0.
+
+## QA 2026-10-29 (commit bec3a30)
+
+- **Verdict (House Manual)**: House Manual's plan editor and item catalogue are solidifying nicely with graceful landscape and keyboard handling, but the house is still flat: you have a 2D floor blueprint, but no wall photos, 3D room navigation, breaker panel wiring, or emergency shutoffs yet (M4–M6 remain unbuilt).
+- **Verdict (Field Log)**: Field Log runs the clock, files, and photos well for daily operations, but on the jobsite you still cannot produce a daily log, assign tasks, or draft change orders for client signature on the phone (T043–T045, T056 are open).
+
+### Confirmed fixed
+- [auto:flow:house-manual:H02-draw-plan] In phone landscape with the keyboard open, the plan editor inspector panel docks beside the plan (~360 dp wide) with scrolling action rows; Done and Room name remain visible and interactive without crushing (fixed in 0bfc2e9). Screenshot: qa/screenshots/latest/hm-plan-editor-landscape-kb.png
+- Cascading flows H02b, H03, H04, H17, H19, x-contacts, x-documents, and dark/font200/landscape tours run without orientation lockups.
+- Item photo discard cleanup (CR2u sweep 2 / baac680): cancelled item drafts cleanly discard uncommitted media.
+
+### Findings
+No new Critical, Major, Minor, or Product gap issues introduced in this commit. Existing open items (such as [UI] Minor nav label wrapping at 200% font scale and launch coldstart/jank benchmarks) remain tracked.
+
+### Product walkthrough
+
+#### House Manual
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding asks name, house type, foundation, garage; lands on Home | qa/screenshots/latest/hm-onboarding.png |
+| H2 | Pass | Plan editor on grid, dimension inputs, undo/redo, responsive landscape inspector | qa/screenshots/latest/hm-plan-editor.png |
+| H3 | Pass | Blueprint with room dimensions, floor switcher, layer chips; tap room opens room screen | qa/screenshots/latest/hm-house-blueprint.png |
+| H4 | Pass | Item form accepts data plate photo, serial age decodes (Rheem MMYY), warranty status line | qa/screenshots/latest/hm-item-detail.png |
+| H5 | Pass | Category picker grouped with icons, items added to rooms | qa/screenshots/latest/hm-items.png |
+| H6 | Pass | Items tab grouped by category, counts, search, and warranty filter | qa/screenshots/latest/hm-items.png |
+| H7 | Pass | Item detail page with hero photo/icon, details, warranty, recalls, consumables | qa/screenshots/latest/hm-item-detail.png |
+| H8 | Pass | Offline/airplane mode keeps stored warranty data without errors | qa/screenshots/latest/hm-item-detail.png |
+| H9 | Blocked | Not built yet (T048 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H10 | Blocked | Not built yet (T049–T051 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H11 | Blocked | Not built yet (T052–T053 open) | qa/screenshots/latest/hm-house-blueprint.png |
+| H12 | Blocked | Not built yet (T066–T067 open) | qa/screenshots/latest/hm-more.png |
+| H13 | Blocked | Not built yet (T070–T071 open) | qa/screenshots/latest/hm-home.png |
+| H14 | Blocked | Not built yet (T072 open) | qa/screenshots/latest/hm-reminders.png |
+| H15 | Blocked | Not built yet (T073/T077 open) | qa/screenshots/latest/hm-more.png |
+| H16 | Blocked | Not built yet (T074 open) | qa/screenshots/latest/hm-more.png |
+| H17 | Pass | Email code sign in and session restore | qa/screenshots/latest/hm-more.png |
+| H18 | Blocked | Not built yet (T063 open) | qa/screenshots/latest/hm-more.png |
+| H19 | Blocked | Not built yet (T032 open) | qa/screenshots/latest/hm-paywall.png |
+
+#### Field Log
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, company creation, lands on Today hub | qa/screenshots/latest/fl-today.png |
+| F2 | Pass | Team member list, role gates enforce permissions | qa/screenshots/latest/fl-more.png |
+| F3 | Pass | Create job with client, address, rooms; Active list & Overview stats | qa/screenshots/latest/fl-jobs.png |
+| F4 | Pass | Clock in from Today with GPS fix; status card ticks elapsed time | qa/screenshots/latest/fl-clock-after-gps.png |
+| F5 | Pass | Start break, end break, clock out; punches record to timesheet | qa/screenshots/latest/fl-clock-break.png |
+| F6 | Pass | Weekly timesheets view, owner approval with checkmark, CSV export | qa/screenshots/latest/fl-timesheets.png |
+| F7 | Pass | Files tab with folders, search, offline indicator | qa/screenshots/latest/fl-job-files.png |
+| F8 | Pass | Photos tab grouped by day, markup badge, detail viewer with annotations, before/after toggle | qa/screenshots/latest/fl-job-photos.png |
+| F9 | Blocked | Not built yet (T043/T045 open) | qa/screenshots/latest/fl-today.png |
+| F10 | Blocked | Not built yet (T019/T054/T062/T063 open) | qa/screenshots/latest/fl-today.png |
+| F11 | Blocked | Not built yet (T044 open) | qa/screenshots/latest/fl-today.png |
+| F12 | Blocked | Not built yet (T056–T058 open) | qa/screenshots/latest/fl-today.png |
+| F13 | Blocked | Not built yet (T059 open) | qa/screenshots/latest/fl-today.png |
+| F14 | Blocked | Not built yet (T060 open) | qa/screenshots/latest/fl-more.png |
+| F15 | Pass | Reports tab with hours by job/person and CSV export | qa/screenshots/latest/fl-reports.png |
+| F16 | Blocked | Not built yet (T010/T046 open) | qa/screenshots/latest/fl-today.png |
+| F17 | Blocked | Not built yet (T064 open) | qa/screenshots/latest/fl-more.png |
+| F18 | Pass | More screens (Team, Timesheets, Reports, Company, Storage on phone, Sign out) open and return | qa/screenshots/latest/fl-more.png |
+
+Not built yet: H9, H10, H11, H12, H13, H14, H15, H16, H18, H19, F9, F10, F11, F12, F13, F14, F16, F17.
+
+Tested: AC-C1, AC-C5, AC-C6, AC-C8, AC-C9, AC-C10, AC-C12, AC-C13, AC-C30, AC-C33, AC-C34, AC-H1, AC-H4, AC-H5, AC-H6, AC-F5, AC-F7, AC-F8, AC-F9, AC-F10, AC-F11, AC-F14, AC-F15, AC-F19, AC-F20, AC-F23, AC-F25, AC-F26, AC-F46, AC-F48, AC-U1..AC-U12. Passed: 31. New issues: 0. Product gaps: 0. Walkthrough: HM 9/9, FL 9/9.
+
