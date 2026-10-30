@@ -49,4 +49,26 @@ class ItemsViewModelTest {
         assertThat(again.state.value.groups).hasSize(2)
         job.cancel(); job2.cancel()
     }
+
+    // AC-H6, SPEC HM-Items "grouped by category (collapsible)": a folded group keeps its header and count, survives
+    // recreation, and opens again while a search is typed so no match hides
+    @Test @AcceptanceCriterion("AC-H6")
+    fun groupsFoldAndStayFoldedAcrossRecreation() {
+        val saved = SavedStateHandle()
+        val vm = ItemsViewModel(MutableStateFlow(rows), saved)
+        val job = vm.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        vm.onEvent(ItemsEvent.ToggleGroup("Appliances"))
+        assertThat(vm.state.value.isCollapsed("Appliances")).isTrue()
+        assertThat(vm.state.value.isCollapsed("Heating and cooling")).isFalse()
+        assertThat(vm.state.value.groups.first { it.key == "Appliances" }.count).isEqualTo(1)
+        val again = ItemsViewModel(MutableStateFlow(rows), saved)
+        val job2 = again.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        assertThat(again.state.value.isCollapsed("Appliances")).isTrue()
+        again.onEvent(ItemsEvent.SetQuery("dish"))
+        assertThat(again.state.value.isCollapsed("Appliances")).isFalse()
+        again.onEvent(ItemsEvent.SetQuery(""))
+        again.onEvent(ItemsEvent.ToggleGroup("Appliances"))
+        assertThat(again.state.value.isCollapsed("Appliances")).isFalse()
+        job.cancel(); job2.cancel()
+    }
 }

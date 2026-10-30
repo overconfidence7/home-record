@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.clock
 
+import androidx.annotation.StringRes
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -321,17 +322,17 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
             text = {
                 Column(Modifier.selectableGroup()) {
                     Text(stringResource(R.string.clock_far_body, sheet.distanceFt), style = MaterialTheme.typography.bodyMedium)
-                    FarReasonSheet.choices.forEach { choice ->
+                    FarReason.entries.forEach { choice ->
                         Row(
                             Modifier.fillMaxWidth().heightIn(min = TargetHeight)
                                 .selectable(sheet.choice == choice, role = Role.RadioButton, onClick = { onEvent(ClockEvent.PickReason(choice)) }),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(sheet.choice == choice, onClick = null)
-                            Text(choice, Modifier.padding(start = 12.dp))
+                            Text(stringResource(farReasonLabel(choice)), Modifier.padding(start = 12.dp))
                         }
                     }
-                    if (sheet.choice == FarReasonSheet.OTHER) {
+                    if (sheet.choice == FarReason.Other) {
                         OutlinedTextField(
                             sheet.other, { onEvent(ClockEvent.OtherReason(it)) },
                             label = { Text(stringResource(R.string.clock_far_other)) },
@@ -357,4 +358,13 @@ private fun ClockDialogs(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
             dismissButton = if (permissionMissing) { { TextButton({ onEvent(ClockEvent.DismissGps) }, Modifier.heightIn(min = TargetHeight)) { Text(stringResource(R.string.cancel)) } } } else null,
         )
     }
+}
+
+/** The label for a far-from-job reason preset (AC-F9). */
+@StringRes
+internal fun farReasonLabel(reason: FarReason): Int = when (reason) {
+    FarReason.Materials -> R.string.clock_far_materials
+    FarReason.SupplyHouse -> R.string.clock_far_supply_house
+    FarReason.Shop -> R.string.clock_far_shop
+    FarReason.Other -> R.string.clock_far_other_choice
 }

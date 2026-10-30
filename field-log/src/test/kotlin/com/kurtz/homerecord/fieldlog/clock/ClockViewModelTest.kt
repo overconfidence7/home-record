@@ -237,17 +237,26 @@ class ClockViewModelTest {
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
         val sheet = await(vm) { it.farReason != null }.farReason
         assertThat(sheet?.canSave).isFalse()
-        vm.onEvent(ClockEvent.PickReason("Supply house"))
+        vm.onEvent(ClockEvent.PickReason(FarReason.SupplyHouse))
         vm.onEvent(ClockEvent.SaveReason)
         await(vm) { it.status is ClockStatus.Working }
         val p = db.punchDao().listFor("c1").single()
         assertThat(p.farFromJob).isTrue()
-        assertThat(p.reason).isEqualTo("Supply house")
+        assertThat(p.reason).isEqualTo("supply_house")
     }
 
     @Test fun otherReasonNeedsText() {
-        assertThat(FarReasonSheet(900, FarReasonSheet.OTHER, "  ").canSave).isFalse()
-        assertThat(FarReasonSheet(900, FarReasonSheet.OTHER, " Dropping off a ladder ").reason).isEqualTo("Dropping off a ladder")
+        assertThat(FarReasonSheet(900, FarReason.Other, "  ").canSave).isFalse()
+        assertThat(FarReasonSheet(900, FarReason.Other, " Dropping off a ladder ").reason).isEqualTo("Dropping off a ladder")
+    }
+
+    // AC-F9: presets are stored as codes, so a punch reads the same whatever the phone's language
+    @Test fun presetReasonsStoreCodes() {
+        assertThat(FarReason.entries.filter { it != FarReason.Other }.map { FarReasonSheet(900, it).reason })
+            .containsExactly("materials", "supply_house", "shop").inOrder()
+        assertThat(FarReason.fromStored("shop")).isEqualTo(FarReason.Shop)
+        assertThat(FarReason.fromStored("other")).isNull()
+        assertThat(FarReason.fromStored("Dropping off a ladder")).isNull()
     }
 
     private suspend fun addMember(id: String, name: String) =
@@ -303,8 +312,8 @@ class ClockViewModelTest {
         vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockInCrew)
         await(vm) { it.farReason != null }
         assertThat(db.punchDao().listFor("c1")).isEmpty()
-        vm.onEvent(ClockEvent.PickReason("Supply house")); vm.onEvent(ClockEvent.SaveReason)
+        vm.onEvent(ClockEvent.PickReason(FarReason.SupplyHouse)); vm.onEvent(ClockEvent.SaveReason)
         await(vm) { it.crewNotice != null }
-        assertThat(db.punchDao().listFor("c1").map { it.reason }).containsExactly("Supply house", "Supply house")
+        assertThat(db.punchDao().listFor("c1").map { it.reason }).containsExactly("supply_house", "supply_house")
     }
 }

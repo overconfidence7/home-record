@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SearchOff
@@ -39,6 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ItemCategory
@@ -89,15 +95,16 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                     }
                 }
                 state.groups.forEach { g ->
+                    val folded = state.isCollapsed(g.key)
                     item(key = "h:${g.key}") {
-                        Text(
-                            stringResource(R.string.items_group_header, g.title.ifEmpty { stringResource(R.string.items_no_room) }, g.count),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp).testTag("hm_items_group_${g.key}"),
+                        GroupHeader(
+                            title = stringResource(R.string.items_group_header, g.title.ifEmpty { stringResource(R.string.items_no_room) }, g.count),
+                            expanded = !folded,
+                            onToggle = { onEvent(ItemsEvent.ToggleGroup(g.key)) },
+                            modifier = Modifier.testTag("hm_items_group_${g.key}"),
                         )
                     }
-                    items(g.items, key = { "${g.key}:${it.id}" }) { r ->
+                    if (!folded) items(g.items, key = { "${g.key}:${it.id}" }) { r ->
                         Column(Modifier.testTag("hm_items_row_${r.id}")) {
                             RecordListItem(
                                 headline = r.name,
@@ -115,6 +122,28 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                 }
             }
         }
+    }
+}
+
+/** A category or room header that folds its rows away (SPEC HM-Items "grouped by category (collapsible)"). */
+@Composable
+private fun GroupHeader(title: String, expanded: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    val stateText = stringResource(if (expanded) R.string.items_group_expanded else R.string.items_group_collapsed)
+    Row(
+        modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable(onClickLabel = stringResource(if (expanded) R.string.items_group_collapse else R.string.items_group_expand), onClick = onToggle)
+            .semantics { heading(); stateDescription = stateText }
+            .padding(start = 16.dp, end = 12.dp, top = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
+        Icon(
+            if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.capture
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.fieldlog.CaptureDeniedPreview
 import com.kurtz.homerecord.fieldlog.CaptureReadyPreview
 import org.junit.Rule
 import org.junit.Test
@@ -72,5 +74,25 @@ class CaptureLayoutTest {
         rule.onNodeWithTag("fl_capture_starting").assertDoesNotExist()
         rule.onNodeWithTag("fl_capture_shutter").assertIsEnabled().performClick()
         assertThat(events).containsExactly(CaptureEvent.Shutter)
+    }
+
+    // ui-standards rule 30 (cr:fl-capture-targets): every capture control is at least 56 dp tall for gloved hands
+    @Test fun roomAndPhaseChipsAreGloveSized() {
+        rule.setContent { CaptureReadyPreview() }
+        rule.onNodeWithTag("fl_capture_room_r1").assertHeightIsAtLeast(56.dp)
+        rule.onNodeWithTag("fl_capture_phase_Rough-in").assertHeightIsAtLeast(56.dp)
+    }
+
+    @Test fun deniedSettingsButtonIsGloveSized() {
+        rule.setContent { CaptureDeniedPreview() }
+        rule.onNodeWithTag("fl_capture_settings").assertHeightIsAtLeast(56.dp)
+    }
+
+    // ui-standards rule 21: the note field has a visible label, not only a placeholder
+    @Test fun noteFieldIsLabelled() {
+        var state by mutableStateOf(CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted, cameraReady = true))
+        rule.setContent { CaptureScreen(state, {}, onBack = {}, onPickGallery = {}, camera = { Box(it) }) }
+        state = state.copy(noteOpen = true)
+        rule.onNodeWithTag("fl_capture_note_text").assert(androidx.compose.ui.test.hasText("Note"))
     }
 }

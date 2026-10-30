@@ -44,7 +44,7 @@ class ClockTargetsTest {
     @Test fun farReasonSaveIs56() = atLeast(
         {
             HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
-                ClockScreen(ClockUiState(loading = false, farReason = FarReasonSheet(1840, "Shop")), {})
+                ClockScreen(ClockUiState(loading = false, farReason = FarReasonSheet(1840, FarReason.Shop)), {})
             }
         },
         56, "fl_clock_far_save",

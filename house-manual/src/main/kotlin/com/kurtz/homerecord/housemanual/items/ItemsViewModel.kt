@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-/** Items tab (AC-H6): grouping and filters live in [SavedStateHandle] so they survive process death. */
+/** Items tab (AC-H6): grouping, filters and folded groups live in [SavedStateHandle] so they survive process death. */
 class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
     constructor(repo: ItemRepository, homeId: String, pseudoNames: Map<String, String>, saved: SavedStateHandle) :
         this(repo.observeRows(homeId, pseudoNames), saved)
@@ -29,8 +29,11 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
         ),
     )
 
-    val state: StateFlow<ItemsUiState> = combine(rows, grouping, filter) { all, g, f ->
+    private val collapsed = MutableStateFlow(saved.get<ArrayList<String>>(COLLAPSED)?.toSet().orEmpty())
+
+    val state: StateFlow<ItemsUiState> = combine(rows, grouping, filter, collapsed) { all, g, f, c ->
         ItemsUiState(
+            collapsed = c,
             loading = false, totalCount = all.size, grouping = g, filter = f,
             groups = ItemListBuilder.build(all, g, f),
             categoryOptions = all.map { it.categoryLabel }.distinct().sortedBy(ItemListBuilder::categoryOrder),
@@ -46,6 +49,11 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
             is ItemsEvent.SetRoom -> update { copy(roomId = e.roomId) }
             is ItemsEvent.SetWarranty -> update { copy(warranty = e.filter) }
             ItemsEvent.ClearFilters -> update { ItemFilter() }
+            is ItemsEvent.ToggleGroup -> {
+                val c = collapsed.value.let { if (e.key in it) it - e.key else it + e.key }
+                collapsed.value = c
+                saved[COLLAPSED] = ArrayList(c)
+            }
             is ItemsEvent.Open, ItemsEvent.Add -> Unit // navigation is the route's job
         }
     }
@@ -57,6 +65,6 @@ class ItemsViewModel(rows: Flow<List<ItemRow>>, private val saved: SavedStateHan
     }
 
     private companion object {
-        const val GROUPING = "grouping"; const val CATEGORY = "category"; const val ROOM = "room"; const val QUERY = "query"; const val WARRANTY = "warranty"
+        const val GROUPING = "grouping"; const val CATEGORY = "category"; const val ROOM = "room"; const val QUERY = "query"; const val WARRANTY = "warranty"; const val COLLAPSED = "collapsed"
     }
 }

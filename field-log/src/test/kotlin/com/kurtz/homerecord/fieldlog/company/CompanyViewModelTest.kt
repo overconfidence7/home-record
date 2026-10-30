@@ -32,6 +32,22 @@ class CompanyViewModelTest {
         assertThat(s.canSave).isFalse()
     }
 
+    @Test fun unsavedEditsSurviveProcessDeath() {
+        val handle = androidx.lifecycle.SavedStateHandle()
+        val first = CompanyViewModel(api, "c1", handle)
+        first.onEvent(CompanyEvent.Name("Kurtz Electric LLC"))
+        first.onEvent(CompanyEvent.Overtime(OvertimeRule.Weekly40))
+        first.onEvent(CompanyEvent.PunchDistance("250"))
+        // A new process gets only the saved bundle; the profile is fetched again under it.
+        val restored = CompanyViewModel(api, "c1", androidx.lifecycle.SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        val s = restored.state.value
+        assertThat(s.name).isEqualTo("Kurtz Electric LLC")
+        assertThat(s.overtimeRule).isEqualTo(OvertimeRule.Weekly40)
+        assertThat(s.punchDistanceText).isEqualTo("250")
+        assertThat(s.loaded?.name).isEqualTo("Kurtz Electric")
+        assertThat(s.dirty).isTrue()
+    }
+
     @Test fun loadFailureCanRetry() {
         api.profile = ApiResult.Err(ApiFailure.Offline)
         val vm = vm()

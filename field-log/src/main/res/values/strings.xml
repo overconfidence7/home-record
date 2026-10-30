@@ -344,6 +344,10 @@
     <string name="clock_far_title">You\'re away from the job</string>
     <string name="clock_far_body">You are about %1$d ft from the job address. Pick the reason.</string>
     <string name="clock_far_other">What for</string>
+    <string name="clock_far_materials">Picking up materials</string>
+    <string name="clock_far_supply_house">Supply house</string>
+    <string name="clock_far_shop">Shop</string>
+    <string name="clock_far_other_choice">Other</string>
     <string name="clock_gps_title">Location is required</string>
     <string name="clock_gps_permission">Your company needs a location with every punch. Allow location for Field Log in Settings, then clock in again.</string>
     <string name="clock_gps_signal">Your company needs a location with every punch, and the phone hasn\'t found one yet. Move somewhere with a clear view of the sky and try again.</string>

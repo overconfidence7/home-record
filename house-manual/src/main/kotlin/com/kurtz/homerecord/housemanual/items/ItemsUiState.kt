@@ -15,8 +15,12 @@ data class ItemsUiState(
     val groups: List<ItemGroup> = emptyList(),
     val categoryOptions: List<String> = emptyList(),
     val roomOptions: List<RoomOption> = emptyList(),
+    /** Keys of the groups the owner folded away; a search shows every group open so no match hides. */
+    val collapsed: Set<String> = emptySet(),
 ) {
     val filtered: Boolean get() = filter != ItemFilter()
+
+    fun isCollapsed(groupKey: String): Boolean = groupKey in collapsed && filter.query.isBlank()
 }
 
 sealed interface ItemsEvent {
@@ -26,6 +30,7 @@ sealed interface ItemsEvent {
     data class SetRoom(val roomId: String?) : ItemsEvent
     data class SetWarranty(val filter: WarrantyFilter?) : ItemsEvent
     data object ClearFilters : ItemsEvent
+    data class ToggleGroup(val key: String) : ItemsEvent
     data class Open(val itemId: String) : ItemsEvent
     data object Add : ItemsEvent
 }

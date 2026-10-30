@@ -372,7 +372,7 @@ fun ClockBreakPreview() = Frame {
 @Composable
 fun ClockFarReasonPreview() = Frame {
     com.kurtz.homerecord.fieldlog.clock.ClockScreen(
-        clockState().copy(farReason = com.kurtz.homerecord.fieldlog.clock.FarReasonSheet(1840, com.kurtz.homerecord.fieldlog.clock.FarReasonSheet.OTHER, "Dropping off a ladder")), {},
+        clockState().copy(farReason = com.kurtz.homerecord.fieldlog.clock.FarReasonSheet(1840, com.kurtz.homerecord.fieldlog.clock.FarReason.Other, "Dropping off a ladder")), {},
     )
 }
 

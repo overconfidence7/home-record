@@ -4,15 +4,27 @@ import com.kurtz.homerecord.core.punch.ClockStatus
 
 data class ClockJobOption(val id: String, val name: String, val address: String?, val lat: Double? = null, val lng: Double? = null)
 
-/** The far-from-job reason sheet (AC-F9). */
-data class FarReasonSheet(val distanceFt: Int, val choice: String? = null, val other: String = "") {
-    val reason: String? get() = if (choice == OTHER) other.trim().takeIf { it.isNotEmpty() } else choice
-    val canSave: Boolean get() = reason != null
+/**
+ * A far-from-job reason (AC-F9). The punch stores [code] for a preset and the typed text for
+ * [Other], so the stored value does not depend on the phone's language; labels are in strings.xml.
+ */
+enum class FarReason(val code: String) {
+    Materials("materials"),
+    SupplyHouse("supply_house"),
+    Shop("shop"),
+    Other("other");
 
     companion object {
-        const val OTHER = "Other"
-        val choices = listOf("Picking up materials", "Supply house", "Shop", OTHER)
+        /** The preset a stored reason names, or null for typed text (Other) and older English values. */
+        fun fromStored(value: String?): FarReason? = entries.firstOrNull { it != Other && it.code == value }
     }
+}
+
+/** The far-from-job reason sheet (AC-F9). */
+data class FarReasonSheet(val distanceFt: Int, val choice: FarReason? = null, val other: String = "") {
+    /** What the punch stores: the preset's code, or the trimmed text for Other. */
+    val reason: String? get() = if (choice == FarReason.Other) other.trim().takeIf { it.isNotEmpty() } else choice?.code
+    val canSave: Boolean get() = reason != null
 }
 
 /** One teammate a lead can clock in; [onClock] people are shown but cannot be picked (AC-F11). */
@@ -75,7 +87,7 @@ sealed interface ClockEvent {
     data object ExplainContinue : ClockEvent
     data object ExplainSkip : ClockEvent
     data class PermissionResult(val granted: Boolean) : ClockEvent
-    data class PickReason(val choice: String) : ClockEvent
+    data class PickReason(val choice: FarReason) : ClockEvent
     data class OtherReason(val text: String) : ClockEvent
     data object SaveReason : ClockEvent
     data object CancelReason : ClockEvent

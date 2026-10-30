@@ -57,7 +57,7 @@ fun TeamRoute(api: CompanyApi, membership: CompanyMembership, inviteLinkFor: (St
 @Composable
 fun CompanyRoute(api: CompanyApi, membership: CompanyMembership, onSaved: (String) -> Unit, onBack: () -> Unit) {
     val vm = viewModel<CompanyViewModel>(
-        factory = viewModelFactory { initializer { CompanyViewModel(api, membership.companyId, onSaved) } },
+        factory = viewModelFactory { initializer { CompanyViewModel(api, membership.companyId, createSavedStateHandle(), onSaved) } },
     )
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.saved) { if (state.saved) onBack() }

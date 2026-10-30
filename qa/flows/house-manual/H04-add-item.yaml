@@ -70,6 +70,11 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_items_group_category"
 - assertVisible: "Heating and cooling.*"
+# AC-H6: a category group folds away under its header and opens again
+- tapOn: "Heating and cooling.*"
+- assertNotVisible: "Furnace.*"
+- tapOn: "Heating and cooling.*"
+- assertVisible: "Furnace.*"
 # AC-H7, AC-C33: a row opens the item page with details, warranty section and the overflow menu
 - tapOn: "Furnace.*"
 - assertVisible:

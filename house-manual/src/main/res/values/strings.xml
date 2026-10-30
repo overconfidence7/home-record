@@ -54,6 +54,10 @@
     <string name="items_warranty_expired">Expired</string>
     <string name="items_warranty_unknown">Unknown</string>
     <string name="items_group_header">%1$s (%2$d)</string>
+    <string name="items_group_expanded">Expanded</string>
+    <string name="items_group_collapsed">Collapsed</string>
+    <string name="items_group_collapse">Collapse</string>
+    <string name="items_group_expand">Expand</string>
     <string name="items_no_room">No room</string>
     <string name="items_no_match_title">No items match</string>
     <string name="items_no_match_body">Nothing fits those filters. Clear them to see all %1$d items.</string>

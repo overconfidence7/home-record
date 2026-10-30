@@ -181,7 +181,7 @@ private fun Controls(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
                 FilterChip(
                     selected = state.roomId == r.id,
                     onClick = { onEvent(CaptureEvent.SelectRoom(if (state.roomId == r.id) null else r.id)) },
-                    label = { Text(r.name) }, modifier = Modifier.testTag("fl_capture_room_${r.id}"),
+                    label = { Text(r.name) }, modifier = Modifier.heightIn(min = 56.dp).testTag("fl_capture_room_${r.id}"),
                 )
             }
         }
@@ -192,7 +192,7 @@ private fun Controls(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
                 FilterChip(
                     selected = state.phase == p,
                     onClick = { onEvent(CaptureEvent.SelectPhase(if (state.phase == p) null else p)) },
-                    label = { Text(p) }, modifier = Modifier.testTag("fl_capture_phase_$p"),
+                    label = { Text(p) }, modifier = Modifier.heightIn(min = 56.dp).testTag("fl_capture_phase_$p"),
                 )
             }
         }
@@ -277,6 +277,7 @@ private fun NoteDialog(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
         text = {
             OutlinedTextField(
                 value = state.noteText, onValueChange = { onEvent(CaptureEvent.NoteText(it)) },
+                label = { Text(stringResource(R.string.cap_note)) },
                 placeholder = { Text(stringResource(R.string.cap_note_hint)) }, minLines = 3,
                 modifier = Modifier.fillMaxWidth().testTag("fl_capture_note_text"),
             )
@@ -304,7 +305,7 @@ private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onP
             style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("fl_capture_denied"),
         )
         if (state.access == CameraAccess.Denied) {
-            Button(onClick = { onEvent(CaptureEvent.OpenSettings) }, Modifier.fillMaxWidth().padding(0.dp).testTag("fl_capture_settings")) {
+            Button(onClick = { onEvent(CaptureEvent.OpenSettings) }, Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_capture_settings")) {
                 Text(stringResource(R.string.cap_open_settings))
             }
         }
