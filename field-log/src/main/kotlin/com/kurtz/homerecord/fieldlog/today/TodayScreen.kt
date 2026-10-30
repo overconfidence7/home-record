@@ -1,6 +1,5 @@
 package com.kurtz.homerecord.fieldlog.today
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +28,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -44,7 +42,6 @@ import com.kurtz.homerecord.core.sync.SyncPhase
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.SyncStatus
-import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.fieldlog.R
 import java.time.Instant
 import java.time.ZoneId
@@ -83,38 +80,43 @@ data class TodayUiState(
  * FL-Today: clock status card, my jobs today, and for Owner and Office who is on site now (AC-F16). Tasks and photos
  * arrive with later tasks; before the company has a job it explains what to do first (AC-F1).
  */
+/** Everything a tap on Today asks for; the route turns navigation into back-stack pushes (cr:fl-screen-signature). */
+sealed interface TodayEvent {
+    data object InviteCrew : TodayEvent
+    data object SyncNow : TodayEvent
+    data object OpenClock : TodayEvent
+    data class OpenJob(val jobId: String) : TodayEvent
+    data object AddJob : TodayEvent
+    data object Refresh : TodayEvent
+    data object ClearRefused : TodayEvent
+    /** Open the member's last punch location in a maps app (AC-F16). */
+    data class OpenPin(val entry: OnSiteEntry) : TodayEvent
+}
+
 @Composable
-fun TodayScreen(
-    state: TodayUiState,
-    onInviteCrew: () -> Unit,
-    modifier: Modifier = Modifier,
-    onSyncNow: () -> Unit = {},
-    onOpenClock: () -> Unit = {},
-    onOpenJob: (String) -> Unit = {},
-    onAddJob: () -> Unit = {},
-    onRefresh: () -> Unit = {},
-    onClearRefused: () -> Unit = {},
-) {
+fun TodayScreen(state: TodayUiState, onEvent: (TodayEvent) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
-        SyncStatus(state.syncPhase, state.pendingChanges, state.refusedChanges, onSyncNow, onClearRefused, Modifier.padding(horizontal = 16.dp))
+        SyncStatus(
+            state.syncPhase, state.pendingChanges, state.refusedChanges,
+            { onEvent(TodayEvent.SyncNow) }, { onEvent(TodayEvent.ClearRefused) }, Modifier.padding(horizontal = 16.dp),
+        )
         // Pull down syncs and reloads the team, so "On site now" is current (AC-F16).
-        PullToRefreshBox(state.refreshing, onRefresh, Modifier.weight(1f).fillMaxWidth().testTag("fl_today_refresh")) {
-            if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onOpenClock, onOpenJob, Modifier.fillMaxSize())
-            else TodayBody(state, onInviteCrew, onAddJob, Modifier.fillMaxSize())
+        PullToRefreshBox(state.refreshing, { onEvent(TodayEvent.Refresh) }, Modifier.weight(1f).fillMaxWidth().testTag("fl_today_refresh")) {
+            if (state.clock != null && state.hasJobs) TodayContent(state, state.clock, onEvent, Modifier.fillMaxSize())
+            else TodayBody(state, onEvent, Modifier.fillMaxSize())
         }
     }
 }
 
 @Composable
-private fun TodayContent(state: TodayUiState, clock: TodayClock, onOpenClock: () -> Unit, onOpenJob: (String) -> Unit, modifier: Modifier) {
-    val context = LocalContext.current
+private fun TodayContent(state: TodayUiState, clock: TodayClock, onEvent: (TodayEvent) -> Unit, modifier: Modifier) {
     val inset = Modifier.padding(horizontal = 16.dp)
     // Jobs and people are list rows edge to edge (rules 7 and 8); the clock status is the one card (cr:fl-card-lists).
     LazyColumn(
         modifier.testTag("fl_today_list"),
         contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
     ) {
-        item { ClockCard(clock, onOpenClock, inset) }
+        item { ClockCard(clock, { onEvent(TodayEvent.OpenClock) }, inset) }
         item { SectionHeading(stringResource(R.string.today_jobs)) }
         if (state.jobs.isEmpty()) item { Text(stringResource(R.string.today_no_jobs), inset.padding(vertical = 8.dp), style = MaterialTheme.typography.bodyMedium) }
         items(state.jobs, key = { "job-${it.id}" }) { job ->
@@ -122,14 +124,14 @@ private fun TodayContent(state: TodayUiState, clock: TodayClock, onOpenClock: ()
                 headline = job.name,
                 supporting = job.address,
                 leading = { Icon(Icons.Rounded.Work, contentDescription = null) },
-                onClick = { onOpenJob(job.id) },
+                onClick = { onEvent(TodayEvent.OpenJob(job.id)) },
                 modifier = Modifier.fillMaxWidth().testTag("fl_today_job_${job.id}"),
             )
         }
         if (state.role.isAdmin) {
             item { SectionHeading(stringResource(R.string.today_on_site)) }
             if (state.onSite.isEmpty()) item { Text(stringResource(R.string.today_on_site_empty), inset.padding(vertical = 8.dp).testTag("fl_today_on_site_empty"), style = MaterialTheme.typography.bodyMedium) }
-            items(state.onSite, key = { "site-${it.memberId}" }) { row -> OnSiteRow(row) { context.openPin(row) } }
+            items(state.onSite, key = { "site-${it.memberId}" }) { row -> OnSiteRow(row) { onEvent(TodayEvent.OpenPin(row)) } }
         }
     }
 }
@@ -176,12 +178,6 @@ private fun OnSiteRow(row: OnSiteEntry, onPin: () -> Unit) {
     )
 }
 
-private fun Context.openPin(row: OnSiteEntry) {
-    val lat = row.lat ?: return
-    val lng = row.lng ?: return
-    Intents.openMap(this, lat, lng, row.name)
-}
-
 private fun timeText(ms: Long): String = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()))
 
 private fun elapsedText(ms: Long): String {
@@ -190,7 +186,7 @@ private fun elapsedText(ms: Long): String {
 }
 
 @Composable
-private fun TodayBody(state: TodayUiState, onInviteCrew: () -> Unit, onAddJob: () -> Unit, modifier: Modifier) {
+private fun TodayBody(state: TodayUiState, onEvent: (TodayEvent) -> Unit, modifier: Modifier) {
     if (state.role.isAdmin) {
         Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             EmptyState(
@@ -198,11 +194,11 @@ private fun TodayBody(state: TodayUiState, onInviteCrew: () -> Unit, onAddJob: (
                 headline = stringResource(R.string.today_empty_title, state.companyName),
                 body = stringResource(R.string.today_empty_admin),
                 actionLabel = stringResource(R.string.today_add_job),
-                onAction = onAddJob,
+                onAction = { onEvent(TodayEvent.AddJob) },
                 modifier = Modifier.weight(1f),
                 actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_today_add_job"),
             )
-            TextButton(onClick = onInviteCrew, Modifier.heightIn(min = 56.dp).padding(bottom = 16.dp).testTag("fl_today_invite_crew")) {
+            TextButton(onClick = { onEvent(TodayEvent.InviteCrew) }, Modifier.heightIn(min = 56.dp).padding(bottom = 16.dp).testTag("fl_today_invite_crew")) {
                 Text(stringResource(R.string.today_invite_crew))
             }
         }

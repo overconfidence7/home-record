@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
@@ -12,6 +13,7 @@ import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 import com.kurtz.homerecord.fieldlog.more.MoreEvent
 import com.kurtz.homerecord.fieldlog.more.MoreScreen
 import com.kurtz.homerecord.fieldlog.more.MoreUiState
+import com.kurtz.homerecord.fieldlog.today.TodayEvent
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
 import com.kurtz.homerecord.fieldlog.today.TodayUiState
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,6 +24,7 @@ import com.kurtz.homerecord.fieldlog.jobs.JobOverviewScreen
 import com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState
 import com.kurtz.homerecord.fieldlog.jobs.JobsScreen
 import com.kurtz.homerecord.fieldlog.jobs.JobsUiState
+import com.kurtz.homerecord.fieldlog.photos.PhotoDetailEvent
 import com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen
 import com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState
 import org.junit.Rule
@@ -80,23 +83,23 @@ class RoleGatesTest {
     }
 
     @Test fun todayEmptyStateForOwnerOffersInvite() {
-        var invited = false
+        val events = mutableListOf<TodayEvent>()
         rule.setContent {
-            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), { invited = true }) }
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), { events += it }) }
         }
         rule.onNodeWithText("No jobs yet at Kurtz Electric").assertIsDisplayed()
         rule.onNodeWithText("Invite crew").performClick()
-        assertThat(invited).isTrue()
+        assertThat(events).containsExactly(TodayEvent.InviteCrew)
     }
 
     // AC-F1
     @Test fun todayEmptyStateForOwnerOffersAddJob() {
-        var added = false
+        val events = mutableListOf<TodayEvent>()
         rule.setContent {
-            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), {}, onAddJob = { added = true }) }
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), { events += it }) }
         }
         rule.onNodeWithText("Add a job").performClick()
-        assertThat(added).isTrue()
+        assertThat(events).containsExactly(TodayEvent.AddJob)
     }
 
     @Test fun todayEmptyStateForCrewHasNoInviteButton() {
@@ -140,8 +143,18 @@ class RoleGatesTest {
     }
 
     @Test fun photoHasNoDeleteWithoutTheRight() {
-        show { PhotoDetailScreen(PhotoDetailUiState(loading = false, imagePath = "/none/a.jpg", canDelete = false), {}, {}, {}, {}) }
+        show { PhotoDetailScreen(PhotoDetailUiState(loading = false, imagePath = "/none/a.jpg", canDelete = false), {}) }
         rule.onNodeWithTag("fl_photo_share").assertIsDisplayed()
         rule.onNodeWithTag("fl_photo_delete").assertDoesNotExist()
+    }
+
+    // AC-F25 (cr:fl-screen-signature): share, mark up and back reach the route as events
+    @Test fun photoActionsAreEvents() {
+        val events = mutableListOf<PhotoDetailEvent>()
+        show { PhotoDetailScreen(PhotoDetailUiState(loading = false, imagePath = "/none/a.jpg", canDelete = false), { events += it }) }
+        rule.onNodeWithTag("fl_photo_share").performClick()
+        rule.onNodeWithTag("fl_photo_annotate").performClick()
+        rule.onNodeWithContentDescription("Back").performClick()
+        assertThat(events).containsExactly(PhotoDetailEvent.Share, PhotoDetailEvent.Annotate, PhotoDetailEvent.Back).inOrder()
     }
 }

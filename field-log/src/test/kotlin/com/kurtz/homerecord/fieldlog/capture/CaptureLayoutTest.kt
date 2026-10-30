@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ class CaptureLayoutTest {
     @Test fun shutterIsOffWhileTheCameraStarts() {
         val events = mutableListOf<CaptureEvent>()
         var state by mutableStateOf(CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted))
-        rule.setContent { CaptureScreen(state, { events += it }, onBack = {}, onPickGallery = {}, camera = { Box(it) }) }
+        rule.setContent { CaptureScreen(state, { events += it }, camera = { Box(it) }) }
         rule.onNodeWithTag("fl_capture_shutter").assertIsNotEnabled()
         rule.onNodeWithTag("fl_capture_starting").assertExists()
         state = state.copy(cameraReady = true)
@@ -88,10 +89,22 @@ class CaptureLayoutTest {
         rule.onNodeWithTag("fl_capture_settings").assertHeightIsAtLeast(56.dp)
     }
 
+    // AC-F24, AC-F29 (cr:fl-screen-signature): gallery and back are events like the rest, with or without the camera
+    @Test fun galleryAndBackAreEvents() {
+        val events = mutableListOf<CaptureEvent>()
+        var state by mutableStateOf(CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted, cameraReady = true))
+        rule.setContent { CaptureScreen(state, { events += it }, camera = { Box(it) }) }
+        rule.onNodeWithTag("fl_capture_gallery").performClick()
+        rule.onNodeWithContentDescription("Back").performClick()
+        state = state.copy(access = CameraAccess.Denied)
+        rule.onNodeWithTag("fl_capture_gallery").performClick()
+        assertThat(events).containsExactly(CaptureEvent.PickGallery, CaptureEvent.Back, CaptureEvent.PickGallery).inOrder()
+    }
+
     // ui-standards rule 21: the note field has a visible label, not only a placeholder
     @Test fun noteFieldIsLabelled() {
         var state by mutableStateOf(CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted, cameraReady = true))
-        rule.setContent { CaptureScreen(state, {}, onBack = {}, onPickGallery = {}, camera = { Box(it) }) }
+        rule.setContent { CaptureScreen(state, {}, camera = { Box(it) }) }
         state = state.copy(noteOpen = true)
         rule.onNodeWithTag("fl_capture_note_text").assert(androidx.compose.ui.test.hasText("Note"))
     }

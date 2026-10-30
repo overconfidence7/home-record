@@ -76,10 +76,12 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
                 if (state.recording || context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) vm.onEvent(event)
                 else mic.launch(Manifest.permission.RECORD_AUDIO)
             CaptureEvent.OpenSettings -> Intents.openAppSettings(context)
+            CaptureEvent.Back -> onBack()
+            CaptureEvent.PickGallery -> pick()
             else -> vm.onEvent(event)
         }
     }
-    CaptureScreen(state, onEvent, onBack, onPickGallery = pick) { modifier ->
+    CaptureScreen(state, onEvent) { modifier ->
         val owner = LocalLifecycleOwner.current
         val previewView = remember { PreviewView(context) }
         LaunchedEffect(state.access, state.lens) {

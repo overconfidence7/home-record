@@ -127,11 +127,11 @@ fun CompanyFormPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun TodayAdminPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), onInviteCrew = {}) }
+fun TodayAdminPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Owner), onEvent = {}) }
 
 @ThemePreviews
 @Composable
-fun TodayCrewPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Crew), onInviteCrew = {}) }
+fun TodayCrewPreview() = Frame { TodayScreen(TodayUiState("Kurtz Electric", CompanyRole.Crew), onEvent = {}) }
 
 private const val TODAY_NOW = 1_761_400_000_000L
 
@@ -155,7 +155,7 @@ fun TodayAdminOnSitePreview() = Frame {
                 com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", TODAY_NOW - 3 * 3600_000L), "Kitchen Remodel", TODAY_NOW,
             ),
         ),
-        onInviteCrew = {},
+        onEvent = {},
     )
 }
 
@@ -167,7 +167,7 @@ fun TodayCrewOutPreview() = Frame {
             "Kurtz Electric", CompanyRole.Crew, hasJobs = true, jobs = todayJobs.take(1),
             clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
         ),
-        onInviteCrew = {},
+        onEvent = {},
     )
 }
 
@@ -184,7 +184,7 @@ fun TodaySyncRefusedPreview() = Frame {
                 com.kurtz.homerecord.core.sync.RefusedChange("stair", "s1", TODAY_NOW - 3 * 3600_000L),
             ),
         ),
-        onInviteCrew = {},
+        onEvent = {},
     )
 }
 
@@ -196,7 +196,7 @@ fun TodayCrewNothingScheduledPreview() = Frame {
             "Kurtz Electric", CompanyRole.Crew, hasJobs = true,
             clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
         ),
-        onInviteCrew = {},
+        onEvent = {},
     )
 }
 
@@ -551,7 +551,7 @@ private val captureReady = com.kurtz.homerecord.fieldlog.capture.CaptureUiState(
 
 @Composable
 private fun CaptureFrame(state: com.kurtz.homerecord.fieldlog.capture.CaptureUiState) = Frame {
-    com.kurtz.homerecord.fieldlog.capture.CaptureScreen(state, {}, {}, {}) { m ->
+    com.kurtz.homerecord.fieldlog.capture.CaptureScreen(state, {}) { m ->
         androidx.compose.foundation.layout.Box(m.androidx_background())
     }
 }
@@ -650,19 +650,19 @@ private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailU
 
 @ThemePreviews
 @Composable
-fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, {}, {}, {}, java.time.ZoneId.of("UTC")) }
+fun PhotoDetailPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady, {}, zone = java.time.ZoneId.of("UTC")) }
 
 /** Crew tag and caption the photo but cannot delete it (AC-F3). */
 @ThemePreviews
 @Composable
 fun PhotoDetailCrewPreview() = Frame {
-    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(canDelete = false), {}, {}, {}, {}, java.time.ZoneId.of("UTC"))
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(canDelete = false), {}, zone = java.time.ZoneId.of("UTC"))
 }
 
 @ThemePreviews
 @Composable
 fun PhotoDetailDeletePreview() = Frame {
-    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, {}, {}, {}, java.time.ZoneId.of("UTC"))
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(photoDetailReady.copy(confirmDelete = true), {}, zone = java.time.ZoneId.of("UTC"))
 }
 
 /** A photo taken on another phone, downloading by its R2 key (AC-F55). */
@@ -670,7 +670,7 @@ fun PhotoDetailDeletePreview() = Frame {
 @Composable
 fun PhotoDetailDownloadingPreview() = Frame {
     com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(
-        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.Downloading), {}, {}, {}, {}, java.time.ZoneId.of("UTC"),
+        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.Downloading), {}, java.time.ZoneId.of("UTC"),
     )
 }
 
@@ -679,14 +679,14 @@ fun PhotoDetailDownloadingPreview() = Frame {
 @Composable
 fun PhotoDetailOfflinePreview() = Frame {
     com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(
-        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.NoNetwork, annotated = false), {}, {}, {}, {}, java.time.ZoneId.of("UTC"),
+        photoDetailReady.copy(imagePath = "", image = com.kurtz.homerecord.fieldlog.photos.PhotoImage.NoNetwork, annotated = false), {}, java.time.ZoneId.of("UTC"),
     )
 }
 
 @ThemePreviews
 @Composable
 fun PhotoDetailMissingPreview() = Frame {
-    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(loading = false, missing = true), {}, {}, {}, {})
+    com.kurtz.homerecord.fieldlog.photos.PhotoDetailScreen(com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(loading = false, missing = true), {})
 }
 
 private val annotateReady = com.kurtz.homerecord.fieldlog.photos.AnnotateUiState(

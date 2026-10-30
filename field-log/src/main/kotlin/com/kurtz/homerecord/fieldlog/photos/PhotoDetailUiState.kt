@@ -37,4 +37,9 @@ sealed interface PhotoDetailEvent {
     data object ConfirmDelete : PhotoDetailEvent
     /** Tries the download again after no network or a failure. */
     data object RetryDownload : PhotoDetailEvent
+
+    /** The route answers these: share the file, open mark-up, or leave (cr:fl-screen-signature). */
+    data object Share : PhotoDetailEvent
+    data object Annotate : PhotoDetailEvent
+    data object Back : PhotoDetailEvent
 }

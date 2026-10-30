@@ -292,3 +292,7 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 ## 2026-10-30 — Field Log More and job house start move into ViewModels
 - FL-More gets a MoreViewModel fed by `MoreDeps` (lambdas for storage and Free up, the outbox count) so the composables only render and route; the storage total is recounted each time More is shown, as before, because downloads on other screens change it (cr:fl-logic-in-ui).
 - The geocode after saving a job runs on the AppContainer's own scope (`geocodePending`), not a composable scope, so it finishes even if the person leaves right away.
+
+## 2026-10-30 — Today, Capture and Photo take one event callback
+- `TodayScreen`, `CaptureScreen` and `PhotoDetailScreen` now follow `XScreen(state, onEvent)`: navigation, share, gallery and the map pin are events (`TodayEvent`, `CaptureEvent.Back/PickGallery`, `PhotoDetailEvent.Share/Annotate/Back`) that the route answers; the ViewModels ignore them. Capture keeps its `camera` slot, which draws the live preview rather than reporting a tap (cr:fl-screen-signature).
+- Today's destinations are one `TodayNavigation` object built in AppTabs and shared by the route and the signed-out fallback, and `todayEvent()` handles events for both, so the map-pin intent left the composable.

@@ -23,6 +23,7 @@ import com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen
 import com.kurtz.homerecord.fieldlog.timesheets.TimesheetsUiState
 import com.kurtz.homerecord.fieldlog.today.TodayClock
 import com.kurtz.homerecord.fieldlog.today.TodayJob
+import com.kurtz.homerecord.fieldlog.today.TodayEvent
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
 import com.kurtz.homerecord.fieldlog.today.TodayUiState
 import org.junit.Rule
@@ -74,18 +75,19 @@ class ListRowsLayoutTest {
 
     @AcceptanceCriterion("AC-U3", "AC-F16")
     @Test fun todayJobsAndOnSiteAreRowsAndAJobRowOpensTheJob() {
-        val opened = mutableListOf<String>()
+        val events = mutableListOf<TodayEvent>()
         val state = TodayUiState(
             companyName = "QA Electric", role = CompanyRole.Owner, hasJobs = true,
             clock = TodayClock(ClockStatus.Out, null, now = 1_800_000_000_000L),
             jobs = listOf(TodayJob("j1", "Kitchen remodel", "14 Maple St")),
             onSite = listOf(OnSiteEntry("m1", "Luis Ortiz", "j1", "Kitchen remodel", 1_799_990_000_000L, false, 41.1, -81.5)),
         )
-        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(state, {}, onOpenJob = { opened += it }) } }
+        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { TodayScreen(state, { events += it }) } }
         rule.onNodeWithTag("fl_today_job_j1").assert(hasClickAction()).performClick()
-        assertThat(opened).containsExactly("j1")
+        assertThat(events).containsExactly(TodayEvent.OpenJob("j1"))
         rule.onNodeWithTag("fl_today_list").performScrollToNode(hasText("Luis Ortiz"))
         rule.onNodeWithTag("fl_today_site_m1").assertIsDisplayed()
-        rule.onNodeWithTag("fl_today_pin_m1", useUnmergedTree = true).assertIsDisplayed()
+        rule.onNodeWithTag("fl_today_pin_m1", useUnmergedTree = true).assertIsDisplayed().performClick()
+        assertThat(events.last()).isEqualTo(TodayEvent.OpenPin(state.onSite.single()))
     }
 }

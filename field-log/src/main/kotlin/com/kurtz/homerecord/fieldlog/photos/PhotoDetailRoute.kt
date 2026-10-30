@@ -16,5 +16,12 @@ fun PhotoDetailRoute(deps: PhotoDetailDeps, onAnnotate: () -> Unit, onBack: () -
     val vm = viewModel<PhotoDetailViewModel>(key = "photo-${deps.photoId}", factory = viewModelFactory { initializer { PhotoDetailViewModel(deps) } })
     val state = vm.state.collectAsState().value
     LaunchedEffect(state.deleted) { if (state.deleted) onBack() }
-    PhotoDetailScreen(state, vm::onEvent, onShare = { Intents.shareFile(context, File(state.imagePath), "image/jpeg") }, onAnnotate = onAnnotate, onBack = onBack)
+    PhotoDetailScreen(state, onEvent = { event ->
+        when (event) {
+            PhotoDetailEvent.Share -> Intents.shareFile(context, File(state.imagePath), "image/jpeg")
+            PhotoDetailEvent.Annotate -> onAnnotate()
+            PhotoDetailEvent.Back -> onBack()
+            else -> vm.onEvent(event)
+        }
+    })
 }

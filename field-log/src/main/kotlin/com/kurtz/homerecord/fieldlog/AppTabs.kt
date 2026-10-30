@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.company.CompanyMembership
 import com.kurtz.homerecord.core.company.CompanyState
@@ -95,23 +96,24 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     val clearRefused: () -> Unit = { scope.launch { container.syncEngine.clearRefused() } }
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+                    val navigation = com.kurtz.homerecord.fieldlog.today.TodayNavigation(
+                        onInviteCrew = { nav.push(TeamKey) },
+                        onSyncNow = container.syncCoordinator::requestSync,
+                        onClearRefused = clearRefused,
+                        onOpenClock = { nav.selectTab("clock") },
+                        onOpenJob = { nav.push(JobKey(it)) },
+                        onAddJob = { nav.push(JobEditKey(null)) },
+                    )
                     if (memberId == null) {
+                        val context = LocalContext.current
                         TodayScreen(
                             TodayUiState(membership.companyName, membership.role, phase, pending, refused),
-                            onInviteCrew = { nav.push(TeamKey) },
-                            onSyncNow = container.syncCoordinator::requestSync,
-                            onAddJob = { nav.push(JobEditKey(null)) },
-                            onClearRefused = clearRefused,
+                            onEvent = { com.kurtz.homerecord.fieldlog.today.todayEvent(it, navigation, context) },
                         )
                     } else {
                         com.kurtz.homerecord.fieldlog.today.TodayRoute(
                             deps = { container.todayDeps(membership, memberId) },
-                            syncPhase = phase, pending = pending, refused = refused, onClearRefused = clearRefused,
-                            onInviteCrew = { nav.push(TeamKey) },
-                            onSyncNow = container.syncCoordinator::requestSync,
-                            onOpenClock = { nav.selectTab("clock") },
-                            onOpenJob = { nav.push(JobKey(it)) },
-                            onAddJob = { nav.push(JobEditKey(null)) },
+                            syncPhase = phase, pending = pending, refused = refused, navigation = navigation,
                         )
                     }
                 }

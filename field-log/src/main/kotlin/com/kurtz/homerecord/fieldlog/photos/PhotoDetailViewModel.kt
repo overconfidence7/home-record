@@ -111,6 +111,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
                 d.edits.delete(d.photoId)
                 _state.update { it.copy(confirmDelete = false, deleted = true) }
             }
+            PhotoDetailEvent.Share, PhotoDetailEvent.Annotate, PhotoDetailEvent.Back -> Unit
         }
     }
 

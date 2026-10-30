@@ -66,19 +66,16 @@ import java.time.format.FormatStyle
 fun PhotoDetailScreen(
     state: PhotoDetailUiState,
     onEvent: (PhotoDetailEvent) -> Unit,
-    onShare: () -> Unit,
-    onAnnotate: () -> Unit,
-    onBack: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
     ScreenScaffold(
         title = stringResource(R.string.photo_title),
         subtitle = if (state.takenAt > 0) DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).format(Instant.ofEpochMilli(state.takenAt).atZone(zone)) else null,
-        onBack = onBack,
+        onBack = { onEvent(PhotoDetailEvent.Back) },
         actions = {
             if (!state.loading && !state.missing && state.image == PhotoImage.Ready) {
-                IconButton(onAnnotate, Modifier.testTag("fl_photo_annotate")) { Icon(Icons.Rounded.Edit, stringResource(R.string.photo_annotate)) }
-                IconButton(onShare, Modifier.testTag("fl_photo_share")) { Icon(Icons.Rounded.Share, stringResource(R.string.photo_share)) }
+                IconButton({ onEvent(PhotoDetailEvent.Annotate) }, Modifier.testTag("fl_photo_annotate")) { Icon(Icons.Rounded.Edit, stringResource(R.string.photo_annotate)) }
+                IconButton({ onEvent(PhotoDetailEvent.Share) }, Modifier.testTag("fl_photo_share")) { Icon(Icons.Rounded.Share, stringResource(R.string.photo_share)) }
             }
             if (!state.loading && !state.missing) {
                 if (state.canDelete) {

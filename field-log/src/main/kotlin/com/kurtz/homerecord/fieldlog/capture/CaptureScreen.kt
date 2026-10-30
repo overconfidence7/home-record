@@ -78,16 +78,14 @@ import com.kurtz.homerecord.fieldlog.R
 fun CaptureScreen(
     state: CaptureUiState,
     onEvent: (CaptureEvent) -> Unit,
-    onBack: () -> Unit,
-    onPickGallery: () -> Unit,
     camera: @Composable (Modifier) -> Unit,
 ) {
     if (state.noteOpen) NoteDialog(state, onEvent)
-    ScreenScaffold(title = stringResource(R.string.cap_title), subtitle = state.jobName.ifBlank { null }, onBack = onBack) { padding ->
+    ScreenScaffold(title = stringResource(R.string.cap_title), subtitle = state.jobName.ifBlank { null }, onBack = { onEvent(CaptureEvent.Back) }) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
             state.access == CameraAccess.Denied || state.lens == LensChoice.None ->
-                NoCamera(state, onEvent, onPickGallery, Modifier.padding(padding))
+                NoCamera(state, onEvent, Modifier.padding(padding))
             else -> {
                 val focus = remember { FocusRequester() }
                 LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -108,7 +106,7 @@ fun CaptureScreen(
                                 Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Controls(state, onEvent)
                                 }
-                                ShutterRow(state, onEvent, onPickGallery)
+                                ShutterRow(state, onEvent)
                             }
                         }
                     } else {
@@ -116,7 +114,7 @@ fun CaptureScreen(
                             Viewfinder(state, onEvent, camera, Modifier.weight(1f).fillMaxWidth())
                             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Controls(state, onEvent)
-                                ShutterRow(state, onEvent, onPickGallery)
+                                ShutterRow(state, onEvent)
                             }
                         }
                     }
@@ -204,9 +202,9 @@ private fun Controls(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
 }
 
 @Composable
-private fun ShutterRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onPickGallery: () -> Unit) {
+private fun ShutterRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        IconButton(onClick = onPickGallery, Modifier.size(56.dp).testTag("fl_capture_gallery")) {
+        IconButton(onClick = { onEvent(CaptureEvent.PickGallery) }, Modifier.size(56.dp).testTag("fl_capture_gallery")) {
             Icon(Icons.Rounded.PhotoLibrary, stringResource(R.string.cap_gallery))
         }
         Shutter(enabled = state.canShoot, starting = !state.cameraReady) { onEvent(CaptureEvent.Shutter) }
@@ -298,7 +296,7 @@ private fun NoteDialog(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
 
 /** AC-F29: say why, link to Settings, and still offer the gallery so the job can get photos. */
 @Composable
-private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onPickGallery: () -> Unit, modifier: Modifier) {
+private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, modifier: Modifier) {
     Column(modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
         Text(
             stringResource(if (state.access == CameraAccess.Denied) R.string.cap_denied else R.string.cap_no_camera),
@@ -309,7 +307,7 @@ private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, onP
                 Text(stringResource(R.string.cap_open_settings))
             }
         }
-        OutlinedButton(onClick = onPickGallery, Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_capture_gallery")) {
+        OutlinedButton(onClick = { onEvent(CaptureEvent.PickGallery) }, Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_capture_gallery")) {
             Text(stringResource(R.string.cap_from_gallery))
         }
         state.message?.let {

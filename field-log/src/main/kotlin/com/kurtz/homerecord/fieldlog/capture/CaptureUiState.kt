@@ -75,5 +75,9 @@ sealed interface CaptureEvent {
     data object VoiceTap : CaptureEvent
     data object MicDenied : CaptureEvent
     data object OpenSettings : CaptureEvent
+
+    /** The route answers these: leave the screen, or open the photo picker (cr:fl-screen-signature). */
+    data object Back : CaptureEvent
+    data object PickGallery : CaptureEvent
     data object DismissMessage : CaptureEvent
 }

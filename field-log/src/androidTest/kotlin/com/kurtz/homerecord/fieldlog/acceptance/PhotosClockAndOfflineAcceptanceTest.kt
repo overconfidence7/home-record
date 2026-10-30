@@ -98,7 +98,7 @@ class PhotosClockAndOfflineAcceptanceTest {
                 ghost = GhostShot("p-before", "/none/before.jpg"),
             ),
         )
-        show { CaptureScreen(state, { events += it }, onBack = {}, onPickGallery = {}, camera = { Box(it) }) }
+        show { CaptureScreen(state, { events += it }, camera = { Box(it) }) }
         rule.onNodeWithTag("fl_capture_ghost").assertDoesNotExist()
         rule.onNodeWithTag("fl_capture_ghost_toggle").assertIsDisplayed().performClick()
         assertThat(events).contains(CaptureEvent.ToggleGhost)
@@ -129,7 +129,7 @@ class PhotosClockAndOfflineAcceptanceTest {
         var state by mutableStateOf(
             PhotoDetailUiState(loading = false, imagePath = "/none/p1.jpg", caption = "Panel before rough-in", takenAt = 1_761_000_000_000),
         )
-        show { PhotoDetailScreen(state, { events += it }, onShare = {}, onAnnotate = {}, onBack = {}) }
+        show { PhotoDetailScreen(state, { events += it }) }
         rule.onNodeWithTag("fl_photo_mark_before").assertIsOff().performSemanticsAction(SemanticsActions.OnClick)
         assertThat(events).contains(PhotoDetailEvent.ToggleBefore)
         state = state.copy(isBefore = true)
@@ -213,7 +213,7 @@ class PhotosClockAndOfflineAcceptanceTest {
         } finally {
             db.close()
         }
-        show { TodayScreen(TodayUiState("QA Electric", CompanyRole.Owner, SyncPhase.Offline, pendingChanges = 2), onInviteCrew = {}) }
+        show { TodayScreen(TodayUiState("QA Electric", CompanyRole.Owner, SyncPhase.Offline, pendingChanges = 2), onEvent = {}) }
         rule.onNodeWithText("Offline · 2 changes waiting").assertIsDisplayed()
     }
 }

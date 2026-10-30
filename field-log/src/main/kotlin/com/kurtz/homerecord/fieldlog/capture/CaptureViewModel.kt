@@ -151,7 +151,7 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             CaptureEvent.SaveNote -> saveNote()
             CaptureEvent.VoiceTap -> if (_state.value.recording) stopMemo() else startMemo()
             CaptureEvent.MicDenied -> _state.update { it.copy(message = CaptureMessage.MicDenied) }
-            CaptureEvent.Shutter, CaptureEvent.OpenSettings -> Unit
+            CaptureEvent.Shutter, CaptureEvent.OpenSettings, CaptureEvent.Back, CaptureEvent.PickGallery -> Unit
         }
     }
 
