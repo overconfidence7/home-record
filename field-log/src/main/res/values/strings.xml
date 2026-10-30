@@ -65,7 +65,8 @@
     <string name="rep_range_last">Last week</string>
     <string name="rep_range_four">Last 4 weeks</string>
     <string name="rep_dates">%1$s to %2$s</string>
-    <string name="rep_empty">No hours in these dates. Hours show here once the crew clocks in.</string>
+    <string name="rep_empty_title">No hours in these dates</string>
+    <string name="rep_empty">Hours show here once the crew clocks in. Pick another range to see earlier weeks.</string>
     <string name="rep_total">%1$s total</string>
     <string name="rep_regular">%1$s regular</string>
     <string name="rep_overtime">%1$s overtime</string>
@@ -83,7 +84,10 @@
     <string name="ts_next_week">Next week</string>
     <string name="ts_this_week">This week</string>
     <string name="ts_week_of">Week of %1$s</string>
-    <string name="ts_empty">No punches this week. Hours show here once the crew clocks in.</string>
+    <string name="ts_person_expanded">Expanded</string>
+    <string name="ts_person_collapsed">Collapsed</string>
+    <string name="ts_empty_title">No punches this week</string>
+    <string name="ts_empty">Hours show here once the crew clocks in. Use the arrows to see earlier weeks.</string>
     <string name="ts_hours">%1$s total</string>
     <string name="ts_overtime">%1$s overtime</string>
     <string name="ts_approved">Approved</string>

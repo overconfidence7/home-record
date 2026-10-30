@@ -3,15 +3,14 @@ package com.kurtz.homerecord.fieldlog.today
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
@@ -49,6 +48,7 @@ import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.sync.RefusedChange
 import com.kurtz.homerecord.core.sync.SyncPhase
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.fieldlog.R
 
@@ -109,33 +109,40 @@ fun TodayScreen(
 @Composable
 private fun TodayContent(state: TodayUiState, clock: TodayClock, onOpenClock: () -> Unit, onOpenJob: (String) -> Unit, modifier: Modifier) {
     val context = LocalContext.current
+    val inset = Modifier.padding(horizontal = 16.dp)
+    // Jobs and people are list rows edge to edge (rules 7 and 8); the clock status is the one card (cr:fl-card-lists).
     LazyColumn(
         modifier.testTag("fl_today_list"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
     ) {
-        item { ClockCard(clock, onOpenClock) }
-        item { Text(stringResource(R.string.today_jobs), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() }) }
-        if (state.jobs.isEmpty()) item { Text(stringResource(R.string.today_no_jobs), style = MaterialTheme.typography.bodyMedium) }
+        item { ClockCard(clock, onOpenClock, inset) }
+        item { SectionHeading(stringResource(R.string.today_jobs)) }
+        if (state.jobs.isEmpty()) item { Text(stringResource(R.string.today_no_jobs), inset.padding(vertical = 8.dp), style = MaterialTheme.typography.bodyMedium) }
         items(state.jobs, key = { "job-${it.id}" }) { job ->
-            Card(Modifier.fillMaxWidth().clickable { onOpenJob(job.id) }.testTag("fl_today_job_${job.id}")) {
-                Column(Modifier.heightIn(min = 56.dp).padding(16.dp), verticalArrangement = Arrangement.Center) {
-                    Text(job.name, style = MaterialTheme.typography.titleSmall)
-                    job.address?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                }
-            }
+            RecordListItem(
+                headline = job.name,
+                supporting = job.address,
+                leading = { Icon(Icons.Rounded.Work, contentDescription = null) },
+                onClick = { onOpenJob(job.id) },
+                modifier = Modifier.fillMaxWidth().testTag("fl_today_job_${job.id}"),
+            )
         }
         if (state.role.isAdmin) {
-            item { Text(stringResource(R.string.today_on_site), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() }) }
-            if (state.onSite.isEmpty()) item { Text(stringResource(R.string.today_on_site_empty), Modifier.testTag("fl_today_on_site_empty"), style = MaterialTheme.typography.bodyMedium) }
-            items(state.onSite, key = { "site-${it.memberId}" }) { row -> OnSiteRow(row, clock.now) { context.openPin(row) } }
+            item { SectionHeading(stringResource(R.string.today_on_site)) }
+            if (state.onSite.isEmpty()) item { Text(stringResource(R.string.today_on_site_empty), inset.padding(vertical = 8.dp).testTag("fl_today_on_site_empty"), style = MaterialTheme.typography.bodyMedium) }
+            items(state.onSite, key = { "site-${it.memberId}" }) { row -> OnSiteRow(row) { context.openPin(row) } }
         }
     }
 }
 
 @Composable
-private fun ClockCard(clock: TodayClock, onOpenClock: () -> Unit) {
-    Card(Modifier.fillMaxWidth().testTag("fl_today_clock_card")) {
+private fun SectionHeading(text: String) {
+    Text(text, Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 4.dp).semantics { heading() }, style = MaterialTheme.typography.titleMedium)
+}
+
+@Composable
+private fun ClockCard(clock: TodayClock, onOpenClock: () -> Unit, modifier: Modifier) {
+    Card(modifier.fillMaxWidth().testTag("fl_today_clock_card")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             val headline = when (clock.status) {
                 ClockStatus.Out -> R.string.clock_out_status
@@ -152,20 +159,22 @@ private fun ClockCard(clock: TodayClock, onOpenClock: () -> Unit) {
 }
 
 @Composable
-private fun OnSiteRow(row: OnSiteEntry, now: Long, onPin: () -> Unit) {
-    Card(Modifier.fillMaxWidth().testTag("fl_today_site_${row.memberId}")) {
-        Row(Modifier.heightIn(min = 56.dp).padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(row.name.ifBlank { stringResource(R.string.today_unknown_member) }, style = MaterialTheme.typography.titleSmall)
-                val where = row.jobName ?: stringResource(R.string.today_no_job)
-                val line = if (row.onBreak) stringResource(R.string.today_on_site_break, where, timeText(row.since)) else stringResource(R.string.today_on_site_line, where, timeText(row.since))
-                Text(line, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun OnSiteRow(row: OnSiteEntry, onPin: () -> Unit) {
+    val where = row.jobName ?: stringResource(R.string.today_no_job)
+    val line = if (row.onBreak) stringResource(R.string.today_on_site_break, where, timeText(row.since)) else stringResource(R.string.today_on_site_line, where, timeText(row.since))
+    RecordListItem(
+        headline = row.name.ifBlank { stringResource(R.string.today_unknown_member) },
+        supporting = line,
+        leading = { Icon(Icons.Rounded.Person, contentDescription = null) },
+        trailing = if (row.hasPin) {
+            {
+                IconButton(onClick = onPin, Modifier.size(48.dp).testTag("fl_today_pin_${row.memberId}")) {
+                    Icon(Icons.Rounded.LocationOn, contentDescription = stringResource(R.string.today_pin_description, row.name))
+                }
             }
-            if (row.hasPin) IconButton(onClick = onPin, Modifier.size(48.dp).testTag("fl_today_pin_${row.memberId}")) {
-                Icon(Icons.Rounded.LocationOn, contentDescription = stringResource(R.string.today_pin_description, row.name))
-            }
-        }
-    }
+        } else null,
+        modifier = Modifier.fillMaxWidth().testTag("fl_today_site_${row.memberId}"),
+    )
 }
 
 private fun Context.openPin(row: OnSiteEntry) {

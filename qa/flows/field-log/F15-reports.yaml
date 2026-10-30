@@ -1,4 +1,4 @@
-# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are offered (AC-F15, AC-F46).
+# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours (AC-F15, AC-F46).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -29,12 +29,15 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_reports_empty
     timeout: 10000
-# AC-F15 (export part): an empty range says so; the shifts CSV and the QuickBooks export are offered
+# AC-F15 (export part): an empty range says so; the shifts CSV and the QuickBooks export are offered, disabled with nothing to send
 - tapOn:
     id: fl_reports_range_LastFourWeeks
 - assertVisible:
     id: fl_reports_empty
+- assertVisible: "No hours in these dates"
 - assertVisible:
     id: fl_reports_export_shifts
+    enabled: false
 - assertVisible:
     id: fl_reports_export_quickbooks
+    enabled: false

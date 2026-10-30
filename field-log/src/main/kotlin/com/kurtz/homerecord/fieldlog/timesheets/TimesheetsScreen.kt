@@ -19,9 +19,11 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,10 +39,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.PunchKind
 import com.kurtz.homerecord.core.model.ShiftFlag
+import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.clock.WeekSheetBuilder
@@ -68,20 +73,23 @@ fun TimesheetsScreen(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Uni
         } else {
             LazyColumn(
                 Modifier.padding(padding).fillMaxWidth().testTag("fl_timesheets_list"),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
             ) {
-                item { WeekPicker(state, onEvent) }
+                item { WeekPicker(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) }
                 if (state.people.isEmpty()) {
                     item {
-                        Text(
-                            stringResource(R.string.ts_empty), Modifier.fillMaxWidth().padding(vertical = 24.dp).testTag("fl_timesheets_empty"),
-                            style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        EmptyState(
+                            icon = Icons.Rounded.Schedule,
+                            headline = stringResource(R.string.ts_empty_title),
+                            body = stringResource(R.string.ts_empty),
+                            actionLabel = null,
+                            onAction = {},
+                            modifier = Modifier.fillParentMaxHeight(0.5f).testTag("fl_timesheets_empty"),
                         )
                     }
                 }
                 items(state.people, key = { it.memberId }) { person ->
-                    PersonCard(person, expanded = state.expandedId == person.memberId, onEvent = onEvent, zone = zone)
+                    PersonSection(person, expanded = state.expandedId == person.memberId, onEvent = onEvent, zone = zone)
                 }
             }
         }
@@ -90,9 +98,9 @@ fun TimesheetsScreen(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Uni
 }
 
 @Composable
-private fun WeekPicker(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit) {
+private fun WeekPicker(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit, modifier: Modifier) {
     val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton({ onEvent(TimesheetsEvent.PreviousWeek) }, Modifier.heightIn(min = 48.dp).testTag("fl_timesheets_prev")) {
             Icon(Icons.Rounded.ChevronLeft, contentDescription = stringResource(R.string.ts_prev_week))
         }
@@ -106,32 +114,34 @@ private fun WeekPicker(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> U
     }
 }
 
+/** One person's week: a list row that expands into days and punches, rows divided rather than carded (rules 7 and 8). */
 @Composable
-private fun PersonCard(person: PersonWeek, expanded: Boolean, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
-    Card(Modifier.fillMaxWidth().testTag("fl_timesheets_person_${person.memberId}")) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                    .clickable { onEvent(TimesheetsEvent.Toggle(person.memberId)) }
-                    .testTag("fl_timesheets_toggle_${person.memberId}"),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(person.name, style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(R.string.ts_hours, WeekSheetBuilder.hm(person.sheet.totalMillis)), style = MaterialTheme.typography.bodyMedium)
-                    if (person.sheet.overtimeMillis + person.sheet.doubleMillis > 0) {
-                        Text(
-                            stringResource(R.string.ts_overtime, WeekSheetBuilder.hm(person.sheet.overtimeMillis + person.sheet.doubleMillis)),
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+private fun PersonSection(person: PersonWeek, expanded: Boolean, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
+    val extra = person.sheet.overtimeMillis + person.sheet.doubleMillis
+    val supporting = listOfNotNull(
+        stringResource(R.string.ts_hours, WeekSheetBuilder.hm(person.sheet.totalMillis)),
+        if (extra > 0) stringResource(R.string.ts_overtime, WeekSheetBuilder.hm(extra)) else null,
+    ).joinToString(" · ")
+    val stateText = stringResource(if (expanded) R.string.ts_person_expanded else R.string.ts_person_collapsed)
+    Column(Modifier.fillMaxWidth().testTag("fl_timesheets_person_${person.memberId}")) {
+        RecordListItem(
+            headline = person.name,
+            supporting = supporting,
+            leading = { Icon(Icons.Rounded.Person, contentDescription = null) },
+            trailing = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (person.approved) {
+                        Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.ts_approved), Modifier.padding(start = 4.dp, end = 8.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     }
+                    Icon(if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null)
                 }
-                if (person.approved) {
-                    Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text(stringResource(R.string.ts_approved), Modifier.padding(start = 4.dp, end = 8.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                }
-                Icon(if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore, contentDescription = null)
-            }
+            },
+            onClick = { onEvent(TimesheetsEvent.Toggle(person.memberId)) },
+            modifier = Modifier.fillMaxWidth().semantics { stateDescription = stateText }
+                .testTag("fl_timesheets_toggle_${person.memberId}"),
+        )
+        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (person.flags.isNotEmpty()) {
                 val labels = person.flags.map { stringResource(flagLabel(it)) }
                 Text(labels.joinToString(", "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
@@ -158,6 +168,7 @@ private fun PersonCard(person: PersonWeek, expanded: Boolean, onEvent: (Timeshee
                 ) { Text(stringResource(R.string.ts_approve_person, person.name)) }
             }
         }
+        HorizontalDivider()
     }
 }
 
