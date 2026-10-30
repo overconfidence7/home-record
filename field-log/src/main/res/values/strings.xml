@@ -240,7 +240,11 @@
     <string name="files_upload_failed">Upload failed</string>
     <string name="files_download_failed">Couldn\'t download that file. Connect to the internet and try again.</string>
     <string name="files_in_folder">Up from %1$s</string>
-    <string name="files_empty">No files on this job yet. Add a plan, permit or quote and the crew can open it.</string>
+    <string name="files_empty_title">No files yet</string>
+    <string name="files_empty_folder_title">This folder is empty</string>
+    <string name="files_empty">Add a plan, permit or quote and the crew can open it on site.</string>
+    <string name="files_empty_crew">Plans, permits and quotes the office adds show up here.</string>
+    <string name="files_add_menu">Add a file or folder</string>
     <string name="files_no_match">No file name matches %1$s.</string>
     <string name="files_delete_title">Delete %1$s?</string>
     <string name="files_delete_body">The file is removed for everyone on the job.</string>

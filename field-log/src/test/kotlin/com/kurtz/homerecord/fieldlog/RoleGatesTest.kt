@@ -132,6 +132,7 @@ class RoleGatesTest {
         show { FilesScreen(FilesUiState(loading = false, files = listOf(row), canManage = false), {}) }
         rule.onNodeWithTag("fl_files_row_f1").assertIsDisplayed()
         rule.onNodeWithTag("fl_files_offline_f1").assertIsDisplayed()
+        rule.onNodeWithTag("fl_files_fab").assertDoesNotExist()
         rule.onNodeWithTag("fl_files_add").assertDoesNotExist()
         rule.onNodeWithTag("fl_files_new_folder").assertDoesNotExist()
         rule.onNodeWithTag("fl_files_rename_f1").assertDoesNotExist()

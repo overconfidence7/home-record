@@ -42,10 +42,11 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
     private val query = MutableStateFlow(saved.get<String>(QUERY).orEmpty())
     private val dialog = MutableStateFlow<FilesDialog?>(null)
     private val notice = MutableStateFlow<FilesNotice?>(null)
+    private val addMenu = MutableStateFlow(false)
 
     private val canManage = d.canManage.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val state: StateFlow<FilesUiState> = combine(combine(d.dao.observeFor(d.jobId), d.uploads, canManage) { r, u, m -> Triple(r, u, m) }, folder, query, dialog, notice) { (rows, up, manage), f, q, dlg, note ->
+    val state: StateFlow<FilesUiState> = combine(combine(d.dao.observeFor(d.jobId), d.uploads, canManage) { r, u, m -> Triple(r, u, m) }, folder, query, combine(dialog, addMenu, ::Pair), notice) { (rows, up, manage), f, q, (dlg, menu), note ->
         fun JobFileEntity.row() = FileRow(id, name, folder, mime, size, offline, up[id] ?: UploadStatus.None)
         val live = rows.filter { it.mime != JobFiles.FOLDER_MIME }
         val here = f.prefixOf()
@@ -55,15 +56,16 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
             files = live.filter { it.folder == f }.sortedBy { it.name.lowercase() }.map { it.row() },
             query = q,
             results = if (q.isBlank()) emptyList() else live.filter { it.name.lowercase().contains(q.trim().lowercase()) }.sortedBy { it.name.lowercase() }.map { it.row() },
-            dialog = if (manage) dlg else null, notice = note, canManage = manage,
+            dialog = if (manage) dlg else null, notice = note, canManage = manage, addMenuOpen = manage && menu,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FilesUiState())
 
     fun onEvent(e: FilesEvent) {
         if (e.changesFiles() && !canManage.value) return
         when (e) {
-            FilesEvent.AddFile -> Unit
-            FilesEvent.NewFolder -> dialog.value = FilesDialog.NewFolder
+            is FilesEvent.SetAddMenu -> addMenu.value = e.open
+            FilesEvent.AddFile -> addMenu.value = false
+            FilesEvent.NewFolder -> { addMenu.value = false; dialog.value = FilesDialog.NewFolder }
             is FilesEvent.CreateFolder -> viewModelScope.launch {
                 dialog.value = null
                 if (!d.files.createFolder(d.jobId, folder.value, e.name)) notice.value = FilesNotice.FolderExists
@@ -94,7 +96,7 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
         }
     }
 
-    private fun FilesEvent.changesFiles() = this is FilesEvent.AddFile || this is FilesEvent.NewFolder || this is FilesEvent.CreateFolder ||
+    private fun FilesEvent.changesFiles() = (this is FilesEvent.SetAddMenu && open) || this is FilesEvent.AddFile || this is FilesEvent.NewFolder || this is FilesEvent.CreateFolder ||
         this is FilesEvent.AskRename || this is FilesEvent.Rename || this is FilesEvent.AskDelete || this is FilesEvent.Delete
 
     private fun setFolder(path: String) { folder.value = path; saved[FOLDER] = path }
