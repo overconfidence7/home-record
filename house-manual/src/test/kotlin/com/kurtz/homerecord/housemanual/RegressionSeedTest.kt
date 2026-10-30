@@ -10,8 +10,12 @@ import com.kurtz.homerecord.housemanual.qa.RegressionSeed
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.home.AttentionKind
+import com.kurtz.homerecord.housemodel.items.ItemFilter
+import com.kurtz.homerecord.housemodel.items.ItemGrouping
+import com.kurtz.homerecord.housemodel.items.ItemListBuilder
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
+import com.kurtz.homerecord.housemodel.items.WarrantyFilter
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import java.io.File
 import java.time.LocalDate
@@ -82,6 +86,23 @@ class RegressionSeedTest {
         assertThat(docs.map { it.mime }.toSet()).containsExactly("application/pdf")
         assertThat(docs.map { it.itemId }).contains(furnace)
         docs.forEach { assertThat(File(it.path).length()).isGreaterThan(0L) }
+    }
+
+    // AC-H6: what qa/flows/house-manual/H06-items.yaml asserts on the seeded Items list (cr:qa-seed-wiped)
+    @AcceptanceCriterion("AC-H6")
+    @Test fun seededItemsGiveTheH06FlowItsGroupsFilterAndSearch() = runTest {
+        val today = LocalDate.of(2026, 10, 29)
+        val homeId = RegressionSeed.seed(db, repo, today = today)
+        val rows = ItemRepository(db, today = { today }).observeRows(homeId, mapOf(PseudoRooms.EXTERIOR to "Exterior")).first()
+
+        assertThat(ItemListBuilder.build(rows, ItemGrouping.CATEGORY).map { it.title }).contains("Appliances")
+        val kitchen = ItemListBuilder.build(rows, ItemGrouping.ROOM).single { it.title == "Kitchen" }
+        assertThat(kitchen.count).isEqualTo(5)
+        assertThat(kitchen.items.map { it.name }).contains("Refrigerator")
+        val expired = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(warranty = WarrantyFilter.EXPIRED))
+        assertThat(expired.flatMap { it.items }.map { it.name }).containsExactly("AC condenser", "Gas range")
+        val byModel = ItemListBuilder.build(rows, ItemGrouping.CATEGORY, ItemFilter(query = "JGB735"))
+        assertThat(byModel.flatMap { it.items }.map { it.name }).containsExactly("Gas range")
     }
 
     @Test fun seedingTwiceReplacesTheHomeAndResetEmptiesIt() = runTest {

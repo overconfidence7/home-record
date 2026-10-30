@@ -7,6 +7,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <!-- Maestro's openLink after clearState (qa/flows/house-manual/_seed.yaml) -->
+        <activity android:name="com.kurtz.homerecord.housemanual.qa.SeedActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="homerecord-qa-hm" android:host="seed" />
+            </intent-filter>
+        </activity>
         <receiver android:name="com.kurtz.homerecord.housemanual.qa.SeedReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="com.kurtz.homerecord.housemanual.qa.SEED" />

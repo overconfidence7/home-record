@@ -1,0 +1,16 @@
+# Helper, not a walkthrough step: start from a cleared app signed in as the owner of the seeded "QA Electric"
+# (Olive Owner, with Casey Crew on the team) (QA rule 4, cr:qa-seed-wiped). clearState wipes what the suite's
+# seed broadcast set up, so the seed runs again here through the debug-only SeedActivity deep link, against
+# the dev backend the app points at (/dev/seed wipes the backend first, so a flow uses this or
+# _owner-company.yaml, not both); it opens the app on Today when done. launchApp grants every
+# permission the app declares (Maestro's default), which clearState had revoked.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- stopApp
+- openLink: "homerecord-qa-fl://seed?scenario=regression"
+- extendedWaitUntil:
+    visible:
+      id: "fl_tab_today"
+    timeout: 30000

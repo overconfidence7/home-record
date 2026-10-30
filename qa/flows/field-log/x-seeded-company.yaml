@@ -1,0 +1,20 @@
+# Not a walkthrough step (x- prefix): the seeded company reaches a flow intact after clearState
+# (cr:qa-seed-wiped). The owner lands on Today, More offers the owner's rows, and Team lists the
+# seeded crew member (AC-F3).
+appId: com.kurtz.homerecord.fieldlog
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "fl_tab_more"
+- extendedWaitUntil:
+    visible:
+      id: "fl_more_team"
+    timeout: 15000
+- assertVisible:
+    id: "fl_more_company"
+- tapOn:
+    id: "fl_more_team"
+- extendedWaitUntil:
+    visible: "Casey Crew"
+    timeout: 15000
+- takeScreenshot: x-seeded-team

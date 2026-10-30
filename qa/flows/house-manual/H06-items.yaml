@@ -1,0 +1,67 @@
+# Walkthrough H6: open the Items tab on a home with items (AC-H6). Starts from the regression seed
+# (_seed.yaml), so the list has 22 items across rooms with active, expiring and expired warranties.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 15000
+- takeScreenshot: H06-items-by-category
+# Walkthrough H6: search by model finds the item
+- tapOn:
+    id: "hm_items_search"
+- inputText: "JGB735"
+- extendedWaitUntil:
+    visible: "Gas range"
+    timeout: 10000
+- assertNotVisible: "Refrigerator"
+- eraseText: 20
+- hideKeyboard
+# AC-H6: the Expired filter keeps the two expired warranties and drops the active ones
+# (the warranty chips sit right of Category and Room, so swipe the chip row first)
+- swipe:
+    from:
+      id: "hm_items_filter_category"
+    direction: LEFT
+- tapOn:
+    id: "hm_items_filter_warranty_expired"
+- extendedWaitUntil:
+    visible: "Gas range"
+    timeout: 10000
+- assertVisible: "AC condenser"
+- assertNotVisible: "Refrigerator"
+- takeScreenshot: H06-items-expired
+- tapOn:
+    id: "hm_items_filter_warranty_expired"
+# AC-H6: grouped by category with counts
+- scrollUntilVisible:
+    element: "Appliances \\(\\d+\\)"
+    direction: DOWN
+    timeout: 15000
+# AC-H6: the by-room toggle regroups the same items under the seeded rooms
+- scrollUntilVisible:
+    element:
+      id: "hm_items_group_room"
+    direction: UP
+    timeout: 15000
+- tapOn:
+    id: "hm_items_group_room"
+- scrollUntilVisible:
+    element: "Kitchen \\(5\\)"
+    direction: DOWN
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Refrigerator"
+    direction: DOWN
+    timeout: 10000
+- takeScreenshot: H06-items-by-room
+# AC-H6: one tap opens the item
+- tapOn: "Refrigerator"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_hero"
+    timeout: 10000
+- assertVisible: "Refrigerator"

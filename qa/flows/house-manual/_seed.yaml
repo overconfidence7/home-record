@@ -1,0 +1,16 @@
+# Helper, not a walkthrough step: start from a cleared app with the regression home seeded (QA rule 4,
+# cr:qa-seed-wiped). clearState wipes what the suite's seed broadcast put on the device, so the seed runs
+# again here through the debug-only SeedActivity deep link; it opens the app on Home when done. The
+# regression home is "QA House": three floors, 22 items with warranties, an overdue furnace service,
+# two contacts and two PDFs (house-manual/src/debug/.../qa/RegressionSeed.kt). launchApp grants every
+# permission the app declares (Maestro's default), which clearState had revoked.
+appId: com.kurtz.homerecord.housemanual
+---
+- launchApp:
+    clearState: true
+- stopApp
+- openLink: "homerecord-qa-hm://seed?scenario=regression"
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 30000

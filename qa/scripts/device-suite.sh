@@ -134,7 +134,7 @@ done
 # ------------------------------------------------------------------- seed
 for a in $APPS; do
   p=$(pkg_of "$a")
-  r=$(adb shell am broadcast -a "$p.qa.SEED" -p "$p" --es scenario regression 2>/dev/null | tr -d '\r')
+  r=$(adb shell am broadcast --include-stopped-packages -a "$p.qa.SEED" -p "$p" --es scenario regression 2>/dev/null | tr -d '\r')
   if echo "$r" | grep -q "result=1"; then record "seed:$a" pass "regression scenario seeded"; else record "seed:$a" skip "no debug seed receiver yet (PLAN Q005)"; fi
 done
 
@@ -226,7 +226,9 @@ for a in $PER_APP; do
     adb shell am broadcast -a androidx.profileinstaller.action.INSTALL_PROFILE "$p/androidx.profileinstaller.ProfileInstallReceiver" > "$OUT/logs/profile-benchmark-$a.txt" 2>&1
     adb shell am force-stop "$p"
     adb shell cmd package compile -f -m speed-profile "$p" >> "$OUT/logs/profile-benchmark-$a.txt" 2>&1
-    r=$(adb shell am broadcast -a "$p.qa.SEED" -p "$p" --es scenario long-list 2>/dev/null | tr -d '\r')
+    # A fresh install is in the stopped state, which drops broadcasts unless they include stopped packages; without the
+    # flag this seed always came back result=0 and the stage was never measured
+    r=$(adb shell am broadcast --include-stopped-packages -a "$p.qa.SEED" -p "$p" --es scenario long-list 2>/dev/null | tr -d '\r')
     if ! echo "$r" | grep -q "result=1"; then
       record "jank:$a" skip "not measurable: long-list seed failed ($r)"
     elif ! run_flow "$flow" "jank-$a"; then
