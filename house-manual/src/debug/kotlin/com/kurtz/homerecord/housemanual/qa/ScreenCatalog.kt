@@ -43,6 +43,7 @@ object ScreenCatalog {
         QaScreen("contact-form", nonRoot = true) { ContactFormPreview() },
         QaScreen("documents-list", nonRoot = true) { DocumentsListPreview() },
         QaScreen("documents-empty", nonRoot = true) { DocumentsEmptyPreview() },
+        QaScreen("documents-add-menu", nonRoot = true) { DocumentsAddMenuPreview() },
         QaScreen("documents-loading", nonRoot = true) { DocumentsLoadingPreview() },
         QaScreen("documents-unsupported", nonRoot = true) { DocumentsUnsupportedPreview() },
         QaScreen("document-form", nonRoot = false) { DocumentFormPreview() },

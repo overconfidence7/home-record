@@ -24,7 +24,7 @@ class DocumentsViewModel(
     val state: StateFlow<DocumentsUiState> = combine(repo.observeFolders(homeId), ui) { folders, u ->
         DocumentsUiState(
             loading = false, folders = folders, form = u.form, showFormErrors = u.showErrors,
-            confirmDeleteId = u.confirmDeleteId, unsupportedNotice = u.unsupported,
+            confirmDeleteId = u.confirmDeleteId, unsupportedNotice = u.unsupported, addMenuOpen = u.addMenuOpen,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DocumentsUiState())
 
@@ -58,7 +58,10 @@ class DocumentsViewModel(
                 setForm(null, false)
             }
             DocumentsEvent.ScanFailed -> ui.update { it.copy(unsupported = true) }
-            is DocumentsEvent.Open, DocumentsEvent.Back, DocumentsEvent.Upload, DocumentsEvent.Scan -> Unit // the route's job
+            is DocumentsEvent.SetAddMenu -> ui.update { it.copy(addMenuOpen = e.open) }
+            // The route launches the picker or scanner; the menu closes either way.
+            DocumentsEvent.Upload, DocumentsEvent.Scan -> ui.update { it.copy(addMenuOpen = false) }
+            is DocumentsEvent.Open, DocumentsEvent.Back -> Unit // the route's job
         }
     }
 
@@ -76,6 +79,7 @@ class DocumentsViewModel(
         val showErrors: Boolean = false,
         val confirmDeleteId: String? = null,
         val unsupported: Boolean = false,
+        val addMenuOpen: Boolean = false,
     )
 
     private companion object {

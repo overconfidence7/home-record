@@ -27,8 +27,14 @@ fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit,
         when (it) {
             DocumentsEvent.Back -> onBack()
             is DocumentsEvent.Open -> onOpen(it.id)
-            DocumentsEvent.Upload -> picker.launch(arrayOf("application/pdf", "image/*"))
-            DocumentsEvent.Scan -> scan()
+            DocumentsEvent.Upload -> {
+                vm.onEvent(it)
+                picker.launch(arrayOf("application/pdf", "image/*"))
+            }
+            DocumentsEvent.Scan -> {
+                vm.onEvent(it)
+                scan()
+            }
             else -> vm.onEvent(it)
         }
     })

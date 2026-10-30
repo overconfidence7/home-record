@@ -559,6 +559,11 @@ fun DocumentsListPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = 
 @Composable
 fun DocumentsEmptyPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false), {}) }
 
+/** Catalog only: the menu animates open, so a static screenshot shows its first frame (the X, no items). */
+@ThemePreviews
+@Composable
+fun DocumentsAddMenuPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false, addMenuOpen = true), {}) }
+
 @ThemePreviews
 @Composable
 fun DocumentsLoadingPreview() = Frame { DocumentsScreen(DocumentsUiState(), {}) }

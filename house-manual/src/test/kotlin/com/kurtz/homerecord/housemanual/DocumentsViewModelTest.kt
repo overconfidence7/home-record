@@ -89,6 +89,19 @@ class DocumentsViewModelTest {
     }
 
     @AcceptanceCriterion("AC-C37")
+    @Test fun addMenuOpensAndClosesWhenUploadOrScanIsChosen() {
+        val vm = vm()
+        vm.onEvent(DocumentsEvent.SetAddMenu(true))
+        vm.await { it.addMenuOpen }
+        vm.onEvent(DocumentsEvent.Upload)
+        vm.await { !it.addMenuOpen }
+        vm.onEvent(DocumentsEvent.SetAddMenu(true))
+        vm.await { it.addMenuOpen }
+        vm.onEvent(DocumentsEvent.Scan)
+        vm.await { !it.addMenuOpen }
+    }
+
+    @AcceptanceCriterion("AC-C37")
     @Test fun renameAndMoveToFolderThenDelete() {
         val vm = vm()
         vm.onEvent(DocumentsEvent.Picked("u/manual.pdf"))

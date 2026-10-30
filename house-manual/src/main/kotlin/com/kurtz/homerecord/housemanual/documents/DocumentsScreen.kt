@@ -15,7 +15,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DocumentScanner
-import androidx.compose.material3.OutlinedButton
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.UploadFile
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.Description
@@ -27,7 +35,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,21 +62,9 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
     ScreenScaffold(
         title = stringResource(R.string.documents_title),
         onBack = { onEvent(DocumentsEvent.Back) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { onEvent(DocumentsEvent.Upload) }, modifier = Modifier.testTag("hm_documents_fab")) {
-                Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.documents_add))
-            }
-        },
+        floatingActionButton = { DocumentsAddMenu(state.addMenuOpen, onEvent) },
     ) { padding ->
         Column(Modifier.padding(padding)) {
-            OutlinedButton(
-                onClick = { onEvent(DocumentsEvent.Scan) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).heightIn(min = 48.dp).testTag("hm_documents_scan"),
-            ) {
-                Icon(Icons.Rounded.DocumentScanner, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.documents_scan))
-            }
             if (state.unsupportedNotice) {
                 Card(
                     Modifier.fillMaxWidth().padding(16.dp).testTag("hm_documents_notice"),
@@ -90,7 +85,7 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
                     headline = stringResource(R.string.documents_empty_title),
                     body = stringResource(R.string.documents_empty_body),
                     actionLabel = stringResource(R.string.documents_add),
-                    onAction = { onEvent(DocumentsEvent.Upload) },
+                    onAction = { onEvent(DocumentsEvent.SetAddMenu(true)) },
                     actionModifier = Modifier.testTag("hm_documents_add"),
                 )
                 else -> LazyColumn(
@@ -133,6 +128,42 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
             dismissButton = {
                 TextButton(onClick = { onEvent(DocumentsEvent.CancelDelete) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.item_detail_cancel)) }
             },
+        )
+    }
+}
+
+/**
+ * The one create action (rule 13): a FAB menu with Add a file and Scan a document. The empty state's
+ * Add document opens the same menu, so both entry points offer the same two choices (rule 10).
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DocumentsAddMenu(open: Boolean, onEvent: (DocumentsEvent) -> Unit) {
+    BackHandler(enabled = open) { onEvent(DocumentsEvent.SetAddMenu(false)) }
+    val addLabel = stringResource(R.string.documents_add)
+    FloatingActionButtonMenu(
+        expanded = open,
+        button = {
+            ToggleFloatingActionButton(
+                checked = open,
+                onCheckedChange = { onEvent(DocumentsEvent.SetAddMenu(it)) },
+                modifier = Modifier.semantics { contentDescription = addLabel }.testTag("hm_documents_fab"),
+            ) {
+                Icon(if (checkedProgress > 0.5f) Icons.Rounded.Close else Icons.Rounded.Add, contentDescription = null)
+            }
+        },
+    ) {
+        FloatingActionButtonMenuItem(
+            onClick = { onEvent(DocumentsEvent.Upload) },
+            text = { Text(stringResource(R.string.documents_add_file)) },
+            icon = { Icon(Icons.Rounded.UploadFile, contentDescription = null) },
+            modifier = Modifier.testTag("hm_documents_upload"),
+        )
+        FloatingActionButtonMenuItem(
+            onClick = { onEvent(DocumentsEvent.Scan) },
+            text = { Text(stringResource(R.string.documents_scan)) },
+            icon = { Icon(Icons.Rounded.DocumentScanner, contentDescription = null) },
+            modifier = Modifier.testTag("hm_documents_scan"),
         )
     }
 }

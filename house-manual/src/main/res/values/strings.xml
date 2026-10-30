@@ -191,6 +191,7 @@
     <string name="documents_title">Documents</string>
     <string name="documents_add">Add document</string>
     <string name="documents_scan">Scan a document</string>
+    <string name="documents_add_file">Add a file</string>
     <string name="documents_empty_title">No documents yet</string>
     <string name="documents_empty_body">Add the manuals, receipts and permits you would hate to lose. PDFs and photos both work.</string>
     <string name="documents_unfiled">Not in a folder</string>

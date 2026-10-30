@@ -13,12 +13,15 @@ data class DocumentsUiState(
     val confirmDeleteId: String? = null,
     /** True after a picked file turned out not to be a PDF or image. */
     val unsupportedNotice: Boolean = false,
+    /** True while the FAB menu (Add a file, Scan a document) is open. */
+    val addMenuOpen: Boolean = false,
 )
 
 sealed interface DocumentsEvent {
     data object Back : DocumentsEvent
     data object Upload : DocumentsEvent
     data object Scan : DocumentsEvent
+    data class SetAddMenu(val open: Boolean) : DocumentsEvent
     data object ScanFailed : DocumentsEvent
     data class Picked(val uri: String) : DocumentsEvent
     data object DismissNotice : DocumentsEvent
