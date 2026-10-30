@@ -181,8 +181,10 @@ fun PlanEditorScreen(
                 val room = state.selected
                 val panelWidth = minOf(360.dp, maxWidth * 0.45f)
                 val panelMaxHeight = maxHeight * 0.55f
+                // Phone landscape with the keyboard up: the floor chips would take half of what is left, so the plan gets it all.
+                val showFloors = maxHeight >= PinnedActionsMinHeight
                 val plan: @Composable (Modifier) -> Unit = { modifier ->
-                    PlanArea(state, onEvent, canvasWidthDp, canvasHeightDp, { w, h -> canvasWidthDp = w; canvasHeightDp = h }, modifier)
+                    PlanArea(state, onEvent, canvasWidthDp, canvasHeightDp, { w, h -> canvasWidthDp = w; canvasHeightDp = h }, showFloors, modifier)
                 }
                 if (room != null && maxWidth > maxHeight && maxWidth >= 600.dp) {
                     Row(Modifier.fillMaxSize()) {
@@ -207,11 +209,14 @@ private fun PlanArea(
     canvasWidthDp: Float,
     canvasHeightDp: Float,
     onSized: (Float, Float) -> Unit,
+    showFloors: Boolean,
     modifier: Modifier,
 ) {
     Column(modifier) {
-        FloorSwitcher(state, onEvent)
-        if (state.unplaced.isNotEmpty()) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
+        if (showFloors) {
+            FloorSwitcher(state, onEvent)
+            if (state.unplaced.isNotEmpty()) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
+        }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             PlanCanvas(
                 state = state,

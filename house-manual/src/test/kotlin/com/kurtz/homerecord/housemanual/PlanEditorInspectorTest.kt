@@ -1,10 +1,12 @@
 package com.kurtz.homerecord.housemanual
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.theme.Brand
@@ -89,5 +91,21 @@ class PlanEditorInspectorTest {
         rule.onNodeWithTag("hm_plan_room_name").assertIsDisplayed()
         rule.onNodeWithTag("hm_plan_done").performScrollTo().assertIsDisplayed().performClick()
         assertThat(events.last()).isEqualTo(PlanEditorEvent.Select(null))
+    }
+
+    // Same window: the floor chips give their row to the canvas so some of the plan stays visible beside the panel
+    // (judge:hm-rail-ime-status-bar; with the chips the canvas was under 60 dp).
+    @AcceptanceCriterion("AC-C12")
+    @Config(qualifiers = "w800dp-h170dp-land")
+    @Test fun shortLandscapeGivesThePlanTheFloorChipsRow() {
+        show(state)
+        rule.onNodeWithTag("hm_plan_floor_f1").assertDoesNotExist()
+        val canvas = rule.onNodeWithTag("hm_plan_canvas").assertIsDisplayed().getBoundsInRoot()
+        assertThat(canvas.bottom - canvas.top).isGreaterThan(80.dp)
+    }
+
+    @Test fun tallWindowKeepsTheFloorChips() {
+        show(state)
+        rule.onNodeWithTag("hm_plan_floor_f1").assertIsDisplayed()
     }
 }
