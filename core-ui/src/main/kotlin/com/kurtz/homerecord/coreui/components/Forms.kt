@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -25,6 +26,9 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDialog
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDatePickerState
@@ -47,6 +51,9 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.coreui.R
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.ZoneOffset
 
 /**
@@ -253,6 +260,49 @@ fun DateField(
             },
             dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         ) { DatePicker(state) }
+    }
+}
+
+/**
+ * Time of day shown read-only; the clock button opens the Material time picker (ui-standards rule 22).
+ * The picker's open state is kept here, like [DateField].
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimeField(
+    label: String,
+    time: LocalTime,
+    onTimeChange: (LocalTime) -> Unit,
+    modifier: Modifier = Modifier,
+    is24Hour: Boolean = android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current),
+) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    OutlinedTextField(
+        value = time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)),
+        onValueChange = {},
+        readOnly = true,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(label) },
+        trailingIcon = {
+            IconButton(onClick = { open = true }, modifier = Modifier.testTag("${LocalTagPrefix.current}_pick_time")) {
+                Icon(Icons.Rounded.Schedule, contentDescription = stringResource(R.string.pick_time, label))
+            }
+        },
+    )
+    if (open) {
+        val state = rememberTimePickerState(initialHour = time.hour, initialMinute = time.minute, is24Hour = is24Hour)
+        TimePickerDialog(
+            modifier = Modifier.windowTestTags(),
+            onDismissRequest = { open = false },
+            title = { Text(label) },
+            confirmButton = {
+                TextButton(onClick = {
+                    open = false
+                    onTimeChange(LocalTime.of(state.hour, state.minute))
+                }, modifier = Modifier.testTag("${LocalTagPrefix.current}_pick_time_ok")) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
+        ) { TimePicker(state) }
     }
 }
 

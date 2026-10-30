@@ -16,6 +16,7 @@
     <string name="required_label">%1$s (required)</string>
     <string name="remove_link">Remove %1$s</string>
     <string name="pick_date">Pick date for %1$s</string>
+    <string name="pick_time">Pick time for %1$s</string>
     <string name="length_helper_imperial">Type 12\'6\", 12.5 or 12 6.</string>
     <string name="length_helper_metric">Type 3.8 m, 380 cm or 3.8.</string>
     <string name="length_error">Can\'t read that length. Try 12\'6\" or 12.5.</string>

@@ -103,11 +103,10 @@
     <string name="ts_edit_title">Edit punch</string>
     <string name="ts_edit_subtitle">%1$s, %2$s, %3$s</string>
     <string name="ts_edit_time">Time</string>
-    <string name="ts_edit_time_hint">For example 7:30 am</string>
     <string name="ts_edit_job">Job</string>
     <string name="ts_edit_reason">Reason</string>
+    <string name="ts_edit_reason_helper">Your crew sees it on the punch.</string>
     <string name="ts_edit_reason_required">Add a reason. It stays on the punch.</string>
-    <string name="ts_edit_bad_time">Enter a time like 7:30 am or 14:30.</string>
     <string name="ts_edit_locked">This week is approved, so the punch can\'t be changed.</string>
     <string name="ts_audit_title">Changes</string>
     <string name="ts_audit_line">%1$s, %2$s: %3$s to %4$s. %5$s</string>

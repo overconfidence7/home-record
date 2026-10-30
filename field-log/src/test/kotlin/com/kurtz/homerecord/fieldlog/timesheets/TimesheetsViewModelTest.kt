@@ -32,6 +32,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 // AC-F14: a week per person, edit needs a reason and keeps an audit entry, Approve person / all locks the week
@@ -74,13 +75,13 @@ class TimesheetsViewModelTest {
         repo.record(NewPunch("c1", who, "j1", PunchKind.OUT, at = at(day, to)))
     }
 
-    private suspend fun vm(): TimesheetsViewModel {
+    private suspend fun vm(saved: SavedStateHandle = SavedStateHandle()): TimesheetsViewModel {
         val deps = TimesheetsDeps(
             "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
             db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
             db.timesheetApprovalDao().observeAll(), settings, zone, { now },
         )
-        return TimesheetsViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
+        return TimesheetsViewModel(deps, saved).also { created += it; await(it) { s -> !s.loading } }
     }
 
     private suspend fun await(vm: TimesheetsViewModel, test: (TimesheetsUiState) -> Boolean) =
@@ -121,8 +122,8 @@ class TimesheetsViewModelTest {
         val vm = vm()
         val inId = vm.state.value.people.single().punches.first { it.kind == PunchKind.IN }.id
         vm.onEvent(TimesheetsEvent.EditPunch(inId))
-        assertThat(vm.state.value.edit?.timeText).isEqualTo("8:00 AM")
-        vm.onEvent(TimesheetsEvent.EditTime("7:30 am"))
+        assertThat(vm.state.value.edit?.time).isEqualTo(LocalTime.of(8, 0))
+        vm.onEvent(TimesheetsEvent.EditTime(LocalTime.of(7, 30)))
         vm.onEvent(TimesheetsEvent.SaveEdit)
         assertThat(vm.state.value.edit?.error).isEqualTo(EditError.ReasonRequired)
         vm.onEvent(TimesheetsEvent.EditReason("Forgot to clock in"))
@@ -135,13 +136,43 @@ class TimesheetsViewModelTest {
         assertThat(row.edits.single().reason).isEqualTo("Forgot to clock in")
     }
 
-    @Test fun badTimeIsRefused() = runBlocking<Unit> {
+    // AC-F14, ui-standards rules 3 and 15: Close asks first only once something changed
+    @Test fun editFormIsDirtyOnlyAfterAChange() = runBlocking<Unit> {
         shift("m1", 0, 8, 16)
         val vm = vm()
         vm.onEvent(TimesheetsEvent.EditPunch(vm.state.value.people.single().punches.first().id))
-        vm.onEvent(TimesheetsEvent.EditTime("whenever")); vm.onEvent(TimesheetsEvent.EditReason("fix"))
-        vm.onEvent(TimesheetsEvent.SaveEdit)
-        assertThat(vm.state.value.edit?.error).isEqualTo(EditError.BadTime)
+        assertThat(vm.state.value.edit?.dirty).isFalse()
+        vm.onEvent(TimesheetsEvent.EditJob("j2"))
+        assertThat(vm.state.value.edit?.dirty).isTrue()
+        vm.onEvent(TimesheetsEvent.EditJob("j1"))
+        assertThat(vm.state.value.edit?.dirty).isFalse()
+        vm.onEvent(TimesheetsEvent.EditTime(LocalTime.of(7, 45)))
+        assertThat(vm.state.value.edit?.dirty).isTrue()
+        vm.onEvent(TimesheetsEvent.CancelEdit)
+        assertThat(vm.state.value.edit).isNull()
+    }
+
+    // AC-F14: the open Edit punch form, with the picked time, job and typed reason, survives process death
+    @Test fun editFormSurvivesProcessDeath() = runBlocking<Unit> {
+        shift("m1", 0, 8, 16)
+        val saved = SavedStateHandle()
+        val first = vm(saved)
+        val inId = first.state.value.people.single().punches.first { it.kind == PunchKind.IN }.id
+        first.onEvent(TimesheetsEvent.EditPunch(inId))
+        first.onEvent(TimesheetsEvent.EditTime(LocalTime.of(7, 15)))
+        first.onEvent(TimesheetsEvent.EditJob("j2"))
+        first.onEvent(TimesheetsEvent.EditReason("Started at the supply house"))
+        val restored = SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) })
+        val again = vm(restored)
+        val e = await(again) { it.edit != null }.edit
+        assertThat(e?.punchId).isEqualTo(inId)
+        assertThat(e?.time).isEqualTo(LocalTime.of(7, 15))
+        assertThat(e?.jobId).isEqualTo("j2")
+        assertThat(e?.reason).isEqualTo("Started at the supply house")
+        assertThat(e?.originalTime).isEqualTo(LocalTime.of(8, 0))
+        again.onEvent(TimesheetsEvent.CancelEdit)
+        val closed = SavedStateHandle(restored.keys().associateWith { restored.get<Any?>(it) })
+        assertThat(vm(closed).state.value.edit).isNull()
     }
 
     @Test fun approveLocksThePersonsWeekAndEditsAreRefused() = runBlocking<Unit> {

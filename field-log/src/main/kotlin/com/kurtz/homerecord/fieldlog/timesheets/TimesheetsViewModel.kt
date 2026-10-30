@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
@@ -72,6 +73,7 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
                 start to people
             }.collect { (start, people) ->
                 _state.update { it.copy(loading = false, weekStart = start, isCurrentWeek = start == thisWeek, people = people) }
+                restoreEdit()
             }
         }
     }
@@ -94,11 +96,11 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
                 viewModelScope.launch { d.approvals.approveAll(ids, weekStart.toString(), d.callerId) }
             }
             is TimesheetsEvent.EditPunch -> openEdit(event.punchId)
-            is TimesheetsEvent.EditTime -> editSheet { it.copy(timeText = event.text, error = null) }
+            is TimesheetsEvent.EditTime -> editSheet { it.copy(time = event.time) }
             is TimesheetsEvent.EditJob -> editSheet { it.copy(jobId = event.jobId) }
             is TimesheetsEvent.EditReason -> editSheet { it.copy(reason = event.text, error = null) }
             TimesheetsEvent.SaveEdit -> save()
-            TimesheetsEvent.CancelEdit -> _state.update { it.copy(edit = null) }
+            TimesheetsEvent.CancelEdit -> closeEdit()
         }
     }
 
@@ -107,35 +109,68 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
         saved[WEEK] = start.toString()
         saved[OPEN] = null
         week.value = start
-        _state.update { it.copy(expandedId = null, edit = null) }
+        _state.update { it.copy(expandedId = null) }
+        closeEdit()
     }
 
-    private fun editSheet(block: (PunchEditSheet) -> PunchEditSheet) = _state.update { s -> s.edit?.let { s.copy(edit = block(it)) } ?: s }
+    /** Changes the open form and keeps it in [saved] so it survives process death (CLAUDE.md forms rule). */
+    private fun editSheet(block: (PunchEditSheet) -> PunchEditSheet) {
+        _state.update { s -> s.edit?.let { s.copy(edit = block(it)) } ?: s }
+        persistEdit()
+    }
+
+    private fun persistEdit() {
+        val e = _state.value.edit ?: return
+        saved[EDIT] = e.punchId
+        saved[EDIT_TIME] = e.time.toSecondOfDay()
+        saved[EDIT_JOB] = e.jobId
+        saved[EDIT_REASON] = e.reason
+    }
+
+    private fun closeEdit() {
+        saved[EDIT] = null
+        _state.update { it.copy(edit = null) }
+    }
+
+    /** Reopens the form the system killed, with what was typed, once its punch has loaded. */
+    private fun restoreEdit() {
+        val id = saved.get<String>(EDIT) ?: return
+        if (_state.value.edit != null) return
+        if (_state.value.people.none { p -> p.punches.any { it.id == id } }) return
+        val time = saved.get<Int>(EDIT_TIME)?.let { LocalTime.ofSecondOfDay(it.toLong()) }
+        val hasJob = saved.contains(EDIT_JOB)
+        val jobId = saved.get<String>(EDIT_JOB)
+        val reason = saved.get<String>(EDIT_REASON).orEmpty()
+        val sheet = sheetFor(id) ?: run { saved[EDIT] = null; return }
+        _state.update { it.copy(edit = sheet.copy(time = time ?: sheet.time, jobId = if (hasJob) jobId else sheet.jobId, reason = reason)) }
+        persistEdit()
+    }
 
     private fun openEdit(punchId: String) {
-        val person = _state.value.people.firstOrNull { p -> p.punches.any { it.id == punchId } } ?: return
+        val sheet = sheetFor(punchId) ?: return
+        _state.update { it.copy(edit = sheet) }
+        persistEdit()
+    }
+
+    private fun sheetFor(punchId: String): PunchEditSheet? {
+        val person = _state.value.people.firstOrNull { p -> p.punches.any { it.id == punchId } } ?: return null
         val punch = person.punches.first { it.id == punchId }
-        if (person.approved) return // an approved week is locked (AC-F14)
+        if (person.approved) return null // an approved week is locked (AC-F14)
         val local = Instant.ofEpochMilli(punch.at).atZone(d.zone)
-        _state.update {
-            it.copy(
-                edit = PunchEditSheet(
-                    punchId, person.name, punch.kind, local.format(DateTimeFormatter.ofPattern("EEE MMM d")),
-                    local.format(DateTimeFormatter.ofPattern("h:mm a")), punch.jobId, latestJobs, audit = punch.edits,
-                ),
-            )
-        }
+        return PunchEditSheet(
+            punchId, person.name, punch.kind, local.format(DateTimeFormatter.ofPattern("EEE MMM d")),
+            local.toLocalTime().withSecond(0).withNano(0), punch.jobId, latestJobs, audit = punch.edits,
+        )
     }
 
     private fun save() {
         val sheet = _state.value.edit ?: return
         if (sheet.reason.isBlank()) { editSheet { it.copy(error = EditError.ReasonRequired) }; return }
-        val time = TimeText.parse(sheet.timeText) ?: run { editSheet { it.copy(error = EditError.BadTime) }; return }
         val old = latestPunches.firstOrNull { it.id == sheet.punchId } ?: return
-        val newAt = Instant.ofEpochMilli(old.at).atZone(d.zone).toLocalDate().atTime(time).atZone(d.zone).toInstant().toEpochMilli()
+        val newAt = Instant.ofEpochMilli(old.at).atZone(d.zone).toLocalDate().atTime(sheet.time).atZone(d.zone).toInstant().toEpochMilli()
         viewModelScope.launch {
             val ok = d.punchRepo.edit(sheet.punchId, d.callerId, d.callerName(), newAt, sheet.jobId, sheet.reason)
-            if (ok) _state.update { it.copy(edit = null) } else editSheet { it.copy(error = EditError.Locked) }
+            if (ok) closeEdit() else editSheet { it.copy(error = EditError.Locked) }
         }
     }
 
@@ -145,5 +180,9 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
     private companion object {
         const val WEEK = "week"
         const val OPEN = "open"
+        const val EDIT = "edit"
+        const val EDIT_TIME = "edit_time"
+        const val EDIT_JOB = "edit_job"
+        const val EDIT_REASON = "edit_reason"
     }
 }

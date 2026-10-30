@@ -471,9 +471,10 @@ fun TimesheetsEditPreview() = Frame {
     com.kurtz.homerecord.fieldlog.timesheets.TimesheetsScreen(
         tsState().copy(
             edit = com.kurtz.homerecord.fieldlog.timesheets.PunchEditSheet(
-                "p3", "Marcus Ortiz", "IN", "Tue Oct 20", "7:30 AM", "j2",
+                "p3", "Marcus Ortiz", "IN", "Tue Oct 20", java.time.LocalTime.of(7, 30), "j2",
                 listOf(com.kurtz.homerecord.fieldlog.timesheets.JobChoice("j1", "Garage subpanel"), com.kurtz.homerecord.fieldlog.timesheets.JobChoice("j2", "Ortiz kitchen remodel")),
                 error = com.kurtz.homerecord.fieldlog.timesheets.EditError.ReasonRequired, audit = listOf(tsEdit),
+                originalTime = java.time.LocalTime.of(8, 45),
             ),
         ),
         {}, {}, TS_ZONE,

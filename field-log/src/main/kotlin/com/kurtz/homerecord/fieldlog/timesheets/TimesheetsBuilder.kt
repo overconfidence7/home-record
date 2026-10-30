@@ -9,26 +9,7 @@ import com.kurtz.homerecord.core.punch.PunchEdit
 import com.kurtz.homerecord.fieldlog.clock.WeekSheetBuilder
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
-
-/** "7:30", "07:30", "2:30 pm" or "2pm" to a time of day; null when it is not one (AC-F14 edit sheet). Pure. */
-object TimeText {
-    private val pattern = Regex("""^\s*(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?\s*$""", RegexOption.IGNORE_CASE)
-
-    fun parse(text: String): LocalTime? {
-        val m = pattern.matchEntire(text) ?: return null
-        var hour = m.groupValues[1].toInt()
-        val minute = m.groupValues[2].ifEmpty { "0" }.toInt()
-        val meridiem = m.groupValues[3].lowercase()
-        if (minute > 59) return null
-        if (meridiem.isNotEmpty()) {
-            if (hour !in 1..12) return null
-            hour = hour % 12 + if (meridiem == "p") 12 else 0
-        } else if (hour > 23) return null
-        return LocalTime.of(hour, minute)
-    }
-}
 
 /** Builds the Timesheets week: one [PersonWeek] per member with punches or an approval in the week (AC-F13, AC-F14). Pure. */
 object TimesheetsBuilder {

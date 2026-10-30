@@ -296,3 +296,8 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 ## 2026-10-30 — Today, Capture and Photo take one event callback
 - `TodayScreen`, `CaptureScreen` and `PhotoDetailScreen` now follow `XScreen(state, onEvent)`: navigation, share, gallery and the map pin are events (`TodayEvent`, `CaptureEvent.Back/PickGallery`, `PhotoDetailEvent.Share/Annotate/Back`) that the route answers; the ViewModels ignore them. Capture keeps its `camera` slot, which draws the live preview rather than reporting a tap (cr:fl-screen-signature).
 - Today's destinations are one `TodayNavigation` object built in AppTabs and shared by the route and the signed-out fallback, and `todayEvent()` handles events for both, so the map-pin intent left the composable.
+
+## 2026-10-30 — Edit punch is a full-screen form with a time picker
+- FL-Timesheets' Edit punch was an `AlertDialog` with three inputs; ui-standards rule 15 puts any create/edit with more than two fields on a full-screen route with Close and Save, so it now draws through `FormScaffold` in place of the week list while `TimesheetsUiState.edit` is set (no new Nav3 key: the form belongs to the week the owner is looking at, and its state already lives in TimesheetsViewModel). Close or Back asks "Discard changes?" once the time, job or reason changed (rule 3).
+- The time is picked with Material's `TimePicker` in `TimePickerDialog` through a new `:core-ui` `TimeField` (rule 22), 12- or 24-hour from the device setting. The free-text parser `TimeText` and its "Enter a time like 7:30 am" error are gone with the text field.
+- The open form (punch, time, job, reason) is kept in SavedStateHandle and reopened once the week reloads after process death.

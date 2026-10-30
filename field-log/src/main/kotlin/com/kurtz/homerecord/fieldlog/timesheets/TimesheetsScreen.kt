@@ -1,7 +1,10 @@
 package com.kurtz.homerecord.fieldlog.timesheets
 
 import com.kurtz.homerecord.coreui.components.windowTestTags
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,8 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -22,17 +23,21 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.input.ImeAction
+import com.kurtz.homerecord.coreui.components.FormScaffold
+import com.kurtz.homerecord.coreui.components.LabeledField
+import com.kurtz.homerecord.coreui.components.TimeField
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -57,6 +62,7 @@ import java.time.format.FormatStyle
 /** FL-Timesheets (Owner and Office): a week per person with flags, punch edits with a reason, Approve (AC-F14). */
 @Composable
 fun TimesheetsScreen(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit, onBack: () -> Unit, zone: ZoneId = ZoneId.systemDefault()) {
+    state.edit?.let { PunchEditScreen(it, onEvent, zone); return }
     ScreenScaffold(
         title = stringResource(R.string.ts_title),
         onBack = onBack,
@@ -94,7 +100,7 @@ fun TimesheetsScreen(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Uni
             }
         }
     }
-    TimesheetsDialogs(state, onEvent, zone)
+    TimesheetsDialogs(state, onEvent)
 }
 
 @Composable
@@ -211,7 +217,7 @@ private fun AuditLines(edits: List<com.kurtz.homerecord.core.punch.PunchEdit>, z
 }
 
 @Composable
-private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
+private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEvent) -> Unit) {
     if (state.confirmApproveAll) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),
@@ -222,26 +228,35 @@ private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEven
             dismissButton = { TextButton({ onEvent(TimesheetsEvent.CancelApproveAll) }, Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) } },
         )
     }
-    state.edit?.let { sheet ->
-        AlertDialog(
-            modifier = Modifier.windowTestTags(),
-            onDismissRequest = { onEvent(TimesheetsEvent.CancelEdit) },
-            title = { Text(stringResource(R.string.ts_edit_title)) },
-            text = {
-                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(R.string.ts_edit_subtitle, sheet.personName, stringResource(kindLabel(sheet.kind)), sheet.dateLabel),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    OutlinedTextField(
-                        sheet.timeText, { onEvent(TimesheetsEvent.EditTime(it)) },
-                        Modifier.fillMaxWidth().testTag("fl_timesheets_edit_time"),
-                        label = { Text(stringResource(R.string.ts_edit_time)) },
-                        supportingText = { Text(if (sheet.error == EditError.BadTime) stringResource(R.string.ts_edit_bad_time) else stringResource(R.string.ts_edit_time_hint)) },
-                        isError = sheet.error == EditError.BadTime, singleLine = true,
-                    )
-                    if (sheet.jobs.isNotEmpty()) {
-                        Text(stringResource(R.string.ts_edit_job), style = MaterialTheme.typography.labelLarge)
+}
+
+/**
+ * Edit punch as a full-screen form with Close and Save (ui-standards rules 3 and 15): the time comes from the
+ * time picker (rule 22), the job from chips, and a reason is required; earlier changes are listed under it (AC-F14).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PunchEditScreen(sheet: PunchEditSheet, onEvent: (TimesheetsEvent) -> Unit, zone: ZoneId) {
+    // Back with nothing changed closes the form; with changes, FormScaffold's own handler asks first.
+    BackHandler { onEvent(TimesheetsEvent.CancelEdit) }
+    CompositionLocalProvider(LocalTagPrefix provides "fl_timesheets_edit") {
+        FormScaffold(
+            title = stringResource(R.string.ts_edit_title),
+            dirty = sheet.dirty,
+            saveEnabled = true,
+            onClose = { onEvent(TimesheetsEvent.CancelEdit) },
+            onSave = { onEvent(TimesheetsEvent.SaveEdit) },
+            modifier = Modifier.testTag("fl_timesheets_edit"),
+        ) {
+            Text(
+                stringResource(R.string.ts_edit_subtitle, sheet.personName, stringResource(kindLabel(sheet.kind)), sheet.dateLabel),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            TimeField(stringResource(R.string.ts_edit_time), sheet.time, { onEvent(TimesheetsEvent.EditTime(it)) }, Modifier.testTag("fl_timesheets_edit_time"))
+            if (sheet.jobs.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.ts_edit_job), style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         sheet.jobs.forEach { job ->
                             FilterChip(
                                 selected = sheet.jobId == job.id, onClick = { onEvent(TimesheetsEvent.EditJob(job.id)) },
@@ -249,23 +264,25 @@ private fun TimesheetsDialogs(state: TimesheetsUiState, onEvent: (TimesheetsEven
                             )
                         }
                     }
-                    OutlinedTextField(
-                        sheet.reason, { onEvent(TimesheetsEvent.EditReason(it)) },
-                        Modifier.fillMaxWidth().testTag("fl_timesheets_edit_reason"),
-                        label = { Text(stringResource(R.string.ts_edit_reason)) },
-                        supportingText = { if (sheet.error == EditError.ReasonRequired) Text(stringResource(R.string.ts_edit_reason_required)) },
-                        isError = sheet.error == EditError.ReasonRequired,
-                    )
-                    if (sheet.error == EditError.Locked) Text(stringResource(R.string.ts_edit_locked), color = MaterialTheme.colorScheme.error)
-                    if (sheet.audit.isNotEmpty()) {
-                        Text(stringResource(R.string.ts_audit_title), style = MaterialTheme.typography.labelLarge)
-                        AuditLines(sheet.audit, zone)
-                    }
                 }
-            },
-            confirmButton = { Button({ onEvent(TimesheetsEvent.SaveEdit) }, Modifier.heightIn(min = 48.dp).testTag("fl_timesheets_edit_save")) { Text(stringResource(R.string.save)) } },
-            dismissButton = { TextButton({ onEvent(TimesheetsEvent.CancelEdit) }, Modifier.heightIn(min = 48.dp).testTag("fl_timesheets_edit_cancel")) { Text(stringResource(R.string.cancel)) } },
-        )
+            }
+            LabeledField(
+                stringResource(R.string.ts_edit_reason), sheet.reason, { onEvent(TimesheetsEvent.EditReason(it)) },
+                Modifier.testTag("fl_timesheets_edit_reason"), required = true,
+                helper = stringResource(R.string.ts_edit_reason_helper),
+                error = if (sheet.error == EditError.ReasonRequired) stringResource(R.string.ts_edit_reason_required) else null,
+                singleLine = false, imeAction = ImeAction.Default,
+            )
+            if (sheet.error == EditError.Locked) {
+                Text(stringResource(R.string.ts_edit_locked), Modifier.testTag("fl_timesheets_edit_locked"), color = MaterialTheme.colorScheme.error)
+            }
+            if (sheet.audit.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.ts_audit_title), style = MaterialTheme.typography.labelLarge)
+                    AuditLines(sheet.audit, zone)
+                }
+            }
+        }
     }
 }
 

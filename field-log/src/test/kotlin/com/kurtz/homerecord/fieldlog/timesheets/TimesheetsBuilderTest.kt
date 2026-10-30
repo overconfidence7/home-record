@@ -8,7 +8,6 @@ import com.kurtz.homerecord.core.model.ShiftFlag
 import com.kurtz.homerecord.core.model.TimesheetRules
 import org.junit.Test
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 
 // AC-F14 (a week per person with flags), AC-F13 (totals match the clock's own sheet), AC-F12 (flags)
@@ -65,16 +64,5 @@ class TimesheetsBuilderTest {
         assertThat(p.edited).isTrue()
         assertThat(p.edits.single().reason).isEqualTo("Forgot to clock out")
         assertThat(ShiftFlag.Edited in row.flags).isTrue()
-    }
-
-    @Test fun timeTextAcceptsTwelveAndTwentyFourHour() {
-        assertThat(TimeText.parse("7:30")).isEqualTo(LocalTime.of(7, 30))
-        assertThat(TimeText.parse("2:30 pm")).isEqualTo(LocalTime.of(14, 30))
-        assertThat(TimeText.parse("2PM")).isEqualTo(LocalTime.of(14, 0))
-        assertThat(TimeText.parse("12:05 am")).isEqualTo(LocalTime.of(0, 5))
-        assertThat(TimeText.parse("17:45")).isEqualTo(LocalTime.of(17, 45))
-        assertThat(TimeText.parse("25:00")).isNull()
-        assertThat(TimeText.parse("13 pm")).isNull()
-        assertThat(TimeText.parse("soon")).isNull()
     }
 }
