@@ -11,7 +11,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Email and step survive process death through [SavedStateHandle]; the code is never saved. */
+/**
+ * Email and step survive process death through [SavedStateHandle]; the code is never saved.
+ * The ViewModel outlives a sign-in (it is scoped to the activity), so a successful sign-in resets it to an
+ * empty email step: the next sign-out must not reopen on the last person's code step.
+ */
 class SignInViewModel(private val repo: AuthRepository, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
     private val _state = MutableStateFlow(
         SignInUiState(
@@ -42,7 +46,11 @@ class SignInViewModel(private val repo: AuthRepository, private val saved: Saved
     private fun verify() = launchCall { finish(repo.verifyEmailCode(_state.value.email, _state.value.code)) }
 
     private fun finish(result: AuthResult) =
-        update { copy(busy = false, signedIn = result == AuthResult.Success, error = result.takeIf { it != AuthResult.Success }) }
+        if (result == AuthResult.Success) {
+            update { SignInUiState(signedIn = true) }
+        } else {
+            update { copy(busy = false, signedIn = false, error = result) }
+        }
 
     private fun launchCall(block: suspend () -> Unit) {
         if (_state.value.busy) return

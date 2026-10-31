@@ -2301,6 +2301,7 @@ Judged: 242 screenshots opened (all 115 device flow, tour, launch and monkey sho
 Automated suite run at 2026-10-31 03:28 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
 
 - [ ] [Major] field-log scroll jank (regression of a fixed item) [auto:jank:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit 695d291f - expected: under 10% janky frames (AC-U11) - actual: 13% of 111 frames ran the UI thread past the frame budget (AC-U11; software renderer, overall 88% janky of 109; 200-row list, benchmark build)
+- [x] [Major] Flow F02-invite-join fails on field-log (still open from earlier runs) [auto:flow:field-log:F02-invite-join] - steps: automated, qa-results latest/ for commit 695d291f, step 083 - expected: walkthrough F02 passes - actual: after the crew member signed out, Sign in reopened on the crew member's code step ("We sent a 6 digit code to qa-crew-f02@example.test", old code filled in), so fl_sign_in_email was not on screen; app bug: SignInViewModel is scoped to the activity and kept its email, step and code after a successful sign-in - fixed in SHA_PENDING (a successful sign-in resets the sign-in state to an empty email step and clears its saved state; SignInViewModelTest.signInResetsToEmptyEmailStepForTheNextSignOut, AC-F4)
 
 Still open from earlier runs: [auto:flow:field-log:F02-invite-join]
 
