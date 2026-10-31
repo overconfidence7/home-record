@@ -84,6 +84,8 @@ appId: com.kurtz.homerecord.fieldlog
     notVisible: "Done \\(1\\)"
     timeout: 10000
 # AC-F34: swiping an open task across completes it too, with the same Undo
+# Undo slides the row back up from Done; swipe once it has landed, not while it is still moving under the finger
+- waitForAnimationToEnd
 - swipe:
     from:
       text: "Set the kitchen outlets"
@@ -138,6 +140,7 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "My tasks"
 - assertVisible: "Hale kitchen · Due today"
 # AC-F34: swipe completes it with Undo; Undo brings it back
+- waitForAnimationToEnd
 - swipe:
     from:
       text: "Label the panel"
