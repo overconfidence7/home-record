@@ -334,3 +334,10 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - A task has no "done at" column; the log treats a done task's `updatedAt` as the time it was ticked (SPEC's Task has no completion time). T044 keeps that true by not touching done tasks except to untick them.
 - The weather snapshot lives on the row (inside `sectionsJson`, mirrored to `weatherJson`). It is looked up when the row has none, or when the one kept is 6 h old (the backend cache) and was taken before the day ended; one taken after the day ended is final. A failed lookup keeps the old snapshot; with none, the screen says "No weather (offline)". A job without map coordinates gets no lookup, and a day past the forecast range (backend 404) is "not yet", so neither is called offline.
 - A re-assembly that changes nothing writes and queues nothing, so opening the Log tab does not churn sync.
+
+## 2026-10-31 — FL-Log screen (T043d1; AC-F30, AC-F31, AC-F32)
+- Who edits the log follows the server rule (`backend/src/sync/policy.ts`, `daily_log` is a Lead job row): Owner and Office on every job, a Lead on the jobs they are on. Crew and Sub read the saved log and never build a draft, since their phone could not sync it. Listed under Decisions to confirm.
+- Opening a day assembles and saves the draft (no "Build log" button): the log is meant to write itself (PRODUCT step 6). Future days cannot be picked.
+- Edits follow rule 15: typed sections are a one-field sheet, a crew line a one-field dialog (decimal hours, `7:30` and `7h 30m` also read), a delay a two-field sheet with the five reasons as a radio list (more than four options, rule 22). Work done is edited as paragraphs, one entry each.
+- Editing one person's hours fixes the whole crew section as typed and clears "on site now", so a frozen list never claims someone is still on site.
+- `DailyLogRepository` now runs every read-change-write of a log row under one mutex, and assembly re-reads the row under it after the weather lookup: two quick edits, or an edit made while the weather is still being fetched, both land instead of the later write undoing the earlier.

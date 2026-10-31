@@ -894,3 +894,92 @@ fun FileViewerNoPreviewPreview() = Frame {
         ), {},
     )
 }
+
+private val logDay = java.time.LocalDate.of(2026, 10, 30)
+
+/** A full Friday on the Hale kitchen: two people, notes, photos, a delay, rain (SPEC FL-Log). */
+private val logReady = com.kurtz.homerecord.fieldlog.log.LogUiState(
+    day = logDay, today = logDay, loading = false, canEdit = true, exists = true,
+    crew = listOf(
+        com.kurtz.homerecord.fieldlog.log.LogCrewRow("m1", "Marcus Ortiz", 465, onSiteNow = false),
+        com.kurtz.homerecord.fieldlog.log.LogCrewRow("m2", "Sam Rivera", 390, onSiteNow = true),
+    ),
+    workDone = listOf(
+        "Set the base cabinets along the sink wall and shimmed them level.",
+        "Ran the 20 amp circuit for the dishwasher, boxes in, ready for rough-in inspection.",
+    ),
+    photos = listOf("p1", "p2", "p3", "p4").map { com.kurtz.homerecord.fieldlog.log.LogPhotoThumb(it, "") },
+    tasksDone = listOf(com.kurtz.homerecord.fieldlog.log.LogLine("t1", "Level the sink base")),
+    changeOrders = listOf(com.kurtz.homerecord.fieldlog.log.LogLine("co1", "Add under-cabinet lights", "$640.00")),
+    materials = listOf(com.kurtz.homerecord.fieldlog.log.LogLine("ma1", "Home Depot, Electrical", "$212.48, Romex and boxes")),
+    weather = com.kurtz.homerecord.core.model.LogWeather(highF = 58, lowF = 41, precipIn = 0.12, conditions = "rain"),
+    weatherStatus = com.kurtz.homerecord.core.log.WeatherStatus.Shown,
+    delays = listOf(com.kurtz.homerecord.core.model.LogDelay(com.kurtz.homerecord.core.model.DelayReason.MATERIALS, "Countertop templates pushed to Monday")),
+    visitors = "Township inspector, 2:15 PM",
+    safety = "",
+    clientNotes = "Cabinets are in. Countertops get templated Monday.",
+)
+
+@ThemePreviews
+@Composable
+fun LogReadyPreview() = Frame { com.kurtz.homerecord.fieldlog.log.LogScreen(logReady, {}, zone = java.time.ZoneId.of("UTC")) }
+
+/** Crew read the lead's log with no edit controls (AC-F3). */
+@ThemePreviews
+@Composable
+fun LogCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        logReady.copy(canEdit = false, day = logDay.minusDays(1), sentAt = 1_793_400_000_000), {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
+/** Offline on a quiet morning: one person on site, no weather yet (AC-F31). */
+@ThemePreviews
+@Composable
+fun LogOfflinePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        com.kurtz.homerecord.fieldlog.log.LogUiState(
+            day = logDay, today = logDay, loading = false, canEdit = true, exists = true,
+            crew = listOf(com.kurtz.homerecord.fieldlog.log.LogCrewRow("m1", "Marcus Ortiz", 95, onSiteNow = true)),
+            weatherStatus = com.kurtz.homerecord.core.log.WeatherStatus.Offline,
+        ),
+        {},
+    )
+}
+
+/** Crew on a day the lead has not opened yet. */
+@ThemePreviews
+@Composable
+fun LogEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(com.kurtz.homerecord.fieldlog.log.LogUiState(day = logDay, today = logDay, loading = false), {})
+}
+
+@ThemePreviews
+@Composable
+fun LogLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.log.LogScreen(com.kurtz.homerecord.fieldlog.log.LogUiState(day = logDay, today = logDay), {}) }
+
+@ThemePreviews
+@Composable
+fun LogFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(com.kurtz.homerecord.fieldlog.log.LogUiState(day = logDay, today = logDay, loading = false, failed = true), {})
+}
+
+/** The delay sheet's content with Materials picked (AC-F32). */
+@ThemePreviews
+@Composable
+fun LogDelaySheetPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogDelaySheetContent(
+        com.kurtz.homerecord.fieldlog.log.LogEditor.Delay(com.kurtz.homerecord.core.model.DelayReason.INSPECTION, "Inspector moved us to Tuesday"), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun LogTextSheetPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogTextSheetContent(
+        com.kurtz.homerecord.fieldlog.log.LogEditor.Text(
+            com.kurtz.homerecord.fieldlog.log.LogTextSection.CLIENT_NOTES, "Cabinets are in. Countertops get templated Monday.",
+        ),
+        {},
+    )
+}

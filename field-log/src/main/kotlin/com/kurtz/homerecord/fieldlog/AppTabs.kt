@@ -157,6 +157,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onOpenPhoto = { nav.push(PhotoKey(it)) },
                 onOpenFile = { nav.push(FileKey(it)) },
                 downloads = container.mediaDownloads,
+                logs = container.dailyLogs,
                 files = container.filesDeps(
                     key.jobId,
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),

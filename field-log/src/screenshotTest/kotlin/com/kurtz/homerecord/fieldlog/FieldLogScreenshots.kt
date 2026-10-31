@@ -426,3 +426,43 @@ fun MarkupTextScreenshot() = MarkupTextPreview()
 @ThemePreviews
 @Composable
 fun MarkupNotAvailableScreenshot() = MarkupNotAvailablePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogReadyScreenshot() = LogReadyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogCrewScreenshot() = LogCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogOfflineScreenshot() = LogOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogEmptyScreenshot() = LogEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogLoadingScreenshot() = LogLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogFailedScreenshot() = LogFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogDelaySheetScreenshot() = LogDelaySheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogTextSheetScreenshot() = LogTextSheetPreview()

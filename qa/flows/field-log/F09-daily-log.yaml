@@ -1,0 +1,124 @@
+# Walkthrough F9: today's daily log on the job's Log tab writes itself from the day (a typed note becomes Work done),
+# says why there is no weather, takes a delay with a reason and note, and keeps a typed section (AC-F30, AC-F31, AC-F32).
+# Send and the PDF arrive with T045.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+    permissions:
+      camera: deny
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f09@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# a note for today, typed from Capture (the camera is refused so the flow needs no shutter)
+- tapOn:
+    id: fl_job_tab_photos
+- extendedWaitUntil:
+    visible:
+      id: fl_photos_fab
+    timeout: 10000
+- tapOn:
+    id: fl_photos_fab
+- tapOn:
+    text: "Don.t allow"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: fl_capture_note
+    timeout: 15000
+- tapOn:
+    id: fl_capture_note
+- tapOn:
+    id: fl_capture_note_text
+- inputText: "Set the base cabinets"
+- hideKeyboard
+- tapOn:
+    id: fl_capture_note_save
+- extendedWaitUntil:
+    visible: "Note saved to today."
+    timeout: 10000
+- back
+# AC-F30: the Log tab opens on today with the note under Work done
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_log
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_log
+- extendedWaitUntil:
+    visible:
+      id: fl_log_list
+    timeout: 15000
+- assertVisible: "Today, .*"
+- assertVisible: "Set the base cabinets"
+- assertVisible: "No one clocked in on this job this day."
+# AC-F32: a delay with a reason and a note
+- scrollUntilVisible:
+    element:
+      id: fl_log_delay_add
+    direction: DOWN
+- tapOn:
+    id: fl_log_delay_add
+- assertVisible:
+    id: fl_log_delay_reason_inspection
+- tapOn:
+    id: fl_log_delay_reason_weather
+- tapOn:
+    id: fl_log_delay_note
+- inputText: "Rain held up the siding"
+- hideKeyboard
+- tapOn:
+    id: fl_log_delay_save
+- extendedWaitUntil:
+    visible: "Rain held up the siding"
+    timeout: 10000
+- assertVisible:
+    id: fl_log_delay_0
+# AC-F31: no address on this job, so the weather says why it is missing
+- scrollUntilVisible:
+    element:
+      id: fl_log_weather_none
+    direction: DOWN
+- assertVisible: "No weather. Add the job.s address to look it up."
+# a typed section saves and stays when the day is opened again
+- scrollUntilVisible:
+    element:
+      id: fl_log_visitors_edit
+    direction: DOWN
+- tapOn:
+    id: fl_log_visitors_edit
+- tapOn:
+    id: fl_log_text_field
+- inputText: "Township inspector"
+- hideKeyboard
+- tapOn:
+    id: fl_log_text_save
+- extendedWaitUntil:
+    visible:
+      id: fl_log_visitors_text
+    timeout: 10000
+- tapOn:
+    id: fl_log_prev
+- extendedWaitUntil:
+    visible:
+      id: fl_log_next
+    timeout: 10000
+- tapOn:
+    id: fl_log_next
+- scrollUntilVisible:
+    element:
+      id: fl_log_visitors_text
+    direction: DOWN
+- assertVisible: "Township inspector"
+- takeScreenshot: F09-daily-log

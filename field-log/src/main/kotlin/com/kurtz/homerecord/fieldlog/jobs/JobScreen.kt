@@ -37,6 +37,7 @@ fun JobScreen(
     houseContent: @Composable () -> Unit = { SoonNote(JobTab.HOUSE) },
     photosContent: @Composable () -> Unit = { SoonNote(JobTab.PHOTOS) },
     filesContent: @Composable () -> Unit = { SoonNote(JobTab.FILES) },
+    logContent: @Composable () -> Unit = { SoonNote(JobTab.LOG) },
 ) {
     ScreenScaffold(
         title = state.name.ifBlank { stringResource(R.string.tab_jobs) }, subtitle = state.clientName, onBack = onBack,
@@ -56,6 +57,8 @@ fun JobScreen(
                 JobOverviewScreen(state, onEvent)
             } else if (selected == JobTab.PHOTOS) {
                 photosContent()
+            } else if (selected == JobTab.LOG) {
+                logContent()
             } else if (selected == JobTab.FILES) {
                 filesContent()
             } else if (selected == JobTab.HOUSE) {

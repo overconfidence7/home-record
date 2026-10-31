@@ -20,6 +20,7 @@ import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -170,5 +171,26 @@ class DailyLogRepositoryTest {
     @Test fun theIdIsTheSameOnEveryPhone() {
         assertThat(DailyLogRepository.idFor("j1", day)).isEqualTo(DailyLogRepository.idFor("j1", LocalDate.parse("2026-10-30")))
         assertThat(DailyLogRepository.idFor("j1", day)).isNotEqualTo(DailyLogRepository.idFor("j1", day.plusDays(1)))
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun editsSavedTogetherOrDuringAssemblyAllLand() = runBlocking<Unit> {
+        val id = checkNotNull(repo.assemble("j1", day)).log.id
+        kotlinx.coroutines.coroutineScope {
+            listOf("Visitors", "Safety", "Client").forEach { what ->
+                launch(kotlinx.coroutines.Dispatchers.IO) {
+                    repo.update(id) { s ->
+                        when (what) {
+                            "Visitors" -> s.copy(visitors = "Township inspector")
+                            "Safety" -> s.copy(safety = "Covered the open floor box")
+                            else -> s.copy(clientNotes = "Countertops Monday")
+                        }
+                    }
+                }
+            }
+            launch(kotlinx.coroutines.Dispatchers.IO) { repo.assemble("j1", day) }
+        }
+        val s = checkNotNull(repo.observe("j1", day).first()).sections
+        assertThat(listOf(s.visitors, s.safety, s.clientNotes)).containsExactly("Township inspector", "Covered the open floor box", "Countertops Monday").inOrder()
     }
 }

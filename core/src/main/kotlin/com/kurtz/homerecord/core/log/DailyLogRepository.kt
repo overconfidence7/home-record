@@ -25,6 +25,8 @@ import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 
 /** Why the weather section reads the way it does (AC-F31). Only [Shown] has a snapshot to show. */
@@ -73,6 +75,9 @@ class DailyLogRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** Every read-change-write of a log row runs one at a time, so two quick edits, or an edit during assembly, both land. */
+    private val writes = Mutex()
+
     /** The saved log for [jobId] on [day], or null before anyone opened it. */
     fun observe(jobId: String, day: LocalDate): Flow<DailyLog?> =
         db.dailyLogDao().observeFor(jobId).map { rows -> pick(rows, jobId, day)?.toModel() }
@@ -90,12 +95,17 @@ class DailyLogRepository(
      */
     suspend fun assemble(jobId: String, day: LocalDate): AssembleResult? {
         val job = db.jobDao().get(jobId) ?: return null
-        val existing = pick(db.dailyLogDao().listFor(jobId), jobId, day)
-        val previous = existing?.let { DailyLogSections.fromJson(it.sectionsJson) }
-        val (fresh, weatherStatus) = weatherFor(job, day, previous)
-        val stamp = now()
-        val sections = LogAssembler.assemble(inputs(job, day, fresh), stamp, previous)
-        val row = save(existing, jobId, day, sections, stamp)
+        val before = pick(db.dailyLogDao().listFor(jobId), jobId, day)?.let { DailyLogSections.fromJson(it.sectionsJson) }
+        // the weather lookup can take seconds; it runs outside the lock so an edit made meanwhile is not held up
+        val (fresh, weatherStatus) = weatherFor(job, day, before)
+        val (row, sections) = writes.withLock {
+            // read again under the lock: an edit saved during the lookup must not be overwritten
+            val existing = pick(db.dailyLogDao().listFor(jobId), jobId, day)
+            val previous = existing?.let { DailyLogSections.fromJson(it.sectionsJson) }
+            val stamp = now()
+            val sections = LogAssembler.assemble(inputs(job, day, fresh), stamp, previous)
+            save(existing, jobId, day, sections, stamp) to sections
+        }
         val status = when {
             sections.weather.value != null -> WeatherStatus.Shown
             weatherStatus == WeatherStatus.Shown -> WeatherStatus.Offline
@@ -108,12 +118,12 @@ class DailyLogRepository(
      * Saves a change to the log's sections. The caller marks what it changed as edited (see [DailyLogSections]); the
      * row is only written, and queued, when the sections actually changed.
      */
-    suspend fun update(logId: String, change: (DailyLogSections) -> DailyLogSections): DailyLog? {
-        val row = db.dailyLogDao().get(logId) ?: return null
+    suspend fun update(logId: String, change: (DailyLogSections) -> DailyLogSections): DailyLog? = writes.withLock {
+        val row = db.dailyLogDao().get(logId) ?: return@withLock null
         val before = DailyLogSections.fromJson(row.sectionsJson)
         val after = change(before)
-        if (after == before) return row.toModel()
-        return save(row, row.jobId, LocalDate.parse(row.day), after, now()).toModel()
+        if (after == before) return@withLock row.toModel()
+        save(row, row.jobId, LocalDate.parse(row.day), after, now()).toModel()
     }
 
     private suspend fun save(existing: DailyLogEntity?, jobId: String, day: LocalDate, sections: DailyLogSections, stamp: Long): DailyLogEntity {
