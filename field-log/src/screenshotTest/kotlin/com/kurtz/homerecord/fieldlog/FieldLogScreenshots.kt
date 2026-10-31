@@ -71,6 +71,16 @@ fun TodayMyTasksScreenshot() = TodayMyTasksPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun TodayRecentPhotosScreenshot() = TodayRecentPhotosPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TodayCapturePickerScreenshot() = TodayCapturePickerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun MoreOwnerScreenshot() = MoreOwnerPreview()
 
 @PreviewTest

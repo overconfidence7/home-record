@@ -21,6 +21,8 @@ object ScreenCatalog {
         QaScreen("today-sync-refused", nonRoot = false) { TodaySyncRefusedPreview() },
         QaScreen("today-crew-nothing-scheduled", nonRoot = false) { TodayCrewNothingScheduledPreview() },
         QaScreen("today-my-tasks", nonRoot = false) { TodayMyTasksPreview() },
+        QaScreen("today-recent-photos", nonRoot = false) { TodayRecentPhotosPreview() },
+        QaScreen("today-capture-picker", nonRoot = false) { TodayCapturePickerPreview() },
         QaScreen("jobs-list", nonRoot = false) { JobsListPreview() },
         QaScreen("jobs-crew", nonRoot = false) { JobsCrewPreview() },
         QaScreen("jobs-empty", nonRoot = false) { JobsEmptyPreview() },

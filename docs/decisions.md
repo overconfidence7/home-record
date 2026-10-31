@@ -397,3 +397,6 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - The task form shows "Pinned on a file: <file> · Page n" with Remove. Saving the form writes the file pin only when the form changed it, so a pin dropped from the viewer while the form was open elsewhere is kept.
 - Pins follow the plan across versions: the viewer shows pins on any version of the file (marking up saves a new version with a new id). Pins on a page the open version lacks are left off.
 - Pins are drawn as Compose nodes over the page (same map pin as FL-House, fixed number size, 48 dp head, TalkBack "Task n: title"); a tap opens the task form for managers or the job's Tasks tab for Crew, who see only their own pins. The shared `PdfViewer` gained `onPageTap` and `pageOverlay`; House Manual's document viewer passes neither and is unchanged.
+
+## 2026-10-31 — Today's camera button picks the job without asking when it can (T035c3)
+SPEC puts a capture FAB on Today but capture is always tagged to a job. Order: the job I'm clocked in on, then my only job today, then the company's only live job; otherwise a "Photo for which job?" sheet (my jobs today first). Reason: a crew member on site should get one tap to the camera; asking only when there is a real choice. Recent photos are company-wide (crew can see every job in Jobs too), the 12 newest on non-archived jobs.

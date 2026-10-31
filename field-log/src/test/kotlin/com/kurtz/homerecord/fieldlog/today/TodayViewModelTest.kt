@@ -105,4 +105,36 @@ class TodayViewModelTest {
         assertThat(vm.state.value.taskUndo).isNull()
         assertThat(calls).hasSize(3)
     }
+
+    private fun job(id: String, name: String) = com.kurtz.homerecord.core.data.JobEntity(id = id, companyId = "c", name = name, createdAt = 0, updatedAt = 0)
+
+    private fun captureDeps(jobs: List<com.kurtz.homerecord.core.data.JobEntity>, photos: List<com.kurtz.homerecord.core.data.PhotoEntity> = emptyList()) = TodayDeps(
+        memberId = "me", base = TodayUiState("Kurtz Electric", CompanyRole.Crew),
+        punches = flowOf(emptyList()), members = flowOf(emptyList()), jobs = flowOf(jobs),
+        assignments = flowOf(emptyList()), ticks = flowOf(Unit), photos = flowOf(photos),
+        zone = java.time.ZoneOffset.UTC, now = { java.time.Instant.parse("2026-10-25T15:00:00Z").toEpochMilli() },
+    )
+
+    // AC-F24: with one live job the camera button opens capture on it; with two it asks which, and closing the sheet clears it.
+    @Test fun theCameraButtonOpensOnThePlainJobOrAsks() {
+        val one = TodayViewModel(captureDeps(listOf(job("j1", "Kitchen Remodel")))).also { created += it }
+        assertThat(one.startCapture()).isEqualTo("j1")
+        assertThat(one.state.value.pickingCaptureJob).isFalse()
+
+        val two = TodayViewModel(captureDeps(listOf(job("j1", "Kitchen Remodel"), job("j2", "Deck Rebuild")))).also { created += it }
+        assertThat(two.startCapture()).isNull()
+        assertThat(two.state.value.pickingCaptureJob).isTrue()
+        assertThat(two.state.value.capture.options.map { it.name }).containsExactly("Kitchen Remodel", "Deck Rebuild").inOrder()
+        two.dismissCapturePicker()
+        assertThat(two.state.value.pickingCaptureJob).isFalse()
+    }
+
+    // AC-F24: the photos flow lands on Today as the Recent photos row.
+    @Test fun recentPhotosComeFromThePhotosFlow() {
+        val photo = com.kurtz.homerecord.core.data.PhotoEntity(
+            id = "ph1", homeId = "h1", jobId = "j1", path = "/m/ph1.jpg", thumbPath = "/m/ph1_t.jpg", takenAt = 5, createdAt = 5, updatedAt = 5,
+        )
+        val vm = TodayViewModel(captureDeps(listOf(job("j1", "Kitchen Remodel")), listOf(photo))).also { created += it }
+        assertThat(vm.state.value.photos).containsExactly(TodayPhoto("ph1", "j1", "/m/ph1_t.jpg", "Kitchen Remodel"))
+    }
 }

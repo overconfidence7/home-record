@@ -22,6 +22,9 @@ class TodayNavigation(
     val onOpenJob: (String) -> Unit = {},
     val onAddJob: () -> Unit,
     val onOpenTask: (jobId: String, taskId: String) -> Unit = { _, _ -> },
+    /** Opens FL-Capture tagged to the job (AC-F24). */
+    val onCapture: (jobId: String) -> Unit = {},
+    val onOpenPhoto: (photoId: String) -> Unit = {},
 )
 
 @Composable
@@ -43,6 +46,12 @@ fun TodayRoute(
                 is TodayEvent.CompleteTask -> vm.completeTask(e.taskId)
                 TodayEvent.UndoTask -> vm.undoTask()
                 TodayEvent.DismissTaskUndo -> vm.dismissTaskUndo()
+                TodayEvent.Capture -> vm.startCapture()?.let(navigation.onCapture)
+                TodayEvent.DismissCapturePicker -> vm.dismissCapturePicker()
+                is TodayEvent.CaptureFor -> {
+                    vm.dismissCapturePicker()
+                    navigation.onCapture(e.jobId)
+                }
                 else -> todayEvent(e, navigation, context, vm::refresh)
             }
         },
@@ -61,8 +70,11 @@ fun todayEvent(event: TodayEvent, navigation: TodayNavigation, context: Context,
         TodayEvent.AddJob -> navigation.onAddJob()
         TodayEvent.Refresh -> onRefresh()
         is TodayEvent.OpenTask -> navigation.onOpenTask(event.jobId, event.taskId)
-        // Ticking a task needs the ViewModel; TodayRoute handles these before they get here.
-        is TodayEvent.CompleteTask, TodayEvent.UndoTask, TodayEvent.DismissTaskUndo -> Unit
+        is TodayEvent.OpenPhoto -> navigation.onOpenPhoto(event.photoId)
+        is TodayEvent.CaptureFor -> navigation.onCapture(event.jobId)
+        // Ticking a task and the camera button's choice need the ViewModel; TodayRoute handles these before they get here.
+        is TodayEvent.CompleteTask, TodayEvent.UndoTask, TodayEvent.DismissTaskUndo,
+        TodayEvent.Capture, TodayEvent.DismissCapturePicker -> Unit
         is TodayEvent.OpenPin -> {
             val lat = event.entry.lat ?: return
             val lng = event.entry.lng ?: return

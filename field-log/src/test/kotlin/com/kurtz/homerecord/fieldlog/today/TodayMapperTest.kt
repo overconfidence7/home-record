@@ -94,4 +94,31 @@ class TodayMapperTest {
             com.kurtz.homerecord.core.model.TaskDue.OVERDUE, com.kurtz.homerecord.core.model.TaskDue.OVERDUE, com.kurtz.homerecord.core.model.TaskDue.TODAY,
         ).inOrder()
     }
+
+    private fun photo(id: String, job: String?, takenAt: Long, path: String = "/m/$id.jpg", thumb: String? = "/m/${id}_t.jpg", deleted: Long? = null) =
+        com.kurtz.homerecord.core.data.PhotoEntity(
+            id = id, homeId = "h", jobId = job, path = path, thumbPath = thumb, takenAt = takenAt, createdAt = takenAt, updatedAt = takenAt, deletedAt = deleted,
+        )
+
+    // AC-F24: Recent photos are the newest on live jobs, thumbnails first, waiting ones without a path, capped at twelve.
+    @Test fun recentPhotosAreNewestOnLiveJobsOnly() {
+        val photos = listOf(
+            photo("old", "j1", 1), photo("new", "j2", 9, thumb = null), photo("archived", "j3", 8),
+            photo("elsewhere", "j2", 7, path = ""), photo("gone", "j1", 10, deleted = 10), photo("loose", null, 11),
+        )
+        val recent = TodayMapper.recentPhotos(photos, jobs, "2026-10-25")
+        assertThat(recent.map { it.id }).containsExactly("new", "elsewhere", "old").inOrder()
+        assertThat(recent[0]).isEqualTo(TodayPhoto("new", "j2", "/m/new.jpg", "Deck Rebuild"))
+        assertThat(recent[1].imagePath).isEmpty()
+        assertThat(recent[2].imagePath).isEqualTo("/m/old_t.jpg")
+        val many = (1..20).map { photo("p$it", "j1", it.toLong()) }
+        assertThat(TodayMapper.recentPhotos(many, jobs, "2026-10-25")).hasSize(TodayMapper.RECENT_PHOTOS)
+    }
+
+    // AC-F24: clocked in on a job, the camera button shoots for it without asking.
+    @Test fun theCameraButtonFollowsMyShift() {
+        val state = map(CompanyRole.Crew, listOf(punch("me", PunchKind.IN, now - hour, "j2")))
+        assertThat(state.capture.target).isEqualTo("j2")
+        assertThat(map(CompanyRole.Crew, emptyList()).capture.options.map { it.id }).containsExactly("j1", "j2").inOrder()
+    }
 }

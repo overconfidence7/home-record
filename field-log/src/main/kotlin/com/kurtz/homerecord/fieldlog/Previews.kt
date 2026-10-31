@@ -223,6 +223,53 @@ fun TodayMyTasksPreview() = Frame {
     )
 }
 
+/** Owner clocked in on Kitchen Remodel: the camera button shoots for it, and the newest job photos sit in a row (SPEC FL-Today). */
+@ThemePreviews
+@Composable
+fun TodayRecentPhotosPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Owner, hasJobs = true, jobs = todayJobs, onSite = todayOnSite().take(1),
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(
+                com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", TODAY_NOW - 3 * 3600_000L), "Kitchen Remodel", TODAY_NOW,
+            ),
+            photos = listOf(
+                com.kurtz.homerecord.fieldlog.today.TodayPhoto("ph1", "j1", "/none/ph1.jpg", "Kitchen Remodel"),
+                com.kurtz.homerecord.fieldlog.today.TodayPhoto("ph2", "j1", "/none/ph2.jpg", "Kitchen Remodel"),
+                com.kurtz.homerecord.fieldlog.today.TodayPhoto("ph3", "j2", "", "Deck Rebuild"),
+                com.kurtz.homerecord.fieldlog.today.TodayPhoto("ph4", "j2", "/none/ph4.jpg", "Deck Rebuild"),
+            ),
+            capture = com.kurtz.homerecord.fieldlog.today.TodayCaptureChoice(target = "j1"),
+        ),
+        onEvent = {},
+    )
+}
+
+/** Clocked out with two jobs today: the camera button asks which job the photo is for. */
+@ThemePreviews
+@Composable
+fun TodayCapturePickerPreview() = Frame {
+    val choices = todayJobs + com.kurtz.homerecord.fieldlog.today.TodayJob("j3", "Garage subpanel", null)
+    Box(Modifier.fillMaxSize()) {
+        TodayScreen(
+            TodayUiState(
+                "Kurtz Electric", CompanyRole.Crew, hasJobs = true, jobs = todayJobs,
+                clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
+                capture = com.kurtz.homerecord.fieldlog.today.TodayCaptureChoice(options = choices),
+            ),
+            onEvent = {},
+        )
+        // The sheet is a popup the renderer cannot draw; draw its content over a scrim instead.
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)))
+        Surface(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), tonalElevation = 1.dp,
+        ) {
+            Column(Modifier.padding(top = 16.dp)) { com.kurtz.homerecord.fieldlog.today.TodayCaptureChooser(choices) {} }
+        }
+    }
+}
+
 @ThemePreviews
 @Composable
 fun TodayCrewNothingScheduledPreview() = Frame {

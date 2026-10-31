@@ -2,6 +2,18 @@ package com.kurtz.homerecord.fieldlog.today
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import com.kurtz.homerecord.coreui.components.OptionsSheet
+import com.kurtz.homerecord.coreui.components.OptionsSheetContent
+import com.kurtz.homerecord.coreui.components.SheetOption
+import java.io.File
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.SnackbarDuration
@@ -100,11 +112,17 @@ data class TodayUiState(
     val tasks: List<TodayTask> = emptyList(),
     /** A task just ticked done from Today; the snackbar offers Undo (AC-F34). */
     val taskUndo: com.kurtz.homerecord.fieldlog.tasks.TaskUndo? = null,
+    /** The company's newest job photos; the row is left out when there are none. */
+    val photos: List<TodayPhoto> = emptyList(),
+    /** What the camera button does; no button before there is a live job (AC-F24). */
+    val capture: TodayCaptureChoice = TodayCaptureChoice(),
+    /** "Photo for which job?" is open. */
+    val pickingCaptureJob: Boolean = false,
 )
 
 /**
- * FL-Today: clock status card, my jobs today, and for Owner and Office who is on site now (AC-F16). Tasks and photos
- * arrive with later tasks; before the company has a job it explains what to do first (AC-F1).
+ * FL-Today: clock status card, my jobs today, my tasks, recent photos, the camera button, and for Owner and Office who
+ * is on site now (AC-F16); before the company has a job it explains what to do first (AC-F1).
  */
 /** Everything a tap on Today asks for; the route turns navigation into back-stack pushes (cr:fl-screen-signature). */
 sealed interface TodayEvent {
@@ -123,6 +141,12 @@ sealed interface TodayEvent {
     data object DismissTaskUndo : TodayEvent
     /** Open a task: its job's Tasks tab, and the task form for those who manage it (AC-F34). */
     data class OpenTask(val jobId: String, val taskId: String) : TodayEvent
+    /** The camera button: opens capture on the plain job, or asks which job (AC-F24). */
+    data object Capture : TodayEvent
+    /** A job picked in "Photo for which job?". */
+    data class CaptureFor(val jobId: String) : TodayEvent
+    data object DismissCapturePicker : TodayEvent
+    data class OpenPhoto(val photoId: String) : TodayEvent
 }
 
 @Composable
@@ -139,10 +163,43 @@ fun TodayScreen(
         val result = snackbar.showSnackbar(undoMessage, actionLabel = undoLabel, withDismissAction = true, duration = SnackbarDuration.Long)
         onEvent(if (result == SnackbarResult.ActionPerformed) TodayEvent.UndoTask else TodayEvent.DismissTaskUndo)
     }
+    val showCapture = state.capture.available && state.clock != null && state.hasJobs
     Box(modifier.fillMaxSize()) {
         TodayColumn(state, onEvent)
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).testTag("fl_today_snackbar"))
+        if (showCapture) {
+            val takePhotoLabel = stringResource(R.string.photos_take)
+            ExtendedFloatingActionButton(
+                onClick = { onEvent(TodayEvent.Capture) },
+                icon = { Icon(Icons.Rounded.PhotoCamera, contentDescription = null) },
+                text = { Text(takePhotoLabel) },
+                // The clickable container carries the label itself so TalkBack and uiautomator name it.
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 56.dp)
+                    .semantics { contentDescription = takePhotoLabel }.testTag("fl_today_capture"),
+            )
+        }
+        // The snackbar sits above the camera button instead of over it.
+        SnackbarHost(
+            snackbar,
+            Modifier.align(Alignment.BottomCenter).padding(bottom = if (showCapture) 88.dp else 0.dp).testTag("fl_today_snackbar"),
+        )
     }
+    if (state.pickingCaptureJob) {
+        OptionsSheet(
+            title = stringResource(R.string.today_capture_which),
+            options = state.capture.options.map { SheetOption(it.id, it.name, Icons.Rounded.Work) },
+            onDismiss = { onEvent(TodayEvent.DismissCapturePicker) },
+            onPick = { onEvent(TodayEvent.CaptureFor(it.id)) },
+        )
+    }
+}
+
+/** "Photo for which job?" without the sheet, for previews and the catalog. */
+@Composable
+fun TodayCaptureChooser(options: List<TodayJob>, onEvent: (TodayEvent) -> Unit) {
+    OptionsSheetContent(
+        stringResource(R.string.today_capture_which),
+        options.map { SheetOption(it.id, it.name, Icons.Rounded.Work) },
+    ) { onEvent(TodayEvent.CaptureFor(it.id)) }
 }
 
 @Composable
@@ -166,7 +223,8 @@ private fun TodayContent(state: TodayUiState, clock: TodayClock, onEvent: (Today
     // Jobs and people are list rows edge to edge (rules 7 and 8); the clock status is the one card (cr:fl-card-lists).
     LazyColumn(
         modifier.testTag("fl_today_list"),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+        // Room at the bottom so the last row clears the camera button.
+        contentPadding = PaddingValues(top = 8.dp, bottom = if (state.capture.available) 96.dp else 24.dp),
     ) {
         item { ClockCard(clock, { onEvent(TodayEvent.OpenClock) }, inset) }
         item { SectionHeading(stringResource(R.string.today_jobs)) }
@@ -188,6 +246,10 @@ private fun TodayContent(state: TodayUiState, clock: TodayClock, onEvent: (Today
                     modifier = Modifier.animateItem().testTag("fl_today_task_swipe_${task.id}"),
                 ) { TodayTaskRow(task, onEvent) }
             }
+        }
+        if (state.photos.isNotEmpty()) {
+            item(key = "photos-heading") { SectionHeading(stringResource(R.string.today_photos)) }
+            item(key = "photos") { RecentPhotos(state.photos, onEvent) }
         }
         if (state.role.isAdmin) {
             item { SectionHeading(stringResource(R.string.today_on_site)) }
@@ -221,6 +283,39 @@ private fun TodayTaskRow(task: TodayTask, onEvent: (TodayEvent) -> Unit) {
         onClick = { onEvent(TodayEvent.OpenTask(task.jobId, task.id)) },
         modifier = Modifier.fillMaxWidth().testTag("fl_today_task_${task.id}"),
     )
+}
+
+/** The newest job photos in one row; a tap opens the photo (rule 27: square tiles, 2 dp gaps). */
+@Composable
+private fun RecentPhotos(photos: List<TodayPhoto>, onEvent: (TodayEvent) -> Unit) {
+    LazyRow(
+        Modifier.fillMaxWidth().testTag("fl_today_photos"),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        items(photos, key = { it.id }) { photo -> RecentPhotoTile(photo) { onEvent(TodayEvent.OpenPhoto(photo.id)) } }
+    }
+}
+
+@Composable
+private fun RecentPhotoTile(photo: TodayPhoto, onOpen: () -> Unit) {
+    val description = photo.jobName?.let { stringResource(R.string.today_photo_description, it) } ?: stringResource(R.string.today_photo)
+    Box(
+        Modifier.size(104.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clickable(onClickLabel = null, onClick = onOpen)
+            .semantics { contentDescription = description }
+            .testTag("fl_today_photo_${photo.id}"),
+    ) {
+        if (photo.imagePath.isEmpty()) {
+            // Taken on another phone and not downloaded yet; the job's Photos tab fetches it.
+            Icon(
+                Icons.Rounded.CloudDownload, contentDescription = stringResource(R.string.photos_not_here),
+                Modifier.align(Alignment.Center).size(32.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            AsyncImage(model = File(photo.imagePath), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        }
+    }
 }
 
 @Composable

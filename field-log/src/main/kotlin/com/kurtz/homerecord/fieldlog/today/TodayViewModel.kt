@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.AssignmentEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.data.PunchEntity
 import com.kurtz.homerecord.core.model.JobTask
 import com.kurtz.homerecord.fieldlog.tasks.TaskUndo
@@ -36,6 +37,8 @@ class TodayDeps(
     val tasks: Flow<List<JobTask>> = flowOf(emptyList()),
     /** Ticks a task done or open again; false when nothing changed (JobTasks.setDone). */
     val setTaskDone: suspend (id: String, done: Boolean) -> Boolean = { _, _ -> false },
+    /** The company's newest job photos (PhotoDao.observeRecentForCompany); the mapper keeps live jobs' ones. */
+    val photos: Flow<List<PhotoEntity>> = flowOf(emptyList()),
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
     val ticks: Flow<Unit> = flow { while (true) { emit(Unit); kotlinx.coroutines.delay(30_000) } },
@@ -48,17 +51,18 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
     init {
         viewModelScope.launch { d.refreshMembers() }
         viewModelScope.launch {
-            val tasksAndTicks = combine(d.tasks, d.ticks) { t, _ -> t }
+            val tasksAndTicks = combine(d.tasks, d.photos, d.ticks) { t, ph, _ -> t to ph }
             combine(d.punches, d.members, d.jobs, d.assignments, tasksAndTicks) { p, m, j, a, t -> arrayOf(p, m, j, a, t) }
                 .collect { rows ->
                     @Suppress("UNCHECKED_CAST")
+                    val extra = rows[4] as Pair<List<JobTask>, List<PhotoEntity>>
                     val now = d.now()
                     _state.update { prev ->
                         TodayMapper.map(
                             prev, d.memberId, rows[0] as List<PunchEntity>, rows[1] as List<MemberEntity>,
                             rows[2] as List<JobEntity>, rows[3] as List<AssignmentEntity>,
                             Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString(), now,
-                            rows[4] as List<JobTask>,
+                            extra.first, extra.second,
                         )
                     }
                 }
@@ -96,6 +100,18 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
     }
 
     fun dismissTaskUndo() = _state.update { it.copy(taskUndo = null) }
+
+    /**
+     * The camera button: the job to shoot for when the answer is plain (TodayCapture), otherwise null and the
+     * "Photo for which job?" sheet opens.
+     */
+    fun startCapture(): String? {
+        val choice = _state.value.capture
+        if (choice.target == null && choice.options.isNotEmpty()) _state.update { it.copy(pickingCaptureJob = true) }
+        return choice.target
+    }
+
+    fun dismissCapturePicker() = _state.update { it.copy(pickingCaptureJob = false) }
 
     /** Sync status comes from the engine, not the database. */
     fun setSync(

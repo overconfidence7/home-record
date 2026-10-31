@@ -62,3 +62,34 @@ appId: com.kurtz.homerecord.fieldlog
 - assertNotVisible:
     id: fl_photos_empty
 - takeScreenshot: F08b-photos-today
+# SPEC FL-Today, AC-F24: Today shows the new photo under Recent photos; a tap opens it
+- back
+- tapOn:
+    id: fl_tab_today
+- scrollUntilVisible:
+    element:
+      id: "fl_today_photo_.*"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Recent photos"
+- takeScreenshot: F08b-today-recent-photos
+- tapOn:
+    id: "fl_today_photo_.*"
+- extendedWaitUntil:
+    visible:
+      id: fl_photo_body
+    timeout: 15000
+- back
+# AC-F24: the company has one job, so Today's camera button opens capture on it without asking
+- extendedWaitUntil:
+    visible:
+      id: fl_today_capture
+    timeout: 10000
+- tapOn:
+    id: fl_today_capture
+- extendedWaitUntil:
+    visible:
+      id: fl_capture_shutter
+    timeout: 15000
+- assertVisible: "Garage subpanel"
+- takeScreenshot: F08b-today-capture

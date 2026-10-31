@@ -391,6 +391,8 @@ class AppContainer(private val app: Application) {
             requestSync = syncCoordinator::requestSync,
             tasks = jobTasks.observeAssigned(membership.companyId, memberId),
             setTaskDone = jobTasks::setDone,
+            // A few more than the row shows, so photos on archived jobs can drop out and still fill it.
+            photos = db.photoDao().observeRecentForCompany(membership.companyId, com.kurtz.homerecord.fieldlog.today.TodayMapper.RECENT_PHOTOS * 2),
         )
 
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */

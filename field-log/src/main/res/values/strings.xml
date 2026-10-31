@@ -45,6 +45,10 @@
     <string name="today_jobs">My jobs today</string>
     <string name="today_no_jobs">Nothing scheduled for you today.</string>
     <string name="today_tasks">My tasks</string>
+    <string name="today_photos">Recent photos</string>
+    <string name="today_photo">Job photo</string>
+    <string name="today_photo_description">Photo from %1$s</string>
+    <string name="today_capture_which">Photo for which job?</string>
     <string name="today_on_site">On site now</string>
     <string name="today_on_site_empty">Nobody is clocked in.</string>
     <string name="today_on_site_line">%1$s since %2$s</string>

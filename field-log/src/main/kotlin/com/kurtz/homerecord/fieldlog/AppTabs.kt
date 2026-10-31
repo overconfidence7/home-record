@@ -109,6 +109,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                             nav.push(JobKey(jobId, tab = com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS.name))
                             if (gates?.canManageTasks(jobId) == true) nav.push(TaskFormKey(jobId, taskId))
                         },
+                        onCapture = { nav.push(CaptureKey(it)) },
+                        onOpenPhoto = { nav.push(PhotoKey(it)) },
                     )
                     if (memberId == null) {
                         val context = LocalContext.current

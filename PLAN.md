@@ -208,13 +208,14 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T034: FL-Clock screen: Clock in with job picker, GPS fix (FusedLocationProvider, while-in-use, 5 s cap), far-from-job reason sheet, Break / Switch / Clock out, elapsed ticker, permission explanation and no-GPS path, "My timesheet" week view (acceptance: AC-F8, AC-F10, AC-F18)
   - [x] T034a: `LocationProvider` (Fused, 5 s cap) in :core and `ClockController` (clock in, break, switch, out, far reason, no-location and require-GPS paths) with tests (AC-F8, AC-F10, AC-F18)
   - [x] T034b: FL-Clock screen on the Clock tab (job picker, permission explanation, far-from-job sheet, GPS-required Settings prompt, elapsed ticker, My timesheet week view) with ScreenCatalog, screenshots, F04 flow
-- [ ] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
+- [x] T035: FL-Today: clock status card, today's jobs for me, my tasks due (placeholder until T044), recent photos, capture FAB; Owner "Who's on site now" with map pin links; clock widget 2×2 (acceptance: AC-F16, AC-F17, Today shell)
   - [x] T035a: `OnSiteBuilder` in :core (open shifts to "Who's on site" rows with clock-in pin) with tests (AC-F16)
   - [x] T035b: FL-Today screen (clock status card opening the Clock tab, my jobs today, Owner/Office on-site list with map pin links), TodayMapper/ViewModel, ScreenCatalog, screenshots, F05 flow (AC-F16)
   - [x] T035c1: Today refreshes the cached team list on open (`TodayDeps.refreshMembers`)
   - [x] T035c2: clock widget 2x2 with Glance (AC-F17)
-  - [ ] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
+  - [x] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
     - note 2026-10-31: the "my tasks due" part is done by T044c; capture FAB and recent photos remain
+    - note 2026-10-31: capture FAB ("Take a photo": the clocked-in job, my only job today or the only live job, otherwise "Photo for which job?") and Recent photos (12 newest on live jobs) done (AC-F24)
 - [x] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
   - [x] T036a: `CrewClock` (one fix, one IN punch per selected member with `clockedInBy`, skips people already in), `TimesheetApprovals` + `WeekKey`, edits refused in an approved week (AC-F11, AC-F14)
   - [x] T036b: crew clock-in UI for leads (multi-select on the Clock tab) with ScreenCatalog, screenshots, flow (AC-F11)
