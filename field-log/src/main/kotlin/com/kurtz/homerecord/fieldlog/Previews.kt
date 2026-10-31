@@ -198,6 +198,31 @@ fun TodaySyncRefusedPreview() = Frame {
     )
 }
 
+private val TODAY_DAY = java.time.LocalDate.of(2025, 10, 25)
+
+/** Crew at work with two tasks: one overdue from earlier in the week, one due today (AC-F34). */
+@ThemePreviews
+@Composable
+fun TodayMyTasksPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Crew, hasJobs = true, jobs = todayJobs.take(1),
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(
+                com.kurtz.homerecord.core.punch.ClockStatus.Working("j1", TODAY_NOW - 2 * 3600_000L), "Kitchen Remodel", TODAY_NOW,
+            ),
+            tasks = listOf(
+                com.kurtz.homerecord.fieldlog.today.TodayTask(
+                    "t1", "j2", "Replace GFCI by the back door", "Deck Rebuild", TODAY_DAY.minusDays(3), com.kurtz.homerecord.core.model.TaskDue.OVERDUE,
+                ),
+                com.kurtz.homerecord.fieldlog.today.TodayTask(
+                    "t2", "j1", "Label the new kitchen circuits in the panel", "Kitchen Remodel", TODAY_DAY, com.kurtz.homerecord.core.model.TaskDue.TODAY,
+                ),
+            ),
+        ),
+        onEvent = {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun TodayCrewNothingScheduledPreview() = Frame {

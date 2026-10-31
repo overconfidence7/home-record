@@ -44,6 +44,7 @@
     <string name="today_empty_admin">Add a job or invite your crew. Anyone with your code can join from their own phone.</string>
     <string name="today_jobs">My jobs today</string>
     <string name="today_no_jobs">Nothing scheduled for you today.</string>
+    <string name="today_tasks">My tasks</string>
     <string name="today_on_site">On site now</string>
     <string name="today_on_site_empty">Nobody is clocked in.</string>
     <string name="today_on_site_line">%1$s since %2$s</string>

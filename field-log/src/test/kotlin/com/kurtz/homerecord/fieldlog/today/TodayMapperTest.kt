@@ -68,4 +68,30 @@ class TodayMapperTest {
         val state = TodayMapper.map(TodayUiState("Kurtz Electric", CompanyRole.Owner), "me", emptyList(), members, emptyList(), emptyList(), "2026-10-25", now)
         assertThat(state.hasJobs).isFalse()
     }
+
+    private fun task(id: String, job: String, due: String?, assignee: String = "me", done: Boolean = false, order: Int = 0) =
+        com.kurtz.homerecord.core.model.JobTask(
+            id = id, jobId = job, title = "Task $id", assigneeId = assignee, due = due?.let(java.time.LocalDate::parse), done = done, sortOrder = order,
+        )
+
+    // AC-F34: My tasks shows my open tasks overdue (oldest first) then due today, with the job's name; not later,
+    // undated, done, someone else's or on an archived job.
+    @Test fun myTasksAreOverdueThenDueTodayWithTheJobName() {
+        val tasks = listOf(
+            task("today", "j1", "2026-10-25"),
+            task("late2", "j2", "2026-10-24"),
+            task("late1", "j1", "2026-10-20"),
+            task("later", "j1", "2026-10-26"),
+            task("undated", "j1", null),
+            task("done", "j1", "2026-10-25", done = true),
+            task("theirs", "j1", "2026-10-25", assignee = "dev"),
+            task("archived", "j3", "2026-10-25"),
+        )
+        val state = TodayMapper.map(TodayUiState("Kurtz Electric", CompanyRole.Crew), "me", emptyList(), members, jobs, emptyList(), "2026-10-25", now, tasks)
+        assertThat(state.tasks.map { it.id }).containsExactly("late1", "late2", "today").inOrder()
+        assertThat(state.tasks.map { it.jobName }).containsExactly("Kitchen Remodel", "Deck Rebuild", "Kitchen Remodel").inOrder()
+        assertThat(state.tasks.map { it.dueKind }).containsExactly(
+            com.kurtz.homerecord.core.model.TaskDue.OVERDUE, com.kurtz.homerecord.core.model.TaskDue.OVERDUE, com.kurtz.homerecord.core.model.TaskDue.TODAY,
+        ).inOrder()
+    }
 }

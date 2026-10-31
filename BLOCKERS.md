@@ -13,6 +13,7 @@
 - (CR2p1) Production API domain: release builds call `https://api.homerecord.app` (BuildConfig.API_BASE_URL). Point that domain at the deployed Worker (Cloudflare custom domain), or give the builder the real https URL to put in `api.releaseBaseUrl` / the `API_RELEASE_BASE_URL` environment variable. Until then release builds install and launch but sign-in and sync fail with a network error.
 
 ## Decisions to confirm
+- 2026-10-31 (T044c) My tasks on Today: tapping a task opens its job on the Tasks tab, and for those who manage that job's tasks (Owner, Office, the job's Lead) the task form opens on top; Crew land on the Tasks tab, where their task is listed, since they can't edit tasks. The "My tasks" section is left out entirely when nothing is overdue or due today, and tasks on archived jobs are not shown (done and upcoming jobs still count).
 
 - 2026-10-31 T044b1: Crew can't open a task, only tick it (the row shows who, due, room and the note). A task's photo is picked from the job's photos, not taken from the form. The tasks flow is F11-tasks.yaml (walkthrough F11), not F10 as PLAN T044b says.
 

@@ -66,6 +66,11 @@ fun TodayCrewNothingScheduledScreenshot() = TodayCrewNothingScheduledPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun TodayMyTasksScreenshot() = TodayMyTasksPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun MoreOwnerScreenshot() = MoreOwnerPreview()
 
 @PreviewTest

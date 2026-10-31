@@ -214,6 +214,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T035c1: Today refreshes the cached team list on open (`TodayDeps.refreshMembers`)
   - [x] T035c2: clock widget 2x2 with Glance (AC-F17)
   - [ ] T035c3: capture FAB and recent photos (after T039/T040), my tasks due (after T044)
+    - note 2026-10-31: the "my tasks due" part is done by T044c; capture FAB and recent photos remain
 - [x] T036: Lead crew clock-in and FL-Timesheets: multi-select crew punch, week per person with flags, edit with reason + audit, Approve person/all with lock, crew-side "Approved" (acceptance: AC-F11, AC-F14)
   - [x] T036a: `CrewClock` (one fix, one IN punch per selected member with `clockedInBy`, skips people already in), `TimesheetApprovals` + `WeekKey`, edits refused in an approved week (AC-F11, AC-F14)
   - [x] T036b: crew clock-in UI for leads (multi-select on the Clock tab) with ScreenCatalog, screenshots, flow (AC-F11)
@@ -264,7 +265,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T044b: FL-Tasks on the job's Tasks tab: open and done lists, All / Punch list filter, swipe to complete with Undo snackbar, drag to reorder, full-screen task form (title, assignee, due, room, photo, note, punch), Crew sees only their tasks and can only tick them; ScreenCatalog, screenshots, F10 flow (AC-F34)
     - [x] T044b1: Tasks tab list (open in crew order, Done section, All / Punch list chips, tick done with Undo snackbar, Crew see and tick only their own), Add task FAB and full-screen task form (title, who, due, room, job photo, note, punch; edit and delete), ScreenCatalog, screenshots, F11 flow (AC-F34)
     - [x] T044b2: swipe a row to complete with Undo and drag to reorder open tasks (`sh.calvin.reorderable`, `JobTasks.move`), extend F11 (AC-F34)
-  - [ ] T044c: My tasks on Today (overdue and due today, swipe complete with Undo, tap opens the task) (AC-F34)
+  - [x] T044c: My tasks on Today (overdue and due today, swipe complete with Undo, tap opens the task) (AC-F34)
   - [ ] T044d: pin a task on the floor plan (FL-House) and on a plan file page; the pin opens the task (AC-F35)
 - [ ] T045: Log PDF and Send: logo header, sections, photos; share sheet and email to client/office; Sent status, re-send (acceptance: AC-F33)
 - [ ] T046: Offline hardening: airplane-mode pass over every FL flow, pending count on Today, reconnect sync within 60 s, conflict log viewer under Settings (acceptance: AC-F52, AC-F55)

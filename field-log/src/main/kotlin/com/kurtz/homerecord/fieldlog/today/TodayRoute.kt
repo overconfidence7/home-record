@@ -21,6 +21,7 @@ class TodayNavigation(
     val onOpenClock: () -> Unit = {},
     val onOpenJob: (String) -> Unit = {},
     val onAddJob: () -> Unit,
+    val onOpenTask: (jobId: String, taskId: String) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -35,7 +36,18 @@ fun TodayRoute(
     val vm = viewModel<TodayViewModel>(factory = viewModelFactory { initializer { TodayViewModel(deps()) } })
     LaunchedEffect(syncPhase, pending, refused) { vm.setSync(syncPhase, pending, refused) }
     val context = LocalContext.current
-    TodayScreen(vm.state.collectAsState().value, onEvent = { todayEvent(it, navigation, context, vm::refresh) }, modifier)
+    TodayScreen(
+        vm.state.collectAsState().value,
+        onEvent = { e ->
+            when (e) {
+                is TodayEvent.CompleteTask -> vm.completeTask(e.taskId)
+                TodayEvent.UndoTask -> vm.undoTask()
+                TodayEvent.DismissTaskUndo -> vm.dismissTaskUndo()
+                else -> todayEvent(e, navigation, context, vm::refresh)
+            }
+        },
+        modifier,
+    )
 }
 
 /** Handles a Today event outside the screen; [onRefresh] is the ViewModel's, or nothing before the member is known. */
@@ -48,6 +60,9 @@ fun todayEvent(event: TodayEvent, navigation: TodayNavigation, context: Context,
         is TodayEvent.OpenJob -> navigation.onOpenJob(event.jobId)
         TodayEvent.AddJob -> navigation.onAddJob()
         TodayEvent.Refresh -> onRefresh()
+        is TodayEvent.OpenTask -> navigation.onOpenTask(event.jobId, event.taskId)
+        // Ticking a task needs the ViewModel; TodayRoute handles these before they get here.
+        is TodayEvent.CompleteTask, TodayEvent.UndoTask, TodayEvent.DismissTaskUndo -> Unit
         is TodayEvent.OpenPin -> {
             val lat = event.entry.lat ?: return
             val lng = event.entry.lng ?: return

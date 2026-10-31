@@ -374,3 +374,9 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - `sh.calvin.reorderable:reorderable` 3.1.0 (approved in CLAUDE.md; latest stable on the Maven Central mirror, published April 2026) is back in the catalog for Field Log only.
 - Swiping an open task either way marks it done (same Undo snackbar as the check box); done tasks and tasks this person cannot tick do not swipe.
 - Managers (Owner, Office, the job's Lead) drag an open task by its trailing handle; the handle replaces the chevron on open rows, the row still opens on tap. The new order is saved once, when the drag ends (`JobTasks.move`, only moved rows sync). No reordering on the Punch list filter, since it shows only part of the list. TalkBack gets Move up / Move down custom actions on each row.
+
+## 2026-10-31 — T044c My tasks on Today
+- Today lists my open tasks overdue (oldest due day first) then due today, under "My tasks" after "My jobs today"; no section when none are due; archived jobs' tasks are left out.
+- Check box or a swipe either way ticks a task done with the same "Done: … · Undo" snackbar as the Tasks tab; the swipe is one shared `SwipeToComplete` in the tasks package used by both screens.
+- A tap opens the job on its Tasks tab, plus the task form on top for those who manage the job's tasks (RoleGates.canManageTasks); Crew can't edit tasks, so they get the tab.
+- `RecordListItem` gains `headlineMaxLines` (default 2, nothing else changes); task rows on Today and the Tasks tab allow 6 so long titles don't clip at 200% (rule 32).

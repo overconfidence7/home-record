@@ -378,6 +378,8 @@ class AppContainer(private val app: Application) {
             assignments = db.assignmentDao().observeForCompany(membership.companyId),
             refreshMembers = { refreshMembers(membership.companyId) },
             requestSync = syncCoordinator::requestSync,
+            tasks = jobTasks.observeAssigned(membership.companyId, memberId),
+            setTaskDone = jobTasks::setDone,
         )
 
     /** Caches the team list locally so crew can be picked offline; the list is not synced from here (the server owns members). */

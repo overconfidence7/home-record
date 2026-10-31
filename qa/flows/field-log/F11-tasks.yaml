@@ -1,6 +1,7 @@
-# Walkthrough F11 (first part, T044b): Tasks tab on a job: empty state, add tasks through the full-screen form,
-# Punch list filter, tick a task done and Undo it from the snackbar (AC-F34). My tasks on Today (T044c) and
-# pinning on the plan (T044d) extend this flow when they land.
+# Walkthrough F11 (T044b, T044c): Tasks tab on a job: empty state, add tasks through the full-screen form,
+# Punch list filter, tick a task done and Undo it from the snackbar; a task assigned to me and due today shows
+# under My tasks on Today, swipes done with Undo and opens in the form (AC-F34). Pinning on the plan (T044d)
+# extends this flow when it lands.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -106,6 +107,60 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_close
 - assertVisible:
     id: fl_tasks_list
+# AC-F34: a third task assigned to me (the only person after "Nobody yet") and due today
+- tapOn:
+    id: fl_tasks_add
+- tapOn:
+    id: fl_task_form_title
+- inputText: "Label the panel"
+- hideKeyboard
+- tapOn:
+    id: fl_task_form_assignee
+- tapOn:
+    id: "fl_sheet_.*"
+    index: 1
+- tapOn:
+    id: fl_task_form_due
+- tapOn: "Today, .+"
+- tapOn: "OK"
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Label the panel"
+    timeout: 10000
+# AC-F34: My tasks on Today shows it with its job and "Due today"
+- tapOn:
+    id: fl_back
+- tapOn: "Today"
+- scrollUntilVisible:
+    element: "Label the panel"
+    direction: DOWN
+- assertVisible: "My tasks"
+- assertVisible: "Hale kitchen · Due today"
+# AC-F34: swipe completes it with Undo; Undo brings it back
+- swipe:
+    from:
+      text: "Label the panel"
+    direction: RIGHT
+- extendedWaitUntil:
+    visible: "Done: Label the panel"
+    timeout: 10000
+- assertNotVisible: "Hale kitchen · Due today"
+- tapOn: "Undo"
+- extendedWaitUntil:
+    visible: "Hale kitchen · Due today"
+    timeout: 10000
+# AC-F34: tap opens the task (the owner manages it, so the form over the job's Tasks tab)
+- tapOn: "Label the panel"
+- extendedWaitUntil:
+    visible: "Edit task"
+    timeout: 10000
+- tapOn:
+    id: fl_close
+- extendedWaitUntil:
+    visible:
+      id: fl_tasks_list
+    timeout: 10000
 # AC-F36: the task changes sync; the backend accepts them, so nothing is listed as refused
 - tapOn:
     id: fl_back

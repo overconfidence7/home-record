@@ -94,6 +94,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     val pending by container.syncEngine.pendingCount.collectAsState(0)
                     val refused by container.syncEngine.refused.collectAsState(emptyList())
                     val clearRefused: () -> Unit = { scope.launch { container.syncEngine.clearRefused() } }
+                    val gates by container.roleGates.collectAsState(null)
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
                     val navigation = com.kurtz.homerecord.fieldlog.today.TodayNavigation(
@@ -103,6 +104,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         onOpenClock = { nav.selectTab("clock") },
                         onOpenJob = { nav.push(JobKey(it)) },
                         onAddJob = { nav.push(JobEditKey(null)) },
+                        // The task's job opens on Tasks; those who manage the job's tasks land in the task form over it (AC-F34).
+                        onOpenTask = { jobId, taskId ->
+                            nav.push(JobKey(jobId, tab = com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS.name))
+                            if (gates?.canManageTasks(jobId) == true) nav.push(TaskFormKey(jobId, taskId))
+                        },
                     )
                     if (memberId == null) {
                         val context = LocalContext.current

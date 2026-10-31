@@ -212,6 +212,12 @@ private fun moveActions(id: String, index: Int, last: Int, onEvent: (TasksEvent)
 @Composable
 private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @Composable () -> Unit) {
     if (!row.canTick || row.done) { content(); return }
+    SwipeToComplete({ onEvent(TasksEvent.SetDone(row.id, true)) }, Modifier.testTag("fl_tasks_swipe_${row.id}"), content)
+}
+
+/** A row that swipes either way to complete it: the Tasks tab and My tasks on Today (AC-F34). */
+@Composable
+fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val swipe = rememberSwipeToDismissBoxState()
     val scope = rememberCoroutineScope()
     SwipeToDismissBox(
@@ -226,10 +232,10 @@ private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @C
             }
         },
         onDismiss = {
-            onEvent(TasksEvent.SetDone(row.id, true))
+            onComplete()
             scope.launch { swipe.reset() }
         },
-        modifier = Modifier.testTag("fl_tasks_swipe_${row.id}"),
+        modifier = modifier,
     ) { content() }
 }
 
@@ -254,6 +260,7 @@ private fun TaskListRow(
         headline = row.title,
         supporting = supporting(row),
         supportingMaxLines = 8,
+        headlineMaxLines = 6,
         leading = {
             Checkbox(
                 checked = row.done,

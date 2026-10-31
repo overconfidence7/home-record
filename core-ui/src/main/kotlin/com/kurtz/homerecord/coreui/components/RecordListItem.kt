@@ -24,6 +24,8 @@ fun RecordListItem(
     modifier: Modifier = Modifier,
     supporting: String? = null,
     supportingMaxLines: Int = 2,
+    /** Rows whose title is the whole point (a task) let it wrap further at 200% text (rule 32). */
+    headlineMaxLines: Int = 2,
     overline: String? = null,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
@@ -36,7 +38,7 @@ fun RecordListItem(
         Modifier.combinedClickable(onClickLabel = onClickLabel, onClick = { onClick?.invoke() }, onLongClick = onLongClick)
     } else Modifier
     ListItem(
-        headlineContent = { Text(headline, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge) },
+        headlineContent = { Text(headline, maxLines = headlineMaxLines, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge) },
         supportingContent = supporting?.let { { Text(it, maxLines = supportingMaxLines, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) } },
         overlineContent = overline?.let { { Text(it, style = MaterialTheme.typography.labelMedium) } },
         leadingContent = leading,

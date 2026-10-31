@@ -1,6 +1,18 @@
 package com.kurtz.homerecord.fieldlog.today
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.semantics.contentDescription
+import com.kurtz.homerecord.core.model.TaskDue
+import com.kurtz.homerecord.fieldlog.tasks.SwipeToComplete
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,6 +71,16 @@ data class TodayClock(val status: ClockStatus, val jobName: String?, val now: Lo
 
 data class TodayJob(val id: String, val name: String, val address: String?)
 
+/** One of my open tasks due today or overdue, with the job it belongs to (AC-F34). */
+data class TodayTask(
+    val id: String,
+    val jobId: String,
+    val title: String,
+    val jobName: String?,
+    val due: java.time.LocalDate?,
+    val dueKind: com.kurtz.homerecord.core.model.TaskDue,
+)
+
 data class TodayUiState(
     val companyName: String,
     val role: CompanyRole,
@@ -74,6 +96,10 @@ data class TodayUiState(
     val onSite: List<OnSiteEntry> = emptyList(),
     /** A pull to refresh is running (AC-F16). */
     val refreshing: Boolean = false,
+    /** My tasks: overdue first, then due today (AC-F34). The section is left out when nothing is due. */
+    val tasks: List<TodayTask> = emptyList(),
+    /** A task just ticked done from Today; the snackbar offers Undo (AC-F34). */
+    val taskUndo: com.kurtz.homerecord.fieldlog.tasks.TaskUndo? = null,
 )
 
 /**
@@ -91,11 +117,37 @@ sealed interface TodayEvent {
     data object ClearRefused : TodayEvent
     /** Open the member's last punch location in a maps app (AC-F16). */
     data class OpenPin(val entry: OnSiteEntry) : TodayEvent
+    /** Tick one of my tasks done (check box or swipe); the snackbar offers Undo (AC-F34). */
+    data class CompleteTask(val taskId: String) : TodayEvent
+    data object UndoTask : TodayEvent
+    data object DismissTaskUndo : TodayEvent
+    /** Open a task: its job's Tasks tab, and the task form for those who manage it (AC-F34). */
+    data class OpenTask(val jobId: String, val taskId: String) : TodayEvent
 }
 
 @Composable
-fun TodayScreen(state: TodayUiState, onEvent: (TodayEvent) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxSize().statusBarsPadding()) {
+fun TodayScreen(
+    state: TodayUiState,
+    onEvent: (TodayEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    snackbar: SnackbarHostState = remember { SnackbarHostState() },
+) {
+    val undoMessage = state.taskUndo?.let { stringResource(R.string.tasks_done_snackbar, it.title) }
+    val undoLabel = stringResource(R.string.tasks_undo)
+    LaunchedEffect(state.taskUndo) {
+        if (undoMessage == null) return@LaunchedEffect
+        val result = snackbar.showSnackbar(undoMessage, actionLabel = undoLabel, withDismissAction = true, duration = SnackbarDuration.Long)
+        onEvent(if (result == SnackbarResult.ActionPerformed) TodayEvent.UndoTask else TodayEvent.DismissTaskUndo)
+    }
+    Box(modifier.fillMaxSize()) {
+        TodayColumn(state, onEvent)
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).testTag("fl_today_snackbar"))
+    }
+}
+
+@Composable
+private fun TodayColumn(state: TodayUiState, onEvent: (TodayEvent) -> Unit) {
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
         SyncStatus(
             state.syncPhase, state.pendingChanges, state.refusedChanges,
             { onEvent(TodayEvent.SyncNow) }, { onEvent(TodayEvent.ClearRefused) }, Modifier.padding(horizontal = 16.dp),
@@ -128,12 +180,47 @@ private fun TodayContent(state: TodayUiState, clock: TodayClock, onEvent: (Today
                 modifier = Modifier.fillMaxWidth().testTag("fl_today_job_${job.id}"),
             )
         }
+        if (state.tasks.isNotEmpty()) {
+            item(key = "tasks-heading") { SectionHeading(stringResource(R.string.today_tasks)) }
+            items(state.tasks, key = { "task-${it.id}" }) { task ->
+                SwipeToComplete(
+                    onComplete = { onEvent(TodayEvent.CompleteTask(task.id)) },
+                    modifier = Modifier.animateItem().testTag("fl_today_task_swipe_${task.id}"),
+                ) { TodayTaskRow(task, onEvent) }
+            }
+        }
         if (state.role.isAdmin) {
             item { SectionHeading(stringResource(R.string.today_on_site)) }
             if (state.onSite.isEmpty()) item { Text(stringResource(R.string.today_on_site_empty), inset.padding(vertical = 8.dp).testTag("fl_today_on_site_empty"), style = MaterialTheme.typography.bodyMedium) }
             items(state.onSite, key = { "site-${it.memberId}" }) { row -> OnSiteRow(row) { onEvent(TodayEvent.OpenPin(row)) } }
         }
     }
+}
+
+@Composable
+private fun TodayTaskRow(task: TodayTask, onEvent: (TodayEvent) -> Unit) {
+    val checkLabel = stringResource(R.string.tasks_mark_done, task.title)
+    val due = when (task.dueKind) {
+        TaskDue.OVERDUE -> task.due?.let { stringResource(R.string.tasks_due_overdue, it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))) }
+        TaskDue.TODAY -> stringResource(R.string.tasks_due_today)
+        else -> null
+    }
+    RecordListItem(
+        headline = task.title,
+        supporting = listOfNotNull(task.jobName, due).joinToString(" · ").takeIf { it.isNotEmpty() },
+        supportingMaxLines = 4,
+        headlineMaxLines = 6,
+        leading = {
+            Checkbox(
+                checked = false,
+                onCheckedChange = { if (it) onEvent(TodayEvent.CompleteTask(task.id)) },
+                modifier = Modifier.semantics { contentDescription = checkLabel }.testTag("fl_today_task_check_${task.id}"),
+            )
+        },
+        trailing = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
+        onClick = { onEvent(TodayEvent.OpenTask(task.jobId, task.id)) },
+        modifier = Modifier.fillMaxWidth().testTag("fl_today_task_${task.id}"),
+    )
 }
 
 @Composable

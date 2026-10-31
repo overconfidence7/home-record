@@ -6,7 +6,10 @@ import com.kurtz.homerecord.core.data.AssignmentEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.model.JobTask
+import com.kurtz.homerecord.fieldlog.tasks.TaskUndo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +32,10 @@ class TodayDeps(
     val refreshMembers: suspend () -> Unit = {},
     /** Asks the sync engine for a pass now; it runs on its own and reports through the sync chip. */
     val requestSync: () -> Unit = {},
+    /** Tasks assigned to me on the company's jobs; the mapper keeps those overdue or due today (AC-F34). */
+    val tasks: Flow<List<JobTask>> = flowOf(emptyList()),
+    /** Ticks a task done or open again; false when nothing changed (JobTasks.setDone). */
+    val setTaskDone: suspend (id: String, done: Boolean) -> Boolean = { _, _ -> false },
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
     val ticks: Flow<Unit> = flow { while (true) { emit(Unit); kotlinx.coroutines.delay(30_000) } },
@@ -41,7 +48,8 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
     init {
         viewModelScope.launch { d.refreshMembers() }
         viewModelScope.launch {
-            combine(d.punches, d.members, d.jobs, d.assignments, d.ticks) { p, m, j, a, _ -> arrayOf(p, m, j, a) }
+            val tasksAndTicks = combine(d.tasks, d.ticks) { t, _ -> t }
+            combine(d.punches, d.members, d.jobs, d.assignments, tasksAndTicks) { p, m, j, a, t -> arrayOf(p, m, j, a, t) }
                 .collect { rows ->
                     @Suppress("UNCHECKED_CAST")
                     val now = d.now()
@@ -50,6 +58,7 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
                             prev, d.memberId, rows[0] as List<PunchEntity>, rows[1] as List<MemberEntity>,
                             rows[2] as List<JobEntity>, rows[3] as List<AssignmentEntity>,
                             Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString(), now,
+                            rows[4] as List<JobTask>,
                         )
                     }
                 }
@@ -71,6 +80,22 @@ class TodayViewModel(private val d: TodayDeps) : ViewModel() {
             }
         }
     }
+
+    /** Ticks one of my tasks done from Today; the snackbar then offers Undo (AC-F34). */
+    fun completeTask(id: String) {
+        val title = _state.value.tasks.firstOrNull { it.id == id }?.title ?: return
+        viewModelScope.launch {
+            if (d.setTaskDone(id, true)) _state.update { it.copy(taskUndo = TaskUndo(id, title)) }
+        }
+    }
+
+    fun undoTask() {
+        val undo = _state.value.taskUndo ?: return
+        _state.update { it.copy(taskUndo = null) }
+        viewModelScope.launch { d.setTaskDone(undo.id, false) }
+    }
+
+    fun dismissTaskUndo() = _state.update { it.copy(taskUndo = null) }
 
     /** Sync status comes from the engine, not the database. */
     fun setSync(
