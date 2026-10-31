@@ -168,7 +168,18 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.photos.PhotoDetailRoute(container.photoDetailDeps(key.photoId), onAnnotate = { nav.push(AnnotateKey(key.photoId)) }, onBack = nav::pop)
         }
         entry<FileKey> { key ->
-            com.kurtz.homerecord.fieldlog.files.FileViewerRoute(container.fileViewerDeps(key.fileId), onBack = nav::pop)
+            com.kurtz.homerecord.fieldlog.files.FileViewerRoute(
+                container.fileViewerDeps(key.fileId), onBack = nav::pop,
+                onMarkUp = { nav.push(MarkupKey(it)) }, onOpenVersion = { nav.push(FileKey(it)) },
+            )
+        }
+        entry<MarkupKey> { key ->
+            val author = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+            com.kurtz.homerecord.fieldlog.files.MarkupRoute(
+                container.markupDeps(key.fileId, author), onClose = nav::pop,
+                // The new version replaces the one marked up: close the editor and that viewer, open the new version.
+                onSaved = { id -> nav.pop(); nav.pop(); nav.push(FileKey(id)) },
+            )
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)

@@ -115,6 +115,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] Q005b: Android half of Q005: debug `<pkg>.qa.SEED` receivers (`regression`, `reset`) for both apps (Field Log seed signs in as the dev-backend owner; its job arrives with T018)
 - [x] Q005c: `qa/fixtures/` files per its README (images and plan.pdf), then tick Q005
 - [ ] Q006: First green run: read `origin/qa-results:latest/summary.md` and the `## QA auto` entries in REVIEW.md, fix every Critical and Major the suite found (app bugs, flow mistakes, coverage gaps), and record in PROGRESS.md which stages still skip and why (acceptance: newest `## QA auto` entry ends with `New issues: 0`)
+  - note 2026-10-31: every Critical and Major of the last run (6a0e6db4) is fixed; the only stage that still skips is the handoff job (no cross-app flows until the handoff tasks); acceptance waits on the next suite run of `build` HEAD
 
 ## M1 House model
 
@@ -247,7 +248,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T041b2b: upload progress, Available offline download (opens in airplane mode), storage in Settings with Free up (AC-F19, AC-F20)
 - [ ] T042: PDF markup and document scanner: `MarkupCanvas` (pen, arrow, rectangle, text, highlight) → new version with author/time, version history; ML Kit document scanner to PDF into Files (acceptance: AC-F21, AC-F22)
   - [x] T042a: `PdfMarkup` in :core (marks saved as a new file version with author and time, original untouched, version history, list shows latest only) (AC-F21)
-  - [ ] T042b: MarkupCanvas screen + `MarkedPdfWriter` (PdfDocument over PdfRenderer pages) + version history sheet on FL-File (AC-F21)
+  - [x] T042b: MarkupCanvas screen + `MarkedPdfWriter` (PdfDocument over PdfRenderer pages) + version history sheet on FL-File (AC-F21)
   - [ ] T042c: ML Kit document scanner to PDF into Files (AC-F22)
 - [ ] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
 - [ ] T043: Daily log: `LogAssembler` `[unit]`, FL-Log sections (crew/hours, work done, photos, tasks, materials, delays, weather, visitors, safety, client notes), delay picker, backend `/weather` proxy (Open-Meteo) with cache, "No weather (offline)" (acceptance: AC-F30, AC-F31, AC-F32, AC-B32)

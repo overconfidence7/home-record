@@ -229,7 +229,20 @@ class AppContainer(private val app: Application) {
 
     fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(
         fileId, db.jobFileDao(), ensureOnPhone = jobFileTransfers::ensureOnPhone,
+        history = pdfMarkup::history, memberName = { db.memberDao().get(it)?.name },
+        canManage = { jobId -> roleGates.map { it.canManageFiles(jobId) } },
     )
+
+    /** Marks on a PDF are saved as a new version in filesDir/media and queued for upload (AC-F21). */
+    val pdfMarkup by lazy {
+        com.kurtz.homerecord.core.photo.PdfMarkup(
+            db, com.kurtz.homerecord.fieldlog.files.AndroidMarkedPdfWriter,
+            mediaDir = { java.io.File(app.filesDir, "media").also { it.mkdirs() }.path },
+            queueUpload = ::uploadMedia, companyId = { company.current?.companyId }, onChange = ::recordChange,
+        )
+    }
+
+    fun markupDeps(fileId: String, author: String?) = com.kurtz.homerecord.fieldlog.files.MarkupDeps(fileId, db.jobFileDao(), pdfMarkup, author)
 
     val photoEdits by lazy { com.kurtz.homerecord.core.photo.PhotoEdits(db, onChange = ::recordChange) }
 

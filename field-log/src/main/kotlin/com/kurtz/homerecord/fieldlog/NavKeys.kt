@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class PhotoKey(val photoId: String) : NavKey
 @Serializable data class FileKey(val fileId: String) : NavKey
+@Serializable data class MarkupKey(val fileId: String) : NavKey
 @Serializable data class AnnotateKey(val photoId: String) : NavKey
 
 @Serializable data class CaptureKey(val jobId: String) : NavKey
