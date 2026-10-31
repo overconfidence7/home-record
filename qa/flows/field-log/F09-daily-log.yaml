@@ -1,6 +1,6 @@
 # Walkthrough F9: today's daily log on the job's Log tab writes itself from the day (a typed note becomes Work done),
 # says why there is no weather, takes a delay with a reason and note, and keeps a typed section (AC-F30, AC-F31, AC-F32).
-# Send and the PDF arrive with T045.
+# The weather is corrected by hand on its full-screen form (T043d2). Send and the PDF arrive with T045.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -122,3 +122,40 @@ appId: com.kurtz.homerecord.fieldlog
     direction: DOWN
 - assertVisible: "Township inspector"
 - takeScreenshot: F09-daily-log
+# AC-F30: the weather is editable: typed on its full-screen form, it shows on the log marked as typed in by hand
+- scrollUntilVisible:
+    element:
+      id: fl_log_weather_edit
+    direction: DOWN
+- tapOn:
+    id: fl_log_weather_edit
+- extendedWaitUntil:
+    visible:
+      id: fl_log_weather_form
+    timeout: 10000
+- tapOn:
+    id: fl_log_weather_cond_showers
+- scrollUntilVisible:
+    element:
+      id: fl_log_weather_high
+    direction: DOWN
+- tapOn:
+    id: fl_log_weather_high
+- inputText: "61"
+- tapOn:
+    id: fl_log_weather_low
+- inputText: "44"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible:
+      id: fl_log_list
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_log_weather
+    direction: DOWN
+- assertVisible: "Showers, high 61°, low 44°"
+- assertVisible: ".*Typed in by hand.*"
+- takeScreenshot: F09-daily-log-weather

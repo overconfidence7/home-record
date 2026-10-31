@@ -6,11 +6,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.hasTestTag
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.log.WeatherStatus
 import com.kurtz.homerecord.core.model.DelayReason
+import com.kurtz.homerecord.core.model.LogWeather
+import com.kurtz.homerecord.core.model.LogLineKind
 import com.kurtz.homerecord.core.model.LogDelay
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.theme.Brand
@@ -83,5 +86,56 @@ class LogScreenTest {
         rule.onNodeWithTag("fl_log_delay_save").assertIsNotEnabled()
         rule.onNodeWithTag("fl_log_delay_reason_inspection").performClick()
         assertThat(events).containsExactly(LogEvent.EditorReason(DelayReason.INSPECTION))
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun leadCanLeaveRecordLinesOutPutThemBackAndCorrectTheWeather() {
+        val events = mutableListOf<LogEvent>()
+        show(
+            ready.copy(
+                photos = listOf(LogPhotoThumb("ph1", "")),
+                tasksDone = listOf(LogLine("t1", "Level the sink base")),
+                materials = listOf(LogLine("ma1", "Home Depot, Electrical", "$212.48")),
+                dropped = mapOf(LogLineKind.TASK to 2),
+                weather = LogWeather(highF = 61, lowF = 44, conditions = "showers"),
+                weatherEdited = true,
+                weatherStatus = WeatherStatus.Shown,
+            ),
+        ) { events += it }
+        listOf("fl_log_photos_drop_ph1", "fl_log_tasks_drop_t1", "fl_log_tasks_put_back", "fl_log_materials_drop_ma1", "fl_log_weather_edit").forEach {
+            rule.onNodeWithTag("fl_log_list").performScrollToNode(hasTestTag(it))
+            rule.onNodeWithTag(it).performClick()
+            if (it == "fl_log_tasks_put_back") rule.onNodeWithText("Put back 2 left out").assertExists()
+        }
+        rule.onNodeWithText("Typed in by hand", substring = true).assertExists()
+        assertThat(events).containsExactly(
+            LogEvent.AskDrop(LogLineKind.PHOTO, "ph1"), LogEvent.AskDrop(LogLineKind.TASK, "t1"), LogEvent.PutBack(LogLineKind.TASK),
+            LogEvent.AskDrop(LogLineKind.MATERIAL, "ma1"), LogEvent.EditWeather,
+        ).inOrder()
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun crewGetNoDropPutBackOrWeatherControls() {
+        show(ready.copy(canEdit = false, tasksDone = listOf(LogLine("t1", "Level the sink base")), dropped = mapOf(LogLineKind.TASK to 1)))
+        listOf("fl_log_tasks_drop_t1", "fl_log_tasks_put_back", "fl_log_weather_edit").forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun weatherFormListsTheConditionsAndSaysWhatIsWrong() {
+        val events = mutableListOf<LogWeatherEvent>()
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                LogWeatherScreen(LogWeatherUiState(day = day, loading = false, showErrors = true, draft = WeatherDraft(high = "48", low = "52")), { events += it })
+            }
+        }
+        rule.onNodeWithTag("fl_log_weather_conditions_error").assertExists()
+        rule.onNodeWithText("The low can\u2019t be above the high.").assertExists()
+        rule.onNodeWithTag("fl_save").assertIsNotEnabled()
+        rule.onNodeWithTag("fl_log_weather_lookup").assertDoesNotExist()
+        rule.onNodeWithTag("fl_log_weather_cond_thunderstorm").performScrollTo().performClick()
+        // typed changes: Close asks before discarding (rule 3), Discard closes
+        rule.onNodeWithTag("fl_close").performClick()
+        rule.onNodeWithTag("fl_discard").performClick()
+        assertThat(events).containsExactly(LogWeatherEvent.Conditions("thunderstorm"), LogWeatherEvent.Close).inOrder()
     }
 }

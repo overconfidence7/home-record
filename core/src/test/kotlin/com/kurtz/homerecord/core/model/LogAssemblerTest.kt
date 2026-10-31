@@ -174,4 +174,37 @@ class LogAssemblerTest {
         assertEquals(DailyLogSections(), DailyLogSections.fromJson(null))
         assertEquals(480, s.totalCrewMinutes)
     }
+
+    @Test fun linesLeftOutStayOutOnReassemblyWhileNewOnesArriveAndPutBackRestoresThem() { // AC-F30
+        val photos = listOf(LogPhotoInput("p1", at(9)), LogPhotoInput("p2", at(13)))
+        val tasks = listOf(LogTaskInput("t1", "Patch drywall at the window", at(15)), LogTaskInput("t2", "Hang the door", at(16)))
+        val cos = listOf(LogChangeOrderInput("co1", "Add pantry outlet", 34_500, at(11)))
+        val mats = listOf(LogMaterialInput("mat1", "2026-10-30", "Home Depot", "Lumber", 18_742, null))
+        val first = LogAssembler.assemble(inputs(photos = photos, tasks = tasks, changeOrders = cos, materials = mats), now = endOfDay)
+
+        val dropped = first.drop(LogLineKind.PHOTO, "p1").drop(LogLineKind.TASK, "t2")
+            .drop(LogLineKind.CHANGE_ORDER, "co1").drop(LogLineKind.MATERIAL, "mat1").drop(LogLineKind.PHOTO, "p1")
+        assertEquals(listOf("p2"), dropped.photoIds.value)
+        assertEquals(listOf("t1"), dropped.tasksDone.value.map { it.taskId })
+        assertTrue(dropped.changeOrders.value.isEmpty())
+        assertTrue(dropped.materials.value.isEmpty())
+        assertEquals(listOf("p1"), dropped.dropped[LogLineKind.PHOTO])
+        // dropping is not a hand edit of the section: later records still come in
+        assertFalse(dropped.photoIds.edited)
+
+        val later = photos + LogPhotoInput("p3", at(17))
+        val again = LogAssembler.assemble(inputs(photos = later, tasks = tasks, changeOrders = cos, materials = mats), now = endOfDay, previous = dropped)
+        assertEquals(listOf("p2", "p3"), again.photoIds.value)
+        assertEquals(listOf("t1"), again.tasksDone.value.map { it.taskId })
+        assertTrue(again.changeOrders.value.isEmpty())
+        assertTrue(again.materials.value.isEmpty())
+        assertEquals(again, DailyLogSections.fromJson(again.toJson()))
+
+        val back = LogAssembler.assemble(
+            inputs(photos = later, tasks = tasks, changeOrders = cos, materials = mats), now = endOfDay, previous = again.restore(LogLineKind.PHOTO),
+        )
+        assertEquals(listOf("p1", "p2", "p3"), back.photoIds.value)
+        assertEquals(listOf("t1"), back.tasksDone.value.map { it.taskId })
+        assertNull(back.dropped[LogLineKind.PHOTO])
+    }
 }

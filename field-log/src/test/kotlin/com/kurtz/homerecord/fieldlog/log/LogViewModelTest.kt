@@ -21,6 +21,7 @@ import com.kurtz.homerecord.core.log.WeatherStatus
 import com.kurtz.homerecord.core.model.DailyLogSections
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.model.LogDelay
+import com.kurtz.homerecord.core.model.LogLineKind
 import com.kurtz.homerecord.core.model.LogWeather
 import com.kurtz.homerecord.core.model.PunchKind
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -214,6 +215,43 @@ class LogViewModelTest {
         v.onEvent(LogEvent.AskRemoveDelay(0))
         assertThat(v.settled().editor).isNull()
         assertThat(saved()).isEqualTo(sections)
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun aPhotoLeftOutAfterConfirmStaysOutOnReopeningUntilPutBack() = runBlocking<Unit> {
+        val v = vm()
+        v.settled { it.photos.isNotEmpty() }
+        v.onEvent(LogEvent.AskDrop(LogLineKind.PHOTO, "nope"))
+        v.onEvent(LogEvent.AskDrop(LogLineKind.PHOTO, "ph1"))
+        assertThat(v.settled { it.editor != null }.editor).isEqualTo(LogEditor.Drop(LogLineKind.PHOTO, "ph1", null))
+        v.onEvent(LogEvent.SaveEditor)
+        val s = v.settled { it.photos.isEmpty() }
+        assertThat(s.editor).isNull()
+        assertThat(s.dropped).containsExactly(LogLineKind.PHOTO, 1)
+        // the photo itself stays on the job
+        assertThat(db.photoDao().observeForJob("j1").first().map { it.id }).containsExactly("ph1")
+
+        val again = vm().settled { it.exists }
+        assertThat(again.photos).isEmpty()
+        again.let { assertThat(it.dropped[LogLineKind.PHOTO]).isEqualTo(1) }
+
+        v.onEvent(LogEvent.PutBack(LogLineKind.PHOTO))
+        val back = v.settled { it.photos.isNotEmpty() }
+        assertThat(back.photos.map { it.id }).containsExactly("ph1")
+        assertThat(back.dropped).isEmpty()
+        assertThat(saved().dropped).isEmpty()
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun crewCannotLeaveLinesOut() = runBlocking<Unit> {
+        vm().settled { it.photos.isNotEmpty() }
+        gates.value = RoleGates(CompanyRole.Crew)
+        val v = vm()
+        v.settled { it.exists && !it.canEdit }
+        v.onEvent(LogEvent.AskDrop(LogLineKind.PHOTO, "ph1"))
+        v.onEvent(LogEvent.PutBack(LogLineKind.PHOTO))
+        assertThat(v.settled().editor).isNull()
+        assertThat(saved().photoIds.value).containsExactly("ph1")
     }
 
     @Test fun editsMarkTheirSectionAndZeroHoursTakesAPersonOff() {

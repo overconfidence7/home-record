@@ -10,7 +10,9 @@ import com.kurtz.homerecord.core.log.DailyLogRepository
 import com.kurtz.homerecord.core.log.WeatherStatus
 import com.kurtz.homerecord.core.model.DailyLogSections
 import com.kurtz.homerecord.core.model.LogDelay
+import com.kurtz.homerecord.core.model.LogLineKind
 import com.kurtz.homerecord.core.model.LogSection
+import com.kurtz.homerecord.core.model.LogWeather
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.Locale
@@ -124,6 +126,8 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             },
             weather = s.weather.value,
             weatherStatus = weather ?: if (s.weather.value != null) WeatherStatus.Shown else null,
+            weatherEdited = s.weather.edited,
+            dropped = s.dropped.mapValues { it.value.size }.filterValues { it > 0 },
             delays = s.delays,
             visitors = s.visitors,
             safety = s.safety,
@@ -161,6 +165,9 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             }
             LogEvent.AddDelay -> if (st.canEdit && st.exists) open(LogEditor.Delay())
             is LogEvent.AskRemoveDelay -> if (st.canEdit && event.index in st.delays.indices) open(LogEditor.RemoveDelay(event.index))
+            is LogEvent.AskDrop -> if (st.canEdit) dropLabel(st, event.kind, event.id)?.let { open(LogEditor.Drop(event.kind, event.id, it.ifEmpty { null })) }
+            is LogEvent.PutBack -> putBack(st, event.kind)
+            LogEvent.EditWeather -> Unit // the route opens the weather form
             is LogEvent.EditorText -> when (val e = openEditor()) {
                 is LogEditor.Text -> open(e.copy(text = event.text))
                 is LogEditor.Hours -> {
@@ -195,10 +202,29 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
                 { s -> s.copy(delays = s.delays + LogDelay(reason, e.note.trim())) }
             }
             is LogEditor.RemoveDelay -> { s -> s.copy(delays = s.delays.filterIndexed { i, _ -> i != e.index }) }
+            is LogEditor.Drop -> { s -> s.drop(e.kind, e.id) }
             LogEditor.PickDay -> return
         }
         close()
         viewModelScope.launch { d.logs.update(logId, change) }
+    }
+
+    /** The line's name for the confirm dialog ("" for a photo), or null when it is not on the shown day's log. */
+    private fun dropLabel(st: LogUiState, kind: LogLineKind, id: String): String? = when (kind) {
+        LogLineKind.PHOTO -> st.photos.firstOrNull { it.id == id }?.let { "" }
+        LogLineKind.TASK -> st.tasksDone.firstOrNull { it.id == id }?.headline
+        LogLineKind.CHANGE_ORDER -> st.changeOrders.firstOrNull { it.id == id }?.headline
+        LogLineKind.MATERIAL -> st.materials.firstOrNull { it.id == id }?.headline
+    }
+
+    /** Forgets what was left out, then rebuilds the day so those lines come back from the records. */
+    private fun putBack(st: LogUiState, kind: LogLineKind) {
+        val logId = current?.id ?: return
+        if (!st.canEdit || (st.dropped[kind] ?: 0) == 0) return
+        viewModelScope.launch {
+            d.logs.update(logId) { it.restore(kind) }
+            retries.value++
+        }
     }
 
     private fun goTo(target: LocalDate) {
@@ -223,6 +249,16 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
 
 /** The hand edits on a day's sections. Each marks the section edited so re-assembling keeps it (AC-F30). */
 object LogEdits {
+    /** Weather typed by hand: kept as typed, never replaced by a lookup. */
+    fun weather(s: DailyLogSections, weather: LogWeather): DailyLogSections = s.copy(weather = LogSection(weather, edited = true))
+
+    /**
+     * Back to looking the weather up. The typed weather stays on screen until a lookup answers, and is marked as never
+     * fetched so the next assembly asks the backend (AC-F31).
+     */
+    fun lookUpWeather(s: DailyLogSections): DailyLogSections =
+        s.copy(weather = LogSection(s.weather.value?.copy(fetchedAt = 0), edited = false))
+
     fun text(s: DailyLogSections, section: LogTextSection, text: String): DailyLogSections = when (section) {
         // one entry per paragraph, as the sheet shows them
         LogTextSection.WORK_DONE -> s.copy(

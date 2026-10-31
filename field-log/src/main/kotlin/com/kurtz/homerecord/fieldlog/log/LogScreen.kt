@@ -2,6 +2,11 @@ package com.kurtz.homerecord.fieldlog.log
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.RemoveCircleOutline
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -93,6 +98,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kurtz.homerecord.core.log.WeatherStatus
 import com.kurtz.homerecord.core.model.DelayReason
+import com.kurtz.homerecord.core.model.LogLineKind
 import com.kurtz.homerecord.core.model.LogWeather
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.ErrorState
@@ -175,12 +181,14 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
             "work", R.string.log_section_work, state.workDone, Icons.AutoMirrored.Rounded.Notes, R.string.log_work_none,
             edit = if (state.canEdit) ({ onEvent(LogEvent.EditText(LogTextSection.WORK_DONE)) }) else null,
         )
-        photos(state)
-        lines("tasks", R.string.log_section_tasks, state.tasksDone, Icons.Rounded.CheckCircle, R.string.log_tasks_none)
-        if (state.changeOrders.isNotEmpty()) lines("changes", R.string.log_section_changes, state.changeOrders, Icons.Rounded.ReceiptLong, null)
-        lines("materials", R.string.log_section_materials, state.materials, Icons.Rounded.LocalShipping, R.string.log_materials_none)
+        photos(state, onEvent)
+        lines("tasks", R.string.log_section_tasks, state.tasksDone, Icons.Rounded.CheckCircle, R.string.log_tasks_none, LogLineKind.TASK, state, onEvent)
+        if (state.changeOrders.isNotEmpty() || (state.dropped[LogLineKind.CHANGE_ORDER] ?: 0) > 0) {
+            lines("changes", R.string.log_section_changes, state.changeOrders, Icons.Rounded.ReceiptLong, R.string.log_changes_none, LogLineKind.CHANGE_ORDER, state, onEvent)
+        }
+        lines("materials", R.string.log_section_materials, state.materials, Icons.Rounded.LocalShipping, R.string.log_materials_none, LogLineKind.MATERIAL, state, onEvent)
         delays(state, onEvent)
-        weather(state)
+        weather(state, onEvent)
         typed("visitors", R.string.log_section_visitors, state.visitors, Icons.Rounded.Groups, LogTextSection.VISITORS, state.canEdit, onEvent)
         typed("safety", R.string.log_section_safety, state.safety, Icons.Rounded.HealthAndSafety, LogTextSection.SAFETY, state.canEdit, onEvent)
         typed("client", R.string.log_section_client, state.clientNotes, Icons.AutoMirrored.Rounded.EventNote, LogTextSection.CLIENT_NOTES, state.canEdit, onEvent)
@@ -260,13 +268,41 @@ private fun LazyListScope.textList(key: String, title: Int, entries: List<String
     itemsIndexed(entries, key = { i, _ -> "$key-$i" }) { _, text -> Line(icon, text) }
 }
 
-private fun LazyListScope.lines(key: String, title: Int, lines: List<LogLine>, icon: ImageVector, none: Int?) {
+/** Record lines a lead can leave out of the log one by one (AC-F30); the records themselves stay on the job. */
+private fun LazyListScope.lines(
+    key: String, title: Int, lines: List<LogLine>, icon: ImageVector, none: Int, kind: LogLineKind, state: LogUiState, onEvent: (LogEvent) -> Unit,
+) {
     item(key = "$key-h") { Header(stringResource(title), key) }
-    if (lines.isEmpty() && none != null) item(key = "$key-none") { NoneLine(none) }
-    items(lines, key = { "$key-${it.id}" }) { Line(icon, it.headline, supporting = it.supporting) }
+    if (lines.isEmpty()) item(key = "$key-none") { NoneLine(none) }
+    items(lines, key = { "$key-${it.id}" }) { line ->
+        Line(
+            icon, line.headline, Modifier.testTag("fl_log_${key}_${line.id}"), supporting = line.supporting,
+            trailing = if (state.canEdit) ({
+                IconButton(onClick = { onEvent(LogEvent.AskDrop(kind, line.id)) }, modifier = Modifier.testTag("fl_log_${key}_drop_${line.id}")) {
+                    Icon(Icons.Rounded.RemoveCircleOutline, contentDescription = stringResource(R.string.log_drop_line, line.headline))
+                }
+            }) else null,
+        )
+    }
+    putBack(key, kind, state, onEvent)
 }
 
-private fun LazyListScope.photos(state: LogUiState) {
+/** "Put back 2 left out" under a section once something was dropped from it. */
+private fun LazyListScope.putBack(key: String, kind: LogLineKind, state: LogUiState, onEvent: (LogEvent) -> Unit) {
+    val count = state.dropped[kind] ?: 0
+    if (!state.canEdit || count == 0) return
+    item(key = "$key-put-back") {
+        TextButton(
+            onClick = { onEvent(LogEvent.PutBack(kind)) },
+            modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp).testTag("fl_log_${key}_put_back"),
+        ) {
+            Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, Modifier.size(18.dp))
+            Text(pluralStringResource(R.plurals.log_put_back, count, count), Modifier.padding(start = 8.dp))
+        }
+    }
+}
+
+private fun LazyListScope.photos(state: LogUiState, onEvent: (LogEvent) -> Unit) {
     item(key = "photos-h") {
         Header(
             stringResource(R.string.log_section_photos), "photos",
@@ -282,8 +318,9 @@ private fun LazyListScope.photos(state: LogUiState) {
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(state.photos, key = { it.id }) { photo ->
+                itemsIndexed(state.photos, key = { _, p -> p.id }) { index, photo ->
                     val shape = RoundedCornerShape(8.dp)
+                    Box(Modifier.size(72.dp)) {
                     if (photo.path.isEmpty()) {
                         Icon(
                             Icons.Rounded.PhotoLibrary, contentDescription = stringResource(R.string.photos_not_here),
@@ -296,10 +333,25 @@ private fun LazyListScope.photos(state: LogUiState) {
                             modifier = Modifier.size(72.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
                         )
                     }
+                    if (state.canEdit) {
+                        // a small badge on a 48 dp target in the corner, readable over any photo
+                        IconButton(
+                            onClick = { onEvent(LogEvent.AskDrop(LogLineKind.PHOTO, photo.id)) },
+                            modifier = Modifier.align(Alignment.TopEnd).testTag("fl_log_photos_drop_${photo.id}"),
+                        ) {
+                            Icon(
+                                Icons.Rounded.Close, contentDescription = stringResource(R.string.log_drop_photo, index + 1),
+                                Modifier.size(24.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest).padding(3.dp),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                    }
                 }
             }
         }
     }
+    putBack("photos", LogLineKind.PHOTO, state, onEvent)
 }
 
 private fun DelayReason.icon(): ImageVector = when (this) {
@@ -345,7 +397,7 @@ private fun LazyListScope.delays(state: LogUiState, onEvent: (LogEvent) -> Unit)
     }
 }
 
-private fun conditionsIcon(key: String): ImageVector = when (key) {
+internal fun conditionsIcon(key: String): ImageVector = when (key) {
     "clear" -> Icons.Rounded.WbSunny
     "partly_cloudy" -> Icons.Rounded.WbCloudy
     "drizzle" -> Icons.Rounded.Grain
@@ -355,7 +407,7 @@ private fun conditionsIcon(key: String): ImageVector = when (key) {
     else -> Icons.Rounded.Cloud
 }
 
-private fun conditionsLabel(key: String): Int = when (key) {
+internal fun conditionsLabel(key: String): Int = when (key) {
     "clear" -> R.string.weather_clear
     "partly_cloudy" -> R.string.weather_partly_cloudy
     "cloudy" -> R.string.weather_cloudy
@@ -369,8 +421,11 @@ private fun conditionsLabel(key: String): Int = when (key) {
     else -> R.string.weather_unknown
 }
 
-private fun LazyListScope.weather(state: LogUiState) {
-    item(key = "weather-h") { Header(stringResource(R.string.log_section_weather), "weather") }
+private fun LazyListScope.weather(state: LogUiState, onEvent: (LogEvent) -> Unit) {
+    item(key = "weather-h") {
+        val t = stringResource(R.string.log_section_weather)
+        Header(t, "weather", stringResource(R.string.log_edit_section, t), if (state.canEdit) ({ onEvent(LogEvent.EditWeather) }) else null)
+    }
     item(key = "weather") {
         val w: LogWeather? = state.weather
         if (w != null) {
@@ -379,7 +434,8 @@ private fun LazyListScope.weather(state: LogUiState) {
                 if (w.highF != null && w.lowF != null) stringResource(R.string.weather_high_low, w.highF ?: 0, w.lowF ?: 0) else null,
             ).joinToString(", ")
             val precip = w.precipIn?.takeIf { it > 0 }?.let { stringResource(R.string.weather_precip, "%.2f".format(java.util.Locale.US, it)) }
-            Line(conditionsIcon(w.conditions), headline, Modifier.testTag("fl_log_weather"), precip)
+            val supporting = listOfNotNull(precip, if (state.weatherEdited) stringResource(R.string.log_weather_typed) else null).joinToString(". ").ifEmpty { null }
+            Line(conditionsIcon(w.conditions), headline, Modifier.testTag("fl_log_weather"), supporting)
         } else {
             val text = when (state.weatherStatus) {
                 WeatherStatus.NoLocation -> R.string.log_weather_no_location
@@ -458,6 +514,23 @@ private fun LogEditorHost(state: LogUiState, onEvent: (LogEvent) -> Unit) {
                 dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) } },
             )
         }
+        is LogEditor.Drop -> AlertDialog(
+            onDismissRequest = dismiss,
+            modifier = Modifier.windowTestTags(),
+            title = { Text(stringResource(R.string.log_drop_title)) },
+            text = {
+                Text(
+                    if (e.label == null) stringResource(R.string.log_drop_photo_body)
+                    else stringResource(R.string.log_drop_body, e.label),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(LogEvent.SaveEditor) }, modifier = Modifier.testTag("fl_log_drop_confirm")) {
+                    Text(stringResource(R.string.log_drop_confirm))
+                }
+            },
+            dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) } },
+        )
         LogEditor.PickDay -> {
             val todayMillis = state.today.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
             val picker = rememberDatePickerState(

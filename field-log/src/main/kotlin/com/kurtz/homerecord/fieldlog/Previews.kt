@@ -983,3 +983,52 @@ fun LogTextSheetPreview() = Frame {
         {},
     )
 }
+
+/** The lead left a photo and the materials receipt out, and typed the weather in by hand (AC-F30). */
+@ThemePreviews
+@Composable
+fun LogLeftOutPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        logReady.copy(
+            photos = logReady.photos.drop(1),
+            materials = emptyList(),
+            weather = com.kurtz.homerecord.core.model.LogWeather(highF = 61, lowF = 44, precipIn = 0.3, conditions = "showers"),
+            weatherEdited = true,
+            dropped = mapOf(com.kurtz.homerecord.core.model.LogLineKind.PHOTO to 1, com.kurtz.homerecord.core.model.LogLineKind.MATERIAL to 1),
+        ),
+        {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
+/** Correcting a rainy Friday's weather the lookup got wrong (rule 15). */
+@ThemePreviews
+@Composable
+fun LogWeatherFormPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.log.WeatherDraft(conditions = "showers", high = "61", low = "44", precip = "0.3")
+    com.kurtz.homerecord.fieldlog.log.LogWeatherScreen(
+        com.kurtz.homerecord.fieldlog.log.LogWeatherUiState(
+            day = logDay, loading = false, draft = draft,
+            initial = draft.copy(conditions = "rain", high = "58", low = "41", precip = "0.12"), handEntered = true,
+        ),
+        {},
+    )
+}
+
+/** Save pressed with no conditions picked and a low above the high (rule 21). */
+@ThemePreviews
+@Composable
+fun LogWeatherFormErrorsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogWeatherScreen(
+        com.kurtz.homerecord.fieldlog.log.LogWeatherUiState(
+            day = logDay, loading = false, showErrors = true,
+            draft = com.kurtz.homerecord.fieldlog.log.WeatherDraft(high = "48", low = "52", precip = "a little"),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun LogWeatherFormFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogWeatherScreen(com.kurtz.homerecord.fieldlog.log.LogWeatherUiState(day = logDay, loading = false, failed = true), {})
+}

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.kurtz.homerecord.core.log.WeatherStatus
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.model.LogDelay
+import com.kurtz.homerecord.core.model.LogLineKind
 import com.kurtz.homerecord.core.model.LogWeather
 import java.time.LocalDate
 import kotlinx.serialization.Serializable
@@ -26,6 +27,8 @@ sealed interface LogEditor {
     @Serializable data class Hours(val memberId: String, val name: String, val text: String) : LogEditor
     @Serializable data class Delay(val reason: DelayReason? = null, val note: String = "") : LogEditor
     @Serializable data class RemoveDelay(val index: Int) : LogEditor
+    /** "Leave out of the log?" for one photo, task, change order or material line; [label] names it (null for a photo). */
+    @Serializable data class Drop(val kind: LogLineKind, val id: String, val label: String? = null) : LogEditor
     @Serializable data object PickDay : LogEditor
 }
 
@@ -52,6 +55,10 @@ data class LogUiState(
     val materials: List<LogLine> = emptyList(),
     val weather: LogWeather? = null,
     val weatherStatus: WeatherStatus? = null,
+    /** The weather was typed in by hand, so it is no longer looked up. */
+    val weatherEdited: Boolean = false,
+    /** How many lines of each kind were left out of this day's log; each kind with any offers "Put back". */
+    val dropped: Map<LogLineKind, Int> = emptyMap(),
     val delays: List<LogDelay> = emptyList(),
     val visitors: String = "",
     val safety: String = "",
@@ -73,6 +80,10 @@ sealed interface LogEvent {
     data class EditHours(val memberId: String) : LogEvent
     data object AddDelay : LogEvent
     data class AskRemoveDelay(val index: Int) : LogEvent
+    data class AskDrop(val kind: LogLineKind, val id: String) : LogEvent
+    data class PutBack(val kind: LogLineKind) : LogEvent
+    /** Opens the full-screen weather form for the shown day; the route handles it (rule 15). */
+    data object EditWeather : LogEvent
     data class EditorText(val text: String) : LogEvent
     data class EditorReason(val reason: DelayReason) : LogEvent
     data object SaveEditor : LogEvent

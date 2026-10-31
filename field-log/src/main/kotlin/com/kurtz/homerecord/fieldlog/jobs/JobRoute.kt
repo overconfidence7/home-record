@@ -29,7 +29,7 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, onEditWeather: (java.time.LocalDate) -> Unit = {}, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -63,7 +63,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             )
         },
         logContent = {
-            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates))
+            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates), onEditWeather = onEditWeather)
         },
         filesContent = {
             if (files != null) com.kurtz.homerecord.fieldlog.files.FilesRoute(files, onOpenFile = { onOpenFile?.invoke(it) })

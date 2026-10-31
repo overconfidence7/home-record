@@ -466,3 +466,23 @@ fun LogDelaySheetScreenshot() = LogDelaySheetPreview()
 @ThemePreviews
 @Composable
 fun LogTextSheetScreenshot() = LogTextSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogLeftOutScreenshot() = LogLeftOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogWeatherFormScreenshot() = LogWeatherFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogWeatherFormErrorsScreenshot() = LogWeatherFormErrorsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogWeatherFormFailedScreenshot() = LogWeatherFormFailedPreview()

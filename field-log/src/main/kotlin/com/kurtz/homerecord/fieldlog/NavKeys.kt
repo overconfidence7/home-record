@@ -26,4 +26,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class MarkupKey(val fileId: String) : NavKey
 @Serializable data class AnnotateKey(val photoId: String) : NavKey
 
+/** The weather form for a job's daily log on [day] (ISO yyyy-MM-dd). */
+@Serializable data class LogWeatherKey(val jobId: String, val day: String) : NavKey
+
 @Serializable data class CaptureKey(val jobId: String) : NavKey

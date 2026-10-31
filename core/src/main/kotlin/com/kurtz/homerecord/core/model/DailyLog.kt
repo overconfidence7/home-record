@@ -24,6 +24,9 @@ data class ChangeOrderLine(val changeOrderId: String, val title: String, val tot
 @Serializable
 data class MaterialLine(val materialId: String, val vendor: String?, val category: String?, val amountCents: Long, val note: String?)
 
+/** The record lines a lead can leave out of a day's log (AC-F30); the record itself stays on the job. */
+enum class LogLineKind { PHOTO, TASK, CHANGE_ORDER, MATERIAL }
+
 /** Delay reasons for the picker (AC-F32). Words come from string resources in the app. */
 enum class DelayReason { WEATHER, MATERIALS, INSPECTION, CLIENT, OTHER }
 
@@ -60,8 +63,28 @@ data class DailyLogSections(
     val visitors: String = "",
     val safety: String = "",
     val clientNotes: String = "",
+    /**
+     * Record ids left out of the log by hand, per kind. Re-assembling skips them, so a photo dropped from the log
+     * stays out while photos taken later that day still arrive (AC-F30).
+     */
+    val dropped: Map<LogLineKind, List<String>> = emptyMap(),
 ) {
     val totalCrewMinutes: Int get() = crew.value.sumOf { it.minutes }
+
+    /** Leaves one line out of the log: gone from its section now and skipped by every later re-assembly. */
+    fun drop(kind: LogLineKind, id: String): DailyLogSections {
+        val ids = dropped[kind].orEmpty()
+        val next = copy(dropped = dropped + (kind to (if (id in ids) ids else ids + id)))
+        return when (kind) {
+            LogLineKind.PHOTO -> next.copy(photoIds = photoIds.copy(value = photoIds.value.filter { it != id }))
+            LogLineKind.TASK -> next.copy(tasksDone = tasksDone.copy(value = tasksDone.value.filter { it.taskId != id }))
+            LogLineKind.CHANGE_ORDER -> next.copy(changeOrders = changeOrders.copy(value = changeOrders.value.filter { it.changeOrderId != id }))
+            LogLineKind.MATERIAL -> next.copy(materials = materials.copy(value = materials.value.filter { it.materialId != id }))
+        }
+    }
+
+    /** Forgets what was left out of [kind]; the next re-assembly puts those lines back from the records. */
+    fun restore(kind: LogLineKind): DailyLogSections = copy(dropped = dropped - kind)
 
     fun toJson(): String = json.encodeToString(serializer(), this)
 
@@ -115,19 +138,20 @@ object LogAssembler {
         val end = inputs.day.plusDays(1).atStartOfDay(inputs.zone).toInstant().toEpochMilli()
         val inDay = { t: Long -> t in start until end }
         val iso = inputs.day.toString()
+        val prev = previous ?: DailyLogSections()
+        fun kept(kind: LogLineKind, id: String) = id !in prev.dropped[kind].orEmpty()
 
         val crew = crewLines(inputs, start, end, now)
         val workDone = inputs.notes.filter { inDay(it.createdAt) }.sortedWith(compareBy({ it.createdAt }, { it.id }))
             .mapNotNull { n -> listOf(n.text, n.transcript.orEmpty()).map { it.trim() }.filter { it.isNotEmpty() }.distinct().joinToString("\n").ifEmpty { null } }
-        val photos = inputs.photos.filter { inDay(it.takenAt) }.sortedWith(compareBy({ it.takenAt }, { it.id })).map { it.id }
-        val tasks = inputs.tasks.filter { it.doneAt?.let(inDay) == true }.sortedWith(compareBy({ it.doneAt }, { it.id }))
+        val photos = inputs.photos.filter { inDay(it.takenAt) && kept(LogLineKind.PHOTO, it.id) }.sortedWith(compareBy({ it.takenAt }, { it.id })).map { it.id }
+        val tasks = inputs.tasks.filter { it.doneAt?.let(inDay) == true && kept(LogLineKind.TASK, it.id) }.sortedWith(compareBy({ it.doneAt }, { it.id }))
             .map { TaskLine(it.id, it.title) }
-        val changeOrders = inputs.changeOrders.filter { it.signedAt?.let(inDay) == true }.sortedWith(compareBy({ it.signedAt }, { it.id }))
+        val changeOrders = inputs.changeOrders.filter { it.signedAt?.let(inDay) == true && kept(LogLineKind.CHANGE_ORDER, it.id) }.sortedWith(compareBy({ it.signedAt }, { it.id }))
             .map { ChangeOrderLine(it.id, it.title, it.totalCents) }
-        val materials = inputs.materials.filter { it.date == iso }.sortedBy { it.id }
+        val materials = inputs.materials.filter { it.date == iso && kept(LogLineKind.MATERIAL, it.id) }.sortedBy { it.id }
             .map { MaterialLine(it.id, it.vendor, it.category, it.amountCents, it.note) }
 
-        val prev = previous ?: DailyLogSections()
         fun <T> keepOr(old: LogSection<T>, fresh: T): LogSection<T> = if (old.edited) old else LogSection(fresh)
         val weather: LogSection<LogWeather?> = when {
             prev.weather.edited -> prev.weather

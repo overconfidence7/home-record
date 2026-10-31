@@ -521,4 +521,31 @@
     <string name="weather_unknown">Weather</string>
     <string name="weather_high_low">high %1$d°, low %2$d°</string>
     <string name="weather_precip">%1$s in of rain or snow</string>
+    <string name="log_changes_none">No change orders signed this day.</string>
+    <string name="log_drop_line">Leave out of the log: %1$s</string>
+    <string name="log_drop_photo">Leave photo %1$d out of the log</string>
+    <string name="log_drop_title">Leave out of the log?</string>
+    <string name="log_drop_body">“%1$s” stays on the job. It just won’t show in this day’s log.</string>
+    <string name="log_drop_photo_body">The photo stays on the job. It just won’t show in this day’s log.</string>
+    <string name="log_drop_confirm">Leave out</string>
+    <plurals name="log_put_back">
+        <item quantity="one">Put back %1$d left out</item>
+        <item quantity="other">Put back %1$d left out</item>
+    </plurals>
+    <string name="log_weather_typed">Typed in by hand</string>
+    <string name="log_weather_form_title">Weather</string>
+    <string name="log_weather_form_failed">This day’s log isn’t on this phone yet. Open the day on the Log tab first, then tap Retry.</string>
+    <string name="log_weather_conditions">Conditions</string>
+    <string name="log_weather_conditions_error">Pick the conditions.</string>
+    <string name="log_weather_high">High (°F)</string>
+    <string name="log_weather_low">Low (°F)</string>
+    <string name="log_weather_precip">Rain or snow (in)</string>
+    <string name="log_weather_precip_help">Leave it blank if you don’t know.</string>
+    <string name="log_weather_precip_not_number">Type inches as a number, like 0.25.</string>
+    <string name="log_weather_precip_range">Type between 0 and 40 inches.</string>
+    <string name="log_weather_temp_not_number">Type degrees as a number, like 58.</string>
+    <string name="log_weather_temp_range">Type between −80 and 140 °F.</string>
+    <string name="log_weather_low_above_high">The low can’t be above the high.</string>
+    <string name="log_weather_hand_entered">This weather was typed in by hand, so the app stops looking it up for this day.</string>
+    <string name="log_weather_look_up">Look it up again</string>
 </resources>

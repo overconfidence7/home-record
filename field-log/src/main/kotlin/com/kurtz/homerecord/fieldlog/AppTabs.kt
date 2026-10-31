@@ -158,6 +158,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onOpenFile = { nav.push(FileKey(it)) },
                 downloads = container.mediaDownloads,
                 logs = container.dailyLogs,
+                onEditWeather = { day -> nav.push(LogWeatherKey(key.jobId, day.toString())) },
                 files = container.filesDeps(
                     key.jobId,
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
@@ -180,6 +181,12 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 container.markupDeps(key.fileId, author), onClose = nav::pop,
                 // The new version replaces the one marked up: close the editor and that viewer, open the new version.
                 onSaved = { id -> nav.pop(); nav.pop(); nav.push(FileKey(id)) },
+            )
+        }
+        entry<LogWeatherKey> { key ->
+            com.kurtz.homerecord.fieldlog.log.LogWeatherRoute(
+                com.kurtz.homerecord.fieldlog.log.LogWeatherDeps(key.jobId, java.time.LocalDate.parse(key.day), container.dailyLogs, container.roleGates),
+                onClose = nav::pop,
             )
         }
         entry<AnnotateKey> { key ->
