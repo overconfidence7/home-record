@@ -88,6 +88,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         tabs = tabs,
         startTabId = if (openEditor) "house" else null,
         startKeys = if (openEditor) listOf(PlanKey()) else emptyList(),
+        fullScreen = ::isFullScreen,
         entries = { nav ->
         entry<HomeKey> {
             HomeRoute(

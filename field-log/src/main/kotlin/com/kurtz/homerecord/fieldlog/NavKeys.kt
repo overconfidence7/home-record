@@ -30,3 +30,12 @@ import kotlinx.serialization.Serializable
 @Serializable data class LogWeatherKey(val jobId: String, val day: String) : NavKey
 
 @Serializable data class CaptureKey(val jobId: String) : NavKey
+
+/**
+ * Full-screen editors and the camera: the tab bar is hidden while one is on top, so Close/Save
+ * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
+ */
+fun isFullScreen(key: NavKey): Boolean = when (key) {
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, CompanyKey -> true
+    else -> false
+}

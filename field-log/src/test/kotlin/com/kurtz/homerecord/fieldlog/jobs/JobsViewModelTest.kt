@@ -10,7 +10,10 @@ import com.kurtz.homerecord.core.company.RoleGates
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -45,7 +48,12 @@ class JobsViewModelTest {
         }
     }
 
+    private var created: JobsViewModel? = null
+
     @After fun tearDown() {
+        // The state collects eagerly on the mapping thread and resumes on Main; stop it before Main is reset,
+        // or it races the next test's setMain ("Dispatchers.Main is used concurrently with setting it").
+        created?.let { runBlocking { it.viewModelScope.coroutineContext.job.cancelAndJoin() } }
         db.close()
         mapping.close()
         Dispatchers.resetMain()
@@ -58,7 +66,7 @@ class JobsViewModelTest {
             "c1", db.jobDao(), db.clientDao(), db.assignmentDao(), flowOf(RoleGates(CompanyRole.Owner)), SavedStateHandle(),
             todayProvider = { synchronized(mappedOn) { mappedOn += Thread.currentThread().name.substringBefore(" @") }; "2026-10-31" },
             mapping = mapping,
-        )
+        ).also { created = it }
         val state = runBlocking { withTimeout(10_000) { vm.state.first { !it.loading } } }
         assertThat(state.groups.active).hasSize(200)
         assertThat(state.groups.active.first().supporting).isEqualTo("100 Maple Ave")

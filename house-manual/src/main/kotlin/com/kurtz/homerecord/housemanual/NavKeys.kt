@@ -23,3 +23,6 @@ import kotlinx.serialization.Serializable
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey
 @Serializable data class PaywallKey(val feature: LimitedFeature? = null) : NavKey
+
+/** Full-screen editors hide the tab bar so only Close/Save or back leaves them (ui-standards rule 3). */
+fun isFullScreen(key: NavKey): Boolean = key is ItemEditKey || key is PaywallKey

@@ -50,6 +50,9 @@ class AppTab(
 /**
  * App shell: a navigation bar (rail from 600 dp) over one Navigation 3 back stack per tab.
  * Each stack and the selected tab survive rotation and process death.
+ *
+ * [fullScreen] names the keys that are full-screen editors or capture screens (ui-standards
+ * rule 3): while one is on top the bar or rail is hidden, so only Close/Save (or back) leaves it.
  */
 @Composable
 fun HomeRecordApp(
@@ -59,6 +62,7 @@ fun HomeRecordApp(
     startTabId: String? = null,
     startKeys: List<NavKey> = emptyList(),
     tabRequests: Flow<String>? = null,
+    fullScreen: (NavKey) -> Boolean = { false },
 ) {
     var selectedId by rememberSaveable { mutableStateOf(startTabId ?: tabs.first().id) }
     // Outside entry points (a widget, a notification) ask for a tab here.
@@ -80,7 +84,11 @@ fun HomeRecordApp(
     val tagPrefix = LocalTagPrefix.current
     NavigationSuiteScaffold(
         modifier = modifier,
-        layoutType = if (wideEnough) NavigationSuiteType.NavigationRail else NavigationSuiteType.NavigationBar,
+        layoutType = when {
+            stack.lastOrNull()?.let(fullScreen) == true -> NavigationSuiteType.None
+            wideEnough -> NavigationSuiteType.NavigationRail
+            else -> NavigationSuiteType.NavigationBar
+        },
         navigationSuiteItems = {
             tabs.forEach { tab ->
                 val isSelected = tab.id == selected.id

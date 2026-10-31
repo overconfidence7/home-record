@@ -35,6 +35,11 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible:
     id: fl_markup_tool_highlight
 - assertVisible: "Page 1 of 2"
+# rule 3: the editor is full screen; no tab bar under the page leads away from unsaved marks
+- assertNotVisible:
+    id: "fl_tab_jobs"
+- assertNotVisible:
+    id: "fl_tab_today"
 - tapOn:
     id: fl_markup_tool_rectangle
 - swipe:

@@ -35,9 +35,9 @@ class HomeRecordAppTest {
         HomeRecordApp(tabs, entries = { nav ->
             entry<PlaceholderKey> { key ->
                 if (key.depth == 0) PlaceholderRoot(key.title, { nav.push(key.copy(depth = 1)) })
-                else PlaceholderDetail("Detail ${key.title}", nav::pop, {})
+                else PlaceholderDetail("Detail ${key.title} ${key.depth}", nav::pop, { nav.push(key.copy(depth = key.depth + 1)) })
             }
-        }, tabRequests = requests?.flow)
+        }, tabRequests = requests?.flow, fullScreen = { it is PlaceholderKey && it.depth >= 2 })
     }
 
     @Test fun tabsShowIconAndLabelAndSwitch() {
@@ -50,7 +50,7 @@ class HomeRecordAppTest {
     @Test fun detailHasBackArrowAndBackReturns() {
         setApp()
         rule.onNodeWithText("Open a detail screen").performClick()
-        rule.onAllNodesWithText("Detail a").onFirst().assertIsDisplayed()
+        rule.onAllNodesWithText("Detail a 1").onFirst().assertIsDisplayed()
         rule.onNodeWithContentDescription("Back").performClick()
         rule.onNodeWithText("Open a detail screen").assertIsDisplayed()
     }
@@ -69,7 +69,7 @@ class HomeRecordAppTest {
         rule.onNodeWithText("Open a detail screen").performClick()
         rule.onNodeWithText("Beta").performClick()
         rule.onNodeWithText("Alpha").performClick()
-        rule.onAllNodesWithText("Detail a").onFirst().assertIsDisplayed()
+        rule.onAllNodesWithText("Detail a 1").onFirst().assertIsDisplayed()
         rule.onNodeWithText("Alpha").performClick()
         rule.onNodeWithText("Open a detail screen").assertIsDisplayed()
     }
@@ -88,5 +88,18 @@ class HomeRecordAppTest {
         // A new request still switches tabs.
         requests.request("b")
         rule.onNodeWithText("b", substring = false).assertIsDisplayed()
+    }
+
+    // judge:fl-markup-nav-bar (rule 3): a full-screen editor on top hides the tab bar; leaving it brings the bar back.
+    @Test fun fullScreenKeyHidesTheTabBar() {
+        setApp()
+        rule.onNodeWithText("Open a detail screen").performClick()
+        rule.onNodeWithTag("app_tab_b").assertIsDisplayed()
+        rule.onNodeWithText("Open a detail screen").performClick()
+        rule.onAllNodesWithText("Detail a 2").onFirst().assertIsDisplayed()
+        rule.onNodeWithTag("app_tab_b").assertDoesNotExist()
+        rule.onNodeWithTag("app_tab_a").assertDoesNotExist()
+        rule.onNodeWithContentDescription("Back").performClick()
+        rule.onNodeWithTag("app_tab_b").assertIsDisplayed()
     }
 }
