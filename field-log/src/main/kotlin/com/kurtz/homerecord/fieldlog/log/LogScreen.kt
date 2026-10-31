@@ -199,11 +199,12 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
 @Composable
 private fun Header(title: String, key: String, editLabel: String? = null, onEdit: (() -> Unit)? = null, supporting: String? = null) {
     Column(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().padding(end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            // the pencil drops by the header's top padding so it lines up with the title, not above it
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // the pencil drops by the header's top padding so it lines up with the title, not above it;
+            // the button itself is 48 dp (not 40 inside a 48 touch box) so it measures 48 even when scrolled out of view
             SectionHeader(title, Modifier.weight(1f))
             if (onEdit != null && editLabel != null) {
-                IconButton(onClick = onEdit, modifier = Modifier.padding(top = 12.dp).testTag("fl_log_${key}_edit")) {
+                IconButton(onClick = onEdit, modifier = Modifier.padding(top = 8.dp).size(48.dp).testTag("fl_log_${key}_edit")) {
                     Icon(Icons.Rounded.Edit, contentDescription = editLabel)
                 }
             }

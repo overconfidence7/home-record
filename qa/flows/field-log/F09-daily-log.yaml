@@ -143,6 +143,12 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_log_weather_high
 - inputText: "61"
+# the keyboard covers the next field; close it and scroll to Low like a person would
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: fl_log_weather_low
+    direction: DOWN
 - tapOn:
     id: fl_log_weather_low
 - inputText: "44"
