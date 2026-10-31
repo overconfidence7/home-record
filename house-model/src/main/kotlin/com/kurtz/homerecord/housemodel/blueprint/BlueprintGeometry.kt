@@ -47,3 +47,27 @@ object RoomHitTester {
         return inside
     }
 }
+
+/**
+ * A task pin on the plan (AC-F35): [number] is drawn in the head, [label] is what TalkBack reads. The point is the pin's
+ * tip; its round head sits above it.
+ */
+data class BlueprintPin(val id: String, val label: String, val xIn: Int, val yIn: Int, val number: Int)
+
+/** Where a pin's head sits on screen and which pin a tap lands on; the head is the 48 dp target (rule 13). */
+object PinHitTester {
+    /** Head center in pixels: straight above the tip by [headLiftPx]. */
+    fun head(pin: BlueprintPin, view: BlueprintView, headLiftPx: Float): Pair<Float, Float> = view.x(pin.xIn) to view.y(pin.yIn) - headLiftPx
+
+    /** The pin whose head is nearest the tap within [radiusPx]; the pin drawn last (on top) wins a tie. */
+    fun pinAt(pins: List<BlueprintPin>, view: BlueprintView, px: Float, py: Float, headLiftPx: Float, radiusPx: Float): BlueprintPin? {
+        var best: BlueprintPin? = null
+        var bestD = Float.MAX_VALUE
+        pins.forEach { pin ->
+            val (hx, hy) = head(pin, view, headLiftPx)
+            val d = (hx - px) * (hx - px) + (hy - py) * (hy - py)
+            if (d <= radiusPx * radiusPx && d <= bestD) { best = pin; bestD = d }
+        }
+        return best
+    }
+}

@@ -1,0 +1,106 @@
+# Walkthrough F11 (T044d1): pin a task on the job's floor plan and open it from the pin (AC-F35).
+# Builds a one-room plan on a new job (House tab: Start the plan, Edit plan, Add room "Kitchen"), adds a task,
+# drops its pin in the middle of the plan from the task form, then taps the pin on the House tab to open the task.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f11b@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# A task with no room yet, pinned on the plan from its form (AC-F35)
+- tapOn:
+    id: fl_job_tab_tasks
+- tapOn:
+    id: fl_tasks_add
+- tapOn:
+    id: fl_task_form_title
+- inputText: "Move the outlet behind the range"
+- hideKeyboard
+- tapOn:
+    id: fl_task_form_pin
+- extendedWaitUntil:
+    visible: "Tap the plan where the work is."
+    timeout: 10000
+- takeScreenshot: F11b-pin-picker
+# The one room fills the plan, so its middle is inside the Kitchen
+- tapOn:
+    id: fl_task_pin_plan
+- extendedWaitUntil:
+    visible: "Tap somewhere else to move the pin."
+    timeout: 5000
+- assertVisible:
+    id: fl_task_pin_remove
+- tapOn:
+    id: fl_task_pin_done
+# The form says where the pin is ("Main · Kitchen"); the pin also filled the empty Room field
+- extendedWaitUntil:
+    visible: ".*· Kitchen"
+    timeout: 5000
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Move the outlet behind the range"
+    timeout: 10000
+# The pin shows on the House tab and opens the task (AC-F35)
+- tapOn:
+    id: fl_job_tab_house
+- extendedWaitUntil:
+    visible: "Tap a pin to open its task, or a room to open the room."
+    timeout: 10000
+- takeScreenshot: F11b-house-pin
+- tapOn:
+    id: "fl_plan_pin_.*"
+- extendedWaitUntil:
+    visible: "Edit task"
+    timeout: 10000
+- assertVisible: "Move the outlet behind the range"
+- tapOn:
+    id: fl_close
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 10000

@@ -380,3 +380,11 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - Check box or a swipe either way ticks a task done with the same "Done: … · Undo" snackbar as the Tasks tab; the swipe is one shared `SwipeToComplete` in the tasks package used by both screens.
 - A tap opens the job on its Tasks tab, plus the task form on top for those who manage the job's tasks (RoleGates.canManageTasks); Crew can't edit tasks, so they get the tab.
 - `RecordListItem` gains `headlineMaxLines` (default 2, nothing else changes); task rows on Today and the Tasks tab allow 6 so long titles don't clip at 200% (rule 32).
+
+## 2026-10-31 — T044d1: task pins on the floor plan (AC-F35)
+
+- The pin is `TaskPlanPin(floorId, xIn, yIn)` stored as JSON in the existing task column `planPinJson` (no schema change; it syncs with the row). An unreadable value reads as no pin, so a bad pin never breaks the task.
+- Pinning lives in the task form ("Pin on plan" field, shown only when the job's house has rooms) and opens a plan picker over the form, one floor at a time; a tap drops or moves the pin. The pin is part of the typed form, so it is kept by Save and dropped by Close → Discard like any other field.
+- Dropping a pin in a room fills the task's Room when it is empty; it never replaces a room already chosen.
+- FL-House draws open tasks' pins as numbered map pins (tertiary color, fixed size so the number does not grow with font scale; TalkBack reads "Task n: title"). Managers (Owner, Office, the job's Lead) see every pin and a tap opens the task form; Crew see only their own tasks' pins, as on the Tasks tab, and a tap switches to the Tasks tab. Done tasks' pins are hidden.
+- The file-page pin (task `fileId`/`page`/`x`/`y`) is split out as T044d2.

@@ -1217,3 +1217,74 @@ fun TaskFormDeletePreview() = Frame {
         {},
     )
 }
+
+// Hale kitchen job's main floor: kitchen, mudroom by the back door, dining room.
+private val pinRooms = listOf(
+    com.kurtz.homerecord.housemodel.plan.PlanRoom.rectangle("r1", "Kitchen", "KITCHEN", 0, 0, 168, 144),
+    com.kurtz.homerecord.housemodel.plan.PlanRoom.rectangle("r2", "Mudroom", "MUDROOM", 168, 0, 96, 144),
+    com.kurtz.homerecord.housemodel.plan.PlanRoom.rectangle("r4", "Dining room", "DINING_ROOM", 0, 144, 264, 132),
+)
+private val pinFloors = listOf(
+    com.kurtz.homerecord.fieldlog.tasks.PinFloor("f0", "Basement", listOf(com.kurtz.homerecord.housemodel.plan.PlanRoom.rectangle("r3", "Basement", "BASEMENT", 0, 0, 264, 276))),
+    com.kurtz.homerecord.fieldlog.tasks.PinFloor("f1", "Main floor", pinRooms),
+)
+private val pinnedDraft = taskEditDraft.copy(planPin = com.kurtz.homerecord.core.model.TaskPlanPin("f1", 216, 110))
+
+/** FL-House with two task pins on the main floor; a tap on a pin opens its task (AC-F35). */
+@ThemePreviews
+@Composable
+fun JobHousePinsPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.HouseScreen(
+        state = com.kurtz.homerecord.housemodel.ui.HouseUiState(
+            loading = false, homeName = "Hale kitchen", summary = "418 Linden Ave, Ithaca",
+            floors = listOf(
+                com.kurtz.homerecord.housemodel.FloorSummary("f0", "Basement", 96, false, 1),
+                com.kurtz.homerecord.housemodel.FloorSummary("f1", "Main floor", 108, false, 3),
+            ),
+            floorId = "f1", rooms = pinRooms,
+        ),
+        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {},
+        pins = listOf(
+            com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t1", "Task 1: Move the outlet behind the range", 60, 30, 1),
+            com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t2", "Task 2: Replace cracked cover plate by the back door", 216, 110, 2),
+        ),
+    )
+}
+
+/** The task form with its pin on the plan: "Main floor · Mudroom" (AC-F35). */
+@ThemePreviews
+@Composable
+fun TaskFormPinnedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, draft = pinnedDraft, initial = pinnedDraft, people = taskPeople, rooms = taskRooms, plan = pinFloors,
+        ),
+        {},
+    )
+}
+
+/** Pin on plan: the main floor with the task's pin in the mudroom, floor chips, Remove pin (AC-F35). */
+@ThemePreviews
+@Composable
+fun TaskPinPickerPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, draft = pinnedDraft, initial = pinnedDraft, people = taskPeople, rooms = taskRooms,
+            plan = pinFloors, pinning = true, pinFloorId = "f1",
+        ),
+        {},
+    )
+}
+
+/** Pin on plan before a pin is placed: one sentence says where to tap. */
+@ThemePreviews
+@Composable
+fun TaskPinPickerEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            loading = false, draft = com.kurtz.homerecord.fieldlog.tasks.TaskFormDraft(title = "Add a GFCI by the sink"),
+            people = taskPeople, rooms = taskRooms, plan = pinFloors, pinning = true, pinFloorId = "f1",
+        ),
+        {},
+    )
+}

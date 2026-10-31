@@ -3,7 +3,9 @@ package com.kurtz.homerecord.fieldlog.tasks
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
+import com.kurtz.homerecord.housemodel.blueprint.RoomHitTester
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +24,8 @@ class TaskFormDeps(
     val people: suspend () -> List<PersonOption> = { emptyList() },
     val rooms: suspend () -> List<RoomOption> = { emptyList() },
     val photos: suspend () -> List<PhotoOption> = { emptyList() },
+    /** The job's floors with rooms, bottom floor first, for pinning on the plan (AC-F35). */
+    val plan: suspend () -> List<PinFloor> = { emptyList() },
     /** RoleGates.leads(jobId): only Owner, Office and the job's Lead add and edit tasks (AC-F3). */
     val canManage: Flow<Boolean> = flowOf(false),
 )
@@ -47,8 +51,9 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             val initial = existing?.let(TaskFormDraft::of) ?: TaskFormDraft()
             val draft = saved.get<String>(DRAFT)?.let { runCatching { json.decodeFromString(TaskFormDraft.serializer(), it) }.getOrNull() } ?: initial
             val people = d.people().sortedWith(compareByDescending<PersonOption> { it.onJob }.thenBy { it.name.lowercase() })
+            val plan = d.plan().filter { it.rooms.isNotEmpty() }
             _state.update {
-                it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos())
+                it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos(), plan = plan)
             }
         }
     }
@@ -64,6 +69,13 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             is TaskFormEvent.Punch -> edit { it.copy(punch = e.on) }
             is TaskFormEvent.OpenSheet -> if (ready()) _state.update { it.copy(sheet = e.sheet) }
             TaskFormEvent.CloseSheet -> closeSheet()
+            TaskFormEvent.OpenPin -> if (ready() && _state.value.plan.isNotEmpty()) {
+                _state.update { st -> st.copy(pinning = true, pinFloorId = st.draft.planPin?.floorId?.takeIf { id -> st.plan.any { it.id == id } } ?: st.plan.first().id) }
+            }
+            TaskFormEvent.ClosePin -> _state.update { it.copy(pinning = false) }
+            is TaskFormEvent.PinFloor -> if (_state.value.plan.any { it.id == e.floorId }) _state.update { it.copy(pinFloorId = e.floorId) }
+            is TaskFormEvent.PlacePin -> placePin(e.xIn, e.yIn)
+            TaskFormEvent.RemovePin -> edit { it.copy(planPin = null) }
             TaskFormEvent.Save -> save()
             TaskFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             TaskFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
@@ -82,6 +94,14 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
         val draft = change(_state.value.draft)
         saved[DRAFT] = json.encodeToString(TaskFormDraft.serializer(), draft)
         _state.update { it.copy(draft = draft) }
+    }
+
+    /** Drops the pin where the plan was tapped; a task with no room yet takes the room the pin falls in. */
+    private fun placePin(xIn: Int, yIn: Int) {
+        val st = _state.value
+        val floor = st.pinFloor ?: return
+        val room = RoomHitTester.roomAt(floor.rooms, xIn.toFloat(), yIn.toFloat())?.id?.takeIf { id -> st.rooms.any { it.id == id } }
+        edit { it.copy(planPin = TaskPlanPin(floor.id, xIn, yIn), roomId = it.roomId ?: room) }
     }
 
     private fun save() {

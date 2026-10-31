@@ -267,6 +267,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T044b2: swipe a row to complete with Undo and drag to reorder open tasks (`sh.calvin.reorderable`, `JobTasks.move`), extend F11 (AC-F34)
   - [x] T044c: My tasks on Today (overdue and due today, swipe complete with Undo, tap opens the task) (AC-F34)
   - [ ] T044d: pin a task on the floor plan (FL-House) and on a plan file page; the pin opens the task (AC-F35)
+    - [x] T044d1: pin on the floor plan: `TaskPlanPin` (task `planPinJson`) and `TaskPins` `[unit]`, "Pin on plan" in the task form (plan picker per floor, the pin fills an empty Room, Remove pin), numbered pins on FL-House that open the task (Crew see their own and land on Tasks), `PinHitTester`; ScreenCatalog, screenshots, F11b flow (AC-F35)
+    - [ ] T044d2: pin a task on a plan file page (task `fileId`/`page`/`x`/`y`) from the file viewer, pins drawn on the page open the task (AC-F35)
 - [ ] T045: Log PDF and Send: logo header, sections, photos; share sheet and email to client/office; Sent status, re-send (acceptance: AC-F33)
 - [ ] T046: Offline hardening: airplane-mode pass over every FL flow, pending count on Today, reconnect sync within 60 s, conflict log viewer under Settings (acceptance: AC-F52, AC-F55)
 - [ ] T047: Push notifications: FCM registration per member (delivery only), backend send for task assigned / schedule changed / change order signed / timesheet approved, deep links (acceptance: AC-B30, AC-F36)

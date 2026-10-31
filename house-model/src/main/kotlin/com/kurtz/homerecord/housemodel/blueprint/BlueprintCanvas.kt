@@ -39,7 +39,11 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
-/** Read-only blueprint of one floor, fitted to the space it gets. Tap opens a room, long press asks for its menu. */
+/**
+ * Read-only blueprint of one floor, fitted to the space it gets. Tap opens a room, long press asks for its menu.
+ * Task [pins] (AC-F35) are drawn on top and a tap on one calls [onPinClick]. With [onPlanTap] set, a tap anywhere on
+ * the plan reports its plan position in inches instead (placing a pin), and rooms and pins do not open.
+ */
 @Composable
 fun BlueprintCanvas(
     rooms: List<PlanRoom>,
@@ -47,6 +51,9 @@ fun BlueprintCanvas(
     layers: LayerSet = LayerSet(),
     markers: List<BlueprintMarker> = emptyList(),
     system: UnitSystem = UnitSystem.IMPERIAL,
+    pins: List<BlueprintPin> = emptyList(),
+    onPinClick: (String) -> Unit = {},
+    onPlanTap: ((xIn: Int, yIn: Int) -> Unit)? = null,
     onRoomClick: (PlanRoom) -> Unit = {},
     onRoomLongClick: (PlanRoom) -> Unit = {},
 ) {
@@ -65,6 +72,15 @@ fun BlueprintCanvas(
     val currentRooms by rememberUpdatedState(rooms)
     val click by rememberUpdatedState(onRoomClick)
     val longClick by rememberUpdatedState(onRoomLongClick)
+    val currentPins by rememberUpdatedState(pins)
+    val pinClick by rememberUpdatedState(onPinClick)
+    val planTap by rememberUpdatedState(onPlanTap)
+    val pinColors = PinColors(scheme.tertiary, scheme.onTertiary, scheme.surface)
+    // The number sits inside a fixed-size head, so it does not grow with the font scale; TalkBack reads the task title.
+    val fontScale = LocalDensity.current.fontScale
+    val pinStyle = MaterialTheme.typography.labelMedium.copy(fontSize = androidx.compose.ui.unit.TextUnit(12f / fontScale, androidx.compose.ui.unit.TextUnitType.Sp))
+    val liftPx = PIN_LIFT_DP * density
+    val hitPx = 24f * density
     val description = pluralStringResource(R.plurals.blueprint_description, rooms.size, rooms.size)
     val marginPx = 40f * density
     BoxWithConstraints(modifier) {
@@ -78,9 +94,17 @@ fun BlueprintCanvas(
                 detectTapGestures(
                     onTap = { at ->
                         val view = BlueprintView.fit(currentRooms, size.width.toFloat(), size.height.toFloat(), marginPx)
-                        RoomHitTester.roomAt(currentRooms, view.planX(at.x), view.planY(at.y))?.let(click)
+                        val place = planTap
+                        if (place != null) {
+                            place(Math.round(view.planX(at.x)), Math.round(view.planY(at.y)))
+                            return@detectTapGestures
+                        }
+                        val pin = PinHitTester.pinAt(currentPins, view, at.x, at.y, liftPx, hitPx)
+                        if (pin != null) pinClick(pin.id)
+                        else RoomHitTester.roomAt(currentRooms, view.planX(at.x), view.planY(at.y))?.let(click)
                     },
                     onLongPress = { at ->
+                        if (planTap != null) return@detectTapGestures
                         val view = BlueprintView.fit(currentRooms, size.width.toFloat(), size.height.toFloat(), marginPx)
                         RoomHitTester.roomAt(currentRooms, view.planX(at.x), view.planY(at.y))?.let(longClick)
                     },
@@ -89,6 +113,7 @@ fun BlueprintCanvas(
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
         drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, layers, markers)
+        pins.forEach { drawPin(it, view, density, measurer, pinStyle, pinColors) }
     }
     // Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its bounds.
     if (rooms.isNotEmpty() && widthPx > 0f && heightPx > 0f) {
@@ -112,6 +137,22 @@ fun BlueprintCanvas(
                         stateDescription = size
                         onClick { click(room); true }
                         onLongClick { longClick(room); true }
+                    },
+            )
+        }
+        // One 48 dp node per pin over its head, after the rooms so TalkBack reads them last (rule 13).
+        val prefix = LocalTagPrefix.current
+        pins.forEach { pin ->
+            val (hx, hy) = PinHitTester.head(pin, view, liftPx)
+            Box(
+                Modifier
+                    .offset(toDp(hx - hitPx), toDp(hy - hitPx))
+                    .size(toDp(2 * hitPx))
+                    .testTag("${prefix}_plan_pin_${pin.id}")
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = pin.label
+                        if (planTap == null) onClick { pinClick(pin.id); true }
                     },
             )
         }

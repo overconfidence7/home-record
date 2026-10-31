@@ -21,6 +21,30 @@ import com.kurtz.homerecord.housemodel.plan.WallDeriver
 
 private const val STAIR_TREAD_IN = 10
 
+/** How far above its tip a task pin's head sits, in dp. */
+const val PIN_LIFT_DP = 20f
+
+data class PinColors(val fill: Color, val onFill: Color, val outline: Color)
+
+/** A map pin: a round numbered head above a point at the task's spot, outlined so it reads on any room fill (AC-F35). */
+fun DrawScope.drawPin(pin: BlueprintPin, view: BlueprintView, density: Float, measurer: TextMeasurer, style: TextStyle, colors: PinColors) {
+    val tip = Offset(view.x(pin.xIn), view.y(pin.yIn))
+    val head = Offset(tip.x, tip.y - PIN_LIFT_DP * density)
+    val r = 12f * density
+    val body = Path().apply {
+        moveTo(tip.x, tip.y)
+        lineTo(head.x - r * 0.7f, head.y + r * 0.7f)
+        lineTo(head.x + r * 0.7f, head.y + r * 0.7f)
+        close()
+    }
+    drawPath(body, colors.outline, style = Stroke(width = 4f * density))
+    drawCircle(colors.outline, r + 2f * density, head)
+    drawPath(body, colors.fill)
+    drawCircle(colors.fill, r, head)
+    val text = measurer.measure(pin.number.toString(), style.copy(color = colors.onFill))
+    drawText(text, topLeft = Offset(head.x - text.size.width / 2f, head.y - text.size.height / 2f))
+}
+
 /** A layer marker at a plan position; items and overlays supply these as they are added. */
 data class BlueprintMarker(val layer: BlueprintLayer, val xIn: Int, val yIn: Int)
 

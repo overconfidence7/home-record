@@ -235,6 +235,11 @@ class AppContainer(private val app: Application) {
         photos = {
             db.photoDao().observeForJob(jobId).first().map { com.kurtz.homerecord.fieldlog.tasks.PhotoOption(it.id, it.thumbPath ?: it.path) }
         },
+        plan = {
+            val homeId = db.jobDao().get(jobId)?.homeId
+            if (homeId == null) emptyList()
+            else homes.observeFloors(homeId).first().map { com.kurtz.homerecord.fieldlog.tasks.PinFloor(it.id, it.name, homes.loadPlan(it.id).placed) }
+        },
         canManage = roleGates.map { it.canManageTasks(jobId) },
     )
 

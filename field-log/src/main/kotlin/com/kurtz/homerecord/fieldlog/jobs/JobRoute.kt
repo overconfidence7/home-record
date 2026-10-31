@@ -5,15 +5,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.housemodel.HomeRepository
+import com.kurtz.homerecord.core.model.TaskPins
+import com.kurtz.homerecord.fieldlog.R
+import com.kurtz.homerecord.housemodel.blueprint.BlueprintPin
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
+import kotlinx.coroutines.flow.flowOf
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
 
@@ -73,6 +79,10 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
         },
         houseContent = {
             val homeId = state.homeId
+            // Task pins (AC-F35): managers see every open pin and open the task form; Crew see their own and land on Tasks.
+            val jobTasks by remember(tasks) { tasks?.tasks?.observeForJob(jobId) ?: flowOf(emptyList()) }.collectAsState(emptyList())
+            val canManageTasks by remember(tasks) { tasks?.canManage ?: flowOf(false) }.collectAsState(false)
+            val pinLabel = stringResource(R.string.task_pin_label)
             if (homeId == null) {
                 JobHouseEmpty(onStart = vm::startHouse, modifier = Modifier.fillMaxSize())
             } else {
@@ -87,6 +97,13 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     onEditShape = { floorId, room -> house.onEditShape(homeId, state.name, floorId, room) },
                     onOpenFloors = { house.onOpenFloors(homeId, state.name) },
                     modifier = Modifier.fillMaxSize(),
+                    pins = { floorId ->
+                        TaskPins.onFloor(jobTasks, floorId, canManageTasks, tasks?.me).mapIndexed { i, t ->
+                            val pin = t.planPin ?: return@mapIndexed null
+                            BlueprintPin(t.id, String.format(pinLabel, i + 1, t.title), pin.xIn, pin.yIn, i + 1)
+                        }.filterNotNull()
+                    },
+                    onOpenPin = { id -> if (canManageTasks) onOpenTask(id) else tab = JobTab.TASKS },
                 )
             }
         },

@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.coreui.platform.Intents
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.R
+import com.kurtz.homerecord.housemodel.blueprint.BlueprintPin
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
@@ -36,6 +37,9 @@ fun HouseRoute(
     onEditShape: (floorId: String?, PlanRoom) -> Unit,
     onOpenFloors: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Task pins for a floor (FL-House, AC-F35). */
+    pins: (floorId: String?) -> List<BlueprintPin> = { emptyList() },
+    onOpenPin: (String) -> Unit = {},
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -64,5 +68,7 @@ fun HouseRoute(
         onEditShape = { onEditShape(state.floorId, it) },
         onOpenFloors = onOpenFloors,
         modifier = modifier,
+        pins = pins(state.floorId),
+        onOpenPin = onOpenPin,
     )
 }

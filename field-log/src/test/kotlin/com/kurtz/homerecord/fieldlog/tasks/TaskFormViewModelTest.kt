@@ -7,7 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.core.task.TaskDraft
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.Dispatchers
@@ -27,8 +29,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
 
+// AC-F35: the form pins the task on the floor plan (picker per floor, the pin fills an empty room, Remove pin).
 // AC-F34: a task has title, assignee, due date, room, photo, note and punch flag; the form adds, edits and deletes
-@AcceptanceCriterion("AC-F34")
+@AcceptanceCriterion("AC-F34", "AC-F35")
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -58,9 +61,17 @@ class TaskFormViewModelTest {
             people = { listOf(PersonOption("m1", "Nate Kurtz"), PersonOption("m3", "Marcus Bell", onJob = true), PersonOption("m2", "Dana Ortiz", onJob = true)) },
             rooms = { listOf(RoomOption("r1", "Kitchen")) },
             photos = { listOf(PhotoOption("p1", "/media/p1.jpg")) },
+            plan = { plan },
             canManage = flowOf(manage),
         ),
         saved,
+    )
+
+    // Kitchen (r1) on the main floor is 0..144 x 0..120 inches; the basement has no rooms and is not offered.
+    private var plan = listOf(
+        PinFloor("basement", "Basement", emptyList()),
+        PinFloor("main", "Main floor", listOf(PlanRoom.rectangle("r1", "Kitchen", "KITCHEN", 0, 0, 144, 120))),
+        PinFloor("upper", "Upstairs", listOf(PlanRoom.rectangle("r9", "Bedroom", "BEDROOM", 0, 0, 144, 144))),
     )
 
     private fun TaskFormViewModel.current(until: (TaskFormUiState) -> Boolean = { true }): TaskFormUiState = runBlocking {
@@ -157,5 +168,50 @@ class TaskFormViewModelTest {
     @Test fun aTaskFromAnotherJobDoesNotOpen() {
         val id = checkNotNull(runBlocking { tasks.add("j2", TaskDraft("Mount the subpanel")) })
         assertThat(vm(id).current().failed).isTrue()
+    }
+
+    @Test fun pinOnPlanDropsThePinAndFillsTheRoom() {
+        val vm = vm()
+        val s = vm.current()
+        assertThat(s.plan.map { it.id }).containsExactly("main", "upper").inOrder()
+        vm.onEvent(TaskFormEvent.Title("Move the outlet"))
+        vm.onEvent(TaskFormEvent.OpenPin)
+        assertThat(vm.current().pinning).isTrue()
+        assertThat(vm.current().pinFloor?.id).isEqualTo("main")
+        vm.onEvent(TaskFormEvent.PlacePin(60, 40))
+        assertThat(vm.current().draft.planPin).isEqualTo(TaskPlanPin("main", 60, 40))
+        assertThat(vm.current().draft.roomId).isEqualTo("r1")
+        assertThat(vm.current().pinPlace).isEqualTo("Main floor" to "Kitchen")
+        vm.onEvent(TaskFormEvent.ClosePin)
+        assertThat(vm.current().pinning).isFalse()
+        vm.onEvent(TaskFormEvent.Save)
+        vm.current { it.done }
+        val saved = runBlocking { tasks.observeForJob("j1").first().single() }
+        assertThat(saved.planPin).isEqualTo(TaskPlanPin("main", 60, 40))
+        assertThat(saved.roomId).isEqualTo("r1")
+    }
+
+    @Test fun pinOnAnotherFloorKeepsTheRoomAlreadyChosenAndCanBeRemoved() {
+        val id = runBlocking { checkNotNull(tasks.add("j1", TaskDraft(title = "Smoke detector", roomId = "r1", planPin = TaskPlanPin("main", 10, 10)))) }
+        val vm = vm(taskId = id)
+        assertThat(vm.current().pinPlace).isEqualTo("Main floor" to "Kitchen")
+        vm.onEvent(TaskFormEvent.OpenPin)
+        assertThat(vm.current().pinFloorId).isEqualTo("main")
+        vm.onEvent(TaskFormEvent.PinFloor("upper"))
+        vm.onEvent(TaskFormEvent.PlacePin(20, 20))
+        assertThat(vm.current().draft.planPin).isEqualTo(TaskPlanPin("upper", 20, 20))
+        assertThat(vm.current().draft.roomId).isEqualTo("r1")
+        assertThat(vm.current().dirty).isTrue()
+        vm.onEvent(TaskFormEvent.RemovePin)
+        assertThat(vm.current().draft.planPin).isNull()
+        assertThat(vm.current().pinPlace).isNull()
+    }
+
+    @Test fun noPlanMeansNoPinPicker() {
+        plan = emptyList()
+        val vm = vm()
+        vm.current()
+        vm.onEvent(TaskFormEvent.OpenPin)
+        assertThat(vm.current().pinning).isFalse()
     }
 }

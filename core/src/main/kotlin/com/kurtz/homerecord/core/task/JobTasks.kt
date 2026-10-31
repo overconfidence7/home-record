@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.data.TaskEntity
 import com.kurtz.homerecord.core.model.JobTask
 import com.kurtz.homerecord.core.model.TaskList
 import com.kurtz.homerecord.core.model.TaskOrder
+import com.kurtz.homerecord.core.model.TaskPlanPin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -21,13 +22,15 @@ data class TaskDraft(
     val photoId: String? = null,
     val note: String? = null,
     val punch: Boolean = false,
+    /** Where the work is on the floor plan (AC-F35). */
+    val planPin: TaskPlanPin? = null,
 )
 
 fun TaskEntity.toModel(): JobTask = JobTask(
     id = id, jobId = jobId, title = title, assigneeId = assigneeId,
     due = due?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
     roomId = roomId, photoId = photoId, note = note, done = done, punch = punch, sortOrder = sortOrder,
-    doneAt = doneAt ?: if (done) updatedAt else null, createdAt = createdAt,
+    doneAt = doneAt ?: if (done) updatedAt else null, createdAt = createdAt, planPin = TaskPlanPin.decode(planPinJson),
 )
 
 /**
@@ -60,7 +63,7 @@ class JobTasks(
                 TaskEntity(
                     id = id, jobId = jobId, title = title, assigneeId = draft.assigneeId, due = draft.due?.toString(),
                     roomId = draft.roomId, photoId = draft.photoId, note = draft.note.clean(), punch = draft.punch,
-                    sortOrder = dao.maxSortOrder(jobId) + 1, createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
+                    planPinJson = draft.planPin?.encode(), sortOrder = dao.maxSortOrder(jobId) + 1, createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
                 ),
             )
         }
@@ -68,7 +71,7 @@ class JobTasks(
         return id
     }
 
-    /** Saves the form over an existing task; done state, order and pins are kept. False when blank or gone. */
+    /** Saves the form over an existing task, plan pin included; done state, order and the file pin are kept. False when blank or gone. */
     suspend fun update(id: String, draft: TaskDraft): Boolean {
         val title = draft.title.trim()
         val row = dao.get(id) ?: return false
@@ -76,7 +79,8 @@ class JobTasks(
         dao.upsert(
             row.copy(
                 title = title, assigneeId = draft.assigneeId, due = draft.due?.toString(), roomId = draft.roomId,
-                photoId = draft.photoId, note = draft.note.clean(), punch = draft.punch, updatedAt = now(),
+                photoId = draft.photoId, note = draft.note.clean(), punch = draft.punch, planPinJson = draft.planPin?.encode(),
+                updatedAt = now(),
             ),
         )
         onChange(ENTITY, id)

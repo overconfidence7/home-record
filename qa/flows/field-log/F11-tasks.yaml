@@ -1,7 +1,7 @@
 # Walkthrough F11 (T044b, T044c): Tasks tab on a job: empty state, add tasks through the full-screen form,
 # Punch list filter, tick a task done and Undo it from the snackbar; a task assigned to me and due today shows
-# under My tasks on Today, swipes done with Undo and opens in the form (AC-F34). Pinning on the plan (T044d)
-# extends this flow when it lands.
+# under My tasks on Today, swipes done with Undo and opens in the form (AC-F34). Pinning on the plan (T044d1) is
+# F11b-task-pin.yaml.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
