@@ -2238,3 +2238,60 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 52 device stages, 909 unit tests, 133 backend tests, coverage 217/217 ACs. Passed: 49. New issues: 3. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-10-31 (commit 6a0e6db4)
+
+Judged the suite results for 6a0e6db4 (run of 2026-10-30 22:37 UTC, 52 stages, 49 passed). `build` HEAD fb101652 is ten commits ahead (CR2u sweeps 13–15: build-logic convention plugins, item category and type names as string resources; the Edit punch crawler-tag fix 01df1d48 and the jank measurement change f56a8168); the suite has not tested it yet. Since 47c24c4b the visible changes are: Edit punch as a full-screen form, Approve <name> only inside the opened Timesheets row, Edit item keeping Close and Save while loading, flows selecting by id, the seed deep link and a new H06 Items flow on the seeded house. No PLAN task was newly ticked.
+
+Verdict: House Manual: every flow and tour passes again, and the new H06 run on the seeded house shows Items working the way a homeowner expects (by category or by room, folding headers with counts, an Expired filter that finds the gas range and the AC condenser). What Nate says first is unchanged: the house stops at a 2D outline, with no wall photos, 3D, breaker panel or Emergency list, and the Reminders tab is still the "Open a detail screen" placeholder. / Field Log: all thirteen flows pass, and Timesheets finally reads as one row per person with Approve inside the opened row. The crawler stopped at the new Edit punch form, so that form, Files, Photos, Reports and Photo detail were not seen this run, and the biggest gap is still that Schedule is a developer placeholder and there is no daily log, tasks or change order.
+
+- [ ] [Minor] Shutoffs are listed among the items with a "Warranty unknown" line, so the gas main shutoff reads like an appliance whose warranty is missing [judge:hm-items-shutoff-warranty] - steps: seeded house → Items → By room (flow H06) - expected: rule 7 (supporting text that means something for the row) and H6 (the warranty filter and status are for things that carry a warranty); a shutoff shows its location or what it shuts off, not a warranty status - actual: "Gas main shutoff" with a grey "?" "Warranty unknown" line at the top of the by-room list - screenshot: qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png
+- [ ] [Minor] With the Expired filter on, the selected chip sits past the right edge of the chip row ("Expi…"), so the screen does not say which filter is narrowing the list [judge:hm-items-active-chip-offscreen] - steps: Items → tap Expired (flow H06; catalog `items-filtered`) - expected: rule 11 (filters as a row of FilterChips the user can read); the active chip scrolled into view or selected chips moved to the front - actual: Category, Room, Active, Expiring fully visible, the selected Expired chip clipped at the screen edge - screenshot: qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png
+
+Auto entry review: the three auto findings are fair and already marked fixed by the builder. The instrumented failure is the crawler stopping at `timesheets-edit` (the FormScaffold tag prefix), so the Field Log crawler has only 74 of its catalog screens: files, photos, photo detail, reports and the Edit punch form are missing from this run. The jank pair are measurement, not flow, errors; nothing to tag [judge: flow error].
+
+Confirmed on device or in the crawler this run (builder may close): [judge:fl-timesheets-approve-buttons] (`timesheets-collapsed`, `timesheets-week` light and 200%: one row per person, Approve Marcus Ortiz only inside the opened row); [judge:hm-item-edit-loading-nav] (`item-edit-loading-dark.png`, `item-edit-loading-font200.png`: X, "Edit item" and a greyed Save over the spinner; the light frame is a blank capture).
+
+Not seen this run (crawler stopped before them): [judge:fl-edit-punch-dialog] (the new form), [judge:fl-photo-missing-bare], [judge:qa-fl-photo-catalog-no-image], [judge:qa-crawler-job-tab-insets] for files/photos.
+
+Still open and seen again this run: [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (every tour), [judge:fl-clock-solo-owner-noise] ("Clock in 0 people" in `tour-dark-clock`, `tour-font200-clock`), [judge:hm-house-actions-wrap] ("Edit / plan", "Export / PDF" in `flow-H02-draw-plan-H02-blueprint-after-edit.png`), [judge:hm-room-kind-not-inferred] (`flow-H03-blueprint-room-H03-room-kitchen.png`: "14' by 12' 6" · Other" with the five grey cards), [judge:hm-more-signed-in-no-account] (`flow-H17-sign-in-H17-signed-in.png` "You are signed in."), [judge:fl-jobs-rows-no-icon] (`field-log-jank-list.png`, `jobs-list-light.png`), [judge:fl-empty-states-rule10] (Jobs empty icon a fraction of Today's), [judge:fl-catalog-welcome-insets] and [judge:qa-catalog-sheets-no-container] (`welcome-create`, `welcome-join-error`, `document-form`, `item-detail-review-sheet`, `item-edit-plate-sheet`, `item-edit-type-sheet*` draw under the status bar), [judge:qa-fl-tour-blank] (Field Log `tour-landscape-launch` is an empty surface, `tour-dark-launch` opens on Team instead of Today), [judge:qa-crawler-blank-shots] (17 non-loading blanks by script, including `today-admin-light`, `today-crew-light`, `timesheets-collapsed-dark`, `timesheets-week-dark`, `item-detail-upkeep-font200`, `paywall-items-font200`; `item-edit-loading-light` is blank too), and the 200% nav labels ("Remin / ders", "Sched / ule" on every font200 tour shot).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Maple St, two-story, basement → Home with search, Add item, Scan data plate, Emergency "Add a shutoff"; dark, 200% and landscape (rail) clean | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | Add room, typed 14' × 12'6" kept, Living room beside it; H02b shape, doors and stairs pass. Open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint with dimensions and north arrow, room opens, long-press menu, Electrical layer; the Kitchen page says "Other" and lists five grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Clunky | Add item form on device (type, room, make, model, dates); data-plate scan and the saved warranty section only seen in the catalog | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | Still no flow adds more than one item; the seeded house now reads well in Items on device | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | First time on device: by category (Appliances 7) and by room with folding headers, warranty line per row, Expired filter; selected chip off-screen and shutoffs with a warranty line (new Minors) | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Warranty line, Details, Open manual, Warranty; hero is a lone icon over the top third; no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown with no spinner or error (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Sign in ends at "Everything is synced" with the local copy kept; second-phone half not exercised; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Pro screen with limits copy, "Can't load prices right now", Retry, Restore purchases; no RevenueCat key on the runner (catalog `paywall-items` shows Annual $24.99 and Lifetime $59) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder; H15 Home report T073, H16 T074, H18 import T063).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → Set up your company → Today "No jobs yet at QA Electric" with Add a job and Invite crew | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Team shows the code and Share invite; second account joins, More shows "QA Electric · Crew"; seeded company shows Owner and Crew | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-more-crew.png |
+| F3 | Clunky | Overview with address, Open in Maps, stat tiles, Edit job; House tab "No plan for this job yet / Start the plan"; tabs where Log and Tasks lead nowhere yet | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass (clock in, location allow, far-from-job reason, from Today) | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out; "Changes to your punches" with who, when and why | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Clunky | F06 passes; one row per person, flags, Approve only in the opened row; the new Edit punch form was not captured (crawler stopped there); exports not exercised | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Clunky | F07 and F07b pass; no Files screenshots this run (crawler stopped); markup (T042) not built | qa-results:latest/field-log/maestro/F07-files.xml |
+| F8 | Clunky | F08 (denied camera) and F08b pass: shutter saves, counter 1, photo under today on Photos; capture keeps the bottom bar; before/after and mark-up not seen | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F15 | Pass | F15 passes; no Reports screenshots this run (crawler stopped); last seen fine in 47c24c4b | qa-results:latest/field-log/maestro/F15-reports.xml |
+| F18 | Clunky | More, Team, Company in light, dark, 200% and landscape; Schedule tab is the placeholder; "Sched / ule" at 200% | qa-results:latest/field-log/screenshots/tour-font200-schedule.png |
+
+Not built yet: F9–F14, F16, F17 (daily log T043, tasks T044, behind-the-wall T054).
+
+Focus check: nothing wrong. House Manual stays the homeowner's record (warranties, shutoffs, the plumber and the HVAC company); Field Log stays the crew's app (clock, crew, invite code); the shared sign-in and sync chip read fine in both.
+
+Coverage note: the auto entry reports 217/217 claimed ACs covered across 118 ticked tasks and subtasks (0 gaps).
+
+Judged: 242 screenshots opened (all 115 device flow, tour, launch and monkey shots, all 120 light crawler shots, 7 dark/200%/landscape crawler shots of the changed screens); the other 446 crawler variants checked by script for blank frames. 20 walkthrough steps. New issues: 2. Product gaps: 0.
