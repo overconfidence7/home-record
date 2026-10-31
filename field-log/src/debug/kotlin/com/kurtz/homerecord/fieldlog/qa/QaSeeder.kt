@@ -15,8 +15,9 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Debug-only: the seed scenarios, shared by [SeedReceiver] (adb broadcast) and [SeedActivity] (Maestro `openLink`).
- * Needs the dev backend (`ENVIRONMENT=dev`). `regression` seeds "QA Electric" with an Owner and a Crew member there and
- * signs this device in as the owner; `long-list` does the same and adds 200 jobs on this phone; `reset` signs out and
+ * Needs the dev backend (`ENVIRONMENT=dev`). `regression` seeds "QA Electric" with an Owner and a Crew member there,
+ * signs this device in as the owner and adds the job "Garage subpanel" with a plan PDF on this phone ([PlanFileSeed]);
+ * `long-list` does the same and adds 200 jobs on this phone; `reset` signs out and
  * wipes the backend. All three first clear this phone's Room tables, media and prefs (cr:fl-seed-reset).
  */
 object QaSeeder {
@@ -24,7 +25,10 @@ object QaSeeder {
     suspend fun run(context: Context, scenario: String): Boolean {
         val container = (context.applicationContext as HomeRecordApplication).container
         return when (scenario) {
-            "regression" -> signInToSeededCompany(container)
+            "regression" -> signInToSeededCompany(container).also {
+                // F7 markup: a job with a plan PDF on this phone (AC-F21)
+                if (it) PlanFileSeed.seed(container.db, QA_COMPANY_ID, OWNER_ID, java.io.File(context.filesDir, "media"))
+            }
             // AC-U11 scroll jank: the regression company with 200 jobs on Jobs
             "long-list" -> signInToSeededCompany(container).also { if (it) LongListSeed.seed(container.db, QA_COMPANY_ID) }
             "reset" -> {
@@ -65,6 +69,7 @@ object QaSeeder {
         }
 
     private const val OWNER_EMAIL = "owner@qa.test"
+    private const val OWNER_ID = "qa-owner" // backend/src/routes/dev.ts
     private const val QA_COMPANY_ID = "qa-company" // backend/src/routes/dev.ts
     private const val TAG = "QaSeed"
 }

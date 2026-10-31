@@ -401,3 +401,28 @@ fun FileViewerNotOnPhoneScreenshot() = FileViewerNotOnPhonePreview()
 @ThemePreviews
 @Composable
 fun FileViewerNoPreviewScreenshot() = FileViewerNoPreviewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerHistoryScreenshot() = FileViewerHistoryPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MarkupScreenshot() = MarkupPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MarkupEmptyScreenshot() = MarkupEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MarkupTextScreenshot() = MarkupTextPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MarkupNotAvailableScreenshot() = MarkupNotAvailablePreview()

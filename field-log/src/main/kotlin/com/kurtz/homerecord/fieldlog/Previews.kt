@@ -4,6 +4,16 @@ import androidx.compose.ui.graphics.asImageBitmap
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.kurtz.homerecord.core.company.ApiFailure
@@ -784,8 +794,80 @@ private object SamplePlanPages : com.kurtz.homerecord.coreui.pages.PageSource {
 @Composable
 fun FileViewerPreview() = Frame {
     com.kurtz.homerecord.fieldlog.files.FileViewerScreen(
-        com.kurtz.homerecord.fieldlog.files.FileViewerUiState(loading = false, name = "Garage plan.pdf", path = "p", mime = "application/pdf", pages = SamplePlanPages), {},
+        fileViewerReady, {}, java.time.ZoneId.of("UTC"),
     )
+}
+
+private val planVersions = listOf(
+    com.kurtz.homerecord.fieldlog.files.FileVersion("v3", 3, "Marcus Ortiz", 1_792_080_000_000, shown = true),
+    com.kurtz.homerecord.fieldlog.files.FileVersion("v2", 2, "Dana Reyes", 1_791_990_000_000, shown = false),
+    com.kurtz.homerecord.fieldlog.files.FileVersion("v1", 1, null, 1_791_800_000_000, shown = false),
+)
+
+private val fileViewerReady = com.kurtz.homerecord.fieldlog.files.FileViewerUiState(
+    loading = false, name = "Garage plan.pdf", path = "p", mime = "application/pdf", pages = SamplePlanPages,
+    canMarkUp = true, versions = planVersions,
+)
+
+/** The history sheet over the viewer; the sheet itself is a popup the screenshot renderer cannot draw. */
+@ThemePreviews
+@Composable
+fun FileViewerHistoryPreview() = Frame {
+    Box(Modifier.fillMaxSize()) {
+        com.kurtz.homerecord.fieldlog.files.FileViewerScreen(fileViewerReady, {}, java.time.ZoneId.of("UTC"))
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)))
+        Surface(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), tonalElevation = 1.dp,
+        ) {
+            Column(Modifier.padding(top = 16.dp)) {
+                com.kurtz.homerecord.fieldlog.files.VersionHistory(planVersions, {}, java.time.ZoneId.of("UTC"))
+            }
+        }
+    }
+}
+
+private val markupReady = com.kurtz.homerecord.fieldlog.files.MarkupUiState(
+    loading = false, name = "Garage plan.pdf", pages = SamplePlanPages, tool = com.kurtz.homerecord.core.photo.PdfTool.Highlight,
+    marks = listOf(
+        com.kurtz.homerecord.core.photo.PdfMark.Highlight(0, com.kurtz.homerecord.core.photo.NormPoint(0.05f, 0.15f), com.kurtz.homerecord.core.photo.NormPoint(0.75f, 0.2f)),
+        com.kurtz.homerecord.core.photo.PdfMark.Rect(0, com.kurtz.homerecord.core.photo.NormPoint(0.05f, 0.3f), com.kurtz.homerecord.core.photo.NormPoint(0.9f, 0.4f)),
+        com.kurtz.homerecord.core.photo.PdfMark.Arrow(0, com.kurtz.homerecord.core.photo.NormPoint(0.6f, 0.7f), com.kurtz.homerecord.core.photo.NormPoint(0.45f, 0.42f)),
+        com.kurtz.homerecord.core.photo.PdfMark.Text(0, com.kurtz.homerecord.core.photo.NormPoint(0.35f, 0.78f), "Move to north wall"),
+        com.kurtz.homerecord.core.photo.PdfMark.Pen(0, listOf(
+            com.kurtz.homerecord.core.photo.NormPoint(0.1f, 0.6f), com.kurtz.homerecord.core.photo.NormPoint(0.15f, 0.55f),
+            com.kurtz.homerecord.core.photo.NormPoint(0.22f, 0.62f), com.kurtz.homerecord.core.photo.NormPoint(0.3f, 0.56f),
+        )),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun MarkupPreview() = Frame { com.kurtz.homerecord.fieldlog.files.MarkupScreen(markupReady) {} }
+
+@ThemePreviews
+@Composable
+fun MarkupEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.MarkupScreen(markupReady.copy(marks = emptyList(), page = 1, tool = com.kurtz.homerecord.core.photo.PdfTool.Pen)) {}
+}
+
+@ThemePreviews
+@Composable
+fun MarkupTextPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.MarkupScreen(
+        markupReady.copy(
+            tool = com.kurtz.homerecord.core.photo.PdfTool.Text, pendingText = com.kurtz.homerecord.core.photo.NormPoint(0.4f, 0.5f),
+            pendingValue = "Check clearance",
+        ),
+    ) {}
+}
+
+@ThemePreviews
+@Composable
+fun MarkupNotAvailablePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.MarkupScreen(
+        com.kurtz.homerecord.fieldlog.files.MarkupUiState(loading = false, problem = com.kurtz.homerecord.fieldlog.files.MarkupProblem.NotAvailable),
+    ) {}
 }
 
 @ThemePreviews

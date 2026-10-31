@@ -1,0 +1,74 @@
+# Walkthrough F7: mark up the seeded plan PDF; the marks save as version 2 by the owner and the version history
+# lists both versions and opens the original (AC-F21). Seed: "Garage subpanel" with Plans/Garage plan.pdf (PlanFileSeed).
+appId: com.kurtz.homerecord.fieldlog
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "fl_tab_jobs"
+- extendedWaitUntil:
+    visible: "Garage subpanel"
+    timeout: 15000
+- tapOn: "Garage subpanel"
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_files_folder_Plans
+    timeout: 10000
+- tapOn:
+    id: fl_files_folder_Plans
+- tapOn:
+    id: fl_files_row_qa-file-garage-plan
+- extendedWaitUntil:
+    visible:
+      id: fl_file_pages
+    timeout: 10000
+# one version so far: Mark up is offered, Version history is not
+- assertNotVisible:
+    id: fl_file_history
+- tapOn:
+    id: fl_file_markup
+- extendedWaitUntil:
+    visible:
+      id: fl_markup_canvas
+    timeout: 10000
+- assertVisible:
+    id: fl_markup_tool_highlight
+- assertVisible: "Page 1 of 2"
+- tapOn:
+    id: fl_markup_tool_rectangle
+- swipe:
+    from:
+      id: fl_markup_canvas
+    direction: DOWN
+    duration: 800
+- tapOn:
+    id: fl_markup_undo
+- swipe:
+    from:
+      id: fl_markup_canvas
+    direction: RIGHT
+    duration: 800
+- takeScreenshot: F07c-markup-drawn
+- tapOn:
+    id: fl_save
+# the viewer now shows the new version, with history
+- extendedWaitUntil:
+    visible:
+      id: fl_file_history
+    timeout: 15000
+- tapOn:
+    id: fl_file_history
+- extendedWaitUntil:
+    visible:
+      id: fl_file_version_2
+    timeout: 10000
+- assertVisible:
+    id: fl_file_version_1
+- takeScreenshot: F07c-version-history
+- tapOn:
+    id: fl_file_version_1
+- extendedWaitUntil:
+    visible:
+      id: fl_file_pages
+    timeout: 10000
