@@ -25,13 +25,13 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_tasks_empty
     timeout: 10000
-# rule 10: the empty state's action is the FAB's action
+# AC-F34 rule 10: the empty state's action is the FAB's action
 - assertVisible: "No tasks yet"
 - assertVisible:
     id: fl_tasks_add
 - tapOn:
     id: fl_tasks_empty_add
-# rule 15: more than two fields, so a full-screen form with Close and Save and no tab bar (rule 3)
+# AC-F34 rule 15: title, assignee, due, room, photo, note and punch in a form with more than two fields, so full screen, so a full-screen form with Close and Save and no tab bar (rule 3)
 - extendedWaitUntil:
     visible:
       id: fl_task_form_title
@@ -50,7 +50,7 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Set the kitchen outlets"
     timeout: 10000
-# a punch-list item from the FAB
+# AC-F34: a punch-list item from the FAB
 - tapOn:
     id: fl_tasks_add
 - tapOn:
@@ -64,7 +64,7 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Replace cracked cover plate"
     timeout: 10000
-# the punch list is a filter, not a separate list
+# AC-F34: the punch list is a filter, not a separate list
 - tapOn:
     id: fl_tasks_filter_punch
 - assertVisible: "Replace cracked cover plate"
@@ -72,7 +72,7 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_tasks_filter_all
 - assertVisible: "Set the kitchen outlets"
-# tick done, the snackbar offers Undo, Undo puts it back in the open list
+# AC-F34: tick done, the snackbar offers Undo, Undo puts it back in the open list
 - tapOn: "Mark Set the kitchen outlets done"
 - extendedWaitUntil:
     visible: "Done: Set the kitchen outlets"
@@ -82,7 +82,7 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     notVisible: "Done \\(1\\)"
     timeout: 10000
-# open a task, change it, Save keeps the change
+# AC-F34: a task opens in the form to edit
 - tapOn: "Replace cracked cover plate"
 - extendedWaitUntil:
     visible:
@@ -93,3 +93,12 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_close
 - assertVisible:
     id: fl_tasks_list
+# AC-F36: the task changes sync; the backend accepts them, so nothing is listed as refused
+- tapOn:
+    id: fl_back
+- tapOn: "Today"
+- tapOn:
+    id: fl_sync_status
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000

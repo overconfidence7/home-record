@@ -362,3 +362,10 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - Reorder renumbers the open list 0..n-1 and writes only rows whose number changes, so a drag syncs the fewest rows; ties from two phones adding at once are settled by created time, then id.
 - "My tasks" (AC-F34) is open tasks assigned to me on the current company's jobs that are overdue or due today; overdue first by due day, then today's in the crew's order. Tasks with no due day stay on the job's Tasks tab only.
 - The punch list is a filter on a job's tasks (All / Punch list), not a separate list, per FL-Tasks.
+
+## 2026-10-31 T044b1: Tasks tab and task form
+- The tasks flow is `F11-tasks.yaml`, named for walkthrough step F11 (Tasks) in qa/product-walkthrough.md; PLAN T044b said "F10", which is the FL-House step.
+- Ticking the check box completes a task with the "Done: … / Undo" snackbar now; swipe to complete and drag to reorder come in T044b2 with `sh.calvin.reorderable` (already approved).
+- Only Owner, Office and the job's Lead (`RoleGates.canManageTasks`, same as backend policy.ts) see Add task and open the form; Crew see only tasks assigned to them, read the who/when/room/note line on the row, and tick them.
+- A task's photo is picked from the job's photos (three-across sheet) rather than taking a new one, so it stays one of the job's photos and syncs with them; taking a photo for a task is the Photos tab's capture.
+- The assignee picker lists the company's members with the job's crew first.

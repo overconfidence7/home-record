@@ -133,7 +133,7 @@ private fun TaskListRow(row: TaskRow, canManage: Boolean, onEvent: (TasksEvent) 
     RecordListItem(
         headline = row.title,
         supporting = supporting(row),
-        supportingMaxLines = 3,
+        supportingMaxLines = 8,
         leading = {
             Checkbox(
                 checked = row.done,

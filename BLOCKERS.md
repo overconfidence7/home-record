@@ -14,6 +14,8 @@
 
 ## Decisions to confirm
 
+- 2026-10-31 T044b1: Crew can't open a task, only tick it (the row shows who, due, room and the note). A task's photo is picked from the job's photos, not taken from the form. The tasks flow is F11-tasks.yaml (walkthrough F11), not F10 as PLAN T044b says.
+
 - 2026-10-31 (T043d1): Crew and Sub see a job's daily log read only and only once a lead (or Owner/Office) has opened that day; they cannot add a delay or note to the log itself (their notes and photos still flow into it from Capture). This follows the server sync policy. Say if crew should be able to add delays.
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
