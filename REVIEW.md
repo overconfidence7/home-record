@@ -2322,3 +2322,59 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); field-log jank:field-log (not measurable: 98 frames rendered while flinging the 200-row list (need 100))
 
 Tested: 54 device stages, 973 unit tests, 140 backend tests, coverage 236/236 ACs. Passed: 52. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-10-31 (commit 3c734ad3)
+
+Judged the suite results for 3c734ad3 (run of 2026-10-31 11:54 UTC, 54 stages, 52 passed). `build` HEAD 9b6a9c44 is three commits ahead (T043d2 log line removal and weather form, the F07c straight-stroke fix 7be8619f); the suite has not tested it yet. Since 6a0e6db4: CR2 and Q004 closed, T040, T042 (markup, version history, document scanner), R08 and T043a–d1 (weather proxy, LogAssembler, the job's Log tab) ticked; House Manual changed only under the hood (strings, build logic).
+
+Verdict: House Manual: nothing a homeowner can see moved this run; every flow and tour passes, and the house still stops at a 2D outline with no wall photos, 3D, breaker panel or Emergency list, while the Reminders tab is still the "Open a detail screen" placeholder. / Field Log: this is the first build that starts to feel like a jobsite app: the job's Log tab builds the day from punches, notes, photos and change orders, and a plan can be marked up and versioned. The biggest gap is that the log cannot be sent (no PDF, no Sent, T045), Schedule is still a developer placeholder, and on the device the markup Box stroke drew nothing, so F7 failed end to end.
+
+- [ ] [UI] Minor: the Mark up editor keeps the bottom navigation bar (Today, Jobs, Clock, Schedule, More) under the page on the device, while the catalog shows it without one; a tap on a tab leaves a full-screen editor with unsaved marks behind Close/Save and its discard prompt [judge:fl-markup-nav-bar] - steps: Jobs → a job → Files → a PDF → Mark up (flow F07c) - expected: rule 3 (full-screen editors use Close and Save and ask before discarding; nothing else leaves them) and the catalog `markup-dark` - actual: Close, Mark up, Save at the top and the full five-tab bar at the bottom - screenshot: qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png
+- [ ] [UI] Minor: Mark up in landscape shows only the top third of the page; the page switcher ("Page 1 of 3") and the rest of the page are off-screen, so pages 2 and 3 cannot be reached or marked up in landscape [judge:fl-markup-landscape] - steps: catalog `markup` in landscape - expected: rule 33 (rotation keeps the screen usable) and AC-F21 (mark up any page); fit the page to the height or put the tools in a side column - actual: tool row across the top, page cut at the bottom edge, no page controls - screenshot: qa-results:latest/field-log/crawler/field-log/markup-landscape.png
+
+Auto entry review: [auto:flow:field-log:F07c-markup] is a real app bug, not a flow error: `flow-F07c-markup-F07c-markup-drawn.png` shows Box selected, the plan's own rectangle and no drawn mark, and Save greyed. The builder's fix 7be8619f matches what the screenshot shows; acceptance waits on the next run. The jank skip (98 of 100 frames) is measurement, not a finding.
+
+Seen this run and fine: Version history sheet (Version 3 Marcus Ortiz · Oct 15 with a check, Version 2 Dana Reyes, Version 1), Files FAB menu with Scan a document between Add file and New folder, the Log tab in light, offline and 200% (section headers, crew per person with hours and "on site now", work done from notes, delays with icons, "No weather (offline)"), the Add delay sheet (five reasons with icons, note with supporting text), markup in dark (pen, arrow, box, text, highlight drawn as expected), F02 Team after the role change (qa-crew-f02 Lead) and after removal.
+
+Still open and seen again this run: [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (`tour-dark-reminders`, `tour-dark-schedule`), [judge:fl-files-row-actions] (`files-menu-light`: download, pencil and bin on every row), [judge:qa-crawler-job-tab-insets] and [judge:qa-catalog-sheets-no-container] (the new `log-tab`, `log-offline`, `log-delay-sheet` and `files-menu` catalog shots draw the day bar, sheet title and search field under the status bar), [judge:qa-fl-tour-blank] (`tour-landscape-launch` is an empty surface), [judge:qa-crawler-blank-shots] (28 blanks by script, up from 17; new ones include `markup-light`, `log-crew-font200`, `log-failed-dark`, `job-overview-empty-light/dark`, `capture-recording-light/dark`, `today-admin-light`), the 200% nav labels ("Remin / ders" in `tour-font200-home`, "Sched / ule" in `tour-font200-today`).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Unchanged: Maple St, search, Add item, Scan data plate, Emergency "Add a shutoff"; dark, 200% and landscape pass | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint, room page, Electrical layer pass; Kitchen still "Other" with grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Clunky | Add item form on device; scan and saved warranty only in the catalog | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item; seeded house reads well in Items | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired filter; Minors open (chip off-screen, shutoff warranty line) | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third, no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown without spinner (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Sign in ends at "Everything is synced"; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Pro screen with "Can't load prices right now" and Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Now covers role change and removal: crew made Lead, then removed (Members (2) → (1)) | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Clunky | Overview, House "Start the plan"; Log tab now real, Tasks still leads nowhere | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out, changes list | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes; one row per person, Approve inside the row; Edit punch form now captured | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Blocked | Files, offline and history sheet fine; on device the Box stroke drew nothing and Save stayed disabled (fixed in 7be8619f, untested); markup keeps the tab bar and breaks in landscape (new Minors) | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Clunky | F08 and F08b pass; capture keeps the bottom bar; before/after and annotate only in the catalog | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-capture-one-photo.png |
+| F9 | Clunky | F09 passes: crew and hours, work done from notes, photos, tasks, change orders, materials, a Weather delay, Township inspector as visitor; no Send or PDF yet (T045), and the device job had no address so weather never showed | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log.png |
+| F15 | Pass | F15 passes; Reports seen in the catalog | qa-results:latest/field-log/crawler/field-log/reports-week-light.png |
+| F18 | Clunky | More, Team, Company fine in all variants; Schedule is the placeholder; "Sched / ule" at 200% | qa-results:latest/field-log/screenshots/tour-dark-schedule.png |
+
+Not built yet: F10–F14, F16, F17 (tasks T044, log PDF and Send T045, behind-the-wall T054).
+
+Focus check: nothing wrong. The daily log, markup and scanner live only in Field Log and read as crew tools; House Manual has no Field Log wording.
+
+Coverage note: the auto entry reports 236/236 claimed ACs covered across 127 ticked tasks and subtasks (0 gaps).
+
+Judged: 19 screenshots opened (the F07c, F09 and F02 flow shots, the new Log, Markup, Files menu and Version history catalog shots, and the dark, 200% and landscape tours that carry open items), all 660 crawler shots checked by script for blank frames. 21 walkthrough steps. New issues: 2. Product gaps: 0.
