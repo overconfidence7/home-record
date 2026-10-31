@@ -175,6 +175,13 @@ class AppContainer(private val app: Application) {
 
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
+    /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */
+    val dailyLogs by lazy {
+        com.kurtz.homerecord.core.log.DailyLogRepository(
+            db, com.kurtz.homerecord.core.lookup.RetrofitWeatherApi.create(BuildConfig.API_BASE_URL, http), onChange = ::recordChange,
+        )
+    }
+
     /**
      * What this person may do, live: the role from the cached membership (a role change from the office lands on the
      * next /me refresh) and, for a Lead, the jobs they are on. Least privilege while no company is active (AC-F3).
