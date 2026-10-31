@@ -62,4 +62,10 @@ class JobListMapperTest {
         assertThat(JobListMapper.group(rows, "garage", today, false).active.map { it.summary.id }).containsExactly("j2")
         assertThat(JobListMapper.group(rows, "zzz", today, false).isEmpty).isTrue()
     }
+
+    // AC-F6
+    @Test fun supportingJoinsClientAndAddressOnceAndIsNullWhenBothMissing() {
+        assertThat(rows.first { it.summary.id == "j1" }.supporting).isEqualTo("Rivera family, 418 Maple St")
+        assertThat(rows.first { it.summary.id == "j2" }.supporting).isNull()
+    }
 }

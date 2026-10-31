@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -134,7 +135,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
     items(rows, key = { it.summary.id }, contentType = { "job" }) { row ->
         RecordListItem(
             headline = row.summary.name,
-            supporting = listOfNotNull(row.clientName, row.address).joinToString(", ").ifBlank { null },
+            supporting = row.supporting,
             trailing = row.nextDay?.let { day -> { Text(shortDate(day), style = MaterialTheme.typography.labelLarge) } },
             onClick = { onEvent(JobsEvent.Open(row.summary.id)) },
             modifier = Modifier.testTag("fl_jobs_row_${row.summary.id}"),
@@ -142,5 +143,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
     }
 }
 
-private fun shortDate(iso: String): String =
+@Composable
+private fun shortDate(iso: String): String = remember(iso) {
     runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(iso)
+}

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import androidx.compose.runtime.Immutable
 import com.kurtz.homerecord.core.data.AssignmentEntity
 import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.JobEntity
@@ -8,15 +9,23 @@ import com.kurtz.homerecord.core.model.JobOrdering
 import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.model.JobSummary
 
-/** One row of FL-Jobs. */
+/**
+ * One row of FL-Jobs. Immutable so a list that re-emits equal rows (a sync pull rewriting the same jobs) skips them
+ * instead of recomposing every visible row (AC-U11).
+ */
+@Immutable
 data class JobRow(
     val summary: JobSummary,
     val clientName: String?,
     val address: String?,
     /** Next scheduled day (today or later), ISO, for the row's trailing date. */
     val nextDay: String?,
-)
+) {
+    /** "Client, address", built once with the row instead of on every composition while the list scrolls. */
+    val supporting: String? = listOfNotNull(clientName, address).joinToString(", ").ifBlank { null }
+}
 
+@Immutable
 data class JobRowGroups(val active: List<JobRow>, val upcoming: List<JobRow>, val done: List<JobRow>, val archived: List<JobRow>) {
     val isEmpty: Boolean get() = active.isEmpty() && upcoming.isEmpty() && done.isEmpty() && archived.isEmpty()
 }

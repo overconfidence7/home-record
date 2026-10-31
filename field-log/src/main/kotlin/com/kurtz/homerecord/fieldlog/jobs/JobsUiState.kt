@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class JobsUiState(
     val loading: Boolean = true,
     val query: String = "",
