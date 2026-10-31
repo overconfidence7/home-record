@@ -1,0 +1,95 @@
+# Walkthrough F11 (first part, T044b): Tasks tab on a job: empty state, add tasks through the full-screen form,
+# Punch list filter, tick a task done and Undo it from the snackbar (AC-F34). My tasks on Today (T044c) and
+# pinning on the plan (T044d) extend this flow when they land.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f11@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+- tapOn:
+    id: fl_job_tab_tasks
+- extendedWaitUntil:
+    visible:
+      id: fl_tasks_empty
+    timeout: 10000
+# rule 10: the empty state's action is the FAB's action
+- assertVisible: "No tasks yet"
+- assertVisible:
+    id: fl_tasks_add
+- tapOn:
+    id: fl_tasks_empty_add
+# rule 15: more than two fields, so a full-screen form with Close and Save and no tab bar (rule 3)
+- extendedWaitUntil:
+    visible:
+      id: fl_task_form_title
+    timeout: 10000
+- assertNotVisible:
+    id: fl_tab_today
+- tapOn:
+    id: fl_task_form_title
+- inputText: "Set the kitchen outlets"
+- tapOn:
+    id: fl_task_form_note
+- inputText: "GFCI by the sink"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Set the kitchen outlets"
+    timeout: 10000
+# a punch-list item from the FAB
+- tapOn:
+    id: fl_tasks_add
+- tapOn:
+    id: fl_task_form_title
+- inputText: "Replace cracked cover plate"
+- hideKeyboard
+- tapOn:
+    id: fl_task_form_punch
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Replace cracked cover plate"
+    timeout: 10000
+# the punch list is a filter, not a separate list
+- tapOn:
+    id: fl_tasks_filter_punch
+- assertVisible: "Replace cracked cover plate"
+- assertNotVisible: "Set the kitchen outlets"
+- tapOn:
+    id: fl_tasks_filter_all
+- assertVisible: "Set the kitchen outlets"
+# tick done, the snackbar offers Undo, Undo puts it back in the open list
+- tapOn: "Mark Set the kitchen outlets done"
+- extendedWaitUntil:
+    visible: "Done: Set the kitchen outlets"
+    timeout: 10000
+- assertVisible: "Done \\(1\\)"
+- tapOn: "Undo"
+- extendedWaitUntil:
+    notVisible: "Done \\(1\\)"
+    timeout: 10000
+# open a task, change it, Save keeps the change
+- tapOn: "Replace cracked cover plate"
+- extendedWaitUntil:
+    visible:
+      id: fl_task_form_delete
+    timeout: 10000
+- assertVisible: "Edit task"
+- tapOn:
+    id: fl_close
+- assertVisible:
+    id: fl_tasks_list

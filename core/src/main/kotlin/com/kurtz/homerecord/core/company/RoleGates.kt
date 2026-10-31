@@ -26,6 +26,9 @@ data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet
     /** Delete a job photo. */
     fun canDeletePhoto(jobId: String?): Boolean = leads(jobId)
 
+    /** Add, edit, assign, reorder and delete tasks on [jobId]; Crew and Sub only tick their own (AC-F34, backend policy.ts). */
+    fun canManageTasks(jobId: String?): Boolean = leads(jobId)
+
     /** Clock in other people from this phone (AC-F11). */
     fun canClockCrew(jobId: String?): Boolean = leads(jobId)
 

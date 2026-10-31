@@ -33,6 +33,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -200,6 +201,42 @@ class AppContainer(private val app: Application) {
                 com.kurtz.homerecord.core.company.RoleGates.observe(role, memberId, db.jobCrewDao(), db.assignmentDao())
             }
     }
+
+    /** Room id to name on the job's house; empty until the job has one. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun jobRoomNames(companyId: String, jobId: String): kotlinx.coroutines.flow.Flow<Map<String, String>> =
+        db.jobDao().observeFor(companyId).map { jobs -> jobs.firstOrNull { it.id == jobId }?.homeId }
+            .distinctUntilChanged()
+            .flatMapLatest { homeId ->
+                if (homeId == null) kotlinx.coroutines.flow.flowOf(emptyMap())
+                else db.roomDao().observeForHome(homeId).map { rooms -> rooms.associate { it.id to it.name } }
+            }
+
+    /** The job's Tasks tab (AC-F34): Owner, Office and the job's Lead manage, Crew tick their own (AC-F3). */
+    fun tasksDeps(companyId: String, jobId: String, me: String?) = com.kurtz.homerecord.fieldlog.tasks.TasksDeps(
+        jobId, jobTasks,
+        names = db.memberDao().observeFor(companyId).map { rows -> rows.associate { it.id to it.name } },
+        rooms = jobRoomNames(companyId, jobId),
+        canManage = roleGates.map { it.canManageTasks(jobId) },
+        me = me,
+    )
+
+    /** The task form (AC-F34): company members with the job's crew first, the job's rooms and photos. */
+    fun taskFormDeps(companyId: String, jobId: String, taskId: String?) = com.kurtz.homerecord.fieldlog.tasks.TaskFormDeps(
+        jobId, taskId, jobTasks,
+        people = {
+            val crew = db.jobCrewDao().listFor(jobId).map { it.memberId }.toSet()
+            db.memberDao().listFor(companyId).map { com.kurtz.homerecord.fieldlog.tasks.PersonOption(it.id, it.name, it.id in crew) }
+        },
+        rooms = {
+            val homeId = db.jobDao().get(jobId)?.homeId
+            if (homeId == null) emptyList() else db.roomDao().listForHome(homeId).map { com.kurtz.homerecord.fieldlog.tasks.RoomOption(it.id, it.name) }
+        },
+        photos = {
+            db.photoDao().observeForJob(jobId).first().map { com.kurtz.homerecord.fieldlog.tasks.PhotoOption(it.id, it.thumbPath ?: it.path) }
+        },
+        canManage = roleGates.map { it.canManageTasks(jobId) },
+    )
 
     fun filesDeps(jobId: String, authorId: String?) = com.kurtz.homerecord.fieldlog.files.FilesDeps(
         jobId, db.jobFileDao(), jobFiles, authorId,

@@ -491,3 +491,58 @@ fun LogWeatherFormErrorsScreenshot() = LogWeatherFormErrorsPreview()
 @ThemePreviews
 @Composable
 fun LogWeatherFormFailedScreenshot() = LogWeatherFormFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksTabScreenshot() = TasksTabPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksPunchScreenshot() = TasksPunchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksCrewScreenshot() = TasksCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksEmptyScreenshot() = TasksEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksCrewEmptyScreenshot() = TasksCrewEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksNoPunchScreenshot() = TasksNoPunchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TasksLoadingScreenshot() = TasksLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormEditScreenshot() = TaskFormEditPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormNewScreenshot() = TaskFormNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormFailedScreenshot() = TaskFormFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormDeleteScreenshot() = TaskFormDeletePreview()

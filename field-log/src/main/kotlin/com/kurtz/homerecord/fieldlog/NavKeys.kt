@@ -32,11 +32,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class CaptureKey(val jobId: String) : NavKey
 
+/** The task form for [jobId]; [taskId] null adds a new task. */
+@Serializable data class TaskFormKey(val jobId: String, val taskId: String? = null) : NavKey
+
 /**
  * Full-screen editors and the camera: the tab bar is hidden while one is on top, so Close/Save
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, CompanyKey -> true
     else -> false
 }

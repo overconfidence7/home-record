@@ -1062,3 +1062,133 @@ fun LogWeatherFormErrorsPreview() = Frame {
 fun LogWeatherFormFailedPreview() = Frame {
     com.kurtz.homerecord.fieldlog.log.LogWeatherScreen(com.kurtz.homerecord.fieldlog.log.LogWeatherUiState(day = logDay, loading = false, failed = true), {})
 }
+
+// FL-Tasks (AC-F34): a kitchen remodel near the end, with a punch list started.
+private val tasksDay = java.time.LocalDate.of(2026, 10, 22)
+
+private fun taskRow(
+    id: String, title: String, assignee: String? = null, due: java.time.LocalDate? = null, room: String? = null,
+    punch: Boolean = false, done: Boolean = false, photo: Boolean = false, note: String? = null, canTick: Boolean = true,
+) = com.kurtz.homerecord.fieldlog.tasks.TaskRow(
+    id, title, assignee, due,
+    if (done) com.kurtz.homerecord.core.model.TaskDue.NONE else com.kurtz.homerecord.core.model.TaskDue.of(due, tasksDay),
+    room, photo, note, punch, done, canTick,
+)
+
+private val tasksReady = com.kurtz.homerecord.fieldlog.tasks.TasksUiState(
+    loading = false,
+    open = listOf(
+        taskRow("t1", "Pull the old panel and cap the feeders", "Dana Ortiz", tasksDay.minusDays(2), "Basement", photo = true),
+        taskRow("t2", "Set the kitchen counter outlets", "Marcus Bell", tasksDay, "Kitchen", note = "GFCI on the two by the sink."),
+        taskRow("t3", "Replace cracked cover plate by the back door", "Marcus Bell", tasksDay.plusDays(3), "Mudroom", punch = true),
+        taskRow("t4", "Label the new circuits on the panel door"),
+    ),
+    done = listOf(
+        taskRow("t5", "Order the 200A meter base", "Nate Kurtz", done = true),
+        taskRow("t6", "Call for rough-in inspection", "Nate Kurtz", room = "Kitchen", done = true),
+    ),
+    total = 6, canManage = true,
+)
+
+@Composable
+private fun TasksTab(state: com.kurtz.homerecord.fieldlog.tasks.TasksUiState) =
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        sampleOverview, com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS, {}, {}, {},
+        tasksContent = { com.kurtz.homerecord.fieldlog.tasks.TasksScreen(state, {}) },
+    )
+
+/** The office's view: open tasks in the crew's order, then Done (AC-F34). */
+@ThemePreviews
+@Composable
+fun TasksTabPreview() = Frame { TasksTab(tasksReady) }
+
+/** Punch list filter on: only the punch items (FL-Tasks). */
+@ThemePreviews
+@Composable
+fun TasksPunchPreview() = Frame {
+    TasksTab(tasksReady.copy(filter = com.kurtz.homerecord.core.model.TaskFilter.PUNCH, open = tasksReady.open.filter { it.punch }, done = emptyList()))
+}
+
+/** Crew see only their own tasks, tick them, and get no Add task (AC-F3). */
+@ThemePreviews
+@Composable
+fun TasksCrewPreview() = Frame {
+    TasksTab(tasksReady.copy(open = tasksReady.open.filter { it.assignee == "Marcus Bell" }, done = emptyList(), total = 2, canManage = false))
+}
+
+@ThemePreviews
+@Composable
+fun TasksEmptyPreview() = Frame { TasksTab(com.kurtz.homerecord.fieldlog.tasks.TasksUiState(loading = false, canManage = true)) }
+
+@ThemePreviews
+@Composable
+fun TasksCrewEmptyPreview() = Frame { TasksTab(com.kurtz.homerecord.fieldlog.tasks.TasksUiState(loading = false)) }
+
+/** Punch list filter with no punch items yet: offers to show all (rule 11). */
+@ThemePreviews
+@Composable
+fun TasksNoPunchPreview() = Frame {
+    TasksTab(tasksReady.copy(filter = com.kurtz.homerecord.core.model.TaskFilter.PUNCH, open = emptyList(), done = emptyList()))
+}
+
+@ThemePreviews
+@Composable
+fun TasksLoadingPreview() = Frame { TasksTab(com.kurtz.homerecord.fieldlog.tasks.TasksUiState()) }
+
+private val taskPeople = listOf(
+    com.kurtz.homerecord.fieldlog.tasks.PersonOption("m2", "Dana Ortiz", onJob = true),
+    com.kurtz.homerecord.fieldlog.tasks.PersonOption("m3", "Marcus Bell", onJob = true),
+    com.kurtz.homerecord.fieldlog.tasks.PersonOption("m1", "Nate Kurtz"),
+)
+private val taskRooms = listOf(
+    com.kurtz.homerecord.fieldlog.tasks.RoomOption("r1", "Kitchen"),
+    com.kurtz.homerecord.fieldlog.tasks.RoomOption("r2", "Mudroom"),
+    com.kurtz.homerecord.fieldlog.tasks.RoomOption("r3", "Basement"),
+)
+private val taskEditDraft = com.kurtz.homerecord.fieldlog.tasks.TaskFormDraft(
+    title = "Replace cracked cover plate by the back door", assigneeId = "m3", due = "2026-10-25", roomId = "r2",
+    note = "Almond duplex plate, the client has a spare in the garage.", punch = true,
+)
+
+/** Editing a punch item: who, when, where, a note, Punch list on (AC-F34). */
+@ThemePreviews
+@Composable
+fun TaskFormEditPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, draft = taskEditDraft, initial = taskEditDraft, people = taskPeople, rooms = taskRooms,
+        ),
+        {},
+    )
+}
+
+/** A new task with its name typed and then cleared (rule 21). */
+@ThemePreviews
+@Composable
+fun TaskFormNewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            loading = false, draft = com.kurtz.homerecord.fieldlog.tasks.TaskFormDraft(title = "", note = "Bring the fish tape."),
+            initial = com.kurtz.homerecord.fieldlog.tasks.TaskFormDraft(title = "x"), people = taskPeople, rooms = taskRooms,
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun TaskFormFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(isNew = false, loading = false, failed = true), {})
+}
+
+/** Delete asks first (rule 16). */
+@ThemePreviews
+@Composable
+fun TaskFormDeletePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, draft = taskEditDraft, initial = taskEditDraft, people = taskPeople, rooms = taskRooms, confirmDelete = true,
+        ),
+        {},
+    )
+}

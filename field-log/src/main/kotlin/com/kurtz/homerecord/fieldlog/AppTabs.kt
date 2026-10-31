@@ -166,6 +166,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 gates = container.roleGates,
                 initialTab = com.kurtz.homerecord.fieldlog.jobs.JobTab.entries.firstOrNull { it.name == key.tab } ?: com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW,
                 initialLogDay = key.day?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() },
+                tasks = container.tasksDeps(
+                    membership.companyId, key.jobId,
+                    (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
+                ),
+                onOpenTask = { nav.push(TaskFormKey(key.jobId, it)) },
             )
         }
         entry<PhotoKey> { key ->
@@ -190,6 +195,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 com.kurtz.homerecord.fieldlog.log.LogWeatherDeps(key.jobId, java.time.LocalDate.parse(key.day), container.dailyLogs, container.roleGates),
                 onClose = nav::pop,
             )
+        }
+        entry<TaskFormKey> { key ->
+            com.kurtz.homerecord.fieldlog.tasks.TaskFormRoute(container.taskFormDeps(membership.companyId, key.jobId, key.taskId), onClose = nav::pop)
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)
