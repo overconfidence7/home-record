@@ -6,6 +6,9 @@ import com.kurtz.homerecord.core.company.CompanySettings
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.model.DelayDay
+import com.kurtz.homerecord.core.model.DelayReason
+import com.kurtz.homerecord.core.model.LogDelay
 import com.kurtz.homerecord.core.model.PunchKind
 import com.kurtz.homerecord.core.punch.TimeExportFile
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +33,11 @@ class ReportsViewModelTest {
     private fun at(week: Long, day: Long, h: Int) = monday.minusWeeks(week).plusDays(day).atTime(h, 0).atZone(zone).toInstant().toEpochMilli()
     private val shared = mutableListOf<TimeExportFile>()
     private var shareFails = false
+    private val delayRanges = mutableListOf<Pair<LocalDate, LocalDate>>()
+    private val delayDays = listOf(
+        DelayDay("j1", monday.plusDays(1), listOf(LogDelay(DelayReason.WEATHER, "Rain held up the siding"))),
+        DelayDay("j1", monday.minusWeeks(1).plusDays(2), listOf(LogDelay(DelayReason.INSPECTION))),
+    )
 
     @Before fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
     @After fun tearDown() = Dispatchers.resetMain()
@@ -49,6 +57,7 @@ class ReportsViewModelTest {
             clients = flowOf(emptyList()),
             settings = flowOf(CompanySettings()),
             share = { if (shareFails) throw IOException("disk") else shared += it },
+            delays = { from, to -> delayRanges += from to to; flowOf(delayDays) },
             zone = zone, now = { now },
         )
         return ReportsViewModel(deps, saved)
@@ -94,5 +103,17 @@ class ReportsViewModelTest {
         assertThat(vm.state.value.notice).isEqualTo(ExportNotice.Empty)
         vm.onEvent(ReportsEvent.DismissNotice)
         assertThat(vm.state.value.notice).isNull()
+    }
+
+    // AC-F32: delays from the daily logs show as a job timeline for the range picked
+    @Test fun delaysShowAsAJobTimelineForTheRange() {
+        val vm = vm(empty = true)
+        val week = vm.state.value.delays.single()
+        assertThat(week.jobName).isEqualTo("Garage subpanel")
+        assertThat(week.entries.map { it.reason to it.note }).containsExactly(DelayReason.WEATHER to "Rain held up the siding")
+        assertThat(delayRanges.last()).isEqualTo(monday to monday.plusDays(6))
+        vm.onEvent(ReportsEvent.SelectRange(ReportRange.LastWeek))
+        assertThat(delayRanges.last()).isEqualTo(monday.minusWeeks(1) to monday.minusDays(1))
+        assertThat(vm.state.value.delays.single().entries.map { it.reason }).containsExactly(DelayReason.INSPECTION)
     }
 }

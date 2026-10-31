@@ -308,6 +308,11 @@ class AppContainer(private val app: Application) {
             clients = db.clientDao().observeFor(membership.companyId),
             settings = company.settings,
             share = { sharer.share(sharer.write(it)) },
+            delays = { from, to ->
+                dailyLogs.observeRange(from, to).map { logs ->
+                    logs.map { com.kurtz.homerecord.core.model.DelayDay(it.jobId, it.day, it.sections.delays) }
+                }
+            },
         )
     }
 

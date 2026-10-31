@@ -305,6 +305,10 @@ interface DailyLogDao {
     @Query("SELECT * FROM daily_log WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): DailyLogEntity?
     @Query("SELECT * FROM daily_log WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<DailyLogEntity>>
     @Query("SELECT * FROM daily_log WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<DailyLogEntity>
+
+    /** Every job's logs from [from] to [to] (ISO days, inclusive), for the delay timeline in Reports (AC-F32). */
+    @Query("SELECT * FROM daily_log WHERE day BETWEEN :from AND :to AND deletedAt IS NULL ORDER BY createdAt")
+    fun observeBetween(from: String, to: String): Flow<List<DailyLogEntity>>
     @Query("UPDATE daily_log SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

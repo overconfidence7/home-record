@@ -89,6 +89,12 @@ class DailyLogRepository(
                 .sortedByDescending { it.day }
         }
 
+    /** Every job's saved log from [from] to [to] inclusive, one per job and day (for the delay timeline, AC-F32). */
+    fun observeRange(from: LocalDate, to: LocalDate): Flow<List<DailyLog>> =
+        db.dailyLogDao().observeBetween(from.toString(), to.toString()).map { rows ->
+            rows.groupBy { it.jobId to it.day }.mapNotNull { (key, sameDay) -> pick(sameDay, key.first, LocalDate.parse(key.second))?.toModel() }
+        }
+
     /**
      * Builds the day's draft from the job's records and saves it; re-running keeps every hand-edited and typed-only
      * section (AC-F30). Returns null when the job is gone.

@@ -101,6 +101,18 @@ class LogViewModelTest {
         assertThat(s.canGoForward).isFalse()
     }
 
+    @AcceptanceCriterion("AC-F32")
+    @Test fun aDelayTappedInReportsOpensItsDayNeverPastTodayAndTheDayChosenLaterWins() = runBlocking<Unit> {
+        fun open(initial: LocalDate?, saved: SavedStateHandle = SavedStateHandle()) =
+            LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, initialDay = initial), saved)
+        assertThat(open(day.minusDays(3)).state.value.day).isEqualTo(day.minusDays(3))
+        assertThat(open(day.plusDays(2)).state.value.day).isEqualTo(day)
+        val saved = SavedStateHandle()
+        val v = open(day.minusDays(3), saved)
+        v.onEvent(LogEvent.NextDay)
+        assertThat(open(day.minusDays(3), saved).state.value.day).isEqualTo(day.minusDays(2))
+    }
+
     @AcceptanceCriterion("AC-F31")
     @Test fun offlineWithNoSnapshotSaysNoWeatherOffline() = runBlocking<Unit> {
         weather = ApiResult.Err(ApiFailure.Offline)

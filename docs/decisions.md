@@ -350,3 +350,9 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 ## 2026-10-31 FIX F07c: a straight stroke with Box or Highlight draws a thin strip
 
 - `PdfMarkSketch` used to drop any box or highlight with zero width or height, so a highlighter run along a line of text (the natural way to highlight) and any perfectly straight drag drew nothing and left Save disabled; Maestro's straight swipes in F07c hit exactly that. Now a drag shorter than `MIN_EXTENT` (2% of the page) both ways is a tap and draws nothing, and a straight stroke keeps its length and gets `MIN_EXTENT` thickness centred on it, kept on the page. The live preview uses the same rule, so what is drawn is what saves.
+
+## 2026-10-31 T043e: delays as a job timeline in FL-Reports
+
+- "Job timeline" (AC-F32) is read as a Delays section in FL-Reports for the same week range as the hours: one block per job ("Hale kitchen · 2 days delayed"), most delayed job first, then each delay oldest first with its reason icon, the day and the note. The pure rule is `DelayTimeline` in `:core` model with tests; the logs come from a new `DailyLogDao.observeBetween` query (no schema change) through `DailyLogRepository.observeRange`, which keeps one row per job and day the same way `observe` does.
+- A delay row opens the job on its Log tab at that day: `JobKey` gained optional `tab` and `day`, `JobRoute` takes `initialTab`/`initialLogDay`, and `LogDeps.initialDay` sets the first day shown (never past today; a day picked later wins and survives process death).
+- The Delays section sits under the exports so the CSV buttons stay next to the hours they export.

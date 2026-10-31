@@ -164,6 +164,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
                 ),
                 gates = container.roleGates,
+                initialTab = com.kurtz.homerecord.fieldlog.jobs.JobTab.entries.firstOrNull { it.name == key.tab } ?: com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW,
+                initialLogDay = key.day?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() },
             )
         }
         entry<PhotoKey> { key ->
@@ -222,7 +224,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId) }, onBack = nav::pop)
         }
         entry<ReportsKey> {
-            com.kurtz.homerecord.fieldlog.reports.ReportsRoute({ container.reportsDeps(membership) }, onBack = nav::pop)
+            com.kurtz.homerecord.fieldlog.reports.ReportsRoute(
+                { container.reportsDeps(membership) }, onBack = nav::pop,
+                onOpenLog = { jobId, day -> nav.push(JobKey(jobId, com.kurtz.homerecord.fieldlog.jobs.JobTab.LOG.name, day.toString())) },
+            )
         }
         entry<CompanyKey> {
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)

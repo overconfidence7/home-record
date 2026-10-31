@@ -244,6 +244,11 @@ fun ReportsLoadingScreenshot() = ReportsLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ReportsDelaysScreenshot() = ReportsDelaysPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureReadyScreenshot() = CaptureReadyPreview()
 
 @PreviewTest

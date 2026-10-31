@@ -13,7 +13,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class JobEditKey(val jobId: String? = null) : NavKey
 
-@Serializable data class JobKey(val jobId: String) : NavKey
+/** A job; [tab] (a `JobTab` name) and [day] (ISO yyyy-MM-dd, for the Log tab) open it somewhere other than Overview. */
+@Serializable data class JobKey(val jobId: String, val tab: String? = null, val day: String? = null) : NavKey
 
 @Serializable data class JobPlanKey(val homeId: String, val title: String, val floorId: String? = null, val roomId: String? = null, val editShape: Boolean = false) : NavKey
 

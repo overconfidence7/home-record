@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -33,12 +35,23 @@ import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.clock.WeekSheetBuilder
+import com.kurtz.homerecord.fieldlog.log.icon
+import com.kurtz.homerecord.fieldlog.log.label
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** FL-Reports (Owner and Office): hours by person and by job for a week range, shift and QuickBooks CSV (AC-F15, AC-F46). */
+/**
+ * FL-Reports (Owner and Office): hours by person and by job for a week range, shift and QuickBooks CSV (AC-F15, AC-F46),
+ * and the job timeline of delays from the daily logs; a delay opens that job's log on its day (AC-F32).
+ */
 @Composable
-fun ReportsScreen(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit, onBack: () -> Unit) {
+fun ReportsScreen(
+    state: ReportsUiState,
+    onEvent: (ReportsEvent) -> Unit,
+    onBack: () -> Unit,
+    onOpenLog: (jobId: String, day: LocalDate) -> Unit = { _, _ -> },
+) {
     ScreenScaffold(title = stringResource(R.string.rep_title), onBack = onBack) { padding ->
         if (state.loading) {
             LoadingState(Modifier.padding(padding))
@@ -69,6 +82,7 @@ fun ReportsScreen(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit, onBack
                     items(state.byJob, key = { "j-${it.id}" }) { LineRow(it, Icons.Rounded.Work, "fl_reports_job_${it.id}") }
                 }
                 item { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
+                delayTimeline(state, onOpenLog)
             }
         }
     }
@@ -153,6 +167,45 @@ private fun ExportButtons(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit
                 ),
                 Modifier.testTag("fl_reports_notice"), style = MaterialTheme.typography.bodyMedium,
                 color = if (it == ExportNotice.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
+ * Delays in the range, one block per job: the job and how many days it lost, then each delay oldest first with its
+ * reason icon, the day and the note. A row opens the job's Log tab on that day (AC-F32).
+ */
+private fun LazyListScope.delayTimeline(state: ReportsUiState, onOpenLog: (String, LocalDate) -> Unit) {
+    item(key = "delays-h") { SectionHeading(stringResource(R.string.rep_delays)) }
+    if (state.delays.isEmpty()) {
+        item(key = "delays-none") {
+            Text(
+                stringResource(R.string.rep_delays_none),
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("fl_reports_delays_none"),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+    val dayFmt = DateTimeFormatter.ofPattern("EEE, MMM d")
+    state.delays.forEach { job ->
+        item(key = "delays-job-${job.jobId}") {
+            Text(
+                stringResource(R.string.rep_delays_job, job.jobName, pluralStringResource(R.plurals.rep_delay_days, job.days, job.days)),
+                Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).semantics { heading() }.testTag("fl_reports_delays_${job.jobId}"),
+                style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        items(job.entries, key = { "delay-${job.jobId}-${it.day}-${it.index}" }) { entry ->
+            val day = entry.day.format(dayFmt)
+            RecordListItem(
+                headline = stringResource(entry.reason.label()),
+                supporting = if (entry.note.isBlank()) day else stringResource(R.string.rep_delay_line, day, entry.note),
+                leading = { Icon(entry.reason.icon(), contentDescription = null) },
+                onClick = { onOpenLog(job.jobId, entry.day) },
+                onClickLabel = stringResource(R.string.rep_delay_open),
+                modifier = Modifier.fillMaxWidth().testTag("fl_reports_delay_${job.jobId}_${entry.day}_${entry.index}"),
             )
         }
     }

@@ -1,6 +1,7 @@
 # Walkthrough F9: today's daily log on the job's Log tab writes itself from the day (a typed note becomes Work done),
 # says why there is no weather, takes a delay with a reason and note, and keeps a typed section (AC-F30, AC-F31, AC-F32).
-# The weather is corrected by hand on its full-screen form (T043d2). Send and the PDF arrive with T045.
+# The weather is corrected by hand on its full-screen form (T043d2). The delay shows on the job timeline in Reports and
+# opens the job's log on its day (T043e). Send and the PDF arrive with T045.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -159,3 +160,31 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "Showers, high 61°, low 44°"
 - assertVisible: ".*Typed in by hand.*"
 - takeScreenshot: F09-daily-log-weather
+# AC-F32: the delay appears in the job timeline in Reports, and tapping it opens that job's log on the day
+- tapOn: "More"
+- tapOn:
+    id: fl_more_reports
+- extendedWaitUntil:
+    visible:
+      id: fl_reports_list
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      text: "Hale kitchen · 1 day delayed"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: ".*Rain held up the siding"
+    direction: DOWN
+- takeScreenshot: F09-daily-log-reports-delays
+- tapOn: ".*Rain held up the siding"
+- extendedWaitUntil:
+    visible:
+      id: fl_log_list
+    timeout: 15000
+- assertVisible: "Today, .*"
+- scrollUntilVisible:
+    element:
+      id: fl_log_delay_0
+    direction: DOWN
+- assertVisible: "Rain held up the siding"

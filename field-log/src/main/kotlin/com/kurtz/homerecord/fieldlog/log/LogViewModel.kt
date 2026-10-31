@@ -36,6 +36,8 @@ class LogDeps(
     val photos: PhotoDao,
     val gates: Flow<RoleGates>,
     val today: () -> LocalDate = LocalDate::now,
+    /** The day to open on the first time (a delay tapped in Reports); never past today. Null opens today. */
+    val initialDay: LocalDate? = null,
 )
 
 /** How far the day's draft has got: [Running] while the records are read and the weather looked up. */
@@ -59,7 +61,8 @@ private sealed interface Assembly {
 class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val json = Json { ignoreUnknownKeys = true }
     private val today = d.today()
-    private val day = saved.getStateFlow(DAY, today.toString()).map(LocalDate::parse)
+    private val firstDay = (d.initialDay?.let { minOf(it, today) } ?: today).toString()
+    private val day = saved.getStateFlow(DAY, firstDay).map(LocalDate::parse)
     private val editor = saved.getStateFlow(EDITOR, "").map(::decode)
     private val hoursInvalid = MutableStateFlow(false)
     private val canEdit = d.gates.map { it.leads(d.jobId) }.distinctUntilChanged()
@@ -89,7 +92,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             savedLog == null -> base.copy(loading = false)
             else -> fill(base, savedLog.sections, savedLog, photos, if (edit && asm is Assembly.Done && asm.day == dd) asm.weather else null)
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, LogUiState(day = LocalDate.parse(saved.get<String>(DAY) ?: today.toString()), today = today))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, LogUiState(day = LocalDate.parse(saved.get<String>(DAY) ?: firstDay), today = today))
 
     init {
         viewModelScope.launch {

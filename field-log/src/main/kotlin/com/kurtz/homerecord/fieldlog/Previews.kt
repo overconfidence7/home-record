@@ -544,6 +544,36 @@ fun ReportsEmptyPreview() = Frame {
     )
 }
 
+private val repDelays = listOf(
+    com.kurtz.homerecord.core.model.JobDelays(
+        "j2", "Ortiz kitchen remodel", 2,
+        listOf(
+            com.kurtz.homerecord.core.model.DelayEntry(TS_MONDAY.plusDays(1), 0, com.kurtz.homerecord.core.model.DelayReason.WEATHER, "Rain held up the siding"),
+            com.kurtz.homerecord.core.model.DelayEntry(TS_MONDAY.plusDays(1), 1, com.kurtz.homerecord.core.model.DelayReason.MATERIALS, "Cabinet boxes arrive Thursday"),
+            com.kurtz.homerecord.core.model.DelayEntry(TS_MONDAY.plusDays(3), 0, com.kurtz.homerecord.core.model.DelayReason.INSPECTION, "Township rough-in inspection moved to Friday"),
+        ),
+    ),
+    com.kurtz.homerecord.core.model.JobDelays(
+        "j1", "Garage subpanel", 1,
+        listOf(com.kurtz.homerecord.core.model.DelayEntry(TS_MONDAY.plusDays(2), 0, com.kurtz.homerecord.core.model.DelayReason.CLIENT, "")),
+    ),
+)
+
+/** Delays in the range as a job timeline (AC-F32); one person and one job keep the hours short so the delays show. */
+@ThemePreviews
+@Composable
+fun ReportsDelaysPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(
+        repState.copy(
+            byPerson = listOf(com.kurtz.homerecord.core.model.HoursLine("m1", "Dana Whitfield", hrs(25))),
+            byJob = listOf(com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(25))),
+            totalMillis = hrs(25), regularMillis = hrs(25), overtimeMillis = 0,
+            delays = repDelays,
+        ),
+        {}, {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun ReportsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.reports.ReportsScreen(com.kurtz.homerecord.fieldlog.reports.ReportsUiState(), {}, {}) }

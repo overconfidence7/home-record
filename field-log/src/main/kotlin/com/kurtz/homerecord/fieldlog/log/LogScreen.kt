@@ -354,7 +354,7 @@ private fun LazyListScope.photos(state: LogUiState, onEvent: (LogEvent) -> Unit)
     putBack("photos", LogLineKind.PHOTO, state, onEvent)
 }
 
-private fun DelayReason.icon(): ImageVector = when (this) {
+fun DelayReason.icon(): ImageVector = when (this) {
     DelayReason.WEATHER -> Icons.Rounded.Umbrella
     DelayReason.MATERIALS -> Icons.Rounded.LocalShipping
     DelayReason.INSPECTION -> Icons.Rounded.FactCheck

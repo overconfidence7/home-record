@@ -78,6 +78,15 @@
     <string name="rep_notice_shared">File ready. Pick where to send it.</string>
     <string name="rep_notice_failed">Couldn\'t share the file. Try again.</string>
     <string name="rep_notice_empty">Nothing to export in these dates.</string>
+    <string name="rep_delays">Delays</string>
+    <string name="rep_delays_none">No delays logged in these dates.</string>
+    <string name="rep_delays_job">%1$s · %2$s</string>
+    <plurals name="rep_delay_days">
+        <item quantity="one">%d day delayed</item>
+        <item quantity="other">%d days delayed</item>
+    </plurals>
+    <string name="rep_delay_line">%1$s · %2$s</string>
+    <string name="rep_delay_open">Open the daily log</string>
     <string name="more_timesheets">Timesheets</string>
     <string name="ts_title">Timesheets</string>
     <string name="ts_prev_week">Previous week</string>

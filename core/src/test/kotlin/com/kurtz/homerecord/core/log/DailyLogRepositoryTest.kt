@@ -193,4 +193,18 @@ class DailyLogRepositoryTest {
         val s = checkNotNull(repo.observe("j1", day).first()).sections
         assertThat(listOf(s.visitors, s.safety, s.clientNotes)).containsExactly("Township inspector", "Covered the open floor box", "Countertops Monday").inOrder()
     }
+
+    @AcceptanceCriterion("AC-F32")
+    @Test fun rangeListsEveryJobsLogOncePerDayWithItsDelays() = runBlocking<Unit> {
+        db.jobDao().upsert(JobEntity(id = "j2", companyId = "c1", name = "Ortiz bath", createdAt = 1, updatedAt = 1))
+        val hale = checkNotNull(repo.assemble("j1", day)).log.id
+        repo.update(hale) { it.copy(delays = listOf(com.kurtz.homerecord.core.model.LogDelay(com.kurtz.homerecord.core.model.DelayReason.WEATHER, "Rain"))) }
+        repo.assemble("j2", day.minusDays(2))
+        repo.assemble("j1", day.minusDays(9)) // before the range
+        // a second row for the same day written by another phone before ids were derived: the derived one wins
+        db.dailyLogDao().upsert(com.kurtz.homerecord.core.data.DailyLogEntity(id = "old", jobId = "j1", day = day.toString(), createdAt = 0, updatedAt = 0))
+        val logs = repo.observeRange(day.minusDays(6), day).first()
+        assertThat(logs.map { it.jobId to it.day }).containsExactly("j1" to day, "j2" to day.minusDays(2))
+        assertThat(logs.single { it.jobId == "j1" }.sections.delays.map { it.note }).containsExactly("Rain")
+    }
 }

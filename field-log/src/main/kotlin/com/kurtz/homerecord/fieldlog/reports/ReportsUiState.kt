@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.fieldlog.reports
 
 import com.kurtz.homerecord.core.model.HoursLine
+import com.kurtz.homerecord.core.model.JobDelays
 import java.time.LocalDate
 
 /** Which whole Monday weeks a report covers (AC-F46). */
@@ -19,6 +20,8 @@ data class ReportsUiState(
     val regularMillis: Long = 0,
     val overtimeMillis: Long = 0,
     val doubleMillis: Long = 0,
+    /** The job timeline of delays in the range (AC-F32), most delayed job first. */
+    val delays: List<JobDelays> = emptyList(),
     val exporting: Boolean = false,
     val notice: ExportNotice? = null,
 ) {

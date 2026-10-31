@@ -59,6 +59,7 @@ object ScreenCatalog {
         QaScreen("reports-shared", nonRoot = true) { ReportsSharedPreview() },
         QaScreen("reports-empty", nonRoot = true) { ReportsEmptyPreview() },
         QaScreen("reports-loading", nonRoot = true) { ReportsLoadingPreview() },
+        QaScreen("reports-delays", nonRoot = true) { ReportsDelaysPreview() },
         QaScreen("photos-tab", nonRoot = false) { PhotosTabPreview() },
         QaScreen("files-tab", nonRoot = false) { FilesTabPreview() },
         QaScreen("files-crew", nonRoot = false) { FilesCrewPreview() },

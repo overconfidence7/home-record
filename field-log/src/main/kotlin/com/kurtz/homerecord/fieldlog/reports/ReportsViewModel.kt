@@ -8,6 +8,8 @@ import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.model.DelayDay
+import com.kurtz.homerecord.core.model.DelayTimeline
 import com.kurtz.homerecord.core.model.HoursReport
 import com.kurtz.homerecord.core.model.ShiftBuilder
 import com.kurtz.homerecord.core.model.ShiftPunch
@@ -19,7 +21,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -36,11 +41,14 @@ class ReportsDeps(
     val clients: Flow<List<ClientEntity>>,
     val settings: Flow<CompanySettings>,
     val share: suspend (TimeExportFile) -> Unit,
+    /** The daily logs' delays from one day to another, inclusive (AC-F32). */
+    val delays: (from: LocalDate, to: LocalDate) -> Flow<List<DelayDay>> = { _, _ -> flowOf(emptyList()) },
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
 )
 
-/** FL-Reports: hours by person and by job over a week range, and the two CSV exports (AC-F15, AC-F46). */
+/** FL-Reports: hours by person and by job over a week range, the two CSV exports (AC-F15, AC-F46), and the job timeline of delays (AC-F32). */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val _state = MutableStateFlow(ReportsUiState(range = rangeOf(saved[RANGE])))
     val state: StateFlow<ReportsUiState> = _state.asStateFlow()
@@ -76,6 +84,17 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
                     )
                 }
             }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            range.flatMapLatest { r ->
+                val weeks = weeksOf(r)
+                val from = weeks.first()
+                val to = weeks.last().plusDays(6)
+                combine(d.delays(from, to), d.jobs) { days, jobs -> DelayTimeline.build(days, jobs.associate { it.id to it.name }, from, to) }
+            }.collect { timeline -> _state.update { it.copy(delays = timeline) } }
         }
     }
 
