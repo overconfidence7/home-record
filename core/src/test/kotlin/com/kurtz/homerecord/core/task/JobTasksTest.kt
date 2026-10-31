@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.model.MyTasksDue
 import com.kurtz.homerecord.core.model.TaskList
+import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -19,8 +20,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
 
-// AC-F34 (tasks: title, assignee, due, room, photo, note, punch; swipe completes with Undo), AC-F36 (changes sync)
-@AcceptanceCriterion("AC-F34", "AC-F36")
+// AC-F35 (plan pin saved, kept and cleared), AC-F34 (tasks: title, assignee, due, room, photo, note, punch; swipe completes with Undo), AC-F36 (changes sync)
+@AcceptanceCriterion("AC-F34", "AC-F35", "AC-F36")
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class JobTasksTest {
@@ -139,5 +140,22 @@ class JobTasksTest {
         assertThat(changes).containsExactly("task/$id")
         tasks.delete(id)
         assertThat(changes).hasSize(1)
+    }
+
+    @Test fun planPinIsSavedWithTheFormAndClearedWhenRemoved() = runBlocking<Unit> {
+        val pin = TaskPlanPin("f1", 72, 30)
+        val id = checkNotNull(tasks.add("j1", TaskDraft(title = "Move the outlet", planPin = pin)))
+        assertThat(tasks.get(id)?.planPin).isEqualTo(pin)
+        assertThat(db.taskDao().get(id)?.planPinJson).isEqualTo(pin.encode())
+        // A file pin set elsewhere survives saving the form.
+        db.taskDao().get(id)?.let { db.taskDao().upsert(it.copy(fileId = "file1", page = 2, x = 0.4f, y = 0.6f)) }
+        val moved = TaskPlanPin("f1", 96, 30)
+        assertThat(tasks.update(id, TaskDraft(title = "Move the outlet", planPin = moved))).isTrue()
+        assertThat(tasks.get(id)?.planPin).isEqualTo(moved)
+        assertThat(db.taskDao().get(id)?.fileId).isEqualTo("file1")
+        changes.clear()
+        assertThat(tasks.update(id, TaskDraft(title = "Move the outlet"))).isTrue()
+        assertThat(tasks.get(id)?.planPin).isNull()
+        assertThat(changes).containsExactly("task/$id")
     }
 }

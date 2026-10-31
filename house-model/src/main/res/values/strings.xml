@@ -45,6 +45,7 @@
     <string name="house_export_pdf">Export PDF</string>
     <string name="house_edit_plan">Edit plan</string>
     <string name="house_blueprint_hint">Tap a room to open it. Press and hold for more.</string>
+    <string name="house_blueprint_hint_pins">Tap a pin to open its task, or a room to open the room.</string>
     <string name="house_floor_empty_title">No rooms on this floor</string>
     <string name="house_floor_empty_body">Draw the rooms in the plan editor and they show up here.</string>
     <string name="house_room_rename">Rename</string>

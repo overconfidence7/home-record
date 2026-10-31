@@ -598,6 +598,14 @@
     <string name="task_form_room">Room</string>
     <string name="task_form_no_room">No room</string>
     <string name="task_form_photo">Photo</string>
+    <string name="task_form_pin">Pin on plan</string>
+    <string name="task_form_pin_none">Not pinned</string>
+    <string name="task_form_pin_place">%1$s · %2$s</string>
+    <string name="task_pin_hint">Tap the plan where the work is.</string>
+    <string name="task_pin_hint_set">Tap somewhere else to move the pin.</string>
+    <string name="task_pin_done">Done</string>
+    <string name="task_pin_remove">Remove pin</string>
+    <string name="task_pin_label">Task %1$d: %2$s</string>
     <string name="task_form_no_photo">No photo</string>
     <string name="task_form_photo_set">Photo picked</string>
     <string name="task_form_no_photos">No photos on this job yet. Take some from the Photos tab.</string>

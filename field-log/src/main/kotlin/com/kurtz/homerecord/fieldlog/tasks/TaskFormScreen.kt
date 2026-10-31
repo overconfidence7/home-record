@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,6 +70,10 @@ import java.io.File
  */
 @Composable
 fun TaskFormScreen(state: TaskFormUiState, onEvent: (TaskFormEvent) -> Unit, modifier: Modifier = Modifier) {
+    if (state.pinning && !state.loading && !state.failed) {
+        TaskPinPicker(state, onEvent, modifier)
+        return
+    }
     FormScaffold(
         title = stringResource(if (state.isNew) R.string.task_form_new else R.string.task_form_edit),
         dirty = state.dirty && !state.done,
@@ -116,6 +121,20 @@ fun TaskFormScreen(state: TaskFormUiState, onEvent: (TaskFormEvent) -> Unit, mod
             onClick = { onEvent(TaskFormEvent.OpenSheet(TaskFormSheet.ROOM)) },
             tag = "fl_task_form_room",
         )
+        if (state.plan.isNotEmpty()) {
+            val place = state.pinPlace
+            PickerField(
+                label = stringResource(R.string.task_form_pin),
+                value = when {
+                    place == null -> stringResource(R.string.task_form_pin_none)
+                    place.second == null -> place.first
+                    else -> stringResource(R.string.task_form_pin_place, place.first, place.second.orEmpty())
+                },
+                icon = { Icon(Icons.Rounded.PushPin, null) },
+                onClick = { onEvent(TaskFormEvent.OpenPin) },
+                tag = "fl_task_form_pin",
+            )
+        }
         PickerField(
             label = stringResource(R.string.task_form_photo),
             value = stringResource(if (state.photo != null) R.string.task_form_photo_set else R.string.task_form_no_photo),
@@ -200,7 +219,8 @@ private const val NONE = "none"
 private fun PickerField(label: String, value: String, icon: @Composable () -> Unit, onClick: () -> Unit, tag: String) {
     Box(Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = value, onValueChange = {}, readOnly = true, singleLine = true,
+            // Wraps instead of clipping at large text ("Main floor · Mudroom" at 200%, rule 32).
+            value = value, onValueChange = {}, readOnly = true, singleLine = false, maxLines = 3,
             label = { Text(label) },
             leadingIcon = icon,
             trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null) },

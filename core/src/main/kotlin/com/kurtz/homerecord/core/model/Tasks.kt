@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.core.model
 
 import java.time.LocalDate
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /** A job task or punch-list item (AC-F34). [due] is a calendar day; [doneAt] is set while [done]. */
 data class JobTask(
@@ -17,7 +19,36 @@ data class JobTask(
     val sortOrder: Int = 0,
     val doneAt: Long? = null,
     val createdAt: Long = 0,
+    /** Where the work is on the job's floor plan (AC-F35); null when not pinned. */
+    val planPin: TaskPlanPin? = null,
 )
+
+/** A task's pin on the floor plan (AC-F35): the floor and a point on it in plan inches, stored as the task's `planPinJson`. */
+@Serializable
+data class TaskPlanPin(val floorId: String, val xIn: Int, val yIn: Int) {
+    fun encode(): String = JSON.encodeToString(serializer(), this)
+
+    companion object {
+        private val JSON = Json { ignoreUnknownKeys = true }
+
+        /** Reads a stored pin; null for no pin or a value this version cannot read (a pin never breaks the task). */
+        fun decode(json: String?): TaskPlanPin? =
+            json?.takeIf { it.isNotBlank() }?.let { runCatching { JSON.decodeFromString(serializer(), it) }.getOrNull() }
+                ?.takeIf { it.floorId.isNotBlank() }
+    }
+}
+
+/**
+ * Which task pins a floor plan shows (AC-F35): open tasks pinned on [floorId], in the crew's order. People who manage
+ * the job's tasks see every pin; anyone else sees only the pins of tasks assigned to [me], as on the Tasks tab (AC-F3).
+ */
+object TaskPins {
+    fun onFloor(tasks: List<JobTask>, floorId: String?, canManage: Boolean, me: String?): List<JobTask> {
+        if (floorId == null) return emptyList()
+        return tasks.filter { !it.done && it.planPin?.floorId == floorId && (canManage || (me != null && it.assigneeId == me)) }
+            .sortedWith(TaskList.OPEN_ORDER)
+    }
+}
 
 /** Which tasks a job's Tasks tab shows; the punch list is a filter, not a separate list (FL-Tasks). */
 enum class TaskFilter { ALL, PUNCH }

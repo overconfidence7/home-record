@@ -551,3 +551,23 @@ fun TaskFormFailedScreenshot() = TaskFormFailedPreview()
 @ThemePreviews
 @Composable
 fun TaskFormDeleteScreenshot() = TaskFormDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobHousePinsScreenshot() = JobHousePinsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormPinnedScreenshot() = TaskFormPinnedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskPinPickerScreenshot() = TaskPinPickerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskPinPickerEmptyScreenshot() = TaskPinPickerEmptyPreview()

@@ -53,6 +53,7 @@ import com.kurtz.homerecord.coreui.components.OptionsSheet
 import com.kurtz.homerecord.coreui.components.SheetOption
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintCanvas
+import com.kurtz.homerecord.housemodel.blueprint.BlueprintPin
 import com.kurtz.homerecord.housemodel.blueprint.LayerToggleRow
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
@@ -66,6 +67,9 @@ fun HouseScreen(
     onEditShape: (PlanRoom) -> Unit,
     onOpenFloors: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Task pins on the floor in view (FL-House, AC-F35); House Manual has none. */
+    pins: List<BlueprintPin> = emptyList(),
+    onOpenPin: (String) -> Unit = {},
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -103,6 +107,8 @@ fun HouseScreen(
                     modifier = Modifier.fillMaxSize(),
                     layers = state.layers,
                     system = state.system,
+                    pins = pins,
+                    onPinClick = onOpenPin,
                     onRoomClick = onOpenRoom,
                     onRoomLongClick = { onEvent(HouseEvent.LongPressRoom(it)) },
                 )
@@ -112,7 +118,7 @@ fun HouseScreen(
     val hint: @Composable () -> Unit = {
         if (state.rooms.isNotEmpty()) {
             Text(
-                stringResource(R.string.house_blueprint_hint),
+                stringResource(if (pins.isEmpty()) R.string.house_blueprint_hint else R.string.house_blueprint_hint_pins),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
