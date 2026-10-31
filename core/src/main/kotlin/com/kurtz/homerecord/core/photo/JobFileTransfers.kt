@@ -5,6 +5,7 @@ import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.MediaCache
 import com.kurtz.homerecord.core.media.MediaTransferApi
+import com.kurtz.homerecord.core.media.MediaUploader
 import com.kurtz.homerecord.core.sync.TenantRef
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,7 +15,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /** Where a file's upload to R2 stands, for the row on the Files tab (AC-F19). */
-enum class UploadStatus { None, Waiting, Uploading, Failed, Uploaded }
+enum class UploadStatus {
+    None, Waiting, Uploading, Failed, Uploaded;
+
+    companion object {
+        /** A `media_upload` row's state as the file list shows it; "uploaded" means the bytes are already in R2. */
+        fun of(state: String?): UploadStatus = when (state) {
+            null -> None
+            "uploading" -> Uploading
+            "failed" -> Failed
+            "done", MediaUploader.STATE_UPLOADED -> Uploaded
+            else -> Waiting
+        }
+    }
+}
 
 /** Storage the app holds for job files: marked Available offline versus downloads that "Free up" can drop (AC-F20). */
 data class FileStorage(val offlineBytes: Long, val cachedBytes: Long) {
@@ -38,15 +52,7 @@ class JobFileTransfers(
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
     fun uploadStatus(fileId: String): Flow<UploadStatus> =
-        db.mediaUploadDao().observeFor("job_file", fileId).map {
-            when (it?.state) {
-                null -> UploadStatus.None
-                "uploading" -> UploadStatus.Uploading
-                "failed" -> UploadStatus.Failed
-                "done" -> UploadStatus.Uploaded
-                else -> UploadStatus.Waiting
-            }
-        }
+        db.mediaUploadDao().observeFor("job_file", fileId).map { UploadStatus.of(it?.state) }
 
     suspend fun storage(): FileStorage = FileStorage(
         offlineBytes = withContext(io) { offlineDir.listFiles()?.filter { it.isFile }?.sumOf { it.length() } ?: 0 },

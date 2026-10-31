@@ -250,7 +250,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T042a: `PdfMarkup` in :core (marks saved as a new file version with author and time, original untouched, version history, list shows latest only) (AC-F21)
   - [x] T042b: MarkupCanvas screen + `MarkedPdfWriter` (PdfDocument over PdfRenderer pages) + version history sheet on FL-File (AC-F21)
   - [x] T042c: ML Kit document scanner to PDF into Files (AC-F22)
-- [ ] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
+- [x] R08: Review T038–T042; offline scenario in tests (queue survives process death; no duplicate uploads)
 - [ ] T043: Daily log: `LogAssembler` `[unit]`, FL-Log sections (crew/hours, work done, photos, tasks, materials, delays, weather, visitors, safety, client notes), delay picker, backend `/weather` proxy (Open-Meteo) with cache, "No weather (offline)" (acceptance: AC-F30, AC-F31, AC-F32, AC-B32)
 - [ ] T044: Tasks: entity, FL-Tasks per job and My tasks on Today, swipe complete with Undo, punch filter, reorder, pin on plan (FL-House) and on a file page (acceptance: AC-F34, AC-F35)
 - [ ] T045: Log PDF and Send: logo header, sections, photos; share sheet and email to client/office; Sent status, re-send (acceptance: AC-F33)

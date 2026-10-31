@@ -39,8 +39,15 @@ class MediaUploader(
         return dao.find(entity, entityId, filename)?.id ?: id
     }
 
-    /** Call on start: an upload that was mid-flight when the process died goes back to the queue. */
-    suspend fun recover() = dao.requeueInterrupted()
+    /**
+     * Call on start: an upload that was mid-flight when the process died goes back to the queue, and a file whose
+     * PUT finished but whose R2 key never reached its row ([STATE_UPLOADED]) gets [onUploaded] again without a second
+     * PUT, so a restart neither uploads twice nor loses the key other phones download by (R08).
+     */
+    suspend fun recover() {
+        dao.requeueInterrupted()
+        for (row in dao.inState(STATE_UPLOADED)) finish(row, Presigned(row.key.orEmpty(), "", row.putExpiresAt))
+    }
 
     suspend fun retryFailed() = dao.retryFailed()
 
@@ -83,8 +90,11 @@ class MediaUploader(
         val url = current.putUrl ?: return back(current, offline = false)
         return when (api.put(url, file, row.mime)) {
             PutOutcome.Ok -> {
-                dao.save(current.copy(state = "done", putUrl = null))
-                onUploaded(current, presigned ?: Presigned(current.key.orEmpty(), url, current.putExpiresAt))
+                // The bytes are in R2 from here on: remember that before telling the row, so dying in between replays
+                // only the key, never the PUT (see recover).
+                val uploaded = current.copy(state = STATE_UPLOADED, putUrl = null)
+                dao.save(uploaded)
+                finish(uploaded, presigned ?: Presigned(current.key.orEmpty(), url, current.putExpiresAt))
                 Step.Done
             }
             PutOutcome.Offline -> back(current, offline = true)
@@ -105,6 +115,11 @@ class MediaUploader(
         }
     }
 
+    private suspend fun finish(row: MediaUploadEntity, presigned: Presigned) {
+        onUploaded(row, presigned)
+        dao.save(row.copy(state = "done"))
+    }
+
     /** Offline never counts against the file; other failures do, and stop after [MAX_ATTEMPTS]. */
     private suspend fun back(row: MediaUploadEntity, offline: Boolean, giveUp: Boolean = false): Step {
         if (giveUp) {
@@ -122,6 +137,8 @@ class MediaUploader(
     }
 
     companion object {
+        /** PUT finished, key not yet recorded on the entity row. */
+        const val STATE_UPLOADED = "uploaded"
         const val MAX_ATTEMPTS = 6
         const val EXPIRY_MARGIN_MS = 30_000L
         private const val BASE_MS = 30_000L

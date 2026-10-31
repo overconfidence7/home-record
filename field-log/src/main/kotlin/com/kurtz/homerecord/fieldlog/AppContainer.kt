@@ -194,14 +194,7 @@ class AppContainer(private val app: Application) {
     fun filesDeps(jobId: String, authorId: String?) = com.kurtz.homerecord.fieldlog.files.FilesDeps(
         jobId, db.jobFileDao(), jobFiles, authorId,
         uploads = db.mediaUploadDao().observeAllFor("job_file").map { rows ->
-            rows.associate { r ->
-                r.entityId to when (r.state) {
-                    "uploading" -> com.kurtz.homerecord.core.photo.UploadStatus.Uploading
-                    "failed" -> com.kurtz.homerecord.core.photo.UploadStatus.Failed
-                    "done" -> com.kurtz.homerecord.core.photo.UploadStatus.Uploaded
-                    else -> com.kurtz.homerecord.core.photo.UploadStatus.Waiting
-                }
-            }
+            rows.associate { r -> r.entityId to com.kurtz.homerecord.core.photo.UploadStatus.of(r.state) }
         },
         setOffline = jobFileTransfers::setAvailableOffline,
         canManage = roleGates.map { it.canManageFiles(jobId) },

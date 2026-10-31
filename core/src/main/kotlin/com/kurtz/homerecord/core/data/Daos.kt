@@ -401,6 +401,7 @@ interface MediaUploadDao {
     @Query("SELECT COUNT(*) FROM media_upload WHERE state IN ('queued', 'uploading')") fun observePendingCount(): Flow<Int>
     @Query("SELECT MIN(nextAttemptAt) FROM media_upload WHERE state = 'queued'") suspend fun nextAttemptAt(): Long?
     @Query("UPDATE media_upload SET state = 'queued' WHERE state = 'uploading'") suspend fun requeueInterrupted()
+    @Query("SELECT * FROM media_upload WHERE state = :state ORDER BY createdAt") suspend fun inState(state: String): List<MediaUploadEntity>
     @Upsert suspend fun save(row: MediaUploadEntity)
     @Query("UPDATE media_upload SET state = 'queued', attempts = 0, nextAttemptAt = 0 WHERE state = 'failed'") suspend fun retryFailed()
 }

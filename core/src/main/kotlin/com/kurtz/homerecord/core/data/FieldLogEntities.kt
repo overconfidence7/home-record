@@ -322,7 +322,7 @@ data class MediaUploadEntity(
     val filename: String,
     val path: String,
     val mime: String,
-    /** queued, uploading, done, failed. */
+    /** queued, uploading, uploaded (PUT done, key not yet on its row), done, failed. */
     val state: String = "queued",
     val attempts: Int = 0,
     val nextAttemptAt: Long = 0,
