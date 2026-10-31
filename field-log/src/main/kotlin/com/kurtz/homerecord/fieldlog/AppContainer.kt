@@ -336,11 +336,11 @@ class AppContainer(private val app: Application) {
         }
     }
 
-    val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(db, onChange = ::recordChange) }
+    val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(db, app.resources::getString, onChange = ::recordChange) }
 
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 
-    val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange) }
+    val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange, app.getString(com.kurtz.homerecord.housemodel.R.string.floor_default_main)) }
 
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
 

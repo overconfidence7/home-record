@@ -10,13 +10,15 @@ import java.util.UUID
 
 /**
  * A job gets its own home the first time someone types a room or opens the House tab. This creates it
- * (with a Main floor) when it is missing and queues the new rows for sync (AC-F48).
+ * (with a Main floor, named [mainFloorName] in the device's language) when it is missing and queues the new rows for
+ * sync (AC-F48).
  */
 class JobHomeProvisioner(
     private val jobs: JobDao,
     private val homes: HomeDao,
     private val floors: FloorDao,
     private val recordChange: suspend (entity: String, id: String) -> Unit,
+    private val mainFloorName: String,
     private val clock: () -> Long = System::currentTimeMillis,
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) {
@@ -43,11 +45,6 @@ class JobHomeProvisioner(
     /** The home's first floor, created as Main when the home has none. */
     suspend fun mainFloor(homeId: String, now: Long = clock()): FloorEntity =
         floors.listFor(homeId).firstOrNull() ?: FloorEntity(
-            id = newId(), homeId = homeId, sortOrder = 0, name = DEFAULT_FLOOR, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG,
+            id = newId(), homeId = homeId, sortOrder = 0, name = mainFloorName, createdAt = now, updatedAt = now, source = Sources.FIELD_LOG,
         ).also { floors.upsert(it); recordChange("floor", it.id) }
-
-    companion object {
-        /** Stored floor name, the same one House Manual's templates use for the ground floor. */
-        const val DEFAULT_FLOOR = "Main"
-    }
 }

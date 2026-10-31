@@ -33,7 +33,7 @@ class HomeRepositoryTest {
     @Before fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, HomeRecordDatabase::class.java).allowMainThreadQueries().build()
-        repo = HomeRepository(db, now = { clock++ }, onChange = { entity, id -> changes += "$entity/$id" })
+        repo = HomeRepository(db, context.resources::getString, now = { clock++ }, onChange = { entity, id -> changes += "$entity/$id" })
     }
 
     @After fun tearDown() = db.close()
@@ -57,6 +57,22 @@ class HomeRepositoryTest {
         val main = repo.observeFloors(id).first().single { it.name == "Main" }
         assertThat(main.roomCount).isEqualTo(1)
         assertThat(db.roomDao().listFor(main.id).single().name).isEqualTo("Garage")
+    }
+
+    @AcceptanceCriterion("AC-C2")
+    @Test fun seededFloorAndGarageNamesComeFromStringResources() = runTest {
+        // Another language's resources name the seeded floors and the Garage; the stored names follow them.
+        val translated = mapOf(
+            R.string.floor_default_basement to "Sous-sol",
+            R.string.floor_default_main to "Rez-de-chaussée",
+            R.string.floor_default_upper to "Étage",
+            R.string.room_kind_garage to "Garage double",
+        )
+        val french = HomeRepository(db, { translated.getValue(it) })
+        val id = french.createHome(NewHome("Maison", null, HouseType.COLONIAL, Foundation.BASEMENT, attachedGarage = true))
+        val floors = french.observeFloors(id).first()
+        assertThat(floors.map { it.name }).containsExactly("Sous-sol", "Rez-de-chaussée", "Étage").inOrder()
+        assertThat(db.roomDao().listFor(floors[1].id).single().name).isEqualTo("Garage double")
     }
 
     @Test fun noGarageMeansNoRooms() = runTest {

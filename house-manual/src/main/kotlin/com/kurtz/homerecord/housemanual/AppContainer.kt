@@ -104,7 +104,7 @@ class AppContainer(app: Application) {
         }
     }
 
-    val homes = HomeRepository(db) { entity, id -> recordHomeChange(entity, id) }
+    val homes = HomeRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
     val items = ItemRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 

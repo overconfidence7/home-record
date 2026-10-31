@@ -45,7 +45,7 @@ class HomeViewModelsTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
-        repo = HomeRepository(db)
+        repo = HomeRepository(db, ApplicationProvider.getApplicationContext<Context>().resources::getString)
     }
 
     @After fun tearDown() {

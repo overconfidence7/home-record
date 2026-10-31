@@ -50,7 +50,7 @@ class JobEditTest {
 
     /** Room hops to its own executor, so wait for the form to finish loading, as the screen does. */
     private suspend fun vm(jobId: String? = null, saved: SavedStateHandle = SavedStateHandle(), refresh: suspend () -> Unit = {}): JobEditViewModel {
-        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), db.jobCrewDao(), db.memberDao(), refresh, { e, id -> changes += e to id }, saved, { "2026-10-22" }, { 1000L }).also { created += it }
+        val vm = JobEditViewModel("c1", jobId, db.jobDao(), db.clientDao(), db.homeDao(), db.floorDao(), db.roomDao(), db.jobCrewDao(), db.memberDao(), refresh, { e, id -> changes += e to id }, "Main", saved, { "2026-10-22" }, { 1000L }).also { created += it }
         withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first { !it.loading } } }
         return vm
     }

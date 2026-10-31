@@ -83,11 +83,12 @@ class JobEditViewModel(
     private val members: MemberDao,
     private val refreshMembers: suspend () -> Unit,
     private val recordChange: suspend (entity: String, id: String) -> Unit,
+    mainFloorName: String,
     private val saved: SavedStateHandle,
     private val todayProvider: () -> String = { LocalDate.now().toString() },
     private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
-    private val provisioner = JobHomeProvisioner(jobs, homes, floors, recordChange, clock)
+    private val provisioner = JobHomeProvisioner(jobs, homes, floors, recordChange, mainFloorName, clock)
     private val _state = MutableStateFlow(JobEditUiState())
     val state: StateFlow<JobEditUiState> = _state.asStateFlow()
     private val newId = saved.get<String>(NEW_ID) ?: UUID.randomUUID().toString().also { saved[NEW_ID] = it }

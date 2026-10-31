@@ -51,11 +51,12 @@ data class NewHome(
 )
 
 /**
- * Homes, floors and the rooms they start with. [onChange] is called with the entity name and id after every write so
- * the sync outbox can pick it up.
+ * Homes, floors and the rooms they start with. [strings] names the seeded floors and Garage in the device's language.
+ * [onChange] is called with the entity name and id after every write so the sync outbox can pick it up.
  */
 class HomeRepository(
     private val db: HomeRecordDatabase,
+    private val strings: (Int) -> String,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
@@ -96,7 +97,7 @@ class HomeRepository(
                         id = floorId,
                         homeId = homeId,
                         sortOrder = index,
-                        name = f.name,
+                        name = strings(f.role.nameRes),
                         ceilingHeightIn = f.ceilingHeightIn,
                         halfLevel = f.halfLevel,
                         elevationIn = f.elevationIn,
@@ -107,7 +108,7 @@ class HomeRepository(
                 onChange("floor", floorId)
                 if (index == template.garageFloorIndex) {
                     val roomId = Ids.newId()
-                    db.roomDao().upsert(RoomEntity(id = roomId, floorId = floorId, name = "Garage", kind = "GARAGE", createdAt = at, updatedAt = at))
+                    db.roomDao().upsert(RoomEntity(id = roomId, floorId = floorId, name = strings(R.string.room_kind_garage), kind = "GARAGE", createdAt = at, updatedAt = at))
                     onChange("room", roomId)
                 }
             }

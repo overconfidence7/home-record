@@ -40,7 +40,7 @@ class RegressionSeedTest {
     @Before fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, HomeRecordDatabase::class.java).allowMainThreadQueries().build()
-        repo = HomeRepository(db)
+        repo = HomeRepository(db, strings)
     }
 
     @After fun tearDown() = db.close()

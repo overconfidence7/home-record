@@ -54,7 +54,7 @@ class ItemEditViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
-        homes = HomeRepository(db)
+        homes = HomeRepository(db, ApplicationProvider.getApplicationContext<Context>().resources::getString)
         items = ItemRepository(db, ApplicationProvider.getApplicationContext<Context>().resources::getString)
     }
 

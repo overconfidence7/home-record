@@ -20,6 +20,10 @@
     <string name="floors_empty_body">Add a floor, then draw its rooms.</string>
     <string name="floors_add">Add floor</string>
     <string name="floor_name">Floor name</string>
+    <string name="floor_default_basement">Basement</string>
+    <string name="floor_default_lower">Lower</string>
+    <string name="floor_default_main">Main</string>
+    <string name="floor_default_upper">Upper</string>
     <string name="floor_ceiling">Ceiling height</string>
     <string name="floor_edit_title">Edit floor</string>
     <string name="floor_add_title">Add floor</string>
