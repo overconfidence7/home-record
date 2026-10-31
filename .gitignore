@@ -13,3 +13,4 @@ build/
 *.keystore
 .kotlin/
 local.properties
+__pycache__/

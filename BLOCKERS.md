@@ -16,6 +16,8 @@
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
 
+- 2026-10-30 jank gate (AC-U11): on the CI emulator (SwiftShader) the jank stage now gates on UI-thread time per frame from framestats instead of gfxinfo's overall janky-frame count, which there is ~90% for any app because the CPU rasterises every frame. The overall number is still reported. If you want the overall number as the gate, it needs a runner with a hardware GPU (or a physical device); see docs/decisions.md 2026-10-30.
+
 - 2026-10-29 (auto:coldstart): AC-U11's "cold start under 1.5 s" is now measured by the QA suite on the release APK with its baseline profile compiled (as installed from Play), not on the debug APK (no AOT, StrictMode on; 4–5.5 s on the emulator). `qa/scripts/device-suite.sh` is yours; the change is in its coldstart and release stages. Say if AC-U11 should also hold for the debug build.
 
 - 2026-10-28 (CR2n2): When a plan edit removes a wall (a corner deleted, or two sides turned into a diagonal), its wall photos and wall overlays are deleted with it, and items hung on it stay in the room off the wall. The alternative is keeping those photos on the room with no wall.

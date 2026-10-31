@@ -97,7 +97,7 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                 }
                 state.groups.forEach { g ->
                     val folded = state.isCollapsed(g.key)
-                    item(key = "h:${g.key}") {
+                    item(key = "h:${g.key}", contentType = "header") {
                         GroupHeader(
                             title = stringResource(
                                 R.string.items_group_header,
@@ -109,7 +109,7 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                             modifier = Modifier.testTag("hm_items_group_${g.key}"),
                         )
                     }
-                    if (!folded) items(g.items, key = { "${g.key}:${it.id}" }) { r ->
+                    if (!folded) items(g.items, key = { "${g.key}:${it.id}" }, contentType = { "item" }) { r ->
                         Column(Modifier.testTag("hm_items_row_${r.id}")) {
                             RecordListItem(
                                 headline = r.name,

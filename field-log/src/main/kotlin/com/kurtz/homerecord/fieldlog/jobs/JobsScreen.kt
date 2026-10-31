@@ -123,7 +123,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
     onEvent: (JobsEvent) -> Unit,
 ) {
     if (rows.isEmpty()) return
-    item(key = "h-$key") {
+    item(key = "h-$key", contentType = "header") {
         Text(
             stringResource(title),
             style = MaterialTheme.typography.titleSmall,
@@ -131,7 +131,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp),
         )
     }
-    items(rows, key = { it.summary.id }) { row ->
+    items(rows, key = { it.summary.id }, contentType = { "job" }) { row ->
         RecordListItem(
             headline = row.summary.name,
             supporting = listOfNotNull(row.clientName, row.address).joinToString(", ").ifBlank { null },
