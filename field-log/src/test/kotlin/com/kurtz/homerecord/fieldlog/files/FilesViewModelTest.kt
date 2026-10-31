@@ -167,4 +167,33 @@ class FilesViewModelTest {
         vm.onEvent(FilesEvent.AddFile)
         assertThat(current { !it.addMenuOpen }.dialog).isNull()
     }
+
+    // AC-F22: a scanned document lands as one PDF in the open folder, named by date and numbered when the name is taken
+    @Test fun scannedPdfIsNamedByDateAndNumberedInTheOpenFolder() {
+        vm.onEvent(FilesEvent.SetAddMenu(true))
+        current { it.addMenuOpen }
+        vm.onEvent(FilesEvent.ScanDocument)
+        assertThat(current { !it.addMenuOpen }.addMenuOpen).isFalse()
+        vm.scanned(ImportedFile("a.pdf", "/media/a.pdf", "application/pdf", 9_000), "Scan Oct 31, 2026")
+        current { it.files.size == 1 }
+        vm.scanned(ImportedFile("b.pdf", "/media/b.pdf", "application/pdf", 9_000), "Scan Oct 31, 2026")
+        val rows = current { it.files.size == 2 }.files
+        assertThat(rows.map { it.name }).containsExactly("Scan Oct 31, 2026.pdf", "Scan Oct 31, 2026 (2).pdf")
+        assertThat(rows.map { it.mime }.toSet()).containsExactly("application/pdf")
+        runBlocking { withTimeout(5_000) { while (uploaded.size < 2) kotlinx.coroutines.delay(10) } }
+    }
+
+    // AC-F22
+    @Test fun scanNameSkipsTakenNamesIgnoringCase() {
+        assertThat(FilesViewModel.scanName("Scan Oct 31, 2026", emptySet())).isEqualTo("Scan Oct 31, 2026.pdf")
+        assertThat(FilesViewModel.scanName("Scan Oct 31, 2026", setOf("scan oct 31, 2026.PDF", "Scan Oct 31, 2026 (2).pdf"))).isEqualTo("Scan Oct 31, 2026 (3).pdf")
+    }
+
+    // AC-F22: a scan that gives nothing back says so and adds nothing
+    @Test fun failedScanShowsNotice() {
+        vm.scanned(null, "")
+        val state = current { it.notice != null }
+        assertThat(state.notice).isEqualTo(FilesNotice.ScanFailed)
+        assertThat(state.files).isEmpty()
+    }
 }

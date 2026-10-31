@@ -31,15 +31,17 @@ data class FilesUiState(
     val notice: FilesNotice? = null,
     /** Add, new folder, rename and delete: Owner, Office and the job's Lead; Crew and Sub only view (AC-F3). */
     val canManage: Boolean = true,
-    /** The FAB menu (Add file, New folder) is open; only for people who [canManage] (rule 13). */
+    /** The FAB menu (Add file, Scan a document, New folder) is open; only for people who [canManage] (rule 13). */
     val addMenuOpen: Boolean = false,
 )
 
-enum class FilesNotice { FolderExists, AddFailed, DownloadFailed }
+enum class FilesNotice { FolderExists, AddFailed, ScanFailed, DownloadFailed }
 
 sealed interface FilesEvent {
     data class SetAddMenu(val open: Boolean) : FilesEvent
     data object AddFile : FilesEvent
+    /** Opens the camera document scanner; the pages come back as one PDF in the open folder (AC-F22). */
+    data object ScanDocument : FilesEvent
     data object NewFolder : FilesEvent
     data class CreateFolder(val name: String) : FilesEvent
     data class OpenFolder(val name: String) : FilesEvent

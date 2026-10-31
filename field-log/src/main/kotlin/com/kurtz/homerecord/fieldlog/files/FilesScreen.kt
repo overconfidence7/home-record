@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.CreateNewFolder
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Edit
@@ -145,14 +146,14 @@ fun FilesScreen(state: FilesUiState, onEvent: (FilesEvent) -> Unit, modifier: Mo
     state.notice?.let { n ->
         AlertDialog(
             onDismissRequest = { onEvent(FilesEvent.DismissNotice) },
-            text = { Text(stringResource(when (n) { FilesNotice.FolderExists -> R.string.files_folder_exists; FilesNotice.AddFailed -> R.string.files_add_failed; FilesNotice.DownloadFailed -> R.string.files_download_failed })) },
+            text = { Text(stringResource(when (n) { FilesNotice.FolderExists -> R.string.files_folder_exists; FilesNotice.AddFailed -> R.string.files_add_failed; FilesNotice.ScanFailed -> R.string.files_scan_failed; FilesNotice.DownloadFailed -> R.string.files_download_failed })) },
             confirmButton = { TextButton({ onEvent(FilesEvent.DismissNotice) }, Modifier.heightIn(min = 48.dp).testTag("fl_files_notice_ok")) { Text(stringResource(R.string.files_ok)) } },
             modifier = Modifier.windowTestTags(),
         )
     }
 }
 
-/** Add file and New folder behind one FAB (rule 13); the empty state's Add file opens the same menu (rule 10). */
+/** Add file, Scan a document and New folder behind one FAB (rule 13); the empty state's Add file opens the same menu (rule 10). */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FilesAddMenu(open: Boolean, onEvent: (FilesEvent) -> Unit, modifier: Modifier = Modifier) {
@@ -176,6 +177,12 @@ private fun FilesAddMenu(open: Boolean, onEvent: (FilesEvent) -> Unit, modifier:
             text = { Text(stringResource(R.string.files_add)) },
             icon = { Icon(Icons.Rounded.FileUpload, contentDescription = null) },
             modifier = Modifier.testTag("fl_files_add"),
+        )
+        FloatingActionButtonMenuItem(
+            onClick = { onEvent(FilesEvent.ScanDocument) },
+            text = { Text(stringResource(R.string.files_scan)) },
+            icon = { Icon(Icons.Rounded.DocumentScanner, contentDescription = null) },
+            modifier = Modifier.testTag("fl_files_scan"),
         )
         FloatingActionButtonMenuItem(
             onClick = { onEvent(FilesEvent.NewFolder) },

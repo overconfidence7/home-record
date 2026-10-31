@@ -228,6 +228,10 @@
     <string name="files_search">Search files by name</string>
     <string name="files_add">Add file</string>
     <string name="files_new_folder">New folder</string>
+    <string name="files_scan">Scan a document</string>
+    <!-- Name of a scanned PDF in Files before .pdf; %1$s is the date, like Oct 31, 2026 -->
+    <string name="files_scan_name">Scan %1$s</string>
+    <string name="files_scan_failed">Couldn\'t scan that document. Try again, or add the PDF with Add file.</string>
     <string name="files_create">Create</string>
     <string name="files_save">Save</string>
     <string name="files_cancel">Cancel</string>

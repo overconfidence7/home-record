@@ -19,14 +19,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Files has one create action (rule 13, judge:fl-files-empty-and-add): a FAB menu with Add file and New folder. */
+/** Files has one create action (rule 13, judge:fl-files-empty-and-add): a FAB menu with Add file, Scan a document (AC-F22) and New folder. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class FilesAddMenuTest {
     @get:Rule val rule = createComposeRule()
 
-    @AcceptanceCriterion("AC-U3", "AC-U4", "AC-F23")
-    @Test fun emptyStateAndFabOpenOneMenuWithAddFileAndNewFolder() {
+    @AcceptanceCriterion("AC-U3", "AC-U4", "AC-F22", "AC-F23")
+    @Test fun emptyStateAndFabOpenOneMenuWithAddFileScanAndNewFolder() {
         val events = mutableListOf<FilesEvent>()
         var state by mutableStateOf(FilesUiState(loading = false))
         rule.setContent {
@@ -45,11 +45,13 @@ class FilesAddMenuTest {
         assertThat(events).containsExactly(FilesEvent.SetAddMenu(true))
         rule.onNodeWithTag("fl_files_new_folder").performClick()
         rule.onNodeWithTag("fl_files_add").performClick()
+        rule.onNodeWithTag("fl_files_scan").performClick()
         rule.onNodeWithTag("fl_files_fab").performClick()
         assertThat(events).containsExactly(
             FilesEvent.SetAddMenu(true),
             FilesEvent.NewFolder,
             FilesEvent.AddFile,
+            FilesEvent.ScanDocument,
             FilesEvent.SetAddMenu(false),
         ).inOrder()
     }

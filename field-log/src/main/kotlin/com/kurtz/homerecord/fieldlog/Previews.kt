@@ -749,6 +749,11 @@ fun FilesTabPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(
 @Composable
 fun FilesCrewPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(filesReady.copy(canManage = false), {}) }
 
+/** The one create action open: Add file, Scan a document (AC-F22) and New folder (rule 13). No screenshot test: the menu items animate in, so a still shows only the X; the device crawler shows it settled. */
+@ThemePreviews
+@Composable
+fun FilesMenuPreview() = Frame { com.kurtz.homerecord.fieldlog.files.FilesScreen(filesReady.copy(addMenuOpen = true), {}) }
+
 @ThemePreviews
 @Composable
 fun FilesSearchPreview() = Frame {

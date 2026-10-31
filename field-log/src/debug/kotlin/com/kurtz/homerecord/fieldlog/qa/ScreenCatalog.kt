@@ -62,6 +62,7 @@ object ScreenCatalog {
         QaScreen("photos-tab", nonRoot = false) { PhotosTabPreview() },
         QaScreen("files-tab", nonRoot = false) { FilesTabPreview() },
         QaScreen("files-crew", nonRoot = false) { FilesCrewPreview() },
+        QaScreen("files-menu", nonRoot = false) { FilesMenuPreview() },
         QaScreen("files-search", nonRoot = false) { FilesSearchPreview() },
         QaScreen("files-empty", nonRoot = false) { FilesEmptyPreview() },
         QaScreen("files-loading", nonRoot = false) { FilesLoadingPreview() },

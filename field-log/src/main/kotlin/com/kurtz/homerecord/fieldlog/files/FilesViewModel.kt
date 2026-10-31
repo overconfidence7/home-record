@@ -64,7 +64,7 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
         if (e.changesFiles() && !canManage.value) return
         when (e) {
             is FilesEvent.SetAddMenu -> addMenu.value = e.open
-            FilesEvent.AddFile -> addMenu.value = false
+            FilesEvent.AddFile, FilesEvent.ScanDocument -> addMenu.value = false
             FilesEvent.NewFolder -> { addMenu.value = false; dialog.value = FilesDialog.NewFolder }
             is FilesEvent.CreateFolder -> viewModelScope.launch {
                 dialog.value = null
@@ -96,14 +96,36 @@ class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHand
         }
     }
 
-    private fun FilesEvent.changesFiles() = (this is FilesEvent.SetAddMenu && open) || this is FilesEvent.AddFile || this is FilesEvent.NewFolder || this is FilesEvent.CreateFolder ||
+    /**
+     * Stores a scanned PDF in the open folder as "[baseName].pdf", numbered when that name is already there (AC-F22).
+     * Null means the scanner gave nothing back or the copy failed.
+     */
+    fun scanned(file: ImportedFile?, baseName: String) {
+        if (!canManage.value) return
+        if (file == null) { notice.value = FilesNotice.ScanFailed; return }
+        viewModelScope.launch {
+            val here = folder.value
+            val taken = d.dao.listFor(d.jobId).filter { it.folder == here }.map { it.name }.toSet()
+            added(file.copy(name = scanName(baseName, taken)))
+        }
+    }
+
+    private fun FilesEvent.changesFiles() = (this is FilesEvent.SetAddMenu && open) || this is FilesEvent.AddFile || this is FilesEvent.ScanDocument || this is FilesEvent.NewFolder || this is FilesEvent.CreateFolder ||
         this is FilesEvent.AskRename || this is FilesEvent.Rename || this is FilesEvent.AskDelete || this is FilesEvent.Delete
 
     private fun setFolder(path: String) { folder.value = path; saved[FOLDER] = path }
 
     private fun String.prefixOf() = if (isEmpty()) "" else "$this/"
-    private companion object {
-        const val FOLDER = "folder"
-        const val QUERY = "query"
+    internal companion object {
+        private const val FOLDER = "folder"
+        private const val QUERY = "query"
+
+        /** "Scan Oct 31, 2026.pdf", then "Scan Oct 31, 2026 (2).pdf" and up while a name in the folder has it (case ignored). */
+        fun scanName(baseName: String, taken: Set<String>): String {
+            val lower = taken.map { it.lowercase() }.toSet()
+            return generateSequence(1) { it + 1 }
+                .map { n -> if (n == 1) "$baseName.pdf" else "$baseName ($n).pdf" }
+                .first { it.lowercase() !in lower }
+        }
     }
 }

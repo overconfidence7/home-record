@@ -1,4 +1,4 @@
-# Walkthrough F7: Files tab on a job: empty state, new folder, open it, search by name (AC-F19, AC-F23).
+# Walkthrough F7: Files tab on a job: empty state, new folder, open it, search by name (AC-F19, AC-F22, AC-F23).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -29,6 +29,9 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_files_empty_add
 - assertVisible:
     id: fl_files_add
+# AC-F22: the same menu opens the camera document scanner (the scanner itself is Google Play services' UI)
+- assertVisible:
+    id: fl_files_scan
 # AC-F23: a new folder is listed and opens with a way back up
 - tapOn:
     id: fl_files_new_folder
