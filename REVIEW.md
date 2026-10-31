@@ -2310,3 +2310,15 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 52 device stages, 919 unit tests, 133 backend tests, coverage 223/223 ACs. Passed: 50. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA auto 2026-10-31 (commit 3c734ad3)
+
+Automated suite run at 2026-10-31 11:54 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F07c-markup fails on field-log [auto:flow:field-log:F07c-markup] - steps: automated, see qa-results branch latest/ for commit 3c734ad3 - expected: walkthrough step F07c passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F07c-markup.log - screenshot: qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Fail, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F15 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); field-log jank:field-log (not measurable: 98 frames rendered while flinging the 200-row list (need 100))
+
+Tested: 54 device stages, 973 unit tests, 140 backend tests, coverage 236/236 ACs. Passed: 52. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
