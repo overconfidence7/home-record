@@ -222,8 +222,10 @@ class AppContainer(private val app: Application) {
     )
 
     /** The task form (AC-F34): company members with the job's crew first, the job's rooms and photos. */
-    fun taskFormDeps(companyId: String, jobId: String, taskId: String?) = com.kurtz.homerecord.fieldlog.tasks.TaskFormDeps(
+    fun taskFormDeps(companyId: String, jobId: String, taskId: String?, startFilePin: com.kurtz.homerecord.core.model.TaskFilePin? = null) = com.kurtz.homerecord.fieldlog.tasks.TaskFormDeps(
         jobId, taskId, jobTasks,
+        startFilePin = startFilePin,
+        fileName = { id -> db.jobFileDao().get(id)?.name },
         people = {
             val crew = db.jobCrewDao().listFor(jobId).map { it.memberId }.toSet()
             db.memberDao().listFor(companyId).map { com.kurtz.homerecord.fieldlog.tasks.PersonOption(it.id, it.name, it.id in crew) }
@@ -272,10 +274,14 @@ class AppContainer(private val app: Application) {
         )
     }
 
-    fun fileViewerDeps(fileId: String) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(
+    fun fileViewerDeps(fileId: String, me: String?) = com.kurtz.homerecord.fieldlog.files.FileViewerDeps(
         fileId, db.jobFileDao(), ensureOnPhone = jobFileTransfers::ensureOnPhone,
         history = pdfMarkup::history, memberName = { db.memberDao().get(it)?.name },
         canManage = { jobId -> roleGates.map { it.canManageFiles(jobId) } },
+        tasks = jobTasks::observeForJob,
+        canManageTasks = { jobId -> roleGates.map { it.canManageTasks(jobId) } },
+        me = me,
+        pinOnFile = jobTasks::pinOnFile,
     )
 
     /** Marks on a PDF are saved as a new version in filesDir/media and queued for upload (AC-F21). */

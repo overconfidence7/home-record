@@ -388,3 +388,12 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - Dropping a pin in a room fills the task's Room when it is empty; it never replaces a room already chosen.
 - FL-House draws open tasks' pins as numbered map pins (tertiary color, fixed size so the number does not grow with font scale; TalkBack reads "Task n: title"). Managers (Owner, Office, the job's Lead) see every pin and a tap opens the task form; Crew see only their own tasks' pins, as on the Tasks tab, and a tap switches to the Tasks tab. Done tasks' pins are hidden.
 - The file-page pin (task `fileId`/`page`/`x`/`y`) is split out as T044d2.
+
+## 2026-10-31 T044d2: task pins on a file page (AC-F35)
+
+- The file pin is `TaskFilePin(fileId, page, x, y)` in the task's existing `fileId`/`page`/`x`/`y` columns (no schema change; the backend syncs the whole row). `page` is 0-based and `x`/`y` are fractions of the page, so a pin stays put at any zoom or render width. Missing or out-of-range columns read as no pin.
+- A task can carry both pins: the floor plan pin and one file page pin. They answer different questions (where in the house, where on the drawing).
+- Pinning starts in the file viewer, not the task form: "Pin a task" (Owner, Office, the job's Lead) turns on pin mode, a tap on a page opens "Pin which task?" with New task here and the job's open tasks. Choosing an existing task moves its file pin; New task here opens the task form with the spot filled in (counted as typed, so Close asks first).
+- The task form shows "Pinned on a file: <file> · Page n" with Remove. Saving the form writes the file pin only when the form changed it, so a pin dropped from the viewer while the form was open elsewhere is kept.
+- Pins follow the plan across versions: the viewer shows pins on any version of the file (marking up saves a new version with a new id). Pins on a page the open version lacks are left off.
+- Pins are drawn as Compose nodes over the page (same map pin as FL-House, fixed number size, 48 dp head, TalkBack "Task n: title"); a tap opens the task form for managers or the job's Tasks tab for Crew, who see only their own pins. The shared `PdfViewer` gained `onPageTap` and `pageOverlay`; House Manual's document viewer passes neither and is unchanged.

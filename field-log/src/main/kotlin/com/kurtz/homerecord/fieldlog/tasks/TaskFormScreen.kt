@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOff
@@ -134,6 +135,24 @@ fun TaskFormScreen(state: TaskFormUiState, onEvent: (TaskFormEvent) -> Unit, mod
                 onClick = { onEvent(TaskFormEvent.OpenPin) },
                 tag = "fl_task_form_pin",
             )
+        }
+        state.draft.filePin?.let { pin ->
+            val file = state.fileName ?: stringResource(R.string.file_viewer_title)
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 56.dp).semantics(mergeDescendants = true) {}.testTag("fl_task_form_file_pin"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Rounded.Description, contentDescription = null, Modifier.padding(end = 16.dp))
+                Column(Modifier.weight(1f).padding(end = 8.dp)) {
+                    Text(stringResource(R.string.task_form_file_pin), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.task_form_file_pin_place, file, pin.page + 1), style = MaterialTheme.typography.bodyLarge)
+                }
+                val remove = stringResource(R.string.task_form_file_pin_remove_description, file)
+                TextButton(
+                    { onEvent(TaskFormEvent.RemoveFilePin) },
+                    Modifier.heightIn(min = 48.dp).semantics { contentDescription = remove }.testTag("fl_task_form_file_pin_remove"),
+                ) { Text(stringResource(R.string.task_form_file_pin_remove)) }
+            }
         }
         PickerField(
             label = stringResource(R.string.task_form_photo),

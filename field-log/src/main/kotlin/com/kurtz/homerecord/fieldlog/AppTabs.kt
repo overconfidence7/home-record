@@ -184,8 +184,15 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         }
         entry<FileKey> { key ->
             com.kurtz.homerecord.fieldlog.files.FileViewerRoute(
-                container.fileViewerDeps(key.fileId), onBack = nav::pop,
+                container.fileViewerDeps(
+                    key.fileId,
+                    (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
+                ),
+                onBack = nav::pop,
                 onMarkUp = { nav.push(MarkupKey(it)) }, onOpenVersion = { nav.push(FileKey(it)) },
+                onNewTask = { jobId, pin -> nav.push(TaskFormKey(jobId, fileId = pin.fileId, page = pin.page, x = pin.x, y = pin.y)) },
+                onOpenTask = { jobId, taskId -> nav.push(TaskFormKey(jobId, taskId)) },
+                onOpenTasksTab = { jobId -> nav.push(JobKey(jobId, tab = com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS.name)) },
             )
         }
         entry<MarkupKey> { key ->
@@ -203,7 +210,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<TaskFormKey> { key ->
-            com.kurtz.homerecord.fieldlog.tasks.TaskFormRoute(container.taskFormDeps(membership.companyId, key.jobId, key.taskId), onClose = nav::pop)
+            com.kurtz.homerecord.fieldlog.tasks.TaskFormRoute(container.taskFormDeps(
+                    membership.companyId, key.jobId, key.taskId,
+                    startFilePin = key.fileId?.let { com.kurtz.homerecord.core.model.TaskFilePin.of(it, key.page, key.x, key.y) },
+                ), onClose = nav::pop)
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)

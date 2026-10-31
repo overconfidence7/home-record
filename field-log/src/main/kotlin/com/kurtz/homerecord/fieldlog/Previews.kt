@@ -1288,3 +1288,67 @@ fun TaskPinPickerEmptyPreview() = Frame {
         {},
     )
 }
+
+// The garage plan with two task pins on its first page (AC-F35).
+private val filePins = listOf(
+    com.kurtz.homerecord.fieldlog.files.PagePin("t1", 1, "Move the subpanel 6 inches left", 0, 0.62f, 0.34f),
+    com.kurtz.homerecord.fieldlog.files.PagePin("t2", 2, "Add a GFCI by the workbench", 0, 0.3f, 0.6f),
+)
+private val fileViewerPinned = fileViewerReady.copy(jobId = "j1", pins = filePins, canPinTasks = true)
+
+/** A plan with task pins; Pin a task in the top bar (AC-F35). */
+@ThemePreviews
+@Composable
+fun FileViewerPinsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FileViewerScreen(fileViewerPinned, {}, java.time.ZoneId.of("UTC"))
+}
+
+/** Pin mode: the hint bar under the pages says to tap where the work is, with Cancel (AC-F35). */
+@ThemePreviews
+@Composable
+fun FileViewerPinModePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.files.FileViewerScreen(fileViewerPinned.copy(pinMode = true), {}, java.time.ZoneId.of("UTC"))
+}
+
+/** "Pin which task?" over the viewer: New task here, then the job's open tasks; the sheet is a popup the renderer cannot draw. */
+@ThemePreviews
+@Composable
+fun FileViewerPinChooserPreview() = Frame {
+    Box(Modifier.fillMaxSize()) {
+        com.kurtz.homerecord.fieldlog.files.FileViewerScreen(fileViewerPinned.copy(pinMode = true), {}, java.time.ZoneId.of("UTC"))
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)))
+        Surface(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), tonalElevation = 1.dp,
+        ) {
+            Column(Modifier.padding(top = 16.dp)) {
+                com.kurtz.homerecord.fieldlog.files.PinChooser(
+                    listOf(
+                        com.kurtz.homerecord.fieldlog.files.TaskChoice("t1", "Move the subpanel 6 inches left", pinnedHere = true),
+                        com.kurtz.homerecord.fieldlog.files.TaskChoice("t3", "Label every breaker in the new subpanel", pinnedHere = false),
+                        com.kurtz.homerecord.fieldlog.files.TaskChoice("t4", "Seal the conduit through the garage wall", pinnedHere = false),
+                    ),
+                    {},
+                )
+            }
+        }
+    }
+}
+
+private val filePinnedDraft = taskEditDraft.copy(
+    title = "Move the subpanel 6 inches left", roomId = null, punch = false,
+    filePin = com.kurtz.homerecord.fieldlog.tasks.FormFilePin("plan1", 1, 0.62f, 0.34f),
+)
+
+/** The task form with its pin on a file page: "Garage plan.pdf · Page 2" and Remove (AC-F35). */
+@ThemePreviews
+@Composable
+fun TaskFormFilePinPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, draft = filePinnedDraft, initial = filePinnedDraft, people = taskPeople, rooms = taskRooms,
+            fileName = "Garage plan.pdf",
+        ),
+        {},
+    )
+}
