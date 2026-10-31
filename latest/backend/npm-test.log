@@ -1,0 +1,12 @@
+
+> homerecord-backend@0.1.0 test
+> vitest run --reporter=junit --outputFile=../qa-out/backend/junit.xml
+
+
+=======================================================================================
+WARNING: @cloudflare/vitest-pool-workers has been renamed to @cloudflare/vitest-plugin.
+This package will not receive future updates.
+Run `npx @cloudflare/codemods vitest:pool-workers-to-vitest-plugin` to migrate.
+=======================================================================================
+
+JUNIT report written to /home/runner/work/home-record/home-record/qa-out/backend/junit.xml

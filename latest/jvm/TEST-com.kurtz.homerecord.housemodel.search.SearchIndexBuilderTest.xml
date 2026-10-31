@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:27.489Z" hostname="runnervmnwato" time="0.02">
+  <properties/>
+  <testcase name="findsAnItemByModelNumberAndByConsumableSpec" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.015"/>
+  <testcase name="findsContactsAndDocuments" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.0"/>
+  <testcase name="findsAnItemByItsTypeName" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.004"/>
+  <testcase name="findsARoomAndItsItems" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

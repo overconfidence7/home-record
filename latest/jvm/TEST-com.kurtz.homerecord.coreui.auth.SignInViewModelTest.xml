@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:12:43.426Z" hostname="runnervmnwato" time="0.047">
+  <properties/>
+  <testcase name="cancelledGoogleShowsFailure" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.011"/>
+  <testcase name="stepAndEmailSurviveProcessDeath" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.012"/>
+  <testcase name="invalidEmailDoesNotSend" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.0"/>
+  <testcase name="emailThenCodeSignsIn" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.01"/>
+  <testcase name="signInResetsToEmptyEmailStepForTheNextSignOut" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.001"/>
+  <testcase name="offlineSendStaysOnEmail" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.006"/>
+  <testcase name="wrongCodeShowsError" classname="com.kurtz.homerecord.coreui.auth.SignInViewModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

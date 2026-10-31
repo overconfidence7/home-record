@@ -1,0 +1,3 @@
+Broadcasting: Intent { act=androidx.profileinstaller.action.INSTALL_PROFILE flg=0x400000 cmp=com.kurtz.homerecord.fieldlog/androidx.profileinstaller.ProfileInstallReceiver }
+Broadcast completed: result=1
+Success

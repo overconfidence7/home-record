@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.units.LengthParserTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:41.066Z" hostname="runnervmnwato" time="0.012">
+  <properties/>
+  <testcase name="formatThenParseRoundTrips" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.007"/>
+  <testcase name="rejectsGarbageAndNegatives" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.001"/>
+  <testcase name="decimalFeet" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <testcase name="curlyQuotesAreAccepted" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <testcase name="formatsBothSystems" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <testcase name="feetOnlyAndInchesOnly" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <testcase name="metricMetresCentimetresMillimetres" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <testcase name="feetAndInchesWithMarks" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.001"/>
+  <testcase name="spaceSeparatedFeetAndInches" classname="com.kurtz.homerecord.core.units.LengthParserTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

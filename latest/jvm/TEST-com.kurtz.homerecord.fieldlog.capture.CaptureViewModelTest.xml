@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" tests="27" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:16.438Z" hostname="runnervmnwato" time="4.607">
+  <properties/>
+  <testcase name="cameraThatWillNotBindSaysSoAndKeepsTheShutterOff" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="1.169"/>
+  <testcase name="ghostOffTakesAPlainShot" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.277"/>
+  <testcase name="noCameraAtAllSaysSo" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.11"/>
+  <testcase name="resumeWhileAskingKeepsAsking" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.054"/>
+  <testcase name="leavingRightAfterTheShutterKeepsThePhotoAndAddsTheFixLater" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.135"/>
+  <testcase name="shutterWaitsUntilTheCameraIsBound" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.16"/>
+  <testcase name="deniedMicrophoneSaysSo" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.127"/>
+  <testcase name="blankNoteSavesNothingAndKeepsTheDialogOpen" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.124"/>
+  <testcase name="missingJobReportsItAndSavesNothing" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.157"/>
+  <testcase name="voiceTapRecordsThenSavesTheMemoWithoutATranscript" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.21"/>
+  <testcase name="importedGalleryPhotosAreAllSaved" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.195"/>
+  <testcase name="loadsRoomsAndPhasesForTheJob" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.136"/>
+  <testcase name="resumeRereadsTheCameraPermission" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.105"/>
+  <testcase name="ghostOnlyFromTheSelectedRoomAndOneAfterPerBefore" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.149"/>
+  <testcase name="flipWorksWhenBothLensesExist" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.115"/>
+  <testcase name="recorderThatCannotStartShowsAMessageAndDoesNotRecord" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.116"/>
+  <testcase name="withoutLocationPermissionPhotoIsStillSaved" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.114"/>
+  <testcase name="ghostFromAnotherPhoneDownloadsBeforeShowing" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.128"/>
+  <testcase name="singleCameraDeviceHidesFlipAndUsesTheBackLens" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.099"/>
+  <testcase name="typedNoteSavesToTheJobAndClosesTheDialog" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.131"/>
+  <testcase name="flashCyclesOffAutoOn" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.076"/>
+  <testcase name="shutterSavesPhotoWithJobRoomPhaseAndFix" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.136"/>
+  <testcase name="emptyRecordingSavesNoNote" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.09"/>
+  <testcase name="afterShotLinksToTheGhostedBefore" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.097"/>
+  <testcase name="chipsAreRememberedBetweenShots" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.086"/>
+  <testcase name="leavingWhileRecordingSavesTheMemo" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.111"/>
+  <testcase name="deniedPermissionShowsTheDeniedState" classname="com.kurtz.homerecord.fieldlog.capture.CaptureViewModelTest" time="0.11"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

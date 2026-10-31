@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.TimesheetMathTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.746Z" hostname="runnervmnwato" time="0.005">
+  <properties/>
+  <testcase name="dailyTotalsRemoveUnpaidBreak" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.001"/>
+  <testcase name="roundingIsOffByDefaultAndQuarterHourWhenOn" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.003"/>
+  <testcase name="shiftAcrossMidnightSplitsByDay" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="weeklyOvertimeOver40" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="dailyAndWeeklyDoNotCountOvertimeTwice" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="fortyHourWeekWithTenHourDayWeeklyOnlyHasNoOvertime" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.001"/>
+  <testcase name="fortyHourWeekWithTenHourDayCaliforniaHasTwoHoursOvertime" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="noOvertimeRuleMeansAllRegular" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="dailyOvertimeOver8" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <testcase name="californiaDoubleTimeOver12" classname="com.kurtz.homerecord.core.model.TimesheetMathTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

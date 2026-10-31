@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:32.589Z" hostname="runnervmnwato" time="0.077">
+  <properties/>
+  <testcase name="annotatedCopyKeepsTagsAndLeavesOriginal" classname="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" time="0.054"/>
+  <testcase name="afterWithMissingBeforeShowsAlone" classname="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" time="0.012"/>
+  <testcase name="undoRemovesLastMarkAndEmptyMarksAreDropped" classname="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" time="0.004"/>
+  <testcase name="marksRoundTripThroughJson" classname="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" time="0.006"/>
+  <testcase name="afterPairsWithItsBeforeOnTheAfterDay" classname="com.kurtz.homerecord.core.photo.PhotoAnnotationsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

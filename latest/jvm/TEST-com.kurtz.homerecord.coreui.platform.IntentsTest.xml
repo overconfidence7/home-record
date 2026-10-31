@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.platform.IntentsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:18.002Z" hostname="runnervmnwato" time="0.93">
+  <properties/>
+  <testcase name="mapUriPinsTheLabelledPoint" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.071"/>
+  <testcase name="copyWritesTheContentAndReportsAnUnreadableUri" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.241"/>
+  <testcase name="shareTextOpensAChooserWithTheText" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.218"/>
+  <testcase name="shareOfAMissingFileDoesNothing" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.14"/>
+  <testcase name="openMapFiresAViewIntentOrNothingWithoutAMapsApp" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.112"/>
+  <testcase name="openAppSettingsTargetsThisPackage" classname="com.kurtz.homerecord.coreui.platform.IntentsTest" time="0.118"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

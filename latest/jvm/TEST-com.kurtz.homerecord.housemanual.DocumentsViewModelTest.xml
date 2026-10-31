@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:47.617Z" hostname="runnervmnwato" time="0.85">
+  <properties/>
+  <testcase name="addMenuOpensAndClosesWhenUploadOrScanIsChosen" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.151"/>
+  <testcase name="renameAndMoveToFolderThenDelete" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.161"/>
+  <testcase name="openFormSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.153"/>
+  <testcase name="pickedPdfIsListedAndOtherTypesShowNotice" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.187"/>
+  <testcase name="failedScanShowsNoticeAndScannedPdfIsListed" classname="com.kurtz.homerecord.housemanual.DocumentsViewModelTest" time="0.145"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

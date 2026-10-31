@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:35.887Z" hostname="runnervmnwato" time="0.325">
+  <properties/>
+  <testcase name="local writes sync after a short debounce" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.2"/>
+  <testcase name="does nothing while signed out or without a tenant" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.012"/>
+  <testcase name="signing out stops syncing" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.028"/>
+  <testcase name="a pass that throws does not stop later syncs" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.016"/>
+  <testcase name="syncs once when sign-in and tenant are both present" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.017"/>
+  <testcase name="syncs again when the network returns" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.013"/>
+  <testcase name="polls every 30 seconds only while in the foreground" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

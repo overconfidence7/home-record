@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.RoomRemovalTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:33.934Z" hostname="runnervmnwato" time="0.001">
+  <properties/>
+  <testcase name="anUnplacedRoomWithPhotosItemsOrTasksAsksAndCountsThem" classname="com.kurtz.homerecord.fieldlog.jobs.RoomRemovalTest" time="0.001"/>
+  <testcase name="anUnplacedEmptyRoomGoesAtOnce" classname="com.kurtz.homerecord.fieldlog.jobs.RoomRemovalTest" time="0.0"/>
+  <testcase name="aRoomNotSavedYetGoesAtOnce" classname="com.kurtz.homerecord.fieldlog.jobs.RoomRemovalTest" time="0.0"/>
+  <testcase name="aRoomOnThePlanAsksFirst" classname="com.kurtz.homerecord.fieldlog.jobs.RoomRemovalTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

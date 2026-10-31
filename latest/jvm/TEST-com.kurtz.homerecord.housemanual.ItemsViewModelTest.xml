@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemsViewModelTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:01.249Z" hostname="runnervmnwato" time="0.06">
+  <properties/>
+  <testcase name="categoryFilterKeysOnTheEnumAndSearchMatchesItsName" classname="com.kurtz.homerecord.housemanual.ItemsViewModelTest" time="0.045"/>
+  <testcase name="filtersAndGroupingApplyAndSurviveRecreation" classname="com.kurtz.homerecord.housemanual.ItemsViewModelTest" time="0.006"/>
+  <testcase name="groupsFoldAndStayFoldedAcrossRecreation" classname="com.kurtz.homerecord.housemanual.ItemsViewModelTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.PunchDistanceTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.635Z" hostname="runnervmnwato" time="0.006">
+  <properties/>
+  <testcase name="thresholdIsTheCompanySetting" classname="com.kurtz.homerecord.core.model.PunchDistanceTest" time="0.005"/>
+  <testcase name="noFixOrNoJobLocationNeverFlags" classname="com.kurtz.homerecord.core.model.PunchDistanceTest" time="0.0"/>
+  <testcase name="nearFixIsNotFlagged" classname="com.kurtz.homerecord.core.model.PunchDistanceTest" time="0.0"/>
+  <testcase name="reasonTextUsesPickerLabelOrTypedOther" classname="com.kurtz.homerecord.core.model.PunchDistanceTest" time="0.0"/>
+  <testcase name="farFixIsFlagged" classname="com.kurtz.homerecord.core.model.PunchDistanceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

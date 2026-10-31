@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemSectionRowsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:27.974Z" hostname="runnervmnwato" time="0.684">
+  <properties/>
+  <testcase name="serviceRowOpensTheRecord" classname="com.kurtz.homerecord.housemanual.items.ItemSectionRowsTest" time="0.25"/>
+  <testcase name="documentRowOpensTheViewer" classname="com.kurtz.homerecord.housemanual.items.ItemSectionRowsTest" time="0.253"/>
+  <testcase name="consumableRowEditsOnTapAndReordersFromItsButton" classname="com.kurtz.homerecord.housemanual.items.ItemSectionRowsTest" time="0.17"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

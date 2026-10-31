@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.task.JobTasksTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:40.447Z" hostname="runnervmnwato" time="0.614">
+  <properties/>
+  <testcase name="editKeepsDoneStateAndOrder" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.044"/>
+  <testcase name="deleteHidesTheTaskAndSyncs" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.03"/>
+  <testcase name="newTasksGoToTheBottomOfTheList" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.09"/>
+  <testcase name="myTasksComeFromThisCompanysJobsOnly" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.102"/>
+  <testcase name="dragReorderPersistsAndSyncsOnlyMovedRows" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.107"/>
+  <testcase name="swipeDoneThenUndoRestoresTheTask" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.107"/>
+  <testcase name="blankTitleOrMissingJobSavesNothing" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.064"/>
+  <testcase name="addKeepsEveryFieldAndQueuesOneChange" classname="com.kurtz.homerecord.core.task.JobTasksTest" time="0.05"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

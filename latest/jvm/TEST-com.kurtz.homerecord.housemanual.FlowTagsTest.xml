@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.FlowTagsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:48.479Z" hostname="runnervmnwato" time="2.633">
+  <properties/>
+  <testcase name="addFloorDialogFieldsAndSaveHaveIds" classname="com.kurtz.homerecord.housemanual.FlowTagsTest" time="2.268"/>
+  <testcase name="sheetOptionsHaveIdsFromTheirOptionId" classname="com.kurtz.homerecord.housemanual.FlowTagsTest" time="0.356"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

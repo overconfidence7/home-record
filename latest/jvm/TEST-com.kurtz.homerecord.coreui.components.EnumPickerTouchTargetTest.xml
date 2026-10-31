@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.components.EnumPickerTouchTargetTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:11.718Z" hostname="runnervmnwato" time="0.476">
+  <properties/>
+  <testcase name="segmentedOptionsAre48dp" classname="com.kurtz.homerecord.coreui.components.EnumPickerTouchTargetTest" time="0.457"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

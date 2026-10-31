@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:16.170Z" hostname="runnervmnwato" time="4.588">
+  <properties/>
+  <testcase name="v2ToV3AddsR2KeyToPhotoAndNote" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="1.337"/>
+  <testcase name="v3ToV4MovesBeforeOutOfThePhase" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.567"/>
+  <testcase name="v4ToV5AddsTaskOrderAndDoneTime" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.501"/>
+  <testcase name="v1ToV2DropsTheSingleCursorAndKeepsConfirmedRows" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.493"/>
+  <testcase name="latestIsTheCompiledVersion" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.27"/>
+  <testcase name="everyReleasedVersionMigratesToTheLatest" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="1.384"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

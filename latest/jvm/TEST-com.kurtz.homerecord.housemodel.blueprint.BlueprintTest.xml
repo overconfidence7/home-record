@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:14.654Z" hostname="runnervmnwato" time="0.023">
+  <properties/>
+  <testcase name="hitTestFindsRoomsAndRespectsConcaveNotch" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.006"/>
+  <testcase name="fitCentersAndKeepsMargin" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.005"/>
+  <testcase name="layerDecodeIgnoresJunk" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.004"/>
+  <testcase name="labelAnchorStaysInsideConcaveRooms" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.004"/>
+  <testcase name="smallestRoomWinsWhereRoomsOverlap" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.0"/>
+  <testcase name="layerSetRoundTrips" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.002"/>
+  <testcase name="fitEmptyIsIdentity" classname="com.kurtz.homerecord.housemodel.blueprint.BlueprintTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

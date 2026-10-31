@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.lookup.RetrofitLookupApiTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:24.339Z" hostname="runnervmnwato" time="1.07">
+  <properties/>
+  <testcase name="recallFailuresMap" classname="com.kurtz.homerecord.core.lookup.RetrofitLookupApiTest" time="0.639"/>
+  <testcase name="unreadablePhotoIsInvalidAndNetworkIsOffline" classname="com.kurtz.homerecord.core.lookup.RetrofitLookupApiTest" time="0.174"/>
+  <testcase name="readsPlateFields" classname="com.kurtz.homerecord.core.lookup.RetrofitLookupApiTest" time="0.145"/>
+  <testcase name="parsesRecallsAndSendsMakeAndModel" classname="com.kurtz.homerecord.core.lookup.RetrofitLookupApiTest" time="0.091"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:33.947Z" hostname="runnervmnwato" time="2.325">
+  <properties/>
+  <testcase name="crewGetNoDropPutBackOrWeatherControls" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.209"/>
+  <testcase name="delaySheetOffersTheFiveReasonsAndSavesOnlyWithOne" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.21"/>
+  <testcase name="leadCanLeaveRecordLinesOutPutThemBackAndCorrectTheWeather" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.675"/>
+  <testcase name="leadGetsAnEditControlOnEverySectionAndOfflineWeatherIsSaid" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.689"/>
+  <testcase name="weatherFormListsTheConditionsAndSaysWhatIsWrong" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.456"/>
+  <testcase name="crewSeeTheLogWithNoEditControls" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.076"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

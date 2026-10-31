@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.net.LazyCallFactoryTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.790Z" hostname="runnervmnwato" time="0.051">
+  <properties/>
+  <testcase name="wiring an API does not build the client" classname="com.kurtz.homerecord.core.net.LazyCallFactoryTest" time="0.009"/>
+  <testcase name="first call builds the client once and later calls reuse it" classname="com.kurtz.homerecord.core.net.LazyCallFactoryTest" time="0.042"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

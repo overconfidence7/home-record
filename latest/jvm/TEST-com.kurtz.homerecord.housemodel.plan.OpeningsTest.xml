@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.OpeningsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:27.332Z" hostname="runnervmnwato" time="0.015">
+  <properties/>
+  <testcase name="openingLandsWhereTapped" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.006"/>
+  <testcase name="stairsSitInsideTheRoomAndMoveWithIt" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="widthIsClampedToTheWall" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.001"/>
+  <testcase name="shrinkingTheWallPullsTheOpeningIn" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.001"/>
+  <testcase name="tooShortWallTakesNoOpening" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="deletingACornerDropsTheWallsItMerges" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="doorIsCenteredOnTheEdge" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="undoRemovesTheOpening" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="dragSlidesAlongTheWallAndStaysOnIt" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.001"/>
+  <testcase name="addingACornerKeepsOpeningsOnTheirWall" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <testcase name="stairsLinkAndDelete" classname="com.kurtz.homerecord.housemodel.plan.OpeningsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.company.WelcomeTagsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:27.937Z" hostname="runnervmnwato" time="0.297">
+  <properties/>
+  <testcase name="createAndJoinSegmentsHaveIds" classname="com.kurtz.homerecord.fieldlog.company.WelcomeTagsTest" time="0.291"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

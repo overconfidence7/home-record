@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:21.590Z" hostname="runnervmnwato" time="2.73">
+  <properties/>
+  <testcase name="snapshotIsCachedForSixHoursAndKeptWhenARefreshFails" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.473"/>
+  <testcase name="anUnchangedReassemblyWritesAndQueuesNothing" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.177"/>
+  <testcase name="theIdIsTheSameOnEveryPhone" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.086"/>
+  <testcase name="rangeListsEveryJobsLogOncePerDayWithItsDelays" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.349"/>
+  <testcase name="aSnapshotTakenAfterTheDayEndedIsFinal" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.231"/>
+  <testcase name="offlineWithNoSnapshotSaysNoWeather" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.203"/>
+  <testcase name="assemblesTheDayFromRoomAndSavesTheDraft" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.185"/>
+  <testcase name="daysListNewestFirstAndMissingJobIsNull" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.237"/>
+  <testcase name="editsSavedTogetherOrDuringAssemblyAllLand" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.279"/>
+  <testcase name="reassemblingKeepsHandEditsAndPicksUpNewRecords" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.232"/>
+  <testcase name="noLocationAndTooFarAheadAreToldApart" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.225"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

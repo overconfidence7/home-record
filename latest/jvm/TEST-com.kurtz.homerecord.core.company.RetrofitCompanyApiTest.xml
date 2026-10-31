@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:12.039Z" hostname="runnervmnwato" time="0.589">
+  <properties/>
+  <testcase name="secondCompanyMapsToAlreadyInCompany" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.133"/>
+  <testcase name="membersMapRolesAndRates" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.062"/>
+  <testcase name="updateProfileSendsSettingsWireNames" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.035"/>
+  <testcase name="meKeepsOnlyCompanyMemberships" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.034"/>
+  <testcase name="networkFailureIsOffline" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.026"/>
+  <testcase name="createSendsTrimmedFieldsAndOmitsBlanks" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.023"/>
+  <testcase name="statusCodesMap" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.074"/>
+  <testcase name="badCodeMapsToInvalidCode" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.019"/>
+  <testcase name="meReadsTheClockRulesForAnyRole" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.062"/>
+  <testcase name="profileReadsSettingsWithDefaults" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.064"/>
+  <testcase name="setRoleAndRateUsePatchOnTheMember" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

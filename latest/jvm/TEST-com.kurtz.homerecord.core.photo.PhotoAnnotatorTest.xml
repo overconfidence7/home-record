@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.PhotoAnnotatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:32.675Z" hostname="runnervmnwato" time="0.295">
+  <properties/>
+  <testcase name="noUploadWithoutCompany" classname="com.kurtz.homerecord.core.photo.PhotoAnnotatorTest" time="0.115"/>
+  <testcase name="nothingSavedWithoutMarksOrOriginalOrRender" classname="com.kurtz.homerecord.core.photo.PhotoAnnotatorTest" time="0.081"/>
+  <testcase name="copyKeepsOriginalAndTagsAndCarriesMarks" classname="com.kurtz.homerecord.core.photo.PhotoAnnotatorTest" time="0.086"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

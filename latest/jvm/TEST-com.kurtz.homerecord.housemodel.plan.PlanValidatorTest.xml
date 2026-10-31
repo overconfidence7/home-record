@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:27.397Z" hostname="runnervmnwato" time="0.012">
+  <properties/>
+  <testcase name="overlappingRoomsAreFlagged" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.001"/>
+  <testcase name="notchOfLShapeDoesNotOverlapRoomInTheNotch" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.001"/>
+  <testcase name="roomOverlappingOneArmOfAConcaveShapeIsFlagged" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.0"/>
+  <testcase name="smallRoomsAreFlagged" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.0"/>
+  <testcase name="crossShapedOverlapIsDetected" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.0"/>
+  <testcase name="bowTieOutlineIsNotSimple" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.007"/>
+  <testcase name="touchingRoomsAreNotOverlap" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.0"/>
+  <testcase name="containedAndIdenticalRoomsOverlap" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.0"/>
+  <testcase name="zeroLengthEdgesDoNotCrash" classname="com.kurtz.homerecord.housemodel.plan.PlanValidatorTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

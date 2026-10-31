@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.components.SyncStatusTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:13.631Z" hostname="runnervmnwato" time="3.222">
+  <properties/>
+  <testcase name="everySyncedTableHasALabelAndUnknownOnesFallBack" classname="com.kurtz.homerecord.coreui.components.SyncStatusTest" time="0.168"/>
+  <testcase name="closeKeepsTheListAndOfflineStillWins" classname="com.kurtz.homerecord.coreui.components.SyncStatusTest" time="2.34"/>
+  <testcase name="refusedChangesShowOnTheChipAndTapListsThemInsteadOfSyncing" classname="com.kurtz.homerecord.coreui.components.SyncStatusTest" time="0.699"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

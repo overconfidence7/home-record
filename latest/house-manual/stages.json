@@ -1,0 +1,127 @@
+[
+ {
+  "stage": "install:house-manual",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:house-manual",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "seed:house-manual",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:house-manual",
+  "status": "pass",
+  "details": "20 tests"
+ },
+ {
+  "stage": "flow:H01-onboarding",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H01b-home",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02-draw-plan",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02b-shape-doors-stairs",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H03-blueprint-room",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H04-add-item",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H06-items",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H17-sign-in",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H19-paywall",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-contacts",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-documents",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "variant:dark",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:font200",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:landscape",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "monkey:house-manual",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "jank:house-manual",
+  "status": "pass",
+  "details": "5% of 120 frames ran the UI thread past the frame budget (software renderer, overall 75% janky of 121; 200-row list, benchmark build)"
+ },
+ {
+  "stage": "release:house-manual",
+  "status": "pass",
+  "details": "R8 build launches (1152 ms)"
+ },
+ {
+  "stage": "coldstart:house-manual",
+  "status": "pass",
+  "details": "median 615 ms (release, profile compiled)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.housemanual",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

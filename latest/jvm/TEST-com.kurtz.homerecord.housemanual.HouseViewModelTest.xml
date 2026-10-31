@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.HouseViewModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:53.792Z" hostname="runnervmnwato" time="1.315">
+  <properties/>
+  <testcase name="deleteRemovesOnlyThatRoom" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.48"/>
+  <testcase name="renameFromTheLongPressMenuSavesTheRoom" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.271"/>
+  <testcase name="showsTheFloorsRooms" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.202"/>
+  <testcase name="exportPdfPassesEveryFloorToTheExporterAndSurfacesTheUri" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.145"/>
+  <testcase name="layerTogglesPersistPerHome" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.19"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

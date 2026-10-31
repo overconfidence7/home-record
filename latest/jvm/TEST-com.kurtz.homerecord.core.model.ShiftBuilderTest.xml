@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.ShiftBuilderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.671Z" hostname="runnervmnwato" time="0.005">
+  <properties/>
+  <testcase name="inWithoutOutThenNextInClosesThePreviousOne" classname="com.kurtz.homerecord.core.model.ShiftBuilderTest" time="0.002"/>
+  <testcase name="openShiftUnder14HoursStaysOpen" classname="com.kurtz.homerecord.core.model.ShiftBuilderTest" time="0.0"/>
+  <testcase name="switchSplitsJobSegmentsInsideOneShift" classname="com.kurtz.homerecord.core.model.ShiftBuilderTest" time="0.001"/>
+  <testcase name="inBreakOutMakesOneShiftWithOneBreak" classname="com.kurtz.homerecord.core.model.ShiftBuilderTest" time="0.0"/>
+  <testcase name="openShiftPast14HoursIsClosedAt14AndFlagged" classname="com.kurtz.homerecord.core.model.ShiftBuilderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

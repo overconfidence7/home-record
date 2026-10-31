@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.LogAssemblerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.525Z" hostname="runnervmnwato" time="0.093">
+  <properties/>
+  <testcase name="editedCrewHoursSurviveNewPunches" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.043"/>
+  <testcase name="sectionsRoundTripThroughTheStoredJson" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.026"/>
+  <testcase name="shiftsAcrossMidnightCountOnlyTheirPartOfTheDay" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.0"/>
+  <testcase name="workDoneIsNotesAndTranscriptsInOrder" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.001"/>
+  <testcase name="photosTasksChangeOrdersAndMaterialsAreTheDays" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.006"/>
+  <testcase name="weatherIsKeptWhenOfflineAndRefreshedWhenOnline" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.0"/>
+  <testcase name="reassemblingKeepsEditedSectionsAndTypedOnesButRefreshesTheRest" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.003"/>
+  <testcase name="crewHoursComeFromPunchesOnThisJobLessBreaks" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.001"/>
+  <testcase name="linesLeftOutStayOutOnReassemblyWhileNewOnesArriveAndPutBackRestoresThem" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.008"/>
+  <testcase name="someoneStillClockedInCountsUntilNowAndIsMarkedOnSite" classname="com.kurtz.homerecord.core.model.LogAssemblerTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

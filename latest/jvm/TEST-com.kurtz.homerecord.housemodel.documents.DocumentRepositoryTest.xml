@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.documents.DocumentRepositoryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:14.689Z" hostname="runnervmnwato" time="0.544">
+  <properties/>
+  <testcase name="scopesSeparateHomeRoomAndItemDocuments" classname="com.kurtz.homerecord.housemodel.documents.DocumentRepositoryTest" time="0.183"/>
+  <testcase name="foldersGroupRenameMoveAttachAndDelete" classname="com.kurtz.homerecord.housemodel.documents.DocumentRepositoryTest" time="0.189"/>
+  <testcase name="addsPdfAndImageAndRefusesOtherTypes" classname="com.kurtz.homerecord.housemodel.documents.DocumentRepositoryTest" time="0.151"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

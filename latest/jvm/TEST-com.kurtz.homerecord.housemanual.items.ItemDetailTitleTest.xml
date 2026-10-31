@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemDetailTitleTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:11.839Z" hostname="runnervmnwato" time="0.251">
+  <properties/>
+  <testcase name="missingItemSaysNotFoundOnceLoaded" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTitleTest" time="0.114"/>
+  <testcase name="loadingShowsNoNotFoundTitle" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTitleTest" time="0.122"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

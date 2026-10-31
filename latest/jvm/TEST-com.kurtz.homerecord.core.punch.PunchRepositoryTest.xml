@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.punch.PunchRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:34.357Z" hostname="runnervmnwato" time="0.544">
+  <properties/>
+  <testcase name="openShiftThenClockOutClosesIt" classname="com.kurtz.homerecord.core.punch.PunchRepositoryTest" time="0.106"/>
+  <testcase name="editWithoutReasonIsRefused" classname="com.kurtz.homerecord.core.punch.PunchRepositoryTest" time="0.133"/>
+  <testcase name="noLocationPunchStillSaves" classname="com.kurtz.homerecord.core.punch.PunchRepositoryTest" time="0.114"/>
+  <testcase name="clockInSavesFixAndQueuesForSync" classname="com.kurtz.homerecord.core.punch.PunchRepositoryTest" time="0.08"/>
+  <testcase name="editKeepsAuditAndFlagsShiftEdited" classname="com.kurtz.homerecord.core.punch.PunchRepositoryTest" time="0.086"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.FabLabelsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:43.803Z" hostname="runnervmnwato" time="21.112">
+  <properties/>
+  <testcase name="newJobFabIsNamed" classname="com.kurtz.homerecord.fieldlog.FabLabelsTest" time="18.667"/>
+  <testcase name="takePhotoFabIsNamed" classname="com.kurtz.homerecord.fieldlog.FabLabelsTest" time="0.339"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

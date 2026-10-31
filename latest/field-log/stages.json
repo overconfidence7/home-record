@@ -1,0 +1,147 @@
+[
+ {
+  "stage": "install:field-log",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:field-log",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "seed:field-log",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:field-log",
+  "status": "fail",
+  "details": "1 failing of 23"
+ },
+ {
+  "stage": "flow:F01-welcome",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F02-invite-join",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F03-jobs",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F04-clock-in",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F04b-location-allow",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F04c-today-clock-in",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F06-timesheets",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F07-files",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F07b-storage",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F07c-markup",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F08-capture",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F08b-capture-photo",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:F09-daily-log",
+  "status": "fail",
+  "details": "see maestro/F09-daily-log.log"
+ },
+ {
+  "stage": "flow:F15-reports",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-seeded-company",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "variant:dark",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:font200",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:landscape",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "monkey:field-log",
+  "status": "pass",
+  "details": "1500 events, no crash"
+ },
+ {
+  "stage": "jank:field-log",
+  "status": "pass",
+  "details": "9% of 120 frames ran the UI thread past the frame budget (software renderer, overall 81% janky of 125; 200-row list, benchmark build)"
+ },
+ {
+  "stage": "release:field-log",
+  "status": "pass",
+  "details": "R8 build launches (1430 ms)"
+ },
+ {
+  "stage": "coldstart:field-log",
+  "status": "pass",
+  "details": "median 702 ms (release, profile compiled)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.fieldlog",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

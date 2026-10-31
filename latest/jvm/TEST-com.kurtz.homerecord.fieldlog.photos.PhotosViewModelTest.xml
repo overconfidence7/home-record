@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:53.847Z" hostname="runnervmnwato" time="0.296">
+  <properties/>
+  <testcase name="after shot pairs with its before and annotated copy is flagged" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.078"/>
+  <testcase name="empty job shows no days once loaded" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.042"/>
+  <testcase name="photos group by day newest first with room names" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.053"/>
+  <testcase name="photo from another phone shows a placeholder and downloads once" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.104"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

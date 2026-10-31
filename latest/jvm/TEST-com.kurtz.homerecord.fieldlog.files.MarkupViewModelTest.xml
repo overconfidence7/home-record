@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:30.560Z" hostname="runnervmnwato" time="0.494">
+  <properties/>
+  <testcase name="viewerListsVersionsWithNamesAndOffersMarkUpToThoseWhoManageFiles" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.099"/>
+  <testcase name="everyToolMarksThePageShownAndSaveMakesVersionTwoByTheAuthor" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.107"/>
+  <testcase name="undoTakesBackTheLastMarkOnThisPageOnly" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.054"/>
+  <testcase name="pagesStopAtTheFirstAndLast" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.061"/>
+  <testcase name="emptyTextIsNotAddedAndAFailedWriteKeepsTheMarks" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.077"/>
+  <testcase name="onlyAPdfOnThePhoneCanBeMarkedUp" classname="com.kurtz.homerecord.fieldlog.files.MarkupViewModelTest" time="0.059"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

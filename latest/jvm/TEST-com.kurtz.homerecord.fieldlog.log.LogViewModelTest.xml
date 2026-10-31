@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:36.297Z" hostname="runnervmnwato" time="1.332">
+  <properties/>
+  <testcase name="aPhotoLeftOutAfterConfirmStaysOutOnReopeningUntilPutBack" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.373"/>
+  <testcase name="editedWorkDoneAndHoursSurviveReopeningTheDay" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.123"/>
+  <testcase name="offlineWithNoSnapshotSaysNoWeatherOffline" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.075"/>
+  <testcase name="crewReadTheSavedLogButNeverBuildOrChangeOne" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.075"/>
+  <testcase name="dayBarMovesBackButNeverPastTodayAndTheOpenSheetSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.132"/>
+  <testcase name="openingTheDayBuildsTheDraftWithCrewWorkPhotosAndWeather" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.077"/>
+  <testcase name="crewCannotLeaveLinesOut" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.07"/>
+  <testcase name="delayNeedsAReasonThenSavesWithItsNoteAndRemovesAfterConfirm" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.08"/>
+  <testcase name="editsMarkTheirSectionAndZeroHoursTakesAPersonOff" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.052"/>
+  <testcase name="hoursThatDoNotReadAsATimeKeepTheDialogOpen" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.108"/>
+  <testcase name="aDelayTappedInReportsOpensItsDayNeverPastTodayAndTheDayChosenLaterWins" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.132"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

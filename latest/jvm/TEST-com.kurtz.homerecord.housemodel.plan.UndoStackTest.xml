@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.UndoStackTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:27.417Z" hostname="runnervmnwato" time="0.0">
+  <properties/>
+  <testcase name="undoRedoRoundTrip" classname="com.kurtz.homerecord.housemodel.plan.UndoStackTest" time="0.0"/>
+  <testcase name="holdsAtLeastFiftySteps" classname="com.kurtz.homerecord.housemodel.plan.UndoStackTest" time="0.0"/>
+  <testcase name="capacityDropsOldest" classname="com.kurtz.homerecord.housemodel.plan.UndoStackTest" time="0.0"/>
+  <testcase name="duplicateStatesIgnored" classname="com.kurtz.homerecord.housemodel.plan.UndoStackTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:27.425Z" hostname="runnervmnwato" time="0.026">
+  <properties/>
+  <testcase name="rectangleBesideLShapeSharesOnlyTheTouchingWalls" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="cornerTouchOnlyIsNotShared" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="sharedEdgeIsInteriorForBothRooms" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="partialSharedEdgeCountsForLongerWall" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.001"/>
+  <testcase name="lShapeHasSixWalls" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="rectangleHasFourWallsFacingOutward" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="diagonalEdgesGetRunningIndexAndHypotenuseLength" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="zeroLengthEdgeIsNotLabelledAsAWallSide" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="orientationIndependentOfWinding" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.023"/>
+  <testcase name="gapOfTenInchesIsExterior" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.0"/>
+  <testcase name="sharedWithinFourInchesCounts" classname="com.kurtz.homerecord.housemodel.plan.WallDeriverTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

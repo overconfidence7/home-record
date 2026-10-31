@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:13.544Z" hostname="runnervmnwato" time="2.822">
+  <properties/>
+  <testcase name="landscapeViewfinderKeepsFullHeight" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.429"/>
+  <testcase name="noteFieldIsLabelled" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.684"/>
+  <testcase name="shutterIsOffWhileTheCameraStarts" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.202"/>
+  <testcase name="portraitViewfinderOverHalfTheScreen" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.263"/>
+  <testcase name="landscapeAt200PercentKeepsShutterAndViewfinder" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.637"/>
+  <testcase name="galleryAndBackAreEvents" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.241"/>
+  <testcase name="roomAndPhaseChipsAreGloveSized" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.175"/>
+  <testcase name="deniedSettingsButtonIsGloveSized" classname="com.kurtz.homerecord.fieldlog.capture.CaptureLayoutTest" time="0.161"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

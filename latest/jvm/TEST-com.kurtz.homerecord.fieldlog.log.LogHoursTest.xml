@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogHoursTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:33.936Z" hostname="runnervmnwato" time="0.004">
+  <properties/>
+  <testcase name="readsDecimalColonAndHourMinuteForms" classname="com.kurtz.homerecord.fieldlog.log.LogHoursTest" time="0.002"/>
+  <testcase name="savedMinutesShowAsDecimalHoursThatReadBack" classname="com.kurtz.homerecord.fieldlog.log.LogHoursTest" time="0.001"/>
+  <testcase name="rejectsWhatIsNotATimeOrMoreThanADay" classname="com.kurtz.homerecord.fieldlog.log.LogHoursTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

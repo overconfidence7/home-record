@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="23.083" timestamp="2026-10-31T16:54:02">
+    <testcase id="H19-paywall" name="H19-paywall" classname="H19-paywall" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H19-paywall.yaml" time="23.071" timestamp="2026-10-31T16:54:02" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

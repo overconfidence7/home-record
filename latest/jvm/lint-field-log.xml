@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.4.1">
+
+    <issue
+        id="ExifInterface"
+        severity="Warning"
+        message="Avoid using `android.media.ExifInterface`; use `androidx.exifinterface.media.ExifInterface` instead"
+        category="Correctness"
+        priority="6"
+        summary="Using `android.media.ExifInterface`"
+        explanation="The `android.media.ExifInterface` implementation has some known security bugs in older versions of Android. There is a new implementation available of this library in the support library, which is preferable."
+        errorLine1="import android.media.ExifInterface"
+        errorLine2="       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/photos/BitmapAnnotationRenderer.kt"
+            line="9"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="ExifInterface"
+        severity="Warning"
+        message="Avoid using `android.media.ExifInterface`; use `androidx.exifinterface.media.ExifInterface` instead"
+        category="Correctness"
+        priority="6"
+        summary="Using `android.media.ExifInterface`"
+        explanation="The `android.media.ExifInterface` implementation has some known security bugs in older versions of Android. There is a new implementation available of this library in the support library, which is preferable."
+        errorLine1="        ImageOrientation.fromExif(ExifInterface(path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL))"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/photos/BitmapAnnotationRenderer.kt"
+            line="40"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        severity="Warning"
+        message="Attribute `targetCellWidth` is only used in API level 31 and higher (current min is 26)"
+        category="Correctness"
+        priority="6"
+        summary="Attribute unused on older versions"
+        explanation="This check finds attributes set in XML files that were introduced in a version newer than the oldest version targeted by your application (with the `minSdkVersion` attribute).&#xA;&#xA;This is not an error; the application will simply ignore the attribute. However, if the attribute is important to the appearance or functionality of your application, you should consider finding an alternative way to achieve the same result with only available attributes, and then you can optionally create a copy of the layout in a layout-vNN folder which will be used on API NN or higher where you can take advantage of the newer attribute.&#xA;&#xA;Note: This check does not only apply to attributes. For example, some tags can be unused too, such as the new `&lt;tag>` element in layouts introduced in API 21."
+        errorLine1="    android:targetCellWidth=&quot;2&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/xml/clock_widget_info.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        severity="Warning"
+        message="Attribute `targetCellHeight` is only used in API level 31 and higher (current min is 26)"
+        category="Correctness"
+        priority="6"
+        summary="Attribute unused on older versions"
+        explanation="This check finds attributes set in XML files that were introduced in a version newer than the oldest version targeted by your application (with the `minSdkVersion` attribute).&#xA;&#xA;This is not an error; the application will simply ignore the attribute. However, if the attribute is important to the appearance or functionality of your application, you should consider finding an alternative way to achieve the same result with only available attributes, and then you can optionally create a copy of the layout in a layout-vNN folder which will be used on API NN or higher where you can take advantage of the newer attribute.&#xA;&#xA;Note: This check does not only apply to attributes. For example, some tags can be unused too, such as the new `&lt;tag>` element in layouts introduced in API 21."
+        errorLine1="    android:targetCellHeight=&quot;2&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/xml/clock_widget_info.xml"
+            line="6"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/CompanyViewModel.kt"
+            line="27"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/CompanyViewModel.kt"
+            line="27"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {"
+        errorLine2="                                                                                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/FilesViewModel.kt"
+            line="40"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="class FilesViewModel(private val d: FilesDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {"
+        errorLine2="                                                                                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/FilesViewModel.kt"
+            line="40"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/WelcomeViewModel.kt"
+            line="18"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/company/WelcomeViewModel.kt"
+            line="18"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;out&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;log_drop_photo&quot;>Leave photo %1$d out of the log&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="535"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ExportedReceiver"
+        severity="Warning"
+        message="Exported receiver does not require permission"
+        category="Security"
+        priority="5"
+        summary="Receiver does not require permission"
+        explanation="Exported receivers (receivers which either set `exported=true` or contain an intent-filter and do not specify `exported=false`) should define a permission that an entity must have in order to launch the receiver or bind to it. Without this, any application can use this receiver."
+        url="https://goo.gle/ExportedReceiver"
+        urls="https://goo.gle/ExportedReceiver"
+        errorLine1="        &lt;receiver android:name=&quot;com.kurtz.homerecord.fieldlog.qa.SeedReceiver&quot; android:exported=&quot;true&quot;>"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/debug/AndroidManifest.xml"
+            line="19"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="DataExtractionRules"
+        severity="Warning"
+        message="The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+        category="Security"
+        priority="3"
+        summary="Missing data extraction rules"
+        explanation="Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.&#xA;&#xA;In Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you&apos;ll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+        url="https://developer.android.com/about/versions/12/backup-restore#xml-changes"
+        urls="https://developer.android.com/about/versions/12/backup-restore#xml-changes,https://goo.gle/DataExtractionRules"
+        errorLine1="        android:allowBackup=&quot;false&quot;"
+        errorLine2="                             ~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/AndroidManifest.xml"
+            line="12"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.ts_approve` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;ts_approve&quot;>Approve&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="103"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.annotate_save` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;annotate_save&quot;>Save a marked-up copy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="337"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.job_ov_status` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;job_ov_status&quot;>Status&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="358"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.cap_voice_stop` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;cap_voice_stop&quot;>Stop&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/res/values/strings.xml"
+            line="446"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                                val bmp = Bitmap.createBitmap((w * scale).toInt().coerceAtLeast(1), (h * scale).toInt().coerceAtLeast(1), Bitmap.Config.ARGB_8888)"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/AndroidMarkedPdfWriter.kt"
+            line="46"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            clearPrefs = WIPED_PREFS.map { name -> { app.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().commit(); Unit } },"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/AppContainer.kt"
+            line="121"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            rememberTags = { room, phase -> prefs.edit().putString(&quot;room_$jobId&quot;, room).putString(&quot;phase_$jobId&quot;, phase).apply() },"
+        errorLine2="                                            ~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/AppContainer.kt"
+            line="272"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            markPermissionAsked = { prefs.edit().putBoolean(&quot;location_asked&quot;, true).apply() },"
+        errorLine2="                                    ~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/AppContainer.kt"
+            line="296"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            scope.launch { vm.scanned(withContext(Dispatchers.IO) { importScan(context, Uri.parse(uri)) }, base) }"
+        errorLine2="                                                                                        ~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/FilesRoute.kt"
+            line="45"
+            column="89"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val bmp = android.graphics.Bitmap.createBitmap(600, 780, android.graphics.Bitmap.Config.ARGB_8888)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/Previews.kt"
+            line="816"
+            column="19"/>
+    </issue>
+
+</issues>

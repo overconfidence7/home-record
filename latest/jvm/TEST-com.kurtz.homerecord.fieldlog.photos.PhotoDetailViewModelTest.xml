@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:52.414Z" hostname="runnervmnwato" time="0.872">
+  <properties/>
+  <testcase name="loads caption rooms and phases of the job" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.082"/>
+  <testcase name="delete asks first then removes the photo" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.066"/>
+  <testcase name="unknown photo is reported missing" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.055"/>
+  <testcase name="photo on this phone is shown without a download" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.07"/>
+  <testcase name="crew and an off-job lead cannot delete" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.266"/>
+  <testcase name="photo from another phone downloads with offline and retry" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.086"/>
+  <testcase name="caption and tags are saved and queued for sync" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.111"/>
+  <testcase name="before toggles on and off and keeps the phase" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailViewModelTest" time="0.106"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

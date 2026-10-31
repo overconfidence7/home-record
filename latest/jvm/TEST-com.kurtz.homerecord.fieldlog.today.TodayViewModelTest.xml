@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:16:00.333Z" hostname="runnervmnwato" time="0.038">
+  <properties/>
+  <testcase name="pullToRefreshEndsWhenTheTeamRefreshFails" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.01"/>
+  <testcase name="opensByRefreshingTheTeamList" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.008"/>
+  <testcase name="pullToRefreshSyncsAndReloadsTheTeam" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

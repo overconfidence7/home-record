@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:17.493Z" hostname="runnervmnwato" time="9.827">
+  <properties/>
+  <testcase name="bigHouseDropsToASmallerScaleAndStaysInsideTheMargins" classname="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" time="9.157"/>
+  <testcase name="scaleBarIsAWholeNumberOfFeetAtTheDrawnScale" classname="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" time="0.062"/>
+  <testcase name="smallHouseGetsTheLargestScaleThatFits" classname="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" time="0.044"/>
+  <testcase name="noRoomsMeansNoLayout" classname="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" time="0.048"/>
+  <testcase name="aPageDrawsRoomsAndAScaleBarWithoutThrowing" classname="com.kurtz.homerecord.housemodel.pdf.BlueprintPdfTest" time="0.295"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

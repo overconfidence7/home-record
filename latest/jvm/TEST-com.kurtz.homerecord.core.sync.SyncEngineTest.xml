@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.SyncEngineTest" tests="29" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:36.235Z" hostname="runnervmnwato" time="4.203">
+  <properties/>
+  <testcase name="pushedChangeAppearsOnTheOtherDevice" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.259"/>
+  <testcase name="largeOutboxIsSplitIntoPushesThatFitTheBodyLimit" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="1.227"/>
+  <testcase name="secondTenantOnTheSamePhonePullsItsRowsFromTheStart" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.177"/>
+  <testcase name="photoPathStaysOnThePhoneAndTheR2KeySyncs" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.15"/>
+  <testcase name="punchEditLogIsTheOnlyUnionedList" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.03"/>
+  <testcase name="forgottenTenantPullsFromTheStartAndPushesWholeRows" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.101"/>
+  <testcase name="localColumnRule" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.038"/>
+  <testcase name="pendingRowTakesServerValueForFieldsThisDeviceDidNotChange" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.035"/>
+  <testcase name="pulledBackRowsArePrunedRefusedAndUnsentRowsStay" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.173"/>
+  <testcase name="oversizedChangeIsSetAsideWithoutBlockingTheRest" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.148"/>
+  <testcase name="unsentLocalEditNewerThanServerSurvivesAPull" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.16"/>
+  <testcase name="outboxIdsAreNotReusedAfterPruning" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.143"/>
+  <testcase name="anExceptionDuringSyncEndsAsFailedNotStuckSyncing" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.059"/>
+  <testcase name="pulledLocalColumnsFromAnOlderBuildAreIgnored" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.119"/>
+  <testcase name="endedTenantsEmitsTheTenantLeft" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.057"/>
+  <testcase name="pullWhileAnEditIsPendingKeepsOnlyTheEditedField" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.183"/>
+  <testcase name="mergeKeepsOnlyFieldsChangedHere" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.024"/>
+  <testcase name="refusedOpIsSetAsideAndLaterChangesStillSync" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.131"/>
+  <testcase name="jobFileOfflineAndPathAreKeptWhenTheOtherPhoneEdits" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.144"/>
+  <testcase name="pulledRowWithoutALocalColumnKeepsTheLocalValue" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.042"/>
+  <testcase name="refusedChangesAreListedOncePerRecordAndClear" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.093"/>
+  <testcase name="editsToDifferentFieldsOnTwoDevicesBothSurvive" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.136"/>
+  <testcase name="pullKeepsALocalEditNewerThanTheServerValue" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.023"/>
+  <testcase name="softDeletePropagates" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.114"/>
+  <testcase name="offlineChangesWaitThenSyncOnceWithoutDuplicates" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.107"/>
+  <testcase name="unknownColumnsAndUnstorableRowsDoNotBlockThePull" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.065"/>
+  <testcase name="movedRoomKeepsOnlyItsNewCornersOnTheOtherDevice" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.126"/>
+  <testcase name="sameFieldEditedOnTwoDevicesLatestWriteWins" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.083"/>
+  <testcase name="removedPhaseDoesNotComeBackOnPull" classname="com.kurtz.homerecord.core.sync.SyncEngineTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

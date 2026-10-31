@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ContactsViewModelTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:22.094Z" hostname="runnervmnwato" time="17.412">
+  <properties/>
+  <testcase name="saveNeedsNameThenListsContact" classname="com.kurtz.homerecord.housemanual.ContactsViewModelTest" time="14.301"/>
+  <testcase name="openFormSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ContactsViewModelTest" time="0.386"/>
+  <testcase name="deleteAsksThenRemoves" classname="com.kurtz.homerecord.housemanual.ContactsViewModelTest" time="0.196"/>
+  <testcase name="editFormIsDirtyOnlyAfterAChangeAndSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ContactsViewModelTest" time="0.296"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

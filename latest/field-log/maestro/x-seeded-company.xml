@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="12.203" timestamp="2026-10-31T17:05:58">
+    <testcase id="x-seeded-company" name="x-seeded-company" classname="x-seeded-company" file="/home/runner/work/home-record/home-record/qa/flows/field-log/x-seeded-company.yaml" time="12.188" timestamp="2026-10-31T17:05:58" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="70.586" timestamp="2026-10-31T16:52:59">
+    <testcase id="F04b-location-allow" name="F04b-location-allow" classname="F04b-location-allow" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F04b-location-allow.yaml" time="70.563" timestamp="2026-10-31T16:52:59" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

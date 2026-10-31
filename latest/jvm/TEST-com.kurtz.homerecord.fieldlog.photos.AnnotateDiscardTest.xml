@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.AnnotateDiscardTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:39.089Z" hostname="runnervmnwato" time="1.202">
+  <properties/>
+  <testcase name="saveSendsTheSaveEvent" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateDiscardTest" time="0.25"/>
+  <testcase name="discardConfirmedCloses" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateDiscardTest" time="0.327"/>
+  <testcase name="closeWithMarksAsksAndKeepEditingStays" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateDiscardTest" time="0.314"/>
+  <testcase name="closeWithNoMarksLeavesAtOnce" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateDiscardTest" time="0.301"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

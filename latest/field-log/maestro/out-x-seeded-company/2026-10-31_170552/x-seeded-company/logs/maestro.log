@@ -1,0 +1,43 @@
+17:05:58.328 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+17:05:58.331 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+17:05:58.332 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+17:05:58.332 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+17:05:58.332 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run _seed.yaml RUNNING
+17:05:58.333 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+17:05:58.334 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+17:05:58.334 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.kurtz.homerecord.fieldlog" with clear state RUNNING
+17:05:58.335 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.kurtz.homerecord.fieldlog
+17:05:59.635 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.kurtz.homerecord.fieldlog
+17:05:59.635 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.kurtz.homerecord.fieldlog app during launch
+17:05:59.723 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.kurtz.homerecord.fieldlog" with clear state COMPLETED
+17:05:59.724 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Stop com.kurtz.homerecord.fieldlog RUNNING
+17:05:59.726 [ INFO] maestro.Maestro.stopApp$lambda$7: Stopping app com.kurtz.homerecord.fieldlog
+17:06:00.016 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Stop com.kurtz.homerecord.fieldlog COMPLETED
+17:06:00.017 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Open homerecord-qa-fl://seed?scenario=regression RUNNING
+17:06:00.022 [ INFO] maestro.Maestro.openLink: Opening link homerecord-qa-fl://seed?scenario=regression for app: com.kurtz.homerecord.fieldlog with autoVerify config as false
+17:06:01.355 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Open homerecord-qa-fl://seed?scenario=regression COMPLETED
+17:06:01.356 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_tab_today is visible RUNNING
+17:06:03.772 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_tab_today is visible COMPLETED
+17:06:03.772 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run _seed.yaml COMPLETED
+17:06:03.773 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: fl_tab_more RUNNING
+17:06:04.195 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=fl_tab_more, clickable=true, bounds=[881,2127][1080,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[917,2211][1043,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[TreeNode(attributes={text=More, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[941,2253][1019,2295], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[949,2169][1012,2232], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[907,2138][1054,2264], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[881,2127][1080,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=881, y=2127, width=199, height=210))
+17:06:05.759 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+17:06:05.763 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (980, 2232) using hierarchy based logic for wait
+17:06:06.647 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+17:06:06.648 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: fl_tab_more COMPLETED
+17:06:06.648 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_more_team is visible RUNNING
+17:06:06.754 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_more_team is visible COMPLETED
+17:06:06.754 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_more_company is visible RUNNING
+17:06:06.859 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_more_company is visible COMPLETED
+17:06:06.859 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: fl_more_team RUNNING
+17:06:06.994 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=fl_more_team, clickable=true, bounds=[0,379][1080,526], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=Team, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[147,421][257,484], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=0, y=379, width=1080, height=147))
+17:06:08.272 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+17:06:08.273 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (540, 452) using hierarchy based logic for wait
+17:06:09.328 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+17:06:09.329 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: fl_more_team COMPLETED
+17:06:09.329 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Casey Crew" is visible RUNNING
+17:06:09.410 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Casey Crew" is visible COMPLETED
+17:06:09.411 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot x-seeded-team RUNNING
+17:06:09.413 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+17:06:09.414 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+17:06:09.662 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot x-seeded-team COMPLETED

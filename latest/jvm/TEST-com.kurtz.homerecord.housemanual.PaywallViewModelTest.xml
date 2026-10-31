@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PaywallViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:01.312Z" hostname="runnervmnwato" time="0.008">
+  <properties/>
+  <testcase name="showsBothPlansWithStorePrices" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.003"/>
+  <testcase name="failedPurchaseKeepsFreeTierAndSaysSo" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.002"/>
+  <testcase name="priceFailureShowsRetryAndRetryRecovers" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.001"/>
+  <testcase name="purchaseUnlocksProAndLiftsTheItemLimitWithoutRestart" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.001"/>
+  <testcase name="restoreWithNothingFoundSaysSo" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.001"/>
+  <testcase name="restoreFindingProUnlocks" classname="com.kurtz.homerecord.housemanual.PaywallViewModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

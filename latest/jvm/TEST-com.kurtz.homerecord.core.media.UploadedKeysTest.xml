@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.UploadedKeysTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.180Z" hostname="runnervmnwato" time="0.177">
+  <properties/>
+  <testcase name="photoNoteAndFileGetTheirKeyAndAreQueuedForSync" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.096"/>
+  <testcase name="sameKeyAgainMissingRowOrUnknownEntityChangesNothing" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

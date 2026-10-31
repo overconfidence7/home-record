@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.WarrantyStatusTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.756Z" hostname="runnervmnwato" time="0.007">
+  <properties/>
+  <testcase name="endsOnUsesLongestTermFromInServiceDate" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.001"/>
+  <testcase name="missingOrUnreadableEndIsUnknown" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.0"/>
+  <testcase name="endsTodayIsExpiringWithZeroDays" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.005"/>
+  <testcase name="pastEndIsExpired" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.0"/>
+  <testcase name="sixtyDaysOutIsExpiringAndSixtyOneIsActive" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.001"/>
+  <testcase name="endsOnIsNullWithoutDateOrTerm" classname="com.kurtz.homerecord.core.model.WarrantyStatusTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

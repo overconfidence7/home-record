@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.reports.ListRowsLayoutTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:54.197Z" hostname="runnervmnwato" time="1.07">
+  <properties/>
+  <testcase name="emptyTimesheetWeekHasHeadline" classname="com.kurtz.homerecord.fieldlog.reports.ListRowsLayoutTest" time="0.193"/>
+  <testcase name="reportsRowsShowNameAndHoursAndExportsAreEnabled" classname="com.kurtz.homerecord.fieldlog.reports.ListRowsLayoutTest" time="0.343"/>
+  <testcase name="todayJobsAndOnSiteAreRowsAndAJobRowOpensTheJob" classname="com.kurtz.homerecord.fieldlog.reports.ListRowsLayoutTest" time="0.311"/>
+  <testcase name="emptyReportsRangeHasHeadlineAndDisablesExports" classname="com.kurtz.homerecord.fieldlog.reports.ListRowsLayoutTest" time="0.207"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:14:15.499Z" hostname="runnervmnwato" time="0.024">
+  <properties/>
+  <testcase name="groupsByCategoryWithCountsInCategoryOrder" classname="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" time="0.008"/>
+  <testcase name="filtersByCategoryRoomAndQueryTogether" classname="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" time="0.001"/>
+  <testcase name="searchMatchesTheCategoryNameShown" classname="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" time="0.0"/>
+  <testcase name="groupsByRoomAlphabetically" classname="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" time="0.001"/>
+  <testcase name="filtersByEachWarrantyStatus" classname="com.kurtz.homerecord.housemodel.items.ItemListBuilderTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

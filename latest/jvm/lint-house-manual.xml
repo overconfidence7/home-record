@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.4.1">
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/contacts/ContactsViewModel.kt"
+            line="20"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/contacts/ContactsViewModel.kt"
+            line="20"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/documents/DocumentsViewModel.kt"
+            line="20"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/documents/DocumentsViewModel.kt"
+            line="20"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/home/HomeViewModel.kt"
+            line="22"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/home/HomeViewModel.kt"
+            line="22"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailViewModel.kt"
+            line="43"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailViewModel.kt"
+            line="43"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemsViewModel.kt"
+            line="23"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemsViewModel.kt"
+            line="23"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/onboarding/OnboardingViewModel.kt"
+            line="19"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/onboarding/OnboardingViewModel.kt"
+            line="19"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="ComposableNaming"
+        severity="Warning"
+        message="Composable functions that return Unit should start with an uppercase letter"
+        category="Correctness"
+        priority="3"
+        summary="Incorrect naming for @Composable functions"
+        explanation="@Composable functions without a return type should use similar naming to classes, starting with an uppercase letter and ending with a noun. @Composable functions with a return type should be treated as normal Kotlin functions, starting with a lowercase letter."
+        errorLine1="private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {})"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/debug/kotlin/com/kurtz/homerecord/housemanual/Previews.kt"
+            line="245"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;floors&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;floors_row_count&quot;>%1$d floors&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;items&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;items_no_match_body&quot;>Nothing fits those filters. Clear them to see all %1$d items.&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="63"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        severity="Warning"
+        message="Formatting %d followed by words (&quot;months&quot;): This should probably be a plural rather than a string"
+        category="Correctness:Messages"
+        priority="5"
+        summary="Potential Plurals"
+        explanation="This lint check looks for potential errors in internationalization where you have translated a message which involves a quantity and it looks like other parts of the string may need grammatical changes.&#xA;&#xA;For example, rather than something like this:&#xA;```xml&#xA;  &lt;string name=&quot;try_again&quot;>Try again in %d seconds.&lt;/string>&#xA;```&#xA;you should be using a plural:&#xA;```xml&#xA;   &lt;plurals name=&quot;try_again&quot;>&#xA;        &lt;item quantity=&quot;one&quot;>Try again in %d second&lt;/item>&#xA;        &lt;item quantity=&quot;other&quot;>Try again in %d seconds&lt;/item>&#xA;    &lt;/plurals>&#xA;```&#xA;This will ensure that in other languages the right set of translations are provided for the different quantity classes.&#xA;&#xA;(This check depends on some heuristics, so it may not accurately determine whether a string really should be a quantity. You can use tools:ignore to filter out false positives."
+        url="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        urls="https://developer.android.com/guide/topics/resources/string-resource.html#Plurals"
+        errorLine1="    &lt;string name=&quot;item_detail_warranty_months&quot;>%1$d months&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="95"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ExportedReceiver"
+        severity="Warning"
+        message="Exported receiver does not require permission"
+        category="Security"
+        priority="5"
+        summary="Receiver does not require permission"
+        explanation="Exported receivers (receivers which either set `exported=true` or contain an intent-filter and do not specify `exported=false`) should define a permission that an entity must have in order to launch the receiver or bind to it. Without this, any application can use this receiver."
+        url="https://goo.gle/ExportedReceiver"
+        urls="https://goo.gle/ExportedReceiver"
+        errorLine1="        &lt;receiver android:name=&quot;com.kurtz.homerecord.housemanual.qa.SeedReceiver&quot; android:exported=&quot;true&quot;>"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/debug/AndroidManifest.xml"
+            line="19"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="DataExtractionRules"
+        severity="Warning"
+        message="The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+        category="Security"
+        priority="3"
+        summary="Missing data extraction rules"
+        explanation="Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.&#xA;&#xA;In Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you&apos;ll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+        url="https://developer.android.com/about/versions/12/backup-restore#xml-changes"
+        urls="https://developer.android.com/about/versions/12/backup-restore#xml-changes,https://goo.gle/DataExtractionRules"
+        errorLine1="        android:allowBackup=&quot;false&quot;"
+        errorLine2="                             ~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/AndroidManifest.xml"
+            line="6"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.house_title` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;house_title&quot;>House&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.floors_row_count` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;floors_row_count&quot;>%1$d floors&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.floors_loading` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;floors_loading&quot;>Loading floors&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.plan_row` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;plan_row&quot;>Floor plan&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.plan_row_supporting` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;plan_row_supporting&quot;>Draw and edit rooms floor by floor&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.item_detail_manual` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;item_detail_manual&quot;>Manual&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="89"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.item_detail_save` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;item_detail_save&quot;>Save&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="126"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.document_viewer_open` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;document_viewer_open&quot;>Open %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="194"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.string.contacts_save` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.&#xA;"
+        errorLine1="    &lt;string name=&quot;contacts_save&quot;>Save&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/res/values/strings.xml"
+            line="232"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            is ContactsEvent.Call -> context.launch(Intent(Intent.ACTION_DIAL, Uri.parse(&quot;tel:&quot; + it.phone.filter { c -> c.isDigit() || c == &apos;+&apos; })))"
+        errorLine2="                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/contacts/ContactsRoute.kt"
+            line="25"
+            column="80"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            is ContactsEvent.Email -> context.launch(Intent(Intent.ACTION_SENDTO, Uri.parse(&quot;mailto:&quot; + it.address)))"
+        errorLine2="                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/contacts/ContactsRoute.kt"
+            line="26"
+            column="83"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }"
+        errorLine2="                                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailRoute.kt"
+            line="74"
+            column="107"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val bmp = android.graphics.Bitmap.createBitmap(600, 780, android.graphics.Bitmap.Config.ARGB_8888)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/house-manual/src/debug/kotlin/com/kurtz/homerecord/housemanual/Previews.kt"
+            line="587"
+            column="19"/>
+    </issue>
+
+</issues>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.JobOrderingTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:29.493Z" hostname="runnervmnwato" time="0.011">
+  <properties/>
+  <testcase name="upcomingSortsByStartDateUndatedLast" classname="com.kurtz.homerecord.core.model.JobOrderingTest" time="0.005"/>
+  <testcase name="archivedHiddenUnlessToggled" classname="com.kurtz.homerecord.core.model.JobOrderingTest" time="0.001"/>
+  <testcase name="pastScheduledDaysAreIgnoredForNextDay" classname="com.kurtz.homerecord.core.model.JobOrderingTest" time="0.0"/>
+  <testcase name="doneSortsByEndDateNewestFirstUndatedLast" classname="com.kurtz.homerecord.core.model.JobOrderingTest" time="0.0"/>
+  <testcase name="activeSortsByNextScheduledDayThenName" classname="com.kurtz.homerecord.core.model.JobOrderingTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

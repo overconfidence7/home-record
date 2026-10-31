@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.RoleGatesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:12.634Z" hostname="runnervmnwato" time="1.929">
+  <properties/>
+  <testcase name="ownerAndOfficeDoEverythingOnEveryJob" classname="com.kurtz.homerecord.core.company.RoleGatesTest" time="0.091"/>
+  <testcase name="leadManagesOnlyTheJobsTheyAreOn" classname="com.kurtz.homerecord.core.company.RoleGatesTest" time="0.102"/>
+  <testcase name="crewAndSubOnlyView" classname="com.kurtz.homerecord.core.company.RoleGatesTest" time="0.068"/>
+  <testcase name="nonLeadsNeverReadTheJobLists" classname="com.kurtz.homerecord.core.company.RoleGatesTest" time="1.112"/>
+  <testcase name="leadJobsComeFromJobCrewAndScheduledDaysLive" classname="com.kurtz.homerecord.core.company.RoleGatesTest" time="0.513"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.PdfMarkupTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:32.131Z" hostname="runnervmnwato" time="0.452">
+  <properties/>
+  <testcase name="markupOfADownloadIsWrittenToMediaNotBesideTheDownload" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.047"/>
+  <testcase name="nothingSavedForNoMarksNotOnPhoneNotPdfOrFailedWrite" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.059"/>
+  <testcase name="historyStopsOnAParentCycle" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.048"/>
+  <testcase name="historyListsEveryVersionNewestFirstAndListShowsOnlyTheLatest" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.056"/>
+  <testcase name="markupSavesNewVersionAndKeepsOriginal" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.062"/>
+  <testcase name="historyKeepsBothBranchesOfOneVersion" classname="com.kurtz.homerecord.core.photo.PdfMarkupTest" time="0.156"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

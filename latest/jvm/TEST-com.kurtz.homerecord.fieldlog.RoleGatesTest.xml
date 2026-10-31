@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.RoleGatesTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:15:07.045Z" hostname="runnervmnwato" time="6.474">
+  <properties/>
+  <testcase name="todayEmptyStateForOwnerOffersAddJob" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.559"/>
+  <testcase name="todayEmptyStateForOwnerOffersInvite" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.415"/>
+  <testcase name="jobsShowNewJobForOwner" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.289"/>
+  <testcase name="officeSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.528"/>
+  <testcase name="photoHasNoDeleteWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="1.228"/>
+  <testcase name="jobOverviewHidesEditWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.324"/>
+  <testcase name="crewDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.155"/>
+  <testcase name="signOutAsksFirst" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.78"/>
+  <testcase name="jobsHideNewJobWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.217"/>
+  <testcase name="filesAreViewOnlyWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.783"/>
+  <testcase name="todayEmptyStateForCrewHasNoInviteButton" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.4"/>
+  <testcase name="leadDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.255"/>
+  <testcase name="photoActionsAreEvents" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.281"/>
+  <testcase name="ownerSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.209"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

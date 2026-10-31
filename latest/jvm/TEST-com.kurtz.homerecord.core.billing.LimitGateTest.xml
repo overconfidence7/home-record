@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.billing.LimitGateTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:12:55.302Z" hostname="runnervmnwato" time="0.009">
+  <properties/>
+  <testcase name="proHasNoLimits" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.001"/>
+  <testcase name="limitsLiftWithoutRestartWhenProFlips" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.007"/>
+  <testcase name="freeTierAllowsOneHomeAndOnePanel" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="freeTierAllowsFifteenItemsNotSixteen" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="freeTierHasNoCloudSync" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="unavailableBillingStaysFree" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

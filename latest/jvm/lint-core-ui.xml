@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.4.1">
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/auth/AccountViewModel.kt"
+            line="16"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="    private val saved: SavedStateHandle = SavedStateHandle(),"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/auth/AccountViewModel.kt"
+            line="16"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="class SignInViewModel(private val repo: AuthRepository, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {"
+        errorLine2="                                                                                              ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/auth/SignInViewModel.kt"
+            line="19"
+            column="95"/>
+    </issue>
+
+    <issue
+        id="VisibleForTests"
+        severity="Warning"
+        message="This method should only be accessed from tests or within private scope"
+        category="Correctness"
+        priority="4"
+        summary="Visible Only For Tests"
+        explanation="This check looks for accesses from production code (e.g. not tests) where the access would not have been allowed with the intended production visibility.&#xA;&#xA;Depending on your development environment, you may be able to use an `@VisibleForTesting` annotation to specify the intended visibility if the method had not been more widely visible for the tests.&#xA;&#xA;When using `androidx.annotations.VisibleForTesting`, the production visibility is assumed to be private unless specified with the `otherwise=` parameter. `com.google.common.annotations.VisibleForTesting` and `com.android.internal.annotations.VisibleForTesting` work similarly with their own parameters called `productionVisibility` and `visibility`.&#xA;&#xA;If instead you use `org.jetbrains.annotations.VisibleForTesting`, there is no such parameter, and the production visibility is instead assumed to be &quot;one step down&quot; from the testing visibility. For example, if the testing visibility is public, the production visibility is assumed to be package-private."
+        errorLine1="class SignInViewModel(private val repo: AuthRepository, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {"
+        errorLine2="                                                                                              ~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/auth/SignInViewModel.kt"
+            line="19"
+            column="95"/>
+    </issue>
+
+    <issue
+        id="ComposableNaming"
+        severity="Warning"
+        message="Composable functions that return Unit should start with an uppercase letter"
+        category="Correctness"
+        priority="3"
+        summary="Incorrect naming for @Composable functions"
+        explanation="@Composable functions without a return type should use similar naming to classes, starting with an uppercase letter and ending with a noun. @Composable functions with a return type should be treated as normal Kotlin functions, starting with a lowercase letter."
+        errorLine1="    private fun app(requests: TabRequests? = null) {"
+        errorLine2="                ~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/shell/HomeRecordAppTest.kt"
+            line="30"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="    fun mapUri(lat: Double, lng: Double, label: String): Uri = Uri.parse(&quot;geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})&quot;)"
+        errorLine2="                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/platform/Intents.kt"
+            line="14"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    val bmp = Bitmap.createBitmap(widthPx, height, Bitmap.Config.ARGB_8888)"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="/home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/pages/PageSources.kt"
+            line="68"
+            column="31"/>
+    </issue>
+
+</issues>

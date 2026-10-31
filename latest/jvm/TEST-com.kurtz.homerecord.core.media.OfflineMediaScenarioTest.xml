@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.OfflineMediaScenarioTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:28.701Z" hostname="runnervmnwato" time="0.473">
+  <properties/>
+  <testcase name="dyingBetweenThePutAndTheKeyReplaysOnlyTheKey" classname="com.kurtz.homerecord.core.media.OfflineMediaScenarioTest" time="0.158"/>
+  <testcase name="photosTakenOfflineUploadOnceEachAfterARestart" classname="com.kurtz.homerecord.core.media.OfflineMediaScenarioTest" time="0.213"/>
+  <testcase name="aRowWhosePutFinishedShowsAsUploadedBeforeItsKeyIsRecorded" classname="com.kurtz.homerecord.core.media.OfflineMediaScenarioTest" time="0.09"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

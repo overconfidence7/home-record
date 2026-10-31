@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.JobNotesTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-31T16:13:31.246Z" hostname="runnervmnwato" time="0.418">
+  <properties/>
+  <testcase name="transcriptCanBeEdited" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.103"/>
+  <testcase name="voiceMemoKeptWhenDeviceCannotTranscribe" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.065"/>
+  <testcase name="blankNoteSavesNothing" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.051"/>
+  <testcase name="missingJobSavesNothingAndDeleteHidesNote" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.072"/>
+  <testcase name="typedNoteAttachesToJobAndDay" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.056"/>
+  <testcase name="voiceMemoIsTranscribedAndQueuedForUpload" classname="com.kurtz.homerecord.core.photo.JobNotesTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
