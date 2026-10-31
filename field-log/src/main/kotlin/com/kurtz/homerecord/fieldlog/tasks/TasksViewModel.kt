@@ -45,6 +45,7 @@ class TasksViewModel(private val d: TasksDeps, private val saved: SavedStateHand
         when (e) {
             is TasksEvent.SetFilter -> { filter.value = e.filter; saved[FILTER] = e.filter.name }
             is TasksEvent.SetDone -> setDone(e.id, e.done)
+            is TasksEvent.Move -> move(e.id, e.to)
             TasksEvent.Undo -> undo.value?.let { u ->
                 undo.value = null
                 viewModelScope.launch { d.tasks.setDone(u.id, false) }
@@ -62,6 +63,14 @@ class TasksViewModel(private val d: TasksDeps, private val saved: SavedStateHand
             if (!canManage.value && (d.me == null || task.assigneeId != d.me)) return@launch
             if (d.tasks.setDone(id, done)) undo.value = if (done) TaskUndo(id, row?.title ?: task.title) else null
         }
+    }
+
+    private fun move(id: String, to: Int) {
+        val current = state.value
+        if (!current.canReorder) return
+        val from = current.open.indexOfFirst { it.id == id }
+        if (from < 0 || from == to) return
+        viewModelScope.launch { d.tasks.move(d.jobId, from, to.coerceIn(0, current.open.lastIndex)) }
     }
 
     private companion object {

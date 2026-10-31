@@ -1,5 +1,28 @@
 package com.kurtz.homerecord.fieldlog.tasks
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +71,7 @@ import java.time.format.FormatStyle
 
 /**
  * The Tasks tab of FL-Job (FL-Tasks, AC-F34): All / Punch list chips, open tasks in the crew's order, then Done. The
- * check box ticks a task done and the snackbar offers Undo. Owner, Office and the job's Lead get the Add task FAB and
+ * check box or a swipe ticks a task done and the snackbar offers Undo; managers drag the handle to reorder. Owner, Office and the job's Lead get the Add task FAB and
  * open a task to edit it; Crew see their own tasks and tick them (AC-F3).
  */
 @Composable
@@ -88,15 +111,7 @@ fun TasksScreen(
                     modifier = Modifier.padding(bottom = 88.dp).testTag("fl_tasks_no_punch"),
                     actionModifier = Modifier.heightIn(min = 48.dp).testTag("fl_tasks_show_all"),
                 )
-                else -> LazyColumn(Modifier.fillMaxSize().testTag("fl_tasks_list"), contentPadding = PaddingValues(bottom = 88.dp)) {
-                    items(state.open, key = { it.id }) { row -> TaskListRow(row, state.canManage, onEvent, Modifier.animateItem()) }
-                    if (state.done.isNotEmpty()) {
-                        item(key = "done-header") {
-                            SectionHeader(pluralStringResource(R.plurals.tasks_done_header, state.done.size, state.done.size), Modifier.animateItem())
-                        }
-                        items(state.done, key = { it.id }) { row -> TaskListRow(row, state.canManage, onEvent, Modifier.animateItem()) }
-                    }
-                }
+                else -> TaskLists(state, onEvent)
             }
         }
         if (state.canManage) {
@@ -127,8 +142,113 @@ private fun FilterRow(filter: TaskFilter, onEvent: (TasksEvent) -> Unit) {
     }
 }
 
+/**
+ * Open tasks then Done. Managers drag an open task by its handle to reorder it (or use Move up / Move down from
+ * TalkBack); the new order is saved when the drag ends. Swiping an open task either way ticks it done (AC-F34).
+ */
 @Composable
-private fun TaskListRow(row: TaskRow, canManage: Boolean, onEvent: (TasksEvent) -> Unit, modifier: Modifier = Modifier) {
+private fun TaskLists(state: TasksUiState, onEvent: (TasksEvent) -> Unit) {
+    // The open list while a drag is under way; the saved order replaces it whenever the tasks change.
+    var open by remember(state.open) { mutableStateOf(state.open) }
+    val haptics = LocalHapticFeedback.current
+    val listState = rememberLazyListState()
+    val reorder = rememberReorderableLazyListState(listState) { from, to ->
+        val fromIndex = open.indexOfFirst { it.id == from.key }
+        val toIndex = open.indexOfFirst { it.id == to.key }
+        if (fromIndex >= 0 && toIndex >= 0) {
+            open = open.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+            haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
+    }
+    LazyColumn(Modifier.fillMaxSize().testTag("fl_tasks_list"), state = listState, contentPadding = PaddingValues(bottom = 88.dp)) {
+        itemsIndexed(open, key = { _, row -> row.id }) { index, row ->
+            ReorderableItem(reorder, key = row.id, enabled = state.canReorder) { dragging ->
+                val elevation by animateDpAsState(if (dragging) 6.dp else 0.dp, label = "drag")
+                val moves = if (state.canReorder) moveActions(row.id, index, open.lastIndex, onEvent) else emptyList()
+                SwipeToDone(row, onEvent) {
+                    TaskListRow(
+                        row, state.canManage, onEvent,
+                        handle = if (state.canReorder) {
+                            {
+                                DragHandle(
+                                    row.title,
+                                    Modifier.draggableHandle(
+                                        onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate) },
+                                        onDragStopped = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                            val to = open.indexOfFirst { it.id == row.id }
+                                            if (to >= 0) onEvent(TasksEvent.Move(row.id, to))
+                                        },
+                                    ),
+                                )
+                            }
+                        } else null,
+                        modifier = Modifier.shadow(elevation).semantics { if (moves.isNotEmpty()) customActions = moves },
+                    )
+                }
+            }
+        }
+        if (state.done.isNotEmpty()) {
+            item(key = "done-header") {
+                SectionHeader(pluralStringResource(R.plurals.tasks_done_header, state.done.size, state.done.size), Modifier.animateItem())
+            }
+            items(state.done, key = { it.id }) { row -> TaskListRow(row, state.canManage, onEvent, modifier = Modifier.animateItem()) }
+        }
+    }
+}
+
+/** Move up / Move down for TalkBack and switch access, since a drag needs a finger (rule: every gesture has a button). */
+@Composable
+private fun moveActions(id: String, index: Int, last: Int, onEvent: (TasksEvent) -> Unit): List<CustomAccessibilityAction> {
+    val up = stringResource(R.string.tasks_move_up)
+    val down = stringResource(R.string.tasks_move_down)
+    return buildList {
+        if (index > 0) add(CustomAccessibilityAction(up) { onEvent(TasksEvent.Move(id, index - 1)); true })
+        if (index < last) add(CustomAccessibilityAction(down) { onEvent(TasksEvent.Move(id, index + 1)); true })
+    }
+}
+
+/** An open task the person may tick swipes either way to done; the check box does the same (AC-F34). */
+@Composable
+private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @Composable () -> Unit) {
+    if (!row.canTick || row.done) { content(); return }
+    val swipe = rememberSwipeToDismissBoxState()
+    val scope = rememberCoroutineScope()
+    SwipeToDismissBox(
+        state = swipe,
+        backgroundContent = {
+            val toEnd = swipe.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+            Box(
+                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer).padding(horizontal = 24.dp),
+                contentAlignment = if (toEnd) Alignment.CenterStart else Alignment.CenterEnd,
+            ) {
+                Icon(Icons.Rounded.Done, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        },
+        onDismiss = {
+            onEvent(TasksEvent.SetDone(row.id, true))
+            scope.launch { swipe.reset() }
+        },
+        modifier = Modifier.testTag("fl_tasks_swipe_${row.id}"),
+    ) { content() }
+}
+
+@Composable
+private fun DragHandle(title: String, modifier: Modifier) {
+    val label = stringResource(R.string.tasks_reorder, title)
+    Box(modifier.size(48.dp).semantics { contentDescription = label }.testTag("fl_tasks_handle"), contentAlignment = Alignment.Center) {
+        Icon(Icons.Rounded.DragHandle, contentDescription = null)
+    }
+}
+
+@Composable
+private fun TaskListRow(
+    row: TaskRow,
+    canManage: Boolean,
+    onEvent: (TasksEvent) -> Unit,
+    handle: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
     val checkLabel = stringResource(if (row.done) R.string.tasks_mark_open else R.string.tasks_mark_done, row.title)
     RecordListItem(
         headline = row.title,
@@ -142,7 +262,7 @@ private fun TaskListRow(row: TaskRow, canManage: Boolean, onEvent: (TasksEvent) 
                 modifier = Modifier.semantics { contentDescription = checkLabel }.testTag("fl_tasks_check_${row.id}"),
             )
         },
-        trailing = if (canManage) { { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) } } else null,
+        trailing = handle ?: if (canManage) { { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) } } else null,
         onClick = if (canManage) { { onEvent(TasksEvent.Open(row.id)) } } else null,
         modifier = modifier.testTag("fl_tasks_row_${row.id}"),
     )

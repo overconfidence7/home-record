@@ -111,4 +111,27 @@ class TasksViewModelTest {
         assertThat(runBlocking { tasks.get(theirs) }?.done).isFalse()
         assertThat(runBlocking { tasks.get(mine) }?.done).isTrue()
     }
+
+    @Test fun dragMovesTheTaskAndKeepsTheNewOrder() {
+        val vm = vm()
+        vm.current { it.open.size == 2 }
+        vm.onEvent(TasksEvent.Move(theirs, 0))
+        val moved = vm.current { it.open.firstOrNull()?.id == theirs }
+        assertThat(moved.open.map { it.id }).containsExactly(theirs, mine).inOrder()
+        assertThat(runBlocking { tasks.get(theirs) }?.sortOrder).isEqualTo(0)
+        assertThat(runBlocking { tasks.get(mine) }?.sortOrder).isEqualTo(1)
+    }
+
+    @Test fun noReorderOnThePunchListOrForCrew() {
+        val vm = vm()
+        vm.onEvent(TasksEvent.SetFilter(TaskFilter.PUNCH))
+        assertThat(vm.current { it.filter == TaskFilter.PUNCH && it.total > 0 }.canReorder).isFalse()
+        vm.onEvent(TasksEvent.Move(theirs, 0))
+        vm.onEvent(TasksEvent.SetFilter(TaskFilter.ALL))
+        val all = vm.current { it.filter == TaskFilter.ALL && it.open.size == 2 }
+        assertThat(all.canReorder).isTrue()
+        assertThat(all.open.map { it.id }).containsExactly(mine, theirs).inOrder()
+        manage.value = false
+        assertThat(vm.current { !it.canManage }.canReorder).isFalse()
+    }
 }

@@ -578,6 +578,9 @@
     <string name="tasks_mark_open">Mark %1$s not done</string>
     <string name="tasks_done_snackbar">Done: %1$s</string>
     <string name="tasks_undo">Undo</string>
+    <string name="tasks_reorder">Drag to reorder %1$s</string>
+    <string name="tasks_move_up">Move up</string>
+    <string name="tasks_move_down">Move down</string>
     <string name="tasks_due_today">Due today</string>
     <string name="tasks_due_on">Due %1$s</string>
     <string name="tasks_due_overdue">Overdue, %1$s</string>

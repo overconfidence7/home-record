@@ -82,6 +82,19 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     notVisible: "Done \\(1\\)"
     timeout: 10000
+# AC-F34: swiping an open task across completes it too, with the same Undo
+- swipe:
+    from:
+      text: "Set the kitchen outlets"
+    direction: RIGHT
+- extendedWaitUntil:
+    visible: "Done: Set the kitchen outlets"
+    timeout: 10000
+- assertVisible: "Done \\(1\\)"
+- tapOn: "Undo"
+- extendedWaitUntil:
+    notVisible: "Done \\(1\\)"
+    timeout: 10000
 # AC-F34: a task opens in the form to edit
 - tapOn: "Replace cracked cover plate"
 - extendedWaitUntil:

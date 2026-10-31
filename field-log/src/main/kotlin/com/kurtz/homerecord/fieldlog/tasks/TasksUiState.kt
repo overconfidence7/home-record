@@ -40,11 +40,16 @@ data class TasksUiState(
     val undo: TaskUndo? = null,
 ) {
     val isEmpty: Boolean get() = open.isEmpty() && done.isEmpty()
+
+    /** Drag to reorder the open list: managers only, on All (the punch filter hides rows, so its order is partial). */
+    val canReorder: Boolean get() = canManage && filter == TaskFilter.ALL && open.size > 1
 }
 
 sealed interface TasksEvent {
     data class SetFilter(val filter: TaskFilter) : TasksEvent
     data class SetDone(val id: String, val done: Boolean) : TasksEvent
+    /** Drops the open task [id] at position [to] of the open list (drag to reorder, or Move up / Move down). */
+    data class Move(val id: String, val to: Int) : TasksEvent
     data object Undo : TasksEvent
     data object DismissUndo : TasksEvent
     /** Opens the task form for a task (the route navigates). */

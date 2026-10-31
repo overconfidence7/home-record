@@ -2,9 +2,17 @@ package com.kurtz.homerecord.fieldlog.tasks
 
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.test.swipeLeft
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.model.TaskFilter
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -75,5 +83,37 @@ class TasksScreenTest {
         val events = show(TasksUiState(loading = false, canManage = true))
         rule.onNodeWithTag("fl_tasks_empty_add").performClick()
         assertThat(events).containsExactly(TasksEvent.Add)
+    }
+
+    @Test fun swipingAnOpenTaskTicksItDone() {
+        val events = show(ready)
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput { swipeRight() }
+        rule.waitForIdle()
+        assertThat(events).contains(TasksEvent.SetDone("t1", true))
+        // Someone else's task does not swipe, as it cannot be ticked.
+        rule.onNodeWithTag("fl_tasks_swipe_t2").assertDoesNotExist()
+        rule.onNodeWithTag("fl_tasks_swipe_t3").assertDoesNotExist()
+    }
+
+    @Test fun swipingTheOtherWayTicksItToo() {
+        val events = show(ready)
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput { swipeLeft() }
+        rule.waitForIdle()
+        assertThat(events).contains(TasksEvent.SetDone("t1", true))
+    }
+
+    @Test fun managersGetDragHandlesAndMoveActions() {
+        val events = show(ready)
+        rule.onAllNodesWithTag("fl_tasks_handle", useUnmergedTree = true).assertCountEquals(2)
+        val row = rule.onNodeWithTag("fl_tasks_row_t1")
+        row.assert(SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions))
+        val down = row.fetchSemanticsNode().config[SemanticsActions.CustomActions].single { it.label == "Move down" }
+        rule.runOnIdle { down.action() }
+        assertThat(events).containsExactly(TasksEvent.Move("t1", 1))
+    }
+
+    @Test fun noHandlesOnThePunchListOrForCrew() {
+        show(ready.copy(filter = TaskFilter.PUNCH))
+        rule.onNodeWithTag("fl_tasks_handle", useUnmergedTree = true).assertDoesNotExist()
     }
 }

@@ -369,3 +369,8 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - Only Owner, Office and the job's Lead (`RoleGates.canManageTasks`, same as backend policy.ts) see Add task and open the form; Crew see only tasks assigned to them, read the who/when/room/note line on the row, and tick them.
 - A task's photo is picked from the job's photos (three-across sheet) rather than taking a new one, so it stays one of the job's photos and syncs with them; taking a photo for a task is the Photos tab's capture.
 - The assignee picker lists the company's members with the job's crew first.
+
+## 2026-10-31 T044b2: swipe and drag on FL-Tasks
+- `sh.calvin.reorderable:reorderable` 3.1.0 (approved in CLAUDE.md; latest stable on the Maven Central mirror, published April 2026) is back in the catalog for Field Log only.
+- Swiping an open task either way marks it done (same Undo snackbar as the check box); done tasks and tasks this person cannot tick do not swipe.
+- Managers (Owner, Office, the job's Lead) drag an open task by its trailing handle; the handle replaces the chevron on open rows, the row still opens on tap. The new order is saved once, when the drag ends (`JobTasks.move`, only moved rows sync). No reordering on the Punch list filter, since it shows only part of the list. TalkBack gets Move up / Move down custom actions on each row.
