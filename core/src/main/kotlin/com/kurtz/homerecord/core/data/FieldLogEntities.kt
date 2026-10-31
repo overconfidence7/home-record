@@ -209,6 +209,10 @@ data class TaskEntity(
     val page: Int? = null,
     val x: Float? = null,
     val y: Float? = null,
+    /** Position in the job's list; the crew drag to reorder (v5). */
+    @ColumnInfo(defaultValue = "0") val sortOrder: Int = 0,
+    /** When the task was ticked done, for the daily log; null while open (v5). */
+    val doneAt: Long? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val deletedAt: Long? = null,

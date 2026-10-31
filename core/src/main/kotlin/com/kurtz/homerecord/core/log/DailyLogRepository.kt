@@ -177,8 +177,8 @@ class DailyLogRepository(
             memberNames = names,
             notes = db.noteDao().listFor(job.id).map { LogNoteInput(it.id, it.createdAt, it.text, it.transcript) },
             photos = db.photoDao().observeForJob(job.id).first().map { LogPhotoInput(it.id, it.takenAt) },
-            // a task has no done time of its own; the last change of a done task is when it was ticked
-            tasks = db.taskDao().listFor(job.id).map { LogTaskInput(it.id, it.title, if (it.done) it.updatedAt else null) },
+            // doneAt since v5; a done row synced from an older app falls back to its last change
+            tasks = db.taskDao().listFor(job.id).map { LogTaskInput(it.id, it.title, if (it.done) it.doneAt ?: it.updatedAt else null) },
             changeOrders = db.changeOrderDao().listFor(job.id).map { LogChangeOrderInput(it.id, it.title, it.totalCents, it.signedAt) },
             materials = db.materialDao().listFor(job.id).map { LogMaterialInput(it.id, it.date, it.vendor, it.category, it.amountCents, it.note) },
             weather = weather,

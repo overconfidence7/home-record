@@ -356,3 +356,9 @@ The Files tab's top row of Add file and New folder buttons is gone. Both actions
 - "Job timeline" (AC-F32) is read as a Delays section in FL-Reports for the same week range as the hours: one block per job ("Hale kitchen · 2 days delayed"), most delayed job first, then each delay oldest first with its reason icon, the day and the note. The pure rule is `DelayTimeline` in `:core` model with tests; the logs come from a new `DailyLogDao.observeBetween` query (no schema change) through `DailyLogRepository.observeRange`, which keeps one row per job and day the same way `observe` does.
 - A delay row opens the job on its Log tab at that day: `JobKey` gained optional `tab` and `day`, `JobRoute` takes `initialTab`/`initialLogDay`, and `LogDeps.initialDay` sets the first day shown (never past today; a day picked later wins and survives process death).
 - The Delays section sits under the exports so the CSV buttons stay next to the hours they export.
+
+## 2026-10-31 T044a: task order and done time
+- Task gains `sortOrder` (drag to reorder, FL-Tasks) and `doneAt` (Tasks completed in the daily log) in Room v5 by AutoMigration; tasks done before v5 take their last change as the done time, which is what the log used until now. Rows synced from an older app with `doneAt` missing fall back the same way.
+- Reorder renumbers the open list 0..n-1 and writes only rows whose number changes, so a drag syncs the fewest rows; ties from two phones adding at once are settled by created time, then id.
+- "My tasks" (AC-F34) is open tasks assigned to me on the current company's jobs that are overdue or due today; overdue first by due day, then today's in the crew's order. Tasks with no due day stay on the job's Tasks tab only.
+- The punch list is a filter on a job's tasks (All / Punch list), not a separate list, per FL-Tasks.

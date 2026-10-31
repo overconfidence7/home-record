@@ -318,6 +318,15 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): TaskEntity?
     @Query("SELECT * FROM task WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<TaskEntity>>
     @Query("SELECT * FROM task WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<TaskEntity>
+
+    /** Tasks assigned to [memberId] on the company's live jobs, for "My tasks" on Today (AC-F34). */
+    @Query(
+        "SELECT task.* FROM task JOIN job ON job.id = task.jobId WHERE task.assigneeId = :memberId " +
+            "AND job.companyId = :companyId AND task.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY task.createdAt",
+    )
+    fun observeAssigned(companyId: String, memberId: String): Flow<List<TaskEntity>>
+
+    @Query("SELECT COALESCE(MAX(sortOrder), -1) FROM task WHERE jobId = :jobId AND deletedAt IS NULL") suspend fun maxSortOrder(jobId: String): Int
     @Query("UPDATE task SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

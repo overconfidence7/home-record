@@ -68,6 +68,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T044a: tasks gain an order and a done time; a task done before v5 keeps its last change as the done time.
+    @Test fun v4ToV5AddsTaskOrderAndDoneTime() {
+        helper.createDatabase(4).use { db ->
+            db.execSQL("INSERT INTO task (id, jobId, title, done, punch, createdAt, updatedAt, source) VALUES ('t1', 'j1', 'Hang door', 1, 0, 1, 77, 'FIELD_LOG')")
+            db.execSQL("INSERT INTO task (id, jobId, title, done, punch, createdAt, updatedAt, source) VALUES ('t2', 'j1', 'Trim out', 0, 1, 1, 88, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(5).use { db ->
+            assertThat(db.count("SELECT doneAt FROM task WHERE id = 't1' AND sortOrder = 0")).isEqualTo(77L)
+            assertThat(db.texts("SELECT title FROM task WHERE id = 't2' AND doneAt IS NULL AND sortOrder = 0")).containsExactly("Trim out")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -106,6 +118,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 4
+        const val LATEST = 5
     }
 }

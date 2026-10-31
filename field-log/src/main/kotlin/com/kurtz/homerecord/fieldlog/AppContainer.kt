@@ -175,6 +175,9 @@ class AppContainer(private val app: Application) {
 
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
+    /** A job's tasks and punch list (AC-F34), each change queued for sync (AC-F36). */
+    val jobTasks by lazy { com.kurtz.homerecord.core.task.JobTasks(db, onChange = ::recordChange) }
+
     /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */
     val dailyLogs by lazy {
         com.kurtz.homerecord.core.log.DailyLogRepository(

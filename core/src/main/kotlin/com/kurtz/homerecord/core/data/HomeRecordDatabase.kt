@@ -50,7 +50,7 @@ import androidx.sqlite.execSQL
         SyncBaseEntity::class,
         MediaUploadEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -58,6 +58,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 2, to = 3),
         // v4 (CR2o1): pairRole on photo, so Before no longer sits in the phase column.
         AutoMigration(from = 3, to = 4, spec = HomeRecordDatabase.V3ToV4::class),
+        // v5 (T044a): sortOrder and doneAt on task; a task already done keeps its last change as its done time.
+        AutoMigration(from = 4, to = 5, spec = HomeRecordDatabase.V4ToV5::class),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
@@ -111,6 +113,13 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     class V3ToV4 : AutoMigrationSpec {
         override fun onPostMigrate(connection: SQLiteConnection) {
             connection.execSQL("UPDATE photo SET pairRole = 'Before', stage = NULL WHERE stage = 'Before'")
+        }
+    }
+
+    /** v5 (T044a): a task ticked before v5 was done at its last change, the time the daily log used until now. */
+    class V4ToV5 : AutoMigrationSpec {
+        override fun onPostMigrate(connection: SQLiteConnection) {
+            connection.execSQL("UPDATE task SET doneAt = updatedAt WHERE done = 1")
         }
     }
 
