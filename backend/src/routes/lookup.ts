@@ -7,10 +7,12 @@ import {
 } from "../lookup/warranty";
 import { dataPlateRequestSchema, readDataPlate } from "../lookup/dataplate";
 import { RECALL_CACHE_SECONDS, fetchRecalls, recallQuerySchema, recallsCacheKey } from "../lookup/recalls";
+import { WEATHER_CACHE_SECONDS, fetchWeather, weatherCacheKey, weatherQuerySchema, weatherUrl } from "../lookup/weather";
 
 export const lookup = new Hono<AppEnv>();
 lookup.use("/lookup/*", requireSession);
 lookup.use("/recalls", requireSession);
+lookup.use("/weather", requireSession);
 
 async function dailyLimit(db: D1Database, userId: string): Promise<number> {
   const pro = await db
@@ -126,4 +128,24 @@ lookup.get("/recalls", async (c) => {
   if (!recalls) return c.json({ error: "lookup_failed" }, 502);
   await c.env.CACHE.put(key, JSON.stringify(recalls), { expirationTtl: RECALL_CACHE_SECONDS });
   return c.json({ recalls, cached: false });
+});
+
+/** AC-B32: Open-Meteo daily weather (no key) for a job's location and day, cached 6 h. Free, so it takes no quota.
+ * 404 when the day is too far ahead for a forecast; 502 when Open-Meteo fails (the app then shows "No weather"). */
+lookup.get("/weather", async (c) => {
+  const parsed = weatherQuerySchema.safeParse({ lat: c.req.query("lat"), lng: c.req.query("lng"), date: c.req.query("date") });
+  if (!parsed.success) return c.json({ error: "bad_request" }, 400);
+  const { lat, lng, date } = parsed.data;
+  if (!weatherUrl(lat, lng, date)) return c.json({ error: "not_available" }, 404);
+  const key = weatherCacheKey(lat, lng, date);
+  const hit = await c.env.CACHE.get(key);
+  if (hit) {
+    try {
+      return c.json({ ...JSON.parse(hit), cached: true });
+    } catch { /* corrupt entry: refetch */ }
+  }
+  const weather = await fetchWeather(lat, lng, date);
+  if (!weather) return c.json({ error: "lookup_failed" }, 502);
+  await c.env.CACHE.put(key, JSON.stringify(weather), { expirationTtl: WEATHER_CACHE_SECONDS });
+  return c.json({ ...weather, cached: false });
 });
