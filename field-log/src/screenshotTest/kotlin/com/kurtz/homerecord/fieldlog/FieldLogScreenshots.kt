@@ -420,6 +420,26 @@ fun FileViewerHistoryScreenshot() = FileViewerHistoryPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun FileViewerPinsScreenshot() = FileViewerPinsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerPinModeScreenshot() = FileViewerPinModePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun FileViewerPinChooserScreenshot() = FileViewerPinChooserPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskFormFilePinScreenshot() = TaskFormFilePinPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun MarkupScreenshot() = MarkupPreview()
 
 @PreviewTest

@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.data.TaskEntity
 import com.kurtz.homerecord.core.model.JobTask
+import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskList
 import com.kurtz.homerecord.core.model.TaskOrder
 import com.kurtz.homerecord.core.model.TaskPlanPin
@@ -24,6 +25,13 @@ data class TaskDraft(
     val punch: Boolean = false,
     /** Where the work is on the floor plan (AC-F35). */
     val planPin: TaskPlanPin? = null,
+    /** Where the work is on a page of a job file (AC-F35). */
+    val filePin: TaskFilePin? = null,
+    /**
+     * On edit, whether the form moved or removed the file pin. When false the stored file pin is kept, so a pin dropped
+     * from the file viewer while the form was open is not lost.
+     */
+    val filePinEdited: Boolean = false,
 )
 
 fun TaskEntity.toModel(): JobTask = JobTask(
@@ -31,6 +39,7 @@ fun TaskEntity.toModel(): JobTask = JobTask(
     due = due?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
     roomId = roomId, photoId = photoId, note = note, done = done, punch = punch, sortOrder = sortOrder,
     doneAt = doneAt ?: if (done) updatedAt else null, createdAt = createdAt, planPin = TaskPlanPin.decode(planPinJson),
+    filePin = TaskFilePin.of(fileId, page, x, y),
 )
 
 /**
@@ -63,7 +72,8 @@ class JobTasks(
                 TaskEntity(
                     id = id, jobId = jobId, title = title, assigneeId = draft.assigneeId, due = draft.due?.toString(),
                     roomId = draft.roomId, photoId = draft.photoId, note = draft.note.clean(), punch = draft.punch,
-                    planPinJson = draft.planPin?.encode(), sortOrder = dao.maxSortOrder(jobId) + 1, createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
+                    planPinJson = draft.planPin?.encode(), fileId = draft.filePin?.fileId, page = draft.filePin?.page,
+                    x = draft.filePin?.x, y = draft.filePin?.y, sortOrder = dao.maxSortOrder(jobId) + 1, createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
                 ),
             )
         }
@@ -71,18 +81,32 @@ class JobTasks(
         return id
     }
 
-    /** Saves the form over an existing task, plan pin included; done state, order and the file pin are kept. False when blank or gone. */
+    /** Saves the form over an existing task, plan pin included, and the file pin when the form changed it; done state and order are kept. False when blank or gone. */
     suspend fun update(id: String, draft: TaskDraft): Boolean {
         val title = draft.title.trim()
         val row = dao.get(id) ?: return false
         if (title.isEmpty()) return false
+        val file = if (draft.filePinEdited) draft.filePin else TaskFilePin.of(row.fileId, row.page, row.x, row.y)
         dao.upsert(
             row.copy(
                 title = title, assigneeId = draft.assigneeId, due = draft.due?.toString(), roomId = draft.roomId,
                 photoId = draft.photoId, note = draft.note.clean(), punch = draft.punch, planPinJson = draft.planPin?.encode(),
+                fileId = file?.fileId, page = file?.page, x = file?.x, y = file?.y,
                 updatedAt = now(),
             ),
         )
+        onChange(ENTITY, id)
+        return true
+    }
+
+    /**
+     * Pins an existing task on a file page from the file viewer (AC-F35), moving it if it was pinned elsewhere; the
+     * floor plan pin is kept. Returns false when the task is gone or belongs to another job than the file.
+     */
+    suspend fun pinOnFile(id: String, pin: TaskFilePin, fileJobId: String): Boolean {
+        val row = dao.get(id) ?: return false
+        if (row.jobId != fileJobId) return false
+        dao.upsert(row.copy(fileId = pin.fileId, page = pin.page, x = pin.x, y = pin.y, updatedAt = now()))
         onChange(ENTITY, id)
         return true
     }

@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.model.MyTasksDue
 import com.kurtz.homerecord.core.model.TaskList
+import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.flow.first
@@ -157,5 +158,25 @@ class JobTasksTest {
         assertThat(tasks.update(id, TaskDraft(title = "Move the outlet"))).isTrue()
         assertThat(tasks.get(id)?.planPin).isNull()
         assertThat(changes).containsExactly("task/$id")
+    }
+
+    @Test fun filePinIsSavedMovedFromTheViewerAndRemovedFromTheForm() = runBlocking<Unit> {
+        val pin = TaskFilePin("file1", 0, 0.25f, 0.5f)
+        val id = checkNotNull(tasks.add("j1", TaskDraft(title = "Patch the soffit", filePin = pin)))
+        assertThat(tasks.get(id)?.filePin).isEqualTo(pin)
+        // The viewer moves it to page 2; the plan pin is untouched.
+        val moved = TaskFilePin("file1", 1, 0.8f, 0.1f)
+        changes.clear()
+        assertThat(tasks.pinOnFile(id, moved, fileJobId = "j1")).isTrue()
+        assertThat(tasks.get(id)?.filePin).isEqualTo(moved)
+        assertThat(changes).containsExactly("task/$id")
+        // A file of another job cannot take the pin.
+        assertThat(tasks.pinOnFile(id, pin, fileJobId = "j2")).isFalse()
+        assertThat(tasks.pinOnFile("gone", pin, fileJobId = "j1")).isFalse()
+        assertThat(tasks.get(id)?.filePin).isEqualTo(moved)
+        // Remove pin in the form clears all four columns.
+        assertThat(tasks.update(id, TaskDraft(title = "Patch the soffit", filePin = null, filePinEdited = true))).isTrue()
+        assertThat(tasks.get(id)?.filePin).isNull()
+        assertThat(db.taskDao().get(id)?.page).isNull()
     }
 }

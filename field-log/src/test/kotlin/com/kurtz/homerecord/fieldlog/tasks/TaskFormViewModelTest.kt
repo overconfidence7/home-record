@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
@@ -29,7 +30,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
 
-// AC-F35: the form pins the task on the floor plan (picker per floor, the pin fills an empty room, Remove pin).
+// AC-F35: the form pins the task on the floor plan (picker per floor, the pin fills an empty room, Remove pin), and
+// a task started from a file's "New task here" saves pinned on that page; Remove takes it off the file.
 // AC-F34: a task has title, assignee, due date, room, photo, note and punch flag; the form adds, edits and deletes
 @AcceptanceCriterion("AC-F34", "AC-F35")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -55,7 +57,10 @@ class TaskFormViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(taskId: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle(), jobId: String = "j1") = TaskFormViewModel(
+    private fun vm(
+        taskId: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle(), jobId: String = "j1",
+        startFilePin: TaskFilePin? = null,
+    ) = TaskFormViewModel(
         TaskFormDeps(
             jobId, taskId, tasks,
             people = { listOf(PersonOption("m1", "Nate Kurtz"), PersonOption("m3", "Marcus Bell", onJob = true), PersonOption("m2", "Dana Ortiz", onJob = true)) },
@@ -63,6 +68,8 @@ class TaskFormViewModelTest {
             photos = { listOf(PhotoOption("p1", "/media/p1.jpg")) },
             plan = { plan },
             canManage = flowOf(manage),
+            startFilePin = startFilePin,
+            fileName = { if (it == "plan1") "Kitchen plan.pdf" else null },
         ),
         saved,
     )
@@ -213,5 +220,43 @@ class TaskFormViewModelTest {
         vm.current()
         vm.onEvent(TaskFormEvent.OpenPin)
         assertThat(vm.current().pinning).isFalse()
+    }
+
+    @Test fun newTaskHereSavesPinnedOnThePage() {
+        val pin = TaskFilePin("plan1", 1, 0.3f, 0.6f)
+        val vm = vm(startFilePin = pin)
+        val s = vm.current()
+        assertThat(s.draft.filePin?.toPin()).isEqualTo(pin)
+        assertThat(s.fileName).isEqualTo("Kitchen plan.pdf")
+        // The spot counts as typed: Close asks before dropping it.
+        assertThat(s.dirty).isTrue()
+        vm.onEvent(TaskFormEvent.Title("Move the vanity light"))
+        vm.onEvent(TaskFormEvent.Save)
+        vm.current { it.done }
+        val saved = runBlocking { tasks.observeForJob("j1").first().single() }
+        assertThat(saved.filePin).isEqualTo(pin)
+    }
+
+    @Test fun removeFilePinTakesTheTaskOffTheFile() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Move the vanity light", filePin = TaskFilePin("plan1", 0, 0.5f, 0.5f))) })
+        val vm = vm(taskId = id)
+        assertThat(vm.current().draft.filePin).isNotNull()
+        vm.onEvent(TaskFormEvent.RemoveFilePin)
+        assertThat(vm.current().draft.filePin).isNull()
+        vm.onEvent(TaskFormEvent.Save)
+        vm.current { it.done }
+        assertThat(runBlocking { tasks.get(id) }?.filePin).isNull()
+    }
+
+    @Test fun savingTheFormKeepsAFilePinDroppedWhileItWasOpen() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Move the vanity light")) })
+        val vm = vm(taskId = id)
+        vm.current()
+        val pin = TaskFilePin("plan1", 2, 0.1f, 0.2f)
+        runBlocking { tasks.pinOnFile(id, pin, "j1") }
+        vm.onEvent(TaskFormEvent.Note("Box is 6 inches left of center"))
+        vm.onEvent(TaskFormEvent.Save)
+        vm.current { it.done }
+        assertThat(runBlocking { tasks.get(id) }?.filePin).isEqualTo(pin)
     }
 }

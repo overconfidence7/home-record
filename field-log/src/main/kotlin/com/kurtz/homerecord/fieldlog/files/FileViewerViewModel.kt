@@ -6,6 +6,10 @@ import com.kurtz.homerecord.coreui.pages.PageSource
 import com.kurtz.homerecord.coreui.pages.PageSources
 import com.kurtz.homerecord.core.data.JobFileDao
 import com.kurtz.homerecord.core.data.JobFileEntity
+import com.kurtz.homerecord.core.model.JobTask
+import com.kurtz.homerecord.core.model.TaskFilePin
+import com.kurtz.homerecord.core.model.TaskList
+import com.kurtz.homerecord.core.model.TaskPins
 import com.kurtz.homerecord.core.photo.OnPhone
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +37,14 @@ class FileViewerDeps(
     val memberName: suspend (memberId: String) -> String? = { null },
     /** Whether this person may change the job's files (RoleGates.canManageFiles). */
     val canManage: (jobId: String) -> Flow<Boolean> = { flowOf(false) },
+    /** The job's tasks (JobTasks.observeForJob), for the pins on this file (AC-F35). */
+    val tasks: (jobId: String) -> Flow<List<JobTask>> = { flowOf(emptyList()) },
+    /** Whether this person manages the job's tasks (RoleGates.canManageTasks). */
+    val canManageTasks: (jobId: String) -> Flow<Boolean> = { flowOf(false) },
+    /** The signed-in member, so Crew see their own pins. */
+    val me: String? = null,
+    /** Pins an existing task on this file (JobTasks.pinOnFile). */
+    val pinOnFile: suspend (taskId: String, pin: TaskFilePin, fileJobId: String) -> Boolean = { _, _, _ -> false },
 )
 
 /**
@@ -42,6 +55,7 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
     private val _state = MutableStateFlow(FileViewerUiState())
     val state: StateFlow<FileViewerUiState> = _state.asStateFlow()
     private var gate: Job? = null
+    private var pinsJob: Job? = null
 
     init {
         viewModelScope.launch { load() }
@@ -53,6 +67,38 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
     }
 
     fun onShowHistory(show: Boolean) = _state.update { it.copy(showHistory = show) }
+
+    /** Pin-a-task events (AC-F35); [FileViewerEvent.NewTaskHere] and [FileViewerEvent.OpenPin] are the route's. */
+    fun onPinEvent(e: FileViewerEvent) {
+        when (e) {
+            FileViewerEvent.StartPinning -> if (_state.value.canStartPinning) _state.update { it.copy(pinMode = true, spot = null) }
+            FileViewerEvent.CancelPinning -> _state.update { it.copy(pinMode = false, spot = null) }
+            is FileViewerEvent.TapPage -> if (_state.value.pinMode) {
+                val pin = TaskFilePin.at(d.fileId, e.page, e.x, e.y)
+                _state.update { it.copy(spot = PageSpot(pin.page, pin.x, pin.y)) }
+            }
+            FileViewerEvent.DismissChooser -> _state.update { it.copy(spot = null) }
+            FileViewerEvent.DismissPinFailed -> _state.update { it.copy(pinFailed = false) }
+            is FileViewerEvent.ChooseTask -> choose(e.id)
+            else -> Unit
+        }
+    }
+
+    /** The spot as a pin on this file, for "New task here". */
+    fun spotPin(): TaskFilePin? = _state.value.spot?.let { TaskFilePin(d.fileId, it.page, it.x, it.y) }
+
+    /** Leaves pin mode once "New task here" has opened the form. */
+    fun onNewTaskOpened() = _state.update { it.copy(pinMode = false, spot = null) }
+
+    private fun choose(taskId: String) {
+        val st = _state.value
+        val pin = spotPin() ?: return
+        val jobId = st.jobId ?: return
+        _state.update { it.copy(pinMode = false, spot = null) }
+        viewModelScope.launch {
+            if (!d.pinOnFile(taskId, pin, jobId)) _state.update { it.copy(pinFailed = true) }
+        }
+    }
 
     private suspend fun load() {
         var row = d.dao.get(d.fileId)
@@ -81,10 +127,26 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
         val markable = row.mime == PDF && pages != null
         _state.value = FileViewerUiState(
             loading = false, name = row.name, path = path.orEmpty(), mime = row.mime, pages = pages, problem = problem, versions = versions,
+            jobId = row.jobId,
         )
         gate?.cancel()
         if (markable) {
             gate = viewModelScope.launch { d.canManage(row.jobId).collect { can -> _state.update { it.copy(canMarkUp = can) } } }
+        }
+        pinsJob?.cancel()
+        if (pages != null) {
+            val fileIds = (versions.map { it.id } + row.id).toSet()
+            val pageCount = pages.pageCount
+            pinsJob = viewModelScope.launch {
+                combine(d.tasks(row.jobId), d.canManageTasks(row.jobId)) { tasks, manage -> tasks to manage }.collect { (tasks, manage) ->
+                    val pinned = TaskPins.onFile(tasks, fileIds, manage, d.me)
+                    val pins = pinned.mapIndexedNotNull { i, t ->
+                        t.filePin?.takeIf { it.page < pageCount }?.let { PagePin(t.id, i + 1, t.title, it.page, it.x, it.y) }
+                    }
+                    val choices = if (manage) TaskList.build(tasks).open.map { TaskChoice(it.id, it.title, it.filePin?.fileId in fileIds) } else emptyList()
+                    _state.update { it.copy(pins = pins, canPinTasks = manage, choices = choices, pinMode = it.pinMode && manage) }
+                }
+            }
         }
     }
 

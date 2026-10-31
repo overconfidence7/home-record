@@ -3,6 +3,7 @@ package com.kurtz.homerecord.fieldlog.tasks
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
 import com.kurtz.homerecord.housemodel.blueprint.RoomHitTester
@@ -28,6 +29,10 @@ class TaskFormDeps(
     val plan: suspend () -> List<PinFloor> = { emptyList() },
     /** RoleGates.leads(jobId): only Owner, Office and the job's Lead add and edit tasks (AC-F3). */
     val canManage: Flow<Boolean> = flowOf(false),
+    /** A new task from a file's "New task here" starts pinned there (AC-F35). */
+    val startFilePin: TaskFilePin? = null,
+    /** A job file's name from its id, for the "Pinned on a file" row. */
+    val fileName: suspend (fileId: String) -> String? = { null },
 )
 
 /** Add or edit one task (FL-Tasks, AC-F34). Save adds it at the bottom of the open list or saves over it; the typing survives process death. */
@@ -49,11 +54,14 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
                 return@launch
             }
             val initial = existing?.let(TaskFormDraft::of) ?: TaskFormDraft()
-            val draft = saved.get<String>(DRAFT)?.let { runCatching { json.decodeFromString(TaskFormDraft.serializer(), it) }.getOrNull() } ?: initial
+            // The spot from the file viewer is typed-in content of a new task: Close asks before dropping it.
+            val opened = if (existing == null && d.startFilePin != null) initial.copy(filePin = FormFilePin.of(d.startFilePin)) else initial
+            val draft = saved.get<String>(DRAFT)?.let { runCatching { json.decodeFromString(TaskFormDraft.serializer(), it) }.getOrNull() } ?: opened
+            val fileName = (draft.filePin ?: initial.filePin)?.let { d.fileName(it.fileId) }
             val people = d.people().sortedWith(compareByDescending<PersonOption> { it.onJob }.thenBy { it.name.lowercase() })
             val plan = d.plan().filter { it.rooms.isNotEmpty() }
             _state.update {
-                it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos(), plan = plan)
+                it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos(), plan = plan, fileName = fileName)
             }
         }
     }
@@ -76,6 +84,7 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             is TaskFormEvent.PinFloor -> if (_state.value.plan.any { it.id == e.floorId }) _state.update { it.copy(pinFloorId = e.floorId) }
             is TaskFormEvent.PlacePin -> placePin(e.xIn, e.yIn)
             TaskFormEvent.RemovePin -> edit { it.copy(planPin = null) }
+            TaskFormEvent.RemoveFilePin -> edit { it.copy(filePin = null) }
             TaskFormEvent.Save -> save()
             TaskFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             TaskFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
@@ -109,7 +118,7 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
         if (!ready() || !st.draft.titleOk) return
         _state.update { it.copy(working = true) }
         viewModelScope.launch {
-            val ok = if (d.taskId == null) d.tasks.add(d.jobId, st.draft.toDraft()) != null else d.tasks.update(d.taskId, st.draft.toDraft())
+            val ok = if (d.taskId == null) d.tasks.add(d.jobId, st.draft.toDraft()) != null else d.tasks.update(d.taskId, st.draft.toDraft(st.initial))
             if (ok) finish() else _state.update { it.copy(working = false, failed = true) }
         }
     }

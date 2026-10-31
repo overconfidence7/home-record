@@ -32,8 +32,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class CaptureKey(val jobId: String) : NavKey
 
-/** The task form for [jobId]; [taskId] null adds a new task. */
-@Serializable data class TaskFormKey(val jobId: String, val taskId: String? = null) : NavKey
+/**
+ * The task form for [jobId]; [taskId] null adds a new task. A new task from a file's "New task here" starts pinned on
+ * [fileId] page [page] (0-based) at fractions [x], [y] (AC-F35).
+ */
+@Serializable data class TaskFormKey(
+    val jobId: String,
+    val taskId: String? = null,
+    val fileId: String? = null,
+    val page: Int? = null,
+    val x: Float? = null,
+    val y: Float? = null,
+) : NavKey
 
 /**
  * Full-screen editors and the camera: the tab bar is hidden while one is on top, so Close/Save

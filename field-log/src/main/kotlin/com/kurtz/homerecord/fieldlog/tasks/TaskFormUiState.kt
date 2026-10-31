@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog.tasks
 
 import androidx.compose.runtime.Immutable
 import com.kurtz.homerecord.core.model.JobTask
+import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.TaskDraft
 import com.kurtz.homerecord.housemodel.blueprint.RoomHitTester
@@ -22,17 +23,33 @@ data class TaskFormDraft(
     val punch: Boolean = false,
     /** Where the work is on the floor plan (AC-F35). */
     val planPin: TaskPlanPin? = null,
+    /** Where the work is on a page of a job file (AC-F35); set from the file viewer, removable here. */
+    val filePin: FormFilePin? = null,
 ) {
     val titleOk: Boolean get() = title.isNotBlank()
 
-    fun toDraft(): TaskDraft = TaskDraft(
+    /** [initial] is the form as opened; the file pin is written only when it differs, so a pin set meanwhile is kept. */
+    fun toDraft(initial: TaskFormDraft? = null): TaskDraft = TaskDraft(
         title = title.trim(), assigneeId = assigneeId,
         due = due?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
         roomId = roomId, photoId = photoId, note = note.trim().takeIf { it.isNotEmpty() }, punch = punch, planPin = planPin,
+        filePin = filePin?.toPin(), filePinEdited = initial == null || filePin != initial.filePin,
     )
 
     companion object {
-        fun of(t: JobTask) = TaskFormDraft(t.title, t.assigneeId, t.due?.toString(), t.roomId, t.photoId, t.note.orEmpty(), t.punch, t.planPin)
+        fun of(t: JobTask) = TaskFormDraft(
+            t.title, t.assigneeId, t.due?.toString(), t.roomId, t.photoId, t.note.orEmpty(), t.punch, t.planPin, t.filePin?.let(FormFilePin::of),
+        )
+    }
+}
+
+/** [TaskFilePin] in the form's saved state. */
+@Serializable
+data class FormFilePin(val fileId: String, val page: Int, val x: Float, val y: Float) {
+    fun toPin(): TaskFilePin = TaskFilePin(fileId, page, x, y)
+
+    companion object {
+        fun of(p: TaskFilePin) = FormFilePin(p.fileId, p.page, p.x, p.y)
     }
 }
 
@@ -71,6 +88,8 @@ data class TaskFormUiState(
     val pinning: Boolean = false,
     /** Floor shown in the picker. */
     val pinFloorId: String? = null,
+    /** Name of the file the task is pinned on, for the "Pinned on a file" row. */
+    val fileName: String? = null,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The name error shows once someone has typed and cleared it (rule 21). */
@@ -103,6 +122,8 @@ sealed interface TaskFormEvent {
     /** A tap on the plan in the picker, in plan inches. */
     data class PlacePin(val xIn: Int, val yIn: Int) : TaskFormEvent
     data object RemovePin : TaskFormEvent
+    /** Takes the task off the file page it is pinned on (AC-F35). */
+    data object RemoveFilePin : TaskFormEvent
     data object Save : TaskFormEvent
     data object AskDelete : TaskFormEvent
     data object DismissDelete : TaskFormEvent

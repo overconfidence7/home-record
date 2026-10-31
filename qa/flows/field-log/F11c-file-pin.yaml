@@ -1,0 +1,67 @@
+# Walkthrough F11 (T044d2): pin a task on a page of the job's plan PDF and open it from the pin (AC-F35).
+# Seed: "Garage subpanel" with Plans/Garage plan.pdf (PlanFileSeed). Pin a task, tap the page, New task here, name
+# it and save; the numbered pin shows on the page and opens the task form.
+appId: com.kurtz.homerecord.fieldlog
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "fl_tab_jobs"
+- extendedWaitUntil:
+    visible: "Garage subpanel"
+    timeout: 15000
+- tapOn: "Garage subpanel"
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_files_folder_Plans
+    timeout: 10000
+- tapOn:
+    id: fl_files_folder_Plans
+- tapOn:
+    id: fl_files_row_qa-file-garage-plan
+- extendedWaitUntil:
+    visible:
+      id: fl_file_pages
+    timeout: 10000
+# Pin a task: the hint bar says where to tap (AC-F35)
+- tapOn:
+    id: fl_file_pin
+- extendedWaitUntil:
+    visible: "Tap the page where the work is."
+    timeout: 5000
+- tapOn:
+    id: fl_file_page_1
+- extendedWaitUntil:
+    visible: "Pin which task?"
+    timeout: 5000
+- takeScreenshot: F11c-pin-chooser
+- tapOn:
+    id: fl_file_pin_new
+# The new task's form already knows the spot
+- extendedWaitUntil:
+    visible: "Garage plan.pdf · Page 1"
+    timeout: 10000
+- tapOn:
+    id: fl_task_form_title
+- inputText: "Move the subpanel 6 inches left"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+# Back on the plan: pin mode is over and the task's pin is on the page
+- extendedWaitUntil:
+    visible: "Task 1: Move the subpanel 6 inches left"
+    timeout: 10000
+- assertNotVisible: "Tap the page where the work is."
+- takeScreenshot: F11c-file-pin
+- tapOn: "Task 1: Move the subpanel 6 inches left"
+- extendedWaitUntil:
+    visible: "Edit task"
+    timeout: 10000
+- assertVisible: "Move the subpanel 6 inches left"
+- tapOn:
+    id: fl_close
+- extendedWaitUntil:
+    visible:
+      id: fl_file_pages
+    timeout: 10000

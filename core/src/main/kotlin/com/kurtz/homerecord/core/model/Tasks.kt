@@ -21,7 +21,28 @@ data class JobTask(
     val createdAt: Long = 0,
     /** Where the work is on the job's floor plan (AC-F35); null when not pinned. */
     val planPin: TaskPlanPin? = null,
+    /** Where the work is on a page of a job file, such as a plan PDF (AC-F35); null when not pinned. */
+    val filePin: TaskFilePin? = null,
 )
+
+/**
+ * A task's pin on a page of a job file (AC-F35): [page] is 0-based and [x], [y] are fractions of the page's width and
+ * height, so the pin stays put at any zoom or render size. Stored in the task's `fileId`, `page`, `x`, `y` columns.
+ */
+data class TaskFilePin(val fileId: String, val page: Int, val x: Float, val y: Float) {
+    companion object {
+        /** A pin from the stored columns; null when any is missing or out of range (a pin never breaks the task). */
+        fun of(fileId: String?, page: Int?, x: Float?, y: Float?): TaskFilePin? {
+            if (fileId.isNullOrBlank() || page == null || x == null || y == null) return null
+            if (page < 0 || x.isNaN() || y.isNaN() || x !in 0f..1f || y !in 0f..1f) return null
+            return TaskFilePin(fileId, page, x, y)
+        }
+
+        /** A tap on a page as a pin, clamped onto the page. */
+        fun at(fileId: String, page: Int, x: Float, y: Float): TaskFilePin =
+            TaskFilePin(fileId, page.coerceAtLeast(0), x.takeUnless { it.isNaN() }?.coerceIn(0f, 1f) ?: 0.5f, y.takeUnless { it.isNaN() }?.coerceIn(0f, 1f) ?: 0.5f)
+    }
+}
 
 /** A task's pin on the floor plan (AC-F35): the floor and a point on it in plan inches, stored as the task's `planPinJson`. */
 @Serializable
@@ -48,6 +69,14 @@ object TaskPins {
         return tasks.filter { !it.done && it.planPin?.floorId == floorId && (canManage || (me != null && it.assigneeId == me)) }
             .sortedWith(TaskList.OPEN_ORDER)
     }
+
+    /**
+     * The open tasks pinned on a job file, in the crew's order, with the same who-sees-what rule as [onFloor].
+     * [fileIds] are every version of the file: marking up a plan saves a new version, and the pins stay with the plan.
+     */
+    fun onFile(tasks: List<JobTask>, fileIds: Set<String>, canManage: Boolean, me: String?): List<JobTask> =
+        tasks.filter { !it.done && it.filePin?.fileId in fileIds && (canManage || (me != null && it.assigneeId == me)) }
+            .sortedWith(TaskList.OPEN_ORDER)
 }
 
 /** Which tasks a job's Tasks tab shows; the punch list is a filter, not a separate list (FL-Tasks). */
