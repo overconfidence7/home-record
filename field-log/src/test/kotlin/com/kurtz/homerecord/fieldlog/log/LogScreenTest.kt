@@ -1,6 +1,9 @@
 package com.kurtz.homerecord.fieldlog.log
 
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -65,6 +68,16 @@ class LogScreenTest {
             LogEvent.EditText(LogTextSection.VISITORS), LogEvent.EditText(LogTextSection.SAFETY), LogEvent.EditText(LogTextSection.CLIENT_NOTES),
         ).inOrder()
         rule.onNodeWithTag("fl_log_next").assertIsNotEnabled()
+    }
+
+    /** QA auto c1240620: the section pencils measured 40 dp when scrolled out of view; they are 48 dp buttons now. */
+    @AcceptanceCriterion("AC-F30")
+    @Test fun sectionEditButtonsAreFullTouchTargets() {
+        show(ready)
+        listOf("fl_log_work_edit", "fl_log_visitors_edit", "fl_log_safety_edit", "fl_log_client_edit").forEach {
+            rule.onNodeWithTag("fl_log_list").performScrollToNode(hasTestTag(it))
+            rule.onNodeWithTag(it).assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
+        }
     }
 
     @AcceptanceCriterion("AC-F30")
