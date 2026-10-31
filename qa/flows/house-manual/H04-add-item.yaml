@@ -43,9 +43,13 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_item_photo_item"
 # AC-C31: the data plate button offers camera and gallery (the on-device scan sheet follows the photo; OCR itself is covered by DataPlateParserTest and ItemEditViewModelTest)
+# the scroll can still be settling when the tap lands, and a tap during a fling only stops it
+- waitForAnimationToEnd
 - tapOn:
     id: "hm_item_photo_data_plate"
-- assertVisible: "Take photo"
+- extendedWaitUntil:
+    visible: "Take photo"
+    timeout: 10000
 - assertVisible: "Choose from gallery"
 - pressKey: back
 - tapOn:

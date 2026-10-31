@@ -215,10 +215,14 @@ private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @C
     SwipeToComplete({ onEvent(TasksEvent.SetDone(row.id, true)) }, Modifier.testTag("fl_tasks_swipe_${row.id}"), content)
 }
 
+private const val SWIPE_THRESHOLD = 0.25f
+
 /** A row that swipes either way to complete it: the Tasks tab and My tasks on Today (AC-F34). */
 @Composable
 fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val swipe = rememberSwipeToDismissBoxState()
+    // A quarter of the row is enough: a thumb (or a glove) from the middle of the row reaches the edge
+    // well short of the default half-width threshold, and the swipe would spring back (F11).
+    val swipe = rememberSwipeToDismissBoxState(positionalThreshold = { total -> total * SWIPE_THRESHOLD })
     val scope = rememberCoroutineScope()
     SwipeToDismissBox(
         state = swipe,

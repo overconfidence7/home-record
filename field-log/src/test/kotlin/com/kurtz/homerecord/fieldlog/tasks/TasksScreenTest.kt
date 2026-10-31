@@ -13,6 +13,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.geometry.Offset
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.model.TaskFilter
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -93,6 +95,16 @@ class TasksScreenTest {
         // Someone else's task does not swipe, as it cannot be ticked.
         rule.onNodeWithTag("fl_tasks_swipe_t2").assertDoesNotExist()
         rule.onNodeWithTag("fl_tasks_swipe_t3").assertDoesNotExist()
+    }
+
+    // AC-F34: a half-width swipe from the middle of the row, as a thumb (and Maestro's F11 swipe) makes it, completes the task.
+    @Test fun aShortSwipeFromTheMiddleTicksItDone() {
+        val events = show(ready)
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput {
+            swipe(center, Offset(width * 0.9f, centerY), durationMillis = 400)
+        }
+        rule.waitForIdle()
+        assertThat(events).contains(TasksEvent.SetDone("t1", true))
     }
 
     @Test fun swipingTheOtherWayTicksItToo() {

@@ -9,6 +9,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.geometry.Offset
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.model.TaskDue
@@ -66,6 +68,16 @@ class TodayTasksScreenTest {
         rule.onNodeWithTag("fl_today_task_swipe_t2").performTouchInput { swipeLeft() }
         rule.waitForIdle()
         assertThat(events).containsExactly(TodayEvent.CompleteTask("t1"), TodayEvent.CompleteTask("t2")).inOrder()
+    }
+
+    // AC-F34: a half-width swipe from the middle of the row (F11's Maestro swipe) is enough.
+    @Test fun aShortSwipeFromTheMiddleCompletesTheTask() {
+        val events = show(state)
+        rule.onNodeWithTag("fl_today_task_swipe_t1").performTouchInput {
+            swipe(center, Offset(width * 0.9f, centerY), durationMillis = 400)
+        }
+        rule.waitForIdle()
+        assertThat(events).containsExactly(TodayEvent.CompleteTask("t1"))
     }
 
     @Test fun undoSnackbarSendsUndoTask() {
