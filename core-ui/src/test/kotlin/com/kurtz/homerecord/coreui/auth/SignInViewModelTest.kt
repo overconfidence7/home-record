@@ -58,6 +58,24 @@ class SignInViewModelTest {
         assertThat(store.t).isEqualTo("tok")
     }
 
+    // AC-F4: after a sign-in, the next sign-out starts on an empty email step, not the last person's code step
+    @Test fun signInResetsToEmptyEmailStepForTheNextSignOut() {
+        val saved = SavedStateHandle()
+        val vm = vm(saved)
+        vm.onEvent(SignInEvent.EmailChanged("crew@b.com"))
+        vm.onEvent(SignInEvent.SendCode)
+        vm.onEvent(SignInEvent.CodeChanged("123456"))
+        vm.onEvent(SignInEvent.VerifyCode)
+        assertThat(vm.state.value.signedIn).isTrue()
+        assertThat(vm.state.value.step).isEqualTo(SignInStep.Email)
+        assertThat(vm.state.value.email).isEmpty()
+        assertThat(vm.state.value.code).isEmpty()
+        assertThat(vm.state.value.busy).isFalse()
+        val restored = vm(saved).state.value
+        assertThat(restored.step).isEqualTo(SignInStep.Email)
+        assertThat(restored.email).isEmpty()
+    }
+
     @Test fun wrongCodeShowsError() {
         verify = TokenOrError(null, AuthResult.InvalidCode)
         val vm = vm()
