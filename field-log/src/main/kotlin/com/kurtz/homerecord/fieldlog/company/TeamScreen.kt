@@ -98,7 +98,7 @@ private fun TeamList(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShareIn
                 leading = { Icon(Icons.Rounded.Person, contentDescription = null) },
                 trailing = null,
                 onClick = if (editable) ({ onEvent(TeamEvent.OpenActions(member)) }) else null,
-                modifier = Modifier.testTag("row_${member.userId}"),
+                modifier = Modifier.testTag("fl_team_row_${member.userId}"),
             )
         }
     }

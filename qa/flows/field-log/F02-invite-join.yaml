@@ -1,4 +1,4 @@
-# Walkthrough F2: invite a crew member, role gates, sign-out (AC-F2, AC-F3, AC-F4).
+# Walkthrough F2: invite a crew member, role gates, sign-out, role change and remove (AC-F2, AC-F3, AC-F4).
 # One emulator plays both people: the Owner creates the company and copies the invite code,
 # signs out, then a second account joins as Crew and sees no admin screens.
 appId: com.kurtz.homerecord.fieldlog
@@ -86,3 +86,55 @@ appId: com.kurtz.homerecord.fieldlog
 - assertNotVisible:
     id: "fl_more_company"
 - takeScreenshot: F02-more-crew
+# AC-F2/AC-F3 (Owner side): the Owner signs back in, makes the new member a Lead, then removes them
+- tapOn:
+    id: "fl_more_sign_out"
+- tapOn:
+    id: "fl_more_sign_out_confirm"
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: "qa-owner-f02@example.test"
+- extendedWaitUntil:
+    visible:
+      id: "fl_tab_today"
+    timeout: 15000
+- tapOn:
+    id: "fl_tab_more"
+- tapOn:
+    id: "fl_more_team"
+- assertVisible: "Members \\(2\\)"
+# Members are sorted Owner first, so the crew member is the second row
+- extendedWaitUntil:
+    visible:
+      id: "fl_team_row_.*"
+      index: 1
+    timeout: 10000
+- tapOn:
+    id: "fl_team_row_.*"
+    index: 1
+- tapOn:
+    id: "fl_sheet_role:lead"
+# The sheet closes once the backend has the new role; the row then reads Lead
+- extendedWaitUntil:
+    notVisible:
+      id: "fl_sheet_role:lead"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: ".*Lead.*"
+    timeout: 10000
+- takeScreenshot: F02-team-lead
+- tapOn:
+    id: "fl_team_row_.*"
+    index: 1
+- tapOn:
+    id: "fl_sheet_remove"
+- tapOn:
+    id: "fl_team_remove_confirm"
+- extendedWaitUntil:
+    visible: "Members \\(1\\)"
+    timeout: 10000
+- assertNotVisible:
+    id: "fl_team_row_.*"
+    index: 1
+- takeScreenshot: F02-team-removed
