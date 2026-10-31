@@ -49,6 +49,10 @@ appId: com.kurtz.homerecord.fieldlog
       id: fl_markup_canvas
     direction: RIGHT
     duration: 800
+# a straight stroke with the box tool still draws (a thin box), so there is something to save
+- assertVisible:
+    id: fl_save
+    enabled: true
 - takeScreenshot: F07c-markup-drawn
 - tapOn:
     id: fl_save
