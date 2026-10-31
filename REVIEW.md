@@ -2295,3 +2295,17 @@ Focus check: nothing wrong. House Manual stays the homeowner's record (warrantie
 Coverage note: the auto entry reports 217/217 claimed ACs covered across 118 ticked tasks and subtasks (0 gaps).
 
 Judged: 242 screenshots opened (all 115 device flow, tour, launch and monkey shots, all 120 light crawler shots, 7 dark/200%/landscape crawler shots of the changed screens); the other 446 crawler variants checked by script for blank frames. 20 walkthrough steps. New issues: 2. Product gaps: 0.
+
+## QA auto 2026-10-31 (commit 695d291f)
+
+Automated suite run at 2026-10-31 03:28 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] field-log scroll jank (regression of a fixed item) [auto:jank:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit 695d291f - expected: under 10% janky frames (AC-U11) - actual: 13% of 111 frames ran the UI thread past the frame budget (AC-U11; software renderer, overall 88% janky of 109; 200-row list, benchmark build)
+
+Still open from earlier runs: [auto:flow:field-log:F02-invite-join]
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Fail, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F08 Pass, field-log F08b Pass, field-log F15 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 52 device stages, 919 unit tests, 133 backend tests, coverage 223/223 ACs. Passed: 50. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
