@@ -19,10 +19,24 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_save
 - tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; the row keeps the selected
+# tab in view, so step along it by id (Files, then Time) the way F03 does instead of swiping
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
 - extendedWaitUntil:
     visible:
       id: fl_job_tab_house
-    timeout: 10000
+    timeout: 5000
 - tapOn:
     id: fl_job_tab_house
 - tapOn:
@@ -85,7 +99,17 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Move the outlet behind the range"
     timeout: 10000
-# The pin shows on the House tab and opens the task (AC-F35)
+# The pin shows on the House tab and opens the task (AC-F35); from Tasks, Time is next and House after it
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
 - tapOn:
     id: fl_job_tab_house
 - extendedWaitUntil:
