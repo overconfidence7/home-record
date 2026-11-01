@@ -58,7 +58,16 @@ object BitmapAnnotationRenderer : AnnotatedImageRenderer {
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         val stored = BitmapFactory.decodeFile(path, options) ?: return null
-        val orientation = orientationOf(path)
+        val upright = turnUpright(stored, orientationOf(path))
+        return if (upright.isMutable) upright else upright.copy(Bitmap.Config.ARGB_8888, true).also { upright.recycle() }
+    }
+
+    /**
+     * [stored] turned by [orientation] so it looks the way the camera saw it; [stored] itself when no turn is needed,
+     * otherwise a new bitmap (possibly immutable) and [stored] is recycled. Used for the marked-up copy (AC-F26) and the
+     * daily log PDF's photos (AC-F33).
+     */
+    fun turnUpright(stored: Bitmap, orientation: ImageOrientation): Bitmap {
         if (orientation.isIdentity) return stored
         // Turn, then mirror: EXIF 5 (transpose) is a quarter turn clockwise followed by a horizontal flip.
         val matrix = Matrix().apply {
@@ -67,7 +76,7 @@ object BitmapAnnotationRenderer : AnnotatedImageRenderer {
         }
         val upright = Bitmap.createBitmap(stored, 0, 0, stored.width, stored.height, matrix, true)
         if (upright !== stored) stored.recycle()
-        return if (upright.isMutable) upright else upright.copy(Bitmap.Config.ARGB_8888, true).also { upright.recycle() }
+        return upright
     }
 
     /** Draws onto [canvas] sized [w] by [h]; the same marks as the editor shows, scaled to the photo. */

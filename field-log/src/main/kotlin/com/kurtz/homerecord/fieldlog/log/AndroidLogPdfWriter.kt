@@ -14,13 +14,15 @@ import com.kurtz.homerecord.core.log.LogPdfLayout
 import com.kurtz.homerecord.core.log.LogPdfMeasure
 import com.kurtz.homerecord.core.log.LogPdfOp
 import com.kurtz.homerecord.core.log.LogPdfPage
+import com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRenderer
 import java.io.File
 import java.io.OutputStream
 
 /**
  * Draws a daily log PDF (AC-F33) with the platform PdfDocument: [LogPdfLayout] places everything, this draws it.
  * Photos are decoded at about twice the size they print, cropped to fill their cell; the logo is fitted inside its
- * square. A photo that cannot be read leaves a light box rather than failing the whole PDF.
+ * square. Photos print upright whatever their EXIF orientation. A photo that cannot be read leaves a light box rather
+ * than failing the whole PDF.
  */
 class AndroidLogPdfWriter(private val pageFooter: (page: Int, pages: Int) -> String, private val spec: LogPdfPage = LogPdfPage()) {
     private val regular = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
@@ -80,7 +82,7 @@ class AndroidLogPdfWriter(private val pageFooter: (page: Int, pages: Int) -> Str
         text.color = if (muted) MUTED else INK
     }
 
-    /** Decodes [path] no larger than about twice the box (PDF points print at 72 dpi). */
+    /** Decodes [path] no larger than about twice the box (PDF points print at 72 dpi), turned upright by its EXIF tag. */
     private fun decode(path: String, box: RectF): Bitmap? = runCatching {
         val file = File(path)
         if (!file.exists()) return null
@@ -90,7 +92,9 @@ class AndroidLogPdfWriter(private val pageFooter: (page: Int, pages: Int) -> Str
         val want = maxOf(box.width(), box.height()) * 2f
         var sample = 1
         while (minOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= want) sample *= 2
-        BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sample })
+        val stored = BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sample }) ?: return null
+        // a portrait shot is stored sideways with an EXIF turn; print it the way the camera saw it
+        BitmapAnnotationRenderer.turnUpright(stored, BitmapAnnotationRenderer.orientationOf(path))
     }.getOrNull()
 
     /** The centre part of [bmp] with [box]'s aspect ratio, so the photo fills its cell without stretching. */

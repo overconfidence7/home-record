@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.ExifInterface
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.company.CompanyMembership
@@ -148,6 +149,38 @@ class LogPdfTest {
                 assertThat(Color.blue(px)).isLessThan(100)
             }
         }
+    }
+
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aPortraitPhotoStoredSidewaysWithAnExifTurnPrintsUpright() {
+        // AC-F33: the camera stores a portrait shot as a landscape JPEG tagged "rotate 90"; the PDF prints it upright
+        val dir = File(context.cacheDir, "pdf-exif").apply { mkdirs() }
+        val photo = File(dir, "portrait.jpg")
+        // stored 400×200: green left half, blue right half; turned a quarter clockwise, green is on top
+        val stored = Bitmap.createBitmap(400, 200, Bitmap.Config.ARGB_8888)
+        Canvas(stored).apply {
+            drawRect(0f, 0f, 200f, 200f, android.graphics.Paint().apply { color = Color.GREEN })
+            drawRect(200f, 0f, 400f, 200f, android.graphics.Paint().apply { color = Color.BLUE })
+        }
+        photo.outputStream().use { stored.compress(Bitmap.CompressFormat.JPEG, 95, it) }
+        ExifInterface(photo.path).apply {
+            setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90.toString())
+            saveAttributes()
+        }
+        val writer = AndroidLogPdfWriter({ n, m -> res.getString(R.string.log_pdf_page, n, m) })
+        val content = build().copy(photos = listOf(photo.path), logoPath = null)
+        val pages = writer.pages(content)
+        val (page, img) = pages.firstNotNullOf { ops -> ops.filterIsInstance<LogPdfOp.Image>().firstOrNull { it.path == photo.path }?.let { ops to it } }
+        val bitmap = Bitmap.createBitmap(612, 792, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.WHITE) }
+        writer.draw(Canvas(bitmap), page, content.logoPath)
+        val cx = ((img.left + img.right) / 2).toInt()
+        val h = img.bottom - img.top
+        val top = bitmap.getPixel(cx, (img.top + h * 0.2f).toInt())
+        val bottom = bitmap.getPixel(cx, (img.top + h * 0.8f).toInt())
+        assertThat(Color.green(top)).isGreaterThan(180)
+        assertThat(Color.blue(top)).isLessThan(80)
+        assertThat(Color.blue(bottom)).isGreaterThan(180)
+        assertThat(Color.green(bottom)).isLessThan(80)
     }
 
     @AcceptanceCriterion("AC-F33")
