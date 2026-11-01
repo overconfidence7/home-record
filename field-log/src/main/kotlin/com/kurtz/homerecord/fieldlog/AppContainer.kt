@@ -434,10 +434,14 @@ class AppContainer(private val app: Application) {
         scope.launch(Dispatchers.IO) { jobGeocoder.resolvePending(companyId) }
     }
 
+    /** More > Sync for the current company only: its conflict lines, and Clear touches only its log (R09e, AC-F53). */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     fun syncLogDeps() = com.kurtz.homerecord.fieldlog.sync.SyncLogDeps(
-        syncEngine.phase, syncEngine.pendingCount, conflictLog.entries, syncCoordinator::requestSync,
+        syncEngine.phase, syncEngine.pendingCount,
+        companyTenant.flatMapLatest { t -> t?.let(conflictLog::entriesFor) ?: kotlinx.coroutines.flow.flowOf(emptyList()) },
+        syncCoordinator::requestSync,
         // Clearing the log also clears the refused changes the Today chip counts; the records stay as they are.
-        { conflictLog.clear(); syncEngine.clearRefused() },
+        { company.current?.let { TenantRef(TenantKind.Company, it.companyId) }?.let { conflictLog.clear(it); syncEngine.clearRefused(it) } },
     )
 
     fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(

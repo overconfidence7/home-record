@@ -55,9 +55,9 @@ class SyncEngineTest {
     private fun task(title: String, at: Long, done: Boolean = false) =
         TaskEntity(id = "t1", jobId = "j1", title = title, done = done, createdAt = 1, updatedAt = at)
 
-    private suspend fun save(db: HomeRecordDatabase, engine: SyncEngine, t: TaskEntity) {
+    private suspend fun save(db: HomeRecordDatabase, engine: SyncEngine, t: TaskEntity, into: TenantRef = tenant) {
         db.taskDao().upsert(t)
-        engine.recordChange(tenant, "task", t.id)
+        engine.recordChange(into, "task", t.id)
     }
 
     @Test fun pushedChangeAppearsOnTheOtherDevice() = runTest {
@@ -475,13 +475,13 @@ class SyncEngineTest {
         a.sync(tenant)
 
         assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Set the kitchen outlets")
-        val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA)).entries.first()
+        val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA)).entriesFor(tenant).first()
         assertThat(log).hasSize(1)
         assertThat(log.single().outcome).isEqualTo(ConflictOutcome.NewerKept)
         assertThat(log.single().fields).containsExactly("title")
         assertThat(log.single().entity).isEqualTo("task")
         assertThat(log.single().label).isEqualTo("Set the kitchen outlets")
-        assertThat(SyncConflictLog(dbB.syncConflictDao(), RoomRowStore(dbB)).entries.first()).isEmpty()
+        assertThat(SyncConflictLog(dbB.syncConflictDao(), RoomRowStore(dbB)).entriesFor(tenant).first()).isEmpty()
     }
 
     // AC-F53, T046a: a refused change is logged too, the log survives a failed pass and Clear empties it.
@@ -490,17 +490,39 @@ class SyncEngineTest {
         save(dbA, a, task("Patch drywall", 10))
         a.sync(tenant)
         val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA))
-        assertThat(log.entries.first().map { it.outcome }).containsExactly(ConflictOutcome.Refused)
-        assertThat(log.entries.first().single().label).isEqualTo("Patch drywall")
+        assertThat(log.entriesFor(tenant).first().map { it.outcome }).containsExactly(ConflictOutcome.Refused)
+        assertThat(log.entriesFor(tenant).first().single().label).isEqualTo("Patch drywall")
 
         server.refused = emptySet()
         save(dbA, a, task("Patch drywall again", 20).copy(id = "t2"))
         server.online = false
         a.sync(tenant)
-        assertThat(log.entries.first()).hasSize(1)
+        assertThat(log.entriesFor(tenant).first()).hasSize(1)
 
-        log.clear()
-        assertThat(log.entries.first()).isEmpty()
+        log.clear(tenant)
+        assertThat(log.entriesFor(tenant).first()).isEmpty()
         assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Patch drywall")
+    }
+
+    // R09e, AC-F53: the log is kept per company. A phone that belongs to two companies lists only the current
+    // company's lines on More > Sync, and Clear there leaves the other company's lines and refused changes alone.
+    @Test fun theConflictLogAndClearAreScopedToOneCompany() = runTest {
+        val other = TenantRef(TenantKind.Company, "c2")
+        server.refused = setOf("task")
+        save(dbA, a, task("Patch drywall", 10))
+        a.sync(tenant)
+        save(dbA, a, task("Frame closet", 20).copy(id = "t2", jobId = "j2"), other)
+        a.sync(other)
+
+        val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA))
+        assertThat(log.entriesFor(tenant).first().map { it.label }).containsExactly("Patch drywall")
+        assertThat(log.entriesFor(other).first().map { it.label }).containsExactly("Frame closet")
+        assertThat(a.refusedCount.first()).isEqualTo(2)
+
+        log.clear(tenant)
+        a.clearRefused(tenant)
+        assertThat(log.entriesFor(tenant).first()).isEmpty()
+        assertThat(log.entriesFor(other).first().map { it.label }).containsExactly("Frame closet")
+        assertThat(a.refused.first()).containsExactly(RefusedChange("task", "t2", 20))
     }
 }

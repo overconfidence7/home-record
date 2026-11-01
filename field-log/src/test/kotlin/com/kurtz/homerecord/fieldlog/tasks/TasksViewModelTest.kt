@@ -86,10 +86,12 @@ class TasksViewModelTest {
         val vm = vm()
         vm.current { it.open.size == 2 }
         vm.onEvent(TasksEvent.SetDone(mine, true))
-        vm.current { it.undo != null }
+        // Wait for the done row from Room as well as the snackbar, or Dismiss can land before the list catches up.
+        vm.current { it.undo != null && it.done.isNotEmpty() }
         vm.onEvent(TasksEvent.DismissUndo)
         val s = vm.current { it.undo == null }
         assertThat(s.done.map { it.id }).containsExactly(mine)
+        assertThat(runBlocking { tasks.get(mine) }?.done).isTrue()
     }
 
     @Test fun punchFilterIsKeptAcrossProcessDeath() {

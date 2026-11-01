@@ -58,9 +58,17 @@ class SyncEngine(
         rows.distinctBy { it.entity to it.entityId }.map { RefusedChange(it.entity, it.entityId, it.updatedAt) }
     }
 
-    /** Clears the refused list once the user has seen it; the records themselves stay as they are on this phone. */
+    /** Clears every refused change (House Manual, one home per phone); the records stay as they are on this phone. */
     suspend fun clearRefused() {
         outbox.clearRefused(REFUSED)
+    }
+
+    /**
+     * Clears [tenant]'s refused list once the user has seen it; the records themselves stay as they are on this phone,
+     * and another company's or home's refused changes are left alone.
+     */
+    suspend fun clearRefused(tenant: TenantRef) {
+        outbox.clearRefusedFor(tenant.kind.wire, tenant.id, REFUSED)
     }
 
     /**

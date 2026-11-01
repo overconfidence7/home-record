@@ -91,11 +91,13 @@ object SyncConflicts {
 }
 
 /**
- * The device-local conflict log (AC-F53): [SyncEngine] writes each pass's [ConflictNote]s here with the record's name,
- * the newest [KEEP] rows are kept, and FL-Sync reads the [entries].
+ * The device-local conflict log (AC-F53): [SyncEngine] writes each pass's [ConflictNote]s here with the record's name
+ * and tenant, the newest [KEEP] rows are kept across tenants, and FL-Sync reads one tenant's lines through [entriesFor]
+ * (a phone signed in to a second company sees only that company's log).
  */
 class SyncConflictLog(private val dao: SyncConflictDao, private val store: RowStore) {
-    val entries: Flow<List<ConflictEntry>> = dao.observeRecent(KEEP).map(SyncConflicts::entries)
+    fun entriesFor(tenant: TenantRef): Flow<List<ConflictEntry>> =
+        dao.observeRecentFor(tenant.key, KEEP).map(SyncConflicts::entries)
 
     suspend fun record(tenant: TenantRef, notes: List<ConflictNote>, at: Long) {
         val worth = notes.filter(SyncConflicts::worthLogging)
@@ -114,7 +116,8 @@ class SyncConflictLog(private val dao: SyncConflictDao, private val store: RowSt
         dao.trim(KEEP)
     }
 
-    suspend fun clear() = dao.clear()
+    /** Empties [tenant]'s log; other tenants' lines stay. */
+    suspend fun clear(tenant: TenantRef) = dao.clearFor(tenant.key)
 
     companion object {
         const val KEEP = 200

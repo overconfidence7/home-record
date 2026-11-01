@@ -387,6 +387,8 @@ interface OutboxDao {
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 1 AND serverSeq = :refused") fun observeRefusedCount(refused: Long): kotlinx.coroutines.flow.Flow<Int>
     @Query("SELECT * FROM outbox WHERE sent = 1 AND serverSeq = :refused ORDER BY seq DESC") fun observeRefused(refused: Long): kotlinx.coroutines.flow.Flow<List<OutboxEntity>>
     @Query("DELETE FROM outbox WHERE sent = 1 AND serverSeq = :refused") suspend fun clearRefused(refused: Long): Int
+    @Query("DELETE FROM outbox WHERE sent = 1 AND serverSeq = :refused AND tenantKind = :kind AND tenantId = :tenantId")
+    suspend fun clearRefusedFor(kind: String, tenantId: String, refused: Long): Int
     /** Drops rows the server accepted and this device has pulled back (serverSeq ≤ the tenant's cursor); refused rows (serverSeq < 0) stay for the log. */
     @Query("DELETE FROM outbox WHERE sent = 1 AND tenantKind = :kind AND tenantId = :tenantId AND serverSeq >= 0 AND serverSeq <= :upTo")
     suspend fun pruneConfirmed(kind: String, tenantId: String, upTo: Long): Int
@@ -395,9 +397,11 @@ interface OutboxDao {
 @Dao
 interface SyncConflictDao {
     @androidx.room.Insert suspend fun add(rows: List<SyncConflictEntity>)
-    @Query("SELECT * FROM sync_conflict ORDER BY id DESC LIMIT :limit") fun observeRecent(limit: Int): Flow<List<SyncConflictEntity>>
+    /** The newest [limit] lines of one tenant's log (`kind:id`), so one company's More > Sync never lists another's. */
+    @Query("SELECT * FROM sync_conflict WHERE tenantKey = :tenantKey ORDER BY id DESC LIMIT :limit")
+    fun observeRecentFor(tenantKey: String, limit: Int): Flow<List<SyncConflictEntity>>
     @Query("DELETE FROM sync_conflict WHERE id NOT IN (SELECT id FROM sync_conflict ORDER BY id DESC LIMIT :keep)") suspend fun trim(keep: Int)
-    @Query("DELETE FROM sync_conflict") suspend fun clear()
+    @Query("DELETE FROM sync_conflict WHERE tenantKey = :tenantKey") suspend fun clearFor(tenantKey: String)
 }
 
 @Dao
