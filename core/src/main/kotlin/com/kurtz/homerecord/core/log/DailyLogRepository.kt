@@ -27,6 +27,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /** Why the weather section reads the way it does (AC-F31). Only [Shown] has a snapshot to show. */
@@ -53,7 +55,12 @@ data class DailyLog(
     val status: String,
     val sentAt: Long?,
     val updatedAt: Long,
-)
+    /** Who the last send went to by email; empty when it went through the share sheet (AC-F33). */
+    val recipients: List<String> = emptyList(),
+    val pdfPath: String? = null,
+) {
+    val sent: Boolean get() = status == DailyLogRepository.STATUS_SENT
+}
 
 data class AssembleResult(val log: DailyLog, val weather: WeatherStatus)
 
@@ -132,6 +139,21 @@ class DailyLogRepository(
         save(row, row.jobId, LocalDate.parse(row.day), after, now()).toModel()
     }
 
+    /**
+     * Marks the log Sent now, to [recipients] (empty for the share sheet), with the PDF that went out (AC-F33). Sending
+     * again replaces the time, recipients and PDF, so the log always shows its latest send. Null when the log is gone.
+     */
+    suspend fun markSent(logId: String, recipients: List<String>, pdfPath: String): DailyLog? = writes.withLock {
+        val row = db.dailyLogDao().get(logId) ?: return@withLock null
+        val stamp = now()
+        val sent = row.copy(
+            status = STATUS_SENT, sentAt = stamp, recipientsJson = json.encodeToString(recipients), pdfPath = pdfPath, updatedAt = stamp,
+        )
+        db.dailyLogDao().upsert(sent)
+        onChange("daily_log", sent.id)
+        sent.toModel()
+    }
+
     private suspend fun save(existing: DailyLogEntity?, jobId: String, day: LocalDate, sections: DailyLogSections, stamp: Long): DailyLogEntity {
         val text = sections.toJson()
         val weatherJson = sections.weather.value?.let { json.encodeToString(LogWeather.serializer(), it) }
@@ -195,11 +217,15 @@ class DailyLogRepository(
     private fun DailyLogEntity.toModel() = DailyLog(
         id = id, jobId = jobId, day = LocalDate.parse(day), sections = DailyLogSections.fromJson(sectionsJson),
         status = status, sentAt = sentAt, updatedAt = updatedAt,
+        recipients = runCatching { json.decodeFromString<List<String>>(recipientsJson) }.getOrDefault(emptyList()), pdfPath = pdfPath,
     )
 
     companion object {
         /** A saved snapshot is looked up again after six hours, matching the backend's cache (AC-B32). */
         const val WEATHER_REFRESH_MS = 6 * 3_600_000L
+
+        const val STATUS_DRAFT = "DRAFT"
+        const val STATUS_SENT = "SENT"
 
         /** The same job and day always get the same id, on every phone. */
         fun idFor(jobId: String, day: LocalDate): String =

@@ -571,6 +571,12 @@
     <string name="log_weather_low_above_high">The low can’t be above the high.</string>
     <string name="log_weather_hand_entered">This weather was typed in by hand, so the app stops looking it up for this day.</string>
     <string name="log_weather_look_up">Look it up again</string>
+    <string name="log_pdf_title">Daily log, %1$s</string>
+    <string name="log_pdf_page">Page %1$d of %2$d</string>
+    <string name="log_pdf_crew_line">%1$s, %2$s</string>
+    <string name="log_pdf_crew_total">Total: %1$s</string>
+    <string name="log_pdf_delay_line">%1$s: %2$s</string>
+    <string name="log_pdf_subject">%1$s: %2$s</string>
     <!-- FL-Tasks (AC-F34) -->
     <string name="tasks_add">Add task</string>
     <string name="tasks_filter_all">All</string>

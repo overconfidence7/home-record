@@ -1,0 +1,54 @@
+package com.kurtz.homerecord.fieldlog.log
+
+import android.content.Context
+import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.log.DailyLog
+import com.kurtz.homerecord.core.log.LogRecipients
+import com.kurtz.homerecord.fieldlog.R
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+
+/** A daily log written to a PDF, with who it goes to by email (AC-F33). */
+data class LogPdfFile(val file: File, val recipients: List<String>, val subject: String)
+
+/**
+ * Builds the PDF for a saved daily log into `cache/logs/` (shared through the app's FileProvider) and works out its
+ * email recipients from the job's client and office addresses (AC-F33). Null when the log or its job is gone, or the
+ * file could not be written.
+ */
+class LogPdfMaker(private val context: Context, private val db: HomeRecordDatabase) {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    suspend fun make(log: DailyLog): LogPdfFile? = withContext(Dispatchers.IO) {
+        val job = db.jobDao().get(log.jobId) ?: return@withContext null
+        val company = db.companyDao().get(job.companyId)
+        val client = job.clientId?.let { db.clientDao().get(it) }
+        // the full photo when it is on this phone, else its thumbnail; neither means it is still on another phone
+        val photos = db.photoDao().observeForJob(job.id).first().associate { p ->
+            p.id to (p.path.takeIf { it.isNotBlank() && File(it).exists() } ?: p.thumbPath?.takeIf { File(it).exists() }.orEmpty())
+        }
+        val res = context.resources
+        val content = LogPdfContentBuilder.build(res, company, job, client, log, photos)
+        val writer = AndroidLogPdfWriter({ n, m -> res.getString(R.string.log_pdf_page, n, m) })
+        val dir = File(context.cacheDir, "logs").apply { mkdirs() }
+        val file = File(dir, fileName(job.name, log.day.toString()))
+        val ok = runCatching { file.outputStream().use { writer.write(content, it) } }.isSuccess
+        if (!ok) {
+            file.delete()
+            return@withContext null
+        }
+        val office = runCatching { json.decodeFromString<List<String>>(job.officeEmailsJson) }.getOrDefault(emptyList())
+        LogPdfFile(file, LogRecipients.of(client?.email, office), res.getString(R.string.log_pdf_subject, job.name, content.title))
+    }
+
+    companion object {
+        /** "Daily log Hale kitchen 2026-10-30.pdf", with characters a file name cannot hold dropped. */
+        fun fileName(job: String, day: String): String {
+            val safe = job.replace(Regex("""[\\/:*?"<>|\n\r\t]"""), " ").replace(Regex("\\s+"), " ").trim().take(60)
+            return "Daily log ${safe.ifEmpty { "job" }} $day.pdf"
+        }
+    }
+}

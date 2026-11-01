@@ -207,4 +207,29 @@ class DailyLogRepositoryTest {
         assertThat(logs.map { it.jobId to it.day }).containsExactly("j1" to day, "j2" to day.minusDays(2))
         assertThat(logs.single { it.jobId == "j1" }.sections.delays.map { it.note }).containsExactly("Rain")
     }
+
+    @AcceptanceCriterion("AC-F33")
+    @Test fun markSentRecordsTimeRecipientsAndPdfAndASecondSendReplacesThem() = runBlocking<Unit> {
+        val id = checkNotNull(repo.assemble("j1", day)).log.id
+        assertThat(repo.observe("j1", day).first()?.sent).isFalse()
+        changes.clear()
+        clock = at(17, 45)
+        val sent = checkNotNull(repo.markSent(id, listOf("dana@halehome.com", "office@ortizbuild.com"), "/cache/logs/a.pdf"))
+        assertThat(sent.sent).isTrue()
+        assertThat(sent.sentAt).isEqualTo(at(17, 45))
+        assertThat(sent.recipients).containsExactly("dana@halehome.com", "office@ortizbuild.com").inOrder()
+        assertThat(sent.pdfPath).isEqualTo("/cache/logs/a.pdf")
+        assertThat(changes).containsExactly("daily_log" to id)
+        // re-send through the share sheet: the latest send wins
+        clock = at(18, 10)
+        repo.markSent(id, emptyList(), "/cache/logs/b.pdf")
+        val again = checkNotNull(repo.observe("j1", day).first())
+        assertThat(again.sentAt).isEqualTo(at(18, 10))
+        assertThat(again.recipients).isEmpty()
+        assertThat(again.pdfPath).isEqualTo("/cache/logs/b.pdf")
+        // editing after the send keeps it marked sent; re-assembling does too
+        repo.update(id) { it.copy(safety = "Hard hats on") }
+        assertThat(checkNotNull(repo.assemble("j1", day)).log.sent).isTrue()
+        assertThat(repo.markSent("missing", emptyList(), "/x.pdf")).isNull()
+    }
 }
