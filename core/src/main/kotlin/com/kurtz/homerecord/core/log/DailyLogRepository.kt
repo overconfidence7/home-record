@@ -48,6 +48,9 @@ enum class WeatherStatus {
 
     /** The day is further ahead than any forecast. */
     NotYet,
+
+    /** The lookup worked but Open-Meteo has no values for the day: "No weather recorded.", not offline. */
+    NoData,
 }
 
 /** A job's log for one day as the screen reads it. */
@@ -74,7 +77,8 @@ data class AssembleResult(val log: DailyLog, val weather: WeatherStatus)
  * leaving two logs. Every save goes to Room first and queues for sync through [onChange] (AC-F52).
  *
  * The weather snapshot is kept on the row: it is fetched when there is none, or when the one kept is older than
- * [WEATHER_REFRESH_MS] and was taken before the day ended (a snapshot taken after the day is over is final). When the
+ * [WEATHER_REFRESH_MS] and was taken before the day ended (a snapshot the backend fetched after the day is over is
+ * final; its [LogWeather.fetchedAt] is the backend's fetch time, so a cached evening forecast is not). When the
  * fetch fails the kept snapshot stays; with none, the status is [WeatherStatus.Offline].
  */
 class DailyLogRepository(
@@ -191,7 +195,7 @@ class DailyLogRepository(
         val due = snapshot == null || (snapshot.fetchedAt < dayEnd && now() - snapshot.fetchedAt >= WEATHER_REFRESH_MS)
         if (!due) return null to WeatherStatus.Shown
         return when (val r = weatherApi.day(lat, lng, day.toString())) {
-            is ApiResult.Ok -> r.value to WeatherStatus.Shown
+            is ApiResult.Ok -> r.value?.let { it to WeatherStatus.Shown } ?: (null to WeatherStatus.NoData)
             is ApiResult.Err -> null to if (r.failure == ApiFailure.NotFound) WeatherStatus.NotYet else WeatherStatus.Offline
         }
     }

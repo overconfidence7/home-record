@@ -498,7 +498,7 @@ private fun LazyListScope.weather(state: LogUiState, onEvent: (LogEvent) -> Unit
                 WeatherStatus.NoLocation -> R.string.log_weather_no_location
                 WeatherStatus.NotYet -> R.string.log_weather_not_yet
                 WeatherStatus.Offline -> R.string.log_weather_offline
-                else -> R.string.log_weather_none
+                WeatherStatus.NoData, WeatherStatus.Shown, null -> R.string.log_weather_none
             }
             Line(Icons.Rounded.CloudOff, stringResource(text), modifier = Modifier.testTag("fl_log_weather_none"))
         }

@@ -46,8 +46,22 @@ class RetrofitWeatherApiTest {
     @Test fun missingValuesStayMissing() = runTest {
         val r = api(body = """{"date":"2026-10-30","highF":null,"lowF":null,"precipIn":null,"code":null,"conditions":"unknown"}""")
             .day(40.0, -75.0, "2026-10-30") as ApiResult.Ok
-        assertThat(r.value.highF).isNull()
-        assertThat(r.value.conditions).isEqualTo("unknown")
+        assertThat(r.value?.highF).isNull()
+        assertThat(r.value?.conditions).isEqualTo("unknown")
+    }
+
+    @AcceptanceCriterion("AC-F31")
+    @Test fun theSnapshotCarriesTheBackendsFetchTimeNotThePhones() = runTest {
+        val r = api(body = """{"date":"2026-10-30","highF":57,"lowF":41,"conditions":"rain","fetchedAt":1793397600000,"cached":true}""")
+            .day(40.0, -75.0, "2026-10-30") as ApiResult.Ok
+        assertThat(r.value?.fetchedAt).isEqualTo(1_793_397_600_000L)
+    }
+
+    @AcceptanceCriterion("AC-F31")
+    @Test fun anEmptyDayIsOkWithNoSnapshot() = runTest {
+        val r = api(body = """{"date":"2026-10-30","empty":true,"fetchedAt":1793397600000,"cached":false}""")
+            .day(40.0, -75.0, "2026-10-30")
+        assertThat(r).isEqualTo(ApiResult.Ok(null))
     }
 
     @AcceptanceCriterion("AC-F31")

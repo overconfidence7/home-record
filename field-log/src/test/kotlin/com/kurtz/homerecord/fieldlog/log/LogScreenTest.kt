@@ -70,6 +70,15 @@ class LogScreenTest {
         rule.onNodeWithTag("fl_log_next").assertIsNotEnabled()
     }
 
+    /** R09c: a day Open-Meteo has no values for is not the phone being offline. */
+    @AcceptanceCriterion("AC-F31")
+    @Test fun aDayWithNoWeatherDataSaysNoWeatherNotOffline() {
+        show(ready.copy(weatherStatus = WeatherStatus.NoData))
+        rule.onNodeWithTag("fl_log_list").performScrollToNode(hasTestTag("fl_log_weather_none"))
+        rule.onNodeWithText("No weather recorded.").assertExists()
+        rule.onNodeWithText("No weather (offline)").assertDoesNotExist()
+    }
+
     /** QA auto c1240620: the section pencils measured 40 dp when scrolled out of view; they are 48 dp buttons now. */
     @AcceptanceCriterion("AC-F30")
     @Test fun sectionEditButtonsAreFullTouchTargets() {

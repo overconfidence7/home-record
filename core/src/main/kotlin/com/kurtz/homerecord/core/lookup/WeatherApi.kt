@@ -14,10 +14,11 @@ import retrofit2.http.Query
 
 /**
  * The day's weather at a job from the backend's Open-Meteo proxy (AC-F31, AC-B32). Offline when there is no network;
- * NotFound when the day is too far ahead for a forecast; Failed when the upstream lookup failed (502).
+ * NotFound when the day is too far ahead for a forecast; Failed when the upstream lookup failed (502); `Ok(null)` when
+ * Open-Meteo answered with no values for the day. A snapshot's [LogWeather.fetchedAt] is the backend's fetch time.
  */
 fun interface WeatherApi {
-    suspend fun day(lat: Double, lng: Double, date: String): ApiResult<LogWeather>
+    suspend fun day(lat: Double, lng: Double, date: String): ApiResult<LogWeather?>
 }
 
 @Serializable
@@ -27,6 +28,9 @@ internal data class WeatherBody(
     val lowF: Double? = null,
     val precipIn: Double? = null,
     val conditions: String = "unknown",
+    /** When the Worker fetched the day; a cached answer keeps its first fetch time. Older Workers send none. */
+    val fetchedAt: Long? = null,
+    val empty: Boolean = false,
 )
 
 internal interface WeatherService {
@@ -37,14 +41,17 @@ class RetrofitWeatherApi internal constructor(
     private val service: WeatherService,
     private val now: () -> Long,
 ) : WeatherApi {
-    override suspend fun day(lat: Double, lng: Double, date: String): ApiResult<LogWeather> = apiCall {
+    override suspend fun day(lat: Double, lng: Double, date: String): ApiResult<LogWeather?> = apiCall {
         val r = service.weather(lat, lng, date)
+        if (r.empty) return@apiCall null
         LogWeather(
             highF = r.highF?.let { Math.round(it).toInt() },
             lowF = r.lowF?.let { Math.round(it).toInt() },
             precipIn = r.precipIn,
             conditions = r.conditions.ifBlank { "unknown" },
-            fetchedAt = now(),
+            // the backend's time, not the phone's: the Worker cache can hand back the evening forecast after
+            // midnight, and that snapshot must not count as taken once the day was over
+            fetchedAt = r.fetchedAt?.takeIf { it > 0 } ?: now(),
         )
     }
 

@@ -40,7 +40,9 @@ class DailyLogRepositoryTest {
     private var clock = at(17)
     private val changes = mutableListOf<Pair<String, String>>()
     private val weatherCalls = mutableListOf<String>()
-    private var weather: ApiResult<LogWeather> = ApiResult.Ok(LogWeather(highF = 58, lowF = 41, precipIn = 0.12, conditions = "rain"))
+    private var weather: ApiResult<LogWeather?> = ApiResult.Ok(LogWeather(highF = 58, lowF = 41, precipIn = 0.12, conditions = "rain"))
+    /** When the backend fetched the snapshot it hands back; null stamps it with the phone's clock. */
+    private var fetchedByBackend: Long? = null
 
     @Before fun setUp() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
@@ -49,7 +51,7 @@ class DailyLogRepositoryTest {
             db,
             weatherApi = { lat, lng, date ->
                 weatherCalls += "$lat,$lng,$date"
-                when (val w = weather) { is ApiResult.Ok -> ApiResult.Ok(w.value.copy(fetchedAt = clock)); is ApiResult.Err -> w }
+                when (val w = weather) { is ApiResult.Ok -> ApiResult.Ok(w.value?.copy(fetchedAt = fetchedByBackend ?: clock)); is ApiResult.Err -> w }
             },
             now = { clock }, zone = { zone }, onChange = { e, id -> changes += e to id },
         )
@@ -136,6 +138,41 @@ class DailyLogRepositoryTest {
         clock = at(9, d = day.plusDays(3))
         repo.assemble("j1", day)
         assertThat(weatherCalls).hasSize(1)
+    }
+
+    @AcceptanceCriterion("AC-F31")
+    @Test fun aCachedEveningForecastHandedOutAfterMidnightIsNotFinal() = runBlocking<Unit> {
+        // the Worker fetched the forecast at 20:00 and its cache hands it out at 00:30: the day's real values come later
+        fetchedByBackend = at(20)
+        clock = at(0, 30, d = day.plusDays(1))
+        repo.assemble("j1", day)
+        assertThat(weatherCalls).hasSize(1)
+        // once the cache has turned over, the next open fetches the day again and that snapshot is final
+        fetchedByBackend = at(9, d = day.plusDays(1))
+        weather = ApiResult.Ok(LogWeather(highF = 55, lowF = 40, precipIn = 0.4, conditions = "showers"))
+        clock = at(9, d = day.plusDays(1))
+        val later = checkNotNull(repo.assemble("j1", day))
+        assertThat(weatherCalls).hasSize(2)
+        assertThat(later.log.sections.weather.value?.conditions).isEqualTo("showers")
+        clock = at(9, d = day.plusDays(4))
+        repo.assemble("j1", day)
+        assertThat(weatherCalls).hasSize(2)
+    }
+
+    @AcceptanceCriterion("AC-F31")
+    @Test fun aDayOpenMeteoHasNoValuesForSaysNoWeatherNotOffline() = runBlocking<Unit> {
+        weather = ApiResult.Ok(null)
+        val result = checkNotNull(repo.assemble("j1", day))
+        assertThat(result.weather).isEqualTo(WeatherStatus.NoData)
+        assertThat(result.log.sections.weather.value).isNull()
+        // a snapshot kept from earlier stays when a later lookup comes back empty
+        weather = ApiResult.Ok(LogWeather(highF = 60, lowF = 45, conditions = "clear"))
+        repo.assemble("j1", day)
+        weather = ApiResult.Ok(null)
+        clock = at(23)
+        val kept = checkNotNull(repo.assemble("j1", day))
+        assertThat(kept.weather).isEqualTo(WeatherStatus.Shown)
+        assertThat(kept.log.sections.weather.value?.highF).isEqualTo(60)
     }
 
     @AcceptanceCriterion("AC-F31")

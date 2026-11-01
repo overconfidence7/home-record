@@ -131,7 +131,9 @@ lookup.get("/recalls", async (c) => {
 });
 
 /** AC-B32: Open-Meteo daily weather (no key) for a job's location and day, cached 6 h. Free, so it takes no quota.
- * 404 when the day is too far ahead for a forecast; 502 when Open-Meteo fails (the app then shows "No weather"). */
+ * 404 when the day is too far ahead for a forecast; 502 when Open-Meteo fails (the app then shows "No weather (offline)");
+ * 200 with `empty: true` when Open-Meteo answers with no values for the day (the app shows "No weather recorded").
+ * Every answer carries `fetchedAt`, the time this Worker fetched it, which a cache hit keeps. */
 lookup.get("/weather", async (c) => {
   const parsed = weatherQuerySchema.safeParse({ lat: c.req.query("lat"), lng: c.req.query("lng"), date: c.req.query("date") });
   if (!parsed.success) return c.json({ error: "bad_request" }, 400);
@@ -144,8 +146,9 @@ lookup.get("/weather", async (c) => {
       return c.json({ ...JSON.parse(hit), cached: true });
     } catch { /* corrupt entry: refetch */ }
   }
-  const weather = await fetchWeather(lat, lng, date);
-  if (!weather) return c.json({ error: "lookup_failed" }, 502);
-  await c.env.CACHE.put(key, JSON.stringify(weather), { expirationTtl: WEATHER_CACHE_SECONDS });
-  return c.json({ ...weather, cached: false });
+  const found = await fetchWeather(lat, lng, date);
+  if (found.kind === "failed") return c.json({ error: "lookup_failed" }, 502);
+  const body = found.kind === "day" ? found.weather : found.day;
+  await c.env.CACHE.put(key, JSON.stringify(body), { expirationTtl: WEATHER_CACHE_SECONDS });
+  return c.json({ ...body, cached: false });
 });

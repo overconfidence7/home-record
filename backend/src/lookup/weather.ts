@@ -28,7 +28,19 @@ export interface DayWeather {
   precipIn: number | null;
   code: number | null;
   conditions: Conditions;
+  /** When this Worker fetched the day from Open-Meteo (epoch ms); a cached answer keeps its first fetch time, so the
+   * app can tell an evening forecast handed out after midnight from a snapshot taken once the day was over. */
+  fetchedAt: number;
 }
+
+/** Open-Meteo answered but has no values for the day (an archive day not filled in yet, a cell with no data). */
+export interface EmptyDay {
+  date: string;
+  empty: true;
+  fetchedAt: number;
+}
+
+export type WeatherLookup = { kind: "day"; weather: DayWeather } | { kind: "empty"; day: EmptyDay } | { kind: "failed" };
 
 /** WMO weather interpretation codes as Open-Meteo documents them. */
 export function conditionsFor(code: number | null): Conditions {
@@ -85,7 +97,7 @@ const num = (v: unknown): number | null => (typeof v === "number" && Number.isFi
 const round1 = (v: number | null) => (v === null ? null : Math.round(v * 10) / 10);
 
 /** Picks the requested day out of an Open-Meteo daily answer; null when the day is missing. */
-export function parseDaily(raw: OpenMeteoDaily, date: string): DayWeather | null {
+export function parseDaily(raw: OpenMeteoDaily, date: string, fetchedAt = Date.now()): DayWeather | null {
   const d = raw.daily;
   const i = d?.time?.indexOf(date) ?? -1;
   if (!d || i < 0) return null;
@@ -100,16 +112,20 @@ export function parseDaily(raw: OpenMeteoDaily, date: string): DayWeather | null
     precipIn: round1(num(d.precipitation_sum?.[i])),
     code,
     conditions: conditionsFor(code),
+    fetchedAt,
   };
 }
 
+/** A failed upstream call is `failed` (the app says offline); an answer with no values for the day is `empty`. */
 export async function fetchWeather(
   lat: number, lng: number, date: string, fetchFn: typeof fetch = fetch, now = Date.now(),
-): Promise<DayWeather | null> {
+): Promise<WeatherLookup> {
   const url = weatherUrl(lat, lng, date, now);
-  if (!url) return null;
-  const res = await fetchFn(url);
-  if (!res.ok) return null;
+  if (!url) return { kind: "failed" };
+  const res = await fetchFn(url).catch(() => null);
+  if (!res || !res.ok) return { kind: "failed" };
   const raw = (await res.json().catch(() => null)) as OpenMeteoDaily | null;
-  return raw ? parseDaily(raw, date) : null;
+  if (!raw || typeof raw !== "object") return { kind: "failed" };
+  const weather = parseDaily(raw, date, now);
+  return weather ? { kind: "day", weather } : { kind: "empty", day: { date, empty: true, fetchedAt: now } };
 }

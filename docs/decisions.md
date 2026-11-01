@@ -458,3 +458,12 @@ writer wins, as every other field does. The old `sectionsJson` stays as a read f
 saved before v7); it is no longer written. No backend change: the Worker stores rows as JSON and merges any field.
 Chosen over a per-section merge rule inside one JSON value, which would need matching special cases in the Worker and
 `RowMerge`.
+
+## 2026-11-01 — Weather snapshots carry the Worker's fetch time; empty days are not "offline" (R09c)
+
+`GET /weather` now returns `fetchedAt` (when the Worker fetched the day from Open-Meteo; a KV cache hit keeps it) and,
+when Open-Meteo answers with no values for the day, `200 {date, empty: true, fetchedAt}` instead of a 502. The app
+stamps the snapshot with that time (falling back to the phone's clock for an older Worker), so a cached evening forecast
+handed out after midnight is not treated as the day's final weather; an empty day shows "No weather recorded." through
+the new `WeatherStatus.NoData`. A thrown upstream fetch is a 502 like a failed one. Empty answers are cached for the
+same 6 h so a cell with no data does not call Open-Meteo on every open.

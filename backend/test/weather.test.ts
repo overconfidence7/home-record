@@ -43,7 +43,7 @@ describe("AC-B32 GET /weather", () => {
     const res = await get(t, `lat=40.0583&lng=-75.4001&date=${today}`);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
-      date: today, highF: 62, lowF: 44, precipIn: 0.2, code: 63, conditions: "rain", cached: false,
+      date: today, highF: 62, lowF: 44, precipIn: 0.2, code: 63, conditions: "rain", cached: false, fetchedAt: expect.any(Number),
     });
     const url = new URL(upstream.mock.calls[0][0] as string);
     expect(url.host).toBe("api.open-meteo.com");
@@ -70,6 +70,37 @@ describe("AC-B32 GET /weather", () => {
     expect((await get(t, `lat=41.1&lng=-74.1&date=${today}`)).status).toBe(502);
     expect(await env.CACHE.get(weatherCacheKey(41.1, -74.1, today))).toBeNull();
     expect((await get(t, `lat=41.1&lng=-74.1&date=${today}`)).status).toBe(200);
+  });
+
+  it("a cache hit keeps the time the Worker first fetched the day, not the time it is handed out", async () => {
+    const t = await seedUser("wx5", "wx5@example.com");
+    const first = Date.parse("2026-10-30T22:00:00Z");
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(first);
+      const a = (await (await get(t, `lat=40.2&lng=-75.2&date=${"2026-10-30"}`)).json()) as { fetchedAt: number; cached: boolean };
+      expect(a).toMatchObject({ fetchedAt: first, cached: false });
+      // after midnight the evening forecast still comes back from the cache, stamped with its evening fetch time
+      vi.setSystemTime(Date.parse("2026-10-31T02:30:00Z"));
+      const b = (await (await get(t, `lat=40.2&lng=-75.2&date=${"2026-10-30"}`)).json()) as { fetchedAt: number; cached: boolean };
+      expect(b).toMatchObject({ fetchedAt: first, cached: true });
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(upstream).toHaveBeenCalledTimes(1);
+  });
+
+  it("answers an empty day, not a failure, when Open-Meteo has no values for it", async () => {
+    const t = await seedUser("wx6", "wx6@example.com");
+    upstream.mockResolvedValueOnce(new Response(JSON.stringify({
+      daily: { time: [today], temperature_2m_max: [null], temperature_2m_min: [null], precipitation_sum: [null], weather_code: [null] },
+    }), { status: 200 }));
+    const res = await get(t, `lat=42.5&lng=-73.5&date=${today}`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ date: today, empty: true, fetchedAt: expect.any(Number), cached: false });
+    // a thrown upstream call is still a failure
+    upstream.mockRejectedValueOnce(new Error("network"));
+    expect((await get(t, `lat=42.6&lng=-73.6&date=${today}`)).status).toBe(502);
   });
 
   it("answers 404 for a day too far ahead for a forecast", async () => {
