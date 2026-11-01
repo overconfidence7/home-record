@@ -6,6 +6,7 @@ import { company } from "./routes/company";
 import { lookup, pruneLookupQuota } from "./routes/lookup";
 import { media, removeOrphanedMedia } from "./routes/media";
 import { pruneLimits } from "./auth/rateLimit";
+import { prunePushLog } from "./push/notify";
 import { me } from "./routes/me";
 import { pruneSync, sync } from "./routes/sync";
 import { tenants } from "./routes/tenants";
@@ -36,5 +37,6 @@ export default Object.assign(app, {
     ctx.waitUntil(pruneLimits(env.DB));
     ctx.waitUntil(pruneSync(env.DB));
     ctx.waitUntil(pruneLookupQuota(env.DB));
+    ctx.waitUntil(prunePushLog(env.DB));
   },
 });

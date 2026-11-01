@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import type { AppEnv } from "../env";
 import { requireSession } from "../tenancy";
 import { DEFAULT_SETTINGS } from "./company";
@@ -38,4 +39,30 @@ me.get("/", async (c) => {
     });
   }
   return c.json({ user, memberships });
+});
+
+const TokenBody = z.object({ token: z.string().min(1).max(4096), app: z.enum(["field-log", "house-manual"]) });
+
+/**
+ * Registers this phone's FCM token for the caller (AC-B30). A token signed in to another account before moves to
+ * this one, so a shared phone only hears about the account signed in on it now.
+ */
+me.put("/push-token", async (c) => {
+  const parsed = TokenBody.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return c.json({ error: "invalid" }, 400);
+  await c.env.DB.prepare(
+    `INSERT INTO push_tokens (token, user_id, app, updated_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT (token) DO UPDATE SET user_id = excluded.user_id, app = excluded.app, updated_at = excluded.updated_at`,
+  )
+    .bind(parsed.data.token, c.get("session").userId, parsed.data.app, Date.now())
+    .run();
+  return c.body(null, 204);
+});
+
+/** Forgets this phone's token on sign out; only the caller's own token can be removed. */
+me.delete("/push-token", async (c) => {
+  const parsed = z.object({ token: z.string().min(1).max(4096) }).safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return c.json({ error: "invalid" }, 400);
+  await c.env.DB.prepare("DELETE FROM push_tokens WHERE token = ? AND user_id = ?").bind(parsed.data.token, c.get("session").userId).run();
+  return c.body(null, 204);
 });

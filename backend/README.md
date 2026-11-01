@@ -27,7 +27,7 @@ npm run dev   # wrangler dev with ENVIRONMENT=dev (/dev/* helpers on, sign-in li
 | `R2_ACCESS_KEY_ID` | presigned media URLs: an R2 API token scoped to `homerecord-media` |
 | `R2_SECRET_ACCESS_KEY` | presigned media URLs: that token's secret |
 | `CLAUDE_API_KEY` | warranty and data-plate lookup (T025) |
-| `FCM_SERVICE_ACCOUNT` | push delivery (T047) |
+| `FCM_SERVICE_ACCOUNT` | push delivery (T047): the whole service-account JSON key of the Firebase project (role Firebase Cloud Messaging API Admin); without it nothing is sent and pushes are only logged |
 | `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064) |
 
 For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<a random string of at least 32 bytes>` and `ENVIRONMENT=dev`; without the secret (or with a shorter one) sign-in answers 500, and without `ENVIRONMENT=dev` a plain `npx wrangler dev` runs as production (no `/dev/last-code` for the QA flows). The QA workflow writes both itself.
@@ -54,3 +54,10 @@ One bucket, `homerecord-media`: the `MEDIA` binding in `wrangler.toml` (the orph
 ## Tenancy
 
 Every row belongs to a company (Field Log) or a home (House Manual). `requireSession` loads the caller's memberships; tenant routes use `requireTenant()`, which answers 404 for any tenant the caller is not in, so other tenants are indistinguishable from missing ones.
+
+## Push notifications (AC-B30)
+
+- `PUT /me/push-token` `{token, app: "field-log" | "house-manual"}` registers a phone's FCM token for the caller (204); a token already on another account moves to the caller. `DELETE /me/push-token` `{token}` removes the caller's own token. `POST /auth/revoke` drops all of the account's tokens.
+- An accepted company sync op can trigger a push (`src/push/events.ts`): a task assigned to someone (to the assignee), an assignment on today or tomorrow added, removed or moved (to the member, in the company's `settings.timeZone`, Eastern by default), a change order turning `SIGNED` (to Owner and Office), a timesheet approval (to the member). The pusher is never notified, and a recipient must still be a member.
+- Delivery is FCM HTTP v1, data-only (`type`, `companyId`, ids, `jobName`, `title`), high priority, 24 h TTL, to every Field Log token of the recipient, after the push has answered. A token FCM reports unregistered is deleted.
+- Each notification is logged in `push_log` (migration 0011, pruned after 30 days by the daily cron) with the number of phones FCM accepted. In dev, `GET /dev/pushes` lists the newest 50.

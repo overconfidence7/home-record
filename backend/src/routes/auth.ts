@@ -82,7 +82,12 @@ auth.post("/google", async (c) => {
 
 /** Signs out every phone of the caller: bumps token_version, so all earlier tokens answer 401 (cr:session-revoke). */
 auth.post("/revoke", requireSession, async (c) => {
-  await c.env.DB.prepare("UPDATE users SET token_version = token_version + 1 WHERE id = ?").bind(c.get("session").userId).run();
+  const userId = c.get("session").userId;
+  // Signed out everywhere, so no phone of this account should still get its pushes (AC-B30).
+  await c.env.DB.batch([
+    c.env.DB.prepare("UPDATE users SET token_version = token_version + 1 WHERE id = ?").bind(userId),
+    c.env.DB.prepare("DELETE FROM push_tokens WHERE user_id = ?").bind(userId),
+  ]);
   c.set("sessionEnded", true);
   return c.body(null, 204);
 });

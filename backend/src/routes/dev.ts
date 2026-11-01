@@ -21,6 +21,15 @@ dev.get("/last-code", async (c) => {
   return code ? c.json({ code }) : c.json({ error: "not_found" }, 404);
 });
 
+/** The newest notifications the Worker sent (or would have, without FCM), for flows that check a push went out. */
+dev.get("/pushes", async (c) => {
+  const { results } = await c.env.DB.prepare("SELECT user_id, type, data_json, delivered, at FROM push_log ORDER BY id DESC LIMIT 50")
+    .all<{ user_id: string; type: string; data_json: string; delivered: number; at: number }>();
+  return c.json({
+    pushes: results.map((r) => ({ userId: r.user_id, type: r.type, data: JSON.parse(r.data_json), delivered: r.delivered, at: r.at })),
+  });
+});
+
 dev.post("/reset", async (c) => {
   await resetAll(c.env);
   return c.json({ ok: true });
@@ -48,7 +57,7 @@ dev.post("/seed", async (c) => {
 
 async function resetAll(env: AppEnv["Bindings"]) {
   const tables = [
-    "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
+    "push_tokens", "push_log", "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
     "memberships", "email_codes", "auth_limits", "media_objects", "lookup_log", "lookup_quota", "companies", "homes", "users",
   ];
   await env.DB.batch(tables.map((t) => env.DB.prepare(`DELETE FROM ${t}`)));

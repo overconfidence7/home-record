@@ -4,6 +4,8 @@ import { z } from "zod";
 import type { AppEnv, TenantKind } from "../env";
 import { membershipFor, requireSession, requireTenant } from "../tenancy";
 import { mergeRow, type FieldTimes, type Row } from "../sync/merge";
+import { companyDays, pushEventsFor, type CompanyDays, type PushEvent } from "../push/events";
+import { deliver } from "../push/notify";
 import { ADMIN_ROLES, accessFor, canPush, visibleRow, visibleTimes, type Access } from "../sync/policy";
 
 export const sync = new Hono<AppEnv>();
@@ -52,7 +54,7 @@ const PushBody = z.object({
 
 type PushOp = z.infer<typeof PushBody>["ops"][number];
 type Applied =
-  | { result: "accepted"; seq: number; conflicts: ReturnType<typeof mergeRow>["conflicts"] }
+  | { result: "accepted"; seq: number; conflicts: ReturnType<typeof mergeRow>["conflicts"]; change?: { before: Row | null; after: Row } }
   | { result: "role" }
   | { result: "busy" };
 const TRIES = 10;
@@ -128,7 +130,7 @@ async function applyOp(
       ).bind(...key, JSON.stringify(merged.row), JSON.stringify(merged.times), pin),
     ]);
     const bumped = (results[2].results as { seq: number }[])[0];
-    if (bumped) return { result: "accepted", seq: bumped.seq, conflicts: merged.conflicts };
+    if (bumped) return { result: "accepted", seq: bumped.seq, conflicts: merged.conflicts, change: { before: storedRow, after: merged.row } };
   }
   return { result: "busy" };
 }
@@ -153,6 +155,8 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const userId = c.get("session").userId;
   const access = kind === "company" ? await accessFor(db, tenantId, userId, role) : OPEN_ACCESS(userId);
 
+  const events: PushEvent[] = [];
+  let days: CompanyDays | undefined;
   for (const op of ops) {
     if (!ENTITIES[kind].has(op.entity)) {
       rejected.push({ outboxId: op.outboxId, reason: "entity" });
@@ -178,11 +182,36 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
     }
     // Lost the race on this row every try: stop here so later ops keep their order; the phone retries the rest.
     if (outcome.result === "busy") break;
+    if (kind === "company" && outcome.change) {
+      days ??= await daysFor(db, tenantId);
+      events.push(...pushEventsFor(op.entity, outcome.change.before, outcome.change.after, userId, days));
+    }
     for (const x of outcome.conflicts) conflicts.push({ entity: op.entity, entityId: op.entityId, field: x.field, reason: x.reason });
     accepted.push({ outboxId: op.outboxId, serverSeq: outcome.seq });
   }
+  if (events.length > 0) {
+    // AC-B30: the phone gets its answer without waiting for FCM; tests (no execution context) wait for delivery.
+    const sending = deliver(c.env, tenantId, userId, events).catch((e) => console.error(e));
+    try {
+      c.executionCtx.waitUntil(sending);
+    } catch {
+      await sending;
+    }
+  }
   return c.json({ accepted, conflicts, rejected });
 });
+
+/** The company's today and tomorrow, in `settings.timeZone` (Eastern when unset), for schedule pushes. */
+async function daysFor(db: D1Database, companyId: string): Promise<CompanyDays> {
+  const row = await db.prepare("SELECT settings FROM companies WHERE id = ?").bind(companyId).first<{ settings: string | null }>();
+  let zone: string | undefined;
+  try {
+    zone = (JSON.parse(row?.settings ?? "{}") as { timeZone?: string }).timeZone;
+  } catch {
+    zone = undefined;
+  }
+  return companyDays(Date.now(), zone);
+}
 
 sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireTenant(), async (c) => {
   const kind = kindOf(c.req.param("kind"));
