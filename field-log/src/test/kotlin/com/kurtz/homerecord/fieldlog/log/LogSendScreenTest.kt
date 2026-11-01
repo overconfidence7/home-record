@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.fieldlog.log
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -49,6 +51,24 @@ class LogSendScreenTest {
         rule.onNodeWithTag("fl_log_sent").assertExists()
         rule.onNodeWithText("To jen.hale@example.com, office@ortizbuild.com").assertExists()
         rule.onNodeWithText("Send again").assertExists()
+    }
+
+    /**
+     * QA F09b on c5543600: the Sent line arrived as a new first row while the list sat at its top, and the list kept
+     * "Crew on site" as its first row, so the line was above the viewport and the log still looked unsent.
+     */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun theSentLineScrollsIntoViewWhenTheLogIsMarkedSentWhileOpen() {
+        val state = mutableStateOf(ready)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { LogScreen(state.value, {}, zone = ZoneOffset.UTC) }
+        }
+        rule.onNodeWithTag("fl_log_sent").assertDoesNotExist()
+        state.value = ready.copy(sentAt = day.atTime(16, 10).toInstant(ZoneOffset.UTC).toEpochMilli())
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_log_sent").assertIsDisplayed()
+        rule.onNodeWithText("Through the share sheet").assertIsDisplayed()
+        rule.onNodeWithText("Send again").assertIsDisplayed()
     }
 
     @AcceptanceCriterion("AC-F33")

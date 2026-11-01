@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -173,7 +174,13 @@ private fun DayBar(state: LogUiState, onEvent: (LogEvent) -> Unit) {
 
 @Composable
 private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneId) {
-    LazyColumn(Modifier.fillMaxSize().testTag("fl_log_list"), contentPadding = PaddingValues(bottom = 24.dp)) {
+    val list = rememberLazyListState()
+    // The Sent line is a new first row. A lazy list keeps its first visible row by key, so a send while the list sits
+    // at the top would leave the line just above the viewport; bring it into view when the log has just been sent.
+    LaunchedEffect(state.sentAt) {
+        if (state.sentAt != null && list.firstVisibleItemIndex <= 1) list.scrollToItem(0)
+    }
+    LazyColumn(Modifier.fillMaxSize().testTag("fl_log_list"), state = list, contentPadding = PaddingValues(bottom = 24.dp)) {
         state.sentAt?.let { sent ->
             item(key = "sent") {
                 val time = Instant.ofEpochMilli(sent).atZone(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
