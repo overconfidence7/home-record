@@ -131,6 +131,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenTimesheets = { nav.push(TimesheetsKey) },
                     onOpenReports = { nav.push(ReportsKey) },
                     onOpenCompany = { nav.push(CompanyKey) },
+                    onOpenSync = { nav.push(SyncLogKey) },
                     onSignOut = container::signOut,
                 )
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
@@ -265,6 +266,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 { container.reportsDeps(membership) }, onBack = nav::pop,
                 onOpenLog = { jobId, day -> nav.push(JobKey(jobId, com.kurtz.homerecord.fieldlog.jobs.JobTab.LOG.name, day.toString())) },
             )
+        }
+        entry<SyncLogKey> {
+            com.kurtz.homerecord.fieldlog.sync.SyncLogRoute({ container.syncLogDeps() }, onBack = nav::pop)
         }
         entry<CompanyKey> {
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)

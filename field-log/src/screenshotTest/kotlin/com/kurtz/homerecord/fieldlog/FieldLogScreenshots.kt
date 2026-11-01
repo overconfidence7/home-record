@@ -626,3 +626,23 @@ fun TaskPinPickerScreenshot() = TaskPinPickerPreview()
 @ThemePreviews
 @Composable
 fun TaskPinPickerEmptyScreenshot() = TaskPinPickerEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SyncLogUpToDateScreenshot() = SyncLogUpToDatePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SyncLogConflictsScreenshot() = SyncLogConflictsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SyncLogOfflineScreenshot() = SyncLogOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SyncLogLoadingScreenshot() = SyncLogLoadingPreview()

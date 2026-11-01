@@ -8,12 +8,14 @@ import com.kurtz.homerecord.core.data.SyncBaseDao
 import com.kurtz.homerecord.core.data.SyncBaseEntity
 import com.kurtz.homerecord.core.data.SyncCursorDao
 import com.kurtz.homerecord.core.data.SyncCursorEntity
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.longOrNull
@@ -38,6 +40,8 @@ class SyncEngine(
     private val now: () -> Long = System::currentTimeMillis,
     /** Runs before each pass; House Manual registers its offline-made home here (AC-H15). An error ends the pass. */
     private val prepare: suspend (TenantRef) -> ApiResult<Unit> = { ApiResult.Ok(Unit) },
+    /** Where each pass's conflicts are kept for FL-Sync (AC-F53); null keeps none. */
+    private val conflictLog: SyncConflictLog? = null,
 ) {
     private val lock = Mutex()
     private val _phase = MutableStateFlow(SyncPhase.Idle)
@@ -90,12 +94,29 @@ class SyncEngine(
     }
 
     suspend fun sync(tenant: TenantRef): ApiResult<SyncResult> = lock.withLock {
+        val conflicts = mutableListOf<ConflictNote>()
+        try {
+            pass(tenant, conflicts)
+        } finally {
+            // Whatever the pass learned is logged even when it then failed or was cancelled (AC-F53).
+            if (conflicts.isNotEmpty() && conflictLog != null) {
+                withContext(NonCancellable) {
+                    try {
+                        conflictLog.record(tenant, conflicts, now())
+                    } catch (e: Exception) {
+                        // The log is a courtesy; a write failure here must not undo a pass that synced.
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun pass(tenant: TenantRef, conflicts: MutableList<ConflictNote>): ApiResult<SyncResult> {
         _phase.value = SyncPhase.Syncing
         var pushed = 0
         var pulled = 0
-        val conflicts = mutableListOf<ConflictNote>()
-        try {
-            prepare(tenant).let { if (it is ApiResult.Err) return@withLock fail(it.failure) }
+        return try {
+            prepare(tenant).let { if (it is ApiResult.Err) return fail(it.failure) }
             while (true) {
                 val pending = outbox.pendingFor(tenant.kind.wire, tenant.id, PushBatches.MAX_OPS)
                 if (pending.isEmpty()) break
@@ -113,7 +134,7 @@ class SyncEngine(
                 val batch = pending.take(fits)
                 val ops = all.take(fits)
                 when (val res = api.push(tenant, deviceId, ops)) {
-                    is ApiResult.Err -> return@withLock fail(res.failure)
+                    is ApiResult.Err -> return fail(res.failure)
                     is ApiResult.Ok -> {
                         res.value.accepted.forEach { outbox.markSent(it.outboxId, it.serverSeq) }
                         val bySeq = batch.associateBy { it.seq }
@@ -123,14 +144,14 @@ class SyncEngine(
                         }
                         conflicts += res.value.conflicts
                         pushed += res.value.accepted.size
-                        if (res.value.accepted.size + res.value.rejected.size < batch.size) return@withLock fail(ApiFailure.Failed)
+                        if (res.value.accepted.size + res.value.rejected.size < batch.size) return fail(ApiFailure.Failed)
                     }
                 }
             }
             do {
                 val since = cursors.get(tenant.kind.wire, tenant.id) ?: 0L
                 val page = when (val res = api.pull(tenant, since)) {
-                    is ApiResult.Err -> return@withLock fail(res.failure)
+                    is ApiResult.Err -> return fail(res.failure)
                     is ApiResult.Ok -> res.value
                 }
                 for (row in page.rows) {

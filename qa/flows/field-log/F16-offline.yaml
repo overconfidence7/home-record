@@ -1,0 +1,54 @@
+# Walkthrough F16 (T046a): with the phone in airplane mode a new job and a task save on the phone; More > Sync says
+# how many changes are saved here and shows the conflict log (none yet); back online, everything syncs within 60 s
+# and the count returns to "Everything is synced" (AC-F52, AC-F53). The second phone half of F16 is the handoff job.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f16@example.test"
+- setAirplaneMode: enabled
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Offline panel swap"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+# AC-F52: the job saved with no connection
+- extendedWaitUntil:
+    visible: "Offline panel swap"
+    timeout: 10000
+- tapOn: "More"
+- assertVisible:
+    id: fl_more_sync
+- tapOn:
+    id: fl_more_sync
+- extendedWaitUntil:
+    visible:
+      id: fl_sync_status
+    timeout: 10000
+# AC-F52: Sync now with no connection keeps the changes and says they are saved on this phone
+- tapOn:
+    id: fl_sync_now
+- extendedWaitUntil:
+    visible: ".*saved on this phone.*"
+    timeout: 20000
+- takeScreenshot: F16-offline-saved-here
+# AC-F53: the conflict log is there, empty on a fresh phone
+- assertVisible:
+    id: fl_sync_none
+- setAirplaneMode: disabled
+# AC-F52: back online, everything goes out within 60 s with nothing left waiting
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+- takeScreenshot: F16-offline-synced
+- tapOn:
+    id: fl_back
+- assertVisible:
+    id: fl_more_sync

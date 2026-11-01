@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Business
+import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Schedule
@@ -47,6 +48,7 @@ sealed interface MoreEvent {
     data object OpenTimesheets : MoreEvent
     data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
+    data object OpenSync : MoreEvent
     data object FreeUp : MoreEvent
     data object SignOut : MoreEvent
 }
@@ -89,6 +91,14 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 modifier = Modifier.testTag("fl_more_company"),
             )
         }
+        RecordListItem(
+            headline = stringResource(R.string.more_sync),
+            supporting = if (state.unsynced > 0) pluralStringResource(R.plurals.sync_log_waiting, state.unsynced, state.unsynced)
+            else stringResource(R.string.sync_log_up_to_date),
+            leading = { Icon(Icons.Rounded.CloudSync, contentDescription = null) },
+            onClick = { onEvent(MoreEvent.OpenSync) },
+            modifier = Modifier.testTag("fl_more_sync"),
+        )
         state.storage?.let { s ->
             RecordListItem(
                 headline = stringResource(R.string.more_storage),

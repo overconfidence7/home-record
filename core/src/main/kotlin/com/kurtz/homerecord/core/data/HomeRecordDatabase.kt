@@ -49,8 +49,9 @@ import androidx.sqlite.execSQL
         SyncCursorEntity::class,
         SyncBaseEntity::class,
         MediaUploadEntity::class,
+        SyncConflictEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -60,6 +61,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 3, to = 4, spec = HomeRecordDatabase.V3ToV4::class),
         // v5 (T044a): sortOrder and doneAt on task; a task already done keeps its last change as its done time.
         AutoMigration(from = 4, to = 5, spec = HomeRecordDatabase.V4ToV5::class),
+        // v6 (T046a): the device-local sync conflict log.
+        AutoMigration(from = 5, to = 6),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
@@ -101,6 +104,7 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun syncCursorDao(): SyncCursorDao
     abstract fun syncBaseDao(): SyncBaseDao
     abstract fun mediaUploadDao(): MediaUploadDao
+    abstract fun syncConflictDao(): SyncConflictDao
 
     /**
      * v2 (CR2b): the single pull cursor becomes one per tenant. The old cursor is dropped, so the next sync pulls each

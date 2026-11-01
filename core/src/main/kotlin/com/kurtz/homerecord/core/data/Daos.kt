@@ -393,6 +393,14 @@ interface OutboxDao {
 }
 
 @Dao
+interface SyncConflictDao {
+    @androidx.room.Insert suspend fun add(rows: List<SyncConflictEntity>)
+    @Query("SELECT * FROM sync_conflict ORDER BY id DESC LIMIT :limit") fun observeRecent(limit: Int): Flow<List<SyncConflictEntity>>
+    @Query("DELETE FROM sync_conflict WHERE id NOT IN (SELECT id FROM sync_conflict ORDER BY id DESC LIMIT :keep)") suspend fun trim(keep: Int)
+    @Query("DELETE FROM sync_conflict") suspend fun clear()
+}
+
+@Dao
 interface SyncCursorDao {
     @Upsert suspend fun set(cursor: SyncCursorEntity)
     @Query("SELECT lastServerSeq FROM sync_cursor WHERE tenantKind = :kind AND tenantId = :tenantId") suspend fun get(kind: String, tenantId: String): Long?

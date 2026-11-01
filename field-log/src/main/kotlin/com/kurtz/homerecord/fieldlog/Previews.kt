@@ -290,6 +290,47 @@ fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", Compan
 @Composable
 fun MoreCrewPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew), {}) }
 
+/** Fixed times (Oct 28, 2026 in the afternoon, UTC) keep the screenshots stable. */
+private val sampleConflicts = listOf(
+    com.kurtz.homerecord.core.sync.ConflictEntry(
+        "task", "t1", "Set the kitchen outlets", com.kurtz.homerecord.core.sync.ConflictOutcome.NewerKept,
+        listOf("due date", "title"), 1_793_200_440_000L,
+    ),
+    com.kurtz.homerecord.core.sync.ConflictEntry(
+        "punch", "p1", null, com.kurtz.homerecord.core.sync.ConflictOutcome.OfficeKept, listOf("note", "time"), 1_793_197_000_000L,
+    ),
+    com.kurtz.homerecord.core.sync.ConflictEntry(
+        "daily_log", "d1", "2026-10-27", com.kurtz.homerecord.core.sync.ConflictOutcome.NewerKept, listOf("safety notes"), 1_793_194_800_000L,
+    ),
+    com.kurtz.homerecord.core.sync.ConflictEntry(
+        "photo", "ph1", null, com.kurtz.homerecord.core.sync.ConflictOutcome.Refused, emptyList(), 1_793_190_000_000L,
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun SyncLogUpToDatePreview() = Frame { com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun SyncLogConflictsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(
+        com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(com.kurtz.homerecord.core.sync.SyncPhase.Idle, 3, sampleConflicts, loading = false), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun SyncLogOfflinePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(
+        com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(com.kurtz.homerecord.core.sync.SyncPhase.Offline, 12, sampleConflicts.take(1), loading = false), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun SyncLogLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(), {}) }
+
 private fun job(id: String, name: String, status: JobStatus, client: String?, address: String?, next: String? = null, start: String? = null) =
     JobRow(JobSummary(id, name, status, startDate = start), client, address, next)
 

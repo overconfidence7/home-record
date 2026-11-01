@@ -80,6 +80,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // AC-F53 (T046a): v6 adds the device-local conflict log and keeps every row.
+    @Test fun v5ToV6AddsTheConflictLog() {
+        helper.createDatabase(5).use { db ->
+            db.execSQL("INSERT INTO task (id, jobId, title, done, punch, createdAt, updatedAt, source, sortOrder) VALUES ('t1', 'j1', 'Hang door', 0, 0, 1, 1, 'FIELD_LOG', 0)")
+        }
+        helper.runMigrationsAndValidate(6).use { db ->
+            assertThat(db.texts("SELECT title FROM task WHERE id = 't1'")).containsExactly("Hang door")
+            db.execSQL("INSERT INTO sync_conflict (tenantKey, entity, entityId, field, reason, label, at) VALUES ('company:c1', 'task', 't1', 'title', 'older', 'Hang door', 5)")
+            assertThat(db.count("SELECT COUNT(*) FROM sync_conflict")).isEqualTo(1L)
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -118,6 +130,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 5
+        const val LATEST = 6
     }
 }

@@ -265,8 +265,10 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             val pdf = sender.make(log)
             val byEmail = email && pdf != null && pdf.recipients.isNotEmpty()
             if (pdf != null && sender.open(pdf, byEmail)) {
-                d.logs.markSent(log.id, if (byEmail) pdf.recipients else emptyList(), pdf.file.path)
+                // Close first: the saved log's Sent emission must never show with the sheet still open, and a late
+                // close must not shut a sheet opened again after it (Send again).
                 close()
+                d.logs.markSent(log.id, if (byEmail) pdf.recipients else emptyList(), pdf.file.path)
             } else {
                 sendFailed.value = true
             }

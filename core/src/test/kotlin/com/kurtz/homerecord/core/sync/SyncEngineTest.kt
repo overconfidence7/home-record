@@ -46,6 +46,7 @@ private class FakeServer : SyncApi {
         pushBytes += ops.sumOf { PushBatches.encodedSize(it) }
         val rows = tenants.getOrPut(tenant.key) { LinkedHashMap() }
         val rejected = ops.filter { it.entity in refused }.map { Rejected(it.outboxId, "entity") }
+        val conflicts = mutableListOf<ConflictNote>()
         val accepted = ops.filter { it.entity !in refused }.map { op ->
             val serverSeq = applied.getOrPut(deviceId to op.outboxId) {
                 val incoming = kotlinx.serialization.json.Json.parseToJsonElement(op.payload) as JsonObject
@@ -55,6 +56,7 @@ private class FakeServer : SyncApi {
                 val times = HashMap(old?.times ?: emptyMap())
                 for ((f, v) in incoming) {
                     if (op.updatedAt >= (times[f] ?: Long.MIN_VALUE)) { row[f] = v; times[f] = op.updatedAt }
+                    else if (row[f] != v) conflicts += ConflictNote(op.entity, op.entityId, f, "older")
                 }
                 val seq = (seqs[tenant.key] ?: 0L) + 1
                 seqs[tenant.key] = seq
@@ -63,7 +65,7 @@ private class FakeServer : SyncApi {
             }
             Accepted(op.outboxId, serverSeq)
         }
-        return ApiResult.Ok(PushResponse(accepted, rejected = rejected))
+        return ApiResult.Ok(PushResponse(accepted, conflicts, rejected))
     }
 
     override suspend fun pull(tenant: TenantRef, since: Long): ApiResult<PullResponse> {
@@ -88,7 +90,10 @@ class SyncEngineTest {
     private lateinit var b: SyncEngine
 
     private fun engine(db: HomeRecordDatabase, device: String) =
-        SyncEngine(server, RoomRowStore(db), db.outboxDao(), db.syncCursorDao(), db.syncBaseDao(), device)
+        SyncEngine(
+            server, RoomRowStore(db), db.outboxDao(), db.syncCursorDao(), db.syncBaseDao(), device,
+            conflictLog = SyncConflictLog(db.syncConflictDao(), RoomRowStore(db)),
+        )
 
     @Before fun setUp() {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
@@ -510,5 +515,45 @@ class SyncEngineTest {
         assertThat(LocalColumns.isLocal("job_file", "offline")).isTrue()
         assertThat(LocalColumns.isLocal("photo", "r2Key")).isFalse()
         assertThat(LocalColumns.isLocal("task", "offline")).isFalse()
+    }
+
+    // AC-F53 (a conflict log is kept), T046a: a change of this phone's that lost to a newer one from another phone is
+    // logged with the record's title and the field in plain words; the change that won is the one both phones keep.
+    @Test fun anOlderEditThatLosesIsLoggedWithTheRecordName() = runTest {
+        save(dbA, a, task("Base", 10))
+        a.sync(tenant); b.sync(tenant)
+        save(dbB, b, checkNotNull(dbB.taskDao().get("t1")).copy(title = "Set the kitchen outlets", updatedAt = 50))
+        b.sync(tenant)
+        save(dbA, a, checkNotNull(dbA.taskDao().get("t1")).copy(title = "Old idea", updatedAt = 40))
+        a.sync(tenant)
+
+        assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Set the kitchen outlets")
+        val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA)).entries.first()
+        assertThat(log).hasSize(1)
+        assertThat(log.single().outcome).isEqualTo(ConflictOutcome.NewerKept)
+        assertThat(log.single().fields).containsExactly("title")
+        assertThat(log.single().entity).isEqualTo("task")
+        assertThat(log.single().label).isEqualTo("Set the kitchen outlets")
+        assertThat(SyncConflictLog(dbB.syncConflictDao(), RoomRowStore(dbB)).entries.first()).isEmpty()
+    }
+
+    // AC-F53, T046a: a refused change is logged too, the log survives a failed pass and Clear empties it.
+    @Test fun aRefusedChangeIsLoggedAndClearEmptiesTheLog() = runTest {
+        server.refused = setOf("task")
+        save(dbA, a, task("Patch drywall", 10))
+        a.sync(tenant)
+        val log = SyncConflictLog(dbA.syncConflictDao(), RoomRowStore(dbA))
+        assertThat(log.entries.first().map { it.outcome }).containsExactly(ConflictOutcome.Refused)
+        assertThat(log.entries.first().single().label).isEqualTo("Patch drywall")
+
+        server.refused = emptySet()
+        save(dbA, a, task("Patch drywall again", 20).copy(id = "t2"))
+        server.online = false
+        a.sync(tenant)
+        assertThat(log.entries.first()).hasSize(1)
+
+        log.clear()
+        assertThat(log.entries.first()).isEmpty()
+        assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Patch drywall")
     }
 }

@@ -129,6 +129,37 @@
     <string name="punch_break_start">Break start</string>
     <string name="punch_break_end">Break end</string>
     <string name="punch_switch">Switched job</string>
+    <string name="more_sync">Sync</string>
+    <string name="sync_log_title">Sync</string>
+    <string name="sync_log_syncing">Syncing…</string>
+    <string name="sync_log_offline">No connection</string>
+    <string name="sync_log_failed">Last sync failed</string>
+    <string name="sync_log_up_to_date">Everything is synced</string>
+    <plurals name="sync_log_waiting">
+        <item quantity="one">%d change waiting to send</item>
+        <item quantity="other">%d changes waiting to send</item>
+    </plurals>
+    <plurals name="sync_log_saved_here">
+        <item quantity="one">%d change saved on this phone</item>
+        <item quantity="other">%d changes saved on this phone</item>
+    </plurals>
+    <string name="sync_log_offline_body">Keep working. Clock ins, photos, tasks and logs are saved on this phone and sent when you\'re back online.</string>
+    <string name="sync_log_failed_body">Your changes are saved on this phone. Tap Sync now to try again.</string>
+    <string name="sync_log_waiting_body">They go out within a minute of having a connection.</string>
+    <string name="sync_log_up_to_date_body">Every change made on this phone is on the server.</string>
+    <string name="sync_log_sync_now">Sync now</string>
+    <string name="sync_log_conflicts">Conflicts</string>
+    <string name="sync_log_none">No conflicts</string>
+    <string name="sync_log_none_body">When two phones change the same thing, the change that was kept shows here.</string>
+    <string name="sync_log_newer_kept">Kept the newer change from another phone.</string>
+    <string name="sync_log_newer_kept_fields">Kept the newer change from another phone (%1$s).</string>
+    <string name="sync_log_office_kept">Kept the office\'s edit to this time.</string>
+    <string name="sync_log_office_kept_fields">Kept the office\'s edit to this time (%1$s).</string>
+    <string name="sync_log_refused">The server turned this change down. It is saved on this phone only.</string>
+    <string name="sync_log_not_stored">A change from another phone couldn\'t be saved here. Update Field Log and sync again.</string>
+    <string name="sync_log_clear">Clear log</string>
+    <string name="sync_log_clear_title">Clear the conflict log?</string>
+    <string name="sync_log_clear_body">The records stay as they are. Only this list is emptied.</string>
     <string name="more_storage">Storage on this phone</string>
     <string name="more_storage_detail">%1$s used, %2$s kept offline</string>
     <string name="more_free_up">Free up</string>

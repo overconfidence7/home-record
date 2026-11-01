@@ -97,8 +97,12 @@ class AppContainer(private val app: Application) {
         db.syncCursorDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
+        conflictLog = conflictLog,
         )
     }
+
+    /** What sync kept out, for More > Sync (AC-F53). */
+    val conflictLog by lazy { com.kurtz.homerecord.core.sync.SyncConflictLog(db.syncConflictDao(), RoomRowStore(db)) }
 
     private val companyTenant = company.state.map { s -> (s as? CompanyState.Active)?.let { TenantRef(TenantKind.Company, it.membership.companyId) } }
 
@@ -426,6 +430,10 @@ class AppContainer(private val app: Application) {
     fun geocodePending(companyId: String) {
         scope.launch(Dispatchers.IO) { jobGeocoder.resolvePending(companyId) }
     }
+
+    fun syncLogDeps() = com.kurtz.homerecord.fieldlog.sync.SyncLogDeps(
+        syncEngine.phase, syncEngine.pendingCount, conflictLog.entries, syncCoordinator::requestSync, { conflictLog.clear() },
+    )
 
     fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(
         membership.companyName, membership.role, syncEngine.pendingCount, jobFileTransfers::storage, { jobFileTransfers.freeUp() },

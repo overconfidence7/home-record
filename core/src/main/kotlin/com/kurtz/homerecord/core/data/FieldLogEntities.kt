@@ -296,6 +296,24 @@ data class OutboxEntity(
     val serverSeq: Long? = null,
 )
 
+/**
+ * One line of the sync conflict log (AC-F53): a change of this phone's the server kept out ([reason] `older`,
+ * `authoritative`, `refused:*`) or a pulled row this phone could not store (`unstored:*`). [field] is the column, ""
+ * for the whole change; [label] is the record's name or title when the log was written, so the line still reads after
+ * the record is gone. Device-local, never synced; trimmed to the newest [com.kurtz.homerecord.core.sync.SyncConflictLog.KEEP].
+ */
+@Entity(tableName = "sync_conflict", indices = [Index("at")])
+data class SyncConflictEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val tenantKey: String,
+    val entity: String,
+    val entityId: String,
+    val field: String,
+    val reason: String,
+    val label: String? = null,
+    val at: Long,
+)
+
 /** How far this device has pulled one tenant; `serverSeq` counts per tenant on the server (AC-B20). */
 @Entity(tableName = "sync_cursor", primaryKeys = ["tenantKind", "tenantId"])
 data class SyncCursorEntity(

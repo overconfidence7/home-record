@@ -15,6 +15,7 @@ fun MoreRoute(
     onOpenTimesheets: () -> Unit,
     onOpenReports: () -> Unit,
     onOpenCompany: () -> Unit,
+    onOpenSync: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val vm = viewModel<MoreViewModel>(factory = viewModelFactory { initializer { MoreViewModel(deps()) } })
@@ -26,6 +27,7 @@ fun MoreRoute(
             MoreEvent.OpenTimesheets -> onOpenTimesheets()
             MoreEvent.OpenReports -> onOpenReports()
             MoreEvent.OpenCompany -> onOpenCompany()
+            MoreEvent.OpenSync -> onOpenSync()
             MoreEvent.FreeUp -> vm.freeUp()
             MoreEvent.SignOut -> onSignOut()
         }

@@ -128,6 +128,10 @@ object ScreenCatalog {
         QaScreen("annotate-measure", nonRoot = true) { AnnotateTextPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
+        QaScreen("sync-log", nonRoot = true) { SyncLogUpToDatePreview() },
+        QaScreen("sync-log-conflicts", nonRoot = true) { SyncLogConflictsPreview() },
+        QaScreen("sync-log-offline", nonRoot = true) { SyncLogOfflinePreview() },
+        QaScreen("sync-log-loading", nonRoot = true) { SyncLogLoadingPreview() },
     )
 
     fun find(id: String?): QaScreen? = entries.firstOrNull { it.id == id }
