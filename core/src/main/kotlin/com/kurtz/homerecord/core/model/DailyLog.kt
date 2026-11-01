@@ -25,6 +25,7 @@ data class ChangeOrderLine(val changeOrderId: String, val title: String, val tot
 data class MaterialLine(val materialId: String, val vendor: String?, val category: String?, val amountCents: Long, val note: String?)
 
 /** The record lines a lead can leave out of a day's log (AC-F30); the record itself stays on the job. */
+@Serializable
 enum class LogLineKind { PHOTO, TASK, CHANGE_ORDER, MATERIAL }
 
 /** Delay reasons for the picker (AC-F32). Words come from string resources in the app. */
@@ -47,8 +48,8 @@ data class LogWeather(
 )
 
 /**
- * The daily log's sections as stored in `daily_log.sectionsJson`. Assembled sections come from the day's
- * records; [delays], [visitors], [safety] and [clientNotes] are only ever typed by hand.
+ * The daily log's sections; each is stored in its own `daily_log` column ([DailyLogColumns]), older rows in the single
+ * `sectionsJson`. Assembled sections come from the day's records; [delays], [visitors], [safety] and [clientNotes] are only ever typed by hand.
  */
 @Serializable
 data class DailyLogSections(

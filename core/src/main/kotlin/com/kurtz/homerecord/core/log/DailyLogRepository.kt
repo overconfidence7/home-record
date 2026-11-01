@@ -6,7 +6,11 @@ import com.kurtz.homerecord.core.data.DailyLogEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.Sources
+import com.kurtz.homerecord.core.data.columns
+import com.kurtz.homerecord.core.data.sections
+import com.kurtz.homerecord.core.data.withColumns
 import com.kurtz.homerecord.core.lookup.WeatherApi
+import com.kurtz.homerecord.core.model.DailyLogColumns
 import com.kurtz.homerecord.core.model.DailyLogSections
 import com.kurtz.homerecord.core.model.LogAssembler
 import com.kurtz.homerecord.core.model.LogChangeOrderInput
@@ -108,13 +112,13 @@ class DailyLogRepository(
      */
     suspend fun assemble(jobId: String, day: LocalDate): AssembleResult? {
         val job = db.jobDao().get(jobId) ?: return null
-        val before = pick(db.dailyLogDao().listFor(jobId), jobId, day)?.let { DailyLogSections.fromJson(it.sectionsJson) }
+        val before = pick(db.dailyLogDao().listFor(jobId), jobId, day)?.let { it.sections() }
         // the weather lookup can take seconds; it runs outside the lock so an edit made meanwhile is not held up
         val (fresh, weatherStatus) = weatherFor(job, day, before)
         val (row, sections) = writes.withLock {
             // read again under the lock: an edit saved during the lookup must not be overwritten
             val existing = pick(db.dailyLogDao().listFor(jobId), jobId, day)
-            val previous = existing?.let { DailyLogSections.fromJson(it.sectionsJson) }
+            val previous = existing?.let { it.sections() }
             val stamp = now()
             val sections = LogAssembler.assemble(inputs(job, day, fresh), stamp, previous)
             save(existing, jobId, day, sections, stamp) to sections
@@ -133,7 +137,7 @@ class DailyLogRepository(
      */
     suspend fun update(logId: String, change: (DailyLogSections) -> DailyLogSections): DailyLog? = writes.withLock {
         val row = db.dailyLogDao().get(logId) ?: return@withLock null
-        val before = DailyLogSections.fromJson(row.sectionsJson)
+        val before = row.sections()
         val after = change(before)
         if (after == before) return@withLock row.toModel()
         save(row, row.jobId, LocalDate.parse(row.day), after, now()).toModel()
@@ -154,15 +158,22 @@ class DailyLogRepository(
         sent.toModel()
     }
 
+    /**
+     * Writes [sections] one column per section (R09a). Nothing is written, or queued, when no column changed, so opening a
+     * day whose records have not moved saves nothing; sync then pushes only the columns that did change, and a section
+     * typed on another phone is not overwritten by this phone's copy of it.
+     */
     private suspend fun save(existing: DailyLogEntity?, jobId: String, day: LocalDate, sections: DailyLogSections, stamp: Long): DailyLogEntity {
-        val text = sections.toJson()
+        val columns = DailyLogColumns.of(sections)
         val weatherJson = sections.weather.value?.let { json.encodeToString(LogWeather.serializer(), it) }
-        if (existing != null && existing.sectionsJson == text && existing.weatherJson == weatherJson) return existing
-        val row = existing?.copy(sectionsJson = text, weatherJson = weatherJson, updatedAt = stamp)
-            ?: DailyLogEntity(
-                id = idFor(jobId, day), jobId = jobId, day = day.toString(), sectionsJson = text, weatherJson = weatherJson,
-                createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
-            )
+        if (existing != null && existing.columns() == columns && existing.weatherJson == weatherJson) return existing
+        val row = (
+            existing?.copy(weatherJson = weatherJson, updatedAt = stamp)
+                ?: DailyLogEntity(
+                    id = idFor(jobId, day), jobId = jobId, day = day.toString(), weatherJson = weatherJson,
+                    createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
+                )
+            ).withColumns(columns)
         db.dailyLogDao().upsert(row)
         onChange("daily_log", row.id)
         return row
@@ -215,7 +226,7 @@ class DailyLogRepository(
     }
 
     private fun DailyLogEntity.toModel() = DailyLog(
-        id = id, jobId = jobId, day = LocalDate.parse(day), sections = DailyLogSections.fromJson(sectionsJson),
+        id = id, jobId = jobId, day = LocalDate.parse(day), sections = sections(),
         status = status, sentAt = sentAt, updatedAt = updatedAt,
         recipients = runCatching { json.decodeFromString<List<String>>(recipientsJson) }.getOrDefault(emptyList()), pdfPath = pdfPath,
     )

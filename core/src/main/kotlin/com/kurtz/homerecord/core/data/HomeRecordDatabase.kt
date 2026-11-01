@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -63,6 +63,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 4, to = 5, spec = HomeRecordDatabase.V4ToV5::class),
         // v6 (T046a): the device-local sync conflict log.
         AutoMigration(from = 5, to = 6),
+        // v7 (R09a): one column per daily log section; older logs keep reading from sectionsJson until saved again.
+        AutoMigration(from = 6, to = 7),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

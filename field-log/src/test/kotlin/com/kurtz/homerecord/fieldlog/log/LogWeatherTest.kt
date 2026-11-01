@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.log
 
+import com.kurtz.homerecord.core.data.sections
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.room.Room
@@ -69,7 +70,7 @@ class LogWeatherTest {
         withTimeout(5_000) { state.first { !it.loading && check(it) } }
 
     private suspend fun saved(): DailyLogSections =
-        DailyLogSections.fromJson(checkNotNull(db.dailyLogDao().get(DailyLogRepository.idFor("j1", day))).sectionsJson)
+        checkNotNull(db.dailyLogDao().get(DailyLogRepository.idFor("j1", day))).sections()
 
     @AcceptanceCriterion("AC-F30")
     @Test fun typedWeatherIsSavedAndALaterLookupNeverReplacesIt() = runBlocking<Unit> {

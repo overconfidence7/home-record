@@ -446,3 +446,15 @@ QA judge [judge:fl-log-send-empty]: Send on a day with nothing logged now opens 
 anyway) before the Send sheet, rather than disabling Send. A contractor may still want to send a "no work today" page,
 so Send stays available, but a blank page never goes to a client by accident. "Nothing logged" means no crew time, work
 done, photos, tasks, change orders, materials, delays, visitors, safety or client notes; weather alone does not count.
+
+## 2026-11-01 — Daily log sections sync one column each (R09a)
+
+`daily_log.sectionsJson` held every section in one value, and sync merges a row field by field, last writer wins. An
+office phone with a running shift's day open re-assembles crew hours and saves the whole value, so a Lead's Visitors or
+delays typed offline were lost when the office phone's save was newer. Each section now has its own column (Room v7,
+`crewJson` … `clientNotes`, mapped by the pure `DailyLogColumns`); the phone pushes only the columns that changed, so two
+phones editing different sections both keep their edits. Two phones changing the same section still resolve last
+writer wins, as every other field does. The old `sectionsJson` stays as a read fallback for a column still null (logs
+saved before v7); it is no longer written. No backend change: the Worker stores rows as JSON and merges any field.
+Chosen over a per-section merge rule inside one JSON value, which would need matching special cases in the Worker and
+`RowMerge`.

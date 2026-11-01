@@ -92,6 +92,17 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // R09a: v7 adds one column per daily log section; a log saved before keeps its single value and reads from it.
+    @Test fun v6ToV7AddsTheDailyLogSectionColumns() {
+        helper.createDatabase(6).use { db ->
+            db.execSQL("INSERT INTO daily_log (id, jobId, day, sectionsJson, status, recipientsJson, createdAt, updatedAt, source) VALUES ('l1', 'j1', '2026-10-30', '{\"visitors\":\"Inspector\"}', 'DRAFT', '[]', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(7).use { db ->
+            assertThat(db.texts("SELECT sectionsJson FROM daily_log WHERE id = 'l1' AND visitors IS NULL AND crewJson IS NULL AND delaysJson IS NULL"))
+                .containsExactly("{\"visitors\":\"Inspector\"}")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -130,6 +141,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 6
+        const val LATEST = 7
     }
 }
