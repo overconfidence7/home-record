@@ -685,4 +685,25 @@
     <string name="task_form_delete">Delete task</string>
     <string name="task_delete_title">Delete %1$s?</string>
     <string name="task_delete_body">The task comes off this job for everyone.</string>
+    <string name="push_channel_tasks">Tasks</string>
+    <string name="push_channel_tasks_desc">When someone gives you a task.</string>
+    <string name="push_channel_schedule">Schedule</string>
+    <string name="push_channel_schedule_desc">When your day today or tomorrow changes.</string>
+    <string name="push_channel_change_orders">Change orders</string>
+    <string name="push_channel_change_orders_desc">When a client signs a change order.</string>
+    <string name="push_channel_timesheets">Timesheets</string>
+    <string name="push_channel_timesheets_desc">When your week\'s hours are approved.</string>
+    <string name="push_task_title">New task on %1$s</string>
+    <string name="push_task_title_no_job">New task for you</string>
+    <string name="push_task_body_untitled">Open Tasks to see it.</string>
+    <string name="push_schedule_title_today">Today\'s schedule changed</string>
+    <string name="push_schedule_title_tomorrow">Tomorrow\'s schedule changed</string>
+    <string name="push_schedule_title_date">Your schedule for %1$s changed</string>
+    <string name="push_schedule_body">Open the schedule to see where you\'re working.</string>
+    <string name="push_change_order_title">Change order signed</string>
+    <string name="push_change_order_title_by">%1$s signed a change order</string>
+    <string name="push_change_order_body">%1$s on %2$s</string>
+    <string name="push_change_order_body_bare">Open the job to see it.</string>
+    <string name="push_timesheet_title">Timesheet approved</string>
+    <string name="push_timesheet_body">Your hours for the week of %1$s are approved.</string>
 </resources>

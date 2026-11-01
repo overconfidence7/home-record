@@ -25,6 +25,7 @@ googleid = "1.1.1"
 work = "2.12.0"
 glance = "1.2.0"
 purchases = "10.28.1"
+firebaseMessaging = "26.0.1"
 junit = "4.13.2"
 robolectric = "4.17"
 androidxTest = "1.7.0"
@@ -78,6 +79,7 @@ work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "w
 glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 purchases = { module = "com.revenuecat.purchases:purchases", version.ref = "purchases" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }

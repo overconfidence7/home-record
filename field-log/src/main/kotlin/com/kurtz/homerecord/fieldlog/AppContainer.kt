@@ -134,6 +134,8 @@ class AppContainer(private val app: Application) {
      * an expired token.
      */
     suspend fun signOutAndWipe() {
+        // While the session still answers, so this phone stops getting the account's pushes (AC-B30).
+        pushRegistrar.unregister()
         auth.signOut()
         localWipe.run()
         runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
@@ -453,6 +455,38 @@ class AppContainer(private val app: Application) {
             val connectivity = AndroidConnectivityMonitor(app)
             combine(connectivity.online, company.state) { online, c -> (c as? CompanyState.Active)?.takeIf { online } }
                 .collect { active -> active?.let { jobGeocoder.resolvePending(it.membership.companyId) } }
+        }
+    }
+
+    /** Firebase for Cloud Messaging only; false (no push) while the build has no Firebase config (AC-B30). */
+    private val pushEnabled by lazy { com.kurtz.homerecord.fieldlog.push.FirebasePush.init(app, com.kurtz.homerecord.fieldlog.push.FirebaseConfig.fromBuild()) }
+
+    private val pushStore by lazy { com.kurtz.homerecord.core.push.PrefsPushRegistrationStore(app.getSharedPreferences("push", Context.MODE_PRIVATE)) }
+
+    private val pushRegistrar by lazy {
+        com.kurtz.homerecord.core.push.PushRegistrar(
+            com.kurtz.homerecord.core.push.RetrofitPushTokenApi.create(BuildConfig.API_BASE_URL, http),
+            com.kurtz.homerecord.fieldlog.push.FirebaseTokenSource(pushEnabled), pushStore, app = "field-log",
+        )
+    }
+
+    /** Turns pushes into notifications (AC-F36, AC-F42). */
+    val pushNotifier by lazy { com.kurtz.homerecord.fieldlog.push.PushNotifier(app) }
+
+    /** FCM handed out a new token. */
+    fun onPushToken(token: String) {
+        scope.launch(Dispatchers.IO) { pushRegistrar.onNewToken(token) }
+    }
+
+    /** False after sign out: a push the server sent before it heard about the sign out is not shown. */
+    fun pushRegistered(): Boolean = pushStore.read() != null
+
+    init {
+        // Register this phone's token for whoever signs in, retry once back online, forget it on sign out (AC-B30).
+        scope.launch(Dispatchers.IO) {
+            if (!pushEnabled) return@launch
+            com.kurtz.homerecord.core.push.pushSessions(auth.state, AndroidConnectivityMonitor(app).online)
+                .collect { user -> pushRegistrar.onSession(user) }
         }
     }
 
