@@ -43,6 +43,8 @@ class JobOverviewViewModel(
     private val provisionHouse: suspend (jobId: String) -> String? = { null },
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
+    /** The signed-in member, so the open-task count matches what their Tasks tab shows. */
+    private val me: String? = null,
 ) : ViewModel() {
     private val job: Flow<com.kurtz.homerecord.core.data.JobEntity?> = jobs.observeFor(companyId).map { list -> list.firstOrNull { it.id == jobId } }
 
@@ -55,14 +57,15 @@ class JobOverviewViewModel(
                 combine(client, crew.observeFor(jobId), members.observeFor(companyId)) { c, cr, m -> Triple(c, cr, m) },
                 combine(assignments.observeFor(jobId), tasks.observeFor(jobId)) { a, t -> a to t },
                 combine(punches.observeFor(companyId), photos.observeCountForJob(jobId)) { p, n -> p to n },
-            ) { (c, cr, m), (a, t), (p, n) ->
+                gates,
+            ) { (c, cr, m), (a, t), (p, n), g ->
                 val now = clock()
                 val today = java.time.Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
                 val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant().toEpochMilli()
                 val weekEnd = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusDays(7).atStartOfDay(zone).toInstant().toEpochMilli()
                 val points = p.map { PunchPoint(it.memberId, it.jobId, it.kind, it.at) }
                 val worked = JobHours.workedMillis(points, jobId, weekStart, weekEnd, now)
-                JobOverviewMapper.build(j, c, cr, m, a, t, worked, n, today.toString())
+                JobOverviewMapper.build(j, c, cr, m, a, t, worked, n, today.toString(), g.canManageTasks(jobId), me)
             }
         }
     }, gates) { s, g -> s.copy(canEdit = g.canEditJobs) }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState(canEdit = false))

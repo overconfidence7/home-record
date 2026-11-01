@@ -54,9 +54,14 @@ export function canPush(access: Access, entity: string, stored: Row | null, inco
     return onLeadJob(access, stored, incoming);
   }
   if (CAPTURE.has(entity)) return true;
-  if (entity === "task" && access.role !== "lead") {
-    // Crew mark their own tasks done; they cannot create tasks or hand them to someone else.
-    return stored !== null && str(stored.assigneeId) === access.userId && unchanged(stored, incoming, "assigneeId");
+  if (entity === "task") {
+    // A Lead runs the tasks of the jobs they are on. Anyone else (Crew, Sub, or a Lead off that job) marks their own
+    // tasks done; they cannot create tasks or hand them to someone else (R09: a Lead off the job was refused).
+    if (onLeadJob(access, stored, incoming)) return true;
+    return (
+      stored !== null && str(stored.assigneeId) === access.userId &&
+      unchanged(stored, incoming, "assigneeId") && unchanged(stored, incoming, "jobId")
+    );
   }
   if (LEAD_JOB_ROWS.has(entity)) return onLeadJob(access, stored, incoming);
   if (JOB_HOUSE.has(entity)) return access.role === "lead";

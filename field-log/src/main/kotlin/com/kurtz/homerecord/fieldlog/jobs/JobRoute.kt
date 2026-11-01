@@ -43,6 +43,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                 JobOverviewViewModel(
                     companyId, jobId, db.jobDao(), db.clientDao(), db.jobCrewDao(), db.memberDao(),
                     db.assignmentDao(), db.taskDao(), db.punchDao(), db.photoDao(), gates, house.provisioner::ensure,
+                    me = tasks?.me,
                 )
             }
         },

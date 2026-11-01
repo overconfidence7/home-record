@@ -33,6 +33,15 @@ class JobOverviewMapperTest {
         assertEquals("Rivera", s.clientName)
     }
 
+    // AC-F7 (R09): Crew count only their own open tasks, the ones their Tasks tab lists
+    @Test fun crewCountOnlyTheirOwnOpenTasks() {
+        val tasks = listOf(task("a", false).copy(assigneeId = "m1"), task("b", false).copy(assigneeId = "m2"), task("c", true).copy(assigneeId = "m1"))
+        fun count(manage: Boolean, me: String?) = JobOverviewMapper.build(job, null, emptyList(), emptyList(), emptyList(), tasks, 0, 0, "2026-10-22", manage, me).openTasks
+        assertEquals(2, count(true, "m1"))
+        assertEquals(1, count(false, "m1"))
+        assertEquals(0, count(false, null))
+    }
+
     // AC-F7
     @Test fun nextDaySkipsThePastAndIsNullWhenNothingAhead() {
         val past = AssignmentEntity("a1", "j1", "m1", "2026-10-20", 1, 1)

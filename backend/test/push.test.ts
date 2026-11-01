@@ -46,6 +46,8 @@ describe("AC-B30 pushEventsFor (unit)", () => {
     expect(pushEventsFor("task", null, task, "owner", days)).toEqual([]);
     expect(pushEventsFor("task", null, { ...task, assigneeId: null }, "x", days)).toEqual([]);
     expect(pushEventsFor("task", null, { ...task, done: true }, "x", days)).toEqual([]);
+    // R09: a phone sends Room booleans as 1
+    expect(pushEventsFor("task", null, { ...task, done: 1 }, "x", days)).toEqual([]);
     expect(pushEventsFor("task", null, { ...task, deletedAt: 5 }, "x", days)).toEqual([]);
   });
   it("AC-F42 a schedule change on today or tomorrow tells the member, a later day does not", () => {
