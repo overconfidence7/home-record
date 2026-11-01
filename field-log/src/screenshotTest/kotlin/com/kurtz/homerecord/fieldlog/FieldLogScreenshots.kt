@@ -530,6 +530,11 @@ fun LogSendSheetNoEmailsScreenshot() = LogSendSheetNoEmailsPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun LogSendEmptyScreenshot() = LogSendEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun LogPdfScreenshot() = LogPdfPreview()
 
 @PreviewTest

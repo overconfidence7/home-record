@@ -104,4 +104,34 @@ class LogSendScreenTest {
         rule.onNodeWithTag("fl_log_send_making").assertExists()
         rule.onNodeWithTag("fl_log_send_failed").assertExists()
     }
+
+    /** QA judge [fl-log-send-empty]: the warning says what the client would get and offers Cancel and Send anyway. */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun theEmptyLogWarningOffersCancelAndSendAnyway() {
+        val events = mutableListOf<LogEvent>()
+        show(LogUiState(day = day, today = day, loading = false, canEdit = true, exists = true, editor = LogEditor.SendEmpty)) { events += it }
+        rule.onNodeWithText("Send an empty log?").assertExists()
+        rule.onNodeWithTag("fl_log_send_empty_cancel").assertHeightIsAtLeast(48.dp).performClick()
+        rule.onNodeWithTag("fl_log_send_empty_confirm").assertHeightIsAtLeast(48.dp).performClick()
+        assertThat(events).containsExactly(LogEvent.DismissEditor, LogEvent.SendAnyway).inOrder()
+    }
+
+    @Test fun nothingLoggedCountsEverySectionAButTheWeather() {
+        val bare = LogUiState(day = day, today = day, loading = false, canEdit = true, exists = true)
+        assertThat(bare.nothingLogged).isTrue()
+        assertThat(bare.copy(weather = com.kurtz.homerecord.core.model.LogWeather(highF = 58, lowF = 41, conditions = "rain")).nothingLogged).isTrue()
+        assertThat(bare.copy(visitors = "  ").nothingLogged).isTrue()
+        listOf(
+            bare.copy(crew = listOf(LogCrewRow("m1", "Marcus Ortiz", 60, onSiteNow = false))),
+            bare.copy(workDone = listOf("Set the base cabinets")),
+            bare.copy(photos = listOf(LogPhotoThumb("p1", ""))),
+            bare.copy(tasksDone = listOf(LogLine("t1", "Level the sink base"))),
+            bare.copy(changeOrders = listOf(LogLine("co1", "Add under-cabinet lights"))),
+            bare.copy(materials = listOf(LogLine("ma1", "Home Depot"))),
+            bare.copy(delays = listOf(com.kurtz.homerecord.core.model.LogDelay(com.kurtz.homerecord.core.model.DelayReason.MATERIALS, ""))),
+            bare.copy(visitors = "Township inspector"),
+            bare.copy(safety = "Ladder tied off"),
+            bare.copy(clientNotes = "Cabinets are in."),
+        ).forEach { assertThat(it.nothingLogged).isFalse() }
+    }
 }

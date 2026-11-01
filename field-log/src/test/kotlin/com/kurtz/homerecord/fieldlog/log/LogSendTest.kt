@@ -80,7 +80,9 @@ class LogSendTest {
         )
         runBlocking {
             db.jobDao().upsert(JobEntity(id = "j1", companyId = "c1", name = "Hale kitchen", lat = 40.06, lng = -75.4, createdAt = 1, updatedAt = 1))
-            db.noteDao().upsert(NoteEntity(id = "n1", jobId = "j1", day = day.toString(), text = "Set the base cabinets", createdAt = 1, updatedAt = 1))
+            // written at 9 AM on the day, so the log has something in it and Send goes straight to the sheet
+            val nine = day.atTime(9, 0).toInstant(zone).toEpochMilli()
+            db.noteDao().upsert(NoteEntity(id = "n1", jobId = "j1", day = day.toString(), text = "Set the base cabinets", createdAt = nine, updatedAt = nine))
         }
     }
 
@@ -167,6 +169,41 @@ class LogSendTest {
 
         v.onEvent(LogEvent.DismissEditor)
         assertThat(v.settled { it.editor == null }.sendFailed).isFalse()
+    }
+
+    /** QA judge [fl-log-send-empty]: a day with nothing on it asks before the Send sheet; Cancel sends nothing. */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aDayWithNothingLoggedAsksBeforeSendingAndCancelSendsNothing() = runBlocking<Unit> {
+        runBlocking { db.jobDao().upsert(JobEntity(id = "j2", companyId = "c1", name = "Garage subpanel", lat = 40.06, lng = -75.4, createdAt = 1, updatedAt = 1)) }
+        val v = LogViewModel(LogDeps("j2", repo, db.photoDao(), gates, today = { day }, sender = sender), SavedStateHandle())
+        val empty = v.settled { it.exists }
+        assertThat(empty.nothingLogged).isTrue()
+        v.onEvent(LogEvent.OpenSend)
+        assertThat(v.settled { it.editor != null }.editor).isEqualTo(LogEditor.SendEmpty)
+        // the sheet's buttons do nothing behind the warning
+        v.onEvent(LogEvent.SendShare)
+        assertThat(sender.made).isEmpty()
+        v.onEvent(LogEvent.DismissEditor)
+        assertThat(v.settled { it.editor == null }.sentAt).isNull()
+        assertThat(sender.made).isEmpty()
+
+        v.onEvent(LogEvent.OpenSend)
+        v.settled { it.editor == LogEditor.SendEmpty }
+        v.onEvent(LogEvent.SendAnyway)
+        v.settled { it.editor is LogEditor.Send }
+        v.onEvent(LogEvent.SendShare)
+        assertThat(v.settled { it.sentAt != null }.sentTo).isEmpty()
+        assertThat(sender.made).hasSize(1)
+    }
+
+    @AcceptanceCriterion("AC-F33")
+    @Test fun sendAnywayDoesNothingUnlessTheWarningIsOpen() = runBlocking<Unit> {
+        val v = vm()
+        assertThat(v.settled { it.exists }.nothingLogged).isFalse() // the day has a note
+        v.onEvent(LogEvent.SendAnyway)
+        assertThat(v.state.value.editor).isNull()
+        v.onEvent(LogEvent.OpenSend)
+        assertThat(v.settled { it.editor != null }.editor).isInstanceOf(LogEditor.Send::class.java)
     }
 
     @AcceptanceCriterion("AC-F33", "AC-F3")

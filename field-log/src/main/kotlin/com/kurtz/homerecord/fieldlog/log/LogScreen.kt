@@ -534,6 +534,20 @@ private fun LogEditorHost(state: LogUiState, onEvent: (LogEvent) -> Unit) {
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             modifier = Modifier.windowTestTags(),
         ) { LogSendSheetContent(e, state.sending, state.sendFailed, onEvent) }
+        LogEditor.SendEmpty -> AlertDialog(
+            onDismissRequest = dismiss,
+            modifier = Modifier.windowTestTags(),
+            title = { Text(stringResource(R.string.log_send_empty_title)) },
+            text = { Text(stringResource(R.string.log_send_empty_body)) },
+            confirmButton = {
+                TextButton(onClick = { onEvent(LogEvent.SendAnyway) }, modifier = Modifier.testTag("fl_log_send_empty_confirm")) {
+                    Text(stringResource(R.string.log_send_empty_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = dismiss, modifier = Modifier.testTag("fl_log_send_empty_cancel")) { Text(stringResource(R.string.cancel)) }
+            },
+        )
         is LogEditor.Hours -> AlertDialog(
             onDismissRequest = dismiss,
             modifier = Modifier.windowTestTags(),

@@ -32,6 +32,8 @@ sealed interface LogEditor {
     @Serializable data object PickDay : LogEditor
     /** The Send sheet; [recipients] are the job's client and office emails when it opened (AC-F33). */
     @Serializable data class Send(val recipients: List<String>) : LogEditor
+    /** "Nothing logged for this day yet" before the Send sheet, so an empty page never goes to a client unasked. */
+    @Serializable data object SendEmpty : LogEditor
 }
 
 /**
@@ -80,6 +82,14 @@ data class LogUiState(
 
     /** Owner, Office and the job's Lead send a log once it exists; Crew and Sub only read it (AC-F3, AC-F33). */
     val canSend: Boolean get() = canEdit && exists
+
+    /**
+     * Nothing a client would read is on the day yet: no crew time, work done, photos, tasks, change orders, materials,
+     * delays, visitors, safety or client notes. Weather alone does not count; the PDF would be the header and nothing else.
+     */
+    val nothingLogged: Boolean get() =
+        crew.isEmpty() && workDone.isEmpty() && photos.isEmpty() && tasksDone.isEmpty() && changeOrders.isEmpty() &&
+            materials.isEmpty() && delays.isEmpty() && visitors.isBlank() && safety.isBlank() && clientNotes.isBlank()
 }
 
 sealed interface LogEvent {
@@ -103,6 +113,8 @@ sealed interface LogEvent {
     /** Opens the log's PDF in the in-app viewer; the route handles it. */
     data object Preview : LogEvent
     data object OpenSend : LogEvent
+    /** From the empty-log warning: go on to the Send sheet. */
+    data object SendAnyway : LogEvent
     /** Email the PDF to the job's client and office addresses. */
     data object SendEmail : LogEvent
     /** Hand the PDF to the share sheet (text, another email account, a drive). */

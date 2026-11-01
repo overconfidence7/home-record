@@ -85,6 +85,7 @@ object ScreenCatalog {
         QaScreen("log-sent", nonRoot = false) { LogSentPreview() },
         QaScreen("log-send-sheet", nonRoot = false) { LogSendSheetPreview() },
         QaScreen("log-send-sheet-no-emails", nonRoot = false) { LogSendSheetNoEmailsPreview() },
+        QaScreen("log-send-empty", nonRoot = false) { LogSendEmptyPreview() },
         QaScreen("tasks-tab", nonRoot = true) { TasksTabPreview() },
         QaScreen("tasks-punch", nonRoot = true) { TasksPunchPreview() },
         QaScreen("tasks-crew", nonRoot = true) { TasksCrewPreview() },

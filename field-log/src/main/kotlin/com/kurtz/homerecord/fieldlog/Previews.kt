@@ -1169,6 +1169,21 @@ fun LogSendSheetNoEmailsPreview() = Frame {
     com.kurtz.homerecord.fieldlog.log.LogSendSheetContent(com.kurtz.homerecord.fieldlog.log.LogEditor.Send(emptyList()), sending = false, failed = true, {})
 }
 
+/** A new job's first morning: nothing logged yet, so Send asks before an empty page goes to the client. */
+@ThemePreviews
+@Composable
+fun LogSendEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        com.kurtz.homerecord.fieldlog.log.LogUiState(
+            day = logDay, today = logDay, loading = false, canEdit = true, exists = true,
+            weather = com.kurtz.homerecord.core.model.LogWeather(highF = 58, lowF = 41, conditions = "clouds"),
+            weatherStatus = com.kurtz.homerecord.core.log.WeatherStatus.Shown,
+            editor = com.kurtz.homerecord.fieldlog.log.LogEditor.SendEmpty,
+        ),
+        {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
 /** A daily log page drawn with canvas so the PDF preview shows what the client gets. */
 private object SampleLogPages : com.kurtz.homerecord.coreui.pages.PageSource {
     override val pageCount = 2

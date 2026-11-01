@@ -1,5 +1,5 @@
 # Walkthrough F9 (Send): the day's log previews as a PDF in the app, then goes out through the share sheet and is
-# marked Sent with the time; Send again stays on offer (AC-F33). The job has no client or office email, so the Send sheet
+# marked Sent with the time; Send again stays on offer (AC-F33). Nothing is logged on the new job, so Send warns first. The job has no client or office email, so the Send sheet
 # offers Share PDF as its one action.
 appId: com.kurtz.homerecord.fieldlog
 ---
@@ -50,9 +50,30 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_log_send
     timeout: 10000
-# Send: no emails on this job, so the sheet says so and Share PDF opens the share sheet
+# Send on a day with nothing logged warns first; Cancel leaves the log unsent ([judge:fl-log-send-empty])
 - tapOn:
     id: fl_log_send
+- extendedWaitUntil:
+    visible:
+      id: fl_log_send_empty_confirm
+    timeout: 10000
+- assertVisible: "Send an empty log?"
+- takeScreenshot: F09b-log-send-empty
+- tapOn:
+    id: fl_log_send_empty_cancel
+- assertNotVisible:
+    id: fl_log_send_empty_confirm
+- assertNotVisible:
+    id: fl_log_sent
+# Send anyway: no emails on this job, so the sheet says so and Share PDF opens the share sheet
+- tapOn:
+    id: fl_log_send
+- extendedWaitUntil:
+    visible:
+      id: fl_log_send_empty_confirm
+    timeout: 10000
+- tapOn:
+    id: fl_log_send_empty_confirm
 - extendedWaitUntil:
     visible:
       id: fl_log_send_share

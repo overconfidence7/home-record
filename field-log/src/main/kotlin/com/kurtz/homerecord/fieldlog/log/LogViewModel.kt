@@ -181,7 +181,8 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             is LogEvent.AskDrop -> if (st.canEdit) dropLabel(st, event.kind, event.id)?.let { open(LogEditor.Drop(event.kind, event.id, it.ifEmpty { null })) }
             is LogEvent.PutBack -> putBack(st, event.kind)
             LogEvent.EditWeather, LogEvent.Preview -> Unit // the route opens the weather form and the PDF viewer
-            LogEvent.OpenSend -> openSend(st)
+            LogEvent.OpenSend -> openSend(st, confirmed = false)
+            LogEvent.SendAnyway -> if (openEditor() == LogEditor.SendEmpty) openSend(st, confirmed = true)
             LogEvent.SendEmail -> send(email = true)
             LogEvent.SendShare -> send(email = false)
             is LogEvent.EditorText -> when (val e = openEditor()) {
@@ -219,7 +220,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             }
             is LogEditor.RemoveDelay -> { s -> s.copy(delays = s.delays.filterIndexed { i, _ -> i != e.index }) }
             is LogEditor.Drop -> { s -> s.drop(e.kind, e.id) }
-            LogEditor.PickDay, is LogEditor.Send -> return
+            LogEditor.PickDay, is LogEditor.Send, LogEditor.SendEmpty -> return
         }
         close()
         viewModelScope.launch { d.logs.update(logId, change) }
@@ -243,10 +244,15 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
         }
     }
 
-    private fun openSend(st: LogUiState) {
+    /** Opens the Send sheet; a day with nothing logged asks first ([confirmed] once the person said Send anyway). */
+    private fun openSend(st: LogUiState, confirmed: Boolean) {
         val sender = d.sender ?: return
         if (!st.canSend) return
         sendFailed.value = false
+        if (!confirmed && st.nothingLogged) {
+            open(LogEditor.SendEmpty)
+            return
+        }
         viewModelScope.launch { open(LogEditor.Send(sender.recipients(d.jobId))) }
     }
 

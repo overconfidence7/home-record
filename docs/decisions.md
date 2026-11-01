@@ -439,3 +439,10 @@ kind, `/me` now returns the company's `phone` for every role and its `email` for
 split), `CompanyMembership` and its prefs cache keep them, and the pure `LogPdfCompany.of` fills the PDF's company from
 the membership (only the job's own company; a non-blank local row still wins). The logo stays local-only until the
 company logo upload is built. A Lead's PDF therefore carries the phone but not the email.
+
+## 2026-11-01 Empty daily log warns before Send
+
+QA judge [judge:fl-log-send-empty]: Send on a day with nothing logged now opens "Send an empty log?" (Cancel / Send
+anyway) before the Send sheet, rather than disabling Send. A contractor may still want to send a "no work today" page,
+so Send stays available, but a blank page never goes to a client by accident. "Nothing logged" means no crew time, work
+done, photos, tasks, change orders, materials, delays, visitors, safety or client notes; weather alone does not count.
