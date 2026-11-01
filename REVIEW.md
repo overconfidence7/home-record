@@ -2462,3 +2462,20 @@ Focus check: nothing wrong. Tasks, punch list and delays live only in Field Log 
 Coverage note: the auto entry reports 251/251 claimed ACs covered across 136 ticked tasks and subtasks (0 gaps).
 
 Judged: 16 screenshots opened (both failure shots, the F09 Reports shot, the new Tasks, task form, My tasks, Today and Reports catalog shots in light, dark, 200% and landscape, two tours), 728 crawler shots checked by script for blank frames and 15 landscape tour shots checked by script for orientation. 22 walkthrough steps. New issues: 2. Product gaps: 0.
+
+## QA auto 2026-11-01 (commit c5543600)
+
+Automated suite run at 2026-11-01 03:37 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Instrumented tests fail on field-log (regression of a fixed item) [auto:instrumented:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: all acceptance tests and the screen crawler pass - actual: 1 failing of 24 (qa-results latest/field-log/instrumented/field-log.txt)
+- [ ] [Major] Flow F09-daily-log fails on field-log (regression of a fixed item) [auto:flow:field-log:F09-daily-log] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: walkthrough step F09 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F09-daily-log.log - screenshot: qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png
+- [ ] [Major] Flow F09b-log-send fails on field-log [auto:flow:field-log:F09b-log-send] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: walkthrough step F09b passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F09b-log-send.log - screenshot: qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-pdf.png
+- [ ] [Major] Flow F11-tasks fails on field-log (regression of a fixed item) [auto:flow:field-log:F11-tasks] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: walkthrough step F11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11-tasks.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11-tasks-step-088-tapOnElement-Today,_.+.png
+- [ ] [Major] Flow F11b-task-pin fails on field-log [auto:flow:field-log:F11b-task-pin] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: walkthrough step F11b passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11b-task-pin.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11b-task-pin-step-039-assertCondition-fl_job_tab_house.png
+- [ ] [Major] Flow H04-add-item fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H04-add-item] - steps: automated, see qa-results branch latest/ for commit c5543600 - expected: walkthrough step H04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H04-add-item.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H04-add-item-H01-home-after-onboarding.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Fail, field-log F09b Fail, field-log F11 Fail, field-log F11b Fail, field-log F11c Pass, field-log F15 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Fail, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 58 device stages, 1124 unit tests, 140 backend tests, coverage 261/261 ACs. Passed: 52. New issues: 6. Critical: 0. Product gaps: n/a (judge entry follows).
