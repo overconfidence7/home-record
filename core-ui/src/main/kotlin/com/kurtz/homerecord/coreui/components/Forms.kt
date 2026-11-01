@@ -33,6 +33,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -244,6 +248,7 @@ fun DateField(
         value = isoDate.orEmpty(),
         onValueChange = {},
         readOnly = true,
+        interactionSource = rememberOpensOnTap { open = true },
         modifier = modifier.fillMaxWidth(),
         label = { Text(if (required) stringResource(R.string.required_label, label) else label) },
         trailingIcon = {
@@ -270,6 +275,19 @@ fun DateField(
 }
 
 /**
+ * A read-only picker field opens its picker from a tap anywhere on the field, not only from the trailing icon:
+ * a tap on the body otherwise just focuses a field that cannot be typed in (QA F11: Due stayed empty).
+ */
+@Composable
+private fun rememberOpensOnTap(onTap: () -> Unit): MutableInteractionSource {
+    val source = remember { MutableInteractionSource() }
+    LaunchedEffect(source) {
+        source.interactions.collect { if (it is PressInteraction.Release) onTap() }
+    }
+    return source
+}
+
+/**
  * Time of day shown read-only; the clock button opens the Material time picker (ui-standards rule 22).
  * The picker's open state is kept here, like [DateField].
  */
@@ -287,6 +305,7 @@ fun TimeField(
         value = time.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)),
         onValueChange = {},
         readOnly = true,
+        interactionSource = rememberOpensOnTap { open = true },
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
         trailingIcon = {
