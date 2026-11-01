@@ -43,6 +43,18 @@ class PushNotifierTest {
         assertThat(manager.getNotificationChannel("schedule").name.toString()).isEqualTo("Schedule")
     }
 
+    // T047b2: tapping the notification opens Field Log with the message back, for PushDestination.
+    @Test
+    fun tappingTheNotificationCarriesTheMessageBackToTheApp() {
+        val data = mapOf("type" to "task_assigned", "companyId" to "c1", "taskId" to "t1", "jobId" to "j1", "title" to "Set the kitchen outlets", "jobName" to "Hale kitchen")
+        val message = PushMessage.parse(data) ?: error("parse")
+        notifier.show(message, data)
+        val tap = shadowOf(shadowOf(manager).allNotifications.single().contentIntent).savedIntent
+        assertThat(tap.component?.className).isEqualTo("com.kurtz.homerecord.fieldlog.MainActivity")
+        assertThat(PushIntents.messageOf(tap)).isEqualTo(message)
+        assertThat(PushIntents.messageOf(android.content.Intent(android.content.Intent.ACTION_MAIN))).isNull()
+    }
+
     @Test
     fun aSecondPushAboutTheSameDayReplacesTheFirst() {
         val data = mapOf("type" to "schedule_changed", "companyId" to "c1", "date" to "2026-11-02", "jobId" to "j1", "jobName" to "Hale kitchen")

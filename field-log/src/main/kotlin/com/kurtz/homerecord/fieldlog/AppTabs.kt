@@ -30,6 +30,12 @@ import com.kurtz.homerecord.fieldlog.more.MoreRoute
 import com.kurtz.homerecord.fieldlog.today.TodayScreen
 import com.kurtz.homerecord.fieldlog.today.TodayUiState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
 import com.kurtz.homerecord.coreui.shell.PlaceholderDetail
@@ -84,6 +90,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
     val scope = rememberCoroutineScope()
     val tabs = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
+    PushOpener(container, membership)
+    NotificationPermissionAsk(container)
     HomeRecordApp(tabs = tabs, tabRequests = container.tabRequests.flow, fullScreen = ::isFullScreen, entries = { nav ->
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
@@ -126,7 +134,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 key.depth == 0 && key.title == "more" -> MoreRoute(
                     deps = { container.moreDeps(membership) },
                     onOpenTeam = { nav.push(TeamKey) },
-                    onOpenTimesheets = { nav.push(TimesheetsKey) },
+                    onOpenTimesheets = { nav.push(TimesheetsKey()) },
                     onOpenReports = { nav.push(ReportsKey) },
                     onOpenCompany = { nav.push(CompanyKey) },
                     onOpenSync = { nav.push(SyncLogKey) },
@@ -253,11 +261,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onSaved = { container.geocodePending(membership.companyId) },
             )
         }
-        entry<TimesheetsKey> {
+        entry<TimesheetsKey> { key ->
             val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
             val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
             if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
-            else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId) }, onBack = nav::pop)
+            else com.kurtz.homerecord.fieldlog.timesheets.TimesheetsRoute({ container.timesheetsDeps(membership, memberId, key.week?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }) }, onBack = nav::pop)
         }
         entry<ReportsKey> {
             com.kurtz.homerecord.fieldlog.reports.ReportsRoute(
@@ -272,4 +280,29 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             CompanyRoute(container.companyApi, membership, onSaved = { scope.launch { container.company.refresh() } }, onBack = nav::pop)
         }
     })
+}
+
+/** Opens the screen a tapped push notification is about, once this company's tabs are composed (T047b2). */
+@Composable
+private fun PushOpener(container: AppContainer, membership: CompanyMembership) {
+    LaunchedEffect(membership.companyId) {
+        container.pendingPush.filterNotNull().collect { message ->
+            val gates = container.roleGates.first()
+            val request = com.kurtz.homerecord.fieldlog.push.PushDestination.of(message, membership.companyId, gates)
+            container.pendingPush.value = null
+            container.tabRequests.request(request.tabId, request.keys)
+        }
+    }
+}
+
+/** Asks for the notification permission the first time the person reaches the tabs (Android 13+, push set up). */
+@Composable
+private fun NotificationPermissionAsk(container: AppContainer) {
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        val ask = withContext(Dispatchers.IO) {
+            container.shouldAskNotifications().also { if (it) container.markNotificationsAsked() }
+        }
+        if (ask) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
 }

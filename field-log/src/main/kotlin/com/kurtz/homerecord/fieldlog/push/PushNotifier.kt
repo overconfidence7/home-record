@@ -59,7 +59,7 @@ object PushTexts {
 
 /**
  * Shows a push as a notification on its own channel (AC-F36, AC-F42). Quietly does nothing when the person has not
- * allowed notifications. Tapping it opens Field Log with the message's data as extras for the deep link (T047b2).
+ * allowed notifications. Tapping it opens Field Log with the message's data as extras; [PushDestination] picks the screen.
  */
 class PushNotifier(private val context: Context, private val today: () -> LocalDate = LocalDate::now) {
     fun ensureChannels() {
@@ -79,11 +79,10 @@ class PushNotifier(private val context: Context, private val today: () -> LocalD
         if (!canNotify()) return false
         ensureChannels()
         val text = PushTexts.of(message, today(), context.resources)
-        val open = Intent(context, MainActivity::class.java).apply {
-            action = ACTION_OPEN_PUSH
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            data.forEach { (k, v) -> putExtra(EXTRA_PREFIX + k, v) }
-        }
+        val open = PushIntents.put(
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            data,
+        )
         val id = message.key.hashCode()
         val pending = PendingIntent.getActivity(context, id, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(context, message.channel.id)

@@ -61,18 +61,25 @@ fun HomeRecordApp(
     modifier: Modifier = Modifier,
     startTabId: String? = null,
     startKeys: List<NavKey> = emptyList(),
-    tabRequests: Flow<String>? = null,
+    tabRequests: Flow<TabRequest>? = null,
     fullScreen: (NavKey) -> Boolean = { false },
 ) {
     var selectedId by rememberSaveable { mutableStateOf(startTabId ?: tabs.first().id) }
-    // Outside entry points (a widget, a notification) ask for a tab here.
-    LaunchedEffect(tabRequests) {
-        tabRequests?.collect { id -> if (tabs.any { it.id == id }) selectedId = id }
-    }
     // startKeys are pushed on the start tab's stack only when it is first created; restored stacks win.
     val stacks = tabs.associate {
         val keys = if (it.id == startTabId) listOf(it.root) + startKeys else listOf(it.root)
         it.id to rememberNavBackStack(*keys.toTypedArray())
+    }
+    // Outside entry points (a widget, a notification) ask for a tab, and maybe screens on it, here.
+    LaunchedEffect(tabRequests) {
+        tabRequests?.collect { request ->
+            val target = stacks[request.tabId] ?: return@collect
+            if (request.keys.isNotEmpty()) {
+                while (target.size > 1) target.removeAt(target.lastIndex)
+                target.addAll(request.keys)
+            }
+            selectedId = request.tabId
+        }
     }
     val selected = tabs.firstOrNull { it.id == selectedId } ?: tabs.first()
     val stack = stacks.getValue(selected.id)

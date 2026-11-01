@@ -90,6 +90,20 @@ class HomeRecordAppTest {
         rule.onNodeWithText("b", substring = false).assertIsDisplayed()
     }
 
+    // AC-F36: a notification tap opens a screen on another tab; back walks to that tab's root, the old stack is cut.
+    @Test fun requestWithKeysOpensTheScreenOnThatTabOverItsRoot() {
+        val requests = TabRequests()
+        setApp(requests)
+        rule.onNodeWithText("Beta").performClick()
+        rule.onNodeWithText("Open a detail screen").performClick()
+        rule.onNodeWithText("Alpha").performClick()
+        requests.request("b", listOf(PlaceholderKey("b", depth = 1)))
+        rule.onAllNodesWithText("Detail b 1").onFirst().assertIsDisplayed()
+        rule.onNodeWithContentDescription("Back").performClick()
+        rule.onNodeWithText("Open a detail screen").assertIsDisplayed()
+        rule.onNodeWithTag("app_back").assertDoesNotExist()
+    }
+
     // judge:fl-markup-nav-bar (rule 3): a full-screen editor on top hides the tab bar; leaving it brings the bar back.
     @Test fun fullScreenKeyHidesTheTabBar() {
         setApp()

@@ -75,11 +75,11 @@ class TimesheetsViewModelTest {
         repo.record(NewPunch("c1", who, "j1", PunchKind.OUT, at = at(day, to)))
     }
 
-    private suspend fun vm(saved: SavedStateHandle = SavedStateHandle()): TimesheetsViewModel {
+    private suspend fun vm(saved: SavedStateHandle = SavedStateHandle(), startWeek: LocalDate? = null): TimesheetsViewModel {
         val deps = TimesheetsDeps(
             "o1", { "Nate Kurtz" }, repo, TimesheetApprovals(db, { zone }, { now }),
             db.memberDao().observeFor("c1"), db.punchDao().observeFor("c1"), db.jobDao().observeFor("c1"),
-            db.timesheetApprovalDao().observeAll(), settings, zone, { now },
+            db.timesheetApprovalDao().observeAll(), settings, zone, { now }, startWeek,
         )
         return TimesheetsViewModel(deps, saved).also { created += it; await(it) { s -> !s.loading } }
     }
@@ -103,6 +103,15 @@ class TimesheetsViewModelTest {
         settings.value = CompanySettings(com.kurtz.homerecord.core.company.OvertimeRule.Daily8)
         val s = await(vm) { it.people.single().sheet.overtimeMillis > 0 }
         assertThat(s.people.single().sheet.overtimeMillis).isEqualTo(2 * 3_600_000L)
+    }
+
+    // T047b2: a timesheet-approved notification opens Timesheets on the approved week; a restored week still wins.
+    @Test fun startWeekOpensThatWeekAndSavedStateWins() = runBlocking<Unit> {
+        val last = vm(startWeek = monday.minusDays(4)).state.value
+        assertThat(last.weekStart).isEqualTo(monday.minusWeeks(1))
+        assertThat(last.isCurrentWeek).isFalse()
+        val restored = vm(SavedStateHandle(mapOf("week" to monday.toString())), startWeek = monday.minusWeeks(2)).state.value
+        assertThat(restored.weekStart).isEqualTo(monday)
     }
 
     @Test fun previousWeekIsEmptyAndNextIsBlockedAtThisWeek() = runBlocking<Unit> {

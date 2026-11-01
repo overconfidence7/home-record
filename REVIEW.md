@@ -2479,3 +2479,7 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 58 device stages, 1124 unit tests, 140 backend tests, coverage 261/261 ACs. Passed: 52. New issues: 6. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## Builder notes 2026-11-01 (T047b2)
+
+- [ ] [Minor] `LogSendTest.theShareSheetMarksItSentWithNoRecipientsAndASecondSendReplacesTheFirst` timed out at its 5 s wait once in a full `assembleDebug testDebugUnitTest --max-workers=2` run on d47125a1+T047b2 (code it covers unchanged); passed 3/3 alone and in a 1-worker full run - expected: no timing-dependent JVM test - actual: a 5 s wall-clock wait on a loaded container

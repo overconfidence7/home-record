@@ -41,12 +41,15 @@ class TimesheetsDeps(
     val settings: Flow<CompanySettings>,
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
+    /** The week to open on first show (any day in it); null is this week. */
+    val startWeek: LocalDate? = null,
 )
 
 /** FL-Timesheets: a week per person with flags, punch edits with a reason, Approve person or all (AC-F14). */
 class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val thisWeek = mondayOf(d.now())
-    private var weekStart: LocalDate = saved.get<String>(WEEK)?.let(LocalDate::parse) ?: thisWeek
+    private var weekStart: LocalDate = saved.get<String>(WEEK)?.let(LocalDate::parse)
+        ?: d.startWeek?.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) ?: thisWeek
     private val _state = MutableStateFlow(
         TimesheetsUiState(weekStart = weekStart, isCurrentWeek = weekStart == thisWeek, expandedId = saved[OPEN]),
     )

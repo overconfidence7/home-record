@@ -378,7 +378,7 @@ class AppContainer(private val app: Application) {
         )
     }
 
-    fun timesheetsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
+    fun timesheetsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String, startWeek: java.time.LocalDate? = null) =
         com.kurtz.homerecord.fieldlog.timesheets.TimesheetsDeps(
             callerId = memberId,
             callerName = { db.memberDao().get(memberId)?.name ?: membership.companyName },
@@ -388,6 +388,7 @@ class AppContainer(private val app: Application) {
             jobs = db.jobDao().observeFor(membership.companyId),
             approvalRows = db.timesheetApprovalDao().observeAll(),
             settings = company.settings,
+            startWeek = startWeek,
         )
 
     fun todayDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
@@ -489,6 +490,24 @@ class AppContainer(private val app: Application) {
                 .collect { user -> pushRegistrar.onSession(user) }
         }
     }
+
+    /** A tapped push notification, held until the company's tabs are on screen to open its screen (T047b2). */
+    val pendingPush = MutableStateFlow<com.kurtz.homerecord.core.push.PushMessage?>(null)
+
+    private val notificationAskStore by lazy {
+        com.kurtz.homerecord.fieldlog.push.NotificationAskStore(app.getSharedPreferences("notifications", Context.MODE_PRIVATE))
+    }
+
+    /** True once per install on Android 13+ when push is set up and notifications are not yet allowed; call off the main thread. */
+    fun shouldAskNotifications(): Boolean {
+        val granted = android.os.Build.VERSION.SDK_INT < 33 ||
+            app.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        return com.kurtz.homerecord.fieldlog.push.NotificationAsk.shouldAsk(
+            android.os.Build.VERSION.SDK_INT, granted, notificationAskStore.askedBefore(), pushEnabled,
+        )
+    }
+
+    fun markNotificationsAsked() = notificationAskStore.markAsked()
 
     /** Invite code from a tapped join link, held until the person has signed in and reaches FL-Welcome. */
     val pendingJoinCode = MutableStateFlow<String?>(null)

@@ -419,3 +419,14 @@ The Worker decides who hears what from the row before and after each accepted sy
 
 ## 2026-11-01 — Field Log push: Firebase from BuildConfig, registrar in :core (T047b1)
 `com.google.firebase:firebase-messaging` 26.0.1 (approved; latest stable on Google Maven) is the only Firebase artifact; it is set up with `FirebaseApp.initializeApp(options)` from `firebase.*` local properties or FIREBASE_* env vars baked into BuildConfig, so neither the google-services plugin nor a committed json is needed, and a build without the values simply has no push. The manifest turns off BigQuery delivery-metric export and analytics collection. `PushRegistrar` in `:core` (pure, fakes in tests) keeps the backend's token in step: register on sign in, on token refresh and after each reconnect until it succeeds (`pushSessions`), delete before an explicit sign out while the session still answers; the last registration is kept in plain prefs `push` (the token is not a secret). Notifications use androidx.core `NotificationCompat` (already on the classpath through activity) on four channels; the notification id is the message key's hash, so a second push about the same task, day, change order or week replaces the first. The FCM Task is awaited with a listener, since kotlinx-coroutines-play-services is not approved.
+
+## 2026-11-01 — Notification taps and the permission ask (T047b2)
+A notification tap reaches MainActivity with the push data as extras (`PushIntents`); `PushDestination` picks a tab and
+the screens to open on it, and the shell's `TabRequests` now carries those keys (the tab's stack is cut to its root and
+the keys pushed, so back returns to the tab root). Task: the job's Tasks tab, plus the task form for whoever manages the
+job's tasks (same as a task row on Today). Schedule: the Schedule tab until T059 builds FL-Schedule (T059a opens the
+day). Change order: the job's Changes tab. Timesheet approved: Timesheets on that week for Owner/Office (`TimesheetsKey`
+gained `week`), the Clock tab (own week) for everyone else, since Timesheets is Owner/Office only (AC-F3).
+The POST_NOTIFICATIONS ask comes the first time the person reaches the company's tabs, once per install, and only when
+the build has Firebase config: without it no notification can ever arrive, and an ask would also put a system dialog in
+front of every Maestro flow on the runner.

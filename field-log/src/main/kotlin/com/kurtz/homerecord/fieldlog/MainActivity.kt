@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
+import com.kurtz.homerecord.fieldlog.push.PushIntents
 import com.kurtz.homerecord.fieldlog.widget.ClockWidget
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +23,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         handleJoinLink(intent)
         handleWidget(intent)
+        handlePush(intent)
+    }
+
+    /** A tapped push notification opens its task, day, change order or week once the tabs are up (T047b2). */
+    private fun handlePush(intent: Intent?) {
+        PushIntents.messageOf(intent)?.let { container.pendingPush.value = it }
     }
 
     /** The clock widget's button opens the Clock tab (AC-F17). */
@@ -61,7 +68,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleJoinLink(intent)
-        if (savedInstanceState == null) handleWidget(intent)
+        if (savedInstanceState == null) {
+            handleWidget(intent)
+            handlePush(intent)
+        }
         setContent {
             HomeRecordTheme(Brand.FieldLog) {
                 CompositionLocalProvider(LocalTagPrefix provides "fl") {

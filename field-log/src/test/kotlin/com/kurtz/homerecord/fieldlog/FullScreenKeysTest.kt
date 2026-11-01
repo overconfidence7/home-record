@@ -12,7 +12,7 @@ class FullScreenKeysTest {
     }
 
     @Test fun viewersAndListsKeepTheTabBar() {
-        listOf(JobKey("j"), FileKey("f"), PhotoKey("p"), TeamKey, TimesheetsKey, ReportsKey, JobRoomKey("r"))
+        listOf(JobKey("j"), FileKey("f"), PhotoKey("p"), TeamKey, TimesheetsKey(), ReportsKey, JobRoomKey("r"))
             .forEach { assertFalse("$it", isFullScreen(it)) }
     }
 }

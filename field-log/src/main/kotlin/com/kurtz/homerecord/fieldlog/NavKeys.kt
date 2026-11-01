@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object CompanyKey : NavKey
 
-@Serializable data object TimesheetsKey : NavKey
+/** FL-Timesheets; [week] (ISO Monday) opens that week instead of this one, as a timesheet-approved notification does. */
+@Serializable data class TimesheetsKey(val week: String? = null) : NavKey
 
 @Serializable data object ReportsKey : NavKey
 
