@@ -2495,3 +2495,62 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); house-manual jank:house-manual (not measurable: 95 frames rendered while flinging the 200-row list (need 100))
 
 Tested: 59 device stages, 1171 unit tests, 154 backend tests, coverage 269/269 ACs. Passed: 57. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-01 (commit d47125a1)
+
+Judged the suite results for d47125a1 (run of 2026-11-01 12:55 UTC, 59 stages, 57 passed). `build` HEAD 1ff13dbb is three commits ahead (T047b2 notification taps, the F11 `SwipeToComplete` fix 18943057); the suite has not tested it, so neither is judged here. The c5543600 run was never judged on its own; its six auto findings are closed and its changes are covered by this run. New at this sha since the last judge: T044d1–d2 (task pins on the plan and on plan file pages), T035c3 (Today "Take a photo" and Recent photos), T045a–b (daily log PDF, Send, Sent line), T046a–b (FL-Sync with conflict log, Today chip opens it, offline pass), T047a–b1 (backend push, FCM plumbing; no Firebase keys on the runner, so nothing visible).
+
+Verdict: House Manual: a fourth run with nothing new for the homeowner; the house still ends at a 2D outline with grey "nothing yet" room cards, Reminders is still the placeholder, and there is no Emergency list, breaker panel or 3D. / Field Log: this is the first build where the day leaves the phone: the log turns into a PDF, sends or shares, and shows "Sent … Through the share sheet", and tasks can be pinned where the work is. The first thing a contractor would see is that the PDF his client gets says "Field Log" at the top instead of his company's name.
+
+- [ ] [Major] The daily log PDF sent from a real company is headed "Field Log" (the app name), not the company: the flow creates "QA Electric", yet the PDF's first line is "Field Log" with no phone or email, while the catalog PDF correctly shows "Ortiz Building, (412) 555-0148" [judge:fl-log-pdf-company-fallback] - steps: F09b: create company QA Electric, add a job, Log tab → Send → Share PDF, then Preview PDF - expected: AC-F33 (PDF with company logo …) and PRODUCT.md F9; `LogPdfMaker` reads `companyDao().get(job.companyId)` and `LogPdfContentBuilder` falls back to `R.string.app_name` only when that is null or blank, so on device the company row for the job is not found (or has no name) after sign-up; a JVM or instrumented test that builds the PDF for a company made through the welcome path would catch it - actual: "Field Log" / rule / "Daily log, Sunday, November 1, 2026" / "Hale kitchen" - screenshot: qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-pdf.png
+- [ ] [Product gap] A log with nothing in it sends without a word: on a day with no crew, notes, photos, tasks or materials, Send → Share PDF goes straight through and the client gets a page with only the header and "Page 1 of 1"; the Log tab then says Sent [judge:fl-log-send-empty] - steps: F09b: new job, Log tab for today with no entries → Send → Share PDF → Preview PDF - expected: PRODUCT.md F9 (Send produces the day's log); a contractor would want "This log is empty. Send anyway?" or Send disabled until something is logged - actual: blank page sent and marked "Sent Nov 1, 2026, 12:45 PM" - screenshot: qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png
+- [ ] [UI] Minor: task pins on FL-House sit on top of the room name: a pin dropped near the middle of a room covers its label ("Kitc[pin]hen"), and the plan does not move the label or the pin's anchor [judge:fl-house-pin-over-label] - steps: F11b: Pin on plan, tap the middle of Kitchen, Done, House tab - expected: rule 19 (the link target stays readable) and AC-F35; label drawn above pins or offset when a pin overlaps it - actual: pin 1's head covers the middle of "Kitchen" - screenshot: qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png
+
+Auto entry review: [auto:flow:field-log:F11-tasks] is not a flow error. The failure shot after the swipe shows "Set the kitchen outlets" back as an open row with no snackbar and no Done section, which matches the builder's diagnosis in 18943057 (the row restored as dismissed after Undo and re-completed/undone); that fix is after this sha, so judge it on the next run.
+
+Seen this run and fine: Log tab Send sheet with no job emails ("This job has no client or office email yet…", Share PDF) and with emails (Email PDF / Share another way), the Sent line with icon, time and route, Preview PDF / Send again bar above the navigation bar; Daily log PDF viewer with page thumbnails (catalog: company line, client and address, sections, Delays, Notes for the client); FL-Sync in light and offline ("1 change saved on this phone", Sync now, "No conflicts" with a one-line explanation) and with conflicts (task, punch, log and refused photo rows with reason and time, Clear log in the bar); Today "Take a photo" extended FAB opening Capture on the right job, Recent photos row, "Photo for which job?" sheet; Pin on plan picker (task title as subtitle, Done), pins on a plan file page with the pin button in the bar and page thumbnails. The Field Log landscape tour now rotates (all 8 `tour-landscape-*` are 2400×1080 with the rail), so [judge:qa-fl-tour-landscape-portrait] can be closed. Catalog nits not filed: the catalog PDF prints a "Photos" heading on page 2 with no grid and leaves the lower half of page 1 empty (photo files missing in the catalog, as [judge:qa-fl-photo-catalog-no-image]); `log-send-sheet-*` draws the sheet title through the status bar (catalog hosting, as [judge:qa-catalog-sheets-no-container]; the device sheet in F09b is fine).
+
+Still open and seen again this run: [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (every tour), [judge:hm-house-actions-wrap] (also on FL-House: "Edit / plan", "Export / PDF" in `flow-F11b-task-pin-F11b-house-pin.png`), [judge:hm-room-kind-not-inferred] and the grey room cards (`flow-H03-blueprint-room-H03-room-kitchen.png`: Kitchen "· Other"), [judge:fl-jobs-rows-no-icon] (`tour-landscape-jobs`), [judge:qa-jank-benchmark-missing] (house-manual jank skipped, 95 of 100 frames).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Unchanged; dark, 200% and landscape tours pass | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint, room page, Electrical layer pass; Kitchen still "Other" with a column of grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | H04 passes again after the flow fix; form fine; scan and saved warranty still only seen in the catalog | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item; seeded house reads well in Items | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third, no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown without spinner (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Ends at "Everything is synced"; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | "Can't load prices right now" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview, House, eight sub-tabs | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out, changes list | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Pass | F07, F07b, F07c pass; landscape Minor still open | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Pass | Take a photo on Today opens Capture on the job; photo lands in Recent photos and the job's Photos | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Clunky | F09 and F09b pass: Send, Share PDF, Sent line; but the PDF is headed "Field Log" not the company (new Major) and an empty log sends without a warning | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-pdf.png |
+| F11 | Clunky | Add, punch filter, tick/Undo, plan and file pins pass; swipe-to-done after Undo failed at this sha (fix after it); pin covers the room name | qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png |
+| F15 | Clunky | F15 passes; Delays below the fold with no hours (open Minor) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F16 | Pass | Airplane mode: "1 change saved on this phone", then synced; FL-Sync clear | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-saved-here.png |
+| F18 | Clunky | More, Team, Company, Sync fine; Schedule is the placeholder; landscape now rotates | qa-results:latest/field-log/screenshots/tour-landscape-jobs.png |
+
+Not built yet: F10, F12–F14, F17 (behind-the-wall T054, change orders T056–T058, schedule T059); push notifications built but untestable without Firebase keys (Needs Nate).
+
+Focus check: nothing wrong. Log send, pins, sync and push wording are crew and office wording, only in Field Log; House Manual has no Field Log tabs or terms.
+
+Coverage note: the auto entry reports 269/269 claimed ACs covered across 149 ticked tasks and subtasks (0 gaps).
+
+Judged: 19 screenshots opened (the F11 failure shot, F09b send sheet, PDF and Sent, F08b Today capture and Recent photos, F11b pin picker and house pin, F11c file pin, F16 offline, H03 room, FL landscape Jobs tour, and catalog log-pdf, log-send-sheet 200%, sync-log-conflicts, today-capture-picker, today-recent-photos 200%, job-house-pins), 804 crawler shots present and 15 landscape tour shots checked by script for orientation. 23 walkthrough steps. New issues: 3. Product gaps: 1.
