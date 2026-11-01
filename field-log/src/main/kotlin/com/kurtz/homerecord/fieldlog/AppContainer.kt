@@ -194,7 +194,7 @@ class AppContainer(private val app: Application) {
 
     /** Makes a daily log's PDF and hands it to email or the share sheet (AC-F33). */
     val logSender: com.kurtz.homerecord.fieldlog.log.LogSender by lazy {
-        com.kurtz.homerecord.fieldlog.log.AndroidLogSender(app, com.kurtz.homerecord.fieldlog.log.LogPdfMaker(app, db))
+        com.kurtz.homerecord.fieldlog.log.AndroidLogSender(app, com.kurtz.homerecord.fieldlog.log.LogPdfMaker(app, db) { company.current })
     }
 
     /**

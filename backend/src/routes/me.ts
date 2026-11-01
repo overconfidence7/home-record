@@ -11,6 +11,8 @@ me.use("*", requireSession);
  * Identity, memberships and entitlement so both apps gate consistently (AC-B50 reads these columns).
  * A company membership also carries the clock rules (require GPS, punch distance, break and overtime rule) so every
  * role clocks in under them, not only the Owner and Office who may read the profile (AC-F9, AC-F12, AC-F13, AC-F18).
+ * It also carries the company's phone for every role and its email for Owner and Office (the AC-B3 column split), so the
+ * daily log PDF a Lead or the office sends is headed with the company's contact line (AC-F33).
  */
 me.get("/", async (c) => {
   const session = c.get("session");
@@ -22,11 +24,11 @@ me.get("/", async (c) => {
   for (const m of session.memberships) {
     const table = m.tenantKind === "company" ? "companies" : "homes";
     const cols = m.tenantKind === "company"
-      ? "name, entitlement, trial_ends_at, settings"
-      : "name, entitlement, NULL AS trial_ends_at, NULL AS settings";
+      ? "name, entitlement, trial_ends_at, settings, phone, email"
+      : "name, entitlement, NULL AS trial_ends_at, NULL AS settings, NULL AS phone, NULL AS email";
     const row = await c.env.DB.prepare(`SELECT ${cols} FROM ${table} WHERE id = ?`)
       .bind(m.tenantId)
-      .first<{ name: string; entitlement: string | null; trial_ends_at: number | null; settings: string | null }>();
+      .first<{ name: string; entitlement: string | null; trial_ends_at: number | null; settings: string | null; phone: string | null; email: string | null }>();
     if (!row) continue;
     memberships.push({
       kind: m.tenantKind,
@@ -35,7 +37,13 @@ me.get("/", async (c) => {
       name: row.name,
       entitlement: row.entitlement,
       trialEndsAt: row.trial_ends_at,
-      ...(m.tenantKind === "company" ? { settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings ?? "{}") } } : {}),
+      ...(m.tenantKind === "company"
+        ? {
+            settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings ?? "{}") },
+            phone: row.phone,
+            email: m.role === "owner" || m.role === "office" ? row.email : null,
+          }
+        : {}),
     });
   }
   return c.json({ user, memberships });

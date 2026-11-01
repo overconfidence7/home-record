@@ -6,6 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.company.CompanyMembership
+import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.CompanyEntity
 import com.kurtz.homerecord.core.data.JobEntity
@@ -70,6 +72,33 @@ class LogPdfTest {
         assertThat(c.title).isEqualTo("Daily log, Friday, October 30, 2026")
         assertThat(c.job).isEqualTo("Hale kitchen")
         assertThat(c.jobLine).isEqualTo("Dana Hale · 14 Maple Ave, Wayne, PA")
+    }
+
+    // judge:fl-log-pdf-company-fallback: a company made on the welcome screen has no local company row, only the membership
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aCompanyMadeOnTheWelcomeScreenHeadsThePdfFromItsMembership() {
+        val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Owner, null, null, phone = "(412) 555-0148", email = "office@qaelectric.com")
+        val c = build(LogPdfCompany.of(job.companyId, local = null, membership = membership))
+        assertThat(c.company).isEqualTo("QA Electric")
+        assertThat(c.companyLine).isEqualTo("(412) 555-0148 · office@qaelectric.com")
+        assertThat(c.logoPath).isNull()
+        // a Lead's membership has no email (AC-B3): the phone alone
+        val lead = build(LogPdfCompany.of(job.companyId, null, membership.copy(role = CompanyRole.Lead, email = null)))
+        assertThat(lead.company).isEqualTo("QA Electric")
+        assertThat(lead.companyLine).isEqualTo("(412) 555-0148")
+    }
+
+    @AcceptanceCriterion("AC-F33")
+    @Test fun theLocalCompanyRowWinsAndOnlyTheJobsCompanyFillsItsBlanks() {
+        val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Owner, null, null, phone = "(412) 555-0148", email = "office@qaelectric.com")
+        val merged = LogPdfCompany.of("c1", company.copy(phone = " ", email = null), membership)
+        assertThat(merged?.name).isEqualTo("Ortiz Electric")
+        assertThat(merged?.phone).isEqualTo("(412) 555-0148")
+        assertThat(merged?.email).isEqualTo("office@qaelectric.com")
+        assertThat(merged?.logoPath).isEqualTo("/files/media/logo.png")
+        // another company's membership is never used
+        assertThat(LogPdfCompany.of("c2", null, membership)).isNull()
+        assertThat(build(LogPdfCompany.of("c2", null, membership)).company).isEqualTo(res.getString(R.string.app_name))
     }
 
     @AcceptanceCriterion("AC-F33")

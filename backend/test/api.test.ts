@@ -58,6 +58,7 @@ describe("/me", () => {
       {
         kind: "company", id: "c-me", role: "owner", name: "Kurtz Builders", entitlement: null, trialEndsAt: 1_900_000_000_000,
         settings: { otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false },
+        phone: null, email: null,
       },
     ]);
   });

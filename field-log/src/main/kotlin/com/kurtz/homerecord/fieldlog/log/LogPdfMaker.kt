@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.fieldlog.log
 
 import android.content.Context
+import com.kurtz.homerecord.core.company.CompanyMembership
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.log.DailyLog
 import com.kurtz.homerecord.core.log.LogRecipients
@@ -19,12 +20,17 @@ data class LogPdfFile(val file: File, val recipients: List<String>, val subject:
  * email recipients from the job's client and office addresses (AC-F33). Null when the log or its job is gone, or the
  * file could not be written.
  */
-class LogPdfMaker(private val context: Context, private val db: HomeRecordDatabase) {
+class LogPdfMaker(
+    private val context: Context,
+    private val db: HomeRecordDatabase,
+    /** The signed-in company membership; its name and contact line head the PDF when there is no local company row. */
+    private val membership: () -> CompanyMembership? = { null },
+) {
     private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun make(log: DailyLog): LogPdfFile? = withContext(Dispatchers.IO) {
         val job = db.jobDao().get(log.jobId) ?: return@withContext null
-        val company = db.companyDao().get(job.companyId)
+        val company = LogPdfCompany.of(job.companyId, db.companyDao().get(job.companyId), membership())
         val client = job.clientId?.let { db.clientDao().get(it) }
         // the full photo when it is on this phone, else its thumbnail; neither means it is still on another phone
         val photos = db.photoDao().observeForJob(job.id).first().associate { p ->

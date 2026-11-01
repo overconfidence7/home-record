@@ -45,6 +45,10 @@ data class CompanyMembership(
     val trialEndsAt: Long?,
     val entitlement: String?,
     val settings: CompanySettings = CompanySettings(),
+    /** The company's phone, for every role; heads the daily log PDF (AC-F33). */
+    val phone: String? = null,
+    /** The company's email, sent to Owner and Office only (AC-B3); heads the daily log PDF they send (AC-F33). */
+    val email: String? = null,
 )
 
 data class TeamMember(
@@ -122,6 +126,8 @@ data class MeMembership(
     val entitlement: String? = null,
     @SerialName("trialEndsAt") val trialEndsAt: Long? = null,
     val settings: SettingsBody? = null,
+    val phone: String? = null,
+    val email: String? = null,
 )
 
 @Serializable data class MeResponse(val user: MeUser, val memberships: List<MeMembership>)

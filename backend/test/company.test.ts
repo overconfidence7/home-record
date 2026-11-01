@@ -236,3 +236,19 @@ describe("AC-B3 GET /companies/:id column list per role", () => {
     }
   });
 });
+
+describe("AC-F33 /me carries the company's contact line for the daily log PDF", () => {
+  it("phone for every role, email for Owner and Office only (the AC-B3 split)", async () => {
+    const { owner, id, code } = await setup("meline");
+    await call("PATCH", `/companies/${id}/profile`, owner, { email: "office@kurtz.com" });
+    const ownerMe = await json(await call("GET", "/me", owner));
+    expect(ownerMe.memberships[0]).toMatchObject({ id, name: "Kurtz Builders", phone: "555-0100", email: "office@kurtz.com" });
+    const crew = await joinAs("meline-crew", code);
+    for (const role of ["crew", "lead", "sub", "office"]) {
+      await call("PATCH", `/companies/${id}/members/${crew.userId}`, owner, { role });
+      const me = await json(await call("GET", "/me", crew.token));
+      const expectedEmail = role === "office" ? "office@kurtz.com" : null;
+      expect(me.memberships[0]).toMatchObject({ id, name: "Kurtz Builders", phone: "555-0100", email: expectedEmail });
+    }
+  });
+});

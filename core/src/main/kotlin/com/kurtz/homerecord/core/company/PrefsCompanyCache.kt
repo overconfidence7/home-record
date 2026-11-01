@@ -20,6 +20,8 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
                 punchDistanceFt = prefs.getInt(PUNCH_DISTANCE, CompanySettings.DEFAULT_PUNCH_DISTANCE_FT),
                 photoOnPunch = prefs.getBoolean(PHOTO_ON_PUNCH, false),
             ),
+            phone = prefs.getString(PHONE, null),
+            email = prefs.getString(EMAIL, null),
         )
     }
 
@@ -36,6 +38,8 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
             editor.putBoolean(REQUIRE_GPS, it.settings.requireGps)
             editor.putInt(PUNCH_DISTANCE, it.settings.punchDistanceFt)
             editor.putBoolean(PHOTO_ON_PUNCH, it.settings.photoOnPunch)
+            it.phone?.let { p -> editor.putString(PHONE, p) }
+            it.email?.let { e -> editor.putString(EMAIL, e) }
         }
         editor.apply()
     }
@@ -51,5 +55,7 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
         const val REQUIRE_GPS = "require_gps"
         const val PUNCH_DISTANCE = "punch_distance_ft"
         const val PHOTO_ON_PUNCH = "photo_on_punch"
+        const val PHONE = "phone"
+        const val EMAIL = "email"
     }
 }

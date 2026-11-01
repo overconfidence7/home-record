@@ -16,6 +16,7 @@
 
 ## Decisions to confirm
 
+- 2026-11-01 (judge:fl-log-pdf-company-fallback): the daily log PDF's header line shows the company phone for every sender and the company email only when Owner or Office sends it, because AC-B3 keeps the company email from Crew, Lead and Sub; a Lead's PDF has the phone only. Reply if the email should print for a Lead's send too.
 - 2026-11-01 (T047b2): Field Log asks for notification permission the first time someone reaches the company's tabs (Android 13+, once per install), not at a later moment like the first task assigned to them; a system prompt cannot wait for the push itself, and this is the point from which tasks and schedule changes start reaching them. A timesheet-approved notification opens the Clock tab for crew (Timesheets is Owner/Office only). Reply if a later moment is wanted.
 - 2026-11-01 (T047b1): Field Log sets Firebase up by hand from four BuildConfig values (no google-services Gradle plugin, which is outside the approved list). Notification channels: Tasks, Schedule, Change orders, Timesheets, default importance. A schedule push for a day other than today or tomorrow says "Your schedule for <date> changed". Pushes that arrive after a sign out (the server had not heard yet) are dropped. If the phone is offline at sign out the token stays on the server until FCM reports it gone or another account signs in on the phone.
 

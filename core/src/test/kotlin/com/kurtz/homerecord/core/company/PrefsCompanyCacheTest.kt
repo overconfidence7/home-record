@@ -23,6 +23,16 @@ class PrefsCompanyCacheTest {
         assertThat(PrefsCompanyCache(context).read()).isNull()
     }
 
+    // AC-F33: the company's phone and email, which head the daily log PDF, survive a restart with no network
+    @Test fun keepsTheCompanyContactLine() {
+        val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Owner, null, null, phone = "(412) 555-0148", email = "office@qaelectric.com")
+        PrefsCompanyCache(context).write(membership)
+        assertThat(PrefsCompanyCache(context).read()).isEqualTo(membership)
+        val noEmail = membership.copy(role = CompanyRole.Lead, email = null)
+        PrefsCompanyCache(context).write(noEmail)
+        assertThat(PrefsCompanyCache(context).read()).isEqualTo(noEmail)
+    }
+
     @Test fun aCacheFromBeforeTheRulesReadsTheDefaults() {
         context.getSharedPreferences("company_cache", Context.MODE_PRIVATE).edit()
             .putString("id", "c1").putString("name", "Kurtz Builders").putString("role", "crew").commit()

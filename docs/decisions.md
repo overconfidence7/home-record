@@ -430,3 +430,12 @@ gained `week`), the Clock tab (own week) for everyone else, since Timesheets is 
 The POST_NOTIFICATIONS ask comes the first time the person reaches the company's tabs, once per install, and only when
 the build has Firebase config: without it no notification can ever arrive, and an ask would also put a system dialog in
 front of every Maestro flow on the runner.
+
+## 2026-11-01 — The daily log PDF's header comes from the membership when there is no local company row (judge:fl-log-pdf-company-fallback)
+
+The company profile lives on the Worker (`companies`), and nothing writes the device's Room `company` table, so for a
+company made on the welcome screen `LogPdfMaker` found no row and printed the app name. Rather than add a new sync
+kind, `/me` now returns the company's `phone` for every role and its `email` for Owner and Office (the AC-B3 column
+split), `CompanyMembership` and its prefs cache keep them, and the pure `LogPdfCompany.of` fills the PDF's company from
+the membership (only the job's own company; a non-blank local row still wins). The logo stays local-only until the
+company logo upload is built. A Lead's PDF therefore carries the phone but not the email.
