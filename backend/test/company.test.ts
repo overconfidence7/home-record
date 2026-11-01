@@ -162,6 +162,15 @@ describe("FL-Company profile", () => {
     expect(after.email).toBe("office@kurtz.com");
     expect(after.settings).toMatchObject({ requireGps: true, punchDistanceFt: 300, photoOnPunch: true });
   });
+  // AC-B30 (R09f): the company time zone sets "today" and "tomorrow" for schedule pushes
+  it("keeps a time zone the runtime knows and refuses an unknown one", async () => {
+    const { owner, id } = await setup("proftz");
+    expect((await call("PATCH", `/companies/${id}/profile`, owner, { settings: { timeZone: "America/Chicago" } })).status).toBe(200);
+    expect((await call("PATCH", `/companies/${id}/profile`, owner, { settings: { timeZone: "Not/AZone" } })).status).toBe(400);
+    await call("PATCH", `/companies/${id}/profile`, owner, { settings: { requireGps: true } });
+    const after = await json(await call("GET", `/companies/${id}/profile`, owner));
+    expect(after.settings).toMatchObject({ timeZone: "America/Chicago", requireGps: true });
+  });
   it("rejects an out-of-range punch distance", async () => {
     const { owner, id } = await setup("prof2");
     expect((await call("PATCH", `/companies/${id}/profile`, owner, { settings: { punchDistanceFt: 5 } })).status).toBe(400);

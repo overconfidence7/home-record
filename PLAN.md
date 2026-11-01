@@ -286,7 +286,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] R09c: weather: treat a snapshot as final by the backend's fetch time, not the phone's receive time (the Worker cache can hand back the evening forecast after midnight); an empty Open-Meteo day says "No weather" rather than offline (AC-F31)
   - [x] R09d: Log tab: "today" moves on at midnight while the tab is open; Remove delay targets the delay by id, not list position; a sent log edited or re-assembled later shows "Changed since sent"; notes filed by `NoteEntity.day`, not the viewer's time zone (AC-F30, AC-F33)
   - [x] R09e: conflict log on More > Sync shows only the current company's lines (`tenantKey` is written but never read) (AC-F55)
-  - [ ] R09f: task form opened from a push reloads when the task arrives by sync instead of staying on the error; company time zone settable in `settingsSchema` (today/tomorrow for schedule pushes is always Eastern now); schedule push opens the day (with T059) (AC-F36, AC-F42)
+  - [x] R09f: task form opened from a push reloads when the task arrives by sync instead of staying on the error; company time zone settable in `settingsSchema` (today/tomorrow for schedule pushes is always Eastern now); schedule push opens the day (with T059) (AC-F36, AC-F42)
+  - [ ] R09f1: company time zone picker on FL-Company/Settings (Owner and Office) writing `settings.timeZone`; until then the backend default (Eastern) applies (AC-F42)
   - [ ] R09g: task pins: a Crew pin tap opens that task read only (today it only switches to the Tasks tab); file viewer pin `choose` re-checks canManageTasks; a tap on a page that has not rendered yet drops no pin (AC-F35)
 - [ ] V3: Visual review of M3 screenshots; walk PRODUCT.md Field Log steps 1–6
 

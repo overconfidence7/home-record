@@ -89,7 +89,19 @@ const settingsSchema = z.object({
   requireGps: z.boolean().optional(),
   punchDistanceFt: z.number().int().min(50).max(52_800).optional(),
   photoOnPunch: z.boolean().optional(),
+  /** IANA zone for "today" and "tomorrow" in schedule pushes (AC-B30); unset means Eastern. */
+  timeZone: z.string().min(1).max(64).refine(isTimeZone, "unknown time zone").optional(),
 });
+
+/** True for a zone name the Workers runtime knows (`America/Chicago`, `UTC`). */
+export function isTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const updateBody = z.object({
   name: z.string().trim().min(1).max(120).optional(),

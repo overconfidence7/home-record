@@ -149,6 +149,23 @@ describe("AC-B30 sync push sends the notifications", () => {
     }
   });
 
+  // R09f: "today" and "tomorrow" follow the company's settings.timeZone. Kiritimati (UTC+14) and Pago Pago (UTC-11) are
+  // 25 hours apart, so Kiritimati's tomorrow is always past Pago Pago's tomorrow; with the zone ignored (Eastern) one of
+  // the two companies below gets the wrong answer at any time of day.
+  it("AC-F42 a schedule push uses the company time zone", async () => {
+    const owner = await seedUser("pz-own", "pz-own@example.com");
+    await seedUser("pz-crew", "pz-crew@example.com");
+    const kiriTomorrow = companyDays(Date.now(), "Pacific/Kiritimati").tomorrow;
+    for (const [co, zone] of [["pz-kiri", "Pacific/Kiritimati"], ["pz-pago", "Pacific/Pago_Pago"]]) {
+      await seedCompany(co, "Hale Electric", "pz-own");
+      await addMember(co, "pz-crew", "crew");
+      expect((await call("PATCH", `/companies/${co}/profile`, owner, { settings: { timeZone: zone } })).status).toBe(200);
+      await push(owner, co, [op(1, "assignment", { id: `${co}-a`, jobId: "pz-j", memberId: "pz-crew", date: kiriTomorrow })]);
+    }
+    expect((await log("pz-kiri")).map((r) => [r.userId, r.type, r.data.date])).toEqual([["pz-crew", "schedule_changed", kiriTomorrow]]);
+    expect(await log("pz-pago")).toEqual([]);
+  });
+
   it("a change order signed on a lead's phone tells the Owner and Office, not the lead", async () => {
     const lead = await seedUser("pc-lead", "pc-lead@example.com");
     await seedUser("pc-own", "pc-own@example.com");
