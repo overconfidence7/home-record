@@ -2483,3 +2483,15 @@ Tested: 58 device stages, 1124 unit tests, 140 backend tests, coverage 261/261 A
 ## Builder notes 2026-11-01 (T047b2)
 
 - [ ] [Minor] `LogSendTest.theShareSheetMarksItSentWithNoRecipientsAndASecondSendReplacesTheFirst` timed out at its 5 s wait once in a full `assembleDebug testDebugUnitTest --max-workers=2` run on d47125a1+T047b2 (code it covers unchanged); passed 3/3 alone and in a 1-worker full run - expected: no timing-dependent JVM test - actual: a 5 s wall-clock wait on a loaded container
+
+## QA auto 2026-11-01 (commit d47125a1)
+
+Automated suite run at 2026-11-01 12:56 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F11-tasks fails on field-log (regression of a fixed item) [auto:flow:field-log:F11-tasks] - steps: automated, see qa-results branch latest/ for commit d47125a1 - expected: walkthrough step F11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11-tasks.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F11 Fail, field-log F11b Pass, field-log F11c Pass, field-log F15 Pass, field-log F16 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); house-manual jank:house-manual (not measurable: 95 frames rendered while flinging the 200-row list (need 100))
+
+Tested: 59 device stages, 1171 unit tests, 154 backend tests, coverage 269/269 ACs. Passed: 57. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
