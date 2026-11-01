@@ -269,4 +269,32 @@ class DailyLogRepositoryTest {
         assertThat(checkNotNull(repo.assemble("j1", day)).log.sent).isTrue()
         assertThat(repo.markSent("missing", emptyList(), "/x.pdf")).isNull()
     }
+
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aSentLogEditedOrReassembledLaterIsChangedSinceSent() = runBlocking<Unit> { // R09d
+        val id = checkNotNull(repo.assemble("j1", day)).log.id
+        clock = at(17, 45)
+        repo.markSent(id, emptyList(), "/cache/logs/a.pdf")
+        assertThat(checkNotNull(repo.observe("j1", day).first()).changedSinceSent).isFalse()
+        // re-opening the day with nothing new saves nothing, so it is still the version that went out
+        clock = at(18)
+        assertThat(checkNotNull(repo.assemble("j1", day)).log.changedSinceSent).isFalse()
+        // a note filed later re-assembles the day: the client's PDF is now out of date
+        db.noteDao().upsert(NoteEntity(id = "n3", jobId = "j1", day = day.toString(), text = "Sink base glued", createdAt = at(17, 50), updatedAt = at(17, 50)))
+        clock = at(18, 5)
+        assertThat(checkNotNull(repo.assemble("j1", day)).log.changedSinceSent).isTrue()
+        // sending again clears it; a hand edit after that sets it again
+        clock = at(18, 10)
+        assertThat(checkNotNull(repo.markSent(id, emptyList(), "/cache/logs/b.pdf")).changedSinceSent).isFalse()
+        clock = at(18, 20)
+        assertThat(checkNotNull(repo.update(id) { it.copy(visitors = "Inspector Ruiz") }).changedSinceSent).isTrue()
+    }
+
+    @AcceptanceCriterion("AC-F30")
+    @Test fun aNoteIsFiledUnderItsOwnDayNotTheViewersZone() = runBlocking<Unit> { // R09d
+        // written at 23:30 on the 29th on a phone in Chicago and filed under the 29th; in UTC that moment is the 30th
+        db.noteDao().upsert(NoteEntity(id = "n9", jobId = "j1", day = day.minusDays(1).toString(), text = "Late walk-through", createdAt = at(4, 30), updatedAt = at(4, 30)))
+        assertThat(checkNotNull(repo.assemble("j1", day)).log.sections.workDone.value).containsExactly("Set the base cabinets")
+        assertThat(checkNotNull(repo.assemble("j1", day.minusDays(1))).log.sections.workDone.value).containsExactly("Late walk-through")
+    }
 }

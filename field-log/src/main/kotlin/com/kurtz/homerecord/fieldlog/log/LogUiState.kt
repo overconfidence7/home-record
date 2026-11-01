@@ -26,7 +26,8 @@ sealed interface LogEditor {
     @Serializable data class Text(val section: LogTextSection, val text: String) : LogEditor
     @Serializable data class Hours(val memberId: String, val name: String, val text: String) : LogEditor
     @Serializable data class Delay(val reason: DelayReason? = null, val note: String = "") : LogEditor
-    @Serializable data class RemoveDelay(val index: Int) : LogEditor
+    /** "Remove delay?" for the delay with [key] ([LogDelay.key]). */
+    @Serializable data class RemoveDelay(val key: String) : LogEditor
     /** "Leave out of the log?" for one photo, task, change order or material line; [label] names it (null for a photo). */
     @Serializable data class Drop(val kind: LogLineKind, val id: String, val label: String? = null) : LogEditor
     @Serializable data object PickDay : LogEditor
@@ -53,6 +54,8 @@ data class LogUiState(
     val sentAt: Long? = null,
     /** Who the last send went to by email; empty when it went through the share sheet (AC-F33). */
     val sentTo: List<String> = emptyList(),
+    /** The log was edited or re-assembled after its last send, so the client's copy is out of date (R09d). */
+    val changedSinceSent: Boolean = false,
     /** The PDF is being made for a send. */
     val sending: Boolean = false,
     /** The last send could not make the PDF or found no app to take it. */
@@ -100,7 +103,7 @@ sealed interface LogEvent {
     data class EditText(val section: LogTextSection) : LogEvent
     data class EditHours(val memberId: String) : LogEvent
     data object AddDelay : LogEvent
-    data class AskRemoveDelay(val index: Int) : LogEvent
+    data class AskRemoveDelay(val key: String) : LogEvent
     data class AskDrop(val kind: LogLineKind, val id: String) : LogEvent
     data class PutBack(val kind: LogLineKind) : LogEvent
     /** Opens the full-screen weather form for the shown day; the route handles it (rule 15). */
@@ -110,6 +113,8 @@ sealed interface LogEvent {
     data object SaveEditor : LogEvent
     data object DismissEditor : LogEvent
     data object Retry : LogEvent
+    /** The screen came back to the front: the calendar day may have turned while it was away. */
+    data object CheckToday : LogEvent
     /** Opens the log's PDF in the in-app viewer; the route handles it. */
     data object Preview : LogEvent
     data object OpenSend : LogEvent

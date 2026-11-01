@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -16,6 +18,7 @@ fun LogRoute(deps: LogDeps, modifier: Modifier = Modifier, onEditWeather: (java.
         factory = viewModelFactory { initializer { LogViewModel(deps, createSavedStateHandle()) } },
     )
     val state by vm.state.collectAsState()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.onEvent(LogEvent.CheckToday) }
     LogScreen(state, { e ->
         when (e) {
             LogEvent.EditWeather -> onEditWeather(state.day)

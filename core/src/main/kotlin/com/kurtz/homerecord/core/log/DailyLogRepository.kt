@@ -67,6 +67,9 @@ data class DailyLog(
     val pdfPath: String? = null,
 ) {
     val sent: Boolean get() = status == DailyLogRepository.STATUS_SENT
+
+    /** Saved again after the last send (an edit, a re-assembly, a new weather snapshot): the sent PDF is out of date. */
+    val changedSinceSent: Boolean get() = sent && sentAt != null && updatedAt > sentAt
 }
 
 data class AssembleResult(val log: DailyLog, val weather: WeatherStatus)
@@ -212,7 +215,7 @@ class DailyLogRepository(
             zone = zone(),
             shifts = ShiftBuilder.build(punches, stamp),
             memberNames = names,
-            notes = db.noteDao().listFor(job.id).map { LogNoteInput(it.id, it.createdAt, it.text, it.transcript) },
+            notes = db.noteDao().listFor(job.id).map { LogNoteInput(it.id, it.createdAt, it.text, it.transcript, runCatching { LocalDate.parse(it.day) }.getOrNull()) },
             photos = db.photoDao().observeForJob(job.id).first().map { LogPhotoInput(it.id, it.takenAt) },
             // doneAt since v5; a done row synced from an older app falls back to its last change
             tasks = db.taskDao().listFor(job.id).map { LogTaskInput(it.id, it.title, if (it.done) it.doneAt ?: it.updatedAt else null) },

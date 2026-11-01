@@ -64,7 +64,7 @@ class LogScreenTest {
             }
         }
         assertThat(events).containsExactly(
-            LogEvent.EditHours("m1"), LogEvent.EditText(LogTextSection.WORK_DONE), LogEvent.AskRemoveDelay(0), LogEvent.AddDelay,
+            LogEvent.EditHours("m1"), LogEvent.EditText(LogTextSection.WORK_DONE), LogEvent.AskRemoveDelay("WEATHER:Rain held up the roof tear-off"), LogEvent.AddDelay,
             LogEvent.EditText(LogTextSection.VISITORS), LogEvent.EditText(LogTextSection.SAFETY), LogEvent.EditText(LogTextSection.CLIENT_NOTES),
         ).inOrder()
         rule.onNodeWithTag("fl_log_next").assertIsNotEnabled()

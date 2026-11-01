@@ -31,8 +31,12 @@ enum class LogLineKind { PHOTO, TASK, CHANGE_ORDER, MATERIAL }
 /** Delay reasons for the picker (AC-F32). Words come from string resources in the app. */
 enum class DelayReason { WEATHER, MATERIALS, INSPECTION, CLIENT, OTHER }
 
+/** A delay on the day (AC-F32). [id] is blank on delays saved before R09d; [key] then falls back to what it says. */
 @Serializable
-data class LogDelay(val reason: DelayReason, val note: String = "")
+data class LogDelay(val reason: DelayReason, val note: String = "", val id: String = "") {
+    /** Picks this delay out of the day's list whatever its position, so an edit never hits the wrong one. */
+    val key: String get() = id.ifEmpty { "${reason.name}:$note" }
+}
 
 /**
  * The day's weather at the job (AC-F31, from the backend proxy AC-B32). [conditions] is the backend's key
@@ -100,7 +104,14 @@ data class DailyLogSections(
 }
 
 /** A job note or voice memo for the day; [transcript] is the memo's speech-to-text. */
-data class LogNoteInput(val id: String, val createdAt: Long, val text: String, val transcript: String?)
+data class LogNoteInput(
+    val id: String,
+    val createdAt: Long,
+    val text: String,
+    val transcript: String?,
+    /** The day the note was filed under on the phone that wrote it; null falls back to [createdAt] in the log's zone. */
+    val day: LocalDate? = null,
+)
 
 data class LogPhotoInput(val id: String, val takenAt: Long)
 
@@ -143,7 +154,8 @@ object LogAssembler {
         fun kept(kind: LogLineKind, id: String) = id !in prev.dropped[kind].orEmpty()
 
         val crew = crewLines(inputs, start, end, now)
-        val workDone = inputs.notes.filter { inDay(it.createdAt) }.sortedWith(compareBy({ it.createdAt }, { it.id }))
+        // a note belongs to the day it was filed under, not the day its time falls on in this phone's zone (R09d)
+        val workDone = inputs.notes.filter { n -> n.day?.let { it == inputs.day } ?: inDay(n.createdAt) }.sortedWith(compareBy({ it.createdAt }, { it.id }))
             .mapNotNull { n -> listOf(n.text, n.transcript.orEmpty()).map { it.trim() }.filter { it.isNotEmpty() }.distinct().joinToString("\n").ifEmpty { null } }
         val photos = inputs.photos.filter { inDay(it.takenAt) && kept(LogLineKind.PHOTO, it.id) }.sortedWith(compareBy({ it.takenAt }, { it.id })).map { it.id }
         val tasks = inputs.tasks.filter { it.doneAt?.let(inDay) == true && kept(LogLineKind.TASK, it.id) }.sortedWith(compareBy({ it.doneAt }, { it.id }))

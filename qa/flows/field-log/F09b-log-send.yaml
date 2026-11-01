@@ -94,3 +94,26 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "Through the share sheet"
 - assertVisible: "Send again"
 - takeScreenshot: F09b-log-sent
+# R09d (AC-F33): an edit after the send says the client's copy is out of date
+- scrollUntilVisible:
+    element:
+      id: fl_log_visitors_edit
+    direction: DOWN
+- tapOn:
+    id: fl_log_visitors_edit
+- tapOn:
+    id: fl_log_text_field
+- inputText: "Township inspector"
+- hideKeyboard
+- tapOn:
+    id: fl_log_text_save
+- extendedWaitUntil:
+    visible:
+      id: fl_log_visitors_text
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_log_sent
+    direction: UP
+- assertVisible: "Changed since sent.*"
+- takeScreenshot: F09b-log-changed-since-sent

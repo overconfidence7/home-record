@@ -207,4 +207,16 @@ class LogAssemblerTest {
         assertEquals(listOf("t1"), back.tasksDone.value.map { it.taskId })
         assertNull(back.dropped[LogLineKind.PHOTO])
     }
+
+    @Test fun notesGoByTheDayTheyWereFiledUnderWhenItIsKnown() { // AC-F30 (R09d)
+        val notes = listOf(
+            // 00:30 on the 31st in New York, but filed under the 30th by a phone in Denver
+            LogNoteInput("n1", at(0, 30, d = day.plusDays(1)), "Grout sealed", null, day = day),
+            // 22:00 on the 30th here, filed under the 31st by a phone in Lisbon
+            LogNoteInput("n2", at(22), "Tile delivered", null, day = day.plusDays(1)),
+            // an older note with no day falls back to its time in the log's zone
+            LogNoteInput("n3", at(9), "Primed the walls", null),
+        )
+        assertEquals(listOf("Primed the walls", "Grout sealed"), LogAssembler.assemble(inputs(notes = notes), now = endOfDay).workDone.value)
+    }
 }

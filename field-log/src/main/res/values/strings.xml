@@ -511,6 +511,7 @@
     <string name="log_sent_at">Sent %1$s</string>
     <string name="log_sent_to">To %1$s</string>
     <string name="log_sent_shared">Through the share sheet</string>
+    <string name="log_changed_since_sent">Changed since sent. Send again so the client has this version.</string>
     <string name="log_preview">Preview PDF</string>
     <string name="log_send">Send</string>
     <string name="log_send_again">Send again</string>

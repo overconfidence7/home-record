@@ -520,6 +520,11 @@ fun LogSentScreenshot() = LogSentPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun LogSentChangedScreenshot() = LogSentChangedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun LogSendSheetScreenshot() = LogSendSheetPreview()
 
 @PreviewTest

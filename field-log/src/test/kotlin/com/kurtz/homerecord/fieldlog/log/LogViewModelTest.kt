@@ -32,6 +32,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -178,11 +179,13 @@ class LogViewModelTest {
         v.onEvent(LogEvent.EditorReason(DelayReason.MATERIALS))
         v.onEvent(LogEvent.SaveEditor)
         val s = v.settled { it.delays.isNotEmpty() }
-        assertThat(s.delays).containsExactly(LogDelay(DelayReason.MATERIALS, "Countertop templates pushed to Monday"))
+        assertThat(s.delays.map { it.reason to it.note }).containsExactly(DelayReason.MATERIALS to "Countertop templates pushed to Monday")
+        assertThat(s.delays.single().id).isNotEmpty()
         assertThat(saved().delays).isEqualTo(s.delays)
 
-        v.onEvent(LogEvent.AskRemoveDelay(0))
-        assertThat(v.settled { it.editor != null }.editor).isEqualTo(LogEditor.RemoveDelay(0))
+        val key = s.delays.single().key
+        v.onEvent(LogEvent.AskRemoveDelay(key))
+        assertThat(v.settled { it.editor != null }.editor).isEqualTo(LogEditor.RemoveDelay(key))
         v.onEvent(LogEvent.SaveEditor)
         assertThat(v.settled { it.delays.isEmpty() }.editor).isNull()
     }
@@ -227,7 +230,7 @@ class LogViewModelTest {
         assertThat(s.weatherStatus).isNull()
         v.onEvent(LogEvent.AddDelay)
         v.onEvent(LogEvent.EditText(LogTextSection.SAFETY))
-        v.onEvent(LogEvent.AskRemoveDelay(0))
+        v.onEvent(LogEvent.AskRemoveDelay(LogDelay(DelayReason.WEATHER, "Rain").key))
         assertThat(v.settled().editor).isNull()
         assertThat(saved()).isEqualTo(sections)
     }
@@ -292,5 +295,81 @@ class LogViewModelTest {
         val off = LogEdits.hours(start, "m2", 0)
         assertThat(off.crew.value.map { it.memberId }).containsExactly("m1")
         assertThat(off.crew.edited).isTrue()
+    }
+
+    // AC-F32 (R09d): Remove delay targets the delay itself; one added on another phone meanwhile must not shift it
+    @AcceptanceCriterion("AC-F32")
+    @Test fun removeDelayTakesOffTheDelayAskedAboutEvenWhenTheListShifted() = runBlocking<Unit> {
+        val v = vm()
+        v.settled { it.exists }
+        v.onEvent(LogEvent.AddDelay)
+        v.onEvent(LogEvent.EditorReason(DelayReason.INSPECTION))
+        v.onEvent(LogEvent.EditorText("Rough electrical inspection moved to Friday"))
+        v.onEvent(LogEvent.SaveEditor)
+        val inspection = v.settled { it.delays.isNotEmpty() }.delays.single()
+        v.onEvent(LogEvent.AskRemoveDelay(inspection.key))
+        // while the dialog is open, a delay typed on the office phone syncs in ahead of it
+        repo.update(DailyLogRepository.idFor("j1", day)) { it.copy(delays = listOf(LogDelay(DelayReason.WEATHER, "Rain", id = "office-1")) + it.delays) }
+        v.settled { it.delays.size == 2 }
+        v.onEvent(LogEvent.SaveEditor)
+        val left = v.settled { it.delays.size == 1 }.delays
+        assertThat(left.map { it.id }).containsExactly("office-1")
+        assertThat(saved().delays.map { it.id }).containsExactly("office-1")
+    }
+
+    // AC-F32 (R09d): delays saved before they had ids are told apart by what they say
+    @Test fun delaysWithoutIdsAreRemovedByWhatTheySay() {
+        val start = DailyLogSections(delays = listOf(LogDelay(DelayReason.WEATHER, "Rain"), LogDelay(DelayReason.CLIENT, "Tile change")))
+        assertThat(LogEdits.removeDelay(start, "CLIENT:Tile change").delays).containsExactly(LogDelay(DelayReason.WEATHER, "Rain"))
+        assertThat(LogEdits.removeDelay(start, "gone")).isEqualTo(start)
+    }
+
+    // AC-F30 (R09d): "today" moves on at midnight while the tab is open
+    @AcceptanceCriterion("AC-F30")
+    @Test fun todayMovesOnAtMidnightAndSomeoneOnTodayFollowsIt() = runBlocking<Unit> {
+        var now = day
+        val turns = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+        val v = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }, dayTurns = turns), SavedStateHandle())
+        assertThat(v.settled { it.exists }.canGoForward).isFalse()
+        now = day.plusDays(1)
+        turns.emit(Unit)
+        val s = v.settled { it.today == day.plusDays(1) }
+        assertThat(s.day).isEqualTo(day.plusDays(1))
+        // someone reading an earlier day stays on it, and Next now reaches the new day
+        v.onEvent(LogEvent.PreviousDay)
+        v.settled { it.day == day }
+        now = day.plusDays(2)
+        v.onEvent(LogEvent.CheckToday)
+        val back = v.settled { it.today == day.plusDays(2) }
+        assertThat(back.day).isEqualTo(day)
+        assertThat(back.canGoForward).isTrue()
+    }
+
+    // AC-F30 (R09d): an open sheet keeps its day, so the typing is not saved onto the new day
+    @Test fun anOpenSheetKeepsItsDayWhenMidnightPasses() = runBlocking<Unit> {
+        var now = day
+        val v = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }), SavedStateHandle())
+        v.settled { it.exists }
+        v.onEvent(LogEvent.EditText(LogTextSection.SAFETY))
+        now = day.plusDays(1)
+        v.onEvent(LogEvent.CheckToday)
+        val s = v.settled { it.today == day.plusDays(1) }
+        assertThat(s.day).isEqualTo(day)
+        assertThat(s.editor).isInstanceOf(LogEditor.Text::class.java)
+    }
+
+    // AC-F33 (R09d): a sent log changed later says so on the Sent line
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aSentLogChangedLaterSaysChangedSinceSent() = runBlocking<Unit> {
+        var clock = at(17)
+        val timed = DailyLogRepository(db, weatherApi = { _, _, _ -> weather }, now = { clock }, zone = { zone })
+        val v = LogViewModel(LogDeps("j1", timed, db.photoDao(), gates, today = { day }), SavedStateHandle())
+        val id = v.settled { it.exists }.let { DailyLogRepository.idFor("j1", day) }
+        clock = at(17, 30)
+        timed.markSent(id, emptyList(), "/cache/a.pdf")
+        assertThat(v.settled { it.sentAt != null }.changedSinceSent).isFalse()
+        clock = at(17, 40)
+        timed.update(id) { it.copy(safety = "Hard hats on") }
+        assertThat(v.settled { it.safety.isNotEmpty() }.changedSinceSent).isTrue()
     }
 }

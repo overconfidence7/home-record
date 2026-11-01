@@ -467,3 +467,15 @@ stamps the snapshot with that time (falling back to the phone's clock for an old
 handed out after midnight is not treated as the day's final weather; an empty day shows "No weather recorded." through
 the new `WeatherStatus.NoData`. A thrown upstream fetch is a 502 like a failed one. Empty answers are cached for the
 same 6 h so a cell with no data does not call Open-Meteo on every open.
+
+## 2026-11-01 — Log tab day rollover, delay ids, "Changed since sent", notes by filed day (R09d)
+
+- "Today" on the Log tab is a flow: `Midnight.ticks()` (in `:core`) fires a second after each local midnight and the
+  route re-checks on resume (a sleeping phone's wait does not count deep sleep). Someone looking at today follows it to
+  the new day unless a sheet is open; a past day stays put and Next reaches the new day.
+- `LogDelay` gains an `id` (UUID on new delays); Remove targets `LogDelay.key` (the id, or reason and note for delays
+  saved before ids), so a delay synced in from another phone while the dialog is open cannot shift the target.
+- "Changed since sent" is `sent && updatedAt > sentAt`: any save after the send (hand edit, re-assembly that changed a
+  column, a new weather snapshot) means the client's PDF is out of date. No schema change.
+- The assembler files a note by `NoteEntity.day` (the day the writing phone filed it under) and only falls back to its
+  `createdAt` in the viewer's zone when no day is known.

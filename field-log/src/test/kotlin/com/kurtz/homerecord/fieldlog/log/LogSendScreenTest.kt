@@ -51,6 +51,15 @@ class LogSendScreenTest {
         rule.onNodeWithTag("fl_log_sent").assertExists()
         rule.onNodeWithText("To jen.hale@example.com, office@ortizbuild.com").assertExists()
         rule.onNodeWithText("Send again").assertExists()
+        rule.onNodeWithTag("fl_log_changed_since_sent").assertDoesNotExist()
+    }
+
+    /** R09d: a log edited or re-assembled after it went out says the client's copy is out of date. */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun aSentLogChangedLaterSaysSoOnTheSentLine() {
+        show(ready.copy(sentAt = day.atTime(16, 10).toInstant(ZoneOffset.UTC).toEpochMilli(), changedSinceSent = true))
+        rule.onNodeWithTag("fl_log_changed_since_sent", useUnmergedTree = true).assertIsDisplayed()
+        rule.onNodeWithText("Changed since sent. Send again so the client has this version.").assertExists()
     }
 
     /**

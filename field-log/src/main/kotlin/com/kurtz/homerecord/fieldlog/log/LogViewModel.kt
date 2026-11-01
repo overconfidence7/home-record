@@ -16,6 +16,7 @@ import com.kurtz.homerecord.core.model.LogWeather
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.Locale
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -36,6 +38,8 @@ class LogDeps(
     val photos: PhotoDao,
     val gates: Flow<RoleGates>,
     val today: () -> LocalDate = LocalDate::now,
+    /** Emits when the calendar day may have turned ([com.kurtz.homerecord.core.log.Midnight.ticks]); empty in previews and tests. */
+    val dayTurns: Flow<Unit> = emptyFlow(),
     /** The day to open on the first time (a delay tapped in Reports); never past today. Null opens today. */
     val initialDay: LocalDate? = null,
     /** Makes and hands off the PDF; null leaves Send out (previews). */
@@ -65,8 +69,9 @@ private sealed interface Assembly {
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) : ViewModel() {
     private val json = Json { ignoreUnknownKeys = true }
-    private val today = d.today()
-    private val firstDay = (d.initialDay?.let { minOf(it, today) } ?: today).toString()
+    /** Moves on at midnight while the tab is open, and when the screen comes back to the front (R09d). */
+    private val today = MutableStateFlow(d.today())
+    private val firstDay = (d.initialDay?.let { minOf(it, today.value) } ?: today.value).toString()
     private val day = saved.getStateFlow(DAY, firstDay).map(LocalDate::parse)
     private val editor = saved.getStateFlow(EDITOR, "").map(::decode)
     private val hoursInvalid = MutableStateFlow(false)
@@ -81,19 +86,19 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
     private val thumbs = d.photos.observeForJob(d.jobId).map { rows -> rows.associate { it.id to (it.thumbPath ?: it.path) } }
 
     val state: StateFlow<LogUiState> = combine(
-        combine(day, log) { dd, l -> dd to l },
+        combine(day, log, today) { dd, l, t -> Triple(dd, l, t) },
         canEdit,
         assembly,
         thumbs,
         combine(editor, hoursInvalid, sending, sendFailed) { e, h, s, f -> Editing(e, h, s, f) },
-    ) { (dd, dayLog), edit, asm, photos, (open, badHours, isSending, failedSend) ->
+    ) { (dd, dayLog, now), edit, asm, photos, (open, badHours, isSending, failedSend) ->
         val (logDay, saved) = dayLog
         val fresh = logDay == dd
         val savedLog = saved.takeIf { fresh }
         current = savedLog
         val running = edit && (asm.day != dd || asm is Assembly.Running)
         val base = LogUiState(
-            day = dd, today = today, canEdit = edit, editor = open, hoursInvalid = badHours, sending = isSending, sendFailed = failedSend,
+            day = dd, today = now, canEdit = edit, editor = open, hoursInvalid = badHours, sending = isSending, sendFailed = failedSend,
         )
         when {
             edit && asm is Assembly.Failed && asm.day == dd && savedLog == null -> base.copy(loading = false, failed = true)
@@ -101,9 +106,10 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             savedLog == null -> base.copy(loading = false)
             else -> fill(base, savedLog.sections, savedLog, photos, if (edit && asm is Assembly.Done && asm.day == dd) asm.weather else null)
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, LogUiState(day = LocalDate.parse(saved.get<String>(DAY) ?: firstDay), today = today))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, LogUiState(day = LocalDate.parse(saved.get<String>(DAY) ?: firstDay), today = today.value))
 
     init {
+        viewModelScope.launch { d.dayTurns.collect { checkToday() } }
         viewModelScope.launch {
             combine(day, canEdit, retries) { dd, edit, _ -> dd to edit }.collectLatest { (dd, edit) ->
                 if (!edit) {
@@ -124,6 +130,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             exists = true,
             sentAt = log.sentAt,
             sentTo = log.recipients,
+            changedSinceSent = log.changedSinceSent,
             crew = s.crew.value.map { LogCrewRow(it.memberId, it.name, it.minutes, it.onSiteNow) },
             workDone = s.workDone.value,
             photos = s.photoIds.value.map { LogPhotoThumb(it, photos[it].orEmpty()) },
@@ -162,6 +169,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             is LogEvent.PickDay -> goTo(event.day)
             LogEvent.OpenDayPicker -> open(LogEditor.PickDay)
             LogEvent.Retry -> retries.value++
+            LogEvent.CheckToday -> checkToday()
             is LogEvent.EditText -> if (st.canEdit && st.exists) open(
                 LogEditor.Text(
                     event.section,
@@ -177,7 +185,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
                 open(LogEditor.Hours(it.memberId, it.name, LogHours.text(it.minutes)))
             }
             LogEvent.AddDelay -> if (st.canEdit && st.exists) open(LogEditor.Delay())
-            is LogEvent.AskRemoveDelay -> if (st.canEdit && event.index in st.delays.indices) open(LogEditor.RemoveDelay(event.index))
+            is LogEvent.AskRemoveDelay -> if (st.canEdit && st.delays.any { it.key == event.key }) open(LogEditor.RemoveDelay(event.key))
             is LogEvent.AskDrop -> if (st.canEdit) dropLabel(st, event.kind, event.id)?.let { open(LogEditor.Drop(event.kind, event.id, it.ifEmpty { null })) }
             is LogEvent.PutBack -> putBack(st, event.kind)
             LogEvent.EditWeather, LogEvent.Preview -> Unit // the route opens the weather form and the PDF viewer
@@ -216,9 +224,10 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             }
             is LogEditor.Delay -> {
                 val reason = e.reason ?: return
-                { s -> s.copy(delays = s.delays + LogDelay(reason, e.note.trim())) }
+                { s -> s.copy(delays = s.delays + LogDelay(reason, e.note.trim(), id = UUID.randomUUID().toString())) }
             }
-            is LogEditor.RemoveDelay -> { s -> s.copy(delays = s.delays.filterIndexed { i, _ -> i != e.index }) }
+            // by key, not position: a delay added or removed on another phone meanwhile must not shift the target (R09d)
+            is LogEditor.RemoveDelay -> { s -> LogEdits.removeDelay(s, e.key) }
             is LogEditor.Drop -> { s -> s.drop(e.kind, e.id) }
             LogEditor.PickDay, is LogEditor.Send, LogEditor.SendEmpty -> return
         }
@@ -283,8 +292,21 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
     }
 
     private fun goTo(target: LocalDate) {
-        saved[DAY] = minOf(target, today).toString()
+        saved[DAY] = minOf(target, today.value).toString()
         close()
+    }
+
+    /**
+     * Picks up a new calendar day. Someone looking at today follows it to the new today, unless a sheet is open (their
+     * typing belongs to the day it was opened on); a past day stays put and Next now reaches the new day.
+     */
+    private fun checkToday() {
+        val was = today.value
+        val now = d.today()
+        if (now <= was) return
+        // the day first: a moment with the new today and the old day would flash "Next" on for a frame
+        if (saved.get<String>(DAY) == was.toString() && openEditor() == null) saved[DAY] = now.toString()
+        today.value = now
     }
 
     private fun open(e: LogEditor) {
@@ -314,6 +336,12 @@ object LogEdits {
      */
     fun lookUpWeather(s: DailyLogSections): DailyLogSections =
         s.copy(weather = LogSection(s.weather.value?.copy(fetchedAt = 0), edited = false))
+
+    /** Takes the first delay with [key] off the day; nothing changes when it is already gone. */
+    fun removeDelay(s: DailyLogSections, key: String): DailyLogSections {
+        val at = s.delays.indexOfFirst { it.key == key }
+        return if (at < 0) s else s.copy(delays = s.delays.filterIndexed { i, _ -> i != at })
+    }
 
     fun text(s: DailyLogSections, section: LogTextSection, text: String): DailyLogSections = when (section) {
         // one entry per paragraph, as the sheet shows them

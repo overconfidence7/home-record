@@ -187,11 +187,21 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.log_sent_at, time), style = MaterialTheme.typography.bodyLarge) },
                     supportingContent = {
-                        Text(
-                            if (state.sentTo.isEmpty()) stringResource(R.string.log_sent_shared)
-                            else stringResource(R.string.log_sent_to, state.sentTo.joinToString(", ")),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        Column {
+                            Text(
+                                if (state.sentTo.isEmpty()) stringResource(R.string.log_sent_shared)
+                                else stringResource(R.string.log_sent_to, state.sentTo.joinToString(", ")),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            if (state.changedSinceSent) {
+                                Text(
+                                    stringResource(R.string.log_changed_since_sent),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.testTag("fl_log_changed_since_sent"),
+                                )
+                            }
+                        }
                     },
                     leadingContent = { Icon(Icons.Rounded.MarkEmailRead, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                     modifier = Modifier.heightIn(min = 56.dp).testTag("fl_log_sent"),
@@ -435,7 +445,7 @@ private fun LazyListScope.delays(state: LogUiState, onEvent: (LogEvent) -> Unit)
         Line(
             delay.reason.icon(), reason, Modifier.testTag("fl_log_delay_$i"), delay.note.ifBlank { null },
             trailing = if (state.canEdit) ({
-                IconButton(onClick = { onEvent(LogEvent.AskRemoveDelay(i)) }, modifier = Modifier.testTag("fl_log_delay_remove_$i")) {
+                IconButton(onClick = { onEvent(LogEvent.AskRemoveDelay(delay.key)) }, modifier = Modifier.testTag("fl_log_delay_remove_$i")) {
                     Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.log_delay_remove, reason))
                 }
             }) else null,
@@ -572,7 +582,7 @@ private fun LogEditorHost(state: LogUiState, onEvent: (LogEvent) -> Unit) {
             dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) } },
         )
         is LogEditor.RemoveDelay -> {
-            val delay = state.delays.getOrNull(e.index)
+            val delay = state.delays.firstOrNull { it.key == e.key }
             AlertDialog(
                 onDismissRequest = dismiss,
                 modifier = Modifier.windowTestTags(),

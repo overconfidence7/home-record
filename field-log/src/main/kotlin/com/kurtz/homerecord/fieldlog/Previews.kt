@@ -1153,6 +1153,16 @@ fun LogSentPreview() = Frame {
     )
 }
 
+/** Sent at 4:10, then the lead added a safety note: the line says the client's copy is out of date (AC-F33, R09d). */
+@ThemePreviews
+@Composable
+fun LogSentChangedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        logReady.copy(sentAt = 1_793_478_600_000, sentTo = listOf("jen.hale@example.com"), changedSinceSent = true),
+        {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
 /** The Send sheet for a job with a client email and an office address (AC-F33). */
 @ThemePreviews
 @Composable

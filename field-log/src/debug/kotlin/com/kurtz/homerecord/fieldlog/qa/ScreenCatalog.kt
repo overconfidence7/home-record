@@ -83,6 +83,7 @@ object ScreenCatalog {
         QaScreen("log-text-sheet", nonRoot = false) { LogTextSheetPreview() },
         QaScreen("log-left-out", nonRoot = false) { LogLeftOutPreview() },
         QaScreen("log-sent", nonRoot = false) { LogSentPreview() },
+        QaScreen("log-sent-changed", nonRoot = false) { LogSentChangedPreview() },
         QaScreen("log-send-sheet", nonRoot = false) { LogSendSheetPreview() },
         QaScreen("log-send-sheet-no-emails", nonRoot = false) { LogSendSheetNoEmailsPreview() },
         QaScreen("log-send-empty", nonRoot = false) { LogSendEmptyPreview() },

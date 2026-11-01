@@ -70,7 +70,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             )
         },
         logContent = {
-            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, initialDay = initialLogDay, sender = logSender), onEditWeather = onEditWeather, onPreview = onPreviewLog)
+            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, dayTurns = com.kurtz.homerecord.core.log.Midnight.ticks(), initialDay = initialLogDay, sender = logSender), onEditWeather = onEditWeather, onPreview = onPreviewLog)
         },
         tasksContent = {
             if (tasks != null) com.kurtz.homerecord.fieldlog.tasks.TasksRoute(tasks, onOpenTask = { onOpenTask(it) }, onAddTask = { onOpenTask(null) })
