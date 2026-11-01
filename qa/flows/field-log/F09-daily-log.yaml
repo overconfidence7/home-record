@@ -189,8 +189,14 @@ appId: com.kurtz.homerecord.fieldlog
       id: fl_log_list
     timeout: 15000
 - assertVisible: "Today, .*"
+# the Preview PDF / Send bar (T045b) sits under the list, so the delay row can stop half under it; scroll to the
+# note itself, not just the row's top edge
 - scrollUntilVisible:
     element:
       id: fl_log_delay_0
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "Rain held up the siding"
     direction: DOWN
 - assertVisible: "Rain held up the siding"
