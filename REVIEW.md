@@ -2405,3 +2405,60 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 55 device stages, 1051 unit tests, 140 backend tests, coverage 251/251 ACs. Passed: 53. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-01 (commit 641799f9)
+
+Judged the suite results for 641799f9 (run of 2026-10-31 21:34 UTC, 55 stages, 53 passed). `build` HEAD 38912058 is nine commits ahead (the F11/H04 flow fixes, T044d1–d2 task pins, T035c3 Today camera button and Recent photos, T045a log PDF); the suite has not tested it, so none of those are judged here. The c1240620 run was never judged on its own; its three auto findings are closed and its changes are covered by this run. New at this sha since the last judge: T043e (Delays in Reports), T044a–c (Tasks tab, task form, swipe and reorder, My tasks on Today).
+
+Verdict: House Manual: a third run in a row with nothing a homeowner can see; the house still ends at a 2D outline, Reminders is still the "Open a detail screen" placeholder, and there is no Emergency list, breaker panel or 3D. / Field Log: Tasks are the right shape for a crew (my overdue and due-today tasks on Today, a punch-list filter, tick or swipe with Undo, drag to reorder), and Reports now shows which jobs slipped and why. The biggest gap is still that nothing leaves the phone: the daily log cannot be sent and there are no change orders or schedule, so a contractor cannot yet run a week on it.
+
+- [ ] [UI] Minor: with no hours in the range, Reports fills the screen with the centred "No hours in these dates" empty state and two disabled export buttons, and the Delays section (the one thing this week has) starts under the navigation bar [judge:fl-reports-delays-below-empty] - steps: More → Reports, This week, a job with a logged delay and no punches (flow F09 end) - expected: rule 10 (a full empty state is for an empty screen; here the screen has content) and AC-F reports delays visible for the range; a one-line "No hours in these dates" row and the exports hidden or collapsed when disabled - actual: icon, headline, two sentences and two grey buttons take y 290–1500, "Delays / Hale kitchen · 1 day delayed / Weather" is cut by the bar at y 1770 - screenshot: qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png
+- [ ] [Minor] Suite: the Field Log landscape tour never rotates. All eight `tour-landscape-*.png` for field-log are 1080×2400 portrait (same layout as the light tour), while House Manual's are 2400×1080; so `variant:landscape` "tour ok" for field-log proves nothing about rotation (rule 33) [judge:qa-fl-tour-landscape-portrait] - steps: open qa-results:latest/field-log/screenshots/tour-landscape-jobs.png and compare with house-manual/screenshots/tour-landscape-home.png - expected: rule 33 and qa/README.md (tour per variant in landscape) - actual: portrait screenshots with the bottom bar, not the rail - screenshot: qa-results:latest/field-log/screenshots/tour-landscape-jobs.png
+
+Auto entry review: [auto:flow:house-manual:H04-add-item] [judge: flow error]: the failure shot shows the Add item form mid-scroll with the Photos buttons still under the bottom edge and no sheet, consistent with the builder's fling explanation (no House Manual code changed since it passed). [auto:flow:field-log:F11-tasks] is not clearly a flow error: add, Punch list filter and tick/Undo passed, then after the swipe "Set the kitchen outlets" is still an open row with no snackbar and no Done section; if the settle fix in 2ee3d201 does not make it pass next run, treat it as an app bug as the builder says.
+
+Seen this run and fine: Tasks tab (open in crew order with who · Overdue/Due today/date · room · Punch list · Photo, drag handles, Done (2) with ticked rows), the crew's Tasks tab (no FAB, no handles, only their tasks), Punch list filter in dark (chevron instead of handle, reorder off), the empty state ("No tasks yet", Add task matching the FAB), New task form (Who does it, Due, Room, Photo, Note, Punch list switch with supporting text; the title error only after typing and clearing, rule 21), Tasks in landscape and 200% (titles wrap, nothing clipped except under the FAB at the end of a scroll), My tasks on Today in light and 200%, Today admin with On site now, Reports with hours, exports and the Delays timeline (reason icons, day, note, chevron). Catalog nit: `today-my-tasks` shows "Overdue, Oct 22, 2025", a year older than the rest of the fake data. The crawler had 0 blank frames by script this run (728 shots), down from 28.
+
+Still open and seen again this run: [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (every tour), the 200% nav labels ("Sched / ule" in `tour-font200-today`), [judge:fl-markup-landscape] (not re-shot).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Unchanged; dark, 200% and landscape tours pass | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint, room page, Electrical layer pass; Kitchen still "Other" with grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Clunky | H04 failed at the data plate photo tap after a fling (flow error); form fine; scan and saved warranty only in the catalog | qa-results:latest/house-manual/screenshots/flow-H04-add-item-step-096-assertCondition-Take_photo.png |
+| H5 | Clunky | No flow adds more than one item; seeded house reads well in Items | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired filter; Minors open | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third, no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown without spinner (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Ends at "Everything is synced"; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | "Can't load prices right now" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview, House "Start the plan"; Log and Tasks tabs now real | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out, changes list | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Pass | F07, F07b, F07c pass: Box stroke draws, Save enabled, no tab bar on the editor; landscape Minor still open | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Clunky | F08 and F08b pass; before/after and annotate only in the catalog; Today camera button lands after this sha | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-capture-one-photo.png |
+| F9 | Clunky | F09 passes with weather and the delay reaching Reports; no Send or PDF at this sha (T045) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log.png |
+| F11 | Clunky | Add, punch filter, tick and Undo pass on device; swipe-to-done did not register (flow fixed after this sha); My tasks on Today and pins not reached / not in this build | qa-results:latest/field-log/screenshots/flow-F11-tasks-step-071-assertCondition-Done_Set_the_kitchen_out.png |
+| F15 | Clunky | F15 passes; Delays timeline good, but with no hours it sits below the fold (new Minor) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F18 | Clunky | More, Team, Company fine; Schedule is the placeholder; "Sched / ule" at 200%; landscape tour not rotated | qa-results:latest/field-log/screenshots/tour-dark-schedule.png |
+
+Not built yet: F10, F12–F14, F16, F17 (log Send T045, behind-the-wall T054, change orders T056–T058, schedule T059).
+
+Focus check: nothing wrong. Tasks, punch list and delays live only in Field Log and use crew wording; House Manual has no Field Log tabs or terms.
+
+Coverage note: the auto entry reports 251/251 claimed ACs covered across 136 ticked tasks and subtasks (0 gaps).
+
+Judged: 16 screenshots opened (both failure shots, the F09 Reports shot, the new Tasks, task form, My tasks, Today and Reports catalog shots in light, dark, 200% and landscape, two tours), 728 crawler shots checked by script for blank frames and 15 landscape tour shots checked by script for orientation. 22 walkthrough steps. New issues: 2. Product gaps: 0.
