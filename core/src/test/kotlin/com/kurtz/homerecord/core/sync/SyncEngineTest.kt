@@ -525,4 +525,47 @@ class SyncEngineTest {
         assertThat(log.entriesFor(other).first().map { it.label }).containsExactly("Frame closet")
         assertThat(a.refused.first()).containsExactly(RefusedChange("task", "t2", 20))
     }
+
+    // AC-F34 AC-F36 (QA F11): tick a task done, then Undo while the tick is still on its way. Undo puts `done` back to
+    // the confirmed value, so the old payload dropped the field and the pull's echo of the tick ticked it again.
+    @Test fun undoWhileTheTickIsInFlightStaysUndone() = runTest {
+        save(dbA, a, task("Set the kitchen outlets", 10))
+        a.sync(tenant)
+        save(dbA, a, task("Set the kitchen outlets", 20, done = true))
+        server.beforeNextPull = { save(dbA, a, task("Set the kitchen outlets", 30, done = false)) }
+        a.sync(tenant)
+        assertThat(dbA.taskDao().get("t1")?.done).isFalse()
+        a.sync(tenant)
+        assertThat(dbA.taskDao().get("t1")?.done).isFalse()
+        b.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.done).isFalse()
+    }
+
+    // AC-F34 AC-F36 (QA F11 step 71): tick, sync, Undo, then swipe it done again while the Undo is on its way.
+    @Test fun aSwipeDoneWhileTheUndoIsInFlightStaysDone() = runTest {
+        save(dbA, a, task("Set the kitchen outlets", 10))
+        a.sync(tenant)
+        save(dbA, a, task("Set the kitchen outlets", 20, done = true))
+        a.sync(tenant)
+        save(dbA, a, task("Set the kitchen outlets", 30, done = false))
+        server.beforeNextPull = { save(dbA, a, task("Set the kitchen outlets", 40, done = true)) }
+        a.sync(tenant)
+        assertThat(dbA.taskDao().get("t1")?.done).isTrue()
+        a.sync(tenant)
+        assertThat(dbA.taskDao().get("t1")?.done).isTrue()
+        b.sync(tenant)
+        assertThat(dbB.taskDao().get("t1")?.done).isTrue()
+    }
+
+    // The in-flight fields ride along only until the pull confirms them; a later edit sends just what changed.
+    @Test fun confirmedChangesNoLongerWidenThePayload() = runTest {
+        save(dbA, a, task("Set the kitchen outlets", 10))
+        a.sync(tenant)
+        save(dbA, a, task("Set the kitchen outlets", 20, done = true))
+        a.sync(tenant)
+        save(dbA, a, task("Set the kitchen outlets, both walls", 30, done = true))
+        val payload = dbA.outboxDao().pending().single().payload
+        assertThat(payload).contains("title")
+        assertThat(payload).doesNotContain("\"done\"")
+    }
 }

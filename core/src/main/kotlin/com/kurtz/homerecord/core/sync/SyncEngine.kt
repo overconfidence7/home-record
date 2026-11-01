@@ -86,7 +86,7 @@ class SyncEngine(
                 entity = entity,
                 entityId = entityId,
                 op = if (deleted) "delete" else "upsert",
-                payload = changedFields(entity, entityId, row).toString(),
+                payload = changedFields(tenant, entity, entityId, row).toString(),
                 updatedAt = updatedAt,
                 deviceId = deviceId,
             ),
@@ -96,9 +96,22 @@ class SyncEngine(
     private suspend fun confirmedRow(key: String): JsonObject? =
         base.get(key)?.let { runCatching { Json.parseToJsonElement(it) as? JsonObject }.getOrNull() }
 
-    private suspend fun changedFields(entity: String, entityId: String, row: JsonObject): JsonObject {
+    /**
+     * The fields that differ from the last server-confirmed row, plus every field an earlier change of this row that
+     * the pull has not confirmed yet carried. Without the second part a field set back to its confirmed value (tick a
+     * task done, then Undo while the tick is still on its way) would leave the payload, and the pull that echoes the
+     * earlier change would then overwrite the newer local value: Undo, or the next swipe, silently lost.
+     */
+    private suspend fun changedFields(tenant: TenantRef, entity: String, entityId: String, row: JsonObject): JsonObject {
         val confirmed = confirmedRow("$entity/$entityId") ?: return row
-        return JsonObject(row.filter { (field, value) -> field == "id" || field == "updatedAt" || confirmed[field] != value })
+        val cursor = cursors.get(tenant.kind.wire, tenant.id) ?: 0L
+        val inFlight = outbox.unconfirmedPayloadsFor(tenant.kind.wire, tenant.id, entity, entityId, cursor)
+            .flatMapTo(mutableSetOf()) { payload ->
+                (runCatching { Json.parseToJsonElement(payload) }.getOrNull() as? JsonObject)?.keys.orEmpty()
+            }
+        return JsonObject(
+            row.filter { (field, value) -> field == "id" || field == "updatedAt" || field in inFlight || confirmed[field] != value },
+        )
     }
 
     suspend fun sync(tenant: TenantRef): ApiResult<SyncResult> = lock.withLock {

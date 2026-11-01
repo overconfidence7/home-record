@@ -382,6 +382,12 @@ interface OutboxDao {
     suspend fun pendingFor(kind: String, tenantId: String, limit: Int): List<OutboxEntity>
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 0") fun observePendingCount(): kotlinx.coroutines.flow.Flow<Int>
     @Query("SELECT payload FROM outbox WHERE sent = 0 AND entity = :entity AND entityId = :entityId ORDER BY seq") suspend fun pendingPayloadsFor(entity: String, entityId: String): List<String>
+    /**
+     * Payloads of this row's changes the pull has not confirmed yet: unsent, or accepted with a `serverSeq` past the
+     * tenant's cursor [confirmedUpTo]. Refused rows (`serverSeq` < 0) are not counted.
+     */
+    @Query("SELECT payload FROM outbox WHERE entity = :entity AND entityId = :entityId AND tenantKind = :kind AND tenantId = :tenantId AND (sent = 0 OR (serverSeq IS NOT NULL AND serverSeq > :confirmedUpTo)) ORDER BY seq")
+    suspend fun unconfirmedPayloadsFor(kind: String, tenantId: String, entity: String, entityId: String, confirmedUpTo: Long): List<String>
     @Query("UPDATE outbox SET sent = 1 WHERE seq IN (:seqs)") suspend fun markSent(seqs: List<Long>)
     @Query("UPDATE outbox SET sent = 1, serverSeq = :serverSeq WHERE seq = :seq") suspend fun markSent(seq: Long, serverSeq: Long)
     @Query("SELECT COUNT(*) FROM outbox WHERE sent = 1 AND serverSeq = :refused") fun observeRefusedCount(refused: Long): kotlinx.coroutines.flow.Flow<Int>

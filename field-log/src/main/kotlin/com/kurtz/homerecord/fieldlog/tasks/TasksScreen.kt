@@ -231,7 +231,9 @@ fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, conte
     val complete by rememberUpdatedState(onComplete)
     val scope = rememberCoroutineScope()
     val onDismiss: (SwipeToDismissBoxValue) -> Unit = remember(swipe, scope) {
-        {
+        { direction ->
+            // One line per completed swipe, so a device run shows whether the gesture landed (QA F11).
+            android.util.Log.i("SwipeToComplete", "swiped $direction")
             complete()
             scope.launch { swipe.reset() }
         }

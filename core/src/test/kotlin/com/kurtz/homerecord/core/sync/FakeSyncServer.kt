@@ -14,6 +14,8 @@ internal class FakeSyncServer : SyncApi {
     /** Entities this tenant refuses, as the Worker does for a row outside the tenant's list. */
     var refused = emptySet<String>()
     var throwOnPull: Exception? = null
+    /** Runs once at the start of the next pull, after the push: a local edit landing while the pass is under way. */
+    var beforeNextPull: (suspend () -> Unit)? = null
     val extraPulled = mutableListOf<PulledRow>()
     private val seqs = HashMap<String, Long>()
     private val tenants = HashMap<String, LinkedHashMap<String, PulledRow>>()
@@ -62,6 +64,7 @@ internal class FakeSyncServer : SyncApi {
     override suspend fun pull(tenant: TenantRef, since: Long): ApiResult<PullResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
         throwOnPull?.let { throw it }
+        beforeNextPull?.let { hook -> beforeNextPull = null; hook() }
         pullsSince += tenant.id to since
         val rows = tenants[tenant.key]?.values.orEmpty()
         val out = (rows + extraPulled).filter { it.serverSeq > since }.sortedBy { it.serverSeq }
