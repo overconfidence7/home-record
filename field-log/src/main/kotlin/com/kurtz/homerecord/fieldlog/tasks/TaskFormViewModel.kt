@@ -7,7 +7,9 @@ import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
 import com.kurtz.homerecord.housemodel.blueprint.RoomHitTester
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,12 +47,16 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
         load()
     }
 
+    /** Waits for a task (or the right to edit it) that is not on the phone yet; see [watchForArrival]. */
+    private var arrival: Job? = null
+
     private fun load() {
         _state.update { it.copy(loading = true, failed = false) }
         viewModelScope.launch {
             val existing = d.taskId?.let { d.tasks.get(it) }
             if (!d.canManage.first() || (d.taskId != null && (existing == null || existing.jobId != d.jobId))) {
                 _state.update { it.copy(loading = false, failed = true) }
+                watchForArrival()
                 return@launch
             }
             val initial = existing?.let(TaskFormDraft::of) ?: TaskFormDraft()
@@ -63,6 +69,19 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             _state.update {
                 it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos(), plan = plan, fileName = fileName)
             }
+        }
+    }
+
+    /**
+     * A push for a newly assigned task can open the form before the next sync brings the task (or the Lead's role on the job)
+     * down: the form shows its error, then loads by itself once both are on the phone, instead of staying on the error (R09f).
+     */
+    private fun watchForArrival() {
+        val id = d.taskId ?: return
+        if (arrival?.isActive == true) return
+        arrival = viewModelScope.launch {
+            combine(d.canManage, d.tasks.observeForJob(d.jobId)) { manage, rows -> manage && rows.any { it.id == id } }.first { it }
+            if (_state.value.failed && !_state.value.working) load()
         }
     }
 

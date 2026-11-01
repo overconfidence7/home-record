@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.data.TaskEntity
 import com.kurtz.homerecord.core.model.TaskFilePin
 import com.kurtz.homerecord.core.model.TaskPlanPin
 import com.kurtz.homerecord.core.task.JobTasks
@@ -15,6 +16,7 @@ import com.kurtz.homerecord.core.task.TaskDraft
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -170,6 +172,32 @@ class TaskFormViewModelTest {
 
     @Test fun crewCannotOpenTheForm() {
         assertThat(vm(manage = false).current().failed).isTrue()
+    }
+
+    // AC-F36: a task-assigned push opens the form before sync brings the task down; it loads once the task arrives (R09f).
+    @Test fun aTaskArrivingBySyncLoadsTheFormThatWasOnTheError() {
+        val vm = vm("t-pushed")
+        assertThat(vm.current().failed).isTrue()
+        runBlocking { db.taskDao().upsert(TaskEntity(id = "t-pushed", jobId = "j1", title = "Label the panel", createdAt = 1, updatedAt = 1)) }
+        val s = vm.current { !it.failed }
+        assertThat(s.draft.title).isEqualTo("Label the panel")
+        assertThat(s.isNew).isFalse()
+    }
+
+    @Test fun theFormLoadsOnceTheRightToEditArrives() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Cover plate")) })
+        val manage = MutableStateFlow(false)
+        val vm = TaskFormViewModel(TaskFormDeps("j1", id, tasks, canManage = manage))
+        assertThat(vm.current().failed).isTrue()
+        manage.value = true
+        assertThat(vm.current { !it.failed }.draft.title).isEqualTo("Cover plate")
+    }
+
+    @Test fun aTaskArrivingOnAnotherJobKeepsTheError() {
+        val vm = vm("t-other")
+        assertThat(vm.current().failed).isTrue()
+        runBlocking { db.taskDao().upsert(TaskEntity(id = "t-other", jobId = "j2", title = "Mount the subpanel", createdAt = 1, updatedAt = 1)) }
+        assertThat(vm.current().failed).isTrue()
     }
 
     @Test fun aTaskFromAnotherJobDoesNotOpen() {

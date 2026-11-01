@@ -479,3 +479,14 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   column, a new weather snapshot) means the client's PDF is out of date. No schema change.
 - The assembler files a note by `NoteEntity.day` (the day the writing phone filed it under) and only falls back to its
   `createdAt` in the viewer's zone when no day is known.
+
+## 2026-11-01 — R09f: task form from a push, company time zone
+
+- A task form opened for a task that is not on the phone yet (a task-assigned push tapped before the next sync) shows
+  its error and watches the job's tasks and the edit right (`canManage`); once both are there it loads by itself. A task
+  that lands on another job keeps the error.
+- `settings.timeZone` (IANA name, checked with `Intl.DateTimeFormat`, unknown names refused with 400) is accepted on
+  `PATCH /companies/:id/profile` and merged like the other settings; unset still means Eastern. It is not added to
+  `DEFAULT_SETTINGS`, so the profile and `/me` shapes stay as they are until it is set. No phone screen sets it yet;
+  FL-Company gains the picker next (R09f1).
+- "Schedule push opens the day" stays with T059a, since FL-Schedule does not exist yet.
