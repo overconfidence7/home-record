@@ -2554,3 +2554,15 @@ Focus check: nothing wrong. Log send, pins, sync and push wording are crew and o
 Coverage note: the auto entry reports 269/269 claimed ACs covered across 149 ticked tasks and subtasks (0 gaps).
 
 Judged: 19 screenshots opened (the F11 failure shot, F09b send sheet, PDF and Sent, F08b Today capture and Recent photos, F11b pin picker and house pin, F11c file pin, F16 offline, H03 room, FL landscape Jobs tour, and catalog log-pdf, log-send-sheet 200%, sync-log-conflicts, today-capture-picker, today-recent-photos 200%, job-house-pins), 804 crawler shots present and 15 landscape tour shots checked by script for orientation. 23 walkthrough steps. New issues: 3. Product gaps: 1.
+
+## QA auto 2026-11-01 (commit 9961c19e)
+
+Automated suite run at 2026-11-01 22:34 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F11-tasks fails on field-log (regression of a fixed item) [auto:flow:field-log:F11-tasks] - steps: automated, see qa-results branch latest/ for commit 9961c19e - expected: walkthrough step F11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11-tasks.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F11 Fail, field-log F11b Pass, field-log F11c Pass, field-log F15 Pass, field-log F16 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 59 device stages, 1220 unit tests, 158 backend tests, coverage 278/278 ACs. Passed: 58. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
