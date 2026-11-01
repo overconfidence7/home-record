@@ -35,7 +35,7 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, onEditWeather: (java.time.LocalDate) -> Unit = {}, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>, initialTab: JobTab = JobTab.OVERVIEW, initialLogDay: java.time.LocalDate? = null, tasks: com.kurtz.homerecord.fieldlog.tasks.TasksDeps? = null, onOpenTask: (String?) -> Unit = {}) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, onEditWeather: (java.time.LocalDate) -> Unit = {}, logSender: com.kurtz.homerecord.fieldlog.log.LogSender? = null, onPreviewLog: (java.time.LocalDate) -> Unit = {}, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>, initialTab: JobTab = JobTab.OVERVIEW, initialLogDay: java.time.LocalDate? = null, tasks: com.kurtz.homerecord.fieldlog.tasks.TasksDeps? = null, onOpenTask: (String?) -> Unit = {}) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -69,7 +69,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             )
         },
         logContent = {
-            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, initialDay = initialLogDay), onEditWeather = onEditWeather)
+            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, initialDay = initialLogDay, sender = logSender), onEditWeather = onEditWeather, onPreview = onPreviewLog)
         },
         tasksContent = {
             if (tasks != null) com.kurtz.homerecord.fieldlog.tasks.TasksRoute(tasks, onOpenTask = { onOpenTask(it) }, onAddTask = { onOpenTask(null) })

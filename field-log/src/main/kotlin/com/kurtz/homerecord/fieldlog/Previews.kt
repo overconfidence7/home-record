@@ -1102,6 +1102,66 @@ fun LogLeftOutPreview() = Frame {
     )
 }
 
+/** Sent Friday afternoon to the client and the office; the bar now offers Send again (AC-F33). */
+@ThemePreviews
+@Composable
+fun LogSentPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        logReady.copy(sentAt = 1_793_478_600_000, sentTo = listOf("jen.hale@example.com", "office@ortizbuild.com")),
+        {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
+/** The Send sheet for a job with a client email and an office address (AC-F33). */
+@ThemePreviews
+@Composable
+fun LogSendSheetPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogSendSheetContent(
+        com.kurtz.homerecord.fieldlog.log.LogEditor.Send(listOf("jen.hale@example.com", "office@ortizbuild.com")), sending = false, failed = false, {},
+    )
+}
+
+/** No emails on the job, and the last try found no app to take the PDF: Share PDF is the one action. */
+@ThemePreviews
+@Composable
+fun LogSendSheetNoEmailsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogSendSheetContent(com.kurtz.homerecord.fieldlog.log.LogEditor.Send(emptyList()), sending = false, failed = true, {})
+}
+
+/** A daily log page drawn with canvas so the PDF preview shows what the client gets. */
+private object SampleLogPages : com.kurtz.homerecord.coreui.pages.PageSource {
+    override val pageCount = 2
+    override suspend fun render(index: Int, widthPx: Int) = peek(index)
+    override fun peek(index: Int): androidx.compose.ui.graphics.ImageBitmap {
+        val bmp = android.graphics.Bitmap.createBitmap(612, 792, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(android.graphics.Color.WHITE)
+        val ink = android.graphics.Paint().apply { color = android.graphics.Color.DKGRAY; textSize = 22f; isAntiAlias = true; isFakeBoldText = true }
+        val body = android.graphics.Paint().apply { color = android.graphics.Color.DKGRAY; textSize = 14f; isAntiAlias = true }
+        val lines = if (index == 0) listOf(
+            "Ortiz Building, (412) 555-0148" to body, "Daily log, Friday, October 30, 2026" to ink, "Hale kitchen, Jen Hale, 18 Birch Ln" to body,
+            "" to body, "Crew on site" to ink, "Marcus Ortiz, 7h 45m" to body, "Sam Rivera, 6h 30m" to body,
+            "" to body, "Work done" to ink, "Set the base cabinets along the sink wall." to body, "Ran the 20 amp dishwasher circuit." to body,
+            "" to body, "Delays" to ink, "Materials: countertop templates pushed to Monday" to body,
+        ) else listOf("Photos" to ink, "" to body, "Notes for the client" to ink, "Cabinets are in. Countertops get templated Monday." to body)
+        lines.forEachIndexed { i, (text, paint) -> canvas.drawText(text, 48f, 72f + i * 30f, paint) }
+        canvas.drawText("Page ${index + 1} of 2", 270f, 760f, body)
+        return bmp.asImageBitmap()
+    }
+}
+
+@ThemePreviews
+@Composable
+fun LogPdfPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogPreviewScreen(com.kurtz.homerecord.fieldlog.log.LogPreviewUiState(logDay, loading = false, pages = SampleLogPages), {})
+}
+
+@ThemePreviews
+@Composable
+fun LogPdfFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogPreviewScreen(com.kurtz.homerecord.fieldlog.log.LogPreviewUiState(logDay, loading = false, failed = true), {})
+}
+
 /** Correcting a rainy Friday's weather the lookup got wrong (rule 15). */
 @ThemePreviews
 @Composable

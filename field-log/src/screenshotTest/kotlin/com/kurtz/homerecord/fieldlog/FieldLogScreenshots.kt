@@ -515,6 +515,31 @@ fun LogLeftOutScreenshot() = LogLeftOutPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun LogSentScreenshot() = LogSentPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogSendSheetScreenshot() = LogSendSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogSendSheetNoEmailsScreenshot() = LogSendSheetNoEmailsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogPdfScreenshot() = LogPdfPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogPdfFailedScreenshot() = LogPdfFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun LogWeatherFormScreenshot() = LogWeatherFormPreview()
 
 @PreviewTest

@@ -30,6 +30,9 @@ import kotlinx.serialization.Serializable
 /** The weather form for a job's daily log on [day] (ISO yyyy-MM-dd). */
 @Serializable data class LogWeatherKey(val jobId: String, val day: String) : NavKey
 
+/** The daily log's PDF for [day] (ISO yyyy-MM-dd) in the in-app viewer (AC-F33). */
+@Serializable data class LogPdfKey(val jobId: String, val day: String) : NavKey
+
 @Serializable data class CaptureKey(val jobId: String) : NavKey
 
 /**

@@ -40,9 +40,17 @@ class LogPdfMaker(private val context: Context, private val db: HomeRecordDataba
             file.delete()
             return@withContext null
         }
-        val office = runCatching { json.decodeFromString<List<String>>(job.officeEmailsJson) }.getOrDefault(emptyList())
-        LogPdfFile(file, LogRecipients.of(client?.email, office), res.getString(R.string.log_pdf_subject, job.name, content.title))
+        LogPdfFile(file, recipientsOf(job.officeEmailsJson, client?.email), res.getString(R.string.log_pdf_subject, job.name, content.title))
     }
+
+    /** Who an emailed log for the job goes to: the client, then the office addresses on the job (AC-F33). */
+    suspend fun recipients(jobId: String): List<String> = withContext(Dispatchers.IO) {
+        val job = db.jobDao().get(jobId) ?: return@withContext emptyList()
+        recipientsOf(job.officeEmailsJson, job.clientId?.let { db.clientDao().get(it) }?.email)
+    }
+
+    private fun recipientsOf(officeJson: String, clientEmail: String?): List<String> =
+        LogRecipients.of(clientEmail, runCatching { json.decodeFromString<List<String>>(officeJson) }.getOrDefault(emptyList()))
 
     companion object {
         /** "Daily log Hale kitchen 2026-10-30.pdf", with characters a file name cannot hold dropped. */

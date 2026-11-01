@@ -58,6 +58,10 @@ import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.MarkEmailRead
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -135,7 +139,10 @@ fun LogScreen(state: LogUiState, onEvent: (LogEvent) -> Unit, modifier: Modifier
                 onAction = {},
                 modifier = Modifier.fillMaxSize().testTag("fl_log_empty"),
             )
-            else -> Sections(state, onEvent, zone)
+            else -> Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) { Sections(state, onEvent, zone) }
+                SendBar(state, onEvent)
+            }
         }
     }
     LogEditorHost(state, onEvent)
@@ -170,10 +177,18 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
         state.sentAt?.let { sent ->
             item(key = "sent") {
                 val time = Instant.ofEpochMilli(sent).atZone(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.MarkEmailRead, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text(stringResource(R.string.log_sent_at, time), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyMedium)
-                }
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.log_sent_at, time), style = MaterialTheme.typography.bodyLarge) },
+                    supportingContent = {
+                        Text(
+                            if (state.sentTo.isEmpty()) stringResource(R.string.log_sent_shared)
+                            else stringResource(R.string.log_sent_to, state.sentTo.joinToString(", ")),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                    leadingContent = { Icon(Icons.Rounded.MarkEmailRead, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                    modifier = Modifier.heightIn(min = 56.dp).testTag("fl_log_sent"),
+                )
             }
         }
         crew(state, onEvent)
@@ -192,6 +207,40 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
         typed("visitors", R.string.log_section_visitors, state.visitors, Icons.Rounded.Groups, LogTextSection.VISITORS, state.canEdit, onEvent)
         typed("safety", R.string.log_section_safety, state.safety, Icons.Rounded.HealthAndSafety, LogTextSection.SAFETY, state.canEdit, onEvent)
         typed("client", R.string.log_section_client, state.clientNotes, Icons.AutoMirrored.Rounded.EventNote, LogTextSection.CLIENT_NOTES, state.canEdit, onEvent)
+    }
+}
+
+/**
+ * Preview PDF for everyone who reads the log; Send (Send again once sent) for whoever runs the job (AC-F33). Kept under
+ * the list so it never scrolls away; the two share the row so neither reads as the only action.
+ */
+@Composable
+private fun SendBar(state: LogUiState, onEvent: (LogEvent) -> Unit) {
+    HorizontalDivider()
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedButton(
+            onClick = { onEvent(LogEvent.Preview) },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("fl_log_preview"),
+        ) {
+            Icon(Icons.Rounded.PictureAsPdf, contentDescription = null, Modifier.size(18.dp))
+            Text(stringResource(R.string.log_preview), Modifier.padding(start = 8.dp), textAlign = TextAlign.Center)
+        }
+        if (state.canSend) {
+            Button(
+                onClick = { onEvent(LogEvent.OpenSend) },
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("fl_log_send"),
+            ) {
+                Icon(Icons.AutoMirrored.Rounded.Send, contentDescription = null, Modifier.size(18.dp))
+                Text(
+                    stringResource(if (state.sentAt != null) R.string.log_send_again else R.string.log_send),
+                    Modifier.padding(start = 8.dp), textAlign = TextAlign.Center,
+                )
+            }
+        }
     }
 }
 
@@ -473,6 +522,11 @@ private fun LogEditorHost(state: LogUiState, onEvent: (LogEvent) -> Unit) {
         ) {
             if (e is LogEditor.Text) LogTextSheetContent(e, onEvent) else LogDelaySheetContent(e as LogEditor.Delay, onEvent)
         }
+        is LogEditor.Send -> ModalBottomSheet(
+            onDismissRequest = dismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            modifier = Modifier.windowTestTags(),
+        ) { LogSendSheetContent(e, state.sending, state.sendFailed, onEvent) }
         is LogEditor.Hours -> AlertDialog(
             onDismissRequest = dismiss,
             modifier = Modifier.windowTestTags(),
@@ -630,6 +684,60 @@ fun LogDelaySheetContent(editor: LogEditor.Delay, onEvent: (LogEvent) -> Unit) {
             onClick = { onEvent(LogEvent.SaveEditor) }, enabled = editor.reason != null,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_log_delay_save"),
         ) { Text(stringResource(R.string.log_delay_save)) }
+    }
+}
+
+/**
+ * Who the PDF goes to and the two ways to send it (AC-F33): Email PDF to the job's client and office addresses, or the
+ * share sheet. With no address on the job, Share PDF is the one action. Previews draw it without the sheet.
+ */
+@Composable
+fun LogSendSheetContent(editor: LogEditor.Send, sending: Boolean, failed: Boolean, onEvent: (LogEvent) -> Unit) {
+    SheetColumn {
+        Text(stringResource(R.string.log_send_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+        if (editor.recipients.isEmpty()) {
+            Text(stringResource(R.string.log_send_no_emails), style = MaterialTheme.typography.bodyLarge)
+        } else {
+            Column {
+                Text(stringResource(R.string.log_send_to), style = MaterialTheme.typography.bodyLarge)
+                editor.recipients.forEachIndexed { i, address ->
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_log_send_to_$i"),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Rounded.Email, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(address, Modifier.padding(start = 16.dp), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        }
+        if (sending) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("fl_log_send_making")) {
+                CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 3.dp)
+                Text(stringResource(R.string.log_send_making), Modifier.padding(start = 16.dp), style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+        if (failed) {
+            Text(
+                stringResource(R.string.log_send_failed), Modifier.testTag("fl_log_send_failed"),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+            )
+        }
+        if (editor.recipients.isNotEmpty()) {
+            Button(
+                onClick = { onEvent(LogEvent.SendEmail) }, enabled = !sending,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_log_send_email"),
+            ) { Text(stringResource(R.string.log_send_email)) }
+            OutlinedButton(
+                onClick = { onEvent(LogEvent.SendShare) }, enabled = !sending,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_log_send_share"),
+            ) { Text(stringResource(R.string.log_send_share_other)) }
+        } else {
+            Button(
+                onClick = { onEvent(LogEvent.SendShare) }, enabled = !sending,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_log_send_share"),
+            ) { Text(stringResource(R.string.log_send_share)) }
+        }
     }
 }
 

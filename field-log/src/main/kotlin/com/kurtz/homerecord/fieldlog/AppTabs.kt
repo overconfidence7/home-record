@@ -167,6 +167,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 downloads = container.mediaDownloads,
                 logs = container.dailyLogs,
                 onEditWeather = { day -> nav.push(LogWeatherKey(key.jobId, day.toString())) },
+                logSender = container.logSender,
+                onPreviewLog = { day -> nav.push(LogPdfKey(key.jobId, day.toString())) },
                 files = container.filesDeps(
                     key.jobId,
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
@@ -209,6 +211,15 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.log.LogWeatherRoute(
                 com.kurtz.homerecord.fieldlog.log.LogWeatherDeps(key.jobId, java.time.LocalDate.parse(key.day), container.dailyLogs, container.roleGates),
                 onClose = nav::pop,
+            )
+        }
+        entry<LogPdfKey> { key ->
+            com.kurtz.homerecord.fieldlog.log.LogPreviewRoute(
+                com.kurtz.homerecord.fieldlog.log.LogPreviewDeps(
+                    key.jobId, java.time.LocalDate.parse(key.day), container.dailyLogs, container.logSender,
+                    open = { com.kurtz.homerecord.coreui.pages.PageSources.open(it.path, "application/pdf") },
+                ),
+                onBack = nav::pop,
             )
         }
         entry<TaskFormKey> { key ->

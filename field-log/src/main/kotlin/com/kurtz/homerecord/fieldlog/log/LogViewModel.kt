@@ -38,7 +38,12 @@ class LogDeps(
     val today: () -> LocalDate = LocalDate::now,
     /** The day to open on the first time (a delay tapped in Reports); never past today. Null opens today. */
     val initialDay: LocalDate? = null,
+    /** Makes and hands off the PDF; null leaves Send out (previews). */
+    val sender: LogSender? = null,
 )
+
+/** The open sheet and its transient flags, bundled so the state combine stays at five flows. */
+private data class Editing(val editor: LogEditor?, val hoursInvalid: Boolean, val sending: Boolean, val sendFailed: Boolean)
 
 /** How far the day's draft has got: [Running] while the records are read and the weather looked up. */
 private sealed interface Assembly {
@@ -65,6 +70,8 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
     private val day = saved.getStateFlow(DAY, firstDay).map(LocalDate::parse)
     private val editor = saved.getStateFlow(EDITOR, "").map(::decode)
     private val hoursInvalid = MutableStateFlow(false)
+    private val sending = MutableStateFlow(false)
+    private val sendFailed = MutableStateFlow(false)
     private val canEdit = d.gates.map { it.leads(d.jobId) }.distinctUntilChanged()
     private val assembly = MutableStateFlow<Assembly>(Assembly.Idle)
     private val retries = MutableStateFlow(0)
@@ -78,14 +85,16 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
         canEdit,
         assembly,
         thumbs,
-        combine(editor, hoursInvalid) { e, h -> e to h },
-    ) { (dd, dayLog), edit, asm, photos, (open, badHours) ->
+        combine(editor, hoursInvalid, sending, sendFailed) { e, h, s, f -> Editing(e, h, s, f) },
+    ) { (dd, dayLog), edit, asm, photos, (open, badHours, isSending, failedSend) ->
         val (logDay, saved) = dayLog
         val fresh = logDay == dd
         val savedLog = saved.takeIf { fresh }
         current = savedLog
         val running = edit && (asm.day != dd || asm is Assembly.Running)
-        val base = LogUiState(day = dd, today = today, canEdit = edit, editor = open, hoursInvalid = badHours)
+        val base = LogUiState(
+            day = dd, today = today, canEdit = edit, editor = open, hoursInvalid = badHours, sending = isSending, sendFailed = failedSend,
+        )
         when {
             edit && asm is Assembly.Failed && asm.day == dd && savedLog == null -> base.copy(loading = false, failed = true)
             !fresh || (running && savedLog == null) -> base
@@ -114,6 +123,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             loading = false,
             exists = true,
             sentAt = log.sentAt,
+            sentTo = log.recipients,
             crew = s.crew.value.map { LogCrewRow(it.memberId, it.name, it.minutes, it.onSiteNow) },
             workDone = s.workDone.value,
             photos = s.photoIds.value.map { LogPhotoThumb(it, photos[it].orEmpty()) },
@@ -170,7 +180,10 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             is LogEvent.AskRemoveDelay -> if (st.canEdit && event.index in st.delays.indices) open(LogEditor.RemoveDelay(event.index))
             is LogEvent.AskDrop -> if (st.canEdit) dropLabel(st, event.kind, event.id)?.let { open(LogEditor.Drop(event.kind, event.id, it.ifEmpty { null })) }
             is LogEvent.PutBack -> putBack(st, event.kind)
-            LogEvent.EditWeather -> Unit // the route opens the weather form
+            LogEvent.EditWeather, LogEvent.Preview -> Unit // the route opens the weather form and the PDF viewer
+            LogEvent.OpenSend -> openSend(st)
+            LogEvent.SendEmail -> send(email = true)
+            LogEvent.SendShare -> send(email = false)
             is LogEvent.EditorText -> when (val e = openEditor()) {
                 is LogEditor.Text -> open(e.copy(text = event.text))
                 is LogEditor.Hours -> {
@@ -206,7 +219,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             }
             is LogEditor.RemoveDelay -> { s -> s.copy(delays = s.delays.filterIndexed { i, _ -> i != e.index }) }
             is LogEditor.Drop -> { s -> s.drop(e.kind, e.id) }
-            LogEditor.PickDay -> return
+            LogEditor.PickDay, is LogEditor.Send -> return
         }
         close()
         viewModelScope.launch { d.logs.update(logId, change) }
@@ -230,6 +243,37 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
         }
     }
 
+    private fun openSend(st: LogUiState) {
+        val sender = d.sender ?: return
+        if (!st.canSend) return
+        sendFailed.value = false
+        viewModelScope.launch { open(LogEditor.Send(sender.recipients(d.jobId))) }
+    }
+
+    /**
+     * Makes the PDF from the saved log and hands it to an email app or the share sheet, then marks the log Sent with the
+     * time, who it went to (none for the share sheet) and the PDF (AC-F33). The sheet stays open with an error when the
+     * PDF could not be made or nothing took it. Sending again replaces the last send.
+     */
+    private fun send(email: Boolean) {
+        val sender = d.sender ?: return
+        val log = current ?: return
+        if (openEditor() !is LogEditor.Send || sending.value || !state.value.canSend) return
+        sending.value = true
+        sendFailed.value = false
+        viewModelScope.launch {
+            val pdf = sender.make(log)
+            val byEmail = email && pdf != null && pdf.recipients.isNotEmpty()
+            if (pdf != null && sender.open(pdf, byEmail)) {
+                d.logs.markSent(log.id, if (byEmail) pdf.recipients else emptyList(), pdf.file.path)
+                close()
+            } else {
+                sendFailed.value = true
+            }
+            sending.value = false
+        }
+    }
+
     private fun goTo(target: LocalDate) {
         saved[DAY] = minOf(target, today).toString()
         close()
@@ -241,6 +285,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
 
     private fun close() {
         hoursInvalid.value = false
+        sendFailed.value = false
         saved[EDITOR] = ""
     }
 

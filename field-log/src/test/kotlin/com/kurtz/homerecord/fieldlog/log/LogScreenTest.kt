@@ -120,6 +120,8 @@ class LogScreenTest {
             rule.onNodeWithTag(it).performClick()
             if (it == "fl_log_tasks_put_back") rule.onNodeWithText("Put back 2 left out").assertExists()
         }
+        // the Preview/Send bar under the list leaves the weather line just below the header's scroll position
+        rule.onNodeWithTag("fl_log_list").performScrollToNode(hasTestTag("fl_log_weather"))
         rule.onNodeWithText("Typed in by hand", substring = true).assertExists()
         assertThat(events).containsExactly(
             LogEvent.AskDrop(LogLineKind.PHOTO, "ph1"), LogEvent.AskDrop(LogLineKind.TASK, "t1"), LogEvent.PutBack(LogLineKind.TASK),

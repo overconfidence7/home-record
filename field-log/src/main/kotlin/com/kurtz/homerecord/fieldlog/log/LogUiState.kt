@@ -30,6 +30,8 @@ sealed interface LogEditor {
     /** "Leave out of the log?" for one photo, task, change order or material line; [label] names it (null for a photo). */
     @Serializable data class Drop(val kind: LogLineKind, val id: String, val label: String? = null) : LogEditor
     @Serializable data object PickDay : LogEditor
+    /** The Send sheet; [recipients] are the job's client and office emails when it opened (AC-F33). */
+    @Serializable data class Send(val recipients: List<String>) : LogEditor
 }
 
 /**
@@ -47,6 +49,12 @@ data class LogUiState(
     /** True once a log exists for the day; Crew see an empty state until the lead starts one. */
     val exists: Boolean = false,
     val sentAt: Long? = null,
+    /** Who the last send went to by email; empty when it went through the share sheet (AC-F33). */
+    val sentTo: List<String> = emptyList(),
+    /** The PDF is being made for a send. */
+    val sending: Boolean = false,
+    /** The last send could not make the PDF or found no app to take it. */
+    val sendFailed: Boolean = false,
     val crew: List<LogCrewRow> = emptyList(),
     val workDone: List<String> = emptyList(),
     val photos: List<LogPhotoThumb> = emptyList(),
@@ -69,6 +77,9 @@ data class LogUiState(
 ) {
     val totalMinutes: Int get() = crew.sumOf { it.minutes }
     val canGoForward: Boolean get() = day < today
+
+    /** Owner, Office and the job's Lead send a log once it exists; Crew and Sub only read it (AC-F3, AC-F33). */
+    val canSend: Boolean get() = canEdit && exists
 }
 
 sealed interface LogEvent {
@@ -89,4 +100,11 @@ sealed interface LogEvent {
     data object SaveEditor : LogEvent
     data object DismissEditor : LogEvent
     data object Retry : LogEvent
+    /** Opens the log's PDF in the in-app viewer; the route handles it. */
+    data object Preview : LogEvent
+    data object OpenSend : LogEvent
+    /** Email the PDF to the job's client and office addresses. */
+    data object SendEmail : LogEvent
+    /** Hand the PDF to the share sheet (text, another email account, a drive). */
+    data object SendShare : LogEvent
 }

@@ -1,0 +1,75 @@
+# Walkthrough F9 (Send): the day's log previews as a PDF in the app, then goes out through the share sheet and is
+# marked Sent with the time; Send again stays on offer (AC-F33). The job has no client or office email, so the Send sheet
+# offers Share PDF as its one action.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+    permissions:
+      camera: deny
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f09b@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_log
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_log
+- extendedWaitUntil:
+    visible:
+      id: fl_log_list
+    timeout: 15000
+- assertVisible:
+    id: fl_log_send
+- assertNotVisible:
+    id: fl_log_sent
+# Preview PDF: the in-app viewer shows page 1 of the log
+- tapOn:
+    id: fl_log_preview
+- extendedWaitUntil:
+    visible:
+      id: fl_log_pdf_page_1
+    timeout: 15000
+- assertVisible: "Daily log PDF"
+- takeScreenshot: F09b-log-pdf
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible:
+      id: fl_log_send
+    timeout: 10000
+# Send: no emails on this job, so the sheet says so and Share PDF opens the share sheet
+- tapOn:
+    id: fl_log_send
+- extendedWaitUntil:
+    visible:
+      id: fl_log_send_share
+    timeout: 10000
+- assertVisible: "This job has no client or office email yet.*"
+- assertNotVisible:
+    id: fl_log_send_email
+- takeScreenshot: F09b-log-send-sheet
+- tapOn:
+    id: fl_log_send_share
+# the system share sheet is on top; leave it like a person who picked nothing
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_log_sent
+    timeout: 15000
+- assertVisible: "Sent .*"
+- assertVisible: "Through the share sheet"
+- assertVisible: "Send again"
+- takeScreenshot: F09b-log-sent

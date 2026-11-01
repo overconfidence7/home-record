@@ -186,6 +186,11 @@ class AppContainer(private val app: Application) {
         )
     }
 
+    /** Makes a daily log's PDF and hands it to email or the share sheet (AC-F33). */
+    val logSender: com.kurtz.homerecord.fieldlog.log.LogSender by lazy {
+        com.kurtz.homerecord.fieldlog.log.AndroidLogSender(app, com.kurtz.homerecord.fieldlog.log.LogPdfMaker(app, db))
+    }
+
     /**
      * What this person may do, live: the role from the cached membership (a role change from the office lands on the
      * next /me refresh) and, for a Lead, the jobs they are on. Least privilege while no company is active (AC-F3).

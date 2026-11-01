@@ -10,11 +10,17 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 
 @Composable
-fun LogRoute(deps: LogDeps, modifier: Modifier = Modifier, onEditWeather: (java.time.LocalDate) -> Unit = {}) {
+fun LogRoute(deps: LogDeps, modifier: Modifier = Modifier, onEditWeather: (java.time.LocalDate) -> Unit = {}, onPreview: (java.time.LocalDate) -> Unit = {}) {
     val vm = viewModel<LogViewModel>(
         key = "log-${deps.jobId}",
         factory = viewModelFactory { initializer { LogViewModel(deps, createSavedStateHandle()) } },
     )
     val state by vm.state.collectAsState()
-    LogScreen(state, { e -> if (e == LogEvent.EditWeather) onEditWeather(state.day) else vm.onEvent(e) }, modifier)
+    LogScreen(state, { e ->
+        when (e) {
+            LogEvent.EditWeather -> onEditWeather(state.day)
+            LogEvent.Preview -> onPreview(state.day)
+            else -> vm.onEvent(e)
+        }
+    }, modifier)
 }
