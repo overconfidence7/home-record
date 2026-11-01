@@ -17,5 +17,7 @@ class FieldLogMessagingService : FirebaseMessagingService() {
         if (!container.pushRegistered()) return
         val parsed = PushMessage.parse(message.data) ?: return
         container.pushNotifier.show(parsed, message.data)
+        // pull the row the push is about now, so a tap finds it on the phone (R09); a no-op when sync is not running
+        container.syncCoordinator.requestSync()
     }
 }

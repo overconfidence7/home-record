@@ -317,9 +317,11 @@ object LogEdits {
 
     fun text(s: DailyLogSections, section: LogTextSection, text: String): DailyLogSections = when (section) {
         // one entry per paragraph, as the sheet shows them
-        LogTextSection.WORK_DONE -> s.copy(
-            workDone = LogSection(text.split(Regex("""\n\s*\n""")).map { it.trim() }.filter { it.isNotEmpty() }, edited = true),
-        )
+        LogTextSection.WORK_DONE -> {
+            val lines = text.split(Regex("""\n\s*\n""")).map { it.trim() }.filter { it.isNotEmpty() }
+            // Save with nothing changed keeps the section following notes and memos (R09)
+            if (lines == s.workDone.value) s else s.copy(workDone = LogSection(lines, edited = true))
+        }
         LogTextSection.VISITORS -> s.copy(visitors = text.trim())
         LogTextSection.SAFETY -> s.copy(safety = text.trim())
         LogTextSection.CLIENT_NOTES -> s.copy(clientNotes = text.trim())
@@ -329,7 +331,14 @@ object LogEdits {
      * Sets one person's time; zero takes them off the day. The crew section is then fixed as typed, so nobody stays
      * marked "on site now" on a list that no longer follows the clock.
      */
-    fun hours(s: DailyLogSections, memberId: String, minutes: Int): DailyLogSections = s.copy(
+    fun hours(s: DailyLogSections, memberId: String, minutes: Int): DailyLogSections {
+        // the same time saved again, or zero for someone not on the list, is no edit: the crew keeps following the clock (R09)
+        val current = s.crew.value.firstOrNull { it.memberId == memberId }
+        if (if (current == null) minutes == 0 else current.minutes == minutes) return s
+        return hoursEdited(s, memberId, minutes)
+    }
+
+    private fun hoursEdited(s: DailyLogSections, memberId: String, minutes: Int): DailyLogSections = s.copy(
         crew = LogSection(
             s.crew.value.mapNotNull { line ->
                 when {

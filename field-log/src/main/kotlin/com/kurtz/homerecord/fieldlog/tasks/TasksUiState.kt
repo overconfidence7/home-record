@@ -69,7 +69,8 @@ object TasksMapper {
         rooms: Map<String, String>,
         today: LocalDate,
     ): TasksUiState {
-        // Crew see only what is assigned to them, as the server sends them nothing else (backend policy.ts).
+        // Crew see only what is assigned to them. The server still sends them every task on pull (policy.ts visibleRow has
+        // no task rule); this filter is the only place other people's tasks are hidden.
         val visible = if (canManage) tasks else tasks.filter { me != null && it.assigneeId == me }
         val list = TaskList.build(visible, filter)
         fun JobTask.row() = TaskRow(

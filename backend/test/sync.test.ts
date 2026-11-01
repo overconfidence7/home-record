@@ -267,6 +267,21 @@ describe("AC-B3 sync role gates (AC-F3)", () => {
     expect(crewRoom.rejected).toEqual([{ outboxId: 6, reason: "role" }]);
   });
 
+  it("R09 a Lead ticks their own task on a job they are not on, but cannot hand it on there", async () => {
+    const t = await company("b3c2");
+    await push(t.owner, t.co, "office", [
+      op(1, "t-off", { jobId: "j9", title: "Pull permit", assigneeId: t.leadId, done: false }, 1, "task"),
+    ]);
+    const lead = await json(await push(t.lead, t.co, "lead", [
+      op(1, "t-off", { done: true }, 5, "task"),
+      op(2, "t-off", { assigneeId: t.crewId }, 6, "task"),
+      op(3, "t-new", { jobId: "j9", title: "Mine", assigneeId: t.leadId }, 5, "task"),
+      op(4, "t-off", { jobId: "j8" }, 7, "task"),
+    ]));
+    expect(lead.accepted.map((a: any) => a.outboxId)).toEqual([1]);
+    expect(lead.rejected.map((r: any) => r.outboxId)).toEqual([2, 3, 4]);
+  });
+
   it("Lead clocks in the crew only on jobs they are assigned to, and sees time only on those jobs", async () => {
     const t = await company("b3d");
     await push(t.owner, t.co, "office", [

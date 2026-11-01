@@ -27,6 +27,8 @@ object JobOverviewMapper {
         workedMillis: Long,
         photoCount: Int,
         today: String,
+        canManageTasks: Boolean = true,
+        me: String? = null,
     ): JobOverviewUiState {
         val status = job.effectiveStatus(today)
         val summary = JobSummary(job.id, job.name, status, job.startDate, job.endDate, assignments.map { it.date })
@@ -44,7 +46,8 @@ object JobOverviewMapper {
             phases = runCatching { Json.decodeFromString(ListSerializer(String.serializer()), job.phasesJson) }.getOrDefault(emptyList()),
             hoursThisWeek = Math.round(workedMillis / HOUR_MILLIS * 10) / 10.0,
             photoCount = photoCount,
-            openTasks = tasks.count { !it.done },
+            // the same tasks the Tasks tab shows this person: Crew and Sub see only their own (R09, AC-F7)
+            openTasks = tasks.count { !it.done && (canManageTasks || (me != null && it.assigneeId == me)) },
             nextDay = JobOrdering.nextDay(summary, today),
             crew = crew.mapNotNull { names[it.memberId] }.distinct().sorted(),
             today = today,

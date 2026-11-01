@@ -18,10 +18,12 @@ import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.data.PunchEntity
 import com.kurtz.homerecord.core.log.DailyLogRepository
 import com.kurtz.homerecord.core.log.WeatherStatus
+import com.kurtz.homerecord.core.model.CrewLine
 import com.kurtz.homerecord.core.model.DailyLogSections
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.model.LogDelay
 import com.kurtz.homerecord.core.model.LogLineKind
+import com.kurtz.homerecord.core.model.LogSection
 import com.kurtz.homerecord.core.model.LogWeather
 import com.kurtz.homerecord.core.model.PunchKind
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -272,5 +274,22 @@ class LogViewModelTest {
         assertThat(work.workDone.value).containsExactly("One", "Two", "Three").inOrder()
         assertThat(work.workDone.edited).isTrue()
         assertThat(LogEdits.text(start, LogTextSection.CLIENT_NOTES, " Countertops Monday ").clientNotes).isEqualTo("Countertops Monday")
+    }
+
+    // AC-F30 (R09): Save on a sheet with nothing changed is no edit, so the section keeps following the day
+    @Test fun savingUnchangedWorkDoneOrHoursLeavesTheSectionAutomatic() {
+        val start = DailyLogSections(
+            workDone = LogSection(listOf("Set the panel", "Pulled wire to the kitchen")),
+            crew = LogSection(listOf(CrewLine("m1", "Ana", 240, onSiteNow = true), CrewLine("m2", "Ben", 120))),
+        )
+        assertThat(LogEdits.text(start, LogTextSection.WORK_DONE, "Set the panel\n\nPulled wire to the kitchen")).isEqualTo(start)
+        assertThat(LogEdits.hours(start, "m2", 120)).isEqualTo(start)
+        assertThat(LogEdits.hours(start, "m9", 0)).isEqualTo(start)
+        val changed = LogEdits.hours(start, "m2", 90)
+        assertThat(changed.crew.edited).isTrue()
+        assertThat(changed.crew.value.map { it.minutes }).containsExactly(240, 90).inOrder()
+        val off = LogEdits.hours(start, "m2", 0)
+        assertThat(off.crew.value.map { it.memberId }).containsExactly("m1")
+        assertThat(off.crew.edited).isTrue()
     }
 }

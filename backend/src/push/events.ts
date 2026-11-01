@@ -29,6 +29,8 @@ export interface CompanyDays {
 }
 
 const str = (value: unknown): string | null => (typeof value === "string" && value !== "" ? value : null);
+/** Phones send Room booleans as 0/1 (RowStore reads raw cursors), so a done task arrives as 1 (R09). */
+const isDone = (value: unknown): boolean => value === true || value === 1 || value === "1";
 const live = (row: Row | null): row is Row => row !== null && (row.deletedAt === null || row.deletedAt === undefined);
 
 export function pushEventsFor(entity: string, before: Row | null, after: Row, pusherId: string, days: CompanyDays): PushEvent[] {
@@ -40,7 +42,7 @@ function rawEvents(entity: string, before: Row | null, after: Row, days: Company
   switch (entity) {
     case "task": {
       const assignee = str(after.assigneeId);
-      if (!assignee || !live(after) || after.done === true) return [];
+      if (!assignee || !live(after) || isDone(after.done)) return [];
       if (live(before) && str(before.assigneeId) === assignee) return [];
       const jobId = str(after.jobId);
       return [{ type: "task_assigned", to: assignee, jobId, data: { taskId: String(after.id), jobId: jobId ?? "", title: str(after.title) ?? "" } }];

@@ -290,6 +290,8 @@ private fun PushOpener(container: AppContainer, membership: CompanyMembership) {
             val gates = container.roleGates.first()
             val request = com.kurtz.homerecord.fieldlog.push.PushDestination.of(message, membership.companyId, gates)
             container.pendingPush.value = null
+            // the row the push is about may not be on this phone yet (R09)
+            container.syncCoordinator.requestSync()
             container.tabRequests.request(request.tabId, request.keys)
         }
     }
