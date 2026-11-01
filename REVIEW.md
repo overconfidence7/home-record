@@ -2482,7 +2482,7 @@ Tested: 58 device stages, 1124 unit tests, 140 backend tests, coverage 261/261 A
 
 ## Builder notes 2026-11-01 (T047b2)
 
-- [ ] [Minor] `LogSendTest.theShareSheetMarksItSentWithNoRecipientsAndASecondSendReplacesTheFirst` timed out at its 5 s wait once in a full `assembleDebug testDebugUnitTest --max-workers=2` run on d47125a1+T047b2 (code it covers unchanged); passed 3/3 alone and in a 1-worker full run - expected: no timing-dependent JVM test - actual: a 5 s wall-clock wait on a loaded container
+- [ ] [Minor] `LogSendTest.theShareSheetMarksItSentWithNoRecipientsAndASecondSendReplacesTheFirst` timed out at its 5 s wait once in a full `assembleDebug testDebugUnitTest --max-workers=2` run on d47125a1+T047b2 (code it covers unchanged); passed 3/3 alone and in a 1-worker full run - expected: no timing-dependent JVM test - actual: a 5 s wall-clock wait on a loaded container (seen again 2026-11-01 R09c in a 2-worker full run; passed in the 1-worker rerun)
 
 ## QA auto 2026-11-01 (commit d47125a1)
 

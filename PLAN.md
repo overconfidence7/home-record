@@ -283,7 +283,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] R09: Review T043–T047
   - [x] R09a: daily log sections merge across phones: `sectionsJson` is one last-writer-wins field, so an office phone opening the day (auto-assembly saves while a shift runs) overwrites a Lead's offline Visitors/delays; split hand-typed sections into their own fields or merge per section, and save on open only when an automatic section really changed (AC-F30)
   - [x] R09b: log PDF photos honour the JPEG's EXIF orientation (portrait photos print sideways today) (AC-F33)
-  - [ ] R09c: weather: treat a snapshot as final by the backend's fetch time, not the phone's receive time (the Worker cache can hand back the evening forecast after midnight); an empty Open-Meteo day says "No weather" rather than offline (AC-F31)
+  - [x] R09c: weather: treat a snapshot as final by the backend's fetch time, not the phone's receive time (the Worker cache can hand back the evening forecast after midnight); an empty Open-Meteo day says "No weather" rather than offline (AC-F31)
   - [ ] R09d: Log tab: "today" moves on at midnight while the tab is open; Remove delay targets the delay by id, not list position; a sent log edited or re-assembled later shows "Changed since sent"; notes filed by `NoteEntity.day`, not the viewer's time zone (AC-F30, AC-F33)
   - [ ] R09e: conflict log on More > Sync shows only the current company's lines (`tenantKey` is written but never read) (AC-F55)
   - [ ] R09f: task form opened from a push reloads when the task arrives by sync instead of staying on the error; company time zone settable in `settingsSchema` (today/tomorrow for schedule pushes is always Eastern now); schedule push opens the day (with T059) (AC-F36, AC-F42)
