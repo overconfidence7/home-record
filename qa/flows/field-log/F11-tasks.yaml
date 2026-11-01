@@ -164,12 +164,17 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_tasks_list
     timeout: 10000
-# AC-F36: the task changes sync; the backend accepts them, so nothing is listed as refused
+# AC-F36: the task changes sync; the backend accepts them, so nothing is listed as refused (the Today chip opens FL-Sync, T046b)
 - tapOn:
     id: fl_back
 - tapOn: "Today"
+- extendedWaitUntil:
+    visible:
+      id: fl_today_sync
+      text: "Everything is synced"
+    timeout: 60000
 - tapOn:
-    id: fl_sync_status
+    id: fl_today_sync
 - extendedWaitUntil:
     visible: "Everything is synced"
-    timeout: 60000
+    timeout: 10000

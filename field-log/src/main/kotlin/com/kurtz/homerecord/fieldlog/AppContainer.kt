@@ -432,7 +432,9 @@ class AppContainer(private val app: Application) {
     }
 
     fun syncLogDeps() = com.kurtz.homerecord.fieldlog.sync.SyncLogDeps(
-        syncEngine.phase, syncEngine.pendingCount, conflictLog.entries, syncCoordinator::requestSync, { conflictLog.clear() },
+        syncEngine.phase, syncEngine.pendingCount, conflictLog.entries, syncCoordinator::requestSync,
+        // Clearing the log also clears the refused changes the Today chip counts; the records stay as they are.
+        { conflictLog.clear(); syncEngine.clearRefused() },
     )
 
     fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(

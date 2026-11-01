@@ -65,7 +65,7 @@ import com.kurtz.homerecord.core.sync.RefusedChange
 import com.kurtz.homerecord.core.sync.SyncPhase
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.RecordListItem
-import com.kurtz.homerecord.coreui.components.SyncStatus
+import com.kurtz.homerecord.coreui.components.SyncStatusChip
 import com.kurtz.homerecord.fieldlog.R
 import java.time.Instant
 import java.time.ZoneId
@@ -98,7 +98,7 @@ data class TodayUiState(
     val role: CompanyRole,
     val syncPhase: SyncPhase = SyncPhase.Idle,
     val pendingChanges: Int = 0,
-    /** Changes the server refused, listed from the sync chip (cr:sync-poison-op). */
+    /** Changes the server refused; the chip says how many and opens FL-Sync, which lists them (cr:sync-poison-op). */
     val refusedChanges: List<RefusedChange> = emptyList(),
     /** The company has at least one active job; until then Today explains what to do first (AC-F1). */
     val hasJobs: Boolean = false,
@@ -127,12 +127,12 @@ data class TodayUiState(
 /** Everything a tap on Today asks for; the route turns navigation into back-stack pushes (cr:fl-screen-signature). */
 sealed interface TodayEvent {
     data object InviteCrew : TodayEvent
-    data object SyncNow : TodayEvent
+    /** The sync chip: opens FL-Sync with the pending count, Sync now and the conflict log (AC-F52, AC-F53). */
+    data object OpenSync : TodayEvent
     data object OpenClock : TodayEvent
     data class OpenJob(val jobId: String) : TodayEvent
     data object AddJob : TodayEvent
     data object Refresh : TodayEvent
-    data object ClearRefused : TodayEvent
     /** Open the member's last punch location in a maps app (AC-F16). */
     data class OpenPin(val entry: OnSiteEntry) : TodayEvent
     /** Tick one of my tasks done (check box or swipe); the snackbar offers Undo (AC-F34). */
@@ -205,9 +205,9 @@ fun TodayCaptureChooser(options: List<TodayJob>, onEvent: (TodayEvent) -> Unit) 
 @Composable
 private fun TodayColumn(state: TodayUiState, onEvent: (TodayEvent) -> Unit) {
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        SyncStatus(
-            state.syncPhase, state.pendingChanges, state.refusedChanges,
-            { onEvent(TodayEvent.SyncNow) }, { onEvent(TodayEvent.ClearRefused) }, Modifier.padding(horizontal = 16.dp),
+        SyncStatusChip(
+            state.syncPhase, state.pendingChanges, { onEvent(TodayEvent.OpenSync) },
+            Modifier.padding(horizontal = 16.dp).testTag("fl_today_sync"), refused = state.refusedChanges.size,
         )
         // Pull down syncs and reloads the team, so "On site now" is current (AC-F16).
         PullToRefreshBox(state.refreshing, { onEvent(TodayEvent.Refresh) }, Modifier.weight(1f).fillMaxWidth().testTag("fl_today_refresh")) {

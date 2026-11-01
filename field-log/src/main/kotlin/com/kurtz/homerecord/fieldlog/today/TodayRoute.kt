@@ -16,8 +16,8 @@ import com.kurtz.homerecord.coreui.platform.Intents
 /** Where Today's taps lead; the app wires each to the back stack, the sync engine or another tab. */
 class TodayNavigation(
     val onInviteCrew: () -> Unit,
-    val onSyncNow: () -> Unit,
-    val onClearRefused: () -> Unit,
+    /** FL-Sync: where the pending count, Sync now and the conflict log live (AC-F52). */
+    val onOpenSync: () -> Unit,
     val onOpenClock: () -> Unit = {},
     val onOpenJob: (String) -> Unit = {},
     val onAddJob: () -> Unit,
@@ -63,8 +63,7 @@ fun TodayRoute(
 fun todayEvent(event: TodayEvent, navigation: TodayNavigation, context: Context, onRefresh: () -> Unit = {}) {
     when (event) {
         TodayEvent.InviteCrew -> navigation.onInviteCrew()
-        TodayEvent.SyncNow -> navigation.onSyncNow()
-        TodayEvent.ClearRefused -> navigation.onClearRefused()
+        TodayEvent.OpenSync -> navigation.onOpenSync()
         TodayEvent.OpenClock -> navigation.onOpenClock()
         is TodayEvent.OpenJob -> navigation.onOpenJob(event.jobId)
         TodayEvent.AddJob -> navigation.onAddJob()

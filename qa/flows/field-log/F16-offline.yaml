@@ -1,4 +1,4 @@
-# Walkthrough F16 (T046a): with the phone in airplane mode a new job and a task save on the phone; More > Sync says
+# Walkthrough F16 (T046a, T046b): with the phone in airplane mode a new job and a task save on the phone; More > Sync says
 # how many changes are saved here and shows the conflict log (none yet); back online, everything syncs within 60 s
 # and the count returns to "Everything is synced" (AC-F52, AC-F53). The second phone half of F16 is the handoff job.
 appId: com.kurtz.homerecord.fieldlog
@@ -23,6 +23,19 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Offline panel swap"
     timeout: 10000
+# AC-F52: Today's chip counts the change waiting on this phone and opens FL-Sync (T046b)
+- tapOn: "Today"
+- extendedWaitUntil:
+    visible: "Offline · .* waiting"
+    timeout: 20000
+- tapOn:
+    id: fl_today_sync
+- extendedWaitUntil:
+    visible:
+      id: fl_sync_now
+    timeout: 10000
+- tapOn:
+    id: fl_back
 - tapOn: "More"
 - assertVisible:
     id: fl_more_sync
