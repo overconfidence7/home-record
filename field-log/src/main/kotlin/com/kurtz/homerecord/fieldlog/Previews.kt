@@ -1382,6 +1382,15 @@ private val pinnedDraft = taskEditDraft.copy(planPin = com.kurtz.homerecord.core
 @ThemePreviews
 @Composable
 fun JobHousePinsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, name = "Hale kitchen", clientName = "Hale"),
+        com.kurtz.homerecord.fieldlog.jobs.JobTab.HOUSE, {}, {}, {},
+        houseContent = { JobHousePinsContent() },
+    )
+}
+
+@Composable
+private fun JobHousePinsContent() {
     com.kurtz.homerecord.housemodel.ui.HouseScreen(
         state = com.kurtz.homerecord.housemodel.ui.HouseUiState(
             loading = false, homeName = "Hale kitchen", summary = "418 Linden Ave, Ithaca",
