@@ -1,6 +1,10 @@
 package com.kurtz.homerecord.fieldlog.tasks
 
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
@@ -105,6 +109,58 @@ class TasksScreenTest {
         }
         rule.waitForIdle()
         assertThat(events).contains(TasksEvent.SetDone("t1", true))
+    }
+
+    /** The Tasks tab over a live state: SetDone moves the row to Done with Undo, Undo moves it back (F11's sequence). */
+    private fun showLive(): MutableList<TasksEvent> {
+        val events = mutableListOf<TasksEvent>()
+        val t1 = TaskRow("t1", "Set the kitchen outlets", note = "GFCI by the sink")
+        val t2 = TaskRow("t2", "Replace cracked cover plate", punch = true)
+        val openState = TasksUiState(loading = false, open = listOf(t1, t2), total = 2, canManage = true)
+        var state by mutableStateOf(openState)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                TasksScreen(state, { e ->
+                    events += e
+                    when (e) {
+                        is TasksEvent.SetDone -> state = TasksUiState(
+                            loading = false, open = listOf(t2), done = listOf(t1.copy(done = true)), total = 2, canManage = true,
+                            undo = TaskUndo("t1", t1.title),
+                        )
+                        TasksEvent.Undo -> state = openState
+                        else -> Unit
+                    }
+                })
+            }
+        }
+        return events
+    }
+
+    private fun swipeT1() {
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput { swipe(center, Offset(width * 0.9f, centerY), durationMillis = 400) }
+        rule.waitForIdle()
+    }
+
+    // AC-F34: F11 on device: tick, Undo, then swipe the same row; the swipe must still complete it.
+    @Test fun aRowBackFromUndoAfterATickStillSwipesDone() {
+        val events = showLive()
+        rule.onNodeWithTag("fl_tasks_check_t1").performClick()
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitForIdle()
+        swipeT1()
+        assertThat(events.filterIsInstance<TasksEvent.SetDone>()).hasSize(2)
+        rule.onNodeWithText("Done: Set the kitchen outlets").assertExists()
+    }
+
+    // AC-F34: swipe, Undo, swipe again: the second swipe completes it too and the row comes back in place.
+    @Test fun aRowBackFromUndoAfterASwipeSwipesDoneAgain() {
+        val events = showLive()
+        swipeT1()
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_tasks_check_t1").assertIsDisplayed()
+        swipeT1()
+        assertThat(events.filterIsInstance<TasksEvent.SetDone>()).hasSize(2)
     }
 
     @Test fun swipingTheOtherWayTicksItToo() {

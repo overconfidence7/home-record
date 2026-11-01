@@ -10,7 +10,8 @@ import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,6 +51,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -215,11 +217,25 @@ private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @C
     SwipeToComplete({ onEvent(TasksEvent.SetDone(row.id, true)) }, Modifier.testTag("fl_tasks_swipe_${row.id}"), content)
 }
 
-/** A row that swipes either way to complete it: the Tasks tab and My tasks on Today (AC-F34). */
+/**
+ * A row that swipes either way to complete it: the Tasks tab and My tasks on Today (AC-F34).
+ *
+ * The swipe state is plain `remember`, not saveable: a completed row leaves its list, and a saved "swiped away"
+ * state would come back with it on Undo, drawn off screen with the swipe disabled, and complete the task again.
+ * The latest [onComplete] is read when the swipe settles, so a recomposition mid-swipe neither drops nor repeats it.
+ */
 @Composable
 fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val swipe = rememberSwipeToDismissBoxState()
+    val threshold = SwipeToDismissBoxDefaults.positionalThreshold
+    val swipe = remember { SwipeToDismissBoxState(SwipeToDismissBoxValue.Settled, threshold) }
+    val complete by rememberUpdatedState(onComplete)
     val scope = rememberCoroutineScope()
+    val onDismiss: (SwipeToDismissBoxValue) -> Unit = remember(swipe, scope) {
+        {
+            complete()
+            scope.launch { swipe.reset() }
+        }
+    }
     SwipeToDismissBox(
         state = swipe,
         backgroundContent = {
@@ -231,10 +247,7 @@ fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, conte
                 Icon(Icons.Rounded.Done, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         },
-        onDismiss = {
-            onComplete()
-            scope.launch { swipe.reset() }
-        },
+        onDismiss = onDismiss,
         modifier = modifier,
     ) { content() }
 }

@@ -1,6 +1,10 @@
 package com.kurtz.homerecord.fieldlog.today
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -78,6 +82,36 @@ class TodayTasksScreenTest {
         }
         rule.waitForIdle()
         assertThat(events).containsExactly(TodayEvent.CompleteTask("t1"))
+    }
+
+    // AC-F34: F11 on device: swipe a task off My tasks, Undo brings it back in place, and it swipes done again.
+    @Test fun aTaskBackFromUndoSwipesDoneAgain() {
+        val events = mutableListOf<TodayEvent>()
+        var s by mutableStateOf(state)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                TodayScreen(s, { e ->
+                    events += e
+                    when (e) {
+                        is TodayEvent.CompleteTask -> s = state.copy(tasks = state.tasks.filter { it.id != e.taskId }, taskUndo = TaskUndo(e.taskId, "x"))
+                        TodayEvent.UndoTask -> s = state
+                        else -> Unit
+                    }
+                })
+            }
+        }
+        scrollTo("fl_today_task_swipe_t1")
+        val swipe: () -> Unit = {
+            rule.onNodeWithTag("fl_today_task_swipe_t1").performTouchInput { swipe(center, Offset(width * 0.9f, centerY), durationMillis = 400) }
+            rule.waitForIdle()
+        }
+        swipe()
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitForIdle()
+        scrollTo("fl_today_task_swipe_t1")
+        rule.onNodeWithTag("fl_today_task_check_t1").assertIsDisplayed()
+        swipe()
+        assertThat(events.filterIsInstance<TodayEvent.CompleteTask>()).containsExactly(TodayEvent.CompleteTask("t1"), TodayEvent.CompleteTask("t1"))
     }
 
     @Test fun undoSnackbarSendsUndoTask() {
