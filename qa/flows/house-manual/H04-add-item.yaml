@@ -36,10 +36,14 @@ appId: com.kurtz.homerecord.housemanual
 - inputText: "59SC5A080"
 - hideKeyboard
 - takeScreenshot: H04-item-form
-# AC-C30: photo buttons (data plate, item) sit at the end of the form
+# AC-C30: photo buttons (data plate, item) sit at the end of the form.
+# The form's scroll area ends above the navigation bar (rule 28), and Maestro counts a button whose lower
+# half is still clipped there as visible, so on c5543600 the tap on its centre landed outside the form.
+# One more scroll takes the form to its end, where the row sits wholly inside the scroll area.
 - scrollUntilVisible:
     element:
       id: "hm_item_photo_data_plate"
+- scroll
 - assertVisible:
     id: "hm_item_photo_item"
 # AC-C31: the data plate button offers camera and gallery (the on-device scan sheet follows the photo; OCR itself is covered by DataPlateParserTest and ItemEditViewModelTest)
