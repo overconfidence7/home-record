@@ -44,18 +44,7 @@ fun WallOverlaysRoute(
         },
     )
     val state = vm.state.collectAsState().value
-    // The pending camera file lives in the view model's SavedStateHandle, so a result after rotation or process death still lands.
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> vm.onEvent(WallOverlaysEvent.CameraResult(ok)) }
-    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
-        vm.onEvent(WallOverlaysEvent.GalleryResult(uri?.toString()))
-    }
-    LaunchedEffect(state.photoLaunch) {
-        val launch = state.photoLaunch ?: return@LaunchedEffect
-        vm.onEvent(WallOverlaysEvent.PhotoLaunchHandled)
-        val target = launch.target
-        if (target != null) camera.launch(Uri.parse(target.uri))
-        else gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
+    OverlayPhotoLaunchers(state.photoLaunch, vm::onEvent)
     val back = {
         when {
             state.form != null -> vm.onEvent(WallOverlaysEvent.CloseForm)
@@ -67,4 +56,23 @@ fun WallOverlaysRoute(
     // The form's own handler, composed later, asks before discarding changes.
     BackHandler(enabled = state.form != null || state.drawing != null || state.selectedId != null, onBack = back)
     WallOverlaysScreen(state, { event -> if (event == WallOverlaysEvent.Back) back() else vm.onEvent(event) })
+}
+
+/**
+ * Opens the camera or the photo picker the overlay form asked for in [launch] and hands the result back through [onEvent].
+ * The pending camera file lives in the view model's SavedStateHandle, so a result after rotation or process death still lands.
+ */
+@Composable
+internal fun OverlayPhotoLaunchers(launch: OverlayPhotoLaunch?, onEvent: (WallOverlaysEvent) -> Unit) {
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> onEvent(WallOverlaysEvent.CameraResult(ok)) }
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        onEvent(WallOverlaysEvent.GalleryResult(uri?.toString()))
+    }
+    LaunchedEffect(launch) {
+        launch ?: return@LaunchedEffect
+        onEvent(WallOverlaysEvent.PhotoLaunchHandled)
+        val target = launch.target
+        if (target != null) camera.launch(Uri.parse(target.uri))
+        else gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
 }

@@ -18,8 +18,8 @@ class OverlayTargetTest {
     }
 
     @Test @AcceptanceCriterion("AC-C28")
-    fun aPlanOverlayOpensItsRoomAndOneWithNoRoomOpensNothing() {
-        assertThat(OverlayTarget.of(overlay("r1", null))).isEqualTo(OverlayTarget.Room("r1"))
-        assertThat(OverlayTarget.of(overlay(null, null))).isNull()
+    fun aPlanOverlayOpensThePlanEditorWithItPicked() {
+        assertThat(OverlayTarget.of(overlay("r1", null))).isEqualTo(OverlayTarget.Plan("o1"))
+        assertThat(OverlayTarget.of(overlay(null, null))).isEqualTo(OverlayTarget.Plan("o1"))
     }
 }

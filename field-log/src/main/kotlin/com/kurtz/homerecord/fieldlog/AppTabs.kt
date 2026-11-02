@@ -167,6 +167,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onEditShape = { homeId, title, floorId, room -> nav.push(JobPlanKey(homeId, title, floorId, room.id, editShape = true)) },
                     onOpenFloors = { homeId, title -> nav.push(JobFloorsKey(homeId, title)) },
                     on3D = { homeId, title, floorId -> nav.push(JobHouse3DKey(homeId, title, floorId)) },
+                    overlays = container.overlays,
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
@@ -246,6 +247,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.housemodel.ui.PlanEditorRoute(
                 container.homes, key.homeId, key.title, onBack = nav::pop, onOpenFloors = { nav.push(JobFloorsKey(key.homeId, key.title)) },
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
+                overlays = container.overlays, media = container.media, overlayStage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
+                overlayId = key.overlayId,
             )
         }
         entry<JobHouse3DKey> { key ->
@@ -257,12 +260,18 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<JobRoomKey> { key ->
+            val roomScope = androidx.compose.runtime.rememberCoroutineScope()
             com.kurtz.homerecord.housemodel.ui.RoomRoute(
                 container.homes, container.wallPhotos, container.media, key.roomId, onBack = nav::pop,
                 onOutline = { nav.push(JobWallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
                 onView3D = { nav.push(JobHouse3DKey(it.homeId, it.homeName, it.floorId, it.roomId)) },
                 overlays = container.overlays,
                 onOpenWall = { nav.push(JobWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
+                onOpenPlanOverlay = { overlayId ->
+                    roomScope.launch {
+                        container.homes.roomLocation(key.roomId)?.let { nav.push(JobPlanKey(it.homeId, it.homeName, it.floorId, overlayId = overlayId)) }
+                    }
+                },
             )
         }
         entry<JobWallKey> { key ->

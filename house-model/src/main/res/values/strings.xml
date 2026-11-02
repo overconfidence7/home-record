@@ -80,6 +80,13 @@
     <string name="plan_delete_stairs_title">Delete these stairs?</string>
     <string name="plan_delete_stairs_body">The stairs come off this room and the link to the other floor goes with them.</string>
     <string name="plan_delete_room">Delete room</string>
+    <string name="plan_mode_rooms">Rooms</string>
+    <string name="plan_mode_overlays">Overlays</string>
+    <string name="plan_overlays_draw_hint">Tap along the pipe, wire or duct on the plan. One tap marks a single spot like a floor drain.</string>
+    <string name="plan_overlays_empty">No pipes, wires or ducts drawn on this floor yet. Tap Add overlay, then tap along the line on the plan.</string>
+    <string name="plan_overlays_pick_hint">Tap a line or a spot to pick it.</string>
+    <string name="plan_overlays_no_rooms">Draw a room first. An overlay on the plan belongs to the room it starts in.</string>
+    <string name="plan_overlays_save_failed">Couldn\'t save the overlay. Draw a room on this floor and try again.</string>
     <string name="plan_wall_hint">Tap a wall to add a door or window. Stairs go in the room.</string>
     <string name="plan_wall_selected">Wall, %1$s long</string>
     <string name="plan_add_door">Add door</string>

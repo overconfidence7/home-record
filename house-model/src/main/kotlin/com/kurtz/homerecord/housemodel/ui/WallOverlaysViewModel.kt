@@ -6,9 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.overlays.Overlay
-import com.kurtz.homerecord.housemodel.overlays.OverlayDepth
-import com.kurtz.homerecord.housemodel.overlays.OverlayDraft
-import com.kurtz.homerecord.housemodel.overlays.OverlayKind
 import com.kurtz.homerecord.housemodel.overlays.OverlayPoints
 import com.kurtz.homerecord.housemodel.overlays.OverlayRepository
 import com.kurtz.homerecord.housemodel.overlays.OverlaySave
@@ -41,13 +38,20 @@ class WallOverlaysViewModel(
     /** Where an overlay's photo is kept; null leaves the photo off the form. */
     private val media: MediaFiles? = null,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(restore(defaultStage, selectId).copy(roomId = roomId, canAddPhoto = media != null))
+    private val _state = MutableStateFlow(WallOverlaysUiState())
     val state: StateFlow<WallOverlaysUiState> = _state.asStateFlow()
+    private val forms = OverlayFormController(
+        savedState, media, viewModelScope,
+        current = { _state.value.form },
+        show = { form -> _state.update { it.copy(form = form) } },
+        launchPhoto = { launch -> _state.update { it.copy(photoLaunch = launch) } },
+    )
 
     private var homeId: String? = null
     private var photos: Map<WallStage, WallPhoto> = emptyMap()
 
     init {
+        _state.value = restore(defaultStage, selectId).copy(roomId = roomId, canAddPhoto = media != null)
         viewModelScope.launch {
             val home = repo.roomLocation(roomId)?.homeId ?: return@launch
             homeId = home
@@ -112,52 +116,9 @@ class WallOverlaysViewModel(
                 if (id != null) viewModelScope.launch { overlays.delete(id) }
             }
             WallOverlaysEvent.DismissError -> _state.update { it.copy(error = null) }
-            is WallOverlaysEvent.OpenSheet -> editForm(dirty = false) { it.copy(sheet = event.sheet) }
-            is WallOverlaysEvent.SetKind -> editForm { it.copy(kind = event.kind, sheet = null) }
-            is WallOverlaysEvent.SetLabel -> editForm { it.copy(label = event.label) }
-            is WallOverlaysEvent.SetNote -> editForm { it.copy(note = event.note) }
-            is WallOverlaysEvent.SetDepth -> editForm { it.copy(depth = event.depth, sheet = null) }
-            is WallOverlaysEvent.SetFormStage -> editForm { it.copy(stage = event.stage) }
             WallOverlaysEvent.Save -> save()
-            WallOverlaysEvent.CloseForm -> {
-                _state.value.form?.takeIf { it.photoIsNew }?.photoPath?.let { media?.discard(it) }
-                setForm(null)
-            }
-            WallOverlaysEvent.TakePhoto -> {
-                val files = media ?: return
-                val target = files.newCaptureTarget()
-                savedState[KEY_PENDING] = target.path
-                editForm(dirty = false) { it.copy(sheet = null) }
-                _state.update { it.copy(photoLaunch = OverlayPhotoLaunch(target)) }
-            }
-            WallOverlaysEvent.ChoosePhoto -> {
-                if (media == null) return
-                savedState[KEY_PENDING] = null
-                editForm(dirty = false) { it.copy(sheet = null) }
-                _state.update { it.copy(photoLaunch = OverlayPhotoLaunch(null)) }
-            }
             WallOverlaysEvent.PhotoLaunchHandled -> _state.update { it.copy(photoLaunch = null) }
-            is WallOverlaysEvent.CameraResult -> {
-                val path = savedState.get<String>(KEY_PENDING) ?: return
-                savedState[KEY_PENDING] = null
-                val files = media ?: return
-                if (event.ok && files.exists(path) && _state.value.form != null) setPhoto(path) else files.discard(path)
-            }
-            is WallOverlaysEvent.GalleryResult -> {
-                val uri = event.uri ?: return
-                val files = media ?: return
-                viewModelScope.launch {
-                    val path = files.import(uri) ?: return@launch
-                    if (_state.value.form != null) setPhoto(path) else files.discard(path)
-                }
-            }
-            WallOverlaysEvent.RemovePhoto -> {
-                val form = _state.value.form ?: return
-                if (form.photoIsNew) form.photoPath?.let { media?.discard(it) }
-                editForm { it.copy(photoPath = null, photoIsNew = false) }
-            }
-            is WallOverlaysEvent.SetItemQuery -> editForm(dirty = false) { it.copy(itemQuery = event.query) }
-            is WallOverlaysEvent.SetItem -> editForm { it.copy(itemId = event.itemId, itemQuery = "", sheet = null) }
+            else -> forms.onEvent(event)
         }
     }
 
@@ -191,17 +152,8 @@ class WallOverlaysViewModel(
     }
 
     private fun save() {
-        val form = _state.value.form ?: return
-        val kind = form.kind
-        if (kind == null) {
-            editForm(dirty = false) { it.copy(triedSave = true) }
-            return
-        }
-        if (form.saving) return
-        editForm(dirty = false) { it.copy(saving = true) }
-        val draft = OverlayDraft(kind, form.points, form.stage, form.label, form.note, form.depth, form.photoPath, form.itemId)
+        val (editing, draft) = forms.draftForSave() ?: return
         viewModelScope.launch {
-            val editing = form.editingId
             val result = when {
                 editing != null -> overlays.update(editing, draft)
                 else -> {
@@ -214,17 +166,10 @@ class WallOverlaysViewModel(
                 savedState[KEY_SELECTED] = result.id
                 _state.update { it.copy(selectedId = result.id) }
             } else {
-                editForm(dirty = false) { it.copy(saving = false) }
+                forms.saveFailed()
                 _state.update { it.copy(error = WallOverlaysError.SaveFailed) }
             }
         }
-    }
-
-    /** A new photo on the open form; a fresh one it replaces is deleted, a saved one stays until the overlay is saved. */
-    private fun setPhoto(path: String) {
-        val form = _state.value.form ?: return
-        if (form.photoIsNew && form.photoPath != path) form.photoPath?.let { media?.discard(it) }
-        editForm { it.copy(photoPath = path, photoIsNew = true) }
     }
 
     private fun setDrawing(points: List<com.kurtz.homerecord.housemodel.overlays.OverlayPoint>?, clearSelection: Boolean = false) {
@@ -233,58 +178,13 @@ class WallOverlaysViewModel(
         _state.update { it.copy(drawing = points, selectedId = if (clearSelection) null else it.selectedId) }
     }
 
-    private fun editForm(dirty: Boolean = true, change: (OverlayForm) -> OverlayForm) {
-        val form = _state.value.form ?: return
-        setForm(change(form).let { if (dirty) it.copy(dirty = true) else it })
-    }
-
-    private fun setForm(form: OverlayForm?) {
-        savedState[KEY_FORM] = form?.let(::encodeForm)
-        _state.update { it.copy(form = form) }
-    }
+    private fun setForm(form: OverlayForm?) = forms.open(form)
 
     private fun restore(defaultStage: WallStage, selectId: String?): WallOverlaysUiState {
         val stage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage
         val drawing = savedState.get<String>(KEY_DRAWING)?.let(OverlayPoints::decode)
         val selected = if (savedState.contains(KEY_SELECTED)) savedState.get<String>(KEY_SELECTED) else selectId
-        return WallOverlaysUiState(stage = stage, drawing = drawing, selectedId = selected, form = savedState.get<String>(KEY_FORM)?.let(::decodeForm))
-    }
-
-    private fun encodeForm(form: OverlayForm): String = org.json.JSONObject()
-        .put("id", form.editingId ?: "")
-        .put("points", OverlayPoints.encode(form.points))
-        .put("kind", form.kind?.wire ?: "")
-        .put("label", form.label)
-        .put("note", form.note)
-        .put("depth", form.depth.name)
-        .put("stage", form.stage.name)
-        .put("photo", form.photoPath ?: "")
-        .put("photoNew", form.photoIsNew)
-        .put("item", form.itemId ?: "")
-        .put("query", form.itemQuery)
-        .put("sheet", form.sheet?.name ?: "")
-        .put("dirty", form.dirty)
-        .toString()
-
-    private fun decodeForm(json: String): OverlayForm? = try {
-        val o = org.json.JSONObject(json)
-        OverlayForm(
-            editingId = o.optString("id").ifEmpty { null },
-            points = OverlayPoints.decode(o.optString("points")),
-            kind = o.optString("kind").ifEmpty { null }?.let(OverlayKind::fromWire),
-            label = o.optString("label"),
-            note = o.optString("note"),
-            depth = OverlayDepth.fromStored(o.optString("depth")),
-            stage = WallStage.fromStored(o.optString("stage")),
-            photoPath = o.optString("photo").ifEmpty { null },
-            photoIsNew = o.optBoolean("photoNew"),
-            itemId = o.optString("item").ifEmpty { null },
-            itemQuery = o.optString("query"),
-            sheet = OverlayFormSheet.entries.firstOrNull { it.name == o.optString("sheet") },
-            dirty = o.optBoolean("dirty"),
-        )
-    } catch (_: org.json.JSONException) {
-        null
+        return WallOverlaysUiState(stage = stage, drawing = drawing, selectedId = selected, form = forms.restore())
     }
 
     private fun com.kurtz.homerecord.housemodel.overlays.OverlayPoint.clampedToWall() =
@@ -294,8 +194,6 @@ class WallOverlaysViewModel(
         const val KEY_STAGE = "stage"
         const val KEY_SELECTED = "selected"
         const val KEY_DRAWING = "drawing"
-        const val KEY_FORM = "form"
-        const val KEY_PENDING = "pendingPhoto"
     }
 }
 

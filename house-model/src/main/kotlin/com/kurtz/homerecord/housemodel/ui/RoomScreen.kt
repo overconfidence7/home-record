@@ -302,7 +302,7 @@ private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, ca
     )
 }
 
-/** The Overlays section (AC-C25): every overlay in the room by kind icon and color; a tap opens its wall with it picked. */
+/** The Overlays section (AC-C25): every overlay in the room by kind icon and color; a tap opens its wall, or the plan, with it picked. */
 @Composable
 private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEvent: (RoomEvent) -> Unit) {
     val prefix = LocalTagPrefix.current
@@ -330,8 +330,12 @@ private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEven
                     headline = o.title(kindName),
                     supporting = listOfNotNull(kindName.takeIf { o.label.isNotBlank() }, where, stringResource(R.string.wall_overlay_recorded_at, stringResource(o.stage.labelRes))).joinToString(" · "),
                     leading = { Icon(o.kind.icon, contentDescription = null, tint = o.kind.color(dark)) },
-                    onClick = if (wallId != null && state.canOpenWalls) ({ onEvent(RoomEvent.OpenWall(wallId, o.id)) }) else null,
-                    trailing = if (wallId != null && state.canOpenWalls) RecordListItemChevron else null,
+                    onClick = when {
+                        !state.canOpenWalls -> null
+                        wallId != null -> ({ onEvent(RoomEvent.OpenWall(wallId, o.id)) })
+                        else -> ({ onEvent(RoomEvent.OpenPlanOverlay(o.id)) })
+                    },
+                    trailing = if (state.canOpenWalls) RecordListItemChevron else null,
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.testTag("${prefix}_room_overlay_${o.id}"),
                 )

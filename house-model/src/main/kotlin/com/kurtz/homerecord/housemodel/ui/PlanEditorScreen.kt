@@ -110,6 +110,18 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import com.kurtz.homerecord.housemodel.blueprint.drawPendingRun
+import com.kurtz.homerecord.housemodel.blueprint.drawPlanOverlays
+import com.kurtz.homerecord.housemodel.blueprint.rememberOverlayIcons
+import com.kurtz.homerecord.housemodel.overlays.OverlayHitTest
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
+import com.kurtz.homerecord.housemodel.overlays.nameRes
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.ui.graphics.luminance
 
 private const val HANDLE_RADIUS_DP = 10f
 private const val HANDLE_HIT_DP = 24f
@@ -122,10 +134,16 @@ private sealed interface Target {
     data class Body(val roomId: String) : Target
     data class Opening(val roomId: String, val openingId: String) : Target
     data class Wall(val roomId: String, val edgeIndex: Int, val at: Pt) : Target
+    /** Point [index] of the picked overlay, in Overlays mode (AC-C28). */
+    data class OverlayHandle(val overlayId: String, val index: Int) : Target
     data object None : Target
 }
 
-/** HM-Plan: one floor on a grid. Drag a room to move it, drag a handle to resize, pinch to zoom, two fingers to pan. */
+/**
+ * HM-Plan: one floor on a grid. Drag a room to move it, drag a handle to resize, pinch to zoom, two fingers to pan. In
+ * Overlays mode (AC-C25, AC-C28) taps draw a run or a spot in plan inches, and a picked overlay's points drag; the overlay
+ * form opens full screen in place of the plan.
+ */
 @Composable
 fun PlanEditorScreen(
     state: PlanEditorUiState,
@@ -134,8 +152,16 @@ fun PlanEditorScreen(
     homeName: String? = null,
     onOpenFloors: () -> Unit = {},
 ) {
+    val onOverlay: (WallOverlaysEvent) -> Unit = { onEvent(PlanEditorEvent.OverlayEvent(it)) }
+    val form = state.overlayForm
+    if (form != null) {
+        OverlayFormScreen(form, onOverlay, items = state.itemRows, linked = state.item(form.itemId), canAddPhoto = state.canAddPhoto, houseHasItems = state.items.isNotEmpty())
+        return
+    }
     var canvasWidthDp by remember { mutableStateOf(0f) }
     var canvasHeightDp by remember { mutableStateOf(0f) }
+    val overlayIdle = state.overlayMode && state.drawing == null && state.selectedOverlay == null
+    if (state.confirmDeleteOverlay) state.selectedOverlay?.let { OverlayDeleteDialog(it, onOverlay, screen = "plan") }
     ScreenScaffold(
         title = stringResource(R.string.plan_title),
         subtitle = homeName,
@@ -144,15 +170,25 @@ fun PlanEditorScreen(
             IconButton(onClick = { onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp)) }, enabled = state.rooms.isNotEmpty(), modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_fit")) {
                 Icon(Icons.Rounded.CenterFocusStrong, contentDescription = stringResource(R.string.plan_fit))
             }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_undo")) {
-                Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.plan_undo))
-            }
-            IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_redo")) {
-                Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(R.string.plan_redo))
+            // Undo and Redo step through room edits, so they leave the bar while overlays are being drawn.
+            if (!state.overlayMode) {
+                IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_undo")) {
+                    Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.plan_undo))
+                }
+                IconButton(onClick = { onEvent(PlanEditorEvent.Redo) }, enabled = state.canRedo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_redo")) {
+                    Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(R.string.plan_redo))
+                }
             }
         },
         floatingActionButton = {
-            if (!state.loading && state.floorId != null && state.selected == null) {
+            if (!state.loading && state.floorId != null && overlayIdle && state.rooms.isNotEmpty()) {
+                ExtendedFloatingActionButton(
+                    onClick = { onOverlay(WallOverlaysEvent.StartDrawing) },
+                    icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+                    text = { Text(stringResource(R.string.wall_overlays_add)) },
+                    modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_add_overlay"),
+                )
+            } else if (!state.loading && state.floorId != null && !state.overlayMode && state.selected == null) {
                 ExtendedFloatingActionButton(
                     onClick = {
                         val z = state.zoom
@@ -186,7 +222,12 @@ fun PlanEditorScreen(
                 val plan: @Composable (Modifier) -> Unit = { modifier ->
                     PlanArea(state, onEvent, canvasWidthDp, canvasHeightDp, { w, h -> canvasWidthDp = w; canvasHeightDp = h }, showFloors, modifier)
                 }
-                if (room != null && maxWidth > maxHeight && maxWidth >= 600.dp) {
+                if (state.overlayMode) {
+                    Column(Modifier.fillMaxSize()) {
+                        plan(Modifier.weight(1f).fillMaxWidth())
+                        OverlayPanel(state, onOverlay, Modifier.fillMaxWidth().heightIn(max = panelMaxHeight))
+                    }
+                } else if (room != null && maxWidth > maxHeight && maxWidth >= 600.dp) {
                     Row(Modifier.fillMaxSize()) {
                         plan(Modifier.weight(1f).fillMaxHeight())
                         RoomPanel(state, room, onEvent, Modifier.width(panelWidth).fillMaxHeight())
@@ -215,7 +256,8 @@ private fun PlanArea(
     Column(modifier) {
         if (showFloors) {
             FloorSwitcher(state, onEvent)
-            if (state.unplaced.isNotEmpty()) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
+            if (state.canEditOverlays) ModeSwitch(state.overlayMode, onEvent)
+            if (state.unplaced.isNotEmpty() && !state.overlayMode) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             PlanCanvas(
@@ -226,7 +268,7 @@ private fun PlanArea(
                 canvasHeightDp = canvasHeightDp,
                 onSized = onSized,
             )
-            PlanRoomNodes(state, onEvent)
+            if (state.overlayMode) PlanOverlayNodes(state, onEvent) else PlanRoomNodes(state, onEvent)
             if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
                 Text(
                     stringResource(R.string.plan_empty_hint),
@@ -252,6 +294,97 @@ private fun FloorSwitcher(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
                 modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_floor_${floor.id}"),
                 label = { Text(floor.name) },
             )
+        }
+    }
+}
+
+/** Rooms or Overlays: what taps on the plan edit (rule 22: one segmented row). */
+@Composable
+private fun ModeSwitch(overlayMode: Boolean, onEvent: (PlanEditorEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+        listOf(false to R.string.plan_mode_rooms, true to R.string.plan_mode_overlays).forEachIndexed { index, (overlays, label) ->
+            SegmentedButton(
+                selected = overlays == overlayMode,
+                onClick = { onEvent(PlanEditorEvent.SetOverlayMode(overlays)) },
+                shape = SegmentedButtonDefaults.itemShape(index, 2),
+                icon = { Icon(if (overlays) Icons.Rounded.Layers else Icons.Rounded.GridView, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_plan_mode_${if (overlays) "overlays" else "rooms"}"),
+            ) {
+                Text(stringResource(label), maxLines = 1)
+            }
+        }
+    }
+}
+
+/**
+ * Overlays mode's panel: the points being drawn with Undo, Cancel and Next, or the picked overlay with Edit, Delete and
+ * Done, or a line saying what to do.
+ */
+@Composable
+private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent) -> Unit, modifier: Modifier) {
+    val prefix = LocalTagPrefix.current
+    val drawing = state.drawing
+    val selected = state.selectedOverlay
+    Surface(tonalElevation = 3.dp, modifier = modifier) {
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+            if (state.overlaySaveFailed) {
+                Text(
+                    stringResource(R.string.plan_overlays_save_failed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("${prefix}_plan_overlay_error"),
+                )
+            }
+            when {
+                drawing != null -> DrawingBar(drawing.size, onOverlay, screen = "plan", emptyHint = R.string.plan_overlays_draw_hint)
+                selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onOverlay, screen = "plan")
+                else -> Text(
+                    stringResource(
+                        when {
+                            state.rooms.isEmpty() -> R.string.plan_overlays_no_rooms
+                            state.overlays.isEmpty() -> R.string.plan_overlays_empty
+                            else -> R.string.plan_overlays_pick_hint
+                        },
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 88.dp).testTag("${prefix}_plan_overlays_hint"),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Overlays are drawn, so TalkBack and UI tests get one pointer-transparent node per overlay laid over its points (at
+ * least 48 dp), clipped to the canvas. A tap on one picks it.
+ */
+@Composable
+private fun PlanOverlayNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -> Unit) {
+    val send by rememberUpdatedState(onEvent)
+    Box(Modifier.fillMaxSize().clipToBounds()) {
+        state.overlays.forEach { o ->
+            key(o.id) {
+                val kindName = stringResource(o.kind.nameRes)
+                val half = 24f
+                val left = o.points.minOf { it.x } * state.zoom + state.panX - half
+                val top = o.points.minOf { it.y } * state.zoom + state.panY - half
+                val right = o.points.maxOf { it.x } * state.zoom + state.panX + half
+                val bottom = o.points.maxOf { it.y } * state.zoom + state.panY + half
+                Box(
+                    Modifier
+                        .offset(left.dp, top.dp)
+                        .size((right - left).dp, (bottom - top).dp)
+                        .testTag("${LocalTagPrefix.current}_plan_overlay_${o.id}")
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = o.title(kindName)
+                            selected = o.id == state.overlaySelectedId
+                            onClick { send(PlanEditorEvent.OverlayEvent(WallOverlaysEvent.Select(o.id))); true }
+                        },
+                )
+            }
         }
     }
 }
@@ -290,6 +423,10 @@ private fun PlanCanvas(
     val scheme = MaterialTheme.colorScheme
     val label = MaterialTheme.typography.labelMedium
     val summary = pluralStringResource(R.plurals.plan_canvas_description, state.rooms.size, state.rooms.size)
+    val overlayIcons = rememberOverlayIcons()
+    val dark = scheme.surface.luminance() < 0.5f
+    // A point of the picked overlay being dragged: shown moved at once, saved when the finger lifts.
+    var dragged by remember { mutableStateOf<Triple<String, Int, OverlayPoint>?>(null) }
     var sized by remember { mutableStateOf(false) }
     LaunchedEffect(state.floorId, sized) {
         // First open of a floor with no saved view: fit the rooms once the canvas size is known.
@@ -310,7 +447,7 @@ private fun PlanCanvas(
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     val start = current
-                    val target = hit(start, down.position.x / density, down.position.y / density)
+                    val target = if (start.overlayMode) overlayHit(start, down.position.x / density, down.position.y / density) else hit(start, down.position.x / density, down.position.y / density)
                     var total = Offset.Zero
                     var moved = false
                     var multi = false
@@ -347,6 +484,10 @@ private fun PlanCanvas(
                                         dragging = true
                                     }
                                     is Target.Edge, is Target.Wall -> send(PlanEditorEvent.Transform(start.zoom, start.panX + dxDp, start.panY + dyDp))
+                                    is Target.OverlayHandle -> {
+                                        val p = change.position
+                                        dragged = Triple(target.overlayId, target.index, OverlayPoint((p.x / density - start.panX) / start.zoom, (p.y / density - start.panY) / start.zoom))
+                                    }
                                     is Target.Opening -> {
                                         val p = change.position
                                         val at = Pt(((p.x / density - start.panX) / start.zoom).roundToInt(), ((p.y / density - start.panY) / start.zoom).roundToInt())
@@ -364,7 +505,18 @@ private fun PlanCanvas(
                         }
                     } while (event.changes.any { it.pressed })
                     if (dragging) send(PlanEditorEvent.DragEnd)
-                    if (!moved && !multi) {
+                    dragged?.let { (id, index, to) -> send(PlanEditorEvent.OverlayEvent(WallOverlaysEvent.MovePoint(id, index, to))) }
+                    dragged = null
+                    if (!moved && !multi && start.overlayMode) {
+                        val at = OverlayPoint((down.position.x / density - start.panX) / start.zoom, (down.position.y / density - start.panY) / start.zoom)
+                        if (start.drawing != null) {
+                            send(PlanEditorEvent.OverlayEvent(WallOverlaysEvent.AddPoint(at)))
+                        } else {
+                            val reach = HANDLE_HIT_DP / start.zoom
+                            val hitIndex = OverlayHitTest.overlayAt(start.overlays.map { it.points }, at.x, at.y, reach)
+                            send(PlanEditorEvent.OverlayEvent(WallOverlaysEvent.Select(hitIndex?.let { start.overlays[it].id })))
+                        }
+                    } else if (!moved && !multi) {
                         when (target) {
                             is Target.Corner -> send(PlanEditorEvent.DeleteCorner(target.index))
                             is Target.Edge -> send(PlanEditorEvent.AddCorner(target.edgeIndex, target.at))
@@ -378,6 +530,13 @@ private fun PlanCanvas(
     ) {
         drawPlan(state, measurer, density, scheme.outlineVariant, scheme.surfaceContainerHigh, scheme.primaryContainer, scheme.onPrimaryContainer,
             scheme.primary, scheme.errorContainer, scheme.error, scheme.onSurface, label)
+        val z = state.zoom * density
+        val toScreen = { p: OverlayPoint -> Offset(p.x * z + state.panX * density, p.y * z + state.panY * density) }
+        val shown = dragged?.let { (id, index, to) ->
+            state.overlays.map { o -> if (o.id == id && index in o.points.indices) o.copy(points = o.points.toMutableList().also { it[index] = to }) else o }
+        } ?: state.overlays
+        drawPlanOverlays(shown, toScreen, density, dark, scheme.surface, overlayIcons, selectedId = state.overlaySelectedId.takeIf { state.overlayMode })
+        state.drawing?.let { drawPendingRun(it.map(toScreen), scheme.primary, scheme.surface, density) }
     }
 }
 
@@ -417,6 +576,13 @@ private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
             }
         }
     }
+}
+
+/** In Overlays mode only a point of the picked overlay is grabbed; anything else pans, or picks and draws on a tap. */
+private fun overlayHit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {
+    val picked = s.selectedOverlay?.takeIf { s.drawing == null } ?: return Target.None
+    val onScreen = picked.points.map { OverlayPoint(it.x * s.zoom + s.panX, it.y * s.zoom + s.panY) }
+    return OverlayHitTest.pointAt(onScreen, xDp, yDp, HANDLE_HIT_DP)?.let { Target.OverlayHandle(picked.id, it) } ?: Target.None
 }
 
 private fun hit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {

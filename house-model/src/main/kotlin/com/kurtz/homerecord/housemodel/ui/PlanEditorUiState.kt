@@ -8,6 +8,11 @@ import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice
+import com.kurtz.homerecord.housemodel.overlays.OverlayItemPicker
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
+import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
 
 data class PlanEditorUiState(
     val loading: Boolean = true,
@@ -38,9 +43,35 @@ data class PlanEditorUiState(
     /** Where on that wall the tap landed, so a new door or window starts there. */
     val wallTap: Pt? = null,
     val selectedOpeningId: String? = null,
+    /** The editor can draw overlays (the app gave it the overlays repository). */
+    val canEditOverlays: Boolean = false,
+    /** Overlays mode (AC-C25, AC-C28): taps draw and pick overlays instead of rooms; rooms stay put. */
+    val overlayMode: Boolean = false,
+    /** The floor's plan overlays, points in plan inches. Shown in both modes, picked only in Overlays mode. */
+    val overlays: List<Overlay> = emptyList(),
+    val overlaySelectedId: String? = null,
+    /** The points of a new overlay being drawn, plan inches; null when not drawing. */
+    val drawing: List<OverlayPoint>? = null,
+    val overlayForm: OverlayForm? = null,
+    val confirmDeleteOverlay: Boolean = false,
+    val overlaySaveFailed: Boolean = false,
+    /** The home's items an overlay can serve (AC-C26). */
+    val items: List<OverlayItemChoice> = emptyList(),
+    /** The overlay form offers a photo (the app gave the editor a place to keep one). */
+    val canAddPhoto: Boolean = false,
+    /** A camera or picker the route should open for the overlay form, then answer with PhotoLaunchHandled. */
+    val photoLaunch: OverlayPhotoLaunch? = null,
 ) {
     val selected: PlanRoom? get() = rooms.firstOrNull { it.id == selectedId }
     val selectedOpening: PlanOpening? get() = selected?.openings?.firstOrNull { it.id == selectedOpeningId }
+    val selectedOverlay: Overlay? get() = overlays.firstOrNull { it.id == overlaySelectedId }
+
+    /** The item [itemId] names, when it is still in the house. */
+    fun item(itemId: String?): OverlayItemChoice? = itemId?.let { id -> items.firstOrNull { it.id == id } }
+
+    /** The linked-item sheet's rows, narrowed by the typed query; the room the overlay starts in leads. */
+    val itemRows: List<OverlayItemChoice>
+        get() = OverlayItemPicker.filter(items, overlayForm?.itemQuery.orEmpty(), overlayForm?.points?.let { PlanOverlayPlacer.roomFor(rooms, it) })
 }
 
 sealed interface PlanEditorEvent {
@@ -78,4 +109,11 @@ sealed interface PlanEditorEvent {
     data class Transform(val zoom: Float, val panX: Float, val panY: Float) : PlanEditorEvent
     /** Fits all rooms into a viewport of the given size in dp. */
     data class Fit(val widthDp: Float, val heightDp: Float) : PlanEditorEvent
+    /** Switches between editing rooms and drawing overlays (AC-C25). */
+    data class SetOverlayMode(val on: Boolean) : PlanEditorEvent
+    /**
+     * An overlay event in Overlays mode, the same set the wall editor uses: points are plan inches here (AC-C25, AC-C28).
+     * Stage and Back events do not apply to the plan and are ignored.
+     */
+    data class OverlayEvent(val event: WallOverlaysEvent) : PlanEditorEvent
 }

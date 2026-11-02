@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.foundation.Canvas
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -165,22 +166,28 @@ fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) 
             }
         }
     }
-    if (state.confirmDelete) {
-        val name = state.selected?.let { it.title(stringResource(it.kind.nameRes)) }.orEmpty()
-        AlertDialog(
-            onDismissRequest = { onEvent(WallOverlaysEvent.CancelDelete) },
-            title = { Text(stringResource(R.string.wall_overlay_delete_title, name)) },
-            text = { Text(stringResource(R.string.wall_overlay_delete_body)) },
-            confirmButton = {
-                TextButton(onClick = { onEvent(WallOverlaysEvent.ConfirmDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_overlay_delete_confirm")) {
-                    Text(stringResource(R.string.wall_overlay_delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onEvent(WallOverlaysEvent.CancelDelete) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.wall_overlay_cancel)) }
-            },
-        )
-    }
+    if (state.confirmDelete) state.selected?.let { OverlayDeleteDialog(it, onEvent) }
+}
+
+/** Asks before deleting [overlay] (rule 3); [screen] names the test tags ("wall" or "plan"). */
+@Composable
+internal fun OverlayDeleteDialog(overlay: Overlay, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall") {
+    val prefix = LocalTagPrefix.current
+    val name = overlay.title(stringResource(overlay.kind.nameRes))
+    AlertDialog(
+        modifier = Modifier.windowTestTags(),
+        onDismissRequest = { onEvent(WallOverlaysEvent.CancelDelete) },
+        title = { Text(stringResource(R.string.wall_overlay_delete_title, name)) },
+        text = { Text(stringResource(R.string.wall_overlay_delete_body)) },
+        confirmButton = {
+            TextButton(onClick = { onEvent(WallOverlaysEvent.ConfirmDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_delete_confirm")) {
+                Text(stringResource(R.string.wall_overlay_delete))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onEvent(WallOverlaysEvent.CancelDelete) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.wall_overlay_cancel)) }
+        },
+    )
 }
 
 /**
@@ -302,24 +309,27 @@ private fun DrawScope.drawHandle(at: OverlayPoint, color: Color, ring: Color) {
     drawCircle(color, 9.dp.toPx(), Offset(at.x, at.y))
 }
 
-/** While drawing: what to do, Undo the last point, Cancel and Next to the form (Next once there is a point). */
+/**
+ * While drawing: what to do, Undo the last point, Cancel and Next to the form (Next once there is a point). [screen] names
+ * the test tags ("wall" or "plan").
+ */
 @Composable
-private fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit) {
+internal fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall", @androidx.annotation.StringRes emptyHint: Int = R.string.wall_overlays_draw_hint) {
     val prefix = LocalTagPrefix.current
     Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            if (points == 0) stringResource(R.string.wall_overlays_draw_hint) else pluralStringResource(R.plurals.wall_overlays_draw_points, points, points),
+            if (points == 0) stringResource(emptyHint) else pluralStringResource(R.plurals.wall_overlays_draw_points, points, points),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.testTag("${prefix}_wall_draw_hint"),
+            modifier = Modifier.testTag("${prefix}_${screen}_draw_hint"),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { onEvent(WallOverlaysEvent.CancelDrawing) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_draw_cancel")) {
+            TextButton(onClick = { onEvent(WallOverlaysEvent.CancelDrawing) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_draw_cancel")) {
                 Text(stringResource(R.string.wall_overlay_cancel), maxLines = 1)
             }
             TextButton(
                 onClick = { onEvent(WallOverlaysEvent.UndoPoint) },
                 enabled = points > 0,
-                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_draw_undo"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_draw_undo"),
             ) {
                 Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null)
                 Text(stringResource(R.string.wall_overlays_undo_point), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
@@ -328,19 +338,19 @@ private fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit) {
             Button(
                 onClick = { onEvent(WallOverlaysEvent.FinishDrawing) },
                 enabled = points > 0,
-                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_draw_next"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_draw_next"),
             ) { Text(stringResource(R.string.wall_overlays_next), maxLines = 1) }
         }
     }
 }
 
-/** The picked overlay: what it is, the item it serves and its photo (AC-C26), "Drag a dot to move it", Edit, Delete and Done. */
+/** The picked overlay ([screen] names the test tags): what it is, the item it serves and its photo (AC-C26), "Drag a dot to move it", Edit, Delete and Done. */
 @Composable
-private fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit) {
+internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall") {
     val prefix = LocalTagPrefix.current
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val kindName = stringResource(overlay.kind.nameRes)
-    Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 8.dp).testTag("${prefix}_wall_selection")) {
+    Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 8.dp).testTag("${prefix}_${screen}_selection")) {
         RecordListItem(
             headline = overlay.title(kindName),
             supporting = listOfNotNull(overlaySummary(overlay, kindName), itemName?.let { stringResource(R.string.wall_overlay_serves, it) }).joinToString("\n"),
@@ -348,7 +358,7 @@ private fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOver
             trailing = overlay.photoPath?.let { path ->
                 {
                     val title = overlay.title(kindName)
-                    OverlayPhoto(path, null, stringResource(R.string.wall_overlay_photo_description, title), Modifier.size(56.dp).testTag("${prefix}_wall_overlay_photo"))
+                    OverlayPhoto(path, null, stringResource(R.string.wall_overlay_photo_description, title), Modifier.size(56.dp).testTag("${prefix}_${screen}_overlay_photo"))
                 }
             },
         )
@@ -359,16 +369,16 @@ private fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOver
             modifier = Modifier.padding(horizontal = 16.dp),
         )
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedButton(onClick = { onEvent(WallOverlaysEvent.EditSelected) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_overlay_edit")) {
+            OutlinedButton(onClick = { onEvent(WallOverlaysEvent.EditSelected) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_edit")) {
                 Icon(Icons.Rounded.Edit, contentDescription = null)
                 Text(stringResource(R.string.wall_overlay_edit), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
             }
-            TextButton(onClick = { onEvent(WallOverlaysEvent.AskDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_overlay_delete")) {
+            TextButton(onClick = { onEvent(WallOverlaysEvent.AskDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_delete")) {
                 Icon(Icons.Rounded.Delete, contentDescription = null)
                 Text(stringResource(R.string.wall_overlay_delete), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
             }
             Spacer(Modifier.weight(1f))
-            Button(onClick = { onEvent(WallOverlaysEvent.Select(null)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_wall_overlay_done")) {
+            Button(onClick = { onEvent(WallOverlaysEvent.Select(null)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_done")) {
                 Text(stringResource(R.string.wall_overlay_done), maxLines = 1)
             }
         }

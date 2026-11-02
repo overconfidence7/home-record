@@ -32,6 +32,8 @@ fun RoomRoute(
     /** The room's overlays; with [onOpenWall], wall rows open HM-Wall to draw them (AC-C25..C28). */
     overlays: OverlayRepository? = null,
     onOpenWall: ((WallOpenRequest) -> Unit)? = null,
+    /** Opens the plan editor with a plan overlay picked (AC-C28). */
+    onOpenPlanOverlay: (String) -> Unit = {},
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -53,6 +55,7 @@ fun RoomRoute(
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
+            is RoomEvent.OpenPlanOverlay -> onOpenPlanOverlay(event.overlayId)
             is RoomEvent.OpenItem, RoomEvent.AddItem -> Unit
             else -> vm.onPhotoEvent(event)
         }
@@ -77,6 +80,8 @@ fun RoomRoute(
     /** The room's overlays; with [onOpenWall], wall rows open HM-Wall to draw them (AC-C25..C28). */
     overlays: OverlayRepository? = null,
     onOpenWall: ((WallOpenRequest) -> Unit)? = null,
+    /** Opens the plan editor with a plan overlay picked (AC-C28). */
+    onOpenPlanOverlay: (String) -> Unit = {},
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -100,6 +105,7 @@ fun RoomRoute(
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
+            is RoomEvent.OpenPlanOverlay -> onOpenPlanOverlay(event.overlayId)
             else -> vm.onPhotoEvent(event)
         }
     }

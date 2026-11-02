@@ -1,5 +1,10 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,6 +40,8 @@ class HouseViewModel(
     summary: String,
     system: UnitSystem = UnitSystem.IMPERIAL,
     private val exporter: BlueprintExporter = BlueprintExporter { _, _ -> null },
+    /** The home's overlays; the floor's plan overlays among them show on the blueprint (AC-C25). */
+    homeOverlays: Flow<List<Overlay>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], layers = layerStore.read(homeId), system = system),
@@ -55,9 +62,9 @@ class HouseViewModel(
             }
         }
         viewModelScope.launch {
-            floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }.collect { plan ->
-                _state.update { it.copy(rooms = plan.placed) }
-            }
+            floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }
+                .combine(homeOverlays) { plan, overlays -> plan.placed to PlanOverlayPlacer.onFloor(overlays, plan.placed) }
+                .collect { (rooms, overlays) -> _state.update { it.copy(rooms = rooms, overlays = overlays) } }
         }
     }
 
@@ -65,7 +72,7 @@ class HouseViewModel(
         when (event) {
             is HouseEvent.SelectFloor -> {
                 saved[FLOOR] = event.floorId
-                _state.update { it.copy(floorId = event.floorId, rooms = emptyList()) }
+                _state.update { it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList()) }
                 floorIds.value = event.floorId
             }
             is HouseEvent.ToggleLayer -> {

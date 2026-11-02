@@ -13,6 +13,14 @@ import com.kurtz.homerecord.housemodel.plan.PlanEditor
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanValidator
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import com.kurtz.homerecord.core.media.MediaFiles
+import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoints
+import com.kurtz.homerecord.housemodel.overlays.OverlayRepository
+import com.kurtz.homerecord.housemodel.overlays.OverlaySave
+import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
+import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +35,9 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * HM-Plan (AC-C5, AC-C6, AC-C10, AC-C12). Every committed edit is saved to the database right away, so leaving the
+ * HM-Plan (AC-C5, AC-C6, AC-C10, AC-C12; overlays AC-C25, AC-C28). With [overlays] the editor also has an Overlays mode:
+ * tap points to draw a run or a spot on the plan in plan inches, fill in the same form as on a wall, pick one to drag its
+ * points, edit or delete it. A plan overlay is filed under the room it starts in ([PlanOverlayPlacer]). Every committed edit is saved to the database right away, so leaving the
  * editor or losing the process never drops work. A typed name or size is one edit: it is held (in [SavedStateHandle])
  * until IME Done, focus leaves the field, or the next other edit, then becomes one undo step and one save. Floor, selection and view survive through [SavedStateHandle].
  */
@@ -40,6 +50,13 @@ class PlanEditorViewModel(
     initialFloorId: String? = null,
     initialRoomId: String? = null,
     initialEditShape: Boolean = false,
+    private val overlays: OverlayRepository? = null,
+    /** Where an overlay's photo is kept; null leaves the photo off the overlay form. */
+    media: MediaFiles? = null,
+    /** The stage a new plan overlay is recorded at (Finished in House Manual, Rough-in on a job). */
+    private val overlayStage: WallStage = WallStage.HouseManualDefault,
+    /** Opens in Overlays mode on this overlay's floor with it picked (a search result or a link, AC-C28). */
+    initialOverlayId: String? = null,
 ) : ViewModel() {
     private var pendingEditShape = initialEditShape
     private val snapper = if (system == UnitSystem.METRIC) GridSnapper(gridIn = 4) else GridSnapper()
@@ -56,12 +73,39 @@ class PlanEditorViewModel(
             panX = saved[PAN_X] ?: 0f,
             panY = saved[PAN_Y] ?: 0f,
             system = system,
+            canEditOverlays = overlays != null,
+            canAddPhoto = overlays != null && media != null,
+            overlayMode = overlays != null && (saved[OVERLAY_MODE] ?: (initialOverlayId != null)),
+            overlaySelectedId = if (saved.contains(OVERLAY_SELECTED)) saved[OVERLAY_SELECTED] else initialOverlayId,
+            drawing = saved.get<String>(DRAWING)?.let(OverlayPoints::decode),
         ),
     )
     val state: StateFlow<PlanEditorUiState> = _state.asStateFlow()
+    private val forms = OverlayFormController(
+        saved, media, viewModelScope,
+        current = { _state.value.overlayForm },
+        show = { form -> _state.update { it.copy(overlayForm = form) } },
+        launchPhoto = { launch -> _state.update { it.copy(photoLaunch = launch) } },
+    )
+    private var homeOverlays: List<Overlay> = emptyList()
 
     init {
+        _state.update { it.copy(overlayForm = forms.restore()) }
+        if (overlays != null) {
+            viewModelScope.launch {
+                overlays.observeForHome(homeId).collect { list ->
+                    homeOverlays = list
+                    refresh()
+                }
+            }
+            viewModelScope.launch { overlays.observeItemChoices(homeId).collect { items -> _state.update { it.copy(items = items) } } }
+        }
         viewModelScope.launch {
+            // Opened on an overlay with no floor given: start on the floor of the room it is filed under.
+            if (_state.value.floorId == null && initialOverlayId != null) {
+                val floor = overlays?.get(initialOverlayId)?.roomId?.let { repo.roomLocation(it)?.floorId }
+                if (floor != null) _state.update { it.copy(floorId = floor) }
+            }
             repo.observeFloors(homeId).collect { floors ->
                 val current = _state.value.floorId
                 val chosen = floors.firstOrNull { it.id == current }
@@ -79,7 +123,7 @@ class PlanEditorViewModel(
     fun onEvent(event: PlanEditorEvent) {
         // Typing stays pending; any other edit, selection, undo or floor change first commits it.
         if (event !is PlanEditorEvent.Rename && event !is PlanEditorEvent.SetSize &&
-            event !is PlanEditorEvent.Transform && event !is PlanEditorEvent.Fit
+            event !is PlanEditorEvent.Transform && event !is PlanEditorEvent.Fit && event !is PlanEditorEvent.OverlayEvent
         ) {
             commitFields()
         }
@@ -172,8 +216,101 @@ class PlanEditorViewModel(
             PlanEditorEvent.Redo -> { editor.redo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
             is PlanEditorEvent.Transform -> setView(event.zoom.coerceIn(MIN_ZOOM, MAX_ZOOM), event.panX, event.panY)
             is PlanEditorEvent.Fit -> fit(event.widthDp, event.heightDp)
+            is PlanEditorEvent.SetOverlayMode -> setOverlayMode(event.on)
+            is PlanEditorEvent.OverlayEvent -> onOverlayEvent(event.event)
         }
     }
+
+    private fun setOverlayMode(on: Boolean) {
+        if (overlays == null) return
+        if (on) select(null)
+        saved[OVERLAY_MODE] = on
+        if (!on) {
+            setDrawing(null)
+            selectOverlay(null)
+        }
+        _state.update { it.copy(overlayMode = on) }
+    }
+
+    private fun onOverlayEvent(event: WallOverlaysEvent) {
+        val repo = overlays ?: return
+        when (event) {
+            is WallOverlaysEvent.Select -> selectOverlay(event.id)
+            WallOverlaysEvent.StartDrawing -> if (editor.rooms.isNotEmpty()) {
+                selectOverlay(null)
+                setDrawing(emptyList())
+            }
+            is WallOverlaysEvent.AddPoint -> _state.value.drawing?.let { setDrawing(it + event.point.toWholeInches()) }
+            WallOverlaysEvent.UndoPoint -> _state.value.drawing?.let { setDrawing(it.dropLast(1)) }
+            WallOverlaysEvent.CancelDrawing -> setDrawing(null)
+            WallOverlaysEvent.FinishDrawing -> {
+                val points = _state.value.drawing?.takeIf { it.isNotEmpty() } ?: return
+                setDrawing(null)
+                forms.open(OverlayForm(points = points, stage = overlayStage))
+            }
+            is WallOverlaysEvent.MovePoint -> {
+                val to = event.to.toWholeInches()
+                homeOverlays = homeOverlays.map { o ->
+                    if (o.id != event.id || event.index !in o.points.indices) o else o.copy(points = o.points.toMutableList().also { it[event.index] = to })
+                }
+                refresh()
+                launch { repo.movePoint(event.id, event.index, to) }
+            }
+            WallOverlaysEvent.EditSelected -> {
+                val o = _state.value.selectedOverlay ?: return
+                forms.open(OverlayForm(
+                    editingId = o.id, points = o.points, kind = o.kind, label = o.label, note = o.note.orEmpty(), depth = o.depth, stage = o.stage,
+                    photoPath = o.photoPath, itemId = o.itemId,
+                ))
+            }
+            WallOverlaysEvent.AskDelete -> if (_state.value.selectedOverlay != null) _state.update { it.copy(confirmDeleteOverlay = true) }
+            WallOverlaysEvent.CancelDelete -> _state.update { it.copy(confirmDeleteOverlay = false) }
+            WallOverlaysEvent.ConfirmDelete -> {
+                val id = _state.value.overlaySelectedId
+                _state.update { it.copy(confirmDeleteOverlay = false) }
+                selectOverlay(null)
+                if (id != null) launch { repo.delete(id) }
+            }
+            WallOverlaysEvent.Save -> saveOverlay(repo)
+            WallOverlaysEvent.DismissError -> _state.update { it.copy(overlaySaveFailed = false) }
+            WallOverlaysEvent.PhotoLaunchHandled -> _state.update { it.copy(photoLaunch = null) }
+            WallOverlaysEvent.Back, is WallOverlaysEvent.SelectStage -> Unit
+            else -> forms.onEvent(event)
+        }
+    }
+
+    private fun saveOverlay(repo: OverlayRepository) {
+        val (editing, draft) = forms.draftForSave() ?: return
+        launch {
+            val result = if (editing != null) {
+                repo.update(editing, draft)
+            } else {
+                val room = PlanOverlayPlacer.roomFor(editor.rooms, draft.points)
+                if (room == null) null else repo.addOnPlan(homeId, room, draft)
+            }
+            if (result is OverlaySave.Saved) {
+                forms.open(null)
+                selectOverlay(result.id)
+                _state.update { it.copy(overlaySaveFailed = false) }
+            } else {
+                forms.saveFailed()
+                _state.update { it.copy(overlaySaveFailed = true) }
+            }
+        }
+    }
+
+    private fun selectOverlay(id: String?) {
+        saved[OVERLAY_SELECTED] = id
+        _state.update { it.copy(overlaySelectedId = id) }
+    }
+
+    private fun setDrawing(points: List<OverlayPoint>?) {
+        saved[DRAWING] = points?.let(OverlayPoints::encode)
+        _state.update { it.copy(drawing = points) }
+    }
+
+    /** Plan overlays keep whole inches, like rooms. */
+    private fun OverlayPoint.toWholeInches() = OverlayPoint(x.roundToInt().toFloat(), y.roundToInt().toFloat())
 
     private fun floorById(id: String): FloorSummary? = _state.value.floors.firstOrNull { it.id == id }
 
@@ -285,6 +422,7 @@ class PlanEditorViewModel(
 
     private fun PlanEditorUiState.withRooms(rooms: List<PlanRoom>): PlanEditorUiState = copy(
         rooms = rooms,
+        overlays = PlanOverlayPlacer.onFloor(homeOverlays, rooms),
         canUndo = editor.canUndo,
         canRedo = editor.canRedo,
         flaggedIds = validator.flaggedRoomIds(rooms),
@@ -327,6 +465,9 @@ class PlanEditorViewModel(
         private const val PENDING_NAME = "pendingName"
         private const val PENDING_WIDTH = "pendingWidth"
         private const val PENDING_LENGTH = "pendingLength"
+        private const val OVERLAY_MODE = "overlayMode"
+        private const val OVERLAY_SELECTED = "overlaySelected"
+        private const val DRAWING = "drawing"
         const val MIN_ZOOM = 0.15f
         const val MAX_ZOOM = 6f
         private const val FIT_MARGIN_DP = 24f

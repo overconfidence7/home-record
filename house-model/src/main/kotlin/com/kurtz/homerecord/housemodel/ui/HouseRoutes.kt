@@ -42,11 +42,18 @@ fun HouseRoute(
     onOpenPin: (String) -> Unit = {},
     /** Opens HM-3D on the floor in view (AC-C20). */
     on3D: ((floorId: String?) -> Unit)? = null,
+    /** Draws the floor's plan overlays on the blueprint (AC-C25). */
+    overlays: com.kurtz.homerecord.housemodel.overlays.OverlayRepository? = null,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
         factory = viewModelFactory {
-            initializer { HouseViewModel(repo, homeId, layerStore, createSavedStateHandle(), homeName, summary, exporter = PdfFileExporter(context)) }
+            initializer {
+                HouseViewModel(
+                    repo, homeId, layerStore, createSavedStateHandle(), homeName, summary, exporter = PdfFileExporter(context),
+                    homeOverlays = overlays?.observeForHome(homeId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
+                )
+            }
         },
     )
     val state = vm.state.collectAsState().value

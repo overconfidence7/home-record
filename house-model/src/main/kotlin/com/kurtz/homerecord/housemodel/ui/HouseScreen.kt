@@ -110,6 +110,7 @@ fun HouseScreen(
                     rooms = state.rooms,
                     modifier = Modifier.fillMaxSize(),
                     layers = state.layers,
+                    overlays = state.overlays,
                     system = state.system,
                     pins = pins,
                     onPinClick = onOpenPin,

@@ -89,6 +89,8 @@ sealed interface RoomEvent {
     data object OutlineOpened : RoomEvent
     /** Opens HM-Wall for [wallId] at the shown stage, with [overlayId] picked when one was tapped (AC-C28). */
     data class OpenWall(val wallId: String, val overlayId: String? = null) : RoomEvent
+    /** An overlay drawn on the floor plan: opens the plan editor with it picked (AC-C28). */
+    data class OpenPlanOverlay(val overlayId: String) : RoomEvent
 }
 
 /** The room's items by name; detail is make and model (the screen shows [RoomItem.category] when neither is set, AC-H10). */

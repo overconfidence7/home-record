@@ -120,6 +120,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onEditShape = { floorId, room -> nav.push(PlanKey(floorId, room.id, editShape = true)) },
                 onOpenFloors = { nav.push(FloorsKey) },
                 on3D = { nav.push(House3DKey(it)) },
+                overlays = container.overlays,
             )
         }
         entry<House3DKey> { key ->
@@ -133,6 +134,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             PlanEditorRoute(
                 container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) },
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
+                overlays = container.overlays, media = container.media, overlayId = key.overlayId,
             )
         }
         entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
@@ -160,6 +162,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             onView3D = { nav.push(House3DKey(it.floorId, it.roomId)) },
             overlays = container.overlays,
             onOpenWall = { nav.push(RoomWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
+            onOpenPlanOverlay = { nav.push(PlanKey(overlayId = it)) },
         ) }
         entry<RoomWallKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
@@ -215,7 +218,6 @@ private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppCont
 private fun openOverlay(nav: com.kurtz.homerecord.coreui.shell.ShellNav, o: com.kurtz.homerecord.housemodel.overlays.Overlay) {
     when (val target = OverlayTarget.of(o)) {
         is OverlayTarget.Wall -> nav.push(RoomWallKey(target.roomId, target.wallId, target.stage, target.overlayId))
-        is OverlayTarget.Room -> nav.push(RoomKey(target.roomId))
-        null -> Unit
+        is OverlayTarget.Plan -> nav.push(PlanKey(overlayId = target.overlayId))
     }
 }

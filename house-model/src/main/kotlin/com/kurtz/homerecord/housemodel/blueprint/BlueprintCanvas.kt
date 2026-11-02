@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,6 +51,8 @@ fun BlueprintCanvas(
     modifier: Modifier = Modifier,
     layers: LayerSet = LayerSet(),
     markers: List<BlueprintMarker> = emptyList(),
+    /** The floor's plan overlays (AC-C25), each drawn when its layer is on. */
+    overlays: List<com.kurtz.homerecord.housemodel.overlays.Overlay> = emptyList(),
     system: UnitSystem = UnitSystem.IMPERIAL,
     pins: List<BlueprintPin> = emptyList(),
     onPinClick: (String) -> Unit = {},
@@ -75,6 +78,8 @@ fun BlueprintCanvas(
     val currentPins by rememberUpdatedState(pins)
     val pinClick by rememberUpdatedState(onPinClick)
     val planTap by rememberUpdatedState(onPlanTap)
+    val overlayIcons = rememberOverlayIcons()
+    val shownOverlays = overlays.filter { layers.shows(it) }
     val pinColors = PinColors(scheme.tertiary, scheme.onTertiary, scheme.surface)
     // The number sits inside a fixed-size head, so it does not grow with the font scale; TalkBack reads the task title.
     val fontScale = LocalDensity.current.fontScale
@@ -113,6 +118,7 @@ fun BlueprintCanvas(
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
         drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, layers, markers)
+        drawPlanOverlays(shownOverlays, { Offset(it.x * view.scale + view.originX, it.y * view.scale + view.originY) }, density, colors.dark, scheme.surface, overlayIcons)
         pins.forEach { drawPin(it, view, density, measurer, pinStyle, pinColors) }
     }
     // Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its bounds.
