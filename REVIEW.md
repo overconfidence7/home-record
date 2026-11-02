@@ -2633,3 +2633,16 @@ Opened committed Field Log PNGs for Clock working (200%), Job overview (dark), L
 - [x] [UI] Minor: More (owner) at 200% cut the storage line to "24.5 MB kept o…" (rule 32) - fixed in 8f25f6fc (supporting text wraps)
 - [x] [UI] Minor: Jobs list at 200% cut job names and addresses ("Kitchen remodel rough…", "92 Birch L…") beside the date (rule 32) - fixed in 8f25f6fc (up to four lines each)
 - Noted, not changed: job tabs scroll with "Tasks" cut at the right edge (scrollable tab row); the job name repeats under the House sub-tab header.
+
+## QA auto 2026-11-02 (commit 8f25f6fc)
+
+Automated suite run at 2026-11-02 03:53 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F11-tasks fails on field-log (regression of a fixed item) [auto:flow:field-log:F11-tasks] - steps: automated, see qa-results branch latest/ for commit 8f25f6fc - expected: walkthrough step F11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11-tasks.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png
+- [ ] [Major] Flow H04-add-item fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H04-add-item] - steps: automated, see qa-results branch latest/ for commit 8f25f6fc - expected: walkthrough step H04 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H04-add-item.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H04-add-item-H01-home-after-onboarding.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F11 Fail, field-log F11b Pass, field-log F11c Pass, field-log F15 Pass, field-log F16 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Fail, house-manual H06 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 59 device stages, 1247 unit tests, 160 backend tests, coverage 283/283 ACs. Passed: 57. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
