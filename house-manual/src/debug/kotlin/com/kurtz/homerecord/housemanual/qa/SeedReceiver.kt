@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Debug-only: `adb shell am broadcast --include-stopped-packages -a com.kurtz.homerecord.housemanual.qa.SEED -p <pkg>
- * --es scenario regression|long-list|reset`. Result code 1 means done; the device suite greps for `result=1`.
+ * --es scenario regression|long-list|3d-reference|reset`. Result code 1 means done; the device suite greps for `result=1`.
  * Flows seed through [SeedActivity] instead, after their `clearState`.
  */
 class SeedReceiver : BroadcastReceiver() {

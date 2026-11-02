@@ -614,3 +614,24 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - The camera frames the solid floors only: the chosen floor's floor height, or the middle of the stack for All floors.
 - An empty chosen floor shows the empty state (Edit plan) even when floors below have rooms.
 - T050 is split: T050a (stacking, done) and T050b (performance pass, AC-C24).
+
+## 2026-11-02 — T050b: 3D performance pass (AC-C24)
+
+- Draw calls: `SceneBatcher` merges the scene's parts into one renderable per room and material (room tint for the
+  shell and unphotographed walls, floor, glass, ghost, and one per wall picture), off the main thread. Batching per
+  room rather than per floor keeps Filament's per-renderable frustum culling useful (each batch has its own bounding
+  box), which matters for the inside-the-room view in T051; the reference home's All floors view draws 53
+  renderables instead of 89 (14 rooms, 56 walls, 490 triangles: the cost is draw calls and texture memory, not
+  geometry). Filament culls against bounding boxes by default, so no extra culling code.
+- A photographed wall keeps its own batch and is drawn in the room tint until its texture loads, so batches do not
+  change when textures arrive (no geometry rebuild).
+- Texture memory: `TextureBudget` sizes every wall picture so all the pictures the scene holds at any stage fit 64 MB
+  together (RGBA plus a third for mipmaps): 1024 px up to 11 pictures, 512 px up to 45, 256 px beyond. Decided per
+  scene, not per stage, so switching stages never needs a larger size. One texture per file, shared by every face
+  that shows it, as before.
+- Measurement path for QA: the live view logs `FrameStats` every 2 s under logcat tag `HomeRecord3D` (first frame in
+  ms from the screen opening, frames per second over the last 2 s, draws, textures and their size). The debug seed
+  scenario `3d-reference` (regression home grown to ~3,000 sq ft with a garage and a bonus room, Finished photos on
+  20 walls, 1600 × 1200 JPEGs drawn by the seed) is the reference home; `qa/flows/house-manual/_3d-perf.yaml` seeds
+  it, opens All floors and orbits. The device suite does not run it yet (qa/scripts belongs to Nate); QA runs it by
+  hand or the suite can add a stage.

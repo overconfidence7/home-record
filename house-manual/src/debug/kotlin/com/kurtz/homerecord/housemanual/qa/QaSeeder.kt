@@ -6,7 +6,7 @@ import java.io.File
 
 /** Debug-only: the seed scenarios, shared by [SeedReceiver] (adb broadcast) and [SeedActivity] (Maestro `openLink`). */
 object QaSeeder {
-    /** Runs [scenario] (`regression`, `long-list` or `reset`); false for an unknown one. Throws when a scenario fails. */
+    /** Runs [scenario] (`regression`, `long-list`, `3d-reference` or `reset`); false for an unknown one. Throws when a scenario fails. */
     suspend fun run(context: Context, scenario: String): Boolean {
         val container = (context.applicationContext as HomeRecordApplication).container
         val documents = File(context.filesDir, "documents")
@@ -18,6 +18,12 @@ object QaSeeder {
             // AC-U11 scroll jank: the regression home with 200 items on Items
             "long-list" -> {
                 RegressionSeed.seedLongList(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
+                true
+            }
+            // AC-C24 3D performance: the regression home at ~3,000 sq ft with Finished photos on 20 walls
+            "3d-reference" -> {
+                val homeId = RegressionSeed.seed(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
+                Reference3DSeed.seed(container.db, container.homes, container.wallPhotos, homeId, File(context.filesDir, "media"))
                 true
             }
             "reset" -> {

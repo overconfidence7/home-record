@@ -1,0 +1,57 @@
+# Helper, not a walkthrough step: the AC-C24 3D performance check (T050b). Seeds the 3D reference home
+# (`3d-reference`: the regression home at about 3,000 sq ft on three floors with Finished photos on 20 walls,
+# house-manual/src/debug/.../qa/Reference3DSeed.kt), opens House > 3D view on All floors and orbits it, so the view
+# draws every textured wall. Measure while it runs or right after:
+#   adb logcat -d -s HomeRecord3D      # "first frame N ms; F fps; ... draws; 20 textures at 512 px", every 2 s
+#   adb shell dumpsys gfxinfo com.kurtz.homerecord.housemanual   # or the emulator's GPU profiler
+# AC-C24 passes at first frame under 2000 ms and 30 fps or more while orbiting on a Pixel 6a-class device; a
+# software-rendered emulator measures the CPU path only, so note the renderer with the result.
+appId: com.kurtz.homerecord.housemanual
+---
+- launchApp:
+    clearState: true
+- stopApp
+- openLink: "homerecord-qa-hm://seed?scenario=3d-reference"
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_house"
+    timeout: 60000
+- tapOn:
+    id: "hm_tab_house"
+- scrollUntilVisible:
+    element:
+      id: "hm_house_3d"
+- tapOn:
+    id: "hm_house_3d"
+# AC-C24: the reference home opens in 3D with its photographed walls, then every floor at once
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_reset"
+    timeout: 15000
+- assertVisible:
+    id: "hm_3d_scene"
+- assertVisible: "Finished photos on 12 of 24 walls"
+- tapOn:
+    id: "hm_3d_floor_all"
+- extendedWaitUntil:
+    visible: "All floors in 3D"
+    timeout: 15000
+- assertVisible: "Finished photos on 20 of .* walls"
+# Orbit for the frame-rate sample: one-finger drags across the scene
+- swipe:
+    start: 20%, 45%
+    end: 80%, 45%
+    duration: 1500
+- swipe:
+    start: 80%, 50%
+    end: 20%, 50%
+    duration: 1500
+- swipe:
+    start: 50%, 35%
+    end: 50%, 55%
+    duration: 1000
+- tapOn:
+    id: "hm_3d_reset"
+- assertVisible:
+    id: "hm_3d_scene"
+- takeScreenshot: 3d-perf-all-floors

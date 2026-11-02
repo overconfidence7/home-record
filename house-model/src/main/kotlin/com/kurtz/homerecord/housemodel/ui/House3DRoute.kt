@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemodel.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -27,7 +28,9 @@ fun House3DRoute(
     val vm = viewModel<House3DViewModel>(
         factory = viewModelFactory { initializer { House3DViewModel(repo, wallPhotos, homeId, homeName, floorId, createSavedStateHandle(), defaultStage) } },
     )
+    // AC-C24 first render is timed from here, the screen opening, not from when the mesh is ready.
+    val openedAtNanos = remember { System.nanoTime() }
     House3DScreen(vm.state.collectAsState().value, vm::onEvent, onBack, onEditPlan) { scene, stage, resetCount, modifier ->
-        FloorSceneView(scene, stage, resetCount, modifier)
+        FloorSceneView(scene, stage, resetCount, modifier, openedAtNanos)
     }
 }

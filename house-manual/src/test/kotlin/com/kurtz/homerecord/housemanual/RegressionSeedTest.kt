@@ -130,4 +130,37 @@ class RegressionSeedTest {
         assertThat(rows.map { it.name }).containsAtLeast("Furnace", "Wall paint, Kitchen", "Smoke alarm, Bedroom 2")
         assertThat(db.homeDao().observeAll().first()).hasSize(1)
     }
+
+    // AC-C24: the 3D reference home is ~3,000 sq ft on three floors with Finished photos on 20 walls
+    @AcceptanceCriterion("AC-C24")
+    @Test fun reference3DSeedReachesTheSpecSizeWithTwentyPhotographedWalls() = runTest {
+        val homeId = RegressionSeed.seed(db, repo, strings)
+        val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db)
+        val dir = File(ApplicationProvider.getApplicationContext<Context>().cacheDir, "seed-3d").apply { deleteRecursively() }
+        val saved = com.kurtz.homerecord.housemanual.qa.Reference3DSeed.seed(db, repo, wallPhotos, homeId, dir)
+
+        assertThat(saved).isEqualTo(20)
+        assertThat(com.kurtz.homerecord.housemanual.qa.Reference3DSeed.squareFeet).isIn(com.google.common.collect.Range.closed(2900, 3100))
+        val floors = repo.observeFloors(homeId).first()
+        assertThat(floors).hasSize(3)
+        val roomIds = floors.flatMap { repo.loadPlan(it.id).placed }.map { it.id }
+        assertThat(roomIds).containsAtLeast("qa-garage", "qa-bonus")
+        val pictures = wallPhotos.observeWallPictures(roomIds).first()
+        assertThat(pictures.values.count { com.kurtz.homerecord.housemodel.walls.WallStage.FINISHED in it }).isEqualTo(20)
+        assertThat(pictures.values.flatMap { it.values }.all { File(it).length() > 0 }).isTrue()
+
+        // All floors of the reference home: about three renderables per room plus one per photographed wall
+        var base = 0
+        val layers = floors.sortedBy { it.elevationIn }.map { f ->
+            com.kurtz.homerecord.housemodel.scene.SceneLayer(
+                com.kurtz.homerecord.housemodel.scene.StackedFloor(f.id, f.ceilingHeightIn, base, ghost = false),
+                repo.loadPlan(f.id).placed,
+            ).also { base += f.ceilingHeightIn + 60 }
+        }
+        val scene = com.kurtz.homerecord.housemodel.scene.FloorScene.stack(layers, pictures)
+        val batches = com.kurtz.homerecord.housemodel.scene.SceneBatcher.batch(scene, com.kurtz.homerecord.housemodel.walls.WallStage.FINISHED)
+        assertThat(batches.size).isAtMost(3 * roomIds.size + 20)
+        assertThat(batches.size).isLessThan(scene.mesh.parts.size)
+        assertThat(com.kurtz.homerecord.housemodel.scene.TextureBudget.maxSidePx(20)).isEqualTo(512)
+    }
 }
