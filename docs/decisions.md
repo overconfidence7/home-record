@@ -593,3 +593,12 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   painter's-algorithm still of the same mesh from the same start pose.
 - The stage selector (AC-C20 names it) ships now with Finished first; floor chips switch floors. Stacked floors,
   ghosting and "All floors" stay with T050 (AC-C21).
+
+## 2026-11-02 T049c: FL-House 3D
+
+- Field Log opens the job's house in 3D through the same `House3DRoute`/`House3DViewModel` as House Manual (one
+  screen in `:house-model`, `JobHouse3DKey` in Field Log), with a `defaultStage` parameter: Field Log starts on
+  Rough-in, matching the job room page's behind-the-wall default (T048b), House Manual on Finished (AC-C20 wording).
+  A stage the user picks still wins after process death.
+- The H side of AC-C20 stays in H03 (the House tab already opens 3D there); the Field Log side is the new
+  `F10-house-3d.yaml`, the first part of walkthrough F10 (capture, overlays and the installed item come later).

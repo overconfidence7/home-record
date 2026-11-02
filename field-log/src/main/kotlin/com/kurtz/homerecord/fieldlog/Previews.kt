@@ -1429,11 +1429,36 @@ private fun JobHousePinsContent() {
             ),
             floorId = "f1", rooms = pinRooms,
         ),
-        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {},
+        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {}, on3D = {},
         pins = listOf(
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t1", "Task 1: Move the outlet behind the range", 60, 30, 1),
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t2", "Task 2: Replace cracked cover plate by the back door", 216, 110, 2),
         ),
+    )
+}
+
+/** FL-House in 3D: the job's main floor, opening on Rough-in with the crew's photo of the kitchen's north wall (AC-C20). */
+@ThemePreviews
+@Composable
+fun JobHouse3DPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.House3DScreen(
+        com.kurtz.homerecord.housemodel.ui.House3DUiState(
+            loading = false, homeName = "Hale kitchen",
+            floors = listOf(
+                com.kurtz.homerecord.housemodel.FloorSummary("f0", "Basement", 96, false, 1),
+                com.kurtz.homerecord.housemodel.FloorSummary("f1", "Main floor", 108, false, 3),
+            ),
+            floorId = "f1",
+            stage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
+            scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(
+                pinRooms, 108,
+                mapOf(
+                    com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0) to
+                        mapOf(com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN to "/media/kitchen-north-rough.jpg"),
+                ),
+            ),
+        ),
+        {}, {}, {},
     )
 }
 

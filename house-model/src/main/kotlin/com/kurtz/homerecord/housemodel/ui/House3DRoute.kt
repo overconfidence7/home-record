@@ -9,8 +9,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.scene.FloorSceneView
 import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
+import com.kurtz.homerecord.housemodel.walls.WallStage
 
-/** HM-3D for [homeId], opening on [floorId] (the floor the House tab shows) when given. */
+/** HM-3D (and FL-House 3D) for [homeId], opening on [floorId] (the floor the House tab shows) when given. */
 @Composable
 fun House3DRoute(
     repo: HomeRepository,
@@ -20,9 +21,11 @@ fun House3DRoute(
     floorId: String?,
     onBack: () -> Unit,
     onEditPlan: (floorId: String?) -> Unit,
+    /** Field Log passes [WallStage.BehindTheWall] so a crew sees the rough-in photos first. */
+    defaultStage: WallStage = WallStage.HouseManualDefault,
 ) {
     val vm = viewModel<House3DViewModel>(
-        factory = viewModelFactory { initializer { House3DViewModel(repo, wallPhotos, homeId, homeName, floorId, createSavedStateHandle()) } },
+        factory = viewModelFactory { initializer { House3DViewModel(repo, wallPhotos, homeId, homeName, floorId, createSavedStateHandle(), defaultStage) } },
     )
     House3DScreen(vm.state.collectAsState().value, vm::onEvent, onBack, onEditPlan) { scene, stage, resetCount, modifier ->
         FloorSceneView(scene, stage, resetCount, modifier)

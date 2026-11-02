@@ -40,6 +40,8 @@ class House3DViewModel(
     homeName: String,
     initialFloorId: String?,
     private val saved: SavedStateHandle,
+    /** The stage the view opens on: Finished in House Manual, Rough-in ("behind the wall") in Field Log. */
+    defaultStage: WallStage = WallStage.HouseManualDefault,
     private val buildMesh: MeshMaker = DefaultMeshMaker,
     private val work: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
@@ -47,7 +49,7 @@ class House3DViewModel(
         House3DUiState(
             homeName = homeName,
             floorId = saved[FLOOR] ?: initialFloorId,
-            stage = saved.get<String>(STAGE)?.let(WallStage::fromStored) ?: WallStage.HouseManualDefault,
+            stage = saved.get<String>(STAGE)?.let(WallStage::fromStored) ?: defaultStage,
         ),
     )
     val state: StateFlow<House3DUiState> = _state.asStateFlow()

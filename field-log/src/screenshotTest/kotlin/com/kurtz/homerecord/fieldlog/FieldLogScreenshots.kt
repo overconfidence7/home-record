@@ -630,6 +630,11 @@ fun JobHousePinsScreenshot() = JobHousePinsPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun JobHouse3DScreenshot() = JobHouse3DPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun TaskFormPinnedScreenshot() = TaskFormPinnedPreview()
 
 @PreviewTest

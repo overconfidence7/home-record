@@ -65,8 +65,13 @@ class House3DViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(homeId: String, floorId: String? = null, saved: SavedStateHandle = SavedStateHandle(), buildMesh: MeshMaker = DefaultMeshMaker) =
-        House3DViewModel(repo, wallPhotos, homeId, "Maple St", floorId, saved, buildMesh).also { created += it }
+    private fun vm(
+        homeId: String,
+        floorId: String? = null,
+        saved: SavedStateHandle = SavedStateHandle(),
+        buildMesh: MeshMaker = DefaultMeshMaker,
+        defaultStage: WallStage = WallStage.HouseManualDefault,
+    ) = House3DViewModel(repo, wallPhotos, homeId, "Maple St", floorId, saved, defaultStage, buildMesh).also { created += it }
 
     private val kitchen = PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 168, 144)
     private val living = PlanRoom.rectangle("l", "Living room", "LIVING_ROOM", 168, 0, 180, 144)
@@ -114,6 +119,24 @@ class House3DViewModelTest {
         val restored = vm(homeId, saved = saved).state.let { flow -> withTimeout(10_000) { flow.first { it.scene != null } } }
         assertThat(restored.stage).isEqualTo(WallStage.ROUGH_IN)
         assertThat(restored.floorId).isEqualTo(floors.getValue("Main"))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C20")
+    fun fieldLogOpensOnRoughInWithTheCrewsPhotoPaintedOn() = test {
+        val (homeId, _) = home()
+        val north = db.wallDao().listFor("k").single { it.edgeIndex == 0 }
+        wallPhotos.save(north.id, WallStage.ROUGH_IN, "/m/north.jpg", "/m/north-wall.jpg", outline)
+        val saved = SavedStateHandle()
+        val model = vm(homeId, saved = saved, defaultStage = WallStage.BehindTheWall)
+        val state = withTimeout(10_000) { model.state.first { it.photographedWalls == 1 } }
+        assertThat(state.stage).isEqualTo(WallStage.ROUGH_IN)
+        assertThat(state.scene!!.picturesAt(WallStage.ROUGH_IN)).containsExactly(MeshPartKey.WallFace("k", 0), "/m/north-wall.jpg")
+
+        // A stage the crew picked wins over the default after process death
+        model.onEvent(House3DEvent.SelectStage(WallStage.FINISHED))
+        val restored = vm(homeId, saved = saved, defaultStage = WallStage.BehindTheWall).state.let { flow -> withTimeout(10_000) { flow.first { it.scene != null } } }
+        assertThat(restored.stage).isEqualTo(WallStage.FINISHED)
     }
 
     @Test

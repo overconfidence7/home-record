@@ -1,0 +1,95 @@
+# Walkthrough F10 (T049c): FL-House in 3D (AC-C20). Builds a one-room plan on a new job (House tab: Start the
+# plan, Edit plan, Add room "Kitchen"), then opens "3D view" from the House tab: the scene, Reset view and the
+# stage picker opening on Rough-in (Field Log's behind-the-wall default); Back returns to the House tab.
+# Behind-the-wall capture, overlays and the installed item arrive with T052 and the F10 item work.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f10@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; the row keeps the selected
+# tab in view, so step along it by id (Files, then Time) the way F03 does instead of swiping
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-C20: "3D view" opens the job's floor in 3D with Reset view and the stage selector on Rough-in
+- scrollUntilVisible:
+    element:
+      id: "fl_house_3d"
+- tapOn:
+    id: "fl_house_3d"
+- extendedWaitUntil:
+    visible:
+      id: "fl_3d_reset"
+    timeout: 15000
+- assertVisible:
+    id: "fl_3d_scene"
+- assertVisible:
+    id: "fl_3d_stage_rough_in"
+    selected: true
+- assertVisible:
+    id: "fl_3d_walls"
+- tapOn:
+    id: "fl_3d_reset"
+- takeScreenshot: F10-3d
+- tapOn:
+    id: "fl_back"
+- extendedWaitUntil:
+    visible:
+      id: "fl_house_3d"
+    timeout: 5000
+- stopApp

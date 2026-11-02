@@ -32,6 +32,8 @@ class JobHouseDeps(
     val onOpenRoom: (roomId: String) -> Unit,
     val onEditShape: (homeId: String, title: String, floorId: String?, PlanRoom) -> Unit,
     val onOpenFloors: (homeId: String, title: String) -> Unit,
+    /** Opens the job's house in 3D on the floor in view (AC-C20). */
+    val on3D: (homeId: String, title: String, floorId: String?) -> Unit,
 )
 
 @Composable
@@ -98,6 +100,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     onEditShape = { floorId, room -> house.onEditShape(homeId, state.name, floorId, room) },
                     onOpenFloors = { house.onOpenFloors(homeId, state.name) },
                     modifier = Modifier.fillMaxSize(),
+                    on3D = { floorId -> house.on3D(homeId, state.name, floorId) },
                     pins = { floorId ->
                         TaskPins.onFloor(jobTasks, floorId, canManageTasks, tasks?.me).mapIndexed { i, t ->
                             val pin = t.planPin ?: return@mapIndexed null
