@@ -16,6 +16,7 @@
 
 ## Decisions to confirm
 
+- 2026-11-02 (T052a overlay kinds): Stud, Blocking and Other overlays sit on no blueprint layer (AC-C15 lists none for framing), draw in a neutral slate and always show on the wall. Water supply is two kinds (Hot water, Cold water) and Low-voltage five (Data cable, Coax, Speaker wire, Security wire, Doorbell wire). Reply if framing should get its own layer toggle.
 - 2026-11-01 (judge:fl-log-send-empty): Send on a day with nothing logged asks "Send an empty log?" with Cancel and Send anyway, instead of disabling Send, so a "nobody on site today" page can still go out on purpose. Weather alone counts as nothing logged. Reply if Send should be disabled instead.
 - 2026-11-01 (judge:fl-log-pdf-company-fallback): the daily log PDF's header line shows the company phone for every sender and the company email only when Owner or Office sends it, because AC-B3 keeps the company email from Crew, Lead and Sub; a Lead's PDF has the phone only. Reply if the email should print for a Lead's send too.
 - 2026-11-01 (T047b2): Field Log asks for notification permission the first time someone reaches the company's tabs (Android 13+, once per install), not at a later moment like the first task assigned to them; a system prompt cannot wait for the push itself, and this is the point from which tasks and schedule changes start reaching them. A timesheet-approved notification opens the Clock tab for crew (Timesheets is Owner/Office only). Reply if a later moment is wanted.

@@ -666,3 +666,20 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - Shared key `room-3d:<roomId>` (`SharedKeys.room3D`) sits on the room page's "View in 3D" button and on the 3D
   screen's body while it was opened on that room; after "Back to floor" the key is dropped, so a later Back from the
   whole floor uses the plain transition.
+
+## 2026-11-02 T052a: overlay model and wall space
+
+- T052 split into T052a (model, `WallSpaceMapper`, search, repository; this run), T052b (editor on a wall photo, room
+  Overlays section) and T052c (overlays on the plan, search screen).
+- Wall space is the straightened texture's space: x 0..1 from the wall's left end seen from inside the room, y 0..1 down
+  from the ceiling line, the same orientation the texture warp uses (top-left corner of the outline is 0,0). A wall
+  photo's outline maps it with the unit-square-to-quad perspective transform, written in plain Kotlin (`Homography`)
+  so it is unit-testable; the texture and the plain wall tile need no mapping. Taps up to 2% outside the outline still
+  count (a finger on the edge line) and clamp onto the wall; a crossed outline places nothing.
+- Kinds: the AC-C25 list with Water supply split into Hot water and Cold water and Low-voltage into Data cable, Coax,
+  Speaker wire, Security wire and Doorbell wire (22 kinds). Each has a layer from AC-C15; Stud, Blocking and Other
+  belong to no system layer and use a neutral slate (`LayerPalette.structure`). "Valve" keeps the SPEC's word although
+  voice.md prefers "shutoff": a shutoff in this app is an item with its own page, and a valve drawn on a wall need not
+  be one. Unknown stored kinds read as Other and unknown depths as Behind drywall, so nothing drawn is lost.
+- Search ranks label matches (prefix of the whole label first) above kind matches; kind matches also use a few plain
+  search words per kind ("pipe", "ethernet", "romex").

@@ -13,6 +13,9 @@ object LayerPalette {
         BlueprintLayer.GAS -> if (dark) Color(0xFFFF8A65) else Color(0xFFD84315)
         BlueprintLayer.DRAIN_VENT -> if (dark) Color(0xFFA1887F) else Color(0xFF6D4C41)
     }
+
+    /** Studs, blocking and other marks that belong to no system layer (AC-C25): a neutral slate. */
+    fun structure(dark: Boolean): Color = if (dark) Color(0xFFB0BEC5) else Color(0xFF455A64)
 }
 
 /**

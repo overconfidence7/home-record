@@ -363,4 +363,33 @@
     <string name="house3d_empty_title">Nothing to show in 3D yet</string>
     <string name="house3d_empty_body">Draw this floor\'s rooms and they stand up here as walls.</string>
     <string name="house3d_failed">Couldn\'t build the 3D view from this floor\'s plan. Tap Retry, or open the plan and check its rooms.</string>
+    <!-- Overlay kinds and depths (AC-C25, AC-C26) -->
+    <string name="overlay_kind_water_hot">Hot water</string>
+    <string name="overlay_kind_water_cold">Cold water</string>
+    <string name="overlay_kind_drain">Drain</string>
+    <string name="overlay_kind_vent">Vent</string>
+    <string name="overlay_kind_gas">Gas</string>
+    <string name="overlay_kind_electrical_wire">Electrical wire</string>
+    <string name="overlay_kind_lv_data">Data cable</string>
+    <string name="overlay_kind_lv_coax">Coax</string>
+    <string name="overlay_kind_lv_speaker">Speaker wire</string>
+    <string name="overlay_kind_lv_security">Security wire</string>
+    <string name="overlay_kind_lv_doorbell">Doorbell wire</string>
+    <string name="overlay_kind_duct">Duct</string>
+    <string name="overlay_kind_stud">Stud</string>
+    <string name="overlay_kind_blocking">Blocking</string>
+    <string name="overlay_kind_junction_box">Junction box</string>
+    <string name="overlay_kind_outlet">Outlet</string>
+    <string name="overlay_kind_switch">Switch</string>
+    <string name="overlay_kind_light">Light</string>
+    <string name="overlay_kind_register">Register</string>
+    <string name="overlay_kind_valve">Valve</string>
+    <string name="overlay_kind_cleanout">Cleanout</string>
+    <string name="overlay_kind_other">Other</string>
+    <string name="overlay_depth_behind_drywall">Behind drywall</string>
+    <string name="overlay_depth_in_slab">In slab</string>
+    <string name="overlay_depth_in_ceiling">In ceiling</string>
+    <string name="overlay_depth_in_attic">In attic</string>
+    <string name="overlay_depth_underground">Underground</string>
+    <string name="overlay_depth_exposed">Exposed</string>
 </resources>
