@@ -500,3 +500,15 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - A company with no zone shows Eastern (the backend default) and saves nothing for it, so the backend keeps its
   default until someone picks one. Picking Eastern stores `America/New_York` explicitly.
 - `CompanySettings.timeZone` is cached with the membership so a later phone screen can read it offline.
+
+## 2026-11-02 T048a: wall photos and textures
+
+- One photo per wall per stage. Photographing a wall again at the same stage replaces the earlier photo (soft delete, both
+  rows to the outbox): the room page and the 3D view show one picture per stage, and a retake is how a homeowner fixes a
+  bad shot. When two phones photograph the same stage before a sync, the later `takenAt` wins. The replaced photo's files
+  stay on disk for now; media clean-up is a separate concern.
+- Outline corners are stored 0..1 in the upright photo (EXIF orientation applied), top-left, top-right, bottom-right,
+  bottom-left, in `wall_photo.cornersJson`. "Use" needs a convex outline covering at least 1% of the photo.
+- Texture size: the wall's length × height aspect (the outline's own when the wall has no size), the long side as long as
+  the outline's longer edges in the photo (no upscaling), capped at 2048 px; JPEG quality 88. Sources over 16 MP are
+  decoded at a power-of-two sample first.
