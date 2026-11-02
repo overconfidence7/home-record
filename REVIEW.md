@@ -2566,3 +2566,60 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 59 device stages, 1220 unit tests, 158 backend tests, coverage 278/278 ACs. Passed: 58. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-02 (commit 9961c19e)
+
+Judged the suite results for 9961c19e (run of 2026-11-01 22:34 UTC, 59 stages, 58 passed). `build` HEAD 304fab62 is ten commits ahead (R09e–R09g, the second F11 sync fix f07d86e5); the suite has not tested it, so none of that is judged here. New at this sha since the last judge: the two judge fixes (PDF headed by the company, "Send an empty log?"), the F11 `SwipeToComplete` fix 18943057, R09–R09d (daily log sections merge per column, PDF photos upright, weather fetch time and "No weather recorded", Log tab follows midnight, delays removed by id, "Changed since sent").
+
+Verdict: House Manual: a fifth run with nothing new for the homeowner; Kitchen still says "Other" over a column of grey "nothing yet" cards, Reminders is still the placeholder, and there is no Emergency list, breaker panel or 3D. / Field Log: both of last run's log findings are fixed and look right on device: the PDF now says "QA Electric" at the top, an empty log asks before it goes out, and an edit after sending says "Changed since sent. Send again…". What Nate would hit first is the same as last night: swiping a task done still does nothing after an Undo, two builds running.
+
+- [ ] [UI] Minor: at 200% font the Field Log navigation bar breaks "Schedule" mid-word onto two lines ("Sched / ule") and pushes its icon above the others; noted in three earlier judge entries but never filed [judge:fl-nav-label-200-split] - steps: font scale 200%, open Field Log, any root tab - expected: rule 32 (200% clips nothing; rows grow) and rule 1 (each destination has an icon and a label); a label that does not fit should wrap at a word or ellipsize, not split a word, and the icons stay on one baseline - actual: "Sched" / "ule" under a raised calendar icon, the other four labels on one line - screenshot: qa-results:latest/field-log/screenshots/tour-font200-today.png
+
+Auto entry review: [auto:flow:field-log:F11-tasks] is not a flow error. The failure shot is identical to d47125a1's: after tick → Undo, the swipe on "Set the kitchen outlets" leaves both tasks open with no snackbar and no Done section (step 71), even though 18943057 (swipe state not saveable) is in this sha. So that fix did not cure it on device. The builder's next guess (f07d86e5, sync echo reverting the change, plus a `SwipeToComplete: swiped` logcat line) is after this sha; this run's F11 device-logcat.txt has no such line because the logging is not in this build. Judge it on the next run by that logcat line as the builder asked. Note for the builder: the failure shows no "Done:" snackbar at all, which a sync echo arriving later would not remove within the 10 s wait; a gesture that never completes fits the shot better.
+
+Seen this run and fine: F09b PDF headed "QA Electric" with the rule, date and job ([judge:fl-log-pdf-company-fallback] confirmed fixed on device); "Send an empty log?" dialog with Cancel / Send anyway over the log ([judge:fl-log-send-empty] confirmed); Sent line with "Changed since sent. Send again so the client has this version." and the bar's button turned to "Send again" (device and catalog at 200%); F09 Delays with Add delay, typed weather "Showers, high 61°, low 44° · Typed in by hand", Visitors; catalog Log tab with crew hours, work notes, photos, completed tasks and change orders. Flow-shot nit not filed: `F09b-log-changed-since-sent` stops with the Sent line half under the date bar (scrollUntilVisible stops at first sight). Catalog Log screens still draw the date bar through the status bar (hosting, as [judge:qa-crawler-job-tab-insets]).
+
+Still open and seen again this run: [judge:hm-room-kind-not-inferred] and the grey room cards (`flow-H03-blueprint-room-H03-room-kitchen.png`), [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (every tour), [judge:fl-house-pin-over-label] (not re-shot differently).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Unchanged; dark, 200% and landscape tours pass | qa-results:latest/house-manual/screenshots/tour-dark-home.png |
+| H2 | Pass | H02 and H02b pass; open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Kitchen still "Other" over six grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | H04 passes | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item; seeded house reads well in Items | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third, no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Ends at "Everything is synced"; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | "Can't load prices right now" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 (H14 Reminders is the placeholder).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview, House, sub-tabs | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c pass | qa-results:latest/field-log/crawler/field-log/clock-far-reason-light.png |
+| F5 | Pass | Break, switch job, clock out, changes list | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Pass | F07, F07b, F07c pass; landscape Minor still open | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Pass | Take a photo from Today lands in Recent photos and the job | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Pass | PDF headed by the company, empty-log warning, Sent line, Changed since sent → Send again | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-changed-since-sent.png |
+| F11 | Clunky | Add, punch filter, tick/Undo, plan and file pins pass; swipe-to-done after Undo fails again on device | qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png |
+| F15 | Clunky | F15 passes; Delays below the fold with no hours (open Minor) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F16 | Pass | Offline save, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-saved-here.png |
+| F18 | Clunky | More, Team, Company, Sync fine; Schedule is the placeholder; "Sched / ule" at 200% (new Minor) | qa-results:latest/field-log/screenshots/tour-font200-today.png |
+
+Not built yet: F10, F12–F14, F17 (behind-the-wall T054, change orders T056–T058, schedule T059); push built but untestable without Firebase keys (Needs Nate).
+
+Focus check: nothing wrong. Log send, sync and weather wording stay in Field Log; House Manual has no Field Log tabs or terms.
+
+Coverage note: the auto entry reports 278/278 claimed ACs covered across 155 ticked tasks and subtasks (0 gaps).
+
+Judged: 10 screenshots opened (F11 failure shot, F09b PDF, empty-log warning and Changed since sent, F09 weather/delays, H03 Kitchen, HM dark home, FL 200% Today, catalog log-tab and log-sent-changed 200%), 812 crawler shots present. 23 walkthrough steps. New issues: 1. Product gaps: 0.
