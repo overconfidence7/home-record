@@ -94,7 +94,8 @@ class LogSendTest {
     private fun vm(s: LogSender? = sender) = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, sender = s), SavedStateHandle())
 
     private suspend fun LogViewModel.settled(check: (LogUiState) -> Boolean): LogUiState =
-        withTimeout(5_000) { state.first { !it.loading && check(it) } }
+        // 20 s: under the full suite Room can take longer than 5 s to deliver the first state (same as ClockViewModelTest).
+        withTimeout(20_000) { state.first { !it.loading && check(it) } }
 
     @AcceptanceCriterion("AC-F33")
     @Test fun emailingTheLogMarksItSentWithTheTimeAndRecipients() = runBlocking<Unit> {

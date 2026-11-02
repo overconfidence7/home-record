@@ -715,3 +715,18 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - The item page's Links section lists the overlays linked to the item (kind icon in its color, room, stage); a wall
   overlay opens its wall with it picked. The section hides while nothing is linked; breaker and shutoff links join it
   with T027c and the breaker work. Plan overlays (T052c) list but do not open yet.
+
+## 2026-11-02 T052c2: overlays on the floor plan
+- The plan editor gains a Rooms | Overlays segmented switch (both apps). Overlays mode reuses the wall editor's events
+  (`PlanEditorEvent.OverlayEvent(WallOverlaysEvent)`), drawing bar, selection bar, delete dialog and full-screen form, so
+  a plan overlay is drawn and edited exactly like a wall one: tap points (whole plan inches), Next, form, Save; tap to
+  pick, drag a point, Edit, Delete. Undo and Redo leave the top bar in Overlays mode (they step through room edits).
+- The form's logic moved out of `WallOverlaysViewModel` into `OverlayFormController` (fields, sheets, photo, process
+  death), used by both view models; no behavior change on walls.
+- `PlanOverlayPlacer` files a plan overlay under a room (first point's room, else nearest walls) because overlays carry
+  no floor; a floor's plan overlays are those of its rooms. New overlays are recorded at Finished in House Manual and
+  Rough-in on a job, matching each app's wall default.
+- The blueprint (House tab in both apps) draws the floor's plan overlays when their layer is on: runs as lines in the
+  layer color over a surface halo, spots as discs with the kind's icon. Wall overlays on the blueprint and 3D stay T053.
+- `OverlayTarget.Room` became `OverlayTarget.Plan`: a search result or a room-page row for a plan overlay opens the plan
+  editor in Overlays mode on the overlay's floor with it picked (`PlanKey.overlayId`, `JobPlanKey.overlayId`).

@@ -1,6 +1,7 @@
 # Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
 # (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9 wall part). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
-# in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the blueprint and 3D halves of H11 arrive with T053.
+# in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the plan editor's
+# Overlays mode draws a gas line on the floor plan, picks it and deletes it (T052c2); the blueprint layers and 3D halves of H11 arrive with T053.
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
 appId: com.kurtz.homerecord.housemanual
 ---
@@ -142,3 +143,62 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_wall_overlays_empty"
     timeout: 10000
+# AC-C25: the plan editor's Overlays mode draws a gas line on the floor plan in the Kitchen
+- tapOn:
+    id: "hm_back"
+- tapOn:
+    id: "hm_tab_house"
+- tapOn:
+    id: "hm_house_edit_plan"
+- extendedWaitUntil:
+    visible:
+      id: "hm_plan_mode_overlays"
+    timeout: 10000
+- tapOn:
+    id: "hm_plan_mode_overlays"
+- assertVisible:
+    id: "hm_plan_overlays_hint"
+- tapOn:
+    id: "hm_plan_add_overlay"
+- assertVisible:
+    id: "hm_plan_draw_hint"
+- tapOn: "Kitchen"
+- tapOn:
+    id: "hm_plan_canvas"
+- assertVisible: "2 points.*"
+- takeScreenshot: H11-plan-drawing
+- tapOn:
+    id: "hm_plan_draw_next"
+- extendedWaitUntil:
+    visible: "New overlay"
+    timeout: 10000
+- tapOn:
+    id: "hm_overlay_form_kind"
+- scrollUntilVisible:
+    element:
+      id: "hm_overlay_kind_gas"
+- tapOn:
+    id: "hm_overlay_kind_gas"
+- tapOn:
+    id: "hm_overlay_form_label"
+- inputText: "Range gas line"
+- hideKeyboard
+- tapOn:
+    id: "hm_save"
+# AC-C28: saved and picked on the plan, with Edit and Delete
+- extendedWaitUntil:
+    visible:
+      id: "hm_plan_selection"
+    timeout: 10000
+- assertVisible: "Range gas line"
+- takeScreenshot: H11-plan-overlay-picked
+- tapOn:
+    id: "hm_plan_overlay_delete"
+- assertVisible: "Delete Range gas line?"
+- tapOn:
+    id: "hm_plan_overlay_delete_confirm"
+- extendedWaitUntil:
+    visible:
+      id: "hm_plan_overlays_hint"
+    timeout: 10000
+- assertNotVisible: "Range gas line"

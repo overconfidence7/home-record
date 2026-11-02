@@ -138,4 +138,24 @@ class HouseViewModelTest {
         vm.untilRooms(1)
         assertThat(repo.loadPlan(floorId).placed.map { it.id }).containsExactly("k")
     }
+
+    @Test @com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-C25")
+    fun theBlueprintGetsTheFloorsPlanOverlaysOnly() = test {
+        val (homeId, floorId) = setUpHome()
+        val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db)
+        val draft = { kind: com.kurtz.homerecord.housemodel.overlays.OverlayKind ->
+            com.kurtz.homerecord.housemodel.overlays.OverlayDraft(
+                kind, listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(20f, 20f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(200f, 20f)),
+                com.kurtz.homerecord.housemodel.walls.WallStage.FINISHED,
+            )
+        }
+        overlays.addOnPlan(homeId, "k", draft(com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS))
+        overlays.addOnPlan(homeId, "upstairs-room", draft(com.kurtz.homerecord.housemodel.overlays.OverlayKind.DUCT))
+        val wall = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db).observeRoomWalls("k").first { it.isNotEmpty() }.first().id
+        overlays.addOnWall(homeId, wall, draft(com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD))
+        val vm = HouseViewModel(repo, homeId, store, SavedStateHandle(mapOf("floor" to floorId)), "Maple St", "Colonial", homeOverlays = overlays.observeForHome(homeId))
+            .also { created += it }
+        val state = withTimeout(10_000) { vm.state.first { it.overlays.isNotEmpty() } }
+        assertThat(state.overlays.map { it.kind }).containsExactly(com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS)
+    }
 }

@@ -157,6 +157,7 @@ private fun planState(vararg changes: PlanEditorUiState.() -> PlanEditorUiState)
             panX = 24f,
             panY = 24f,
             canUndo = true,
+            canEditOverlays = true,
         ),
     ) { acc, f -> acc.f() }
 
@@ -234,6 +235,47 @@ fun PlanEditorEmptyPreview() = Frame {
 @Composable
 fun PlanEditorLoadingPreview() = Frame { PlanEditorScreen(PlanEditorUiState(), {}, {}, "Maple St") }
 
+private fun planOverlay(id: String, kind: com.kurtz.homerecord.housemodel.overlays.OverlayKind, label: String, roomId: String, vararg xy: Float, depth: com.kurtz.homerecord.housemodel.overlays.OverlayDepth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.IN_SLAB) =
+    com.kurtz.homerecord.housemodel.overlays.Overlay(
+        id, "h1", roomId, null, kind, label, null, depth,
+        xy.toList().chunked(2).map { com.kurtz.homerecord.housemodel.overlays.OverlayPoint(it[0], it[1]) },
+        WallStage.ROUGH_IN, null, null, 0L,
+    )
+
+/** The main floor's plan overlays: the range's gas line from the meter side, the supply trunk overhead, drains and a register. */
+private val planOverlays = listOf(
+    planOverlay("p1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, "Range gas line", "r2", 384f, 180f, 384f, 120f, 132f, 120f, 132f, 100f),
+    planOverlay("p2", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DUCT, "Supply trunk", "r1", 24f, 60f, 372f, 60f, depth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.IN_CEILING),
+    planOverlay("p3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DRAIN, "Floor drain", "r4", 186f, 250f),
+    planOverlay("p4", com.kurtz.homerecord.housemodel.overlays.OverlayKind.REGISTER, "", "r3", 84f, 240f, depth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.EXPOSED),
+    planOverlay("p5", com.kurtz.homerecord.housemodel.overlays.OverlayKind.CLEANOUT, "Main stack cleanout", "r1", 150f, 24f),
+)
+
+/** Overlays mode (AC-C25): the floor's pipes, ducts and drains in their layer colors, Add overlay, what to tap. */
+@ThemePreviews
+@Composable
+fun PlanEditorOverlaysPreview() = Frame { PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays) }), {}, {}, "Maple St") }
+
+/** The range gas line picked: handles on its points to drag, Edit, Delete and Done (AC-C28). */
+@ThemePreviews
+@Composable
+fun PlanEditorOverlayPickedPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays, overlaySelectedId = "p1") }), {}, {}, "Maple St")
+}
+
+/** Drawing a new run on the plan: three taps so far, Undo, Cancel and Next (AC-C25). */
+@ThemePreviews
+@Composable
+fun PlanEditorOverlayDrawingPreview() = Frame {
+    val points = listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(36f, 132f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(36f, 200f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(120f, 200f))
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays, drawing = points) }), {}, {}, "Maple St")
+}
+
+/** Overlays mode on a floor with nothing drawn yet. */
+@ThemePreviews
+@Composable
+fun PlanEditorOverlaysEmptyPreview() = Frame { PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true) }), {}, {}, "Maple St") }
+
 @ThemePreviews
 @Composable
 fun PlanEditorNoFloorsPreview() = Frame { PlanEditorScreen(PlanEditorUiState(loading = false), {}, {}, "Maple St") }
@@ -261,7 +303,7 @@ fun HouseBlueprintLandscapePreview() = Frame { houseScreen(houseState()) }
 @ThemePreviews
 @Composable
 fun HouseLayersPreview() = Frame {
-    houseScreen(houseState({ copy(layers = LayerSet(setOf(BlueprintLayer.PLUMBING, BlueprintLayer.ELECTRICAL))) }))
+    houseScreen(houseState({ copy(layers = LayerSet(setOf(BlueprintLayer.PLUMBING, BlueprintLayer.ELECTRICAL, BlueprintLayer.GAS, BlueprintLayer.DRAIN_VENT)), overlays = planOverlays) }))
 }
 
 @ThemePreviews

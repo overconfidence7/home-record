@@ -68,6 +68,26 @@ fun PlanEditorWallScreenshot() = PlanEditorWallPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PlanEditorOverlaysScreenshot() = PlanEditorOverlaysPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorOverlayPickedScreenshot() = PlanEditorOverlayPickedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorOverlayDrawingScreenshot() = PlanEditorOverlayDrawingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorOverlaysEmptyScreenshot() = PlanEditorOverlaysEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PlanEditorDoorScreenshot() = PlanEditorDoorPreview()
 
 @PreviewTest
