@@ -16,12 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.drop
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.foundation.layout.Arrangement
@@ -162,6 +164,14 @@ private fun TaskLists(state: TasksUiState, onEvent: (TasksEvent) -> Unit) {
             haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
         }
     }
+    // A task that comes back to the top of the open list (Undo, or a sync) is shown when the list was at the top; the
+    // list would otherwise keep the old first row in view and leave the returning row just above it, out of sight.
+    val firstOpen = open.firstOrNull()?.id
+    val shownFirst = remember { arrayOf(firstOpen) }
+    if (shownFirst[0] != firstOpen) {
+        if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) listState.requestScrollToItem(0)
+        shownFirst[0] = firstOpen
+    }
     LazyColumn(Modifier.fillMaxSize().testTag("fl_tasks_list"), state = listState, contentPadding = PaddingValues(bottom = 88.dp)) {
         itemsIndexed(open, key = { _, row -> row.id }) { index, row ->
             ReorderableItem(reorder, key = row.id, enabled = state.canReorder) { dragging ->
@@ -194,7 +204,10 @@ private fun TaskLists(state: TasksUiState, onEvent: (TasksEvent) -> Unit) {
             item(key = "done-header") {
                 SectionHeader(pluralStringResource(R.plurals.tasks_done_header, state.done.size, state.done.size), Modifier.animateItem())
             }
-            items(state.done, key = { it.id }) { row -> TaskListRow(row, onEvent, modifier = Modifier.animateItem()) }
+            // Done rows have their own keys: a tick or an Undo then removes the row from one section and adds it to the
+            // other, so the list stays where it was instead of following the row (the list keeps its first visible key),
+            // and the open row that comes back from Undo is a fresh swipeable row, not the Done row's slot moved up.
+            items(state.done, key = { "done-${it.id}" }) { row -> TaskListRow(row, onEvent, modifier = Modifier.animateItem()) }
         }
     }
 }
@@ -237,6 +250,10 @@ fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, conte
             complete()
             scope.launch { swipe.reset() }
         }
+    }
+    // Where a swipe got to, for device runs (QA F11): a drag that moved logs its target, a swipe that settled logs "swiped".
+    LaunchedEffect(swipe) {
+        snapshotFlow { swipe.targetValue }.drop(1).collect { android.util.Log.i("SwipeToComplete", "target $it") }
     }
     SwipeToDismissBox(
         state = swipe,

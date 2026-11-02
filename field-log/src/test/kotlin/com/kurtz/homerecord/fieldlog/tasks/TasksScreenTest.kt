@@ -164,6 +164,36 @@ class TasksScreenTest {
         assertThat(events.filterIsInstance<TasksEvent.SetDone>()).hasSize(2)
     }
 
+    // AC-F34: ticking the top task of a long list leaves the list where it was. Open and done rows used to share a key,
+    // so the list followed the ticked row down into Done (and back up on Undo) instead of staying on the open tasks.
+    @Test fun tickingTheTopTaskOfALongListKeepsTheListInPlace() {
+        val rows = (0 until 30).map { TaskRow("t$it", "Run circuit $it to the panel") }
+        val openState = TasksUiState(loading = false, open = rows, total = rows.size, canManage = true)
+        var state by mutableStateOf(openState)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                TasksScreen(state, { e ->
+                    when (e) {
+                        is TasksEvent.SetDone -> state = openState.copy(
+                            open = rows.drop(1), done = listOf(rows[0].copy(done = true)), undo = TaskUndo("t0", rows[0].title),
+                        )
+                        TasksEvent.Undo -> state = openState
+                        else -> Unit
+                    }
+                })
+            }
+        }
+        rule.onNodeWithTag("fl_tasks_check_t0").performClick()
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_tasks_check_t1").assertIsDisplayed()
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_tasks_check_t0").assertIsDisplayed()
+        rule.onNodeWithTag("fl_tasks_swipe_t0").performTouchInput { swipe(center, Offset(width * 0.9f, centerY), durationMillis = 400) }
+        rule.waitForIdle()
+        rule.onNodeWithText("Done: Run circuit 0 to the panel").assertExists()
+    }
+
     @Test fun swipingTheOtherWayTicksItToo() {
         val events = show(ready)
         rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput { swipeLeft() }
