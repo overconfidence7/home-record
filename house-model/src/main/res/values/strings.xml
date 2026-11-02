@@ -346,4 +346,15 @@
     <string name="wall_outline_unreadable_title">Can\'t open this photo</string>
     <string name="wall_outline_unreadable_body">The file is missing or isn\'t a photo. Go back and take it again.</string>
     <string name="wall_outline_back">Back to the room</string>
+    <!-- HM-3D (AC-C20) -->
+    <string name="house_3d">3D view</string>
+    <string name="house3d_title">%1$s in 3D</string>
+    <string name="house3d_title_plain">3D view</string>
+    <string name="house3d_reset">Reset view</string>
+    <string name="house3d_walls_photographed">%3$s photos on %1$d of %2$d walls</string>
+    <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move.</string>
+    <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>
+    <string name="house3d_empty_title">Nothing to show in 3D yet</string>
+    <string name="house3d_empty_body">Draw this floor\'s rooms and they stand up here as walls.</string>
+    <string name="house3d_failed">Couldn\'t build the 3D view from this floor\'s plan. Tap Retry, or open the plan and check its rooms.</string>
 </resources>

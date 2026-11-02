@@ -116,6 +116,27 @@ class WallPhotoRepositoryTest {
         assertThat(repo.observeRoomWalls("kitchen").first().map { it.id }).containsExactly("w-north")
     }
 
+    // AC-C20: the 3D view gets every photographed wall of the floor's rooms by room and plan edge, straightened copy
+    // first, per stage; unphotographed walls and other rooms are left out, and a new photo arrives on the same flow.
+    @Test
+    @AcceptanceCriterion("AC-C20")
+    fun wallPicturesForTheFloorAreKeyedByRoomAndEdge() = runTest {
+        db.wallDao().upsert(WallEntity(id = "w-east", roomId = "kitchen", edgeIndex = 1, orientation = "E", lengthIn = 144, heightIn = 96, createdAt = 2, updatedAt = 2))
+        db.wallDao().upsert(WallEntity(id = "w-den", roomId = "den", edgeIndex = 2, orientation = "S", lengthIn = 120, heightIn = 96, createdAt = 3, updatedAt = 3))
+        db.wallDao().upsert(WallEntity(id = "w-bath", roomId = "bath", edgeIndex = 0, orientation = "N", lengthIn = 60, heightIn = 96, createdAt = 4, updatedAt = 4))
+        assertThat(repo.observeWallPictures(emptyList()).first()).isEmpty()
+        assertThat(repo.observeWallPictures(listOf("kitchen", "den")).first()).isEmpty()
+
+        repo.save("w-east", WallStage.FINISHED, "/m/e.jpg", "/m/e-tex.jpg", outline)
+        repo.save("w-east", WallStage.ROUGH_IN, "/m/r.jpg", null, outline)
+        repo.save("w-den", WallStage.FINISHED, "/m/d.jpg", "/m/d-tex.jpg", outline)
+        repo.save("w-bath", WallStage.FINISHED, "/m/b.jpg", "/m/b-tex.jpg", outline)
+        val pictures = repo.observeWallPictures(listOf("kitchen", "den")).first()
+        assertThat(pictures.keys).containsExactly(WallKey("kitchen", 1), WallKey("den", 2))
+        assertThat(pictures.getValue(WallKey("kitchen", 1))).containsExactly(WallStage.FINISHED, "/m/e-tex.jpg", WallStage.ROUGH_IN, "/m/r.jpg")
+        assertThat(pictures.getValue(WallKey("den", 2))).containsExactly(WallStage.FINISHED, "/m/d-tex.jpg")
+    }
+
     // T048d: a new photo is handed to the upload queue with both files; the room page asks for the missing files of
     // the photos it shows (the newest per wall and stage) after it has its rows, and a failed fetch leaves the page as is.
     @Test

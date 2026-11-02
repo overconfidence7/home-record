@@ -40,6 +40,8 @@ fun HouseRoute(
     /** Task pins for a floor (FL-House, AC-F35). */
     pins: (floorId: String?) -> List<BlueprintPin> = { emptyList() },
     onOpenPin: (String) -> Unit = {},
+    /** Opens HM-3D on the floor in view (AC-C20). */
+    on3D: ((floorId: String?) -> Unit)? = null,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -70,5 +72,6 @@ fun HouseRoute(
         modifier = modifier,
         pins = pins(state.floorId),
         onOpenPin = onOpenPin,
+        on3D = on3D?.let { open -> { open(state.floorId) } },
     )
 }

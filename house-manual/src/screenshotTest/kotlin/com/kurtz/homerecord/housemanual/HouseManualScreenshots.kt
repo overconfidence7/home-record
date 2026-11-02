@@ -414,3 +414,33 @@ fun WallOutlineSavingScreenshot() = WallOutlineSavingPreview()
 @ThemePreviews
 @Composable
 fun WallOutlineUnreadableScreenshot() = WallOutlineUnreadablePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DScreenshot() = House3DPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DRoughInScreenshot() = House3DRoughInPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DEmptyScreenshot() = House3DEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DLoadingScreenshot() = House3DLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DErrorScreenshot() = House3DErrorPreview()
+
+@PreviewTest
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun House3DLandscapeScreenshot() = House3DLandscapePreview()

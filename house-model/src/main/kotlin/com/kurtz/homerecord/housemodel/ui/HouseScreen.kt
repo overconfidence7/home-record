@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Polyline
 import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.ViewInAr
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -71,6 +72,8 @@ fun HouseScreen(
     /** Task pins on the floor in view (FL-House, AC-F35); House Manual has none. */
     pins: List<BlueprintPin> = emptyList(),
     onOpenPin: (String) -> Unit = {},
+    /** Opens HM-3D on this floor (AC-C20); no button when null. */
+    on3D: (() -> Unit)? = null,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -134,6 +137,12 @@ fun HouseScreen(
                 OutlinedButton(onClick = onEditPlan, modifier = m.testTag("${LocalTagPrefix.current}_house_edit_plan")) {
                     Icon(Icons.Rounded.Edit, contentDescription = null)
                     Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
+                }
+            }
+            if (on3D != null && state.rooms.isNotEmpty()) {
+                OutlinedButton(onClick = on3D, modifier = m.testTag("${LocalTagPrefix.current}_house_3d")) {
+                    Icon(Icons.Rounded.ViewInAr, contentDescription = null)
+                    Text(stringResource(R.string.house_3d), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
                 }
             }
             OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("${LocalTagPrefix.current}_house_floors")) {

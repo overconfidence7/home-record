@@ -11,7 +11,11 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+
+/** A wall by its room and plan edge, the way the 3D mesh names wall faces. */
+data class WallKey(val roomId: String, val edgeIndex: Int)
 
 /** One wall photo at one stage (AC-C17); [texturePath] is the straightened copy the 3D view uses (AC-C19). */
 data class WallPhoto(
@@ -50,6 +54,25 @@ class WallPhotoRepository(
     fun observeRoomWalls(roomId: String): Flow<List<RoomWall>> =
         combine(db.wallDao().observeFor(roomId), withMissingFetched(db.wallPhotoDao().observeForRoom(roomId)), RoomWalls::build)
             .distinctUntilChanged()
+
+    /**
+     * The pictures the 3D view paints on the walls of [roomIds] (AC-C20): for each wall that has a photo, keyed by its
+     * room and plan edge, the straightened copy (else the photo as taken) at each photographed stage. Follows new photos
+     * and fetches missing files like the room page.
+     */
+    fun observeWallPictures(roomIds: List<String>): Flow<Map<WallKey, Map<WallStage, String>>> {
+        if (roomIds.isEmpty()) return flowOf(emptyMap())
+        val perRoom = roomIds.distinct().map { roomId ->
+            combine(db.wallDao().observeFor(roomId), withMissingFetched(db.wallPhotoDao().observeForRoom(roomId))) { walls, photos ->
+                val byWall = photos.groupBy { it.wallId }
+                walls.mapNotNull { wall ->
+                    val pictures = latestRowByStage(byWall[wall.id].orEmpty()).mapValues { (_, p) -> p.texturePath ?: p.originalPath }
+                    if (pictures.isEmpty()) null else WallKey(wall.roomId, wall.edgeIndex) to pictures
+                }
+            }
+        }
+        return combine(perRoom) { rooms -> rooms.flatMap { it.toList() }.toMap() }.distinctUntilChanged()
+    }
 
     /**
      * Passes [photos] on unchanged and, after each list, fetches the missing files of the photos the page shows (the

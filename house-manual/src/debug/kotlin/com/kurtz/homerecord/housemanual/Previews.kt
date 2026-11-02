@@ -245,7 +245,7 @@ private fun houseState(vararg changes: HouseUiState.() -> HouseUiState): HouseUi
     ) { acc, f -> acc.f() }
 
 @Composable
-private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {})
+private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {}, on3D = {})
 
 @ThemePreviews
 @Composable
@@ -368,6 +368,56 @@ fun ItemEditFilledPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = f
 fun ItemEditErrorsPreview() = Frame {
     ItemEditScreen(ItemEditUiState(loading = false, rooms = itemRooms, draft = ItemDraft(price = "abc"), showErrors = true, dirty = true), {}, {})
 }
+
+/** The Main floor's walls with Finished photos on the kitchen's north and the living room's north wall (AC-C20). */
+private val house3dScene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(
+    houseRooms,
+    96,
+    mapOf(
+        com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0) to mapOf(WallStage.FINISHED to "/media/kitchen-north-wall.jpg"),
+        com.kurtz.homerecord.housemodel.walls.WallKey("r2", 0) to mapOf(
+            WallStage.FINISHED to "/media/living-north-wall.jpg",
+            WallStage.ROUGH_IN to "/media/living-north-rough.jpg",
+        ),
+    ),
+)
+
+private fun house3dState(vararg changes: com.kurtz.homerecord.housemodel.ui.House3DUiState.() -> com.kurtz.homerecord.housemodel.ui.House3DUiState) =
+    changes.fold(
+        com.kurtz.homerecord.housemodel.ui.House3DUiState(loading = false, homeName = "Maple St", floors = floors, floorId = "f2", scene = house3dScene),
+    ) { acc, f -> acc.f() }
+
+@Composable
+private fun house3dScreen(state: com.kurtz.homerecord.housemodel.ui.House3DUiState) =
+    com.kurtz.homerecord.housemodel.ui.House3DScreen(state, {}, {}, {})
+
+@ThemePreviews
+@Composable
+fun House3DPreview() = Frame { house3dScreen(house3dState()) }
+
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun House3DLandscapePreview() = Frame { house3dScreen(house3dState()) }
+
+/** Rough-in chosen: one wall has a rough-in photo. */
+@ThemePreviews
+@Composable
+fun House3DRoughInPreview() = Frame { house3dScreen(house3dState({ copy(stage = WallStage.ROUGH_IN) })) }
+
+/** The Upper floor has no rooms drawn yet. */
+@ThemePreviews
+@Composable
+fun House3DEmptyPreview() = Frame {
+    house3dScreen(house3dState({ copy(floorId = "f3", scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(emptyList(), 96, emptyMap())) }))
+}
+
+@ThemePreviews
+@Composable
+fun House3DLoadingPreview() = Frame { house3dScreen(house3dState({ copy(loading = true, scene = null) })) }
+
+@ThemePreviews
+@Composable
+fun House3DErrorPreview() = Frame { house3dScreen(house3dState({ copy(failed = true, scene = null) })) }
 
 @ThemePreviews
 @Composable

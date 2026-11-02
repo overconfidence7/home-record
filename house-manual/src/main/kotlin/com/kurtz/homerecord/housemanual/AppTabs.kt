@@ -115,6 +115,13 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onEditPlan = { nav.push(PlanKey(floorId = it)) },
                 onEditShape = { floorId, room -> nav.push(PlanKey(floorId, room.id, editShape = true)) },
                 onOpenFloors = { nav.push(FloorsKey) },
+                on3D = { nav.push(House3DKey(it)) },
+            )
+        }
+        entry<House3DKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.House3DRoute(
+                container.homes, container.wallPhotos, home.id, home.name, key.floorId, onBack = nav::pop,
+                onEditPlan = { nav.push(PlanKey(floorId = it)) },
             )
         }
         entry<PlanKey> { key ->

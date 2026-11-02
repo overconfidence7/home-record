@@ -221,7 +221,7 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
 
 /** Framing, Rough-in, Insulation, Finished as one segmented row (rule 22); a label steps down rather than split at 200%. */
 @Composable
-private fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit, modifier: Modifier = Modifier) {
+internal fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit, modifier: Modifier = Modifier, screen: String = "room_wall") {
     val prefix = LocalTagPrefix.current
     SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
         WallStage.entries.forEachIndexed { index, stage ->
@@ -230,7 +230,7 @@ private fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit, 
                 onClick = { onSelect(stage) },
                 shape = SegmentedButtonDefaults.itemShape(index, WallStage.entries.size),
                 icon = {},
-                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_room_wall_stage_${stage.name.lowercase()}"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_stage_${stage.name.lowercase()}"),
             ) {
                 Text(
                     stringResource(stage.labelRes),
