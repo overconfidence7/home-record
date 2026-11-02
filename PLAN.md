@@ -288,7 +288,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] R09e: conflict log on More > Sync shows only the current company's lines (`tenantKey` is written but never read) (AC-F55)
   - [x] R09f: task form opened from a push reloads when the task arrives by sync instead of staying on the error; company time zone settable in `settingsSchema` (today/tomorrow for schedule pushes is always Eastern now); schedule push opens the day (with T059) (AC-F36, AC-F42)
   - [x] R09f1: company time zone picker on FL-Company/Settings (Owner and Office) writing `settings.timeZone`; until then the backend default (Eastern) applies (AC-F42)
-  - [ ] R09g: task pins: a Crew pin tap opens that task read only (today it only switches to the Tasks tab); file viewer pin `choose` re-checks canManageTasks; a tap on a page that has not rendered yet drops no pin (AC-F35)
+  - [x] R09g: task pins: a Crew pin tap opens that task read only (today it only switches to the Tasks tab); file viewer pin `choose` re-checks canManageTasks; a tap on a page that has not rendered yet drops no pin (AC-F35)
 - [ ] V3: Visual review of M3 screenshots; walk PRODUCT.md Field Log steps 1–6
 
 ## M4 Walls, overlays and 3D
