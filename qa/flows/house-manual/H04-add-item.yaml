@@ -151,6 +151,11 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_detail_document_add"
 - assertVisible:
     id: "hm_item_detail_document_scan"
+# The three document buttons wrap (FlowRow): "Attach" sits on the next row, just below the fold when the
+# scroll above stops as soon as "Add from Files" is fully shown, so scroll to it too instead of assuming it shows
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_document_attach"
 - assertVisible:
     id: "hm_item_detail_document_attach"
 # AC-H10: the room page lists its items and offers Add item
