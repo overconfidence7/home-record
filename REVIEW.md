@@ -2707,3 +2707,19 @@ Focus check: nothing wrong. House Manual's tabs, wording and Emergency card stay
 Coverage note: the auto entry reports 283/283 claimed ACs covered across 159 ticked tasks and subtasks (0 gaps).
 
 Judged: 10 screenshots opened (F11 and H04 failure shots, FL 200% Today, Jobs and More, FL landscape Today, HM dark and landscape House, HM 200% Home, H03 Kitchen), 961 PNGs present. 23 walkthrough steps. New issues: 1. Product gaps: 0.
+
+## QA auto 2026-11-02 (commit 26da2dea)
+
+Automated suite run at 2026-11-02 14:58 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F10-house-3d fails on field-log [auto:flow:field-log:F10-house-3d] - steps: automated, see qa-results branch latest/ for commit 26da2dea - expected: walkthrough step F10 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F10-house-3d.log - screenshot: qa-results:latest/field-log/screenshots/flow-F10-house-3d-step-060-assertCondition-fl_3d_scene.png
+- [ ] [Major] Flow F11-tasks fails on field-log (regression of a fixed item) [auto:flow:field-log:F11-tasks] - steps: automated, see qa-results branch latest/ for commit 26da2dea - expected: walkthrough step F11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F11-tasks.log - screenshot: qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png
+- [ ] [Major] Flow H03-blueprint-room fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H03-blueprint-room] - steps: automated, see qa-results branch latest/ for commit 26da2dea - expected: walkthrough step H03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H03-blueprint-room.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H01-home-after-onboarding.png
+- [ ] [Major] house-manual release (R8) build problem [auto:release:house-manual:house-manual] - steps: automated, see qa-results branch latest/ for commit 26da2dea - expected: release APK installs and launches (S8) - actual: adb: device 'emulator-5554' not found
+- [ ] [Major] house-manual cold start too slow (regression of a fixed item) [auto:coldstart:house-manual:house-manual] - steps: automated, see qa-results branch latest/ for commit 26da2dea - expected: under 1,500 ms (AC-U11) - actual: release build could not be measured (install failed)
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F10 Fail, field-log F11 Fail, field-log F11b Pass, field-log F11c Pass, field-log F15 Pass, field-log F16 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Fail, house-manual H04 Pass, house-manual H06 Pass, house-manual H09 Pass, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); house-manual jank:house-manual (not measurable: adb: device offline)
+
+Tested: 61 device stages, 1343 unit tests, 161 backend tests, coverage 295/295 ACs. Passed: 55. New issues: 5. Critical: 0. Product gaps: n/a (judge entry follows).
