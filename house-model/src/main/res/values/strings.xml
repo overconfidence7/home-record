@@ -351,6 +351,8 @@
     <string name="house3d_title">%1$s in 3D</string>
     <string name="house3d_title_plain">3D view</string>
     <string name="house3d_reset">Reset view</string>
+    <string name="house3d_all_floors">All floors</string>
+    <string name="house3d_ghost_hint">Floors below are shown faded.</string>
     <string name="house3d_walls_photographed">%3$s photos on %1$d of %2$d walls</string>
     <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move.</string>
     <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>

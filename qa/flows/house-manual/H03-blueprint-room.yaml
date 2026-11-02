@@ -64,6 +64,19 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_3d_reset"
 - takeScreenshot: H03-3d
+# AC-C21: All floors stacks every floor, pulled apart; picking a floor again shows it over the faded floors below
+- tapOn:
+    id: "hm_3d_floor_all"
+- extendedWaitUntil:
+    visible: "All floors in 3D"
+    timeout: 15000
+- assertVisible:
+    id: "hm_3d_scene"
+- takeScreenshot: H03-3d-all-floors
+- tapOn: "Main"
+- extendedWaitUntil:
+    visible: "Main in 3D"
+    timeout: 15000
 - tapOn:
     id: "hm_back"
 - assertVisible:

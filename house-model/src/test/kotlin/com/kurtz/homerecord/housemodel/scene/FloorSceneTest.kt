@@ -74,4 +74,68 @@ class FloorSceneTest {
         val floor = triangles.filter { it.key == MeshPartKey.Floor("k") }.flatMap { it.ys.toList() }.average()
         assertThat(north).isLessThan(floor)
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C21")
+    fun stackedFloorsShareOneOriginAndTheFloorsBelowAreGhosts() {
+        // The upper bedroom sits over the kitchen only; on its own it would be centered on itself.
+        val bedroom = PlanRoom.rectangle("b", "Bedroom", "BEDROOM", 0, 0, 168, 144)
+        val layers = listOf(
+            SceneLayer(StackedFloor("main", 96, 0, ghost = true), listOf(kitchen, living)),
+            SceneLayer(StackedFloor("up", 96, 108, ghost = false), listOf(bedroom)),
+        )
+        val pictures = mapOf(
+            WallKey("k", 0) to mapOf(WallStage.FINISHED to "/m/k0.jpg"),
+            WallKey("b", 0) to mapOf(WallStage.FINISHED to "/m/b0.jpg"),
+        )
+        val scene = FloorScene.stack(layers, pictures)
+        assertThat(scene.ghostRooms).containsExactly("k", "l")
+        assertThat(scene.isEmpty).isFalse()
+        assertThat(scene.roomCount).isEqualTo(1)
+        assertThat(scene.wallCount).isEqualTo(4)
+        // Photos only on the chosen floor.
+        assertThat(scene.picturesAt(WallStage.FINISHED)).containsExactly(MeshPartKey.WallFace("b", 0), "/m/b0.jpg")
+        assertThat(scene.isGhost(MeshPartKey.Floor("k"))).isTrue()
+        assertThat(scene.isGhost(MeshPartKey.Floor("b"))).isFalse()
+
+        // The bedroom's floor sits exactly over the kitchen's, raised to the upper floor's base.
+        val kitchenFloor = checkNotNull(scene.mesh.part(MeshPartKey.Floor("k"))).bounds()
+        val bedroomFloor = checkNotNull(scene.mesh.part(MeshPartKey.Floor("b"))).bounds()
+        assertThat(bedroomFloor.minX).isWithin(0.001f).of(kitchenFloor.minX)
+        assertThat(bedroomFloor.maxZ).isWithin(0.001f).of(kitchenFloor.maxZ)
+        assertThat(bedroomFloor.minY - kitchenFloor.minY).isWithin(0.001f).of(108 * 0.0254f)
+        // The camera frames the chosen floor, not the faded one.
+        assertThat(scene.focus.minY).isWithin(0.001f).of(108 * 0.0254f)
+        assertThat(scene.lookAtY).isWithin(0.001f).of(scene.focus.minY)
+        assertThat(scene.mesh.bounds.minY).isWithin(0.001f).of(0f)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C21")
+    fun allFloorsFramesTheWholeStackAndAnEmptyChosenFloorIsEmpty() {
+        val bedroom = PlanRoom.rectangle("b", "Bedroom", "BEDROOM", 0, 0, 168, 144)
+        val all = FloorScene.stack(
+            listOf(
+                SceneLayer(StackedFloor("main", 96, 0, ghost = false), listOf(kitchen, living)),
+                SceneLayer(StackedFloor("up", 96, 156, ghost = false), listOf(bedroom)),
+            ),
+            emptyMap(),
+        )
+        assertThat(all.ghostRooms).isEmpty()
+        assertThat(all.roomCount).isEqualTo(3)
+        assertThat(all.wallCount).isEqualTo(12)
+        assertThat(all.solidFloors).isEqualTo(2)
+        assertThat(all.lookAtY).isWithin(0.001f).of(all.focus.centerY)
+        assertThat(all.focus.maxY).isWithin(0.01f).of((156 + 96) * 0.0254f)
+
+        val upperEmpty = FloorScene.stack(
+            listOf(
+                SceneLayer(StackedFloor("main", 96, 0, ghost = true), listOf(kitchen)),
+                SceneLayer(StackedFloor("up", 96, 108, ghost = false), emptyList()),
+            ),
+            emptyMap(),
+        )
+        assertThat(upperEmpty.isEmpty).isTrue()
+        assertThat(upperEmpty.wallCount).isEqualTo(0)
+    }
 }

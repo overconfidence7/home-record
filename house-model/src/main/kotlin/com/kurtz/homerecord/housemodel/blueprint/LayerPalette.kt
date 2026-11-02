@@ -36,6 +36,9 @@ object RoomPalette {
     val floor = Color(0xFFBDB6AC)
     val glass = Color(0x66B3D9F2)
 
+    /** Floors below the chosen one in 3D (AC-C21): a faint see-through grey. */
+    val ghost = Color(0x40A8A29A)
+
     /** The static picture's stand-in for a wall photo, which it cannot draw. */
     val photo = Color(0xFFC9B79C)
 }

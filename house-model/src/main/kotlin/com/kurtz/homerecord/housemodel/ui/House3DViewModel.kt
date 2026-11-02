@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.defaultFloor
-import com.kurtz.homerecord.housemodel.scene.FloorScene
 import com.kurtz.homerecord.housemodel.scene.DefaultMeshMaker
+import com.kurtz.homerecord.housemodel.scene.FloorScene
+import com.kurtz.homerecord.housemodel.scene.FloorStack
 import com.kurtz.homerecord.housemodel.scene.MeshMaker
+import com.kurtz.homerecord.housemodel.scene.SceneLayer
+import com.kurtz.homerecord.housemodel.scene.StackedFloor
 import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.CancellationException
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -29,8 +30,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * HM-3D (AC-C20): follows the chosen floor's plan, its ceiling height and its wall photos, and rebuilds the floor's
- * mesh off the main thread whenever one of them changes. Floor and stage survive process death.
+ * HM-3D (AC-C20, AC-C21): follows the chosen floor's plan, its ceiling height and its wall photos, plus the floors
+ * below it (drawn faded) or, for All floors, every floor pulled apart ([FloorStack]); rebuilds the scene off the main
+ * thread whenever one of them changes. Floor, All floors and stage survive process death.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class House3DViewModel(
@@ -49,13 +51,14 @@ class House3DViewModel(
         House3DUiState(
             homeName = homeName,
             floorId = saved[FLOOR] ?: initialFloorId,
+            allFloors = saved[ALL] ?: false,
             stage = saved.get<String>(STAGE)?.let(WallStage::fromStored) ?: defaultStage,
         ),
     )
     val state: StateFlow<House3DUiState> = _state.asStateFlow()
 
-    /** The floor in view; only its id and ceiling height change the mesh. */
-    private val floor = MutableStateFlow<FloorSummary?>(null)
+    /** The floors in view and where they sit; only ids, heights and placement change the mesh. */
+    private val stack = MutableStateFlow<List<StackedFloor>>(emptyList())
     private val retries = MutableStateFlow(0)
 
     init {
@@ -71,24 +74,26 @@ class House3DViewModel(
                         scene = if (chosen == null) null else it.scene,
                     )
                 }
-                floor.value = chosen
+                restack()
             }
         }
         viewModelScope.launch {
-            combine(floor.map { it?.let { f -> f.id to f.ceilingHeightIn } }.distinctUntilChanged(), retries) { f, _ -> f }
-                .flatMapLatest { f ->
-                    if (f == null) {
+            combine(stack, retries) { layers, _ -> layers }
+                .flatMapLatest { layers ->
+                    if (layers.isEmpty()) {
                         emptyFlow()
                     } else {
-                        repo.observePlan(f.first).flatMapLatest { plan ->
-                            wallPhotos.observeWallPictures(plan.placed.map { it.id }).map { pictures -> Triple(f, plan.placed, pictures) }
-                        }
+                        combine(layers.map { f -> repo.observePlan(f.floorId).map { SceneLayer(f, it.placed) } }) { it.toList() }
+                            .flatMapLatest { planned ->
+                                val solid = planned.filterNot { it.floor.ghost }.flatMap { l -> l.rooms.map { it.id } }
+                                wallPhotos.observeWallPictures(solid).map { pictures -> Triple(layers, planned, pictures) }
+                            }
                     }
                 }
-                .collect { (f, rooms, pictures) ->
+                .collect { (layers, planned, pictures) ->
                     try {
-                        val scene = withContext(work) { FloorScene.build(rooms, f.second, pictures, buildMesh) }
-                        if (_state.value.floorId == f.first) _state.update { it.copy(scene = scene, loading = false, failed = false) }
+                        val scene = withContext(work) { FloorScene.stack(planned, pictures, buildMesh) }
+                        if (stack.value == layers) _state.update { it.copy(scene = scene, loading = false, failed = false) }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -99,14 +104,26 @@ class House3DViewModel(
         }
     }
 
+    private fun restack() {
+        val s = _state.value
+        stack.value = FloorStack.layout(s.floors, s.floorId, s.allFloors)
+    }
+
     fun onEvent(event: House3DEvent) {
         when (event) {
             is House3DEvent.SelectFloor -> {
-                if (event.floorId == _state.value.floorId) return
+                if (event.floorId == _state.value.floorId && !_state.value.allFloors) return
                 val next = _state.value.floors.firstOrNull { it.id == event.floorId } ?: return
                 saved[FLOOR] = next.id
-                _state.update { it.copy(floorId = next.id, scene = null, loading = true, failed = false) }
-                floor.value = next
+                saved[ALL] = false
+                _state.update { it.copy(floorId = next.id, allFloors = false, scene = null, loading = true, failed = false) }
+                restack()
+            }
+            House3DEvent.ShowAllFloors -> {
+                if (_state.value.allFloors) return
+                saved[ALL] = true
+                _state.update { it.copy(allFloors = true, scene = null, loading = true, failed = false) }
+                restack()
             }
             is House3DEvent.SelectStage -> {
                 saved[STAGE] = event.stage.name
@@ -123,6 +140,7 @@ class House3DViewModel(
     private companion object {
         const val FLOOR = "floor"
         const val STAGE = "stage"
+        const val ALL = "allFloors"
         const val TAG = "House3D"
     }
 }

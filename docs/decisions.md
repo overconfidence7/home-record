@@ -602,3 +602,15 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   A stage the user picks still wins after process death.
 - The H side of AC-C20 stays in H03 (the House tab already opens 3D there); the Field Log side is the new
   `F10-house-3d.yaml`, the first part of walkthrough F10 (capture, overlays and the installed item come later).
+
+## 2026-11-02 — T050a: floors stacking in 3D (AC-C21)
+
+- One floor chosen shows every floor whose elevation is lower, faded (a single see-through grey, no photos, no
+  glass); floors above are left out so they never hide the chosen one. A floor at the same elevation is not "below".
+- All floors draws every floor solid, bottom first, each raised by a 60 in gap and never below the top of the floor
+  under it, so floors with missing or overlapping elevations still separate.
+- Floors are stacked by translating each floor's own mesh onto one shared plan origin (the middle of the combined
+  footprint) instead of changing `PlanMeshBuilder` or `MeshMaker`; the per-floor build stays the unit under test.
+- The camera frames the solid floors only: the chosen floor's floor height, or the middle of the stack for All floors.
+- An empty chosen floor shows the empty state (Edit plan) even when floors below have rooms.
+- T050 is split: T050a (stacking, done) and T050b (performance pass, AC-C24).

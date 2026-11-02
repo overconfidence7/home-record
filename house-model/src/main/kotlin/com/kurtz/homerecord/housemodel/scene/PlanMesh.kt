@@ -36,6 +36,30 @@ class MeshPart(
 ) {
     val vertexCount get() = positions.size / 3
     val triangleCount get() = indices.size / 3
+
+    /** The same piece moved by (dx, dy, dz) meters. */
+    fun translated(dx: Float, dy: Float, dz: Float): MeshPart {
+        val moved = positions.copyOf()
+        for (i in 0 until vertexCount) {
+            moved[i * 3] += dx
+            moved[i * 3 + 1] += dy
+            moved[i * 3 + 2] += dz
+        }
+        return MeshPart(key, moved, normals, uvs, indices)
+    }
+
+    fun bounds(): MeshBounds {
+        if (vertexCount == 0) return MeshBounds.EMPTY
+        var minX = Float.MAX_VALUE; var minY = Float.MAX_VALUE; var minZ = Float.MAX_VALUE
+        var maxX = -Float.MAX_VALUE; var maxY = -Float.MAX_VALUE; var maxZ = -Float.MAX_VALUE
+        for (i in 0 until vertexCount) {
+            val x = positions[i * 3]; val y = positions[i * 3 + 1]; val z = positions[i * 3 + 2]
+            if (x < minX) minX = x; if (x > maxX) maxX = x
+            if (y < minY) minY = y; if (y > maxY) maxY = y
+            if (z < minZ) minZ = z; if (z > maxZ) maxZ = z
+        }
+        return MeshBounds(minX, minY, minZ, maxX, maxY, maxZ)
+    }
 }
 
 /** Axis-aligned bounds of the whole mesh, in meters. */
@@ -60,6 +84,11 @@ data class MeshBounds(
             return kotlin.math.sqrt(dx * dx + dy * dy + dz * dz) / 2
         }
 
+    fun union(o: MeshBounds) = MeshBounds(
+        minOf(minX, o.minX), minOf(minY, o.minY), minOf(minZ, o.minZ),
+        maxOf(maxX, o.maxX), maxOf(maxY, o.maxY), maxOf(maxZ, o.maxZ),
+    )
+
     companion object {
         val EMPTY = MeshBounds(0f, 0f, 0f, 0f, 0f, 0f)
     }
@@ -78,5 +107,13 @@ data class PlanMesh(
     val offsetZIn: Float,
 ) {
     fun part(key: MeshPartKey): MeshPart? = parts.firstOrNull { it.key == key }
+
+    /** The whole mesh moved by (dx, dy, dz) meters; the plan offsets stay as built. */
+    fun translated(dx: Float, dy: Float, dz: Float): PlanMesh = PlanMesh(
+        parts.map { it.translated(dx, dy, dz) },
+        MeshBounds(bounds.minX + dx, bounds.minY + dy, bounds.minZ + dz, bounds.maxX + dx, bounds.maxY + dy, bounds.maxZ + dz),
+        offsetXIn,
+        offsetZIn,
+    )
     val triangleCount get() = parts.sumOf { it.triangleCount }
 }

@@ -14,6 +14,8 @@ import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.scene.FloorScene
+import com.kurtz.homerecord.housemodel.scene.SceneLayer
+import com.kurtz.homerecord.housemodel.scene.StackedFloor
 import com.kurtz.homerecord.housemodel.ui.House3DEvent
 import com.kurtz.homerecord.housemodel.ui.House3DScreen
 import com.kurtz.homerecord.housemodel.ui.House3DUiState
@@ -106,5 +108,30 @@ class House3DScreenTest {
         }
         rule.onNodeWithTag("hm_house_3d").performClick()
         assertThat(opened).isEqualTo(1)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C21")
+    fun allFloorsChipShowsTheStackAndTheFadedFloorsAreNamed() {
+        val events = mutableListOf<House3DEvent>()
+        val stacked = FloorScene.stack(
+            listOf(
+                SceneLayer(StackedFloor("b", 96, -102, ghost = true), listOf(PlanRoom.rectangle("u", "Utility", "UTILITY", 0, 0, 168, 144))),
+                SceneLayer(StackedFloor("m", 96, 0, ghost = false), rooms),
+            ),
+            emptyMap(),
+        )
+        show(ready.copy(scene = stacked), events)
+        rule.onNodeWithText("Floors below are shown faded.").assertExists()
+        rule.onNodeWithTag("hm_3d_floor_all").performClick()
+        assertThat(events).containsExactly(House3DEvent.ShowAllFloors)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C21")
+    fun allFloorsTitlesTheView() {
+        show(ready.copy(allFloors = true), mutableListOf())
+        rule.onNodeWithText("All floors in 3D").assertExists()
+        rule.onNodeWithContentDescription("3D view of All floors: 2 rooms").assertExists()
     }
 }

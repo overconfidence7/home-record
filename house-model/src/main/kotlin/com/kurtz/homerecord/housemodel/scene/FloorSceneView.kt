@@ -36,9 +36,9 @@ import kotlin.math.max
 import kotlin.math.sin
 
 /**
- * The live 3D floor (AC-C20) on SceneView/Filament: one renderable per [MeshPart], wall faces textured with their
- * picture at [stage] (loaded off the main thread, downscaled), other faces lit in the room's tint, a neutral floor and
- * translucent glass. One finger orbits, two pan, pinch zooms (SceneView's camera manipulator); a new [resetCount] puts
+ * The live 3D floor (AC-C20, AC-C21) on SceneView/Filament: one renderable per [MeshPart], wall faces textured with
+ * their picture at [stage] (loaded off the main thread, downscaled), other faces lit in the room's tint, a neutral floor
+ * and translucent glass; floors below the chosen one in a faint see-through grey, without glass. One finger orbits, two pan, pinch zooms (SceneView's camera manipulator); a new [resetCount] puts
  * the camera back where it started: south of the floor, turned and looking down as in [SceneProjection].
  */
 @Composable
@@ -59,9 +59,10 @@ fun FloorSceneView(scene: FloorScene, stage: WallStage, resetCount: Int, modifie
     }
     LaunchedEffect(bitmaps) { bitmaps.forEach { (path, bitmap) -> resources.addTexture(path, bitmap) } }
 
-    val bounds = scene.mesh.bounds
-    val manipulator = remember(bounds, resetCount) {
-        val target = Position(bounds.centerX, bounds.minY, bounds.centerZ)
+    val bounds = scene.focus
+    val lookAtY = scene.lookAtY
+    val manipulator = remember(bounds, lookAtY, resetCount) {
+        val target = Position(bounds.centerX, lookAtY, bounds.centerZ)
         val distance = max(bounds.radius, MIN_RADIUS_M) * DISTANCE_PER_RADIUS
         val yaw = Math.toRadians(SceneProjection.START_YAW_DEG.toDouble())
         val pitch = Math.toRadians(SceneProjection.START_PITCH_DEG.toDouble())
@@ -81,7 +82,9 @@ fun FloorSceneView(scene: FloorScene, stage: WallStage, resetCount: Int, modifie
         autoCenterContent = false,
     ) {
         geometries.forEach { (key, geometry) ->
-            val material = when (key) {
+            val ghost = scene.isGhost(key)
+            if (ghost && key is MeshPartKey.Glass) return@forEach
+            val material = if (ghost) resources.ghost else when (key) {
                 is MeshPartKey.WallFace -> pictures[key]?.let { resources.textured(it) } ?: resources.tint(scene.tintOf(key.roomId))
                 is MeshPartKey.Shell -> resources.tint(scene.tintOf(key.roomId))
                 is MeshPartKey.Floor -> resources.floor
@@ -107,6 +110,7 @@ private class SceneResources(private val engine: Engine, private val loader: Mat
 
     val floor: MaterialInstance by lazy { loader.createColorInstance(RoomPalette.floor, roughness = 0.9f) }
     val glass: MaterialInstance by lazy { loader.createColorInstance(RoomPalette.glass, roughness = 0.1f) }
+    val ghost: MaterialInstance by lazy { loader.createColorInstance(RoomPalette.ghost, roughness = 1f) }
 
     fun tint(index: Int): MaterialInstance = tints.getOrPut(index) { loader.createColorInstance(RoomPalette.tint(index), roughness = 0.8f) }
 

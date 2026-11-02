@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -17,9 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CenterFocusWeak
+import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.ViewInAr
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,8 +51,9 @@ typealias SceneSlot = @Composable (scene: FloorScene, stage: WallStage, resetCou
 val StillScene: SceneSlot = { scene, stage, _, modifier -> FloorScenePicture(scene, stage, modifier) }
 
 /**
- * HM-3D (AC-C20): the chosen floor's rooms as walls, wall photos at the chosen stage painted on, Reset view over the
- * scene. Floor chips when the home has more than one floor; the stage picker matches the room page's.
+ * HM-3D (AC-C20, AC-C21): the chosen floor's rooms as walls over the faded floors below it, wall photos at the chosen
+ * stage painted on, Reset view over the scene. Floor chips and All floors when the home has more than one floor; the
+ * stage picker matches the room page's.
  */
 @Composable
 fun House3DScreen(
@@ -60,7 +64,7 @@ fun House3DScreen(
     sceneSlot: SceneSlot = StillScene,
 ) {
     val prefix = LocalTagPrefix.current
-    val floorName = state.floor?.name
+    val floorName = if (state.allFloors) stringResource(R.string.house3d_all_floors) else state.floor?.name
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     ScreenScaffold(
         title = floorName?.let { stringResource(R.string.house3d_title, it) } ?: stringResource(R.string.house3d_title_plain),
@@ -73,10 +77,19 @@ fun House3DScreen(
                 LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(state.floors.reversed(), key = { it.id }) { floor ->
                         FilterChip(
-                            selected = floor.id == state.floorId,
+                            selected = floor.id == state.floorId && !state.allFloors,
                             onClick = { onEvent(House3DEvent.SelectFloor(floor.id)) },
                             modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_3d_floor_${floor.id}"),
                             label = { Text(floor.name) },
+                        )
+                    }
+                    item(key = "all") {
+                        FilterChip(
+                            selected = state.allFloors,
+                            onClick = { onEvent(House3DEvent.ShowAllFloors) },
+                            modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_3d_floor_all"),
+                            leadingIcon = { Icon(Icons.Rounded.Layers, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
+                            label = { Text(stringResource(R.string.house3d_all_floors)) },
                         )
                     }
                 }
@@ -88,6 +101,14 @@ fun House3DScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp).testTag("${prefix}_3d_walls"),
                 )
+                if (scene.ghostRooms.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.house3d_ghost_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp).testTag("${prefix}_3d_ghost_hint"),
+                    )
+                }
                 Text(
                     stringResource(R.string.house3d_hint),
                     style = MaterialTheme.typography.bodySmall,

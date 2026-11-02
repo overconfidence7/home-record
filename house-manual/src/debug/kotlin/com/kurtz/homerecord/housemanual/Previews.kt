@@ -411,6 +411,52 @@ fun House3DEmptyPreview() = Frame {
     house3dScreen(house3dState({ copy(floorId = "f3", scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(emptyList(), 96, emptyMap())) }))
 }
 
+/** Basement and Upper rooms for the stacked 3D previews (AC-C21). */
+private val basementRooms = listOf(
+    PlanRoom.rectangle("b1", "Utility room", "UTILITY", 0, 0, 168, 264),
+    PlanRoom.rectangle("b2", "Family room", "LIVING_ROOM", 168, 0, 240, 264),
+)
+private val upperRooms = listOf(
+    PlanRoom.rectangle("u1", "Primary bedroom", "BEDROOM", 0, 0, 216, 168),
+    PlanRoom.rectangle("u2", "Bedroom", "BEDROOM", 216, 0, 192, 168),
+    PlanRoom.rectangle("u3", "Hall bath", "BATHROOM", 0, 168, 120, 96),
+)
+private val house3dPictures = mapOf(
+    com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0) to mapOf(WallStage.FINISHED to "/media/kitchen-north-wall.jpg"),
+    com.kurtz.homerecord.housemodel.walls.WallKey("u1", 0) to mapOf(WallStage.FINISHED to "/media/bedroom-north-wall.jpg"),
+)
+
+/** Main chosen: the basement below drawn faded under it. */
+@ThemePreviews
+@Composable
+fun House3DStackedPreview() = Frame {
+    val scene = com.kurtz.homerecord.housemodel.scene.FloorScene.stack(
+        listOf(
+            com.kurtz.homerecord.housemodel.scene.SceneLayer(com.kurtz.homerecord.housemodel.scene.StackedFloor("f1", 96, -102, ghost = true), basementRooms),
+            com.kurtz.homerecord.housemodel.scene.SceneLayer(com.kurtz.homerecord.housemodel.scene.StackedFloor("f2", 96, 0, ghost = false), houseRooms),
+        ),
+        house3dPictures,
+    )
+    house3dScreen(house3dState({ copy(scene = scene) }))
+}
+
+/** All floors pulled apart, bottom first. */
+@ThemePreviews
+@Composable
+fun House3DAllFloorsPreview() = Frame {
+    val stack = com.kurtz.homerecord.housemodel.scene.FloorStack.layout(
+        floors.mapIndexed { i, f -> f.copy(elevationIn = (i - 1) * 108) },
+        "f2",
+        allFloors = true,
+    )
+    val rooms = mapOf("f1" to basementRooms, "f2" to houseRooms, "f3" to upperRooms)
+    val scene = com.kurtz.homerecord.housemodel.scene.FloorScene.stack(
+        stack.map { com.kurtz.homerecord.housemodel.scene.SceneLayer(it, rooms.getValue(it.floorId)) },
+        house3dPictures,
+    )
+    house3dScreen(house3dState({ copy(allFloors = true, scene = scene) }))
+}
+
 @ThemePreviews
 @Composable
 fun House3DLoadingPreview() = Frame { house3dScreen(house3dState({ copy(loading = true, scene = null) })) }

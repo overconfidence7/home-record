@@ -174,4 +174,32 @@ class House3DViewModelTest {
         model.onEvent(House3DEvent.ResetView)
         assertThat(model.state.value.resetCount).isEqualTo(2)
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C21")
+    fun theFloorAboveShowsOverAFadedMainAndAllFloorsSurvivesProcessDeath() = test {
+        val (homeId, floors) = home()
+        val upper = floors.getValue("Upper")
+        repo.savePlan(upper, listOf(PlanRoom.rectangle("b", "Bedroom", "BEDROOM", 0, 0, 168, 144)))
+        val saved = SavedStateHandle()
+        val model = vm(homeId, floorId = upper, saved = saved)
+        val one = withTimeout(10_000) { model.state.first { it.scene?.roomCount == 1 && it.scene?.ghostRooms?.isNotEmpty() == true } }
+        // Main is below Upper; the basement has no rooms, so it adds nothing.
+        assertThat(one.scene!!.ghostRooms).containsExactly("k", "l")
+        assertThat(one.scene!!.wallCount).isEqualTo(4)
+
+        model.onEvent(House3DEvent.ShowAllFloors)
+        assertThat(model.state.value.allFloors).isTrue()
+        val all = withTimeout(10_000) { model.state.first { it.scene?.roomCount == 3 } }
+        assertThat(all.scene!!.ghostRooms).isEmpty()
+        assertThat(all.scene!!.solidFloors).isEqualTo(3)
+
+        val restored = vm(homeId, floorId = upper, saved = saved).state.let { flow -> withTimeout(10_000) { flow.first { it.scene?.roomCount == 3 } } }
+        assertThat(restored.allFloors).isTrue()
+
+        // Picking a floor leaves All floors.
+        model.onEvent(House3DEvent.SelectFloor(floors.getValue("Main")))
+        val main = withTimeout(10_000) { model.state.first { !it.allFloors && it.scene?.roomCount == 2 } }
+        assertThat(main.scene!!.ghostRooms).isEmpty()
+    }
 }

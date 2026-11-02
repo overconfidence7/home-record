@@ -15,7 +15,7 @@ import kotlin.math.min
 
 /**
  * The 3D floor as a still picture from the starting camera, flat-shaded in the same colors as the live view (walls with
- * a photo at [stage] in a photo tone). Used where Filament cannot draw: previews, screenshot tests and the screen catalog.
+ * a photo at [stage] in a photo tone, floors below the chosen one faded). Used where Filament cannot draw: previews, screenshot tests and the screen catalog.
  */
 @Composable
 fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = Modifier) {
@@ -40,13 +40,15 @@ fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = 
         val path = Path()
         triangles.forEach { t ->
             val key = t.key
-            val base = when (key) {
+            val ghost = scene.isGhost(key)
+            if (ghost && key is MeshPartKey.Glass) return@forEach
+            val base = if (ghost) RoomPalette.ghost else when (key) {
                 is MeshPartKey.Floor -> RoomPalette.floor
                 is MeshPartKey.Glass -> RoomPalette.glass
                 is MeshPartKey.WallFace -> if (key in pictured) RoomPalette.photo else RoomPalette.tint(scene.tintOf(key.roomId))
                 is MeshPartKey.Shell -> RoomPalette.tint(scene.tintOf(key.roomId))
             }
-            val color = if (key is MeshPartKey.Glass) base else lerp(Color.Black, base, t.light).copy(alpha = base.alpha)
+            val color = if (key is MeshPartKey.Glass || ghost) base else lerp(Color.Black, base, t.light).copy(alpha = base.alpha)
             path.reset()
             path.moveTo(ox + t.xs[0] * scale, oy + t.ys[0] * scale)
             path.lineTo(ox + t.xs[1] * scale, oy + t.ys[1] * scale)
@@ -54,7 +56,7 @@ fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = 
             path.close()
             drawPath(path, color)
             // A hairline in the same color closes the anti-aliased seams between neighbouring triangles.
-            if (key !is MeshPartKey.Glass) drawPath(path, color, style = Stroke(width = 1f))
+            if (key !is MeshPartKey.Glass && !ghost) drawPath(path, color, style = Stroke(width = 1f))
         }
     }
 }
