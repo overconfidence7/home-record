@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
+import com.kurtz.homerecord.housemodel.overlays.nameRes
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -113,7 +114,9 @@ class AppContainer(app: Application) {
     /** Pipes, wires and boxes drawn on walls and the plan (AC-C25..C28). */
     val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
 
-    val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db, items::subtypeName)
+    val search = com.kurtz.homerecord.housemodel.search.SearchRepository(
+        db, overlayKindName = { app.resources.getString(it.nameRes) }, subtypeName = items::subtypeName,
+    )
 
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 

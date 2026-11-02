@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
 import com.kurtz.homerecord.housemanual.paywall.PaywallRoute
 import kotlinx.coroutines.launch
+import com.kurtz.homerecord.housemodel.overlays.OverlayTarget
 import androidx.compose.runtime.rememberCoroutineScope
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerRoute
 import com.kurtz.homerecord.housemanual.documents.DocumentsRoute
@@ -97,6 +98,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onScanDataPlate = { addItem(scope, container, home.id, nav, scanPlate = true) },
                 onAddShutoff = { addItem(scope, container, home.id, nav, subtypeId = "water_main") }, onOpenItem = { nav.push(ItemDetailKey(it)) },
                 onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
+                onOpenOverlay = { id ->
+                    scope.launch { container.overlays.get(id)?.let { openOverlay(nav, it) } }
+                },
             )
         }
         entry<HouseKey> {
@@ -139,12 +143,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenCopy = { nav.pop(); nav.push(ItemDetailKey(it)) },
                 recalls = container.lookupApi,
                 overlays = container.overlays,
-                onOpenOverlay = { link ->
-                    val o = link.overlay
-                    val roomId = o.roomId
-                    val wallId = o.wallId
-                    if (roomId != null && wallId != null) nav.push(RoomWallKey(roomId, wallId, o.stage.name, o.id))
-                },
+                onOpenOverlay = { link -> openOverlay(nav, link.overlay) },
             )
         }
         entry<ItemEditKey> { key ->
@@ -210,4 +209,13 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
 /** The 16th free item opens HM-Paywall instead of the form (AC-H18); [AddItemGate] decides. */
 private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null, subtypeId: String? = null, scanPlate: Boolean = false) {
     scope.launch { nav.push(container.addItemGate.destination(homeId, roomId, subtypeId, scanPlate)) }
+}
+
+/** Opens an overlay from search or an item's Links (AC-C28): its wall with it picked, or its room for a plan overlay. */
+private fun openOverlay(nav: com.kurtz.homerecord.coreui.shell.ShellNav, o: com.kurtz.homerecord.housemodel.overlays.Overlay) {
+    when (val target = OverlayTarget.of(o)) {
+        is OverlayTarget.Wall -> nav.push(RoomWallKey(target.roomId, target.wallId, target.stage, target.overlayId))
+        is OverlayTarget.Room -> nav.push(RoomKey(target.roomId))
+        null -> Unit
+    }
 }

@@ -1,6 +1,6 @@
 # Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
 # (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9 wall part). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
-# in, so it does not depend on the photo picker; the blueprint and 3D halves of H11 arrive with T053.
+# in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the blueprint and 3D halves of H11 arrive with T053.
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
 appId: com.kurtz.homerecord.housemanual
 ---
@@ -112,6 +112,26 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_wall_selection"
     timeout: 10000
+# AC-C28: Home search finds the overlay by its kind's name and opens its wall with it picked
+- tapOn:
+    id: "hm_back"
+- tapOn:
+    id: "hm_tab_home"
+- tapOn:
+    id: "hm_home_search"
+- inputText: "cold water"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Sink cold supply"
+    timeout: 10000
+- assertVisible: "Overlay · Cold water · Kitchen"
+- takeScreenshot: H11-search-overlay
+- tapOn: "Sink cold supply"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_selection"
+    timeout: 10000
+- assertVisible: "Sink cold supply"
 # AC-C28: delete asks first and takes it off the wall
 - tapOn:
     id: "hm_wall_overlay_delete"

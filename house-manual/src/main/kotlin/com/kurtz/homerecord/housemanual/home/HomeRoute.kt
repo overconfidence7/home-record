@@ -25,6 +25,7 @@ fun HomeRoute(
     onOpenRoom: (String) -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenContacts: () -> Unit,
+    onOpenOverlay: (String) -> Unit = {},
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -45,7 +46,8 @@ fun HomeRoute(
                 SearchKind.ROOM -> onOpenRoom(it.id)
                 SearchKind.DOCUMENT -> onOpenDocument(it.id)
                 SearchKind.CONTACT -> onOpenContacts()
-                SearchKind.OVERLAY, SearchKind.SHUTOFF, SearchKind.BREAKER -> Unit
+                SearchKind.OVERLAY -> onOpenOverlay(it.id)
+                SearchKind.SHUTOFF, SearchKind.BREAKER -> Unit
             }
         }
     })

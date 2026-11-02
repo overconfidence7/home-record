@@ -2,13 +2,17 @@ package com.kurtz.homerecord.core.model
 
 enum class SearchKind { ITEM, ROOM, OVERLAY, SHUTOFF, BREAKER, DOCUMENT, CONTACT }
 
-/** One searchable thing. [fields] are ordered most to least important (name first); [id] opens it. */
+/**
+ * One searchable thing. [fields] are ordered most to least important (name first); [id] opens it. [subkind] is what the
+ * result row draws its icon from when the kind alone is not enough (an overlay's stored kind, "water_cold").
+ */
 data class SearchDocument(
     val kind: SearchKind,
     val id: String,
     val title: String,
     val subtitle: String? = null,
     val fields: List<String> = listOf(title),
+    val subkind: String? = null,
 )
 
 data class SearchHit(val document: SearchDocument, val score: Int)

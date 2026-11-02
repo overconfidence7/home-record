@@ -17,7 +17,8 @@ data class HomeUiState(
     val searching: Boolean get() = query.isNotBlank()
 }
 
-data class SearchResultRow(val kind: SearchKind, val id: String, val title: String, val subtitle: String?)
+/** [subkind] is [com.kurtz.homerecord.core.model.SearchDocument.subkind]: an overlay row draws its kind's icon and color. */
+data class SearchResultRow(val kind: SearchKind, val id: String, val title: String, val subtitle: String?, val subkind: String? = null)
 
 sealed interface HomeEvent {
     data class OpenItem(val itemId: String) : HomeEvent

@@ -27,7 +27,7 @@ class HomeViewModel(
         HomeUiState(
             loading = false, homeName = homeName, itemCount = s.itemCount, shutoffCount = s.shutoffCount,
             attention = s.attention, recent = s.recent, query = q,
-            results = SearchEngine.search(docs, q).map { SearchResultRow(it.document.kind, it.document.id, it.document.title, it.document.subtitle) },
+            results = SearchEngine.search(docs, q).map { SearchResultRow(it.document.kind, it.document.id, it.document.title, it.document.subtitle, it.document.subkind) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState(homeName = homeName))
 

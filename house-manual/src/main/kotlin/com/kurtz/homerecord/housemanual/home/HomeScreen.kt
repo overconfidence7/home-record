@@ -24,6 +24,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
 import com.kurtz.homerecord.core.model.SearchKind
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.kurtz.homerecord.housemodel.overlays.OverlayKind
+import com.kurtz.homerecord.housemodel.overlays.color
+import com.kurtz.homerecord.housemodel.overlays.icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -182,7 +186,7 @@ private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
             RecordListItem(
                 headline = r.title,
                 supporting = listOfNotNull(stringResource(kindLabel(r.kind)), r.subtitle).joinToString(" · "),
-                leading = { Icon(kindIcon(r.kind), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                leading = { ResultIcon(r) },
                 onClick = { onEvent(HomeEvent.OpenResult(r.kind, r.id)) },
                 modifier = Modifier.testTag("hm_home_result_${r.id}"),
             )
@@ -195,7 +199,19 @@ private fun kindLabel(kind: SearchKind): Int = when (kind) {
     SearchKind.ROOM -> R.string.search_kind_room
     SearchKind.DOCUMENT -> R.string.search_kind_document
     SearchKind.CONTACT -> R.string.search_kind_contact
-    SearchKind.OVERLAY, SearchKind.SHUTOFF, SearchKind.BREAKER -> R.string.search_kind_item
+    SearchKind.OVERLAY -> R.string.search_kind_overlay
+    SearchKind.SHUTOFF, SearchKind.BREAKER -> R.string.search_kind_item
+}
+
+/** An overlay shows its own kind's icon in its layer color (rule 26, AC-C25); other results the kind's icon in primary. */
+@Composable
+private fun ResultIcon(r: SearchResultRow) {
+    if (r.kind == SearchKind.OVERLAY) {
+        val kind = OverlayKind.fromWire(r.subkind)
+        Icon(kind.icon, contentDescription = null, tint = kind.color(isSystemInDarkTheme()))
+    } else {
+        Icon(kindIcon(r.kind), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+    }
 }
 
 private fun kindIcon(kind: SearchKind): ImageVector = when (kind) {
