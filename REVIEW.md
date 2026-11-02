@@ -2650,3 +2650,60 @@ Tested: 59 device stages, 1247 unit tests, 160 backend tests, coverage 283/283 A
 ## Builder notes 2026-11-02 (H04 flow fix)
 
 - [ ] [Minor] Flaky JVM test: `:field-log` `SignOutDialogTest` failed once with `UncaughtExceptionsBeforeTest`. An earlier test in the same Robolectric JVM left a `Dispatchers.Main` coroutine running that touched its Room database after `close()` ("Cannot perform this operation because the connection pool has been closed"). On rerun the module was green, 0 failures. Fix: find the test whose ViewModel or repository collector outlives its in-memory DB (cancel the scope or close the DB after the compose rule tears down), so one test's leak can't fail another.
+
+## QA judge 2026-11-02 (commit 8f25f6fc)
+
+Judged the suite results for 8f25f6fc (run of 2026-11-02 03:52 UTC, 59 stages, 57 passed). `build` HEAD 449c345e is well ahead (the two QA-fix commits 51acdf41 and ef01a3ba, then T048a–T050b: wall photos, 3D view, floors stacked in 3D); the suite has not tested any of that, so it is not judged here. New at this sha since the last judge: V3 fixes (bottom bar labels on one line at 200%, Edit plan / Export PDF two per row, More storage line wraps, Jobs rows wrap at 200%) and T048a groundwork with no UI.
+
+Verdict: House Manual: a sixth run with nothing new a homeowner can touch; Kitchen still says "Other" over a column of grey "nothing yet" cards and Reminders is still the placeholder. The 3D view and wall photos are on `build` but not in this build, so tonight's install would look the same as last night's. / Field Log: the 200% fixes look right on device (More and Jobs no longer cut off), but the first thing Nate would hit is still the same: swipe a task done after an Undo and nothing happens, three builds running, and this run's logcat proves the swipe never completes.
+
+- [ ] [UI] Minor: at 200% font the bottom bar draws one label visibly smaller than the other four ("Schedule" in Field Log, "Reminders" in House Manual), and the outer labels ("Today"/"Home", "More") run to the screen edges; the labels no longer split mid-word, but the bar now looks mismatched [judge:nav-label-200-uneven] - steps: font scale 200%, open either app on any root tab - expected: rule 32 (200% clips nothing) with one label style across the bar (rule 25); a bar that cannot fit five labels at 200% should step all labels down together, or show the label only on the selected item, rather than shrinking just the longest one - actual: "Today Jobs Clock" and "More" at full 200% size, "Schedule" at roughly half that height; same with "Reminders" in House Manual - screenshot: qa-results:latest/field-log/screenshots/tour-font200-today.png (also qa-results:latest/house-manual/screenshots/tour-font200-home.png)
+
+Auto entry review: [auto:flow:house-manual:H04-add-item] is a flow error and the builder already treated it as one (ef01a3ba): the step-146 shot shows the Furnace detail with Documents' "Add from Files" and "Scan a document" at the bottom edge and Attach wrapped below the fold; the app is fine [judge: flow error]. [auto:flow:field-log:F11-tasks] is a real app bug: the shot is the same as the last two runs (after tick → Undo, both tasks open, no "Done:" snackbar, no Done section), and this run's logcat has no `SwipeToComplete` line at all although the logging (f07d86e5) is in this sha, so the gesture never settles on device. That rules out the sync-echo theory and agrees with the builder's 51acdf41 diagnosis; judge that fix on the next run by the new "target" logcat line.
+
+Seen this run and fine: Field Log More at 200% ("0 B used, 0 B kept offline" wraps, disabled "Free up"), Jobs at 200% (name and address on their own lines), landscape Today with the rail and full-width Clock in, House tab in dark and landscape with Floors / Export PDF side by side (portrait) or stacked (landscape) and Edit plan as the empty state's action; [judge:fl-nav-label-200-split] confirmed fixed on device in the sense that no word splits (see the new Minor above for what replaced it).
+
+Still open and seen again this run: [judge:hm-room-kind-not-inferred] and the grey room cards (`flow-H03-blueprint-room-H03-room-kitchen.png`), [judge:hm-reminders-placeholder-button] and [judge:fl-schedule-placeholder-button] (every tour), [judge:hm-layer-chips-no-icons] (House tab chips, "Low-"/"HV" cut at the row's edge).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Home at 200% reads well: search, Add item, Scan data plate, Emergency card | qa-results:latest/house-manual/screenshots/tour-font200-home.png |
+| H2 | Pass | H02 and H02b pass; open Minors: editor fit, room kind stays Other | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Kitchen still "Other" over six grey "nothing yet" cards | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | Flow failed on a flow error (Attach below the fold); item form and detail are fine | qa-results:latest/house-manual/screenshots/flow-H04-add-item-step-146-assertCondition-hm_item_detail_document.png |
+| H5 | Clunky | No flow adds more than one item; seeded house reads well in Items | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third, no room/breaker/shutoff chips | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty shown (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H17 | Clunky | Ends at "Everything is synced"; More does not say which account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | "Can't load prices right now" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H9–H16, H18 in this build (H14 Reminders is the placeholder; walls and 3D are on `build` after this sha, untested).
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview, House, sub-tabs; Jobs fits at 200% | qa-results:latest/field-log/screenshots/tour-font200-jobs.png |
+| F4 | Pass | F04, F04b, F04c pass; landscape Today fine | qa-results:latest/field-log/screenshots/tour-landscape-today.png |
+| F5 | Pass | Break, switch job, clock out, changes list | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Pass | F07, F07b, F07c pass; landscape Minor still open | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Pass | Take a photo from Today lands in Recent photos and the job | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Pass | F09 and F09b pass unchanged | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-changed-since-sent.png |
+| F11 | Clunky | Swipe-to-done after Undo fails a third time; no SwipeToComplete line in logcat | qa-results:latest/field-log/screenshots/flow-F11-tasks-step-072-assertCondition-Done_Set_the_kitchen_out.png |
+| F15 | Clunky | F15 passes; Delays below the fold with no hours (open Minor) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F16 | Pass | Offline save, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-saved-here.png |
+| F18 | Clunky | More fits at 200%; Schedule is the placeholder; nav label shrinks alone at 200% (new Minor) | qa-results:latest/field-log/screenshots/tour-font200-more.png |
+
+Not built yet: F10, F12–F14, F17 in this build (behind-the-wall and FL 3D are on `build` after this sha, untested; change orders T056–T058, schedule T059); push built but untestable without Firebase keys (Needs Nate).
+
+Focus check: nothing wrong. House Manual's tabs, wording and Emergency card stay the homeowner's; Field Log's company, crew and clock wording stays in Field Log.
+
+Coverage note: the auto entry reports 283/283 claimed ACs covered across 159 ticked tasks and subtasks (0 gaps).
+
+Judged: 10 screenshots opened (F11 and H04 failure shots, FL 200% Today, Jobs and More, FL landscape Today, HM dark and landscape House, HM 200% Home, H03 Kitchen), 961 PNGs present. 23 walkthrough steps. New issues: 1. Product gaps: 0.
