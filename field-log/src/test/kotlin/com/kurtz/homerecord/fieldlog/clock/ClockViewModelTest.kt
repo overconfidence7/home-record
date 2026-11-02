@@ -82,8 +82,12 @@ class ClockViewModelTest {
         return ClockViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
     }
 
+    // Room runs on real threads here; under a full parallel build (2 Gradle workers, Robolectric) one step took
+    // longer than 5 s and breakSwitchAndClockOut timed out. The wait is generous; the checks are unchanged.
+    private val AWAIT_MS = 20_000L
+
     private suspend fun await(vm: ClockViewModel, test: (ClockUiState) -> Boolean): ClockUiState =
-        withContext(Dispatchers.Default) { withTimeout(5000) { vm.state.first(test) } }
+        withContext(Dispatchers.Default) { withTimeout(AWAIT_MS) { vm.state.first(test) } }
 
     private suspend fun kinds() = db.punchDao().listFor("c1").sortedBy { it.at }.map { it.kind }
 
