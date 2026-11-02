@@ -109,4 +109,43 @@ class CompanyViewModelTest {
         assertThat(vm.state.value.saveFailure).isEqualTo(ApiFailure.Offline)
         assertThat(vm.state.value.name).isEqualTo("New name")
     }
+
+    // AC-F42 (R09f1): the company time zone is picked on FL-Company and saved into settings.timeZone
+    @Test fun pickingATimeZoneSavesIt() {
+        val vm = vm()
+        assertThat(vm.state.value.timeZone).isNull()
+        vm.onEvent(CompanyEvent.OpenTimeZones)
+        assertThat(vm.state.value.timeZoneSheet).isTrue()
+        vm.onEvent(CompanyEvent.TimeZone("America/Chicago"))
+        assertThat(vm.state.value.timeZoneSheet).isFalse()
+        assertThat(vm.state.value.dirty).isTrue()
+        vm.onEvent(CompanyEvent.Save)
+        assertThat(checkNotNull(api.lastUpdate?.settings).timeZone).isEqualTo("America/Chicago")
+    }
+
+    // AC-F42: an untouched zone is sent as unset, so the backend keeps its default; a set zone loads into the form
+    @Test fun untouchedTimeZoneStaysUnsetAndASetOneLoads() {
+        val vm = vm()
+        vm.onEvent(CompanyEvent.Name("Kurtz Electric LLC"))
+        vm.onEvent(CompanyEvent.Save)
+        assertThat(checkNotNull(api.lastUpdate?.settings).timeZone).isNull()
+
+        api.profile = ApiResult.Ok(
+            com.kurtz.homerecord.core.company.CompanyProfile(
+                "c1", "Kurtz Electric", null, null, null, null,
+                com.kurtz.homerecord.core.company.CompanySettings(timeZone = "America/Denver"),
+            ),
+        )
+        val loaded = vm().state.value
+        assertThat(loaded.timeZone).isEqualTo("America/Denver")
+        assertThat(loaded.dirty).isFalse()
+    }
+
+    @Test fun pickedTimeZoneSurvivesProcessDeath() {
+        val handle = androidx.lifecycle.SavedStateHandle()
+        CompanyViewModel(api, "c1", handle).onEvent(CompanyEvent.TimeZone("Pacific/Honolulu"))
+        val restored = CompanyViewModel(api, "c1", androidx.lifecycle.SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        assertThat(restored.state.value.timeZone).isEqualTo("Pacific/Honolulu")
+        assertThat(restored.state.value.dirty).isTrue()
+    }
 }

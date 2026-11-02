@@ -79,8 +79,15 @@ data class CompanySettings(
     val requireGps: Boolean = false,
     val punchDistanceFt: Int = DEFAULT_PUNCH_DISTANCE_FT,
     val photoOnPunch: Boolean = false,
+    /**
+     * IANA zone for the company's "today" and "tomorrow" in schedule pushes (AC-F42, AC-B30); null means the
+     * backend default, [DEFAULT_TIME_ZONE].
+     */
+    val timeZone: String? = null,
 ) {
     companion object {
+        /** The backend's zone when a company has none set (backend/src/push/events.ts DEFAULT_TIME_ZONE). */
+        const val DEFAULT_TIME_ZONE = "America/New_York"
         const val DEFAULT_PUNCH_DISTANCE_FT = 500
         const val MIN_PUNCH_DISTANCE_FT = 50
         const val MAX_PUNCH_DISTANCE_FT = 52_800
@@ -152,6 +159,7 @@ data class SettingsBody(
     val requireGps: Boolean? = null,
     val punchDistanceFt: Int? = null,
     val photoOnPunch: Boolean? = null,
+    val timeZone: String? = null,
 )
 
 /** Wire settings to the app's; a missing field takes the backend's default. */
@@ -161,6 +169,7 @@ fun SettingsBody?.toSettings(): CompanySettings = CompanySettings(
     requireGps = this?.requireGps ?: false,
     punchDistanceFt = this?.punchDistanceFt ?: CompanySettings.DEFAULT_PUNCH_DISTANCE_FT,
     photoOnPunch = this?.photoOnPunch ?: false,
+    timeZone = this?.timeZone?.takeIf { it.isNotBlank() },
 )
 
 @Serializable

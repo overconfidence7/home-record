@@ -14,6 +14,7 @@ object ScreenCatalog {
         QaScreen("team-office", nonRoot = true) { TeamOfficePreview() },
         QaScreen("team-error", nonRoot = true) { TeamErrorPreview() },
         QaScreen("company-form", nonRoot = true) { CompanyFormPreview() },
+        QaScreen("company-time-zones", nonRoot = false) { CompanyTimeZonesPreview() },
         QaScreen("today-admin", nonRoot = false) { TodayAdminPreview() },
         QaScreen("today-crew", nonRoot = false) { TodayCrewPreview() },
         QaScreen("today-admin-on-site", nonRoot = false) { TodayAdminOnSitePreview() },

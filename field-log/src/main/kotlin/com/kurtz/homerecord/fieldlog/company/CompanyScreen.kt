@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.company
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
@@ -20,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -29,6 +35,9 @@ import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.FormScaffold
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
+import com.kurtz.homerecord.coreui.components.OptionsSheet
+import com.kurtz.homerecord.coreui.components.OptionsSheetContent
+import com.kurtz.homerecord.coreui.components.SheetOption
 import com.kurtz.homerecord.fieldlog.R
 
 /** FL-Company: name and contact details plus the punch and overtime rules the time clock uses. */
@@ -52,6 +61,7 @@ fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClos
             LabeledField(stringResource(R.string.company_phone), state.phone, { onEvent(CompanyEvent.Phone(it)) }, Modifier.testTag("fl_company_phone"), keyboardType = KeyboardType.Phone)
             LabeledField(stringResource(R.string.company_email), state.email, { onEvent(CompanyEvent.Email(it)) }, Modifier.testTag("fl_company_email"), keyboardType = KeyboardType.Email)
             LabeledField(stringResource(R.string.company_address), state.address, { onEvent(CompanyEvent.Address(it)) }, Modifier.testTag("fl_company_address"))
+            TimeZoneRow(state.timeZone) { onEvent(CompanyEvent.OpenTimeZones) }
 
             Text(stringResource(R.string.company_ot_title), style = MaterialTheme.typography.titleSmall)
             Column {
@@ -85,6 +95,54 @@ fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClos
             )
             SwitchRow(stringResource(R.string.company_photo_on_punch), stringResource(R.string.company_photo_on_punch_helper), state.photoOnPunch) { onEvent(CompanyEvent.PhotoOnPunch(it)) }
         }
+    }
+    if (state.status == TeamStatus.Ready && state.timeZoneSheet) {
+        OptionsSheet(
+            title = stringResource(R.string.company_tz_title),
+            options = timeZoneOptions(state.timeZone),
+            onDismiss = { onEvent(CompanyEvent.CloseTimeZones) },
+            onPick = { pickTimeZone(state.timeZone, it, onEvent) },
+        )
+    }
+}
+
+/** The time zone sheet's list, for previews and the catalog (the sheet itself needs a window). */
+@Composable
+fun CompanyTimeZoneList(zone: String?, onEvent: (CompanyEvent) -> Unit) =
+    OptionsSheetContent(stringResource(R.string.company_tz_title), timeZoneOptions(zone)) { pickTimeZone(zone, it, onEvent) }
+
+@Composable
+private fun timeZoneOptions(zone: String?): List<SheetOption> =
+    CompanyTimeZones.choices(zone).map { SheetOption(timeZoneTag(it.id), timeZoneLabel(it), Icons.Rounded.Schedule) }
+
+private fun pickTimeZone(zone: String?, picked: SheetOption, onEvent: (CompanyEvent) -> Unit) {
+    CompanyTimeZones.choices(zone).firstOrNull { timeZoneTag(it.id) == picked.id }?.let { onEvent(CompanyEvent.TimeZone(it.id)) }
+}
+
+/** Sheet row ids become test tags (`fl_sheet_america_chicago`), so the IANA slash goes. */
+internal fun timeZoneTag(zone: String): String = zone.lowercase().replace('/', '_')
+
+@Composable
+private fun timeZoneLabel(choice: TimeZoneChoice): String = choice.label?.let { stringResource(it) } ?: choice.id
+
+/** Company time zone (AC-F42): shows the zone in effect and opens the picker sheet (rule 22). */
+@Composable
+private fun TimeZoneRow(zone: String?, onClick: () -> Unit) {
+    val title = stringResource(R.string.company_tz_title)
+    val value = timeZoneLabel(CompanyTimeZones.choiceFor(zone))
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) {}.testTag("fl_company_timezone"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Icon(Icons.Rounded.Schedule, contentDescription = null)
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.company_tz_helper), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Icon(Icons.Rounded.ArrowDropDown, contentDescription = null)
     }
 }
 

@@ -84,7 +84,7 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
             companyId,
             ProfileBody(
                 name = update.name, trade = update.trade, phone = update.phone, email = update.email, address = update.address,
-                settings = s?.let { SettingsBody(it.overtimeRule.wire, it.breakRule, it.requireGps, it.punchDistanceFt, it.photoOnPunch) },
+                settings = s?.let { SettingsBody(it.overtimeRule.wire, it.breakRule, it.requireGps, it.punchDistanceFt, it.photoOnPunch, it.timeZone) },
             ),
         )
     }

@@ -20,6 +20,9 @@ data class CompanyUiState(
     val requireGps: Boolean = false,
     val punchDistanceText: String = CompanySettings.DEFAULT_PUNCH_DISTANCE_FT.toString(),
     val photoOnPunch: Boolean = false,
+    /** IANA zone as chosen; null while the company has none (the backend's Eastern applies). */
+    val timeZone: String? = null,
+    val timeZoneSheet: Boolean = false,
     val saving: Boolean = false,
     val saved: Boolean = false,
     val saveFailure: ApiFailure? = null,
@@ -36,7 +39,7 @@ data class CompanyUiState(
             return name != p.name || trade != p.trade.orEmpty() || phone != p.phone.orEmpty() || email != p.email.orEmpty() ||
                 address != p.address.orEmpty() || overtimeRule != p.settings.overtimeRule || breakRule != p.settings.breakRule ||
                 requireGps != p.settings.requireGps || punchDistanceText.trim() != p.settings.punchDistanceFt.toString() ||
-                photoOnPunch != p.settings.photoOnPunch
+                photoOnPunch != p.settings.photoOnPunch || timeZone != p.settings.timeZone
         }
 }
 
@@ -51,6 +54,9 @@ sealed interface CompanyEvent {
     data class RequireGps(val on: Boolean) : CompanyEvent
     data class PunchDistance(val value: String) : CompanyEvent
     data class PhotoOnPunch(val on: Boolean) : CompanyEvent
+    data object OpenTimeZones : CompanyEvent
+    data object CloseTimeZones : CompanyEvent
+    data class TimeZone(val id: String) : CompanyEvent
     data object Save : CompanyEvent
     data object Retry : CompanyEvent
 }

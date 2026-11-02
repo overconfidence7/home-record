@@ -123,17 +123,21 @@ fun TeamErrorPreview() = Frame {
 fun CompanyFormPreview() = Frame {
     val profile = CompanyProfile(
         "c1", "Kurtz Electric", "Electrical", "(555) 014-2290", "office@kurtzelectric.com", "418 Alder St, Harlan",
-        CompanySettings(OvertimeRule.Daily8Weekly40, breakRule = true, requireGps = true, punchDistanceFt = 500),
+        CompanySettings(OvertimeRule.Daily8Weekly40, breakRule = true, requireGps = true, punchDistanceFt = 500, timeZone = "America/Chicago"),
     )
     CompanyScreen(
         CompanyUiState(
             status = TeamStatus.Ready, loaded = profile, name = profile.name, trade = "Electrical", phone = "(555) 014-2290",
             email = "office@kurtzelectric.com", address = "418 Alder St, Harlan", overtimeRule = OvertimeRule.Daily8Weekly40,
-            breakRule = true, requireGps = true, punchDistanceText = "500",
+            breakRule = true, requireGps = true, punchDistanceText = "500", timeZone = "America/Chicago",
         ),
         {}, {},
     )
 }
+
+@ThemePreviews
+@Composable
+fun CompanyTimeZonesPreview() = Frame { com.kurtz.homerecord.fieldlog.company.CompanyTimeZoneList("America/Chicago") {} }
 
 @ThemePreviews
 @Composable

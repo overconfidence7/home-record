@@ -490,3 +490,13 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   `DEFAULT_SETTINGS`, so the profile and `/me` shapes stay as they are until it is set. No phone screen sets it yet;
   FL-Company gains the picker next (R09f1).
 - "Schedule push opens the day" stays with T059a, since FL-Schedule does not exist yet.
+
+## 2026-11-01 R09f1: company time zone picker
+
+- FL-Company shows a "Time zone" row (after the address) that opens a bottom-sheet list (ui-standards rule 22, more
+  than four options): Eastern, Central, Mountain, Arizona (no daylight saving), Pacific, Alaska, Hawaii, as the IANA
+  zones `America/New_York` ... `Pacific/Honolulu`. US only because the product is for US contractors; a zone set some
+  other way through the API is kept and listed last under its IANA name.
+- A company with no zone shows Eastern (the backend default) and saves nothing for it, so the backend keeps its
+  default until someone picks one. Picking Eastern stores `America/New_York` explicitly.
+- `CompanySettings.timeZone` is cached with the membership so a later phone screen can read it offline.

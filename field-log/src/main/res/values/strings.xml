@@ -202,6 +202,15 @@
     <string name="company_distance_helper">Punches farther than this from the job address ask for a reason.</string>
     <string name="company_distance_error">Enter a number from %1$d to %2$d.</string>
     <string name="company_photo_on_punch">Photo at clock in</string>
+    <string name="company_tz_title">Time zone</string>
+    <string name="company_tz_helper">Today and tomorrow in schedule notifications follow this zone.</string>
+    <string name="company_tz_eastern">Eastern</string>
+    <string name="company_tz_central">Central</string>
+    <string name="company_tz_mountain">Mountain</string>
+    <string name="company_tz_arizona">Arizona (no daylight saving)</string>
+    <string name="company_tz_pacific">Pacific</string>
+    <string name="company_tz_alaska">Alaska</string>
+    <string name="company_tz_hawaii">Hawaii</string>
     <string name="company_photo_on_punch_helper">Asks for a quick photo with each punch. Off by default.</string>
     <string name="jobs_title">Jobs</string>
     <string name="jobs_empty_title">No jobs yet</string>

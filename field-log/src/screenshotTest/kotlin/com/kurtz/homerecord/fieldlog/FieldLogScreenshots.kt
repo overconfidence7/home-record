@@ -36,6 +36,11 @@ fun CompanyFormScreenshot() = CompanyFormPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CompanyTimeZonesScreenshot() = CompanyTimeZonesPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun TodayAdminScreenshot() = TodayAdminPreview()
 
 @PreviewTest

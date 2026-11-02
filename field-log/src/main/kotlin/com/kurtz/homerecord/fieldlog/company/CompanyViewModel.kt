@@ -46,6 +46,9 @@ class CompanyViewModel(
             is CompanyEvent.RequireGps -> edit { copy(requireGps = event.on) }
             is CompanyEvent.PunchDistance -> edit { copy(punchDistanceText = event.value.filter(Char::isDigit).take(5)) }
             is CompanyEvent.PhotoOnPunch -> edit { copy(photoOnPunch = event.on) }
+            CompanyEvent.OpenTimeZones -> _state.update { it.copy(timeZoneSheet = true) }
+            CompanyEvent.CloseTimeZones -> _state.update { it.copy(timeZoneSheet = false) }
+            is CompanyEvent.TimeZone -> edit { copy(timeZone = event.id, timeZoneSheet = false) }
             CompanyEvent.Save -> save()
             CompanyEvent.Retry -> load()
         }
@@ -77,6 +80,7 @@ class CompanyViewModel(
         requireGps = p.settings.requireGps,
         punchDistanceText = p.settings.punchDistanceFt.toString(),
         photoOnPunch = p.settings.photoOnPunch,
+        timeZone = p.settings.timeZone,
     )
 
     private fun save() {
@@ -90,7 +94,7 @@ class CompanyViewModel(
             phone = s.phone.trim(),
             email = s.email.trim(),
             address = s.address.trim(),
-            settings = CompanySettings(s.overtimeRule, s.breakRule, s.requireGps, distance, s.photoOnPunch),
+            settings = CompanySettings(s.overtimeRule, s.breakRule, s.requireGps, distance, s.photoOnPunch, s.timeZone),
         )
         viewModelScope.launch {
             when (val r = api.updateProfile(companyId, update)) {
@@ -123,17 +127,18 @@ class CompanyViewModel(
         val requireGps: Boolean,
         val punchDistanceText: String,
         val photoOnPunch: Boolean,
+        val timeZone: String? = null,
     ) {
         fun applyTo(s: CompanyUiState) = s.copy(
             name = name, trade = trade, phone = phone, email = email, address = address,
             overtimeRule = OvertimeRule.fromWire(overtimeRule), breakRule = breakRule, requireGps = requireGps,
-            punchDistanceText = punchDistanceText, photoOnPunch = photoOnPunch,
+            punchDistanceText = punchDistanceText, photoOnPunch = photoOnPunch, timeZone = timeZone,
         )
 
         companion object {
             fun of(s: CompanyUiState) = CompanyDraft(
                 s.name, s.trade, s.phone, s.email, s.address, s.overtimeRule.wire, s.breakRule, s.requireGps,
-                s.punchDistanceText, s.photoOnPunch,
+                s.punchDistanceText, s.photoOnPunch, s.timeZone,
             )
         }
     }

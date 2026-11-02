@@ -108,4 +108,18 @@ class RetrofitCompanyApiTest {
         assertThat(r.sent).contains(""""otRule":"daily8"""")
         assertThat(r.sent).contains(""""email":"o@k.com"""")
     }
+
+    // AC-F42: the company time zone round-trips; unset is left out so the backend keeps its default
+    @Test fun timeZoneIsReadAndSentOnlyWhenSet() = runTest {
+        val read = Recorder(body = """{"id":"c1","name":"Kurtz","settings":{"timeZone":"America/Chicago"}}""")
+        assertThat((read.api().profile("c1") as ApiResult.Ok).value.settings.timeZone).isEqualTo("America/Chicago")
+        assertThat((Recorder(body = """{"id":"c1","name":"Kurtz","settings":{}}""").api().profile("c1") as ApiResult.Ok).value.settings.timeZone).isNull()
+
+        val set = Recorder()
+        set.api().updateProfile("c1", CompanyProfileUpdate(settings = CompanySettings(timeZone = "America/Denver")))
+        assertThat(set.sent).contains(""""timeZone":"America/Denver"""")
+        val unset = Recorder()
+        unset.api().updateProfile("c1", CompanyProfileUpdate(settings = CompanySettings()))
+        assertThat(unset.sent).doesNotContain("timeZone")
+    }
 }
