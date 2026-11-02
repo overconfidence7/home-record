@@ -194,6 +194,33 @@ class TasksScreenTest {
         rule.onNodeWithText("Done: Run circuit 0 to the panel").assertExists()
     }
 
+    // AC-F34: F11 on device. Maestro drags from the title's centre (40% across) to 90% and the finger stops before it
+    // lifts, so the release has no speed. A row that only completed past half its width snapped back from 50%; a held
+    // drag of a fifth of the row now completes the task, and a short nudge does not.
+    @Test fun aDragThatStopsBeforeLiftingStillTicksItDone() {
+        val events = show(ready)
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput {
+            down(Offset(width * 0.4f, centerY))
+            repeat(20) { moveBy(Offset(width * 0.025f, 0f), delayMillis = 20) }
+            advanceEventTime(200)
+            up()
+        }
+        rule.waitForIdle()
+        assertThat(events).contains(TasksEvent.SetDone("t1", true))
+    }
+
+    @Test fun aShortHeldNudgeDoesNotTickIt() {
+        val events = show(ready)
+        rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput {
+            down(Offset(width * 0.4f, centerY))
+            repeat(5) { moveBy(Offset(width * 0.02f, 0f), delayMillis = 20) }
+            advanceEventTime(200)
+            up()
+        }
+        rule.waitForIdle()
+        assertThat(events.filterIsInstance<TasksEvent.SetDone>()).isEmpty()
+    }
+
     @Test fun swipingTheOtherWayTicksItToo() {
         val events = show(ready)
         rule.onNodeWithTag("fl_tasks_swipe_t1").performTouchInput { swipeLeft() }

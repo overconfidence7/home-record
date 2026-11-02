@@ -8,13 +8,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.shadow
@@ -23,6 +19,19 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.snapTo
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.drop
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -233,43 +242,69 @@ private fun SwipeToDone(row: TaskRow, onEvent: (TasksEvent) -> Unit, content: @C
 /**
  * A row that swipes either way to complete it: the Tasks tab and My tasks on Today (AC-F34).
  *
- * The swipe state is plain `remember`, not saveable: a completed row leaves its list, and a saved "swiped away"
- * state would come back with it on Undo, drawn off screen with the swipe disabled, and complete the task again.
- * The latest [onComplete] is read when the swipe settles, so a recomposition mid-swipe neither drops nor repeats it.
+ * The row slides at most [SwipeCommitFraction] of its width. A release that is still moving completes it once the row
+ * is 56 dp out (or on a fast flick); a release after the finger has stopped completes it past half that slide, a fifth
+ * of the row. M3's SwipeToDismissBox put the end anchor at the full width, so a held drag had to pass half the row and
+ * a thumb (or Maestro's F11 swipe from the title's centre) that stopped just short snapped back.
+ *
+ * The state is plain `remember`, not saveable: a completed row leaves its list, and a saved "swiped" state would come
+ * back with it on Undo. The latest [onComplete] is read when the swipe settles, so a recomposition mid-swipe neither
+ * drops nor repeats it.
  */
 @Composable
 fun SwipeToComplete(onComplete: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    val threshold = SwipeToDismissBoxDefaults.positionalThreshold
-    val swipe = remember { SwipeToDismissBoxState(SwipeToDismissBoxValue.Settled, threshold) }
+    val density = LocalDensity.current
+    // anchoredDraggable reverses the drag in RTL, so the offset is drawn mirrored there and "start to end" stays true.
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val swipe = remember { AnchoredDraggableState(SwipeToDismissBoxValue.Settled) }
     val complete by rememberUpdatedState(onComplete)
-    val scope = rememberCoroutineScope()
-    val onDismiss: (SwipeToDismissBoxValue) -> Unit = remember(swipe, scope) {
-        { direction ->
-            // One line per completed swipe, so a device run shows whether the gesture landed (QA F11).
-            android.util.Log.i("SwipeToComplete", "swiped $direction")
-            complete()
-            scope.launch { swipe.reset() }
+    val fling = AnchoredDraggableDefaults.flingBehavior(swipe, positionalThreshold = { with(density) { 56.dp.toPx() } })
+    LaunchedEffect(swipe) {
+        // Where a swipe got to, for device runs (QA F11): a drag past a fifth of the row logs its target, a swipe that
+        // settled logs "swiped".
+        launch { snapshotFlow { swipe.targetValue }.drop(1).collect { android.util.Log.i("SwipeToComplete", "target $it") } }
+        snapshotFlow { swipe.settledValue }.collect { value ->
+            if (value != SwipeToDismissBoxValue.Settled) {
+                android.util.Log.i("SwipeToComplete", "swiped $value")
+                complete()
+                swipe.snapTo(SwipeToDismissBoxValue.Settled)
+            }
         }
     }
-    // Where a swipe got to, for device runs (QA F11): a drag that moved logs its target, a swipe that settled logs "swiped".
-    LaunchedEffect(swipe) {
-        snapshotFlow { swipe.targetValue }.drop(1).collect { android.util.Log.i("SwipeToComplete", "target $it") }
-    }
-    SwipeToDismissBox(
-        state = swipe,
-        backgroundContent = {
-            val toEnd = swipe.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+    Box(
+        modifier
+            .onSizeChanged { size ->
+                val reach = size.width * SwipeCommitFraction
+                swipe.updateAnchors(
+                    DraggableAnchors {
+                        SwipeToDismissBoxValue.Settled at 0f
+                        SwipeToDismissBoxValue.StartToEnd at reach
+                        SwipeToDismissBoxValue.EndToStart at -reach
+                    },
+                )
+            }
+            .anchoredDraggable(swipe, Orientation.Horizontal, flingBehavior = fling),
+    ) {
+        val offset = swipe.offset.takeUnless { it.isNaN() } ?: 0f
+        if (offset != 0f) {
             Box(
-                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer).padding(horizontal = 24.dp),
-                contentAlignment = if (toEnd) Alignment.CenterStart else Alignment.CenterEnd,
+                Modifier.matchParentSize().background(MaterialTheme.colorScheme.primaryContainer).padding(horizontal = 24.dp),
+                contentAlignment = if (offset > 0f) Alignment.CenterStart else Alignment.CenterEnd,
             ) {
                 Icon(Icons.Rounded.Done, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
             }
-        },
-        onDismiss = onDismiss,
-        modifier = modifier,
-    ) { content() }
+        }
+        Box(
+            Modifier.offset {
+                val x = swipe.offset.takeUnless { it.isNaN() } ?: 0f
+                IntOffset((if (rtl) -x else x).roundToInt(), 0)
+            },
+        ) { content() }
+    }
 }
+
+/** How far a completing row slides, as a share of its width (see [SwipeToComplete]). */
+private const val SwipeCommitFraction = 0.4f
 
 @Composable
 private fun DragHandle(title: String, modifier: Modifier) {
