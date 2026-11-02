@@ -36,6 +36,37 @@ appId: com.kurtz.homerecord.housemanual
     element: "West wall"
 - assertVisible: '.*long · No photos yet'
 - takeScreenshot: H03-room-walls
+# AC-C22: "View in 3D" on the room page stands the camera inside the kitchen; Back to floor shows the whole floor
+- scrollUntilVisible:
+    element:
+      id: "hm_room_view_3d"
+    direction: UP
+- tapOn:
+    id: "hm_room_view_3d"
+- extendedWaitUntil:
+    visible: "Kitchen in 3D"
+    timeout: 15000
+- assertVisible:
+    id: "hm_3d_scene"
+- assertVisible: "Drag to look around, pinch to step closer."
+- swipe:
+    from:
+      id: "hm_3d_scene"
+    direction: LEFT
+- takeScreenshot: H03-3d-room
+- tapOn:
+    id: "hm_3d_back_to_floor"
+- extendedWaitUntil:
+    visible: "Main in 3D"
+    timeout: 15000
+- assertNotVisible:
+    id: "hm_3d_back_to_floor"
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_room_view_3d"
+    timeout: 5000
 - tapOn:
     id: "hm_back"
 - longPressOn: "Kitchen"

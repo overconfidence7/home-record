@@ -42,6 +42,8 @@ data class FloorScene(
     val focus: MeshBounds = mesh.bounds,
     /** Floors drawn solid: one, or every floor for All floors. */
     val solidFloors: Int = 1,
+    /** The solid floors' rooms as placed in the scene, for tapping a room and standing inside it (AC-C22). */
+    val rooms: Map<String, SceneRoom> = emptyMap(),
 ) {
     /** Nothing solid to show: the chosen floor has no rooms (faded floors below do not count). */
     val isEmpty: Boolean get() = mesh.parts.none { it.key.roomId !in ghostRooms }
@@ -73,7 +75,10 @@ data class FloorScene(
             buildMesh: MeshMaker = DefaultMeshMaker,
         ): FloorScene {
             val mesh = buildMesh(rooms, ceilingHeightIn)
-            return FloorScene(mesh, pictures, rooms.associate { it.id to RoomTint.of(it.kind) }, rooms.size)
+            val placed = rooms.filter { it.points.size >= 3 }.associate { r ->
+                r.id to sceneRoom(r, mesh.offsetXIn, mesh.offsetZIn, 0, ceilingHeightIn)
+            }
+            return FloorScene(mesh, pictures, rooms.associate { it.id to RoomTint.of(it.kind) }, rooms.size, rooms = placed)
         }
 
         /**
@@ -93,7 +98,13 @@ data class FloorScene(
             val parts = ArrayList<MeshPart>()
             val solidBounds = ArrayList<MeshBounds>()
             val ghosts = HashSet<String>()
+            val sceneRooms = LinkedHashMap<String, SceneRoom>()
             for (layer in layers) {
+                if (!layer.floor.ghost) {
+                    layer.rooms.filter { it.points.size >= 3 }.forEach { r ->
+                        sceneRooms[r.id] = sceneRoom(r, offX, offZ, layer.floor.baseYIn, layer.floor.ceilingHeightIn)
+                    }
+                }
                 val mesh = buildMesh(layer.rooms, layer.floor.ceilingHeightIn)
                 if (mesh.parts.isEmpty()) continue
                 val placed = mesh.translated(
@@ -115,8 +126,18 @@ data class FloorScene(
                 ghostRooms = ghosts,
                 focus = focus,
                 solidFloors = layers.count { !it.floor.ghost },
+                rooms = sceneRooms,
             )
         }
+
+        /** [room]'s corners in world meters once the plan is shifted by ([offXIn], [offZIn]) inches, on a floor at [baseYIn]. */
+        private fun sceneRoom(room: PlanRoom, offXIn: Float, offZIn: Float, baseYIn: Int, ceilingHeightIn: Int) = SceneRoom(
+            id = room.id,
+            name = room.name,
+            footprint = room.points.map { (it.x + offXIn) * M_PER_IN to (it.y + offZIn) * M_PER_IN },
+            floorY = baseYIn * M_PER_IN,
+            ceilingY = (baseYIn + ceilingHeightIn) * M_PER_IN,
+        )
 
         private const val M_PER_IN = 0.0254f
     }

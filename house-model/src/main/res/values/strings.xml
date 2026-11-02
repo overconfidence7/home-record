@@ -354,7 +354,11 @@
     <string name="house3d_all_floors">All floors</string>
     <string name="house3d_ghost_hint">Floors below are shown faded.</string>
     <string name="house3d_walls_photographed">%3$s photos on %1$d of %2$d walls</string>
-    <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move.</string>
+    <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move. Tap a room to stand inside it.</string>
+    <string name="house3d_room_hint">Drag to look around, pinch to step closer.</string>
+    <string name="house3d_back_to_floor">Back to floor</string>
+    <string name="house3d_room_description">Inside %1$s in 3D, looking at its longest wall</string>
+    <string name="room_view_3d">View in 3D</string>
     <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>
     <string name="house3d_empty_title">Nothing to show in 3D yet</string>
     <string name="house3d_empty_body">Draw this floor\'s rooms and they stand up here as walls.</string>

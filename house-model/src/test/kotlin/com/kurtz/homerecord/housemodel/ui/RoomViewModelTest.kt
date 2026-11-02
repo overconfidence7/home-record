@@ -92,6 +92,22 @@ class RoomViewModelTest {
         assertThat(state.items).isEmpty()
     }
 
+    @AcceptanceCriterion("AC-C22")
+    @Test fun viewIn3DPointsAtTheRoomsFloorOnlyWhereTheAppHas3D() = test {
+        val floorId = mainFloor()
+        val without = withTimeout(10_000) { vm("k").state.first { !it.loading && it.floorId != null } }
+        assertThat(without.showView3D).isFalse()
+
+        val model = RoomViewModel(repo, "k", canView3D = true).also { created += it }
+        val state = withTimeout(10_000) { model.state.first { !it.loading && it.floorId != null } }
+        assertThat(state.showView3D).isTrue()
+        val target = checkNotNull(state.view3DTarget)
+        assertThat(target.floorId).isEqualTo(floorId)
+        assertThat(target.roomId).isEqualTo("k")
+        assertThat(target.homeName).isEqualTo("Maple St")
+        assertThat(target.homeId).isNotEmpty()
+    }
+
     // AC-C14: the page follows the plan, so a rename shows and a delete turns it into Room not found
     @Test fun followsRenameAndDelete() = test {
         val floorId = mainFloor()

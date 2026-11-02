@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,15 +47,31 @@ import com.kurtz.homerecord.housemodel.scene.FloorScene
 import com.kurtz.homerecord.housemodel.scene.FloorScenePicture
 import com.kurtz.homerecord.housemodel.walls.WallStage
 
-/** Draws the floor; the route passes the live SceneView, previews and tests the still picture. */
-typealias SceneSlot = @Composable (scene: FloorScene, stage: WallStage, resetCount: Int, modifier: Modifier) -> Unit
+/** How the scene is to be drawn: the stage's photos, the Reset view count, the room the camera stands in, room taps. */
+data class SceneCamera(
+    val stage: WallStage,
+    val resetCount: Int,
+    val roomId: String? = null,
+    val onRoomTap: (String) -> Unit = {},
+)
 
-val StillScene: SceneSlot = { scene, stage, _, modifier -> FloorScenePicture(scene, stage, modifier) }
+/** Draws the floor; the route passes the live SceneView, previews and tests the still picture. */
+typealias SceneSlot = @Composable (scene: FloorScene, camera: SceneCamera, modifier: Modifier) -> Unit
+
+/** The still picture; standing in a room it shows that room on its own, cut away from the rest of the floor. */
+val StillScene: SceneSlot = { scene, camera, modifier -> FloorScenePicture(scene.only(camera.roomId), camera.stage, modifier) }
+
+private fun FloorScene.only(roomId: String?): FloorScene {
+    if (roomId == null || roomId !in rooms) return this
+    val parts = mesh.parts.filter { it.key.roomId == roomId }
+    return copy(mesh = mesh.copy(parts = parts), ghostRooms = emptySet())
+}
 
 /**
  * HM-3D (AC-C20, AC-C21): the chosen floor's rooms as walls over the faded floors below it, wall photos at the chosen
  * stage painted on, Reset view over the scene. Floor chips and All floors when the home has more than one floor; the
- * stage picker matches the room page's.
+ * stage picker matches the room page's. Tapping a room stands the camera inside it (AC-C22): the title names the room,
+ * Back to floor (and the system Back, unless the screen opened on the room) returns to the whole floor.
  */
 @Composable
 fun House3DScreen(
@@ -65,9 +83,11 @@ fun House3DScreen(
 ) {
     val prefix = LocalTagPrefix.current
     val floorName = if (state.allFloors) stringResource(R.string.house3d_all_floors) else state.floor?.name
+    val room = state.room
+    BackHandler(enabled = room != null && !state.openedOnRoom) { onEvent(House3DEvent.BackToFloor) }
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     ScreenScaffold(
-        title = floorName?.let { stringResource(R.string.house3d_title, it) } ?: stringResource(R.string.house3d_title_plain),
+        title = (room?.name ?: floorName)?.let { stringResource(R.string.house3d_title, it) } ?: stringResource(R.string.house3d_title_plain),
         subtitle = state.homeName.ifBlank { null },
         onBack = onBack,
     ) { padding ->
@@ -110,7 +130,7 @@ fun House3DScreen(
                     )
                 }
                 Text(
-                    stringResource(R.string.house3d_hint),
+                    stringResource(if (room != null) R.string.house3d_room_hint else R.string.house3d_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
@@ -131,19 +151,37 @@ fun House3DScreen(
                     actionModifier = Modifier.testTag("${prefix}_3d_edit_plan"),
                 )
                 else -> Box(m) {
-                    val description = stringResource(R.string.house3d_scene_description, floorName.orEmpty(), scene.roomCount)
+                    val description = if (room != null) {
+                        stringResource(R.string.house3d_room_description, room.name)
+                    } else {
+                        stringResource(R.string.house3d_scene_description, floorName.orEmpty(), scene.roomCount)
+                    }
                     sceneSlot(
                         scene,
-                        state.stage,
-                        state.resetCount,
+                        SceneCamera(state.stage, state.resetCount, room?.id) { onEvent(House3DEvent.ViewRoom(it)) },
                         Modifier.fillMaxSize().semantics { contentDescription = description }.testTag("${prefix}_3d_scene"),
                     )
-                    FilledTonalButton(
-                        onClick = { onEvent(House3DEvent.ResetView) },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).heightIn(min = 48.dp).testTag("${prefix}_3d_reset"),
+                    FlowRow(
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Icon(Icons.Rounded.CenterFocusWeak, contentDescription = null)
-                        Text(stringResource(R.string.house3d_reset), modifier = Modifier.padding(start = 8.dp))
+                        if (room != null) {
+                            FilledTonalButton(
+                                onClick = { onEvent(House3DEvent.BackToFloor) },
+                                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_3d_back_to_floor"),
+                            ) {
+                                Icon(Icons.Rounded.Layers, contentDescription = null)
+                                Text(stringResource(R.string.house3d_back_to_floor), modifier = Modifier.padding(start = 8.dp))
+                            }
+                        }
+                        FilledTonalButton(
+                            onClick = { onEvent(House3DEvent.ResetView) },
+                            modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_3d_reset"),
+                        ) {
+                            Icon(Icons.Rounded.CenterFocusWeak, contentDescription = null)
+                            Text(stringResource(R.string.house3d_reset), modifier = Modifier.padding(start = 8.dp))
+                        }
                     }
                 }
             }

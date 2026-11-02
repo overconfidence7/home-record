@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class JobFloorsKey(val homeId: String, val title: String) : NavKey
 
 /** The job's house in 3D, opening on [floorId] (the floor the House tab shows) at the Rough-in stage (AC-C20). */
-@Serializable data class JobHouse3DKey(val homeId: String, val title: String, val floorId: String? = null) : NavKey
+@Serializable data class JobHouse3DKey(val homeId: String, val title: String, val floorId: String? = null, val roomId: String? = null) : NavKey
 
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
 

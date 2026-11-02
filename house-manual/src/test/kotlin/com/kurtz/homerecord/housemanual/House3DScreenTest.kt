@@ -21,6 +21,11 @@ import com.kurtz.homerecord.housemodel.ui.House3DScreen
 import com.kurtz.homerecord.housemodel.ui.House3DUiState
 import com.kurtz.homerecord.housemodel.ui.HouseScreen
 import com.kurtz.homerecord.housemodel.ui.HouseUiState
+import com.kurtz.homerecord.housemodel.ui.RoomEvent
+import com.kurtz.homerecord.housemodel.ui.RoomScreen
+import com.kurtz.homerecord.housemodel.ui.RoomUiState
+import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.clickable
 import com.kurtz.homerecord.housemodel.walls.WallKey
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import org.junit.Rule
@@ -133,5 +138,55 @@ class House3DScreenTest {
         show(ready.copy(allFloors = true), mutableListOf())
         rule.onNodeWithText("All floors in 3D").assertExists()
         rule.onNodeWithContentDescription("3D view of All floors: 2 rooms").assertExists()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun standingInARoomNamesItAndBackToFloorLeavesIt() {
+        val events = mutableListOf<House3DEvent>()
+        show(ready.copy(roomId = "k"), events)
+        rule.onNodeWithText("Kitchen in 3D").assertExists()
+        rule.onNodeWithContentDescription("Inside Kitchen in 3D, looking at its longest wall").assertExists()
+        rule.onNodeWithText("Drag to look around, pinch to step closer.").assertExists()
+        rule.onNodeWithTag("hm_3d_back_to_floor").performClick()
+        rule.onNodeWithTag("hm_3d_reset").performClick()
+        assertThat(events).containsExactly(House3DEvent.BackToFloor, House3DEvent.ResetView).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun theFloorViewHasNoBackToFloorAndATapOnARoomStandsInIt() {
+        val events = mutableListOf<House3DEvent>()
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    House3DScreen(ready, { events += it }, {}, {}) { _, camera, modifier ->
+                        // A stand-in renderer that reports a tap on the living room.
+                        androidx.compose.foundation.layout.Box(
+                            modifier.then(androidx.compose.ui.Modifier.testTag("fake_scene"))
+                                .then(androidx.compose.ui.Modifier.clickable { camera.onRoomTap("l") }),
+                        )
+                    }
+                }
+            }
+        }
+        rule.onNodeWithTag("hm_3d_back_to_floor").assertDoesNotExist()
+        rule.onNodeWithText("Drag to turn, pinch to zoom, two fingers to move. Tap a room to stand inside it.").assertExists()
+        rule.onNodeWithTag("hm_3d_scene").performClick()
+        assertThat(events).containsExactly(House3DEvent.ViewRoom("l"))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun theRoomPageOffersViewIn3D() {
+        val events = mutableListOf<RoomEvent>()
+        val state = RoomUiState(loading = false, room = rooms[0], floorName = "Main", homeName = "Maple St", floorId = "m", canView3D = true)
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { RoomScreen(state) { events += it } }
+            }
+        }
+        rule.onNodeWithTag("hm_room_view_3d").performClick()
+        assertThat(events).containsExactly(RoomEvent.View3D)
     }
 }

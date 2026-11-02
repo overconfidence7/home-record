@@ -36,6 +36,7 @@ object ScreenCatalog {
         QaScreen("room-page", nonRoot = true) { RoomPagePreview() },
         QaScreen("house-3d", nonRoot = true) { House3DPreview() },
         QaScreen("house-3d-rough-in", nonRoot = true) { House3DRoughInPreview() },
+        QaScreen("house-3d-room", nonRoot = true) { House3DRoomPreview() },
         QaScreen("house-3d-stacked", nonRoot = true) { House3DStackedPreview() },
         QaScreen("house-3d-all-floors", nonRoot = true) { House3DAllFloorsPreview() },
         QaScreen("house-3d-empty", nonRoot = true) { House3DEmptyPreview() },

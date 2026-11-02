@@ -26,6 +26,8 @@ fun RoomRoute(
     roomId: String,
     onBack: () -> Unit,
     onOutline: (WallOutlineRequest) -> Unit,
+    /** Opens the room's floor in 3D standing inside the room (AC-C22); null hides "View in 3D". */
+    onView3D: ((Room3DTarget) -> Unit)? = null,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -33,7 +35,7 @@ fun RoomRoute(
             initializer {
                 RoomViewModel(
                     repo, roomId, walls = wallPhotos.observeRoomWalls(roomId), defaultStage = WallStage.BehindTheWall,
-                    savedState = createSavedStateHandle(), media = media,
+                    savedState = createSavedStateHandle(), media = media, canView3D = onView3D != null,
                 )
             }
         },
@@ -43,6 +45,7 @@ fun RoomRoute(
     RoomScreen(state) { event ->
         when (event) {
             RoomEvent.Back -> onBack()
+            RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenItem, RoomEvent.AddItem -> Unit
             else -> vm.onPhotoEvent(event)
@@ -63,6 +66,8 @@ fun RoomRoute(
     onOpenItem: (String) -> Unit,
     onAddItem: (roomId: String) -> Unit,
     onOutline: (WallOutlineRequest) -> Unit,
+    /** Opens the room's floor in 3D standing inside the room (AC-C22); null hides "View in 3D". */
+    onView3D: ((Room3DTarget) -> Unit)? = null,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -70,7 +75,7 @@ fun RoomRoute(
             initializer {
                 RoomViewModel(
                     repo, roomId, items.observeRows(homeId, emptyMap()), wallPhotos.observeRoomWalls(roomId),
-                    WallStage.HouseManualDefault, createSavedStateHandle(), media,
+                    WallStage.HouseManualDefault, createSavedStateHandle(), media, canView3D = onView3D != null,
                 )
             }
         },
@@ -82,6 +87,7 @@ fun RoomRoute(
             RoomEvent.Back -> onBack()
             is RoomEvent.OpenItem -> onOpenItem(event.id)
             RoomEvent.AddItem -> onAddItem(roomId)
+            RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             else -> vm.onPhotoEvent(event)
         }

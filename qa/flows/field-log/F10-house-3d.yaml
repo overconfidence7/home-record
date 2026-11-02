@@ -1,6 +1,7 @@
 # Walkthrough F10 (T049c): FL-House in 3D (AC-C20). Builds a one-room plan on a new job (House tab: Start the
 # plan, Edit plan, Add room "Kitchen"), then opens "3D view" from the House tab: the scene, Reset view and the
 # stage picker opening on Rough-in (Field Log's behind-the-wall default); Back returns to the House tab.
+# T051 (AC-C22): the Kitchen room page's "View in 3D" stands the camera inside the room; Back to floor leaves it.
 # Behind-the-wall capture, overlays and the installed item arrive with T052 and the F10 item work.
 appId: com.kurtz.homerecord.fieldlog
 ---
@@ -92,4 +93,31 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: "fl_house_3d"
     timeout: 5000
+# AC-C22: the job's room page opens the room in 3D standing inside it; Back to floor shows the whole floor
+- tapOn: "Kitchen"
+- scrollUntilVisible:
+    element:
+      id: "fl_room_view_3d"
+    direction: UP
+- tapOn:
+    id: "fl_room_view_3d"
+- extendedWaitUntil:
+    visible: "Kitchen in 3D"
+    timeout: 15000
+- assertVisible:
+    id: "fl_3d_stage_rough_in"
+    selected: true
+- takeScreenshot: F10-3d-room
+- tapOn:
+    id: "fl_3d_back_to_floor"
+- extendedWaitUntil:
+    visible:
+      id: "fl_3d_reset"
+    timeout: 15000
+- assertNotVisible:
+    id: "fl_3d_back_to_floor"
+- tapOn:
+    id: "fl_back"
+- tapOn:
+    id: "fl_back"
 - stopApp

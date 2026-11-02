@@ -24,13 +24,15 @@ fun House3DRoute(
     onEditPlan: (floorId: String?) -> Unit,
     /** Field Log passes [WallStage.BehindTheWall] so a crew sees the rough-in photos first. */
     defaultStage: WallStage = WallStage.HouseManualDefault,
+    /** Open standing inside this room ("View in 3D" on a room page, AC-C22). */
+    roomId: String? = null,
 ) {
     val vm = viewModel<House3DViewModel>(
-        factory = viewModelFactory { initializer { House3DViewModel(repo, wallPhotos, homeId, homeName, floorId, createSavedStateHandle(), defaultStage) } },
+        factory = viewModelFactory { initializer { House3DViewModel(repo, wallPhotos, homeId, homeName, floorId, createSavedStateHandle(), defaultStage, initialRoomId = roomId) } },
     )
     // AC-C24 first render is timed from here, the screen opening, not from when the mesh is ready.
     val openedAtNanos = remember { System.nanoTime() }
-    House3DScreen(vm.state.collectAsState().value, vm::onEvent, onBack, onEditPlan) { scene, stage, resetCount, modifier ->
-        FloorSceneView(scene, stage, resetCount, modifier, openedAtNanos)
+    House3DScreen(vm.state.collectAsState().value, vm::onEvent, onBack, onEditPlan) { scene, camera, modifier ->
+        FloorSceneView(scene, camera, modifier, openedAtNanos)
     }
 }

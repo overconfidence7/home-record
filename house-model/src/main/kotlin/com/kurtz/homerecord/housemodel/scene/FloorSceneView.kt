@@ -20,7 +20,13 @@ import com.kurtz.homerecord.housemodel.blueprint.RoomPalette
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import dev.romainguy.kotlin.math.Float2
 import io.github.sceneview.SceneView
+import dev.romainguy.kotlin.math.Float3
+import dev.romainguy.kotlin.math.Mat4
+import dev.romainguy.kotlin.math.lookAt
 import io.github.sceneview.createDefaultCameraManipulator
+import io.github.sceneview.gesture.CameraGestureDetector
+import io.github.sceneview.rememberOnGestureListener
+import com.kurtz.homerecord.housemodel.ui.SceneCamera
 import io.github.sceneview.geometries.Geometry
 import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.math.Direction
@@ -45,17 +51,20 @@ import kotlin.math.sin
  * texture arrives; other faces are lit in the room's tint, floors neutral, glass translucent, floors below the chosen one
  * a faint see-through grey. One finger orbits, two pan, pinch zooms (SceneView's camera manipulator); a new
  * [resetCount] puts the camera back where it started: south of the floor, turned and looking down as in
- * [SceneProjection]. Every two seconds while frames are drawn it logs [FrameStats] under [PERF_TAG], timed from
+ * [SceneProjection]. With [SceneCamera.roomId] set the camera stands inside that room instead ([RoomViewpoint],
+ * [LookAround], AC-C22); otherwise a tap on a room reports it through [SceneCamera.onRoomTap]. Every two seconds while frames are drawn it logs [FrameStats] under [PERF_TAG], timed from
  * [openedAtNanos] (the screen opening), for QA's AC-C24 measurement.
  */
 @Composable
 fun FloorSceneView(
     scene: FloorScene,
-    stage: WallStage,
-    resetCount: Int,
+    camera: SceneCamera,
     modifier: Modifier = Modifier,
     openedAtNanos: Long = remember { System.nanoTime() },
 ) {
+    val stage = camera.stage
+    val resetCount = camera.resetCount
+    val room = camera.roomId?.let { scene.rooms[it] }
     val engine = rememberEngine()
     val materialLoader = rememberMaterialLoader(engine)
     // Declared before SceneView so they are released after its nodes (Compose forgets in reverse order).
@@ -79,6 +88,7 @@ fun FloorSceneView(
 
     val stats = remember(openedAtNanos) { FrameStats(openedAtNanos) }
     val draws by rememberUpdatedState(geometries.size)
+    val onRoomTap by rememberUpdatedState(camera.onRoomTap)
     LaunchedEffect(stats) {
         var logged = -1L
         while (true) {
@@ -92,7 +102,9 @@ fun FloorSceneView(
 
     val bounds = scene.focus
     val lookAtY = scene.lookAtY
-    val manipulator = remember(bounds, lookAtY, resetCount) {
+    val viewpoint = remember(room) { room?.let(RoomViewpoint::inside) }
+    val manipulator = remember(bounds, lookAtY, resetCount, room, viewpoint) {
+        if (room != null && viewpoint != null) return@remember LookAroundManipulator(LookAround(viewpoint, room))
         val target = Position(bounds.centerX, lookAtY, bounds.centerZ)
         val distance = max(bounds.radius, MIN_RADIUS_M) * DISTANCE_PER_RADIUS
         val yaw = Math.toRadians(SceneProjection.START_YAW_DEG.toDouble())
@@ -111,6 +123,10 @@ fun FloorSceneView(
         materialLoader = materialLoader,
         cameraManipulator = manipulator,
         autoCenterContent = false,
+        // A tap on a room's walls or floor stands the camera inside it; taps inside a room do nothing.
+        onGestureListener = rememberOnGestureListener(
+            onSingleTapConfirmed = { _, node -> if (room == null) node?.name?.let(onRoomTap) },
+        ),
         // Timed once the scene is on screen: the first frame counted is the first with the house in it.
         onFrame = { nanos -> if (draws > 0) stats.onFrame(nanos) },
     ) {
@@ -128,9 +144,50 @@ fun FloorSceneView(
                 indexBuffer = geometry.indexBuffer,
                 boundingBox = geometry.boundingBox,
                 materialInstance = material,
+                apply = { name = batch.roomId },
             )
         }
     }
+}
+
+/**
+ * The room view's camera (AC-C22) for SceneView: one finger turns the [look] where it stands, a pinch steps it forward
+ * or back inside the room. SceneView hands over touch points with y measured up from the bottom of the view, so a drag's
+ * y is turned back to screen pixels (down) before [LookAround] sees it.
+ */
+private class LookAroundManipulator(private val look: LookAround) : CameraGestureDetector.CameraManipulator {
+    private var lastX = 0
+    private var lastY = 0
+
+    override fun setViewport(width: Int, height: Int) = Unit
+
+    override fun getTransform(): Mat4 {
+        val e = look.eye
+        val t = look.target
+        return lookAt(Float3(e.x, e.y, e.z), Float3(t.x, t.y, t.z), Float3(0f, 1f, 0f))
+    }
+
+    override fun grabBegin(x: Int, y: Int, strafe: Boolean) {
+        lastX = x
+        lastY = y
+    }
+
+    override fun grabUpdate(x: Int, y: Int) {
+        look.drag((x - lastX).toFloat(), -(y - lastY).toFloat())
+        lastX = x
+        lastY = y
+    }
+
+    override fun grabEnd() = Unit
+
+    override fun scrollBegin(x: Int, y: Int, separation: Float) = Unit
+
+    override fun scrollUpdate(x: Int, y: Int, prevSeparation: Float, currSeparation: Float) =
+        look.zoom(prevSeparation, currSeparation)
+
+    override fun scrollEnd() = Unit
+
+    override fun update(deltaTime: Float) = Unit
 }
 
 /** Material instances and textures for one engine, made on first use and released together. Main thread only. */

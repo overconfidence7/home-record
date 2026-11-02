@@ -14,6 +14,10 @@ data class RoomUiState(
     val room: PlanRoom? = null,
     val system: UnitSystem = UnitSystem.IMPERIAL,
     val floorName: String? = null,
+    /** The floor the room is on; with [canView3D], "View in 3D" opens that floor standing inside the room (AC-C22). */
+    val floorId: String? = null,
+    val homeId: String? = null,
+    val canView3D: Boolean = false,
     val homeName: String? = null,
     val items: List<RoomItem> = emptyList(),
     /** House Manual keeps items and offers "Add an item here"; Field Log does not. */
@@ -32,7 +36,21 @@ data class RoomUiState(
     val outlineRequest: WallOutlineRequest? = null,
     /** The picked photo could not be copied into the app. */
     val photoImportFailed: Boolean = false,
-)
+) {
+    /** "View in 3D" shows once the room is drawn on its floor and the app has a 3D view. */
+    val showView3D: Boolean get() = canView3D && floorId != null && (room?.points?.size ?: 0) >= 3
+
+    /** Where "View in 3D" goes, once the room's floor and home are known. */
+    val view3DTarget: Room3DTarget?
+        get() {
+            val r = room ?: return null
+            val floor = floorId ?: return null
+            return Room3DTarget(homeId.orEmpty(), homeName.orEmpty(), floor, r.id)
+        }
+}
+
+/** The 3D view of [homeId]'s floor [floorId], standing inside [roomId] (AC-C22). */
+data class Room3DTarget(val homeId: String, val homeName: String, val floorId: String, val roomId: String)
 
 /** Launch the camera writing to [target], or the photo picker when [target] is null. */
 data class WallPhotoLaunch(val target: CaptureTarget?)
@@ -54,6 +72,7 @@ sealed interface RoomEvent {
     data object Back : RoomEvent
     data class OpenItem(val id: String) : RoomEvent
     data object AddItem : RoomEvent
+    data object View3D : RoomEvent
     data class SelectStage(val stage: WallStage) : RoomEvent
     data class PhotographWall(val wallId: String) : RoomEvent
     data object ClosePhotoSheet : RoomEvent

@@ -635,3 +635,22 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   20 walls, 1600 × 1200 JPEGs drawn by the seed) is the reference home; `qa/flows/house-manual/_3d-perf.yaml` seeds
   it, opens All floors and orbits. The device suite does not run it yet (qa/scripts belongs to Nate); QA runs it by
   hand or the suite can add a stage.
+
+## 2026-11-02 — T051: room view in 3D (AC-C22)
+
+- Opening camera (`RoomViewpoint`, pure): eye height 66" above the room's floor, looking straight at the middle of
+  the room's longest wall (the first one when two tie), standing back from it along its inward normal until 18" short
+  of the first wall that normal meets (halfway across when the room is under 36" deep). Standing on that first
+  stretch keeps the camera inside L- and U-shaped rooms, where the centroid can fall outside.
+- Look-around (`LookAround`, pure; `LookAroundManipulator` adapts it to SceneView's `CameraManipulator`): one finger
+  turns the camera in place with the picture following the finger (0.15° per pixel, up/down stops at 80°). Pinch
+  "zoom" steps the camera forward or back along its heading, 1.5 m per doubling of finger spread, and refuses any
+  step that would bring it within 30 cm of a wall or out of the room. A field-of-view zoom was considered; it needs
+  the camera node's projection, which SceneView's orbit view would then inherit on Back to floor, so it was dropped.
+- Tapping a room: each batched renderable is named by its room id and SceneView's tap listener reports the hit node,
+  so a tap on any part of a room (walls, floor) opens it; ghost floors below are not rooms the camera can enter.
+- "View in 3D" sits on the room page (both apps) under the size line and opens the room's floor standing inside it;
+  Back from there returns to the room page, while a room entered by tapping returns to the floor on system Back.
+  The still picture used for previews and screenshots shows only the chosen room, cut away.
+- The shared-element transition named in the plan is left for T051a.
+

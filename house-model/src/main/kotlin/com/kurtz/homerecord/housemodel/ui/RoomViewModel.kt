@@ -29,10 +29,13 @@ class RoomViewModel(
     private val savedState: SavedStateHandle = SavedStateHandle(),
     /** Where wall photos go; null where the app cannot take one, which hides "Photograph". */
     private val media: MediaFiles? = null,
+    /** The app has a 3D view to open the room in (AC-C22). */
+    canView3D: Boolean = false,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(
             canAddItem = itemRows != null,
+            canView3D = canView3D,
             canPhotograph = media != null && walls != null,
             wallStage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage,
         ),
@@ -42,7 +45,7 @@ class RoomViewModel(
     init {
         viewModelScope.launch {
             val where = repo.roomLocation(roomId)
-            _state.update { it.copy(floorName = where?.floorName, homeName = where?.homeName) }
+            _state.update { it.copy(floorName = where?.floorName, floorId = where?.floorId, homeId = where?.homeId, homeName = where?.homeName) }
             repo.observeRoom(roomId).collect { room -> _state.update { it.copy(loading = false, room = room) } }
         }
         if (itemRows != null) {

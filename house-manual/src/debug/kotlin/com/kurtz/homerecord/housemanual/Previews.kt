@@ -280,6 +280,7 @@ fun HouseNoFloorsPreview() = Frame { houseScreen(HouseUiState(loading = false, h
 @ThemePreviews
 @Composable
 fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", canAddItem = true,
+    floorId = "f2", canView3D = true,
     items = listOf(
         RoomItem("i1", "Dishwasher", "Bosch SHPM88Z75N", iconName = ItemCategory.subtype("dishwasher")?.iconName ?: "Category", warranty = WarrantyStatus.Active("2028-03-14")),
         RoomItem("i2", "Range hood", "Broan", iconName = ItemCategory.subtype("range_hood")?.iconName ?: "Category"),
@@ -394,6 +395,11 @@ private fun house3dScreen(state: com.kurtz.homerecord.housemodel.ui.House3DUiSta
 @ThemePreviews
 @Composable
 fun House3DPreview() = Frame { house3dScreen(house3dState()) }
+
+/** Standing in the kitchen after tapping it (AC-C22): titled by the room, Back to floor beside Reset view. */
+@ThemePreviews
+@Composable
+fun House3DRoomPreview() = Frame { house3dScreen(house3dState({ copy(roomId = "r1") })) }
 
 @Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
 @Composable

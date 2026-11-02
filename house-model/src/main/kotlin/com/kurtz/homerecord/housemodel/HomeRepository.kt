@@ -179,7 +179,7 @@ class HomeRepository(
         val row = db.roomDao().get(roomId) ?: return null
         val floor = db.floorDao().get(row.floorId) ?: return null
         val home = db.homeDao().get(floor.homeId) ?: return null
-        return RoomLocation(floor.id, floor.name, home.name)
+        return RoomLocation(floor.id, floor.name, home.name, home.id)
     }
 
     suspend fun loadPlan(floorId: String): FloorPlan = toFloorPlan(db.roomDao().listFor(floorId))
@@ -366,4 +366,4 @@ class HomeRepository(
 /** A room as the item form's room picker lists it. */
 data class RoomChoice(val id: String, val name: String, val floorName: String)
 
-data class RoomLocation(val floorId: String, val floorName: String, val homeName: String)
+data class RoomLocation(val floorId: String, val floorName: String, val homeName: String, val homeId: String = "")

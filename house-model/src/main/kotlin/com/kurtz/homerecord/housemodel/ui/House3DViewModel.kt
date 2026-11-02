@@ -32,7 +32,8 @@ import kotlinx.coroutines.withContext
 /**
  * HM-3D (AC-C20, AC-C21): follows the chosen floor's plan, its ceiling height and its wall photos, plus the floors
  * below it (drawn faded) or, for All floors, every floor pulled apart ([FloorStack]); rebuilds the scene off the main
- * thread whenever one of them changes. Floor, All floors and stage survive process death.
+ * thread whenever one of them changes. A tapped room (or the room the screen opened on) puts the camera inside it
+ * (AC-C22) until Back to floor. Floor, All floors, stage and room survive process death.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class House3DViewModel(
@@ -45,6 +46,8 @@ class House3DViewModel(
     /** The stage the view opens on: Finished in House Manual, Rough-in ("behind the wall") in Field Log. */
     defaultStage: WallStage = WallStage.HouseManualDefault,
     private val buildMesh: MeshMaker = DefaultMeshMaker,
+    /** Open standing inside this room ("View in 3D" on a room page, AC-C22). */
+    initialRoomId: String? = null,
     private val work: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -53,6 +56,8 @@ class House3DViewModel(
             floorId = saved[FLOOR] ?: initialFloorId,
             allFloors = saved[ALL] ?: false,
             stage = saved.get<String>(STAGE)?.let(WallStage::fromStored) ?: defaultStage,
+            roomId = if (saved.contains(ROOM)) saved.get<String>(ROOM) else initialRoomId,
+            openedOnRoom = saved[OPENED_ON_ROOM] ?: (initialRoomId != null),
         ),
     )
     val state: StateFlow<House3DUiState> = _state.asStateFlow()
@@ -116,12 +121,14 @@ class House3DViewModel(
                 val next = _state.value.floors.firstOrNull { it.id == event.floorId } ?: return
                 saved[FLOOR] = next.id
                 saved[ALL] = false
+                leaveRoom()
                 _state.update { it.copy(floorId = next.id, allFloors = false, scene = null, loading = true, failed = false) }
                 restack()
             }
             House3DEvent.ShowAllFloors -> {
                 if (_state.value.allFloors) return
                 saved[ALL] = true
+                leaveRoom()
                 _state.update { it.copy(allFloors = true, scene = null, loading = true, failed = false) }
                 restack()
             }
@@ -130,6 +137,13 @@ class House3DViewModel(
                 _state.update { it.copy(stage = event.stage) }
             }
             House3DEvent.ResetView -> _state.update { it.copy(resetCount = it.resetCount + 1) }
+            is House3DEvent.ViewRoom -> {
+                // Only a room the camera can stand in: a solid floor's room in the current scene.
+                if (_state.value.scene?.rooms?.containsKey(event.roomId) != true) return
+                saved[ROOM] = event.roomId
+                _state.update { it.copy(roomId = event.roomId) }
+            }
+            House3DEvent.BackToFloor -> leaveRoom()
             House3DEvent.Retry -> {
                 _state.update { it.copy(loading = true, failed = false) }
                 retries.update { it + 1 }
@@ -137,10 +151,18 @@ class House3DViewModel(
         }
     }
 
+    private fun leaveRoom() {
+        saved[ROOM] = null
+        saved[OPENED_ON_ROOM] = false
+        _state.update { it.copy(roomId = null, openedOnRoom = false) }
+    }
+
     private companion object {
         const val FLOOR = "floor"
         const val STAGE = "stage"
         const val ALL = "allFloors"
+        const val ROOM = "room"
+        const val OPENED_ON_ROOM = "openedOnRoom"
         const val TAG = "House3D"
     }
 }

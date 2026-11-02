@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
@@ -95,6 +96,15 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                     ),
                     style = MaterialTheme.typography.bodyLarge,
                 )
+                if (state.showView3D) {
+                    OutlinedButton(
+                        onClick = { onEvent(RoomEvent.View3D) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_room_view_3d"),
+                    ) {
+                        Icon(Icons.Rounded.ViewInAr, contentDescription = null)
+                        Text(stringResource(R.string.room_view_3d), modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
                 RoomSections.forEach { section ->
                     when (section.tag) {
                         "items" -> RoomItemsCard(state.items, state.canAddItem, onEvent)

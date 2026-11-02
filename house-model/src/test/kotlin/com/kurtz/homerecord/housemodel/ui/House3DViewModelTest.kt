@@ -71,7 +71,8 @@ class House3DViewModelTest {
         saved: SavedStateHandle = SavedStateHandle(),
         buildMesh: MeshMaker = DefaultMeshMaker,
         defaultStage: WallStage = WallStage.HouseManualDefault,
-    ) = House3DViewModel(repo, wallPhotos, homeId, "Maple St", floorId, saved, defaultStage, buildMesh).also { created += it }
+        roomId: String? = null,
+    ) = House3DViewModel(repo, wallPhotos, homeId, "Maple St", floorId, saved, defaultStage, buildMesh, initialRoomId = roomId).also { created += it }
 
     private val kitchen = PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 168, 144)
     private val living = PlanRoom.rectangle("l", "Living room", "LIVING_ROOM", 168, 0, 180, 144)
@@ -201,5 +202,53 @@ class House3DViewModelTest {
         model.onEvent(House3DEvent.SelectFloor(floors.getValue("Main")))
         val main = withTimeout(10_000) { model.state.first { !it.allFloors && it.scene?.roomCount == 2 } }
         assertThat(main.scene!!.ghostRooms).isEmpty()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun aTappedRoomPutsTheCameraInsideUntilBackToFloorAndSurvivesProcessDeath() = test {
+        val (homeId, floors) = home()
+        val saved = SavedStateHandle()
+        val model = vm(homeId, saved = saved)
+        withTimeout(10_000) { model.state.first { it.scene != null } }
+        // A room the scene does not hold (a ghost floor's, or gone) is ignored.
+        model.onEvent(House3DEvent.ViewRoom("nope"))
+        assertThat(model.state.value.roomId).isNull()
+
+        model.onEvent(House3DEvent.ViewRoom("k"))
+        val inside = model.state.value
+        assertThat(inside.room?.name).isEqualTo("Kitchen")
+        assertThat(inside.openedOnRoom).isFalse()
+
+        val restored = vm(homeId, saved = saved).state.let { flow -> withTimeout(10_000) { flow.first { it.room != null } } }
+        assertThat(restored.room?.id).isEqualTo("k")
+
+        model.onEvent(House3DEvent.BackToFloor)
+        assertThat(model.state.value.roomId).isNull()
+        assertThat(model.state.value.room).isNull()
+
+        // Changing floors leaves the room too.
+        model.onEvent(House3DEvent.ViewRoom("l"))
+        model.onEvent(House3DEvent.SelectFloor(floors.getValue("Upper")))
+        assertThat(model.state.value.roomId).isNull()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun viewIn3DFromTheRoomPageOpensInsideTheRoom() = test {
+        val (homeId, floors) = home()
+        val saved = SavedStateHandle()
+        val model = vm(homeId, floorId = floors.getValue("Main"), saved = saved, roomId = "l")
+        val state = withTimeout(10_000) { model.state.first { it.room != null } }
+        assertThat(state.room?.name).isEqualTo("Living room")
+        assertThat(state.openedOnRoom).isTrue()
+
+        // Back to floor after process death stays on the floor.
+        model.onEvent(House3DEvent.BackToFloor)
+        val restored = vm(homeId, floorId = floors.getValue("Main"), saved = saved, roomId = "l").state.let { flow ->
+            withTimeout(10_000) { flow.first { it.scene != null } }
+        }
+        assertThat(restored.roomId).isNull()
+        assertThat(restored.openedOnRoom).isFalse()
     }
 }

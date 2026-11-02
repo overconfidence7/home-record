@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class RoomKey(val roomId: String) : NavKey
 
-/** HM-3D opening on [floorId], the floor the House tab shows (AC-C20). */
-@Serializable data class House3DKey(val floorId: String? = null) : NavKey
+/** HM-3D opening on [floorId], the floor the House tab shows (AC-C20), standing inside [roomId] when given (AC-C22). */
+@Serializable data class House3DKey(val floorId: String? = null, val roomId: String? = null) : NavKey
 
 /** HM-WallOutline for the new photo at [photoPath] of [wallId] in [roomId] at [stage] (a `WallStage` name, AC-C18). */
 @Serializable data class WallOutlineKey(val roomId: String, val wallId: String, val stage: String, val photoPath: String) : NavKey
