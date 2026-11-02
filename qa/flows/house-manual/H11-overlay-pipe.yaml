@@ -1,0 +1,124 @@
+# Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
+# (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9 wall part). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
+# in, so it does not depend on the photo picker; the blueprint and 3D halves of H11 arrive with T053.
+# Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: H02-draw-plan.yaml
+- tapOn:
+    id: "hm_tab_house"
+- tapOn: "Kitchen"
+- scrollUntilVisible:
+    element: "North wall"
+# AC-C28: a wall row opens the wall to draw on
+- tapOn: "North wall"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_add_overlay"
+    timeout: 10000
+- assertVisible:
+    id: "hm_wall_picture"
+- assertVisible:
+    id: "hm_wall_overlays_empty"
+- takeScreenshot: H11-wall-empty
+# AC-C25: Add overlay, then taps along the pipe make a run
+- tapOn:
+    id: "hm_wall_add_overlay"
+- assertVisible:
+    id: "hm_wall_draw_hint"
+- tapOn:
+    id: "hm_wall_picture"
+- tapOn:
+    point: "85%,32%"
+- assertVisible: "2 points.*"
+- takeScreenshot: H11-wall-drawing
+- tapOn:
+    id: "hm_wall_draw_next"
+# AC-C26: the form asks for the kind, label, depth, stage and note
+- extendedWaitUntil:
+    visible: "New overlay"
+    timeout: 10000
+- assertVisible:
+    id: "hm_overlay_form_kind"
+- assertVisible:
+    id: "hm_overlay_form_depth"
+- tapOn:
+    id: "hm_overlay_form_kind"
+- scrollUntilVisible:
+    element:
+      id: "hm_overlay_kind_water_cold"
+- tapOn:
+    id: "hm_overlay_kind_water_cold"
+- tapOn:
+    id: "hm_overlay_form_label"
+- inputText: "Kitchen sink cold"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "hm_overlay_form_note"
+- tapOn:
+    id: "hm_overlay_form_note"
+- inputText: "Half inch PEX"
+- hideKeyboard
+- takeScreenshot: H11-overlay-form
+- tapOn:
+    id: "hm_save"
+# AC-C26: saved, picked on the wall with its kind and depth
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_selection"
+    timeout: 10000
+- assertVisible: "Kitchen sink cold"
+- assertVisible: "Cold water · Behind drywall · Finished stage"
+- takeScreenshot: H11-overlay-picked
+- tapOn:
+    id: "hm_wall_overlay_done"
+# AC-C27: switching the wall to Rough-in keeps the overlay on the wall
+- tapOn:
+    id: "hm_wall_stage_rough_in"
+- assertVisible:
+    id: "hm_wall_stage_rough_in"
+    checked: true
+- assertVisible: "Kitchen sink cold"
+- takeScreenshot: H11-overlay-rough-in
+# AC-C28: edit from the wall: pick it from the list, Edit, change the label
+- tapOn: "Kitchen sink cold"
+- tapOn:
+    id: "hm_wall_overlay_edit"
+- extendedWaitUntil:
+    visible: "Edit overlay"
+    timeout: 10000
+- tapOn:
+    id: "hm_overlay_form_label"
+- eraseText: 30
+- inputText: "Sink cold supply"
+- hideKeyboard
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    visible: "Sink cold supply"
+    timeout: 10000
+- tapOn:
+    id: "hm_wall_overlay_done"
+# AC-C25: the room page lists the overlay under Overlays and opens its wall with it picked
+- tapOn:
+    id: "hm_back"
+- scrollUntilVisible:
+    element: "Sink cold supply"
+- assertVisible: "Sink cold supply"
+- takeScreenshot: H11-room-overlays
+- tapOn: "Sink cold supply"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_selection"
+    timeout: 10000
+# AC-C28: delete asks first and takes it off the wall
+- tapOn:
+    id: "hm_wall_overlay_delete"
+- assertVisible: "Delete Sink cold supply?"
+- tapOn:
+    id: "hm_wall_overlay_delete_confirm"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_overlays_empty"
+    timeout: 10000

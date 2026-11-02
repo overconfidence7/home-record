@@ -683,3 +683,21 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   be one. Unknown stored kinds read as Other and unknown depths as Behind drywall, so nothing drawn is lost.
 - Search ranks label matches (prefix of the whole label first) above kind matches; kind matches also use a few plain
   search words per kind ("pipe", "ethernet", "romex").
+
+## 2026-11-02 T052b1: the wall overlay editor
+
+- T052b split into T052b1 (this run: HM-Wall, form, drag, delete, room Overlays section, H11 flow) and T052b2 (overlay
+  photo and linked item, the Field Log F10 flow).
+- HM-Wall is its own route (`RoomWallKey` in House Manual, `JobWallKey` in Field Log), opened by tapping a wall row on
+  the room page or an overlay row in the room's Overlays section. It is full screen (no bottom bar) because it is a
+  drawing surface and its form is a full-screen editor (rule 15).
+- The overlay form is a full-screen state of the same route (`OverlayFormScreen` on `FormScaffold`), not a separate
+  Navigation 3 key: the points being saved live in the wall's view model and its `SavedStateHandle`, so they survive
+  rotation and process death without travelling through a nav key. System back steps out of the form, then the
+  drawing, then the selection, then the wall.
+- What the overlays are drawn on: the stage's straightened copy when there is one (already in wall space), else the
+  photo as taken through its saved outline, else the plain wall at the wall's own length:height. Every overlay on the
+  wall shows on every stage (AC-C27); the stage only picks the picture and is what a new overlay is recorded at.
+- Drawing is tap per point (one tap is a spot, two or more a run), with Undo and Next, instead of a freehand stroke:
+  pipes and wires run straight between turns, and taps are steadier on a phone held against a wall.
+- A point drag shows live and writes once when the finger lifts.

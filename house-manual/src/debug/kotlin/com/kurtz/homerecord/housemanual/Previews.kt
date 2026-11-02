@@ -932,3 +932,109 @@ fun WallOutlineUnreadablePreview() = Frame {
         outlineState.copy(error = com.kurtz.homerecord.housemodel.ui.WallOutlineError.PhotoUnreadable, photoWidth = 0, photoHeight = 0), {},
     )
 }
+
+/** The kitchen's north wall straightened at rough-in: studs every 16 in, plates top and bottom, a window header (AC-C19). */
+private val sampleRoughInTexture: androidx.compose.ui.graphics.painter.Painter by lazy {
+    val w = 840
+    val h = 480
+    val bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(bmp)
+    val paint = android.graphics.Paint()
+    c.drawColor(android.graphics.Color.rgb(214, 196, 168))
+    paint.color = android.graphics.Color.rgb(186, 150, 104)
+    // 168 in wall at 5 px per inch: a stud every 16 in, plates top and bottom.
+    var x = 0f
+    while (x < w) { c.drawRect(x, 0f, x + 8f, h.toFloat(), paint); x += 80f }
+    c.drawRect(0f, 0f, w.toFloat(), 14f, paint)
+    c.drawRect(0f, h - 10f, w.toFloat(), h.toFloat(), paint)
+    c.drawRect(420f, 150f, 640f, 168f, paint)
+    paint.color = android.graphics.Color.rgb(120, 120, 120)
+    c.drawRect(578f, 210f, 600f, 240f, paint)
+    androidx.compose.ui.graphics.painter.BitmapPainter(bmp.asImageBitmap())
+}
+
+private fun sampleOverlay(id: String, kind: com.kurtz.homerecord.housemodel.overlays.OverlayKind, label: String, vararg xy: Float, depth: com.kurtz.homerecord.housemodel.overlays.OverlayDepth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL, wallId: String = "w1") =
+    com.kurtz.homerecord.housemodel.overlays.Overlay(
+        id, "h1", "r1", wallId, kind, label, null, depth,
+        xy.toList().chunked(2).map { com.kurtz.homerecord.housemodel.overlays.OverlayPoint(it[0], it[1]) },
+        WallStage.ROUGH_IN, null, null, 0L,
+    )
+
+/** The sink wall at rough-in: hot and cold supply up to the sink, the drain, and the counter outlet on its circuit. */
+private val sinkWallOverlays = listOf(
+    sampleOverlay("o1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_HOT, "Sink supply", 0.30f, 1f, 0.30f, 0.62f, 0.42f, 0.62f),
+    sampleOverlay("o2", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Sink supply", 0.35f, 1f, 0.35f, 0.68f, 0.42f, 0.68f),
+    sampleOverlay("o3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DRAIN, "Sink drain", 0.39f, 1f, 0.39f, 0.76f, depth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.IN_SLAB),
+    sampleOverlay("o4", com.kurtz.homerecord.housemodel.overlays.OverlayKind.ELECTRICAL_WIRE, "Counter circuit", 0.70f, 0f, 0.70f, 0.42f),
+    sampleOverlay("o5", com.kurtz.homerecord.housemodel.overlays.OverlayKind.OUTLET, "Counter outlet", 0.70f, 0.46f),
+)
+
+private val wallOverlaysState = com.kurtz.homerecord.housemodel.ui.WallOverlaysUiState(
+    loading = false, wall = kitchenWalls[0], roomName = "Kitchen", stage = WallStage.ROUGH_IN,
+    picture = com.kurtz.homerecord.housemodel.ui.WallPicture("/preview/sink-rough-wall.jpg", null, 168f / 96f),
+    overlays = sinkWallOverlays,
+)
+
+/** HM-Wall at rough-in with five overlays on the straightened photo and the list below (AC-C25, AC-C27). */
+@ThemePreviews
+@Composable
+fun WallOverlaysPreview() = Frame { com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(wallOverlaysState, {}, sampleRoughInTexture) }
+
+/** Drawing a new run: two points down, Undo, Cancel and Next (AC-C25). */
+@ThemePreviews
+@Composable
+fun WallOverlaysDrawingPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(
+        wallOverlaysState.copy(drawing = listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.1f, 0.85f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.1f, 0.3f))),
+        {}, sampleRoughInTexture,
+    )
+}
+
+/** The hot water run picked: its points as handles, Edit, Delete and Done (AC-C28). */
+@ThemePreviews
+@Composable
+fun WallOverlaysSelectedPreview() = Frame { com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(wallOverlaysState.copy(selectedId = "o1"), {}, sampleRoughInTexture) }
+
+/** A wall with no framing photo and nothing drawn: the plain wall and how to start. */
+@ThemePreviews
+@Composable
+fun WallOverlaysEmptyPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(wallOverlaysState.copy(stage = WallStage.FRAMING, picture = null, overlays = emptyList()), {})
+}
+
+/** Delete asks first (rule 16). */
+@ThemePreviews
+@Composable
+fun WallOverlaysDeletePreview() = Frame { com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(wallOverlaysState.copy(selectedId = "o5", confirmDelete = true), {}, sampleRoughInTexture) }
+
+private val overlayForm = com.kurtz.homerecord.housemodel.ui.OverlayForm(
+    points = sinkWallOverlays[0].points, kind = com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_HOT,
+    label = "Sink supply", note = "1/2 in PEX, stubbed out 18 in above the floor", stage = WallStage.ROUGH_IN, dirty = true,
+)
+
+/** The overlay form filled in for the hot water run (AC-C26). */
+@ThemePreviews
+@Composable
+fun OverlayFormPreview() = Frame { com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(overlayForm) {} }
+
+/** Save pressed before a kind was picked: the kind field says what is missing (rule 21). */
+@ThemePreviews
+@Composable
+fun OverlayFormMissingKindPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(com.kurtz.homerecord.housemodel.ui.OverlayForm(points = sinkWallOverlays[4].points, stage = WallStage.ROUGH_IN, triedSave = true)) {}
+}
+
+/** The kind sheet's list: every kind with its icon in its layer color (AC-C25, rule 26). */
+@ThemePreviews
+@Composable
+fun OverlayKindListPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.KindList(com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_HOT, androidx.compose.foundation.isSystemInDarkTheme()) {}
+}
+
+/** The room page's Overlays section listing the sink wall's overlays; each opens its wall (AC-C25). */
+@ThemePreviews
+@Composable
+fun RoomOverlaysPreview() = Frame {
+    RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", walls = kitchenWalls, wallStage = WallStage.ROUGH_IN,
+        canOpenWalls = true, overlays = sinkWallOverlays.take(3) + sinkWallOverlays[4]), {})
+}

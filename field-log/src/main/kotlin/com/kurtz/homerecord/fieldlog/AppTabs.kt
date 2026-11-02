@@ -261,6 +261,14 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 container.homes, container.wallPhotos, container.media, key.roomId, onBack = nav::pop,
                 onOutline = { nav.push(JobWallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
                 onView3D = { nav.push(JobHouse3DKey(it.homeId, it.homeName, it.floorId, it.roomId)) },
+                overlays = container.overlays,
+                onOpenWall = { nav.push(JobWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
+            )
+        }
+        entry<JobWallKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
+                container.homes, container.wallPhotos, container.overlays, container.wallTextures, key.roomId, key.wallId,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop,
             )
         }
         entry<JobWallOutlineKey> { key ->

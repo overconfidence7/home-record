@@ -62,6 +62,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.ui.graphics.luminance
+import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.overlays.color
+import com.kurtz.homerecord.housemodel.overlays.icon
+import com.kurtz.homerecord.housemodel.overlays.nameRes
 import com.kurtz.homerecord.core.units.UnitSystem
 import java.io.File
 
@@ -111,6 +118,7 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                     when (section.tag) {
                         "items" -> RoomItemsCard(state.items, state.canAddItem, onEvent)
                         "walls" -> RoomWallsCard(state, onEvent)
+                        "overlays" -> if (state.overlays != null) RoomOverlaysCard(state, state.overlays, onEvent) else RoomSectionCard(section)
                         else -> RoomSectionCard(section)
                     }
                 }
@@ -214,7 +222,7 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("${prefix}_room_wall_photo_error"),
                 )
             }
-            state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, onEvent) }
+            state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, state.canOpenWalls, onEvent) }
         }
     }
     val sheetWall = state.photoSheetFor?.let { id -> state.walls.firstOrNull { it.id == id } }
@@ -257,7 +265,7 @@ internal fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit,
 }
 
 @Composable
-private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, canPhotograph: Boolean, onEvent: (RoomEvent) -> Unit) {
+private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, canPhotograph: Boolean, canOpen: Boolean, onEvent: (RoomEvent) -> Unit) {
     val prefix = LocalTagPrefix.current
     val name = wallName(wall)
     val photographed = WallStage.entries.filter { it in wall.thumbnails }
@@ -285,11 +293,54 @@ private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, ca
             }
         },
         leadingContent = { WallThumbnail(photo, stringResource(R.string.room_wall_photo_description, stringResource(stage.labelRes), name)) },
-        trailingContent = if (canPhotograph && !buttonBelow) button else null,
+        trailingContent = if (canPhotograph && !buttonBelow) button else if (canOpen) RecordListItemChevron else null,
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = Modifier.heightIn(min = 72.dp).testTag("${prefix}_room_wall_${wall.id}"),
+        modifier = Modifier
+            .heightIn(min = 72.dp)
+            .then(if (canOpen) Modifier.clickable(onClickLabel = stringResource(R.string.room_wall_open)) { onEvent(RoomEvent.OpenWall(wall.id)) } else Modifier)
+            .testTag("${prefix}_room_wall_${wall.id}"),
     )
 }
+
+/** The Overlays section (AC-C25): every overlay in the room by kind icon and color; a tap opens its wall with it picked. */
+@Composable
+private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    Card(Modifier.fillMaxWidth().testTag("${prefix}_room_overlays")) {
+        Column(Modifier.padding(vertical = 8.dp)) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Rounded.Layers, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.room_section_overlays), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            }
+            if (overlays.isEmpty()) {
+                Text(
+                    stringResource(if (state.walls.isEmpty()) R.string.room_section_overlays_empty else R.string.room_section_overlays_empty_walls),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
+            overlays.forEach { o ->
+                val kindName = stringResource(o.kind.nameRes)
+                val wall = o.wallId?.let { id -> state.walls.firstOrNull { it.id == id } }
+                val where = wall?.let { wallName(it) } ?: stringResource(R.string.room_overlay_on_plan)
+                val wallId = o.wallId
+                RecordListItem(
+                    headline = o.title(kindName),
+                    supporting = listOfNotNull(kindName.takeIf { o.label.isNotBlank() }, where, stringResource(R.string.wall_overlay_recorded_at, stringResource(o.stage.labelRes))).joinToString(" · "),
+                    leading = { Icon(o.kind.icon, contentDescription = null, tint = o.kind.color(dark)) },
+                    onClick = if (wallId != null && state.canOpenWalls) ({ onEvent(RoomEvent.OpenWall(wallId, o.id)) }) else null,
+                    trailing = if (wallId != null && state.canOpenWalls) RecordListItemChevron else null,
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.testTag("${prefix}_room_overlay_${o.id}"),
+                )
+            }
+        }
+    }
+}
+
+private val RecordListItemChevron: @Composable () -> Unit = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }
 
 /** 56 dp picture of the wall at the chosen stage over a plain tile, which shows when the stage has no photo or it fails to load (rule 27). */
 @Composable

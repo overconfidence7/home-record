@@ -152,7 +152,15 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },
             onOutline = { nav.push(WallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
             onView3D = { nav.push(House3DKey(it.floorId, it.roomId)) },
+            overlays = container.overlays,
+            onOpenWall = { nav.push(RoomWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
         ) }
+        entry<RoomWallKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
+                container.homes, container.wallPhotos, container.overlays, container.wallTextures, key.roomId, key.wallId,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop,
+            )
+        }
         entry<WallOutlineKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOutlineRoute(
                 container.wallPhotos, container.wallTextures, container.media, key.roomId, key.wallId,

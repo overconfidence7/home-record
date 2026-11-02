@@ -443,6 +443,9 @@ class AppContainer(private val app: Application) {
         row.texturePath?.let { uploadMedia(tenant, files.ENTITY, row.id, files.TEXTURE, it, "image/jpeg") }
     }
 
+    /** Pipes, wires and boxes the crew draws on walls and the plan (AC-C25..C28). */
+    val overlays by lazy { com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange) }
+
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 
     val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange, app.getString(com.kurtz.homerecord.housemodel.R.string.floor_default_main)) }

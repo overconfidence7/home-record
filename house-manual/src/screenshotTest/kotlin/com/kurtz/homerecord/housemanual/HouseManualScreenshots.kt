@@ -459,3 +459,48 @@ fun House3DErrorScreenshot() = House3DErrorPreview()
 @Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
 @Composable
 fun House3DLandscapeScreenshot() = House3DLandscapePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysScreenshot() = WallOverlaysPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysDrawingScreenshot() = WallOverlaysDrawingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysSelectedScreenshot() = WallOverlaysSelectedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysEmptyScreenshot() = WallOverlaysEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysDeleteScreenshot() = WallOverlaysDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun OverlayFormScreenshot() = OverlayFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun OverlayFormMissingKindScreenshot() = OverlayFormMissingKindPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun OverlayKindListScreenshot() = OverlayKindListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RoomOverlaysScreenshot() = RoomOverlaysPreview()

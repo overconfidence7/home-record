@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.ItemRow
+import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,8 @@ class RoomViewModel(
     private val media: MediaFiles? = null,
     /** The app has a 3D view to open the room in (AC-C22). */
     canView3D: Boolean = false,
+    /** The room's overlays (AC-C25); with it, wall rows open HM-Wall. */
+    overlays: Flow<List<Overlay>>? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(
@@ -38,6 +41,8 @@ class RoomViewModel(
             canView3D = canView3D,
             canPhotograph = media != null && walls != null,
             wallStage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage,
+            canOpenWalls = overlays != null && walls != null,
+            overlays = if (overlays != null) emptyList() else null,
         ),
     )
     val state: StateFlow<RoomUiState> = _state.asStateFlow()
@@ -55,6 +60,9 @@ class RoomViewModel(
         }
         if (walls != null) {
             viewModelScope.launch { walls.collect { list -> _state.update { it.copy(walls = list) } } }
+        }
+        if (overlays != null) {
+            viewModelScope.launch { overlays.collect { list -> _state.update { it.copy(overlays = list) } } }
         }
     }
 
