@@ -32,6 +32,8 @@ import com.kurtz.homerecord.housemodel.items.labelRes
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.OptionsSheet
+import com.kurtz.homerecord.coreui.components.SheetOption
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
@@ -192,8 +194,28 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                 return@Column
             }
             WallStagePicker(state.wallStage, { onEvent(RoomEvent.SelectStage(it)) }, Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            if (state.photoImportFailed) {
+                Text(
+                    stringResource(R.string.wall_photo_import_failed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("${prefix}_room_wall_photo_error"),
+                )
+            }
             state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, onEvent) }
         }
+    }
+    val sheetWall = state.photoSheetFor?.let { id -> state.walls.firstOrNull { it.id == id } }
+    if (sheetWall != null) {
+        OptionsSheet(
+            title = wallName(sheetWall),
+            options = listOf(
+                SheetOption("wall_take", stringResource(R.string.wall_photo_take), Icons.Rounded.PhotoCamera),
+                SheetOption("wall_choose", stringResource(R.string.wall_photo_choose), Icons.Rounded.PhotoLibrary),
+            ),
+            onDismiss = { onEvent(RoomEvent.ClosePhotoSheet) },
+            onPick = { onEvent(if (it.id == "wall_take") RoomEvent.TakeWallPhoto else RoomEvent.ChooseWallPhoto) },
+        )
     }
 }
 
@@ -272,7 +294,7 @@ private fun WallThumbnail(path: String?, description: String) {
 }
 
 @Composable
-private fun wallName(wall: RoomWall): String {
+internal fun wallName(wall: RoomWall): String {
     val side = stringResource(
         when (wall.side) {
             WallSide.NORTH -> R.string.room_wall_north
@@ -286,7 +308,7 @@ private fun wallName(wall: RoomWall): String {
 }
 
 @get:StringRes
-private val WallStage.labelRes: Int
+internal val WallStage.labelRes: Int
     get() = when (this) {
         WallStage.FRAMING -> R.string.wall_stage_framing
         WallStage.ROUGH_IN -> R.string.wall_stage_rough_in

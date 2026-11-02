@@ -320,4 +320,30 @@
     <string name="reminder_default_replace_smoke_detector_battery">Replace smoke detector battery</string>
     <string name="reminder_default_replace_water_filter">Replace water filter</string>
     <string name="reminder_default_test_sump_pump">Test sump pump</string>
+    <!-- Photograph this wall and HM-WallOutline (AC-C18) -->
+    <string name="wall_photo_take">Take photo</string>
+    <string name="wall_photo_choose">Choose from gallery</string>
+    <string name="wall_photo_import_failed">Couldn\'t open that photo. Try another one.</string>
+    <string name="wall_outline_title">Outline the wall</string>
+    <string name="wall_outline_subtitle">%1$s · %2$s</string>
+    <string name="wall_outline_hint">Drag each corner onto a corner of the wall. The dashed box is the wall\'s shape, %1$s × %2$s.</string>
+    <string name="wall_outline_use">Use</string>
+    <string name="wall_outline_saving">Saving…</string>
+    <string name="wall_outline_reset">Reset corners</string>
+    <string name="wall_outline_corner_top_left">Top left corner</string>
+    <string name="wall_outline_corner_top_right">Top right corner</string>
+    <string name="wall_outline_corner_bottom_right">Bottom right corner</string>
+    <string name="wall_outline_corner_bottom_left">Bottom left corner</string>
+    <string name="wall_outline_move_left">Move left</string>
+    <string name="wall_outline_move_right">Move right</string>
+    <string name="wall_outline_move_up">Move up</string>
+    <string name="wall_outline_move_down">Move down</string>
+    <string name="wall_outline_photo_description">%1$s photo with the outline</string>
+    <string name="wall_outline_loupe_description">Close up of the corner</string>
+    <string name="wall_outline_not_usable">The corners cross or are too close together. Drag them onto the wall\'s four corners.</string>
+    <string name="wall_outline_texture_failed">Couldn\'t save the photo. Check free space and tap Use again.</string>
+    <string name="wall_outline_wall_gone">This wall was removed from the plan, so the photo has nowhere to go.</string>
+    <string name="wall_outline_unreadable_title">Can\'t open this photo</string>
+    <string name="wall_outline_unreadable_body">The file is missing or isn\'t a photo. Go back and take it again.</string>
+    <string name="wall_outline_back">Back to the room</string>
 </resources>

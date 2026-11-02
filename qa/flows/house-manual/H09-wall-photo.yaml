@@ -1,0 +1,60 @@
+# Walkthrough H9: photograph a kitchen wall and outline its corners (AC-C17, AC-C18). Builds on H02 (Kitchen drawn).
+# The camera and the system photo picker are other apps, so the steps inside the picker run only when the picker shows
+# the fixture; the sheet, the outline screen and the saved thumbnail are checked whenever the app reaches them.
+appId: com.kurtz.homerecord.housemanual
+---
+- addMedia:
+    - "../../fixtures/wall-kitchen.jpg"
+- runFlow: H02-draw-plan.yaml
+- tapOn:
+    id: "hm_tab_house"
+- tapOn: "Kitchen"
+- scrollUntilVisible:
+    element: "North wall"
+- assertVisible: "North wall"
+# AC-C18: each wall offers Photograph; it opens the camera or the gallery
+- tapOn:
+    text: "Photograph"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "hm_sheet_wall_take"
+    timeout: 10000
+- assertVisible: "Take photo"
+- assertVisible: "Choose from gallery"
+- takeScreenshot: H09-wall-photo-sheet
+- tapOn:
+    id: "hm_sheet_wall_choose"
+- runFlow:
+    when:
+      visible: "Photo taken on.*"
+    commands:
+      - tapOn:
+          text: "Photo taken on.*"
+          index: 0
+- runFlow:
+    when:
+      visible:
+        id: "hm_wall_outline_use"
+    commands:
+      # AC-C18: the photo with four handles, starting 10% in, the dashed guide and Use
+      - assertVisible: "Outline the wall"
+      - assertVisible:
+          id: "hm_wall_outline_handle_0"
+      - assertVisible:
+          id: "hm_wall_outline_handle_1"
+      - assertVisible:
+          id: "hm_wall_outline_handle_2"
+      - assertVisible:
+          id: "hm_wall_outline_handle_3"
+      - assertVisible: ".*The dashed box is the wall's shape.*"
+      - takeScreenshot: H09-wall-outline
+      - tapOn:
+          id: "hm_wall_outline_use"
+      # Back on the room: the wall row lists the Finished photo
+      - extendedWaitUntil:
+          visible: ".*Photos: Finished"
+          timeout: 15000
+      - assertVisible:
+          text: "Retake"
+      - takeScreenshot: H09-wall-thumbnail

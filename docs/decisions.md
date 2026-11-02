@@ -525,3 +525,20 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   and which stages have photos in words. Photograph/Retake is drawn only when the app can capture (`canPhotograph`), so
   it stays off until T048c wires the camera; at ≥ 150% font the button moves under the row's text.
 - New DAO query `WallPhotoDao.observeForRoom` (join on live walls); no schema change.
+
+## 2026-11-02 T048c: Photograph this wall and the outline screen
+
+- "Photograph" on a wall opens a sheet (Take photo / Choose from gallery, the same words as the item form); the camera
+  writes into `filesDir/media` through `MediaFiles`, the picker's photo is copied there. The wall, the stage shown on the
+  room page and the camera file wait in the room's `SavedStateHandle`, so a result after rotation or process death still
+  opens the outline. Field Log's room page now gets a `MediaFiles` too (the same `AndroidMediaFiles`).
+- HM-WallOutline is one shared screen in `:house-model` (`WallOutlineKey` in House Manual, `JobWallOutlineKey` in Field
+  Log, both full screen without the tab bar). One pointer handler on the photo picks the nearest handle within 48 dp;
+  the handles are separate 48 dp nodes with tags and TalkBack actions (move left/right/up/down by 1%). The loupe (3x)
+  draws the same painter, at the top corner away from the finger. The dashed guide is the wall's length × height
+  centered in 80% of the photo (`OutlineGuide`), drawn white dashes over a dark line so it reads on any wall colour.
+- Use refuses crossed or tiny outlines (`WallOutline.isUsable`) with a message; otherwise `WallTextureMaker`
+  (`AndroidWallTextureMaker`: `WallTextureBuilder` on Dispatchers.Default) writes `<photo>-wall.jpg` beside the photo
+  and `WallPhotoRepository.save` files it at the stage. Back discards the new photo; a texture failure keeps the
+  screen with the reason.
+- Wall photo files do not upload yet (new subtask T048d); the rows sync, the pictures stay on the phone that took them.

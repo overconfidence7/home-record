@@ -63,8 +63,8 @@ class RoomViewModelTest {
 
     private fun vm(roomId: String, rows: MutableStateFlow<List<ItemRow>>? = null) = RoomViewModel(repo, roomId, rows).also { created += it }
 
-    private fun wallsVm(roomId: String, stage: WallStage, saved: SavedStateHandle = SavedStateHandle()) =
-        RoomViewModel(repo, roomId, walls = WallPhotoRepository(db).observeRoomWalls(roomId), defaultStage = stage, savedState = saved).also { created += it }
+    private fun wallsVm(roomId: String, stage: WallStage, saved: SavedStateHandle = SavedStateHandle(), media: FakeWallMedia? = null) =
+        RoomViewModel(repo, roomId, walls = WallPhotoRepository(db).observeRoomWalls(roomId), defaultStage = stage, savedState = saved, media = media).also { created += it }
 
     private val kitchen = PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 168, 144)
     private val living = PlanRoom.rectangle("l", "Living room", "LIVING_ROOM", 168, 0, 180, 144)
@@ -149,5 +149,68 @@ class RoomViewModelTest {
 
         val restored = wallsVm("k", WallStage.BehindTheWall, saved)
         assertThat(restored.state.value.wallStage).isEqualTo(WallStage.INSULATION)
+    }
+
+    @AcceptanceCriterion("AC-C18")
+    @Test fun photographThisWallTakesAPhotoAndOpensTheOutlineAtTheChosenStage() = test {
+        mainFloor()
+        val media = FakeWallMedia()
+        val saved = SavedStateHandle()
+        val model = wallsVm("k", WallStage.BehindTheWall, saved, media)
+        val wall = withTimeout(10_000) { model.state.first { it.walls.size == 4 } }.walls.first()
+        assertThat(model.state.value.canPhotograph).isTrue()
+
+        model.onPhotoEvent(RoomEvent.PhotographWall(wall.id))
+        assertThat(model.state.value.photoSheetFor).isEqualTo(wall.id)
+        model.onPhotoEvent(RoomEvent.TakeWallPhoto)
+        val launch = checkNotNull(model.state.value.photoLaunch)
+        val target = checkNotNull(launch.target)
+        assertThat(model.state.value.photoSheetFor).isNull()
+        model.onPhotoEvent(RoomEvent.PhotoLaunchHandled)
+
+        // The camera result lands on a view model rebuilt after process death.
+        media.written += target.path
+        val restored = wallsVm("k", WallStage.BehindTheWall, saved, media)
+        restored.onPhotoEvent(RoomEvent.CameraResult(ok = true))
+        assertThat(restored.state.value.outlineRequest).isEqualTo(WallOutlineRequest(wall.id, WallStage.ROUGH_IN, target.path))
+        restored.onPhotoEvent(RoomEvent.OutlineOpened)
+        assertThat(restored.state.value.outlineRequest).isNull()
+    }
+
+    @AcceptanceCriterion("AC-C18")
+    @Test fun aWallPhotoCanComeFromTheGalleryAndACancelledCameraLeavesNoFile() = test {
+        mainFloor()
+        val media = FakeWallMedia()
+        val model = wallsVm("k", WallStage.HouseManualDefault, media = media)
+        val wall = withTimeout(10_000) { model.state.first { it.walls.size == 4 } }.walls.last()
+
+        model.onPhotoEvent(RoomEvent.PhotographWall(wall.id))
+        model.onPhotoEvent(RoomEvent.TakeWallPhoto)
+        val path = checkNotNull(model.state.value.photoLaunch?.target).path
+        model.onPhotoEvent(RoomEvent.CameraResult(ok = false))
+        assertThat(media.discarded).containsExactly(path)
+        assertThat(model.state.value.outlineRequest).isNull()
+
+        model.onPhotoEvent(RoomEvent.PhotographWall(wall.id))
+        model.onPhotoEvent(RoomEvent.ChooseWallPhoto)
+        assertThat(model.state.value.photoLaunch).isEqualTo(WallPhotoLaunch(null))
+        model.onPhotoEvent(RoomEvent.GalleryResult("content://picker/42"))
+        val request = withTimeout(10_000) { model.state.first { it.outlineRequest != null } }.outlineRequest
+        assertThat(request).isEqualTo(WallOutlineRequest(wall.id, WallStage.FINISHED, "media/picked.jpg"))
+
+        media.importResult = null
+        model.onPhotoEvent(RoomEvent.OutlineOpened)
+        model.onPhotoEvent(RoomEvent.PhotographWall(wall.id))
+        model.onPhotoEvent(RoomEvent.ChooseWallPhoto)
+        model.onPhotoEvent(RoomEvent.GalleryResult("content://picker/43"))
+        assertThat(withTimeout(10_000) { model.state.first { it.photoImportFailed } }.outlineRequest).isNull()
+    }
+
+    @Test fun noPhotographWithoutSomewhereToKeepThePhoto() = test {
+        mainFloor()
+        val model = wallsVm("k", WallStage.HouseManualDefault)
+        assertThat(model.state.value.canPhotograph).isFalse()
+        model.onPhotoEvent(RoomEvent.PhotographWall("w"))
+        assertThat(model.state.value.photoSheetFor).isNull()
     }
 }

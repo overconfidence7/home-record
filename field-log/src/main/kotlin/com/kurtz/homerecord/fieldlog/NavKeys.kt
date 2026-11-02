@@ -26,6 +26,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
 
+/** The outline screen for a new "behind the wall" photo (AC-C17, AC-C18); [stage] is a `WallStage` name. */
+@Serializable data class JobWallOutlineKey(val roomId: String, val wallId: String, val stage: String, val photoPath: String) : NavKey
+
 @Serializable data class PhotoKey(val photoId: String) : NavKey
 @Serializable data class FileKey(val fileId: String) : NavKey
 @Serializable data class MarkupKey(val fileId: String) : NavKey
@@ -57,6 +60,6 @@ import kotlinx.serialization.Serializable
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is JobWallOutlineKey, CompanyKey -> true
     else -> false
 }

@@ -739,3 +739,94 @@ fun MoreSignOutConfirmPreview() = Frame {
         )
     }
 }
+
+/** A phone shot of a kitchen wall, a little off square, drawn with canvas so the outline previews show a real photo. */
+private val sampleWallPhoto: androidx.compose.ui.graphics.painter.Painter by lazy {
+    val w = 1200
+    val h = 900
+    val bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(bmp)
+    val paint = android.graphics.Paint().apply { isAntiAlias = true }
+    c.drawColor(android.graphics.Color.rgb(226, 224, 218))
+    paint.color = android.graphics.Color.rgb(150, 112, 78)
+    c.drawRect(0f, 780f, w.toFloat(), h.toFloat(), paint)
+    fun quad(vararg p: Float) = android.graphics.Path().apply {
+        moveTo(p[0], p[1]); lineTo(p[2], p[3]); lineTo(p[4], p[5]); lineTo(p[6], p[7]); close()
+    }
+    paint.color = android.graphics.Color.rgb(196, 207, 186)
+    c.drawPath(quad(150f, 120f, 1080f, 170f, 1050f, 800f, 170f, 760f), paint)
+    paint.color = android.graphics.Color.rgb(246, 244, 238)
+    c.drawPath(quad(170f, 735f, 1052f, 772f, 1050f, 800f, 170f, 760f), paint)
+    c.drawPath(quad(430f, 250f, 760f, 262f, 755f, 520f, 432f, 512f), paint)
+    paint.color = android.graphics.Color.rgb(172, 200, 222)
+    c.drawPath(quad(450f, 270f, 740f, 281f, 736f, 500f, 452f, 492f), paint)
+    paint.color = android.graphics.Color.rgb(246, 244, 238)
+    c.drawRect(590f, 270f, 600f, 500f, paint)
+    c.drawRect(880f, 600f, 912f, 650f, paint)
+    paint.color = android.graphics.Color.rgb(90, 90, 90)
+    c.drawRect(893f, 612f, 899f, 622f, paint)
+    c.drawRect(893f, 630f, 899f, 640f, paint)
+    androidx.compose.ui.graphics.painter.BitmapPainter(bmp.asImageBitmap())
+}
+
+private val kitchenNorthWall = RoomWall("w1", WallSide.NORTH, null, 168, 96)
+
+/** Handles dragged most of the way onto the wall's corners; the bottom right one still 10% in. */
+private val outlineInProgress = com.kurtz.homerecord.housemodel.walls.WallOutline(
+    com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.125f, 0.133f),
+    com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.9f, 0.189f),
+    com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.9f, 0.9f),
+    com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.142f, 0.844f),
+)
+
+private val outlineState = com.kurtz.homerecord.housemodel.ui.WallOutlineUiState(
+    loading = false, wall = kitchenNorthWall, stage = WallStage.FINISHED, photoPath = "/preview/kitchen-north.jpg",
+    photoWidth = 1200, photoHeight = 900, outline = outlineInProgress,
+)
+
+/** HM-WallOutline as it opens after the shot, handles part way onto the corners (AC-C18). */
+@ThemePreviews
+@Composable
+fun WallOutlinePreview() = Frame { com.kurtz.homerecord.housemodel.ui.WallOutlineScreen(outlineState, {}, sampleWallPhoto) }
+
+/** Dragging the bottom right handle: the loupe shows the corner up close (AC-C18). */
+@ThemePreviews
+@Composable
+fun WallOutlineDraggingPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOutlineScreen(
+        outlineState.copy(
+            outline = outlineInProgress.moved(2, com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.875f, 0.889f)),
+            dragging = 2,
+        ),
+        {}, sampleWallPhoto,
+    )
+}
+
+/** Use with the corners crossed: the reason sits above the buttons. */
+@ThemePreviews
+@Composable
+fun WallOutlineCrossedPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOutlineScreen(
+        outlineState.copy(
+            outline = outlineInProgress.moved(0, com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.92f, 0.86f)),
+            error = com.kurtz.homerecord.housemodel.ui.WallOutlineError.NotUsable,
+        ),
+        {}, sampleWallPhoto,
+    )
+}
+
+/** Straightening and saving after Use. */
+@ThemePreviews
+@Composable
+fun WallOutlineSavingPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOutlineScreen(outlineState.copy(outline = outlineInProgress.moved(2, com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.875f, 0.889f)), saving = true), {}, sampleWallPhoto)
+}
+
+/** The photo file is gone or not an image. */
+@ThemePreviews
+@Composable
+fun WallOutlineUnreadablePreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOutlineScreen(
+        outlineState.copy(error = com.kurtz.homerecord.housemodel.ui.WallOutlineError.PhotoUnreadable, photoWidth = 0, photoHeight = 0), {},
+    )
+}

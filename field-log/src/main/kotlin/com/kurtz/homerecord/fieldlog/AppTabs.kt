@@ -248,7 +248,16 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<JobRoomKey> { key ->
-            com.kurtz.homerecord.housemodel.ui.RoomRoute(container.homes, container.wallPhotos, key.roomId, onBack = nav::pop)
+            com.kurtz.homerecord.housemodel.ui.RoomRoute(
+                container.homes, container.wallPhotos, container.media, key.roomId, onBack = nav::pop,
+                onOutline = { nav.push(JobWallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
+            )
+        }
+        entry<JobWallOutlineKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.WallOutlineRoute(
+                container.wallPhotos, container.wallTextures, container.media, key.roomId, key.wallId,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.photoPath, onClose = nav::pop,
+            )
         }
         entry<JobFloorsKey> { key ->
             com.kurtz.homerecord.housemodel.ui.FloorsRoute(container.homes, key.homeId, key.title, onBack = nav::pop)

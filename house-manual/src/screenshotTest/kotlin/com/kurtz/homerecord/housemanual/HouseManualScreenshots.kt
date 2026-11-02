@@ -389,3 +389,28 @@ fun MoreSignedOutScreenshot() = MoreSignedOutPreview()
 @ThemePreviews
 @Composable
 fun MoreSignOutConfirmScreenshot() = MoreSignOutConfirmPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOutlineScreenshot() = WallOutlinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOutlineDraggingScreenshot() = WallOutlineDraggingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOutlineCrossedScreenshot() = WallOutlineCrossedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOutlineSavingScreenshot() = WallOutlineSavingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOutlineUnreadableScreenshot() = WallOutlineUnreadablePreview()

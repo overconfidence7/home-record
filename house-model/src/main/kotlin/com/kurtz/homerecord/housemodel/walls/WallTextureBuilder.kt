@@ -97,6 +97,19 @@ object WallTextureBuilder {
         }
     }.getOrNull()
 
+    /** The photo's size as it stands upright (EXIF applied), read from the header only; null when it is not an image. */
+    fun uprightSize(path: String): TextureSize? = runCatching {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@runCatching null
+        val (w, h) = orientationOf(path).uprightSize(bounds.outWidth, bounds.outHeight)
+        TextureSize(w, h)
+    }.getOrNull()
+
+    private fun orientationOf(path: String): ImageOrientation = runCatching {
+        ImageOrientation.fromExif(ExifInterface(path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL))
+    }.getOrDefault(ImageOrientation.Upright)
+
     private fun decodeUpright(path: String): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(path, bounds)
@@ -106,9 +119,7 @@ object WallTextureBuilder {
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         val stored = BitmapFactory.decodeFile(path, options) ?: return null
-        val orientation = runCatching {
-            ImageOrientation.fromExif(ExifInterface(path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL))
-        }.getOrDefault(ImageOrientation.Upright)
+        val orientation = orientationOf(path)
         if (orientation.isIdentity) return stored
         val turn = Matrix().apply {
             postRotate(orientation.rotationDegrees.toFloat())

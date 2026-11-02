@@ -14,6 +14,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class RoomKey(val roomId: String) : NavKey
 
+/** HM-WallOutline for the new photo at [photoPath] of [wallId] in [roomId] at [stage] (a `WallStage` name, AC-C18). */
+@Serializable data class WallOutlineKey(val roomId: String, val wallId: String, val stage: String, val photoPath: String) : NavKey
+
 @Serializable data object ItemsKey : NavKey
 
 @Serializable data class ItemDetailKey(val itemId: String) : NavKey
@@ -25,4 +28,4 @@ import kotlinx.serialization.Serializable
 @Serializable data class PaywallKey(val feature: LimitedFeature? = null) : NavKey
 
 /** Full-screen editors hide the tab bar so only Close/Save or back leaves them (ui-standards rule 3). */
-fun isFullScreen(key: NavKey): Boolean = key is ItemEditKey || key is PaywallKey
+fun isFullScreen(key: NavKey): Boolean = key is ItemEditKey || key is PaywallKey || key is WallOutlineKey

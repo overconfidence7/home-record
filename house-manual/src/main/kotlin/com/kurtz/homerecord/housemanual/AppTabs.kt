@@ -140,9 +140,16 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
         entry<RoomKey> { key -> RoomRoute(
-            container.homes, container.items, container.wallPhotos, home.id, key.roomId, onBack = nav::pop,
+            container.homes, container.items, container.wallPhotos, container.media, home.id, key.roomId, onBack = nav::pop,
             onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },
+            onOutline = { nav.push(WallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
         ) }
+        entry<WallOutlineKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.WallOutlineRoute(
+                container.wallPhotos, container.wallTextures, container.media, key.roomId, key.wallId,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.photoPath, onClose = nav::pop,
+            )
+        }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
