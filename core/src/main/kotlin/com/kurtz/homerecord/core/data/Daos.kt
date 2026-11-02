@@ -67,6 +67,10 @@ interface WallPhotoDao {
     )
     fun observeForRoom(roomId: String): Flow<List<WallPhotoEntity>>
     @Query("UPDATE wall_photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    /** Device-local: where this phone keeps the downloaded photo; no sync, no updatedAt (cr:sync-local-columns). */
+    @Query("UPDATE wall_photo SET originalPath = :path WHERE id = :id") suspend fun setOriginalPath(id: String, path: String)
+    /** Device-local: where this phone keeps the downloaded straightened copy. */
+    @Query("UPDATE wall_photo SET texturePath = :path WHERE id = :id") suspend fun setTexturePath(id: String, path: String)
 }
 
 @Dao

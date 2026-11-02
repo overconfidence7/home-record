@@ -114,6 +114,10 @@ describe("AC-B21 presign", () => {
     expect((await post(lead, { ...plan, entityId: "f-mine" })).status).toBe(200);
     expect((await post(lead, { ...plan, entityId: "f-other" })).status).toBe(403);
     expect((await post(owner, { ...plan, entityId: "f-other" })).status).toBe(200);
+    // T048d: a behind-the-wall photo is a capture: Crew uploads both the photo and its straightened copy.
+    const wall = { ...body, tenantId: "co-rule", entity: "wall_photo", entityId: "wp-crew" };
+    expect((await post(crew, { ...wall, filename: "original.jpg" })).status).toBe(200);
+    expect((await post(crew, { ...wall, filename: "texture.jpg" })).status).toBe(200);
     await syncRow("co-rule", "photo", "p-gone", { jobId: "j-lead", deletedAt: 1761500000000 });
     expect((await post(crew, { ...body, tenantId: "co-rule", entityId: "p-gone" })).status).toBe(404);
   });

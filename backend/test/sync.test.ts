@@ -169,9 +169,28 @@ describe("AC-F5 job rows sync", () => {
       op(2, "o1", { roomId: "r1", kind: "DOOR", updatedAt: 10 }, 10, "opening"),
       op(3, "s1", { floorId: "f1", updatedAt: 10 }, 10, "stair"),
       op(4, "ph1", { jobId: "j1", room: "Kitchen", updatedAt: 10 }, 10, "photo"),
+      op(5, "wp1", { wallId: "w1", stage: "ROUGH_IN", r2Key: "s-c11/wall_photo/wp1/original.jpg", updatedAt: 10 }, 10, "wall_photo"),
     ]));
     expect(res.rejected).toEqual([]);
-    expect(res.accepted).toHaveLength(4);
+    expect(res.accepted).toHaveLength(5);
+  });
+
+  it("a Crew phone's behind-the-wall photo syncs with its R2 keys to the other phones (T048d)", async () => {
+    // AC-C17, AC-F49: the rough-in wall photo taken on one phone reaches the others as a record with its keys.
+    const owner = await seedUser("s-o12", "s-o12@x.com");
+    await seedCompany("s-c12", "Co", "s-o12");
+    const crew = await seedUser("s-w12", "s-w12@x.com");
+    await env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at) VALUES ('m-s-w12', 's-w12', 'company', 's-c12', 'crew', 1)").run();
+    const res = await json(await push(crew, "s-c12", "dev-crew", [
+      op(1, "wp2", {
+        wallId: "w1", stage: "ROUGH_IN", r2Key: "s-c12/wall_photo/wp2/original.jpg",
+        textureR2Key: "s-c12/wall_photo/wp2/texture.jpg", takenAt: 10, createdAt: 10, updatedAt: 10,
+      }, 10, "wall_photo"),
+    ]));
+    expect(res.rejected).toEqual([]);
+    const rows = (await pull(owner, "s-c12")).rows.filter((r: any) => r.entity === "wall_photo");
+    expect(rows).toHaveLength(1);
+    expect(rows[0].row.textureR2Key).toBe("s-c12/wall_photo/wp2/texture.jpg");
   });
 });
 

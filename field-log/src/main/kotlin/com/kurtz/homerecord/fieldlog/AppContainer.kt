@@ -70,7 +70,7 @@ class AppContainer(private val app: Application) {
     val mediaUploader by lazy {
         com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi, onUploaded = { row, presigned ->
             // Remember where the file lives in R2 so other phones, and this one after Free up, can download it (AC-F20).
-            uploadedKeys.record(row.entity, row.entityId, presigned.key.ifEmpty { row.key.orEmpty() })
+            uploadedKeys.record(row.entity, row.entityId, presigned.key.ifEmpty { row.key.orEmpty() }, row.filename)
         })
     }
     private val uploadedKeys by lazy { com.kurtz.homerecord.core.media.UploadedKeys(db, onChange = ::recordChange) }
@@ -428,7 +428,20 @@ class AppContainer(private val app: Application) {
 
     val media: com.kurtz.homerecord.core.media.MediaFiles by lazy { com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles(app) }
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()
-    val wallPhotos by lazy { com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange) }
+    /** Behind-the-wall photos go to R2 with the company's other media and come down on the crew's other phones (T048d). */
+    val wallPhotos by lazy {
+        com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
+            db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange,
+            upload = ::uploadWallPhoto, fetchMissing = { mediaDownloads.wallPhotos(it) },
+        )
+    }
+
+    private suspend fun uploadWallPhoto(row: com.kurtz.homerecord.core.data.WallPhotoEntity) {
+        val tenant = company.current?.let { TenantRef(TenantKind.Company, it.companyId) } ?: return
+        val files = com.kurtz.homerecord.core.media.WallPhotoFiles
+        uploadMedia(tenant, files.ENTITY, row.id, files.originalName(row.originalPath), row.originalPath, files.mime(row.originalPath))
+        row.texturePath?.let { uploadMedia(tenant, files.ENTITY, row.id, files.TEXTURE, it, "image/jpeg") }
+    }
 
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 

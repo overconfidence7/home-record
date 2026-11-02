@@ -6,7 +6,8 @@ import type { Row } from "./merge";
  *
  * - Lead: own time, plus the crew's time, tasks, files, logs, change orders, materials and schedule on the jobs
  *   they are on (job_crew or assignment); captures on any job; the job's house model.
- * - Crew and Sub: own time, captures (photo, note) on any job, and only the tasks assigned to them.
+ * - Crew and Sub: own time, captures (photo, note, behind-the-wall wall photo) on any job, and only the tasks
+ *   assigned to them.
  * - Nobody but Owner and Office writes the company, members, clients, jobs, crew lists, approvals or share links.
  * - Pull: Crew and Sub get only their own punches, shifts and approvals (Lead also the time on their jobs), and
  *   nobody but Owner and Office sees pay rates.
@@ -16,7 +17,7 @@ export const ADMIN_ROLES = new Set(["owner", "office"]);
 const ADMIN_ONLY = new Set(["company", "member", "client", "job", "job_crew", "timesheet_approval", "share_link"]);
 const OWN_TIME = new Set(["punch", "shift"]);
 const LEAD_JOB_ROWS = new Set(["job_file", "daily_log", "change_order", "material", "assignment", "task"]);
-const CAPTURE = new Set(["photo", "note"]);
+const CAPTURE = new Set(["photo", "note", "wall_photo"]);
 const JOB_HOUSE = new Set(["home", "floor", "room", "wall", "opening", "stair"]);
 const PRIVATE_TO_MEMBER = new Set(["punch", "shift", "timesheet_approval"]);
 const ADMIN_FIELDS: Record<string, string[]> = { member: ["rateCents", "fcmToken"] };

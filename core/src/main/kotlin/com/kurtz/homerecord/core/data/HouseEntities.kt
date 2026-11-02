@@ -88,6 +88,10 @@ data class WallPhotoEntity(
     /** JSON array of four {x,y} points in photo space (0..1). */
     val cornersJson: String = "[]",
     val takenAt: Long,
+    /** Where the photo as taken lives in R2 once uploaded; the shared way to reach it from another phone (T048d). */
+    val r2Key: String? = null,
+    /** Where the straightened copy lives in R2 once uploaded (T048d). */
+    val textureR2Key: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val deletedAt: Long? = null,

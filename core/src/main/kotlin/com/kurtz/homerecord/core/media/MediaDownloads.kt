@@ -3,6 +3,7 @@ package com.kurtz.homerecord.core.media
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.WallPhotoEntity
 import com.kurtz.homerecord.core.photo.OnPhone
 import com.kurtz.homerecord.core.sync.TenantRef
 import java.io.File
@@ -44,6 +45,32 @@ class MediaDownloads(
         val row = db.noteDao().get(id) ?: return OnPhone.Failed
         if (isOnPhone(row.voicePath)) return OnPhone.Ready
         fetch(row.r2Key) { db.noteDao().setVoicePath(id, it) }
+    }
+
+    /**
+     * Fetches the wall photos among [rows] whose files are not on this phone but are in R2 (T048d): the straightened
+     * copy first (the room page and the 3D view show it), then the photo as taken. Rows with nothing to fetch cost one
+     * file check each, so the room page can call this on every change. Returns how many files arrived.
+     */
+    suspend fun wallPhotos(rows: List<WallPhotoEntity>): Int {
+        var fetched = 0
+        for (row in rows) {
+            if (row.deletedAt != null) continue
+            if (row.textureR2Key != null && !isOnPhone(row.texturePath)) {
+                if (lock.withLock { wallFile(row.id, row.textureR2Key, { it.texturePath }) { p -> db.wallPhotoDao().setTexturePath(row.id, p) } }) fetched++
+            }
+            if (row.r2Key != null && !isOnPhone(row.originalPath)) {
+                if (lock.withLock { wallFile(row.id, row.r2Key, { it.originalPath }) { p -> db.wallPhotoDao().setOriginalPath(row.id, p) } }) fetched++
+            }
+        }
+        return fetched
+    }
+
+    /** One wall photo file, checked again under the lock so two room pages asking at once fetch it once. */
+    private suspend fun wallFile(id: String, key: String, path: (WallPhotoEntity) -> String?, save: suspend (String) -> Unit): Boolean {
+        val row = db.wallPhotoDao().get(id) ?: return false
+        if (isOnPhone(path(row))) return false
+        return fetch(key, save) == OnPhone.Ready
     }
 
     private suspend fun fetch(key: String?, save: suspend (String) -> Unit): OnPhone {

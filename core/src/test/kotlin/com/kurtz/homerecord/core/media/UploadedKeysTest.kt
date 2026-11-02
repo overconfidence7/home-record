@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobFileEntity
 import com.kurtz.homerecord.core.data.NoteEntity
 import com.kurtz.homerecord.core.data.PhotoEntity
+import com.kurtz.homerecord.core.data.WallPhotoEntity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -55,5 +56,30 @@ class UploadedKeysTest {
         assertThat(keys.record("document", "d1", "k3")).isFalse()
         assertThat(keys.record("photo", "p1", "")).isFalse()
         assertThat(changes).isEmpty()
+    }
+
+    // AC-C17, AC-C19 (T048d): a wall photo has two files; each finished upload fills its own key column.
+    @Test fun wallPhotoOriginalAndTextureEachGetTheirKey() = runBlocking<Unit> {
+        db.wallPhotoDao().upsert(
+            WallPhotoEntity(id = "wp1", wallId = "w1", stage = "ROUGH_IN", originalPath = "/m/wp1.jpg", texturePath = "/m/wp1-wall.jpg", takenAt = 1, createdAt = 1, updatedAt = 1),
+        )
+        assertThat(keys.record("wall_photo", "wp1", "c1/wall_photo/wp1/original.jpg", "original.jpg")).isTrue()
+        assertThat(keys.record("wall_photo", "wp1", "c1/wall_photo/wp1/texture.jpg", WallPhotoFiles.TEXTURE)).isTrue()
+        assertThat(keys.record("wall_photo", "wp1", "c1/wall_photo/wp1/texture.jpg", WallPhotoFiles.TEXTURE)).isFalse()
+
+        val row = checkNotNull(db.wallPhotoDao().get("wp1"))
+        assertThat(row.r2Key).isEqualTo("c1/wall_photo/wp1/original.jpg")
+        assertThat(row.textureR2Key).isEqualTo("c1/wall_photo/wp1/texture.jpg")
+        assertThat(row.updatedAt).isEqualTo(9_000L)
+        assertThat(changes).containsExactly("wall_photo" to "wp1", "wall_photo" to "wp1")
+    }
+
+    @Test fun wallPhotoFileNamesKeepTheExtensionAndType() {
+        assertThat(WallPhotoFiles.originalName("/files/media/abc.JPG")).isEqualTo("original.jpg")
+        assertThat(WallPhotoFiles.originalName("/files/media/abc.png")).isEqualTo("original.png")
+        assertThat(WallPhotoFiles.originalName("/files/media/no-extension")).isEqualTo("original.jpg")
+        assertThat(WallPhotoFiles.mime("/m/a.png")).isEqualTo("image/png")
+        assertThat(WallPhotoFiles.mime("/m/a.jpeg")).isEqualTo("image/jpeg")
+        assertThat(WallPhotoFiles.isTexture("original.jpg")).isFalse()
     }
 }

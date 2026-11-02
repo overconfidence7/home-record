@@ -542,3 +542,17 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   and `WallPhotoRepository.save` files it at the stage. Back discards the new photo; a texture failure keeps the
   screen with the reason.
 - Wall photo files do not upload yet (new subtask T048d); the rows sync, the pictures stay on the phone that took them.
+
+## 2026-11-02 T048d: wall photo files to the cloud
+
+- `wall_photo` gets two synced columns, `r2Key` (photo as taken) and `textureR2Key` (straightened copy); Room v8,
+  AutoMigration 7→8. The paths stay device-local (`*Path`), so a pulled row arrives with empty paths.
+- R2 names are fixed per photo: `<tenant>/wall_photo/<id>/original.<ext>` and `.../texture.jpg` (`WallPhotoFiles`),
+  so the upload queue stays idempotent per file and `UploadedKeys` knows which column a finished upload fills.
+- Downloads: the room page's photo flow passes rows on first, then fetches the missing files of the photos it shows
+  (newest per wall and stage, texture first) through `MediaDownloads`/`MediaCache`; a fetched file sets the local
+  path without a sync, the flow emits again and the picture appears. A failed fetch keeps the plain tile.
+- Backend: `wall_photo` joins the job house entities a company tenant syncs, and counts as a capture (Crew and Sub
+  may push and upload it), because the behind-the-wall photo is a crew job (AC-F49). Orphan cleanup already keys on
+  the row, so both files live as long as the row.
+- House Manual passes no upload/fetch hooks yet: it has no media upload path until its cloud sync (T075a).

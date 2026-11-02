@@ -108,7 +108,7 @@ class AppContainer(app: Application) {
 
     val items = ItemRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
-    val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db) { entity, id -> recordHomeChange(entity, id) }
+    val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()
 
     val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db, items::subtypeName)

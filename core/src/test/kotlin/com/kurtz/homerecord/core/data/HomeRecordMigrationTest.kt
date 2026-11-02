@@ -103,6 +103,16 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T048d: v8 adds the R2 keys of a wall photo's two files; photos taken before keep their paths and have no keys yet.
+    @Test fun v7ToV8AddsTheWallPhotoKeys() {
+        helper.createDatabase(7).use { db ->
+            db.execSQL("INSERT INTO wall_photo (id, wallId, stage, originalPath, texturePath, cornersJson, takenAt, createdAt, updatedAt, source) VALUES ('wp1', 'w1', 'ROUGH_IN', '/m/a.jpg', '/m/a-wall.jpg', '[]', 1, 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(8).use { db ->
+            assertThat(db.texts("SELECT originalPath FROM wall_photo WHERE id = 'wp1' AND r2Key IS NULL AND textureR2Key IS NULL")).containsExactly("/m/a.jpg")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -141,6 +151,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 7
+        const val LATEST = 8
     }
 }

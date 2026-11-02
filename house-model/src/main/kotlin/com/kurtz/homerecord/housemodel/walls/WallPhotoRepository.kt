@@ -4,7 +4,11 @@ import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.data.WallPhotoEntity
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -26,19 +30,45 @@ fun WallPhotoEntity.toWallPhoto(): WallPhoto =
 /**
  * Wall photos per stage. A wall keeps one photo per stage: photographing it again at the same stage replaces the earlier
  * one (the room page and the 3D view show one picture per stage). [onChange] feeds the sync outbox after every write.
+ *
+ * Files to the cloud (T048d): [upload] queues a new photo's files for R2 (the upload records their keys on the row);
+ * [fetchMissing] brings the files of photos taken on another phone onto this one, and runs whenever the room page's
+ * photos change, after the page has its rows, so a wall shows its plain tile until the picture arrives.
  */
 class WallPhotoRepository(
     private val db: HomeRecordDatabase,
     private val source: String = Sources.HOUSE_MANUAL,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    private val upload: suspend (WallPhotoEntity) -> Unit = {},
+    private val fetchMissing: suspend (List<WallPhotoEntity>) -> Unit = {},
 ) {
     /** The wall's photos keyed by stage, the newest at each stage. */
     fun observeByStage(wallId: String): Flow<Map<WallStage, WallPhoto>> = db.wallPhotoDao().observeFor(wallId).map(::latestByStage)
 
     /** The room's walls with a picture per photographed stage, following plan edits and new photos (AC-C17). */
     fun observeRoomWalls(roomId: String): Flow<List<RoomWall>> =
-        combine(db.wallDao().observeFor(roomId), db.wallPhotoDao().observeForRoom(roomId), RoomWalls::build).distinctUntilChanged()
+        combine(db.wallDao().observeFor(roomId), withMissingFetched(db.wallPhotoDao().observeForRoom(roomId)), RoomWalls::build)
+            .distinctUntilChanged()
+
+    /**
+     * Passes [photos] on unchanged and, after each list, fetches the missing files of the photos the page shows (the
+     * newest per wall and stage). A fetched file changes the row, the list comes again and the picture appears; a newer
+     * list cancels a fetch still running. A failed fetch leaves the plain tile, never an error.
+     */
+    private fun withMissingFetched(photos: Flow<List<WallPhotoEntity>>): Flow<List<WallPhotoEntity>> = channelFlow {
+        photos.collectLatest { rows ->
+            send(rows)
+            val shown = rows.groupBy { it.wallId }.values.flatMap { latestRowByStage(it).values }
+            try {
+                fetchMissing(shown)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Wall photo download failed", e)
+            }
+        }
+    }
 
     suspend fun byStage(wallId: String): Map<WallStage, WallPhoto> = latestByStage(db.wallPhotoDao().listFor(wallId))
 
@@ -59,13 +89,13 @@ class WallPhotoRepository(
         val at = now()
         val replaced = db.wallPhotoDao().listFor(wallId).filter { WallStage.fromStored(it.stage) == stage }
         val id = Ids.newId()
-        db.wallPhotoDao().upsert(
-            WallPhotoEntity(
-                id = id, wallId = wallId, stage = stage.name, originalPath = originalPath, texturePath = texturePath,
-                cornersJson = outline.encode(), takenAt = takenAt, createdAt = at, updatedAt = at, source = source,
-            ),
+        val row = WallPhotoEntity(
+            id = id, wallId = wallId, stage = stage.name, originalPath = originalPath, texturePath = texturePath,
+            cornersJson = outline.encode(), takenAt = takenAt, createdAt = at, updatedAt = at, source = source,
         )
+        db.wallPhotoDao().upsert(row)
         onChange(ENTITY, id)
+        upload(row)
         replaced.forEach {
             db.wallPhotoDao().softDelete(it.id, at)
             onChange(ENTITY, it.id)
@@ -81,6 +111,7 @@ class WallPhotoRepository(
 
     companion object {
         const val ENTITY = "wall_photo"
+        private const val TAG = "WallPhotos"
 
         /** The newest photo at each stage; rows with the same stage (two phones before a sync) keep the later one. */
         fun latestByStage(rows: List<WallPhotoEntity>): Map<WallStage, WallPhoto> = latestRowByStage(rows).mapValues { (_, row) -> row.toWallPhoto() }

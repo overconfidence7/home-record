@@ -9,7 +9,12 @@ import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.data.WallEntity
 import com.kurtz.homerecord.core.data.WallPhotoEntity
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -109,5 +114,32 @@ class WallPhotoRepositoryTest {
 
         db.wallDao().softDelete("w-east", 99)
         assertThat(repo.observeRoomWalls("kitchen").first().map { it.id }).containsExactly("w-north")
+    }
+
+    // T048d: a new photo is handed to the upload queue with both files; the room page asks for the missing files of
+    // the photos it shows (the newest per wall and stage) after it has its rows, and a failed fetch leaves the page as is.
+    @Test
+    @AcceptanceCriterion("AC-C17")
+    fun newPhotosGoToTheCloudAndPulledOnesAreFetched() = runTest {
+        val uploaded = mutableListOf<WallPhotoEntity>()
+        val asked = CompletableDeferred<List<String>>()
+        val cloud = WallPhotoRepository(
+            db, Sources.FIELD_LOG, now = { clock++ }, upload = { uploaded += it },
+            fetchMissing = { rows -> asked.complete(rows.map { it.id }); error("no network") },
+        )
+        val id = checkNotNull(cloud.save("w-north", WallStage.ROUGH_IN, "media/r.jpg", "media/r-tex.jpg", outline))
+        assertThat(uploaded.map { Triple(it.id, it.originalPath, it.texturePath) }).containsExactly(Triple(id, "media/r.jpg", "media/r-tex.jpg"))
+
+        // A Finished photo pulled from the other phone, and an older Rough-in one that the newer replaces on screen.
+        db.wallPhotoDao().upsert(WallPhotoEntity(id = "pulled", wallId = "w-north", stage = "FINISHED", originalPath = "", r2Key = "k", takenAt = 5, createdAt = 5, updatedAt = 5))
+        db.wallPhotoDao().upsert(WallPhotoEntity(id = "older", wallId = "w-north", stage = "ROUGH_IN", originalPath = "", r2Key = "k2", takenAt = 0, createdAt = 0, updatedAt = 0))
+
+        val walls = cloud.observeRoomWalls("kitchen").first()
+        assertThat(walls.single().thumbnails.keys).containsExactly(WallStage.ROUGH_IN, WallStage.FINISHED)
+        assertThat(walls.single().thumbnails[WallStage.FINISHED]).isEmpty()
+
+        backgroundScope.launch { cloud.observeRoomWalls("kitchen").collect {} }
+        val ids = withContext(Dispatchers.Default) { withTimeout(10_000) { asked.await() } }
+        assertThat(ids).containsExactly(id, "pulled")
     }
 }

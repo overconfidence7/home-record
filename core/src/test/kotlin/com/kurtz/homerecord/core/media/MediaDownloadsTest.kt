@@ -9,6 +9,7 @@ import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.NoteEntity
 import com.kurtz.homerecord.core.data.PhotoEntity
+import com.kurtz.homerecord.core.data.WallPhotoEntity
 import com.kurtz.homerecord.core.photo.OnPhone
 import com.kurtz.homerecord.core.sync.TenantKind
 import com.kurtz.homerecord.core.sync.TenantRef
@@ -132,5 +133,44 @@ class MediaDownloadsTest {
     @Test fun missingListsPathsNotOnThePhone() = runBlocking<Unit> {
         val here = File(tmp.root, "a.jpg").apply { writeText("x") }.absolutePath
         assertThat(downloads.missing(listOf(here, "", null, "/nowhere/b.jpg"))).containsExactly("", null, "/nowhere/b.jpg")
+    }
+
+    // AC-C17 (T048d): a rough-in wall photo pulled from the crew's other phone arrives as a row with keys and empty
+    // paths; its straightened copy and the photo as taken download into the cache, the local paths are set without
+    // queuing a sync, and asking again fetches nothing.
+    @Test fun pulledWallPhotoDownloadsBothFilesOnce() = runBlocking<Unit> {
+        db.wallPhotoDao().upsert(
+            WallPhotoEntity(
+                id = "wp1", wallId = "w1", stage = "ROUGH_IN", originalPath = "", texturePath = null,
+                r2Key = "c1/wall_photo/wp1/original.jpg", textureR2Key = "c1/wall_photo/wp1/texture.jpg",
+                takenAt = 1, createdAt = 1, updatedAt = 4,
+            ),
+        )
+        val pulled = listOf(checkNotNull(db.wallPhotoDao().get("wp1")))
+        assertThat(downloads.wallPhotos(pulled)).isEqualTo(2)
+        assertThat(net.downloads).containsExactly(
+            "https://r2/get/c1/wall_photo/wp1/texture.jpg", "https://r2/get/c1/wall_photo/wp1/original.jpg",
+        ).inOrder()
+        val row = checkNotNull(db.wallPhotoDao().get("wp1"))
+        assertThat(File(checkNotNull(row.texturePath)).isFile).isTrue()
+        assertThat(File(row.originalPath).isFile).isTrue()
+        assertThat(row.updatedAt).isEqualTo(4)
+        assertThat(db.outboxDao().pending()).isEmpty()
+
+        // The stale list the page still holds: the files are here now, so nothing is fetched twice.
+        assertThat(downloads.wallPhotos(pulled)).isEqualTo(0)
+        assertThat(net.downloads).hasSize(2)
+    }
+
+    @Test fun wallPhotoWithoutKeysOrOfflineKeepsItsPlainTile() = runBlocking<Unit> {
+        val notUploaded = WallPhotoEntity(id = "wp2", wallId = "w1", originalPath = "", takenAt = 1, createdAt = 1, updatedAt = 1)
+        db.wallPhotoDao().upsert(notUploaded)
+        assertThat(downloads.wallPhotos(listOf(notUploaded))).isEqualTo(0)
+        val keyed = notUploaded.copy(id = "wp3", r2Key = "c1/wall_photo/wp3/original.jpg")
+        db.wallPhotoDao().upsert(keyed)
+        net.offline = true
+        assertThat(downloads.wallPhotos(listOf(keyed))).isEqualTo(0)
+        assertThat(checkNotNull(db.wallPhotoDao().get("wp3")).originalPath).isEmpty()
+        assertThat(net.downloads).isEmpty()
     }
 }

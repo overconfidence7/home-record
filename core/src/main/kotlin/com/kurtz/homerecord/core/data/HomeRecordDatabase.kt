@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -65,6 +65,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 5, to = 6),
         // v7 (R09a): one column per daily log section; older logs keep reading from sectionsJson until saved again.
         AutoMigration(from = 6, to = 7),
+        // v8 (T048d): R2 keys of a wall photo and its straightened copy, so other phones can fetch them.
+        AutoMigration(from = 7, to = 8),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
