@@ -63,3 +63,9 @@ fun RefusedChangesDialogScreenshot() = com.kurtz.homerecord.coreui.components.Re
 @ThemeScreenshots
 @Composable
 fun WarrantyStatusLineScreenshot() = com.kurtz.homerecord.coreui.components.WarrantyStatusLinePreview()
+
+// judge:fl-nav-label-200-split: tab labels stay on one line at 200% on a 360 dp phone.
+@PreviewTest
+@com.kurtz.homerecord.coreui.shell.ShellPreviews
+@Composable
+fun ShellNavBarScreenshot() = com.kurtz.homerecord.coreui.shell.ShellNavBarPreview()

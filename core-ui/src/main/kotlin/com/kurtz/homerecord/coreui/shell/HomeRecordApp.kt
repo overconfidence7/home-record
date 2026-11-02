@@ -5,6 +5,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -111,7 +114,18 @@ fun HomeRecordApp(
                     icon = {
                         Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
                     },
-                    label = { Text(tab.label) },
+                    // One line per label: at 200% a long label ("Schedule", "Reminders") steps its size down
+                    // to fit (6 sp at 200% draws as large as the 12 sp label at 100%) instead of splitting mid-word and lifting its
+                    // icon off the others' baseline (rule 32); ellipsis only if even that does not fit.
+                    label = {
+                        Text(
+                            tab.label,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false,
+                            autoSize = TextAutoSize.StepBased(minFontSize = 6.sp, maxFontSize = 12.sp),
+                        )
+                    },
                     modifier = Modifier.testTag("${tagPrefix}_tab_${tab.id}"),
                 )
             }

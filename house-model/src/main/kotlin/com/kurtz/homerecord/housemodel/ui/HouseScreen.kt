@@ -5,6 +5,7 @@ import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -132,12 +133,12 @@ fun HouseScreen(
             if (state.rooms.isNotEmpty()) {
                 OutlinedButton(onClick = onEditPlan, modifier = m.testTag("${LocalTagPrefix.current}_house_edit_plan")) {
                     Icon(Icons.Rounded.Edit, contentDescription = null)
-                    Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
                 }
             }
             OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("${LocalTagPrefix.current}_house_floors")) {
                 Icon(Icons.Rounded.Layers, contentDescription = null)
-                Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
             }
             OutlinedButton(
                 onClick = { onEvent(HouseEvent.ExportPdf) },
@@ -145,7 +146,7 @@ fun HouseScreen(
                 modifier = m.testTag("${LocalTagPrefix.current}_house_export"),
             ) {
                 Icon(Icons.Rounded.PictureAsPdf, contentDescription = null)
-                Text(stringResource(R.string.house_export_pdf), modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.house_export_pdf), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
             }
         }
         // Three buttons side by side break words at large text, so they stack then.
@@ -154,10 +155,13 @@ fun HouseScreen(
                 buttons(Modifier.fillMaxWidth())
             }
         } else {
-            Row(
+            // Three labelled buttons in a third of a 360 dp phone each cut "Edit plan" and "Export
+            // PDF" in two, so at most two share a row: Export PDF takes the full row under them.
+            FlowRow(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                maxItemsInEachRow = 2,
             ) { buttons(Modifier.weight(1f)) }
         }
     }

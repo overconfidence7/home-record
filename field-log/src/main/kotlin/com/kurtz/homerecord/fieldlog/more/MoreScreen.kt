@@ -103,6 +103,8 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             RecordListItem(
                 headline = stringResource(R.string.more_storage),
                 supporting = stringResource(R.string.more_storage_detail, ByteSize.label(s.totalBytes), ByteSize.label(s.offlineBytes)),
+                // The numbers are the point of the row; at 200% they wrap instead of ending in "…" (rule 32).
+                supportingMaxLines = Int.MAX_VALUE,
                 leading = { Icon(Icons.Rounded.Storage, contentDescription = null) },
                 trailing = {
                     TextButton({ onEvent(MoreEvent.FreeUp) }, Modifier.heightIn(min = 48.dp).testTag("fl_more_free_up"), enabled = s.cachedBytes > 0) {

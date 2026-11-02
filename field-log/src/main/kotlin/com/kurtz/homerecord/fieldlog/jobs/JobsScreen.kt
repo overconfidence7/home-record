@@ -136,6 +136,10 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
         RecordListItem(
             headline = row.summary.name,
             supporting = row.supporting,
+            // The job name and address are how the crew tells jobs apart; at 200% beside the date
+            // they wrap rather than end in "…" (rule 32).
+            headlineMaxLines = 4,
+            supportingMaxLines = 4,
             trailing = row.nextDay?.let { day -> { Text(shortDate(day), style = MaterialTheme.typography.labelLarge) } },
             onClick = { onEvent(JobsEvent.Open(row.summary.id)) },
             modifier = Modifier.testTag("fl_jobs_row_${row.summary.id}"),
