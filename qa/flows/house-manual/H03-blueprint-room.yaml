@@ -45,6 +45,29 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_sheet_delete"
 - takeScreenshot: H03-room-long-press
 - back
+# AC-C20: "3D view" opens the floor in 3D with Reset view, the stage selector and the floor's walls
+- scrollUntilVisible:
+    element:
+      id: "hm_house_3d"
+- tapOn:
+    id: "hm_house_3d"
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_reset"
+    timeout: 15000
+- assertVisible:
+    id: "hm_3d_scene"
+- assertVisible:
+    id: "hm_3d_stage_finished"
+    selected: true
+- assertVisible: "Main in 3D"
+- tapOn:
+    id: "hm_3d_reset"
+- takeScreenshot: H03-3d
+- tapOn:
+    id: "hm_back"
+- assertVisible:
+    id: "hm_house_3d"
 # Layer chips toggle overlays and stay set after a restart (AC-C15)
 - tapOn:
     id: "hm_layer_electrical"

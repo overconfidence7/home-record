@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import com.kurtz.homerecord.housemodel.blueprint.RoomPalette
 import com.kurtz.homerecord.housemodel.walls.WallStage
@@ -52,6 +53,8 @@ fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = 
             path.lineTo(ox + t.xs[2] * scale, oy + t.ys[2] * scale)
             path.close()
             drawPath(path, color)
+            // A hairline in the same color closes the anti-aliased seams between neighbouring triangles.
+            if (key !is MeshPartKey.Glass) drawPath(path, color, style = Stroke(width = 1f))
         }
     }
 }

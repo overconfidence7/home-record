@@ -27,6 +27,8 @@
 
 - 2026-10-31 (T043d1): Crew and Sub see a job's daily log read only and only once a lead (or Owner/Office) has opened that day; they cannot add a delay or note to the log itself (their notes and photos still flow into it from Capture). This follows the server sync policy. Say if crew should be able to add delays.
 
+- 2026-11-02 (T049b): untextured walls in 3D are tinted by room kind (kitchens cream, bedrooms soft blue, baths aqua...), since nothing sets a room color yet; and SceneView merges the `VIBRATE` permission (normal, no prompt) into the app. Say if rooms should get a user-picked color, or if `VIBRATE` should be stripped from the manifest.
+
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction.)
 
 - 2026-10-30 jank gate (AC-U11): on the CI emulator (SwiftShader) the jank stage now gates on UI-thread time per frame from framestats instead of gfxinfo's overall janky-frame count, which there is ~90% for any app because the CPU rasterises every frame. The overall number is still reported. If you want the overall number as the gate, it needs a runner with a hardware GPU (or a physical device); see docs/decisions.md 2026-10-30.

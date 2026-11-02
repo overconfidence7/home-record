@@ -572,3 +572,24 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   their height; any opening stops 4" below the ceiling. A door drawn on one room's side of a shared wall opens the
   neighbour's face too.
 - Floors are ear-clipped (own `PolygonTriangulator`, no library) so L-shaped and other concave rooms work.
+
+## 2026-11-02 T049b: HM-3D on SceneView
+
+- `io.github.sceneview:sceneview` **4.60.0** (approved library; the release current on 2026-10-19, built on Kotlin 2.4.21
+  and Compose BOM 2026.09.00 like the project; Filament 1.72.1 inside). The tree has no `arsceneview` and no
+  `filamat-android`: we use SceneView's bundled precompiled `opaque_colored`, `transparent_colored` and
+  `opaque_textured` materials. It merges `INTERNET`, `VIBRATE` (normal permissions) and a required
+  `glEsVersion 3.0` feature into House Manual (and Field Log once T049c uses it); record them in the data safety pass (S10).
+- One `MeshNode` per `MeshPart` (built through SceneView's `Geometry.Builder`, which turns normals into the tangent
+  quaternions lit materials need). Material instances and textures are cached per engine and released together;
+  buffers are released in a `DisposableEffect` declared before `SceneView` so Compose forgets the nodes first.
+  T050 owns the performance pass (merging parts, culling) for AC-C24.
+- Wall pictures load off the main thread, downscaled to 1024 px on the long side, straightened copy first.
+- Untextured faces use a paint-like tint per room-kind group (`RoomTint`, `RoomPalette` beside the layer palette):
+  `Room.color` exists in the schema but nothing sets it yet, and kinds keep every kitchen alike.
+- Reset view builds a new camera manipulator at the start pose (south of the floor, turned 30°, looking down 40°).
+- Filament cannot run in screenshot tests, Robolectric or the screen catalog, so `House3DScreen` takes a scene slot:
+  the route passes the live `FloorSceneView`, previews and the catalog pass `FloorScenePicture`, a flat-shaded
+  painter's-algorithm still of the same mesh from the same start pose.
+- The stage selector (AC-C20 names it) ships now with Finished first; floor chips switch floors. Stacked floors,
+  ghosting and "All floors" stay with T050 (AC-C21).
