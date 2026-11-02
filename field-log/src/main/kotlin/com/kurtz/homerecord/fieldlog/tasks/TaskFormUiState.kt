@@ -90,6 +90,10 @@ data class TaskFormUiState(
     val pinFloorId: String? = null,
     /** Name of the file the task is pinned on, for the "Pinned on a file" row. */
     val fileName: String? = null,
+    /** A Crew member's own task: shown, not edited; only Owner, Office and the job's Lead change tasks (AC-F3, R09g). */
+    val readOnly: Boolean = false,
+    /** The task shown read only is ticked done. */
+    val isDone: Boolean = false,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The name error shows once someone has typed and cleared it (rule 21). */

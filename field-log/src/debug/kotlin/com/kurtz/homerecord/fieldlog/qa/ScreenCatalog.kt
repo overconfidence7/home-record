@@ -101,6 +101,8 @@ object ScreenCatalog {
         QaScreen("task-form-delete", nonRoot = true) { TaskFormDeletePreview() },
         QaScreen("task-form-pinned", nonRoot = true) { TaskFormPinnedPreview() },
         QaScreen("task-form-file-pin", nonRoot = true) { TaskFormFilePinPreview() },
+        QaScreen("task-view", nonRoot = true) { TaskViewPreview() },
+        QaScreen("task-view-done", nonRoot = true) { TaskViewDonePreview() },
         QaScreen("task-pin", nonRoot = true) { TaskPinPickerPreview() },
         QaScreen("task-pin-empty", nonRoot = true) { TaskPinPickerEmptyPreview() },
         QaScreen("log-weather-form", nonRoot = true) { LogWeatherFormPreview() },

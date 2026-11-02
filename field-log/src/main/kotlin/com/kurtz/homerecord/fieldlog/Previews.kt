@@ -1538,3 +1538,29 @@ fun TaskFormFilePinPreview() = Frame {
         {},
     )
 }
+
+/** A Crew member's own task opened from a pin, read only: who, due, room, plan pin, punch list, note (R09g, AC-F35). */
+@ThemePreviews
+@Composable
+fun TaskViewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, readOnly = true, draft = pinnedDraft, initial = pinnedDraft, people = taskPeople, rooms = taskRooms,
+            plan = pinFloors,
+        ),
+        {},
+    )
+}
+
+/** A Crew member's ticked task pinned on a file page, read only (R09g). */
+@ThemePreviews
+@Composable
+fun TaskViewDonePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(
+        com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(
+            isNew = false, loading = false, readOnly = true, isDone = true, draft = filePinnedDraft, initial = filePinnedDraft,
+            people = taskPeople, rooms = taskRooms, fileName = "Garage plan.pdf",
+        ),
+        {},
+    )
+}

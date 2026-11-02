@@ -696,6 +696,10 @@
     <string name="task_form_note">Note</string>
     <string name="task_form_punch_help">The last fixes before the job is handed over.</string>
     <string name="task_form_delete">Delete task</string>
+    <string name="task_view_title">Task</string>
+    <string name="task_view_open">Not done yet</string>
+    <string name="task_view_done">Done</string>
+    <string name="task_view_read_only">Tick it done from your task list. To change anything else, ask the office or the job\'s lead.</string>
     <string name="task_delete_title">Delete %1$s?</string>
     <string name="task_delete_body">The task comes off this job for everyone.</string>
     <string name="push_channel_tasks">Tasks</string>

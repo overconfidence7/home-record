@@ -71,11 +71,12 @@ class TasksScreenTest {
         assertThat(events).contains(TasksEvent.Undo)
     }
 
-    @Test fun crewGetNoAddAndRowsDoNotOpen() {
+    // R09g: Crew see only their own tasks; a row opens the task read only (the form decides), there is no Add
+    @Test fun crewGetNoAddAndRowsOpenTheirTask() {
         val events = show(ready.copy(canManage = false, open = listOf(TaskRow("t1", "Set the kitchen outlets")), done = emptyList(), total = 1))
         rule.onNodeWithTag("fl_tasks_add").assertDoesNotExist()
         rule.onNodeWithTag("fl_tasks_row_t1").performClick()
-        assertThat(events).isEmpty()
+        assertThat(events).containsExactly(TasksEvent.Open("t1"))
     }
 
     @Test fun emptyPunchFilterOffersShowAll() {

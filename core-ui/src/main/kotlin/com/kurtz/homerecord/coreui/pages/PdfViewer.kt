@@ -88,12 +88,15 @@ fun PdfViewer(
                 val label = stringResource(R.string.pdf_viewer_page, index + 1, pages.pageCount)
                 val bitmap by produceState(pages.peek(index), pages, index) { value = pages.render(index, PAGE_WIDTH_PX) }
                 val shown = bitmap
+                // Until the page has rendered its placeholder has a guessed shape, so a tap there would land in the
+                // wrong place on the real page: it reports nothing (R09g).
+                val rendered by rememberUpdatedState(shown != null)
                 // TalkBack users double-tap the page to mark its middle; the spot can be moved by tapping again.
                 val tapping = if (onPageTap == null) Modifier else Modifier.pointerInput(index) {
                     detectTapGestures { at ->
-                        if (size.width > 0 && size.height > 0) tap?.invoke(index, at.x / size.width, at.y / size.height)
+                        if (rendered && size.width > 0 && size.height > 0) tap?.invoke(index, at.x / size.width, at.y / size.height)
                     }
-                }.semantics { onClick(label) { tap?.invoke(index, 0.5f, 0.5f); true } }
+                }.semantics { onClick(label) { if (rendered) tap?.invoke(index, 0.5f, 0.5f); rendered } }
                 Box(Modifier.fillMaxWidth().testTag("${tagPrefix}_page_${index + 1}").then(tapping)) {
                     if (shown == null) {
                         Box(Modifier.fillMaxWidth().aspectRatio(0.77f).semantics { contentDescription = label })

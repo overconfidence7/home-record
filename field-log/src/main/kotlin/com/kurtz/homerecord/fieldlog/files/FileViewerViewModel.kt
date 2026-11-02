@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -96,6 +97,8 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
         val jobId = st.jobId ?: return
         _state.update { it.copy(pinMode = false, spot = null) }
         viewModelScope.launch {
+            // The chooser may have stayed open while the role changed (Lead taken off the job): ask again before writing (R09g).
+            if (!d.canManageTasks(jobId).first()) return@launch
             if (!d.pinOnFile(taskId, pin, jobId)) _state.update { it.copy(pinFailed = true) }
         }
     }
@@ -144,7 +147,7 @@ class FileViewerViewModel(private val d: FileViewerDeps) : ViewModel() {
                         t.filePin?.takeIf { it.page < pageCount }?.let { PagePin(t.id, i + 1, t.title, it.page, it.x, it.y) }
                     }
                     val choices = if (manage) TaskList.build(tasks).open.map { TaskChoice(it.id, it.title, it.filePin?.fileId in fileIds) } else emptyList()
-                    _state.update { it.copy(pins = pins, canPinTasks = manage, choices = choices, pinMode = it.pinMode && manage) }
+                    _state.update { it.copy(pins = pins, canPinTasks = manage, choices = choices, pinMode = it.pinMode && manage, spot = it.spot.takeIf { manage }) }
                 }
             }
         }

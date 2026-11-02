@@ -661,3 +661,13 @@ fun SyncLogOfflineScreenshot() = SyncLogOfflinePreview()
 @ThemePreviews
 @Composable
 fun SyncLogLoadingScreenshot() = SyncLogLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskViewScreenshot() = TaskViewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TaskViewDoneScreenshot() = TaskViewDonePreview()

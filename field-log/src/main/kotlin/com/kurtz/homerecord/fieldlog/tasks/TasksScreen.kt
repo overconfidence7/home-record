@@ -169,7 +169,7 @@ private fun TaskLists(state: TasksUiState, onEvent: (TasksEvent) -> Unit) {
                 val moves = if (state.canReorder) moveActions(row.id, index, open.lastIndex, onEvent) else emptyList()
                 SwipeToDone(row, onEvent) {
                     TaskListRow(
-                        row, state.canManage, onEvent,
+                        row, onEvent,
                         handle = if (state.canReorder) {
                             {
                                 DragHandle(
@@ -194,7 +194,7 @@ private fun TaskLists(state: TasksUiState, onEvent: (TasksEvent) -> Unit) {
             item(key = "done-header") {
                 SectionHeader(pluralStringResource(R.plurals.tasks_done_header, state.done.size, state.done.size), Modifier.animateItem())
             }
-            items(state.done, key = { it.id }) { row -> TaskListRow(row, state.canManage, onEvent, modifier = Modifier.animateItem()) }
+            items(state.done, key = { it.id }) { row -> TaskListRow(row, onEvent, modifier = Modifier.animateItem()) }
         }
     }
 }
@@ -265,7 +265,6 @@ private fun DragHandle(title: String, modifier: Modifier) {
 @Composable
 private fun TaskListRow(
     row: TaskRow,
-    canManage: Boolean,
     onEvent: (TasksEvent) -> Unit,
     handle: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -284,8 +283,9 @@ private fun TaskListRow(
                 modifier = Modifier.semantics { contentDescription = checkLabel }.testTag("fl_tasks_check_${row.id}"),
             )
         },
-        trailing = handle ?: if (canManage) { { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) } } else null,
-        onClick = if (canManage) { { onEvent(TasksEvent.Open(row.id)) } } else null,
+        // Crew see only their own tasks and open them read only (R09g).
+        trailing = handle ?: { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
+        onClick = { onEvent(TasksEvent.Open(row.id)) },
         modifier = modifier.testTag("fl_tasks_row_${row.id}"),
     )
 }

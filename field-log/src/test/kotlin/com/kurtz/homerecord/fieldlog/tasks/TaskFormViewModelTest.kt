@@ -61,7 +61,7 @@ class TaskFormViewModelTest {
 
     private fun vm(
         taskId: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle(), jobId: String = "j1",
-        startFilePin: TaskFilePin? = null,
+        startFilePin: TaskFilePin? = null, me: String? = null,
     ) = TaskFormViewModel(
         TaskFormDeps(
             jobId, taskId, tasks,
@@ -72,6 +72,7 @@ class TaskFormViewModelTest {
             canManage = flowOf(manage),
             startFilePin = startFilePin,
             fileName = { if (it == "plan1") "Kitchen plan.pdf" else null },
+            me = me,
         ),
         saved,
     )
@@ -286,5 +287,68 @@ class TaskFormViewModelTest {
         vm.onEvent(TaskFormEvent.Save)
         vm.current { it.done }
         assertThat(runBlocking { tasks.get(id) }?.filePin).isEqualTo(pin)
+    }
+
+    // AC-F35 (R09g): a Crew member's pin tap opens their own task read only, with the names it points at
+    @Test fun crewOpenTheirOwnTaskReadOnly() {
+        val pin = TaskPlanPin("main", 40, 40)
+        val id = checkNotNull(runBlocking {
+            tasks.add("j1", TaskDraft("Set the kitchen outlets", assigneeId = "m3", roomId = "r1", planPin = pin, filePin = TaskFilePin("plan1", 1, 0.2f, 0.3f)))
+        })
+        val vm = vm(id, manage = false, me = "m3")
+        val s = vm.current()
+        assertThat(s.failed).isFalse()
+        assertThat(s.readOnly).isTrue()
+        assertThat(s.isDone).isFalse()
+        assertThat(s.draft.title).isEqualTo("Set the kitchen outlets")
+        assertThat(s.assigneeName).isEqualTo("Marcus Bell")
+        assertThat(s.roomName).isEqualTo("Kitchen")
+        assertThat(s.pinPlace).isEqualTo("Main floor" to "Kitchen")
+        assertThat(s.fileName).isEqualTo("Kitchen plan.pdf")
+    }
+
+    @Test fun readOnlyChangesNothing() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Set the kitchen outlets", assigneeId = "m3")) })
+        runBlocking { tasks.setDone(id, true) }
+        val vm = vm(id, manage = false, me = "m3")
+        assertThat(vm.current().isDone).isTrue()
+        vm.onEvent(TaskFormEvent.Title("Something else"))
+        vm.onEvent(TaskFormEvent.Punch(true))
+        vm.onEvent(TaskFormEvent.OpenSheet(TaskFormSheet.ASSIGNEE))
+        vm.onEvent(TaskFormEvent.OpenPin)
+        vm.onEvent(TaskFormEvent.Save)
+        vm.onEvent(TaskFormEvent.AskDelete)
+        vm.onEvent(TaskFormEvent.Delete)
+        val s = vm.current()
+        assertThat(s.draft.title).isEqualTo("Set the kitchen outlets")
+        assertThat(s.dirty).isFalse()
+        assertThat(s.sheet).isNull()
+        assertThat(s.pinning).isFalse()
+        assertThat(s.confirmDelete).isFalse()
+        assertThat(s.done).isFalse()
+        val stored = runBlocking { tasks.get(id) }
+        assertThat(stored?.title).isEqualTo("Set the kitchen outlets")
+        assertThat(stored?.punch).isFalse()
+    }
+
+    @Test fun crewCannotOpenSomeoneElsesTask() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Pull the dryer circuit", assigneeId = "m2")) })
+        assertThat(vm(id, manage = false, me = "m3").current().failed).isTrue()
+        assertThat(vm(id, manage = false, me = null).current().failed).isTrue()
+    }
+
+    // AC-F36: a Crew member's task-assigned push opens before the task syncs down; it loads read only once it arrives
+    @Test fun crewTaskArrivingBySyncLoadsReadOnly() {
+        val vm = vm("t-crew", manage = false, me = "m3")
+        assertThat(vm.current().failed).isTrue()
+        runBlocking { db.taskDao().upsert(TaskEntity(id = "t-crew", jobId = "j1", title = "Label the panel", assigneeId = "m3", createdAt = 1, updatedAt = 1)) }
+        val s = vm.current { !it.failed }
+        assertThat(s.readOnly).isTrue()
+        assertThat(s.draft.title).isEqualTo("Label the panel")
+    }
+
+    @Test fun managersStillGetTheFormForTheirOwnTask() {
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Set the kitchen outlets", assigneeId = "m3")) })
+        assertThat(vm(id, manage = true, me = "m3").current().readOnly).isFalse()
     }
 }

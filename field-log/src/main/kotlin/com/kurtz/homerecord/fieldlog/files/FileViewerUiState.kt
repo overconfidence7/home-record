@@ -75,6 +75,6 @@ sealed interface FileViewerEvent {
     data object NewTaskHere : FileViewerEvent
     data object DismissChooser : FileViewerEvent
     data object DismissPinFailed : FileViewerEvent
-    /** A tap on a pin: the task form for those who manage tasks, the job's Tasks tab for Crew. */
+    /** A tap on a pin: the task form for those who manage tasks, the task read only for Crew (R09g). */
     data class OpenPin(val taskId: String) : FileViewerEvent
 }

@@ -20,7 +20,7 @@ fun TasksRoute(deps: TasksDeps, onOpenTask: (String) -> Unit, onAddTask: () -> U
         state,
         { e ->
             when (e) {
-                is TasksEvent.Open -> if (vm.state.value.canManage) onOpenTask(e.id)
+                is TasksEvent.Open -> onOpenTask(e.id)
                 TasksEvent.Add -> if (vm.state.value.canManage) onAddTask()
                 else -> vm.onEvent(e)
             }

@@ -232,9 +232,12 @@ class AppContainer(private val app: Application) {
         me = me,
     )
 
-    /** The task form (AC-F34): company members with the job's crew first, the job's rooms and photos. */
-    fun taskFormDeps(companyId: String, jobId: String, taskId: String?, startFilePin: com.kurtz.homerecord.core.model.TaskFilePin? = null) = com.kurtz.homerecord.fieldlog.tasks.TaskFormDeps(
+    /** The task form (AC-F34): company members with the job's crew first, the job's rooms and photos; Crew's own task read only (R09g). */
+    fun taskFormDeps(
+        companyId: String, jobId: String, taskId: String?, startFilePin: com.kurtz.homerecord.core.model.TaskFilePin? = null, me: String? = null,
+    ) = com.kurtz.homerecord.fieldlog.tasks.TaskFormDeps(
         jobId, taskId, jobTasks,
+        me = me,
         startFilePin = startFilePin,
         fileName = { id -> db.jobFileDao().get(id)?.name },
         people = {

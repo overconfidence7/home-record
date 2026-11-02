@@ -71,6 +71,10 @@ import java.io.File
  */
 @Composable
 fun TaskFormScreen(state: TaskFormUiState, onEvent: (TaskFormEvent) -> Unit, modifier: Modifier = Modifier) {
+    if (state.readOnly && !state.loading && !state.failed) {
+        TaskView(state, onEvent, modifier)
+        return
+    }
     if (state.pinning && !state.loading && !state.failed) {
         TaskPinPicker(state, onEvent, modifier)
         return

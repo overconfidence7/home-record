@@ -35,6 +35,8 @@ class TaskFormDeps(
     val startFilePin: TaskFilePin? = null,
     /** A job file's name from its id, for the "Pinned on a file" row. */
     val fileName: suspend (fileId: String) -> String? = { null },
+    /** The signed-in member: a task assigned to them opens read only when they do not manage the job's tasks (R09g). */
+    val me: String? = null,
 )
 
 /** Add or edit one task (FL-Tasks, AC-F34). Save adds it at the bottom of the open list or saves over it; the typing survives process death. */
@@ -53,8 +55,11 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
     private fun load() {
         _state.update { it.copy(loading = true, failed = false) }
         viewModelScope.launch {
-            val existing = d.taskId?.let { d.tasks.get(it) }
-            if (!d.canManage.first() || (d.taskId != null && (existing == null || existing.jobId != d.jobId))) {
+            val existing = d.taskId?.let { d.tasks.get(it) }?.takeIf { it.jobId == d.jobId }
+            val manage = d.canManage.first()
+            // Crew open their own task (a pin, Today, the Tasks tab, a push) to read it; nobody else's (AC-F3, R09g).
+            val readOnly = !manage && existing != null && d.me != null && existing.assigneeId == d.me
+            if ((!manage && !readOnly) || (d.taskId != null && existing == null)) {
                 _state.update { it.copy(loading = false, failed = true) }
                 watchForArrival()
                 return@launch
@@ -66,6 +71,17 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             val fileName = (draft.filePin ?: initial.filePin)?.let { d.fileName(it.fileId) }
             val people = d.people().sortedWith(compareByDescending<PersonOption> { it.onJob }.thenBy { it.name.lowercase() })
             val plan = d.plan().filter { it.rooms.isNotEmpty() }
+            if (readOnly) {
+                // Nothing typed to keep: show the task as stored, with the names it points at.
+                val shownFile = initial.filePin?.let { d.fileName(it.fileId) }
+                _state.update {
+                    it.copy(
+                        loading = false, readOnly = true, draft = initial, initial = initial, people = people, rooms = d.rooms(),
+                        photos = d.photos(), plan = plan, fileName = shownFile, isDone = existing?.done == true,
+                    )
+                }
+                return@launch
+            }
             _state.update {
                 it.copy(loading = false, draft = draft, initial = initial, people = people, rooms = d.rooms(), photos = d.photos(), plan = plan, fileName = fileName)
             }
@@ -75,12 +91,15 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
     /**
      * A push for a newly assigned task can open the form before the next sync brings the task (or the Lead's role on the job)
      * down: the form shows its error, then loads by itself once both are on the phone, instead of staying on the error (R09f).
+     * A Crew member's own task loads read only once it arrives (R09g).
      */
     private fun watchForArrival() {
         val id = d.taskId ?: return
         if (arrival?.isActive == true) return
         arrival = viewModelScope.launch {
-            combine(d.canManage, d.tasks.observeForJob(d.jobId)) { manage, rows -> manage && rows.any { it.id == id } }.first { it }
+            combine(d.canManage, d.tasks.observeForJob(d.jobId)) { manage, rows ->
+                rows.any { it.id == id && (manage || (d.me != null && it.assigneeId == d.me)) }
+            }.first { it }
             if (_state.value.failed && !_state.value.working) load()
         }
     }
@@ -113,7 +132,7 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
         }
     }
 
-    private fun ready(): Boolean = _state.value.let { !it.loading && !it.failed && !it.working }
+    private fun ready(): Boolean = _state.value.let { !it.loading && !it.failed && !it.working && !it.readOnly }
 
     private fun closeSheet() = _state.update { it.copy(sheet = null) }
 

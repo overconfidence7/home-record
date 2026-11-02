@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -146,6 +147,43 @@ class FileViewerPinsTest {
         vm.onPinEvent(FileViewerEvent.ChooseTask(id))
         assertThat(vm.until { it.pinFailed }.pinFailed).isTrue()
         vm.onPinEvent(FileViewerEvent.DismissPinFailed)
+        assertThat(vm.state.value.pinFailed).isFalse()
+    }
+
+    // R09g: losing the right to manage tasks while the chooser is open closes it, and choosing re-checks the role before writing
+    @Test fun losingTheRoleWhileChoosingPinsNothing() {
+        val file = plan()
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Patch the soffit")) })
+        val vm = viewer(file)
+        vm.until { !it.loading && it.choices.isNotEmpty() }
+        vm.onPinEvent(FileViewerEvent.StartPinning)
+        vm.onPinEvent(FileViewerEvent.TapPage(0, 0.5f, 0.5f))
+        manage.value = false
+        val s = vm.until { !it.canPinTasks }
+        assertThat(s.spot).isNull()
+        assertThat(s.pinMode).isFalse()
+        vm.onPinEvent(FileViewerEvent.ChooseTask(id))
+        assertThat(runBlocking { tasks.get(id) }?.filePin).isNull()
+    }
+
+    @Test fun chooseAsksForTheRoleAgainBeforeWriting() {
+        val file = plan()
+        val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Patch the soffit")) })
+        // The screen's own watch still says Lead; the role on the phone has just changed (the gate is asked again on Choose).
+        var asks = 0
+        val vm = FileViewerViewModel(
+            FileViewerDeps(
+                file, db.jobFileDao(), { _, _ -> pages },
+                tasks = tasks::observeForJob, canManageTasks = { flowOf(asks++ == 0) }, me = "m1", pinOnFile = tasks::pinOnFile,
+            ),
+        )
+        vm.until { !it.loading && it.choices.isNotEmpty() }
+        vm.onPinEvent(FileViewerEvent.StartPinning)
+        vm.onPinEvent(FileViewerEvent.TapPage(0, 0.5f, 0.5f))
+        vm.onPinEvent(FileViewerEvent.ChooseTask(id))
+        runBlocking { kotlinx.coroutines.delay(50) }
+        assertThat(asks).isAtLeast(2)
+        assertThat(runBlocking { tasks.get(id) }?.filePin).isNull()
         assertThat(vm.state.value.pinFailed).isFalse()
     }
 }

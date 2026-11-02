@@ -101,7 +101,6 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     val phase by container.syncEngine.phase.collectAsState()
                     val pending by container.syncEngine.pendingCount.collectAsState(0)
                     val refused by container.syncEngine.refused.collectAsState(emptyList())
-                    val gates by container.roleGates.collectAsState(null)
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
                     val navigation = com.kurtz.homerecord.fieldlog.today.TodayNavigation(
@@ -110,10 +109,11 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         onOpenClock = { nav.selectTab("clock") },
                         onOpenJob = { nav.push(JobKey(it)) },
                         onAddJob = { nav.push(JobEditKey(null)) },
-                        // The task's job opens on Tasks; those who manage the job's tasks land in the task form over it (AC-F34).
+                        // The task's job opens on Tasks with the task over it: the form for those who manage the job's tasks,
+                        // the task read only for Crew (AC-F34, R09g).
                         onOpenTask = { jobId, taskId ->
                             nav.push(JobKey(jobId, tab = com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS.name))
-                            if (gates?.canManageTasks(jobId) == true) nav.push(TaskFormKey(jobId, taskId))
+                            nav.push(TaskFormKey(jobId, taskId))
                         },
                         onCapture = { nav.push(CaptureKey(it)) },
                         onOpenPhoto = { nav.push(PhotoKey(it)) },
@@ -203,7 +203,6 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onMarkUp = { nav.push(MarkupKey(it)) }, onOpenVersion = { nav.push(FileKey(it)) },
                 onNewTask = { jobId, pin -> nav.push(TaskFormKey(jobId, fileId = pin.fileId, page = pin.page, x = pin.x, y = pin.y)) },
                 onOpenTask = { jobId, taskId -> nav.push(TaskFormKey(jobId, taskId)) },
-                onOpenTasksTab = { jobId -> nav.push(JobKey(jobId, tab = com.kurtz.homerecord.fieldlog.jobs.JobTab.TASKS.name)) },
             )
         }
         entry<MarkupKey> { key ->
@@ -233,6 +232,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.tasks.TaskFormRoute(container.taskFormDeps(
                     membership.companyId, key.jobId, key.taskId,
                     startFilePin = key.fileId?.let { com.kurtz.homerecord.core.model.TaskFilePin.of(it, key.page, key.x, key.y) },
+                    me = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
                 ), onClose = nav::pop)
         }
         entry<AnnotateKey> { key ->

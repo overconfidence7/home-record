@@ -104,7 +104,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                             BlueprintPin(t.id, String.format(pinLabel, i + 1, t.title), pin.xIn, pin.yIn, i + 1)
                         }.filterNotNull()
                     },
-                    onOpenPin = { id -> if (canManageTasks) onOpenTask(id) else tab = JobTab.TASKS },
+                    onOpenPin = { id -> onOpenTask(id) },
                 )
             }
         },
