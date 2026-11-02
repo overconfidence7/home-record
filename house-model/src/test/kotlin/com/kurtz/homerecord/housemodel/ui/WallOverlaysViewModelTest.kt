@@ -76,8 +76,24 @@ class WallOverlaysViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val media = FakeWallMedia()
+
     private fun vm(stage: WallStage = WallStage.ROUGH_IN, saved: SavedStateHandle = SavedStateHandle(), select: String? = null) =
-        WallOverlaysViewModel(homes, wallPhotos, overlays, maker, "k", northWall, stage, select, saved).also { created += it }
+        WallOverlaysViewModel(homes, wallPhotos, overlays, maker, "k", northWall, stage, select, saved, media).also { created += it }
+
+    /** Puts an item in the house; [roomId] null leaves it without a room. */
+    private suspend fun addItem(id: String, name: String, roomId: String?) {
+        val homeId = homes.roomLocation("k")!!.homeId
+        db.itemDao().upsert(com.kurtz.homerecord.core.data.ItemEntity(id = id, homeId = homeId, roomId = roomId, category = "PLUMBING", subtype = "water_heater", name = name, createdAt = 1, updatedAt = 1))
+    }
+
+    /** Draws a one-tap spot and opens its form. */
+    private fun openSpotForm(model: WallOverlaysViewModel) {
+        model.onEvent(WallOverlaysEvent.StartDrawing)
+        model.onEvent(WallOverlaysEvent.AddPoint(OverlayPoint(0.4f, 0.6f)))
+        model.onEvent(WallOverlaysEvent.FinishDrawing)
+        model.onEvent(WallOverlaysEvent.SetKind(OverlayKind.DRAIN))
+    }
 
     private suspend fun loaded(model: WallOverlaysViewModel) = withTimeout(10_000) { model.state.first { !it.loading } }
 
@@ -238,5 +254,113 @@ class WallOverlaysViewModelTest {
         assertThat(state.selected?.kind).isEqualTo(OverlayKind.OUTLET)
         assertThat(state.picture).isNull()
         assertThat(state.aspect).isWithin(0.001f).of(168f / state.wall!!.heightIn)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun aPhotoFromTheCameraAndALinkedItemAreSavedWithTheOverlay() = test {
+        addItem("heater", "Water heater", null)
+        addItem("sink", "Kitchen sink", "k")
+        val model = vm()
+        val ready = withTimeout(10_000) { model.state.first { !it.loading && it.items.size == 2 } }
+        assertThat(ready.canAddPhoto).isTrue()
+        openSpotForm(model)
+        // The wall's room leads the picker; a query narrows it.
+        assertThat(model.state.value.itemRows.map { it.id }).containsExactly("sink", "heater").inOrder()
+        model.onEvent(WallOverlaysEvent.SetItemQuery("water"))
+        assertThat(model.state.value.itemRows.map { it.id }).containsExactly("heater")
+        model.onEvent(WallOverlaysEvent.SetItem("heater"))
+        assertThat(model.state.value.form?.itemQuery).isEmpty()
+        assertThat(model.state.value.item(model.state.value.form?.itemId)?.name).isEqualTo("Water heater")
+
+        model.onEvent(WallOverlaysEvent.TakePhoto)
+        val target = model.state.value.photoLaunch?.target
+        assertThat(target?.path).isEqualTo("media/1.jpg")
+        model.onEvent(WallOverlaysEvent.PhotoLaunchHandled)
+        media.written += "media/1.jpg"
+        model.onEvent(WallOverlaysEvent.CameraResult(ok = true))
+        assertThat(model.state.value.form?.photoPath).isEqualTo("media/1.jpg")
+        model.onEvent(WallOverlaysEvent.Save)
+
+        val saved = withTimeout(10_000) { overlays.observeForWall(northWall).first { it.isNotEmpty() } }.single()
+        assertThat(saved.itemId).isEqualTo("heater")
+        assertThat(saved.photoPath).isEqualTo("media/1.jpg")
+        assertThat(media.discarded).isEmpty()
+        assertThat(overlays.observeLinks("heater").first().map { it.overlay.id }).containsExactly(saved.id)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun aGalleryPhotoReplacesAFreshOneAndClosingDeletesWhatWasNotSaved() = test {
+        val model = vm()
+        loaded(model)
+        openSpotForm(model)
+        model.onEvent(WallOverlaysEvent.TakePhoto)
+        media.written += "media/1.jpg"
+        model.onEvent(WallOverlaysEvent.CameraResult(ok = true))
+        model.onEvent(WallOverlaysEvent.ChoosePhoto)
+        assertThat(model.state.value.photoLaunch?.target).isNull()
+        model.onEvent(WallOverlaysEvent.GalleryResult("content://picker/7"))
+        withTimeout(10_000) { model.state.first { it.form?.photoPath == "media/picked.jpg" } }
+        assertThat(media.discarded).containsExactly("media/1.jpg")
+        model.onEvent(WallOverlaysEvent.CloseForm)
+        assertThat(media.discarded).containsExactly("media/1.jpg", "media/picked.jpg").inOrder()
+        assertThat(stored()).isEmpty()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun aCancelledCameraLeavesNoPhotoAndEditKeepsOrClearsTheSavedOne() = test {
+        addItem("heater", "Water heater", null)
+        val model = vm()
+        withTimeout(10_000) { model.state.first { !it.loading && it.items.isNotEmpty() } }
+        openSpotForm(model)
+        model.onEvent(WallOverlaysEvent.TakePhoto)
+        model.onEvent(WallOverlaysEvent.CameraResult(ok = false))
+        assertThat(model.state.value.form?.photoPath).isNull()
+        assertThat(media.discarded).containsExactly("media/1.jpg")
+        model.onEvent(WallOverlaysEvent.ChoosePhoto)
+        model.onEvent(WallOverlaysEvent.GalleryResult("content://picker/3"))
+        withTimeout(10_000) { model.state.first { it.form?.photoPath == "media/picked.jpg" } }
+        model.onEvent(WallOverlaysEvent.SetItem("heater"))
+        model.onEvent(WallOverlaysEvent.Save)
+        withTimeout(10_000) { model.state.first { it.form == null && it.selected != null } }
+
+        // Edit opens with the saved photo and item; removing the saved photo does not delete the file before Save.
+        model.onEvent(WallOverlaysEvent.EditSelected)
+        assertThat(model.state.value.form?.photoPath).isEqualTo("media/picked.jpg")
+        assertThat(model.state.value.form?.itemId).isEqualTo("heater")
+        model.onEvent(WallOverlaysEvent.RemovePhoto)
+        model.onEvent(WallOverlaysEvent.SetItem(null))
+        assertThat(model.state.value.form?.dirty).isTrue()
+        assertThat(media.discarded).containsExactly("media/1.jpg")
+        model.onEvent(WallOverlaysEvent.Save)
+        val saved = withTimeout(10_000) { overlays.observeForWall(northWall).first { it.singleOrNull()?.itemId == null } }.single()
+        assertThat(saved.photoPath).isNull()
+    }
+
+    @Test
+    fun thePhotoTheLinkedItemAndThePendingCameraSurviveProcessDeath() = test {
+        val saved = SavedStateHandle()
+        val first = vm(saved = saved)
+        loaded(first)
+        openSpotForm(first)
+        first.onEvent(WallOverlaysEvent.ChoosePhoto)
+        first.onEvent(WallOverlaysEvent.GalleryResult("content://picker/1"))
+        withTimeout(10_000) { first.state.first { it.form?.photoPath != null } }
+        first.onEvent(WallOverlaysEvent.SetItem("heater"))
+        first.onEvent(WallOverlaysEvent.SetItemQuery("wat"))
+        first.onEvent(WallOverlaysEvent.TakePhoto)
+        // The camera comes back to a new view model after process death.
+        val second = vm(saved = saved)
+        val form = second.state.value.form
+        assertThat(form?.photoPath).isEqualTo("media/picked.jpg")
+        assertThat(form?.photoIsNew).isTrue()
+        assertThat(form?.itemId).isEqualTo("heater")
+        assertThat(form?.itemQuery).isEqualTo("wat")
+        media.written += "media/1.jpg"
+        second.onEvent(WallOverlaysEvent.CameraResult(ok = true))
+        assertThat(second.state.value.form?.photoPath).isEqualTo("media/1.jpg")
+        assertThat(media.discarded).containsExactly("media/picked.jpg")
     }
 }

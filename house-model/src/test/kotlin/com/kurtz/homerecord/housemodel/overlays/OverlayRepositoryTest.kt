@@ -113,4 +113,29 @@ class OverlayRepositoryTest {
         assertThat(repo.delete(id)).isFalse()
         assertThat(changes).containsExactly("overlay/$id", "overlay/$id", "overlay/$id", "overlay/$id").inOrder()
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun theItemsLinksListOnlyItsLiveOverlaysWithTheirPhotoAndItem() = runTest {
+        val linked = (repo.addOnWall("home", "w-north", supply.copy(itemId = "heater", photoPath = "media/pex.jpg")) as OverlaySave.Saved).id
+        repo.addOnWall("home", "w-north", supply.copy(itemId = "other"))
+        val gone = (repo.addOnWall("home", "w-north", supply.copy(itemId = "heater")) as OverlaySave.Saved).id
+        repo.delete(gone)
+
+        val links = repo.observeLinks("heater").first()
+        assertThat(links.map { it.overlay.id }).containsExactly(linked)
+        assertThat(links.single().overlay.photoPath).isEqualTo("media/pex.jpg")
+        assertThat(links.single().overlay.itemId).isEqualTo("heater")
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun anEditCanChangeOrClearThePhotoAndTheLinkedItem() = runTest {
+        val id = (repo.addOnWall("home", "w-north", supply.copy(itemId = "heater", photoPath = "media/a.jpg")) as OverlaySave.Saved).id
+        repo.update(id, supply.copy(itemId = null, photoPath = "media/b.jpg"))
+        val saved = repo.get(id)
+        assertThat(saved?.itemId).isNull()
+        assertThat(saved?.photoPath).isEqualTo("media/b.jpg")
+        assertThat(repo.observeLinks("heater").first()).isEmpty()
+    }
 }

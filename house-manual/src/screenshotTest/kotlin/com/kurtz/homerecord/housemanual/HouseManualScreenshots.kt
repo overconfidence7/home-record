@@ -498,6 +498,31 @@ fun OverlayFormMissingKindScreenshot() = OverlayFormMissingKindPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun OverlayFormLinkedScreenshot() = OverlayFormLinkedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun OverlayItemListScreenshot() = OverlayItemListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun OverlayItemListNoMatchScreenshot() = OverlayItemListNoMatchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysSelectedLinkedScreenshot() = WallOverlaysSelectedLinkedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailLinksScreenshot() = ItemDetailLinksPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun OverlayKindListScreenshot() = OverlayKindListPreview()
 
 @PreviewTest

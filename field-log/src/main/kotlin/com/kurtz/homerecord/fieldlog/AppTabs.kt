@@ -268,7 +268,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
         entry<JobWallKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
                 container.homes, container.wallPhotos, container.overlays, container.wallTextures, key.roomId, key.wallId,
-                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop, media = container.media,
             )
         }
         entry<JobWallOutlineKey> { key ->

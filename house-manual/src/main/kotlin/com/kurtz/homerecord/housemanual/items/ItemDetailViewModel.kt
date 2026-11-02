@@ -14,6 +14,7 @@ import com.kurtz.homerecord.housemodel.items.ItemDetail
 import com.kurtz.homerecord.housemodel.items.LookupOutcome
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.overlays.OverlayLink
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
 import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -42,6 +44,8 @@ class ItemDetailViewModel(
     private val copySuffix: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val recallApi: RecallApi? = null,
+    /** The overlays linked to this item (AC-C26). */
+    overlayLinks: Flow<List<OverlayLink>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val confirmDelete = MutableStateFlow(saved[CONFIRM] ?: false)
 
@@ -105,8 +109,8 @@ class ItemDetailViewModel(
         )
     }
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete) { s, n, p ->
-        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) })
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, overlayLinks) { s, n, p, links ->
+        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = links)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
@@ -186,7 +190,7 @@ class ItemDetailViewModel(
                 documents.attach(e.id, DocumentScope.Item(itemId))
                 setAttach(false)
             }
-            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument -> Unit // navigation is the route's job
+            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay -> Unit // navigation is the route's job
         }
     }
 

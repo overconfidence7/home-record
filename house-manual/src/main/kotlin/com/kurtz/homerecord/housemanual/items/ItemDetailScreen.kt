@@ -1,5 +1,13 @@
 package com.kurtz.homerecord.housemanual.items
 
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.ui.graphics.luminance
+import com.kurtz.homerecord.housemodel.overlays.OverlayLink
+import com.kurtz.homerecord.housemodel.overlays.color
+import com.kurtz.homerecord.housemodel.overlays.icon
+import com.kurtz.homerecord.housemodel.overlays.nameRes
+import com.kurtz.homerecord.housemodel.ui.labelRes
+import com.kurtz.homerecord.housemodel.ui.title
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -123,6 +131,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 ConsumablesSection(state.consumables, onEvent)
                 ServiceSection(state.service, state.contacts, onEvent)
                 DocumentsSection(state, onEvent)
+                ItemLinksSection(state.overlayLinks, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
                 detail.item.notes?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Inset { Text(notes, style = MaterialTheme.typography.bodyLarge) } }
@@ -450,6 +459,36 @@ private fun RecallsSection(recalls: RecallUi, onEvent: (ItemDetailEvent) -> Unit
                 onClick = r.url?.let { url -> { onEvent(ItemDetailEvent.OpenLink(url)) } },
                 onClickLabel = r.url?.let { stringResource(R.string.item_detail_recall_open) },
                 modifier = Modifier.testTag("hm_item_detail_recall_row"),
+            )
+        }
+    }
+}
+
+/**
+ * Links (AC-C26): the pipes, wires and boxes drawn on walls that serve this item, by kind icon in its layer color, with
+ * the room and the stage they were recorded at; a tap opens the wall with the overlay picked. Hidden while nothing is linked.
+ */
+@Composable
+internal fun ItemLinksSection(links: List<OverlayLink>, onEvent: (ItemDetailEvent) -> Unit) {
+    if (links.isEmpty()) return
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    Section(stringResource(R.string.item_detail_links), Modifier.testTag("hm_item_detail_links")) {
+        links.forEach { link ->
+            val o = link.overlay
+            val kindName = stringResource(o.kind.nameRes)
+            val canOpen = o.roomId != null && o.wallId != null
+            RecordListItem(
+                headline = o.title(kindName),
+                supporting = listOfNotNull(
+                    kindName.takeIf { o.label.isNotBlank() },
+                    link.roomName,
+                    stringResource(com.kurtz.homerecord.housemodel.R.string.wall_overlay_recorded_at, stringResource(o.stage.labelRes)),
+                ).joinToString(" · "),
+                leading = { Icon(o.kind.icon, contentDescription = null, tint = o.kind.color(dark)) },
+                trailing = if (canOpen) ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }) else null,
+                onClick = if (canOpen) ({ onEvent(ItemDetailEvent.OpenOverlay(link)) }) else null,
+                onClickLabel = stringResource(R.string.item_detail_link_open),
+                modifier = Modifier.testTag("hm_item_detail_overlay_${o.id}"),
             )
         }
     }

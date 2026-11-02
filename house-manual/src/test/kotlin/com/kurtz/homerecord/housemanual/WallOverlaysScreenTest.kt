@@ -11,6 +11,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.click
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -19,11 +22,13 @@ import com.kurtz.homerecord.coreui.theme.Brand
 import com.kurtz.homerecord.coreui.theme.HomeRecordTheme
 import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.overlays.OverlayDepth
+import com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice
 import com.kurtz.homerecord.housemodel.overlays.OverlayKind
 import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.ui.OverlayForm
 import com.kurtz.homerecord.housemodel.ui.OverlayFormSheet
+import com.kurtz.homerecord.housemodel.ui.ItemPickList
 import com.kurtz.homerecord.housemodel.ui.RoomEvent
 import com.kurtz.homerecord.housemodel.ui.RoomScreen
 import com.kurtz.homerecord.housemodel.ui.RoomUiState
@@ -157,5 +162,76 @@ class WallOverlaysScreenTest {
         rule.onNodeWithTag("hm_room_overlay_o1").performScrollTo().performClick()
         rule.onNodeWithTag("hm_room_wall_w1").performScrollTo().performClick()
         assertThat(events).containsExactly(RoomEvent.OpenWall("w1", "o1"), RoomEvent.OpenWall("w1")).inOrder()
+    }
+
+    private val heater = OverlayItemChoice("i1", "Water heater", null, "Basement")
+    private val sink = OverlayItemChoice("i2", "Kitchen sink", "k", "Kitchen")
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun theFormShowsTheLinkedItemAndPhotoWithReplaceAndRemove() {
+        val events = mutableListOf<WallOverlaysEvent>()
+        val form = OverlayForm(points = pipe.points, kind = OverlayKind.DRAIN, stage = WallStage.ROUGH_IN, itemId = "i1", photoPath = "/missing.jpg")
+        show(base.copy(form = form, items = listOf(heater, sink), canAddPhoto = true), events)
+        rule.onNodeWithContentDescription("Water heater", substring = true).performScrollTo().performClick()
+        rule.onNodeWithTag("hm_overlay_form_photo").performScrollTo().assertExists()
+        rule.onNodeWithTag("hm_overlay_form_photo_replace").performClick()
+        rule.onNodeWithTag("hm_overlay_form_photo_remove").performClick()
+        assertThat(events).containsExactly(
+            WallOverlaysEvent.OpenSheet(OverlayFormSheet.ITEM), WallOverlaysEvent.OpenSheet(OverlayFormSheet.PHOTO), WallOverlaysEvent.RemovePhoto,
+        ).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun withoutAPhotoTheFormOffersAddPhotoAndNothingLinked() {
+        val events = mutableListOf<WallOverlaysEvent>()
+        show(base.copy(form = OverlayForm(points = pipe.points, kind = OverlayKind.DRAIN, stage = WallStage.ROUGH_IN), canAddPhoto = true), events)
+        rule.onNodeWithContentDescription("Nothing linked", substring = true).performScrollTo().assertExists()
+        rule.onNodeWithTag("hm_overlay_form_photo_add").performScrollTo().performClick()
+        assertThat(events).containsExactly(WallOverlaysEvent.OpenSheet(OverlayFormSheet.PHOTO))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun theItemSheetSearchesPicksAndOffersClearWhenNothingMatches() {
+        val events = mutableListOf<WallOverlaysEvent>()
+        var query by androidx.compose.runtime.mutableStateOf("")
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    val rows = com.kurtz.homerecord.housemodel.overlays.OverlayItemPicker.filter(listOf(heater, sink), query, "k")
+                    ItemPickList(query, "i1", rows, houseHasItems = true) { e -> events += e; if (e is WallOverlaysEvent.SetItemQuery) query = e.query }
+                }
+            }
+        }
+        rule.onNodeWithTag("hm_overlay_item_i2").performClick()
+        rule.onNodeWithTag("hm_overlay_item_none").performClick()
+        rule.onNodeWithTag("hm_overlay_item_search").performTextInput("garage")
+        rule.onNodeWithText("No items match \"garage\".").assertExists()
+        rule.onNodeWithTag("hm_overlay_item_clear").performClick()
+        rule.onNodeWithTag("hm_overlay_item_i1").assertExists()
+        assertThat(events).containsAtLeast(WallOverlaysEvent.SetItem("i2"), WallOverlaysEvent.SetItem(null), WallOverlaysEvent.SetItemQuery("garage"), WallOverlaysEvent.SetItemQuery("")).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun aHouseWithNoItemsSaysSoInsteadOfASearch() {
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { ItemPickList("", null, emptyList(), houseHasItems = false) {} }
+            }
+        }
+        rule.onNodeWithTag("hm_overlay_item_empty").assertExists()
+        rule.onNodeWithTag("hm_overlay_item_search").assertDoesNotExist()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C26")
+    fun thePickedOverlayShowsTheItemItServesAndItsPhoto() {
+        val linked = pipe.copy(itemId = "i1", photoPath = "/missing.jpg")
+        show(base.copy(overlays = listOf(linked), selectedId = "o1", items = listOf(heater)), mutableListOf())
+        rule.onNodeWithText("Serves Water heater", substring = true).assertExists()
+        rule.onNodeWithTag("hm_wall_overlay_photo", useUnmergedTree = true).assertExists()
     }
 }

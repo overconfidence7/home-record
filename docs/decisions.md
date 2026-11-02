@@ -701,3 +701,17 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - Drawing is tap per point (one tap is a spot, two or more a run), with Undo and Next, instead of a freehand stroke:
   pipes and wires run straight between turns, and taps are steadier on a phone held against a wall.
 - A point drag shows live and writes once when the finger lifts.
+
+## 2026-11-02 T052b2: overlay photo and linked item
+
+- The overlay form's "Serves" field links one item of the house (AC-C26 "the equipment it serves"). Its sheet searches by
+  item name and room (every typed word must match), lists the wall's room first, and starts with "Nothing linked".
+  The list reads the item table directly through `OverlayRepository.observeItemChoices`, not `ItemRepository`, so
+  both apps get it without the item repository's string and warranty dependencies.
+- The overlay photo uses the same camera-or-gallery path as item photos (`MediaFiles`, `TakePicture` /
+  `PickVisualMedia`), with the pending camera file in the view model's `SavedStateHandle`. A photo taken or picked in
+  the form is deleted again on Close or when replaced before saving; a saved photo is only unlinked on Remove, never
+  deleted before Save.
+- The item page's Links section lists the overlays linked to the item (kind icon in its color, room, stage); a wall
+  overlay opens its wall with it picked. The section hides while nothing is linked; breaker and shutoff links join it
+  with T027c and the breaker work. Plan overlays (T052c) list but do not open yet.

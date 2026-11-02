@@ -138,6 +138,13 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenDocument = { nav.push(DocumentViewerKey(it)) },
                 onOpenCopy = { nav.pop(); nav.push(ItemDetailKey(it)) },
                 recalls = container.lookupApi,
+                overlays = container.overlays,
+                onOpenOverlay = { link ->
+                    val o = link.overlay
+                    val roomId = o.roomId
+                    val wallId = o.wallId
+                    if (roomId != null && wallId != null) nav.push(RoomWallKey(roomId, wallId, o.stage.name, o.id))
+                },
             )
         }
         entry<ItemEditKey> { key ->
@@ -158,7 +165,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<RoomWallKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
                 container.homes, container.wallPhotos, container.overlays, container.wallTextures, key.roomId, key.wallId,
-                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop,
+                com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop, media = container.media,
             )
         }
         entry<WallOutlineKey> { key ->

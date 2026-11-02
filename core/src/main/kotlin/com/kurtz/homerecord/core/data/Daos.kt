@@ -102,6 +102,7 @@ interface OverlayDao {
     @Query("SELECT * FROM overlay WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<OverlayEntity>
     @Query("SELECT * FROM overlay WHERE wallId = :wallId AND deletedAt IS NULL ORDER BY createdAt") fun observeForWall(wallId: String): Flow<List<OverlayEntity>>
     @Query("SELECT * FROM overlay WHERE roomId = :roomId AND deletedAt IS NULL ORDER BY createdAt") fun observeForRoom(roomId: String): Flow<List<OverlayEntity>>
+    @Query("SELECT * FROM overlay WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") fun observeForItem(itemId: String): Flow<List<OverlayEntity>>
 }
 
 @Dao

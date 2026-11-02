@@ -371,7 +371,7 @@ internal fun wallName(wall: RoomWall): String {
 }
 
 @get:StringRes
-internal val WallStage.labelRes: Int
+val WallStage.labelRes: Int
     get() = when (this) {
         WallStage.FRAMING -> R.string.wall_stage_framing
         WallStage.ROUGH_IN -> R.string.wall_stage_rough_in

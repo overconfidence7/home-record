@@ -102,7 +102,7 @@ private val SpotSize = 32.dp
 fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) -> Unit, photo: Painter? = null) {
     val form = state.form
     if (form != null) {
-        OverlayFormScreen(form, onEvent)
+        OverlayFormScreen(form, onEvent, items = state.itemRows, linked = state.item(form.itemId), canAddPhoto = state.canAddPhoto, houseHasItems = state.items.isNotEmpty())
         return
     }
     val prefix = LocalTagPrefix.current
@@ -159,7 +159,7 @@ fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) 
                 val selected = state.selected
                 when {
                     drawing != null -> DrawingBar(drawing.size, onEvent)
-                    selected != null -> SelectionBar(selected, onEvent)
+                    selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onEvent)
                     else -> OverlayList(state.overlays, onEvent, Modifier.weight(1f))
                 }
             }
@@ -334,18 +334,23 @@ private fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit) {
     }
 }
 
-/** The picked overlay: what it is, "Drag a dot to move it", Edit, Delete and Done. */
+/** The picked overlay: what it is, the item it serves and its photo (AC-C26), "Drag a dot to move it", Edit, Delete and Done. */
 @Composable
-private fun SelectionBar(overlay: Overlay, onEvent: (WallOverlaysEvent) -> Unit) {
+private fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit) {
     val prefix = LocalTagPrefix.current
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val kindName = stringResource(overlay.kind.nameRes)
     Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 8.dp).testTag("${prefix}_wall_selection")) {
         RecordListItem(
             headline = overlay.title(kindName),
-            supporting = overlaySummary(overlay, kindName),
+            supporting = listOfNotNull(overlaySummary(overlay, kindName), itemName?.let { stringResource(R.string.wall_overlay_serves, it) }).joinToString("\n"),
             leading = { Icon(overlay.kind.icon, contentDescription = null, tint = overlay.kind.color(dark)) },
-            trailing = null,
+            trailing = overlay.photoPath?.let { path ->
+                {
+                    val title = overlay.title(kindName)
+                    OverlayPhoto(path, null, stringResource(R.string.wall_overlay_photo_description, title), Modifier.size(56.dp).testTag("${prefix}_wall_overlay_photo"))
+                }
+            },
         )
         Text(
             stringResource(R.string.wall_overlays_drag_hint),

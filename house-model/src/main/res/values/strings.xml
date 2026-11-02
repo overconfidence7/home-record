@@ -436,4 +436,22 @@
     <string name="room_section_overlays_empty_walls">No outlets, pipes or wires drawn in this room yet. Tap a wall above to draw one on its photo.</string>
     <string name="room_overlay_on_plan">On the plan</string>
     <string name="room_wall_open">Open wall</string>
+    <string name="overlay_form_item">Serves</string>
+    <string name="overlay_form_item_none">Nothing linked</string>
+    <string name="overlay_form_item_helper">The water heater, panel or fixture this line feeds.</string>
+    <string name="overlay_item_sheet_title">What it serves</string>
+    <string name="overlay_item_search">Search items</string>
+    <string name="overlay_item_none">Nothing linked</string>
+    <string name="overlay_item_none_supporting">Keep this overlay on its own</string>
+    <string name="overlay_item_empty">No items in this house yet. Items added later can be linked from Edit.</string>
+    <string name="overlay_item_no_match">No items match \"%1$s\".</string>
+    <string name="overlay_item_clear_search">Clear search</string>
+    <string name="overlay_form_photo">Photo</string>
+    <string name="overlay_form_photo_add">Add photo</string>
+    <string name="overlay_form_photo_replace">Replace</string>
+    <string name="overlay_form_photo_remove">Remove</string>
+    <string name="overlay_form_photo_description">Photo of this overlay</string>
+    <string name="overlay_form_photo_helper">A close-up of the pipe, wire or box before the wall is closed.</string>
+    <string name="wall_overlay_serves">Serves %1$s</string>
+    <string name="wall_overlay_photo_description">Photo of %1$s</string>
 </resources>

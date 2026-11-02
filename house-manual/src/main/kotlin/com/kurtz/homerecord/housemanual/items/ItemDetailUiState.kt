@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.core.data.ServiceRecordEntity
 import com.kurtz.homerecord.housemodel.items.ItemDetail
+import com.kurtz.homerecord.housemodel.overlays.OverlayLink
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
 import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
 
@@ -41,6 +42,8 @@ data class ItemDetailUiState(
     val showFormErrors: Boolean = false,
     /** A consumable or service record waiting on "Delete …?" (rule 16); null when no confirm is showing. */
     val confirmUpkeepDelete: UpkeepDelete? = null,
+    /** Pipes, wires and boxes drawn on the walls that serve this item (AC-C26), for the Links section. */
+    val overlayLinks: List<OverlayLink> = emptyList(),
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
     val nav: ItemDetailNav? = null,
 )
@@ -107,6 +110,8 @@ sealed interface ItemDetailEvent {
     data object DocumentScanFailed : ItemDetailEvent
     data object DismissDocumentNotice : ItemDetailEvent
     data class OpenDocument(val id: String) : ItemDetailEvent
+    /** A Links row: open the wall of [link]'s overlay with it picked. */
+    data class OpenOverlay(val link: OverlayLink) : ItemDetailEvent
     data object ShowAttach : ItemDetailEvent
     data object HideAttach : ItemDetailEvent
     data class AttachDocument(val id: String) : ItemDetailEvent

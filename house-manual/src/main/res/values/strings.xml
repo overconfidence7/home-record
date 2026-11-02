@@ -256,4 +256,6 @@
     <string name="search_kind_room">Room</string>
     <string name="search_kind_document">Document</string>
     <string name="search_kind_contact">Contact</string>
+    <string name="item_detail_links">Links</string>
+    <string name="item_detail_link_open">Open wall</string>
 </resources>

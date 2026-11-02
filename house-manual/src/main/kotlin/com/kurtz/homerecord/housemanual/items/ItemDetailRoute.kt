@@ -19,6 +19,8 @@ import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
+import com.kurtz.homerecord.housemodel.overlays.OverlayLink
+import com.kurtz.homerecord.housemodel.overlays.OverlayRepository
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 
 @Composable
@@ -34,6 +36,9 @@ fun ItemDetailRoute(
     onOpenDocument: (String) -> Unit,
     onOpenCopy: (String) -> Unit,
     recalls: RecallApi? = null,
+    overlays: OverlayRepository? = null,
+    /** Opens the wall of a linked overlay with it picked; only overlays on a wall in a room come here. */
+    onOpenOverlay: (OverlayLink) -> Unit = {},
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -45,7 +50,8 @@ fun ItemDetailRoute(
         key = itemId,
         factory = viewModelFactory {
             initializer {
-                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), recalls)
+                ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), recalls,
+                    overlays?.observeLinks(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()))
             }
         },
     )
@@ -69,6 +75,7 @@ fun ItemDetailRoute(
             ItemDetailEvent.Back -> onBack()
             ItemDetailEvent.Edit -> onEdit()
             is ItemDetailEvent.OpenDocument -> onOpenDocument(it.id)
+            is ItemDetailEvent.OpenOverlay -> onOpenOverlay(it.link)
             ItemDetailEvent.UploadDocument -> picker.launch(arrayOf("application/pdf", "image/*"))
             ItemDetailEvent.ScanDocument -> scan()
             is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }

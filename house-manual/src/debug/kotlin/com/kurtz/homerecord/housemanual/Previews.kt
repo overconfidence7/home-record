@@ -4,6 +4,9 @@ import com.kurtz.homerecord.coreui.pages.PageSource
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -518,6 +521,28 @@ private fun furnaceDetail(withWarranty: Boolean = true) = com.kurtz.homerecord.h
 @Composable
 fun ItemDetailPreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail()), {}) }
 
+private val furnaceLinks = listOf(
+    com.kurtz.homerecord.housemodel.overlays.OverlayLink(
+        sampleOverlay("o7", com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, "Furnace gas line", 0.1f, 0.2f, 0.6f, 0.2f), "Utility room",
+    ),
+    com.kurtz.homerecord.housemodel.overlays.OverlayLink(
+        sampleOverlay("o8", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DUCT, "", 0.5f, 0f, 0.5f, 0.3f, depth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.IN_CEILING),
+        "Utility room",
+    ),
+)
+
+/** The furnace page with the overlays that serve it; Links sits below Documents (AC-C26). */
+@ThemePreviews
+@Composable
+fun ItemDetailLinksPagePreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), overlayLinks = furnaceLinks), {}) }
+
+/** The item page's Links section on its own: the gas line and the duct drawn on walls that serve the furnace (AC-C26). */
+@ThemePreviews
+@Composable
+fun ItemDetailLinksPreview() = Frame {
+    androidx.compose.foundation.layout.Column(Modifier.padding(vertical = 16.dp)) { com.kurtz.homerecord.housemanual.items.ItemLinksSection(furnaceLinks) {} }
+}
+
 @ThemePreviews
 @Composable
 fun ItemDetailNoWarrantyPreview() = Frame { ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false)), {}) }
@@ -1015,13 +1040,58 @@ private val overlayForm = com.kurtz.homerecord.housemodel.ui.OverlayForm(
 /** The overlay form filled in for the hot water run (AC-C26). */
 @ThemePreviews
 @Composable
-fun OverlayFormPreview() = Frame { com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(overlayForm) {} }
+fun OverlayFormPreview() = Frame { com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(overlayForm, {}, canAddPhoto = true) }
+
+private val overlayItems = listOf(
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i2", "Dishwasher", "r1", "Kitchen"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i3", "Kitchen sink faucet", "r1", "Kitchen"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i1", "Basement furnace", "r2", "Utility room"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i4", "Water heater", "r2", "Utility room"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i5", "Main panel", null, null),
+)
+
+/** The drain filled in with the dishwasher it serves and a close-up photo, Replace and Remove (AC-C26). */
+@ThemePreviews
+@Composable
+fun OverlayFormLinkedPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(
+        com.kurtz.homerecord.housemodel.ui.OverlayForm(
+            editingId = "o3", points = sinkWallOverlays[2].points, kind = com.kurtz.homerecord.housemodel.overlays.OverlayKind.DRAIN,
+            label = "Sink drain", depth = com.kurtz.homerecord.housemodel.overlays.OverlayDepth.IN_SLAB, stage = WallStage.ROUGH_IN,
+            photoPath = "/preview/drain.jpg", itemId = "i2", note = "1-1/2 in ABS with a cleanout under the sink",
+        ),
+        {}, items = overlayItems, linked = overlayItems[0], canAddPhoto = true, photo = sampleRoughInTexture,
+    )
+}
+
+/** The linked-item sheet's list: the kitchen's items first, the chosen one marked, "Nothing linked" on top (AC-C26). */
+@ThemePreviews
+@Composable
+fun OverlayItemListPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPickList("", "i2", overlayItems, houseHasItems = true) {} }
+
+/** The item sheet when a search matches nothing: says so and offers Clear search (rule 11). */
+@ThemePreviews
+@Composable
+fun OverlayItemListNoMatchPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPickList("garage door", null, emptyList(), houseHasItems = true) {} }
+
+/** The sink drain picked on the wall: the dishwasher it serves and its photo beside it (AC-C26). */
+@ThemePreviews
+@Composable
+fun WallOverlaysSelectedLinkedPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(
+        wallOverlaysState.copy(
+            overlays = sinkWallOverlays.map { if (it.id == "o3") it.copy(itemId = "i2", photoPath = "/preview/drain.jpg") else it },
+            selectedId = "o3", items = overlayItems,
+        ),
+        {}, sampleRoughInTexture,
+    )
+}
 
 /** Save pressed before a kind was picked: the kind field says what is missing (rule 21). */
 @ThemePreviews
 @Composable
 fun OverlayFormMissingKindPreview() = Frame {
-    com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(com.kurtz.homerecord.housemodel.ui.OverlayForm(points = sinkWallOverlays[4].points, stage = WallStage.ROUGH_IN, triedSave = true)) {}
+    com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(com.kurtz.homerecord.housemodel.ui.OverlayForm(points = sinkWallOverlays[4].points, stage = WallStage.ROUGH_IN, triedSave = true), {})
 }
 
 /** The kind sheet's list: every kind with its icon in its layer color (AC-C25, rule 26). */

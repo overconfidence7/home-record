@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.OverlayEntity
 import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 /** What a new overlay or an edit sets (AC-C26). */
@@ -48,6 +49,22 @@ class OverlayRepository(
     fun observeForHome(homeId: String): Flow<List<Overlay>> = dao.observeFor(homeId).map { rows -> rows.map { it.toOverlay() } }
 
     suspend fun get(id: String): Overlay? = dao.get(id)?.toOverlay()
+
+    /** The home's items an overlay can serve, with their rooms (AC-C26). */
+    fun observeItemChoices(homeId: String): Flow<List<OverlayItemChoice>> =
+        combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId)) { items, rooms ->
+            val roomNames = rooms.associate { it.id to it.name }
+            items.map { OverlayItemChoice(it.id, it.name, it.roomId, it.roomId?.let(roomNames::get)) }
+        }
+
+    /** The overlays linked to item [itemId] with their rooms' names, for the item page's Links (AC-C26). */
+    fun observeLinks(itemId: String): Flow<List<OverlayLink>> = dao.observeForItem(itemId).map { rows ->
+        val names = mutableMapOf<String, String?>()
+        rows.map { row ->
+            val room = row.roomId?.let { id -> names.getOrPut(id) { db.roomDao().get(id)?.name } }
+            OverlayLink(row.toOverlay(), room)
+        }
+    }
 
     /** A new overlay on wall [wallId] of the home; its room comes from the wall. */
     suspend fun addOnWall(homeId: String, wallId: String, draft: OverlayDraft): OverlaySave {
