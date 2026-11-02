@@ -248,7 +248,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<JobRoomKey> { key ->
-            com.kurtz.homerecord.housemodel.ui.RoomRoute(container.homes, key.roomId, onBack = nav::pop)
+            com.kurtz.homerecord.housemodel.ui.RoomRoute(container.homes, container.wallPhotos, key.roomId, onBack = nav::pop)
         }
         entry<JobFloorsKey> { key ->
             com.kurtz.homerecord.housemodel.ui.FloorsRoute(container.homes, key.homeId, key.title, onBack = nav::pop)

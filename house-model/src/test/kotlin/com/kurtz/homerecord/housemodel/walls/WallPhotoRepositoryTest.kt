@@ -93,4 +93,21 @@ class WallPhotoRepositoryTest {
         assertThat(latest.getValue(WallStage.FINISHED).id).isEqualTo("later")
         assertThat(latest.getValue(WallStage.FINISHED).outline).isNull()
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C17")
+    fun roomWallsFollowNewPhotosAndRemovedWalls() = runTest {
+        db.wallDao().upsert(WallEntity(id = "w-east", roomId = "kitchen", edgeIndex = 1, orientation = "E", lengthIn = 144, heightIn = 96, createdAt = 2, updatedAt = 2))
+        db.wallDao().upsert(WallEntity(id = "w-den", roomId = "den", edgeIndex = 0, orientation = "N", lengthIn = 120, heightIn = 96, createdAt = 3, updatedAt = 3))
+        assertThat(repo.observeRoomWalls("kitchen").first().map { it.id }).containsExactly("w-north", "w-east").inOrder()
+
+        repo.save("w-east", WallStage.FINISHED, "/m/e.jpg", "/m/e-tex.jpg", outline)
+        repo.save("w-den", WallStage.FINISHED, "/m/d.jpg", null, outline)
+        val walls = repo.observeRoomWalls("kitchen").first()
+        assertThat(walls.single { it.id == "w-east" }.thumbnails).containsExactly(WallStage.FINISHED, "/m/e-tex.jpg")
+        assertThat(walls.single { it.id == "w-north" }.thumbnails).isEmpty()
+
+        db.wallDao().softDelete("w-east", 99)
+        assertThat(repo.observeRoomWalls("kitchen").first().map { it.id }).containsExactly("w-north")
+    }
 }

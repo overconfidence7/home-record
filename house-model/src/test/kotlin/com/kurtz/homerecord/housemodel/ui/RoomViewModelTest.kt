@@ -15,6 +15,10 @@ import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemodel.NewHome
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
+import com.kurtz.homerecord.housemodel.walls.WallSide
+import com.kurtz.homerecord.housemodel.walls.WallStage
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,6 +62,9 @@ class RoomViewModelTest {
     }
 
     private fun vm(roomId: String, rows: MutableStateFlow<List<ItemRow>>? = null) = RoomViewModel(repo, roomId, rows).also { created += it }
+
+    private fun wallsVm(roomId: String, stage: WallStage, saved: SavedStateHandle = SavedStateHandle()) =
+        RoomViewModel(repo, roomId, walls = WallPhotoRepository(db).observeRoomWalls(roomId), defaultStage = stage, savedState = saved).also { created += it }
 
     private val kitchen = PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 168, 144)
     private val living = PlanRoom.rectangle("l", "Living room", "LIVING_ROOM", 168, 0, 180, 144)
@@ -115,5 +122,32 @@ class RoomViewModelTest {
         assertThat(state.items[0].warranty).isEqualTo(active)
         rows.value = rows.value + row("4", "Toaster", "k")
         assertThat(withTimeout(10_000) { model.state.first { it.items.size == 3 } }.items.map { it.name }).contains("Toaster")
+    }
+
+    @AcceptanceCriterion("AC-C17")
+    @Test fun listsTheRoomsWallsFromThePlanAndFollowsAResize() = test {
+        val floorId = mainFloor()
+        val model = wallsVm("k", WallStage.HouseManualDefault)
+        val state = withTimeout(10_000) { model.state.first { it.walls.size == 4 } }
+        assertThat(state.wallStage).isEqualTo(WallStage.FINISHED)
+        assertThat(state.walls.map { it.side }).containsExactly(WallSide.NORTH, WallSide.EAST, WallSide.SOUTH, WallSide.WEST).inOrder()
+        assertThat(state.walls.map { it.lengthIn }.sorted()).containsExactly(144, 144, 168, 168)
+
+        repo.savePlan(floorId, listOf(PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 192, 144), PlanRoom.rectangle("l", "Living room", "LIVING_ROOM", 192, 0, 180, 144)))
+        val resized = withTimeout(10_000) { model.state.first { s -> s.walls.any { it.lengthIn == 192 } } }
+        assertThat(resized.walls).hasSize(4)
+    }
+
+    @AcceptanceCriterion("AC-C17")
+    @Test fun stageStartsOnTheAppDefaultAndTheChoiceSurvivesProcessDeath() = test {
+        mainFloor()
+        val saved = SavedStateHandle()
+        val fieldLog = wallsVm("k", WallStage.BehindTheWall, saved)
+        assertThat(fieldLog.state.value.wallStage).isEqualTo(WallStage.ROUGH_IN)
+        fieldLog.selectStage(WallStage.INSULATION)
+        assertThat(fieldLog.state.value.wallStage).isEqualTo(WallStage.INSULATION)
+
+        val restored = wallsVm("k", WallStage.BehindTheWall, saved)
+        assertThat(restored.state.value.wallStage).isEqualTo(WallStage.INSULATION)
     }
 }

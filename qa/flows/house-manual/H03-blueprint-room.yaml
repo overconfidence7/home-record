@@ -17,6 +17,25 @@ appId: com.kurtz.homerecord.housemanual
 # Room page sections are present as the T017 shell of AC-H10 (items list arrives with T021+)
 - assertVisible:
     id: "hm_room_items"
+# AC-C17: the Walls section lists the kitchen's four walls by side and length, on the Finished stage first
+- scrollUntilVisible:
+    element:
+      id: "hm_room_wall_stage_finished"
+- assertVisible:
+    id: "hm_room_wall_stage_finished"
+    selected: true
+- tapOn:
+    id: "hm_room_wall_stage_rough_in"
+- assertVisible:
+    id: "hm_room_wall_stage_rough_in"
+    selected: true
+- scrollUntilVisible:
+    element: "North wall"
+- assertVisible: "North wall"
+- scrollUntilVisible:
+    element: "West wall"
+- assertVisible: '.*long · No photos yet'
+- takeScreenshot: H03-room-walls
 - tapOn:
     id: "hm_back"
 - longPressOn: "Kitchen"

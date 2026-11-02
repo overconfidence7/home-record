@@ -5,6 +5,8 @@ import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.walls.RoomWall
+import com.kurtz.homerecord.housemodel.walls.WallStage
 
 data class RoomUiState(
     val loading: Boolean = true,
@@ -15,6 +17,12 @@ data class RoomUiState(
     val items: List<RoomItem> = emptyList(),
     /** House Manual keeps items and offers "Add an item here"; Field Log does not. */
     val canAddItem: Boolean = false,
+    /** The room's walls by side and length with a picture per photographed stage (AC-C17). */
+    val walls: List<RoomWall> = emptyList(),
+    /** The stage whose photos the Walls section shows; House Manual starts on Finished, Field Log on Rough-in. */
+    val wallStage: WallStage = WallStage.HouseManualDefault,
+    /** True where the app can take a wall photo ("Photograph" on each wall). */
+    val canPhotograph: Boolean = false,
 )
 
 /** One row of the room's item list: icon by subtype, make and model (or category), warranty status (AC-H10). */
@@ -31,6 +39,8 @@ sealed interface RoomEvent {
     data object Back : RoomEvent
     data class OpenItem(val id: String) : RoomEvent
     data object AddItem : RoomEvent
+    data class SelectStage(val stage: WallStage) : RoomEvent
+    data class PhotographWall(val wallId: String) : RoomEvent
 }
 
 /** The room's items by name; detail is make and model (the screen shows [RoomItem.category] when neither is set, AC-H10). */

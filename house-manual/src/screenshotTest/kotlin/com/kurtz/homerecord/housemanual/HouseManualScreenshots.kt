@@ -138,6 +138,11 @@ fun RoomPageScreenshot() = RoomPagePreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun RoomWallsScreenshot() = RoomWallsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun RoomMissingScreenshot() = RoomMissingPreview()
 
 @PreviewTest

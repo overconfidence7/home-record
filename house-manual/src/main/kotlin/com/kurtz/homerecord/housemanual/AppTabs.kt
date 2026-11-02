@@ -140,7 +140,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
         entry<RoomKey> { key -> RoomRoute(
-            container.homes, container.items, home.id, key.roomId, onBack = nav::pop,
+            container.homes, container.items, container.wallPhotos, home.id, key.roomId, onBack = nav::pop,
             onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },
         ) }
         entry<FloorsKey> { FloorsRoute(container.homes, home.id, home.name, onBack = nav::pop) }

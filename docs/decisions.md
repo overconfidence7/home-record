@@ -512,3 +512,16 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - Texture size: the wall's length × height aspect (the outline's own when the wall has no size), the long side as long as
   the outline's longer edges in the photo (no upscaling), capped at 2048 px; JPEG quality 88. Sources over 16 MP are
   decoded at a power-of-two sample first.
+
+## 2026-11-02 T048b: Walls section on the room page
+
+- Walls list in compass order (North, East, South, West, then angled walls), plan order within a side; a side with two or
+  more walls numbers them ("North wall 1", "North wall 2"), a lone wall has no number. The plan's top edge is "North"
+  (WallDeriver's convention); the app does not know true north.
+- The stage picker is a four-option segmented row (rule 22) without the check icon, each label one line that steps its
+  size down at large text rather than splitting mid-word. House Manual opens on Finished, Field Log's room page on
+  Rough-in (its "behind the wall" stage, AC-C17); the choice survives process death (SavedStateHandle).
+- Each wall row shows the selected stage's picture (the straightened texture when there is one, else the photo as taken)
+  and which stages have photos in words. Photograph/Retake is drawn only when the app can capture (`canPhotograph`), so
+  it stays off until T048c wires the camera; at ≥ 150% font the button moves under the row's text.
+- New DAO query `WallPhotoDao.observeForRoom` (join on live walls); no schema change.

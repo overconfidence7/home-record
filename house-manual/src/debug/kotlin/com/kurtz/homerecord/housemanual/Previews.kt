@@ -21,6 +21,9 @@ import com.kurtz.homerecord.housemodel.ui.HouseDialog
 import com.kurtz.homerecord.housemodel.ui.HouseScreen
 import com.kurtz.homerecord.housemodel.ui.HouseUiState
 import com.kurtz.homerecord.housemodel.ui.RoomItem
+import com.kurtz.homerecord.housemodel.walls.RoomWall
+import com.kurtz.homerecord.housemodel.walls.WallSide
+import com.kurtz.homerecord.housemodel.walls.WallStage
 import com.kurtz.homerecord.housemodel.ui.RoomScreen
 import com.kurtz.homerecord.housemodel.ui.ItemEditScreen
 import com.kurtz.homerecord.housemodel.ui.ItemEditUiState
@@ -281,6 +284,22 @@ fun RoomPagePreview() = Frame { RoomScreen(RoomUiState(loading = false, room = h
         RoomItem("i1", "Dishwasher", "Bosch SHPM88Z75N", iconName = ItemCategory.subtype("dishwasher")?.iconName ?: "Category", warranty = WarrantyStatus.Active("2028-03-14")),
         RoomItem("i2", "Range hood", "Broan", iconName = ItemCategory.subtype("range_hood")?.iconName ?: "Category"),
     ),
+    walls = kitchenWalls,
+), {}) }
+
+/** The kitchen's four walls: the sink wall photographed at rough-in and finished, the range wall finished only. */
+private val kitchenWalls = listOf(
+    RoomWall("w1", WallSide.NORTH, null, 168, 96, mapOf(WallStage.ROUGH_IN to "/preview/sink-rough.jpg", WallStage.FINISHED to "/preview/sink.jpg")),
+    RoomWall("w2", WallSide.EAST, null, 144, 96, mapOf(WallStage.FINISHED to "/preview/range.jpg")),
+    RoomWall("w3", WallSide.SOUTH, null, 168, 96),
+    RoomWall("w4", WallSide.WEST, null, 144, 96),
+)
+
+/** The Walls section on its own (no items yet), on Rough-in, with Photograph on each wall (AC-C17). */
+@ThemePreviews
+@Composable
+fun RoomWallsPreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", canAddItem = true,
+    walls = kitchenWalls, wallStage = WallStage.ROUGH_IN, canPhotograph = true,
 ), {}) }
 
 @ThemePreviews

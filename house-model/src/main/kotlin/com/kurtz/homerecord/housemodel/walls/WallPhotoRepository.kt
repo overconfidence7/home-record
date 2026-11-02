@@ -5,6 +5,8 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.data.WallPhotoEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** One wall photo at one stage (AC-C17); [texturePath] is the straightened copy the 3D view uses (AC-C19). */
@@ -33,6 +35,10 @@ class WallPhotoRepository(
 ) {
     /** The wall's photos keyed by stage, the newest at each stage. */
     fun observeByStage(wallId: String): Flow<Map<WallStage, WallPhoto>> = db.wallPhotoDao().observeFor(wallId).map(::latestByStage)
+
+    /** The room's walls with a picture per photographed stage, following plan edits and new photos (AC-C17). */
+    fun observeRoomWalls(roomId: String): Flow<List<RoomWall>> =
+        combine(db.wallDao().observeFor(roomId), db.wallPhotoDao().observeForRoom(roomId), RoomWalls::build).distinctUntilChanged()
 
     suspend fun byStage(wallId: String): Map<WallStage, WallPhoto> = latestByStage(db.wallPhotoDao().listFor(wallId))
 
@@ -77,8 +83,11 @@ class WallPhotoRepository(
         const val ENTITY = "wall_photo"
 
         /** The newest photo at each stage; rows with the same stage (two phones before a sync) keep the later one. */
-        fun latestByStage(rows: List<WallPhotoEntity>): Map<WallStage, WallPhoto> =
+        fun latestByStage(rows: List<WallPhotoEntity>): Map<WallStage, WallPhoto> = latestRowByStage(rows).mapValues { (_, row) -> row.toWallPhoto() }
+
+        /** [latestByStage] without decoding the outlines, for lists that only show the pictures. */
+        fun latestRowByStage(rows: List<WallPhotoEntity>): Map<WallStage, WallPhotoEntity> =
             rows.groupBy { WallStage.fromStored(it.stage) }
-                .mapValues { (_, list) -> list.maxWith(compareBy<WallPhotoEntity>({ it.takenAt }, { it.createdAt }, { it.id })).toWallPhoto() }
+                .mapValues { (_, list) -> list.maxWith(compareBy<WallPhotoEntity>({ it.takenAt }, { it.createdAt }, { it.id })) }
     }
 }

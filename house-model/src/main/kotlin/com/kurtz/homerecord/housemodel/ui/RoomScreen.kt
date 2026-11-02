@@ -38,6 +38,27 @@ import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import com.kurtz.homerecord.housemodel.walls.RoomWall
+import com.kurtz.homerecord.housemodel.walls.WallSide
+import com.kurtz.homerecord.housemodel.walls.WallStage
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.ListItem
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.kurtz.homerecord.core.units.UnitSystem
+import java.io.File
 
 /** HM-Room, opened from the blueprint (AC-C14). Each section says what it will hold until its feature lands (AC-U4). */
 @Composable
@@ -73,7 +94,11 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 RoomSections.forEach { section ->
-                    if (section.tag == "items") RoomItemsCard(state.items, state.canAddItem, onEvent) else RoomSectionCard(section)
+                    when (section.tag) {
+                        "items" -> RoomItemsCard(state.items, state.canAddItem, onEvent)
+                        "walls" -> RoomWallsCard(state, onEvent)
+                        else -> RoomSectionCard(section)
+                    }
                 }
             }
         }
@@ -146,3 +171,125 @@ private fun RoomItemsCard(items: List<RoomItem>, canAdd: Boolean, onEvent: (Room
         }
     }
 }
+
+/** The Walls section (AC-C17): a stage picker, then each wall by side and length with its photo at that stage. */
+@Composable
+private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    Card(Modifier.fillMaxWidth().testTag("${prefix}_room_walls")) {
+        Column(Modifier.padding(vertical = 8.dp)) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Rounded.Straighten, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.room_section_walls), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            }
+            if (state.walls.isEmpty()) {
+                Text(
+                    stringResource(R.string.room_section_walls_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+                return@Column
+            }
+            WallStagePicker(state.wallStage, { onEvent(RoomEvent.SelectStage(it)) }, Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, onEvent) }
+        }
+    }
+}
+
+/** Framing, Rough-in, Insulation, Finished as one segmented row (rule 22); a label steps down rather than split at 200%. */
+@Composable
+private fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit, modifier: Modifier = Modifier) {
+    val prefix = LocalTagPrefix.current
+    SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
+        WallStage.entries.forEachIndexed { index, stage ->
+            SegmentedButton(
+                selected = stage == selected,
+                onClick = { onSelect(stage) },
+                shape = SegmentedButtonDefaults.itemShape(index, WallStage.entries.size),
+                icon = {},
+                modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_room_wall_stage_${stage.name.lowercase()}"),
+            ) {
+                Text(
+                    stringResource(stage.labelRes),
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = MaterialTheme.typography.labelLarge.fontSize),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, canPhotograph: Boolean, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    val name = wallName(wall)
+    val photographed = WallStage.entries.filter { it in wall.thumbnails }
+    val length = LengthParser.format(wall.lengthIn, system)
+    val supporting = if (photographed.isEmpty()) {
+        stringResource(R.string.room_wall_no_photos, length)
+    } else {
+        stringResource(R.string.room_wall_photos, length, photographed.map { stringResource(it.labelRes) }.joinToString(", "))
+    }
+    val photo = wall.thumbnails[stage]
+    // At large text the button moves under the words so the wall name and its stages keep the row's width (rule 32).
+    val buttonBelow = LocalDensity.current.fontScale >= 1.5f
+    val button: @Composable () -> Unit = {
+        TextButton(
+            onClick = { onEvent(RoomEvent.PhotographWall(wall.id)) },
+            modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_room_wall_photograph_${wall.id}"),
+        ) { Text(stringResource(if (photo == null) R.string.room_wall_photograph else R.string.room_wall_retake)) }
+    }
+    ListItem(
+        headlineContent = { Text(name, style = MaterialTheme.typography.bodyLarge) },
+        supportingContent = {
+            Column {
+                Text(supporting, style = MaterialTheme.typography.bodyMedium)
+                if (canPhotograph && buttonBelow) Box(Modifier.padding(top = 4.dp).offset(x = (-12).dp)) { button() }
+            }
+        },
+        leadingContent = { WallThumbnail(photo, stringResource(R.string.room_wall_photo_description, stringResource(stage.labelRes), name)) },
+        trailingContent = if (canPhotograph && !buttonBelow) button else null,
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier.heightIn(min = 72.dp).testTag("${prefix}_room_wall_${wall.id}"),
+    )
+}
+
+/** 56 dp picture of the wall at the chosen stage over a plain tile, which shows when the stage has no photo or it fails to load (rule 27). */
+@Composable
+private fun WallThumbnail(path: String?, description: String) {
+    Box(
+        Modifier.size(56.dp).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.Rounded.Image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (path != null) {
+            AsyncImage(model = File(path), contentDescription = description, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+        }
+    }
+}
+
+@Composable
+private fun wallName(wall: RoomWall): String {
+    val side = stringResource(
+        when (wall.side) {
+            WallSide.NORTH -> R.string.room_wall_north
+            WallSide.EAST -> R.string.room_wall_east
+            WallSide.SOUTH -> R.string.room_wall_south
+            WallSide.WEST -> R.string.room_wall_west
+            WallSide.ANGLED -> R.string.room_wall_angled
+        },
+    )
+    return wall.number?.let { stringResource(R.string.room_wall_numbered, side, it) } ?: side
+}
+
+@get:StringRes
+private val WallStage.labelRes: Int
+    get() = when (this) {
+        WallStage.FRAMING -> R.string.wall_stage_framing
+        WallStage.ROUGH_IN -> R.string.wall_stage_rough_in
+        WallStage.INSULATION -> R.string.wall_stage_insulation
+        WallStage.FINISHED -> R.string.wall_stage_finished
+    }

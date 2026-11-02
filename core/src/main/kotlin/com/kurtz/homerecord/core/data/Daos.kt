@@ -60,6 +60,12 @@ interface WallPhotoDao {
     @Query("SELECT * FROM wall_photo WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): WallPhotoEntity?
     @Query("SELECT * FROM wall_photo WHERE wallId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<WallPhotoEntity>>
     @Query("SELECT * FROM wall_photo WHERE wallId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<WallPhotoEntity>
+    /** Every live photo on the room's live walls (the room page's Walls section, AC-C17). */
+    @Query(
+        "SELECT wall_photo.* FROM wall_photo JOIN wall ON wall.id = wall_photo.wallId " +
+            "WHERE wall.roomId = :roomId AND wall.deletedAt IS NULL AND wall_photo.deletedAt IS NULL ORDER BY wall_photo.createdAt",
+    )
+    fun observeForRoom(roomId: String): Flow<List<WallPhotoEntity>>
     @Query("UPDATE wall_photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

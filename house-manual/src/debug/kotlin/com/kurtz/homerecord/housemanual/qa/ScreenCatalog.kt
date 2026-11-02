@@ -34,6 +34,7 @@ object ScreenCatalog {
         QaScreen("house-loading", nonRoot = false) { HouseLoadingPreview() },
         QaScreen("house-no-floors", nonRoot = false) { HouseNoFloorsPreview() },
         QaScreen("room-page", nonRoot = true) { RoomPagePreview() },
+        QaScreen("room-walls", nonRoot = true) { RoomWallsPreview() },
         QaScreen("paywall-items", nonRoot = true) { PaywallItemsPreview() },
         QaScreen("paywall-failed", nonRoot = true) { PaywallFailedPreview() },
         QaScreen("paywall-loading", nonRoot = true) { PaywallLoadingPreview() },

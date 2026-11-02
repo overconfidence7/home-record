@@ -426,6 +426,8 @@ class AppContainer(private val app: Application) {
 
     val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(db, app.resources::getString, onChange = ::recordChange) }
 
+    val wallPhotos by lazy { com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange) }
+
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 
     val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange, app.getString(com.kurtz.homerecord.housemodel.R.string.floor_default_main)) }
