@@ -58,6 +58,39 @@ EOF
 }
 shot() { adb exec-out screencap -p > "$OUT/screenshots/$1.png" 2>/dev/null || true; }
 
+# The emulator can drop off adb for a moment (26da2dea: "device offline" after the uninstall before the House Manual
+# jank stage, then "device 'emulator-5554' not found" for release and cold start, filed as app Majors). Before each
+# late stage and before retrying a failed install, bring it back: reconnect, wait up to 120 s for the device and for
+# boot_completed, and restart the logcat capture if it ended with the connection.
+device_ready() {
+  [ "$(adb get-state 2>/dev/null | tr -d '\r')" = device ] && [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] && return 0
+  echo "== device not ready ($(adb get-state 2>&1 | tr -d '\r')); reconnecting"
+  adb reconnect offline >/dev/null 2>&1 || true
+  timeout 120 adb wait-for-device >/dev/null 2>&1 || true
+  for _ in $(seq 1 60); do
+    [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] && break
+    sleep 2
+  done
+  if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != 1 ]; then echo "== device did not come back"; return 1; fi
+  if [ -n "${LOGCAT_PID:-}" ] && ! kill -0 "$LOGCAT_PID" 2>/dev/null; then
+    adb logcat -v time >> "$OUT/logs/logcat.txt" 2>/dev/null &
+    LOGCAT_PID=$!
+  fi
+  echo "== device back"
+}
+# install_apk <apk> <log>: adb install -r -g; when adb itself lost the device (not an app failure such as a
+# signature or parse error), recover the device and try once more. The log keeps both attempts.
+install_apk() {
+  if adb install -r -g "$1" > "$2" 2>&1; then return 0; fi
+  if grep -qiE "device offline|not found|no devices|device still authorizing|closed|protocol fault" "$2"; then
+    cp "$2" "$2.first"
+    device_ready || true
+    if adb install -r -g "$1" > "$2" 2>&1; then return 0; fi
+    if ! [ "$(adb get-state 2>/dev/null | tr -d '\r')" = device ]; then echo "emulator lost: adb could not reach the device after reconnecting (not an app failure); $(tail -n 1 "$2")" >> "$2"; fi
+  fi
+  return 1
+}
+
 adb wait-for-device
 adb shell settings put global window_animation_scale 0 >/dev/null 2>&1 || true
 adb shell settings put global transition_animation_scale 0 >/dev/null 2>&1 || true
@@ -223,8 +256,9 @@ for a in $PER_APP; do
   p=$(pkg_of "$a"); bench="$APK/$a-benchmark.apk"; flow="qa/flows/$a/_jank.yaml"
   if [ ! -f "$bench" ]; then record "jank:$a" skip "not measurable: no benchmark apk"; continue; fi
   if [ ! -f "$flow" ]; then record "jank:$a" skip "not measurable: no $flow"; continue; fi
+  device_ready || true
   adb uninstall "$p" >/dev/null 2>&1 || true
-  if adb install -r -g "$bench" > "$OUT/logs/install-benchmark-$a.txt" 2>&1; then
+  if install_apk "$bench" "$OUT/logs/install-benchmark-$a.txt"; then
     adb shell am broadcast -a androidx.profileinstaller.action.INSTALL_PROFILE "$p/androidx.profileinstaller.ProfileInstallReceiver" > "$OUT/logs/profile-benchmark-$a.txt" 2>&1
     adb shell am force-stop "$p"
     adb shell cmd package compile -f -m speed-profile "$p" >> "$OUT/logs/profile-benchmark-$a.txt" 2>&1
@@ -278,7 +312,7 @@ for a in $PER_APP; do
     record "jank:$a" skip "not measurable: $(tail -n 1 "$OUT/logs/install-benchmark-$a.txt")"
   fi
   adb uninstall "$p" >/dev/null 2>&1 || true
-  [ -f "$APK/$a-debug.apk" ] && adb install -r -g "$APK/$a-debug.apk" >/dev/null 2>&1 || true
+  [ -f "$APK/$a-debug.apk" ] && install_apk "$APK/$a-debug.apk" "$OUT/logs/reinstall-debug-$a.txt" || true
 done
 
 # ---------------------------------------------------------------- release
@@ -295,8 +329,9 @@ for a in $PER_APP; do
       record "coldstart:$a" fail "release build could not be measured (unsigned, no apksigner)"; continue
     fi
   fi
+  device_ready || true
   adb uninstall "$p" >/dev/null 2>&1 || true
-  if adb install -r -g "$rel" > "$OUT/logs/install-release-$a.txt" 2>&1; then
+  if install_apk "$rel" "$OUT/logs/install-release-$a.txt"; then
     adb shell am force-stop "$p"; t=$(adb shell am start -W -n "$p/.MainActivity" 2>/dev/null | sed -n 's/^TotalTime: *//p' | tr -d '\r'); sleep 3
     if adb shell pidof "$p" >/dev/null 2>&1; then record "release:$a" pass "R8 build launches (${t:-?} ms)"; shot "$a-release-launch"; else record "release:$a" fail "release build did not stay running"; fi
     # Cold start as installed from Play: the APK's baseline profile (assets/dexopt) compiled ahead of time, which is
@@ -323,7 +358,7 @@ for a in $PER_APP; do
     record "coldstart:$a" fail "release build could not be measured (install failed)"
   fi
   adb uninstall "$p" >/dev/null 2>&1 || true
-  [ -f "$APK/$a-debug.apk" ] && adb install -r -g "$APK/$a-debug.apk" >/dev/null 2>&1 || true
+  [ -f "$APK/$a-debug.apk" ] && install_apk "$APK/$a-debug.apk" "$OUT/logs/reinstall-debug-$a.txt" || true
 done
 
 # ----------------------------------------------------------------- logcat
