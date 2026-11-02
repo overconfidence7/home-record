@@ -1,7 +1,16 @@
 package com.kurtz.homerecord.housemanual
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -174,6 +183,44 @@ class House3DScreenTest {
         rule.onNodeWithText("Drag to turn, pinch to zoom, two fingers to move. Tap a room to stand inside it.").assertExists()
         rule.onNodeWithTag("hm_3d_scene").performClick()
         assertThat(events).containsExactly(House3DEvent.ViewRoom("l"))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C20")
+    fun theSceneTagAndDescriptionSitOnAComposeBoxAroundTheRenderer() {
+        // SceneView is an AndroidView whose own accessibility node hides semantics set on it, so the scene's tag and
+        // description belong to a wrapper the renderer sits inside (the F10/H03 flows find `<app>_3d_scene` by id).
+        var slotModifier: androidx.compose.ui.Modifier? = null
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    House3DScreen(ready, {}, {}, {}) { _, _, modifier ->
+                        slotModifier = modifier
+                        androidx.compose.foundation.layout.Box(modifier.then(androidx.compose.ui.Modifier.testTag("fake_scene")))
+                    }
+                }
+            }
+        }
+        rule.onNodeWithTag("hm_3d_scene").onChildren().filterToOne(hasTestTag("fake_scene")).assertExists()
+        rule.onNodeWithTag("hm_3d_scene").assert(hasContentDescription("Main", substring = true))
+        val modifier = slotModifier
+        assertThat(modifier).isNotNull()
+        assertThat(modifier?.any { it is androidx.compose.ui.semantics.SemanticsModifier }).isFalse()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C20")
+    fun theChosenStageIsExposedAsChecked() {
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    House3DScreen(ready, {}, {}, {}) { _, _, modifier -> androidx.compose.foundation.layout.Box(modifier) }
+                }
+            }
+        }
+        // Segmented buttons are radio buttons to accessibility: the chosen one is checked (Maestro `checked: true`).
+        rule.onNodeWithTag("hm_3d_stage_${ready.stage.name.lowercase()}").assertIsSelected()
+        rule.onNodeWithTag("hm_3d_stage_${ready.stage.name.lowercase()}").assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
     }
 
     @Test

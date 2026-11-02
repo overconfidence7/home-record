@@ -1,5 +1,6 @@
 # Walkthrough H3: the House tab shows a blueprint; tapping a room opens it; long press shows
 # Rename / Delete (AC-C13, AC-C14). Builds on H02.
+# Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked` (not `selected`).
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: H02-draw-plan.yaml
@@ -23,12 +24,12 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_room_wall_stage_finished"
 - assertVisible:
     id: "hm_room_wall_stage_finished"
-    selected: true
+    checked: true
 - tapOn:
     id: "hm_room_wall_stage_rough_in"
 - assertVisible:
     id: "hm_room_wall_stage_rough_in"
-    selected: true
+    checked: true
 - scrollUntilVisible:
     element: "North wall"
 - assertVisible: "North wall"
@@ -90,7 +91,7 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_3d_scene"
 - assertVisible:
     id: "hm_3d_stage_finished"
-    selected: true
+    checked: true
 - assertVisible: "Main in 3D"
 - tapOn:
     id: "hm_3d_reset"

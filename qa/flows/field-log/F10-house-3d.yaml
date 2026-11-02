@@ -3,6 +3,7 @@
 # stage picker opening on Rough-in (Field Log's behind-the-wall default); Back returns to the House tab.
 # T051 (AC-C22): the Kitchen room page's "View in 3D" stands the camera inside the room; Back to floor leaves it.
 # Behind-the-wall capture, overlays and the installed item arrive with T052 and the F10 item work.
+# Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked` (not `selected`).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -81,7 +82,7 @@ appId: com.kurtz.homerecord.fieldlog
     id: "fl_3d_scene"
 - assertVisible:
     id: "fl_3d_stage_rough_in"
-    selected: true
+    checked: true
 - assertVisible:
     id: "fl_3d_walls"
 - tapOn:
@@ -106,7 +107,7 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 15000
 - assertVisible:
     id: "fl_3d_stage_rough_in"
-    selected: true
+    checked: true
 - takeScreenshot: F10-3d-room
 - tapOn:
     id: "fl_3d_back_to_floor"

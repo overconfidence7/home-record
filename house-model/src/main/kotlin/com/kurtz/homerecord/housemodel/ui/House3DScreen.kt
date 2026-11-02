@@ -156,11 +156,16 @@ fun House3DScreen(
                     } else {
                         stringResource(R.string.house3d_scene_description, floorName.orEmpty(), scene.roomCount)
                     }
-                    sceneSlot(
-                        scene,
-                        SceneCamera(state.stage, state.resetCount, room?.id) { onEvent(House3DEvent.ViewRoom(it)) },
-                        Modifier.fillMaxSize().semantics { contentDescription = description }.testTag("${prefix}_3d_scene"),
-                    )
+                    // The tag and description sit on a plain Compose box around the scene: SceneView is an AndroidView,
+                    // whose own accessibility node replaces the semantics set on it, so Maestro and TalkBack would never
+                    // see `<app>_3d_scene` or the description on the view itself.
+                    Box(Modifier.fillMaxSize().semantics { contentDescription = description }.testTag("${prefix}_3d_scene")) {
+                        sceneSlot(
+                            scene,
+                            SceneCamera(state.stage, state.resetCount, room?.id) { onEvent(House3DEvent.ViewRoom(it)) },
+                            Modifier.fillMaxSize(),
+                        )
+                    }
                     FlowRow(
                         modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
