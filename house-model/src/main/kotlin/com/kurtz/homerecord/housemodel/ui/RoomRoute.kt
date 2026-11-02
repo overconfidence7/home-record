@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.overlays.OverlayRepository
 import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
 import com.kurtz.homerecord.housemodel.walls.WallStage
 
@@ -28,6 +29,9 @@ fun RoomRoute(
     onOutline: (WallOutlineRequest) -> Unit,
     /** Opens the room's floor in 3D standing inside the room (AC-C22); null hides "View in 3D". */
     onView3D: ((Room3DTarget) -> Unit)? = null,
+    /** The room's overlays; with [onOpenWall], wall rows open HM-Wall to draw them (AC-C25..C28). */
+    overlays: OverlayRepository? = null,
+    onOpenWall: ((WallOpenRequest) -> Unit)? = null,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -36,6 +40,7 @@ fun RoomRoute(
                 RoomViewModel(
                     repo, roomId, walls = wallPhotos.observeRoomWalls(roomId), defaultStage = WallStage.BehindTheWall,
                     savedState = createSavedStateHandle(), media = media, canView3D = onView3D != null,
+                    overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
                 )
             }
         },
@@ -47,6 +52,7 @@ fun RoomRoute(
             RoomEvent.Back -> onBack()
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
+            is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
             is RoomEvent.OpenItem, RoomEvent.AddItem -> Unit
             else -> vm.onPhotoEvent(event)
         }
@@ -68,6 +74,9 @@ fun RoomRoute(
     onOutline: (WallOutlineRequest) -> Unit,
     /** Opens the room's floor in 3D standing inside the room (AC-C22); null hides "View in 3D". */
     onView3D: ((Room3DTarget) -> Unit)? = null,
+    /** The room's overlays; with [onOpenWall], wall rows open HM-Wall to draw them (AC-C25..C28). */
+    overlays: OverlayRepository? = null,
+    onOpenWall: ((WallOpenRequest) -> Unit)? = null,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -76,6 +85,7 @@ fun RoomRoute(
                 RoomViewModel(
                     repo, roomId, items.observeRows(homeId, emptyMap()), wallPhotos.observeRoomWalls(roomId),
                     WallStage.HouseManualDefault, createSavedStateHandle(), media, canView3D = onView3D != null,
+                    overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
                 )
             }
         },
@@ -89,10 +99,14 @@ fun RoomRoute(
             RoomEvent.AddItem -> onAddItem(roomId)
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
+            is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
             else -> vm.onPhotoEvent(event)
         }
     }
 }
+
+/** HM-Wall for [wallId] opened from the room page at [stage], with [overlayId] picked (AC-C28). */
+data class WallOpenRequest(val wallId: String, val stage: WallStage, val overlayId: String?)
 
 /** Launches the camera or photo picker the view model asks for and opens the outline screen once a photo is in (AC-C18). */
 @Composable

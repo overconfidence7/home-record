@@ -5,6 +5,7 @@ import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.items.ItemRow
+import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallStage
@@ -36,6 +37,10 @@ data class RoomUiState(
     val outlineRequest: WallOutlineRequest? = null,
     /** The picked photo could not be copied into the app. */
     val photoImportFailed: Boolean = false,
+    /** The room's overlays on its walls and on the plan (AC-C25); null where the app has no overlays to show. */
+    val overlays: List<Overlay>? = null,
+    /** A wall row opens HM-Wall to draw and edit overlays on it (AC-C28). */
+    val canOpenWalls: Boolean = false,
 ) {
     /** "View in 3D" shows once the room is drawn on its floor and the app has a 3D view. */
     val showView3D: Boolean get() = canView3D && floorId != null && (room?.points?.size ?: 0) >= 3
@@ -82,6 +87,8 @@ sealed interface RoomEvent {
     data class GalleryResult(val uri: String?) : RoomEvent
     data object PhotoLaunchHandled : RoomEvent
     data object OutlineOpened : RoomEvent
+    /** Opens HM-Wall for [wallId] at the shown stage, with [overlayId] picked when one was tapped (AC-C28). */
+    data class OpenWall(val wallId: String, val overlayId: String? = null) : RoomEvent
 }
 
 /** The room's items by name; detail is make and model (the screen shows [RoomItem.category] when neither is set, AC-H10). */

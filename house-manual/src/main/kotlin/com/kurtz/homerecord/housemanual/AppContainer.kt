@@ -110,6 +110,8 @@ class AppContainer(app: Application) {
 
     val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()
+    /** Pipes, wires and boxes drawn on walls and the plan (AC-C25..C28). */
+    val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
 
     val search = com.kurtz.homerecord.housemodel.search.SearchRepository(db, items::subtypeName)
 

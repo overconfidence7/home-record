@@ -392,4 +392,48 @@
     <string name="overlay_depth_in_attic">In attic</string>
     <string name="overlay_depth_underground">Underground</string>
     <string name="overlay_depth_exposed">Exposed</string>
+    <string name="wall_overlays_title">Wall</string>
+    <string name="wall_overlays_add">Add overlay</string>
+    <string name="wall_overlays_gone_title">Wall not found</string>
+    <string name="wall_overlays_gone_body">This wall was removed from the plan, maybe on another phone.</string>
+    <string name="wall_overlays_no_photo">No %1$s photo of this wall. Overlays show on the plain wall.</string>
+    <string name="wall_overlays_save_failed">Couldn\'t save the overlay. The wall may have been removed from the plan.</string>
+    <string name="wall_overlays_empty">No pipes, wires or boxes drawn on this wall yet. Tap Add overlay, then tap along the line on the wall.</string>
+    <string name="wall_overlays_draw_hint">Tap along the pipe or wire on the photo. One tap marks a single spot like an outlet.</string>
+    <plurals name="wall_overlays_draw_points">
+        <item quantity="one">1 point. Tap again to draw a line, or tap Next for a single spot.</item>
+        <item quantity="other">%1$d points. Keep tapping along the line, then tap Next.</item>
+    </plurals>
+    <string name="wall_overlays_undo_point">Undo</string>
+    <string name="wall_overlays_next">Next</string>
+    <string name="wall_overlays_drag_hint">Drag a dot to move it.</string>
+    <plurals name="wall_overlays_picture_description">
+        <item quantity="one">Wall photo with 1 overlay</item>
+        <item quantity="other">Wall photo with %1$d overlays</item>
+    </plurals>
+    <string name="wall_overlay_edit">Edit</string>
+    <string name="wall_overlay_delete">Delete</string>
+    <string name="wall_overlay_done">Done</string>
+    <string name="wall_overlay_cancel">Cancel</string>
+    <string name="wall_overlay_delete_title">Delete %1$s?</string>
+    <string name="wall_overlay_delete_body">It comes off this wall on every stage and every phone that shares the house.</string>
+    <string name="wall_overlay_recorded_at">%1$s stage</string>
+    <string name="overlay_form_new_title">New overlay</string>
+    <string name="overlay_form_edit_title">Edit overlay</string>
+    <string name="overlay_form_spot">A single spot on the wall.</string>
+    <plurals name="overlay_form_run">
+        <item quantity="one">A line with %1$d point.</item>
+        <item quantity="other">A line with %1$d points.</item>
+    </plurals>
+    <string name="overlay_form_kind">Kind</string>
+    <string name="overlay_form_kind_missing">Pick what this is.</string>
+    <string name="overlay_form_kind_chosen">Chosen</string>
+    <string name="overlay_form_label">Label</string>
+    <string name="overlay_form_label_helper">Like \"Sink supply\" or \"Bath fan circuit\".</string>
+    <string name="overlay_form_depth">Where it runs</string>
+    <string name="overlay_form_stage">Recorded at</string>
+    <string name="overlay_form_note">Note</string>
+    <string name="room_section_overlays_empty_walls">No outlets, pipes or wires drawn in this room yet. Tap a wall above to draw one on its photo.</string>
+    <string name="room_overlay_on_plan">On the plan</string>
+    <string name="room_wall_open">Open wall</string>
 </resources>

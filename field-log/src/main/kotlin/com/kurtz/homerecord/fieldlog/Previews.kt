@@ -1589,3 +1589,27 @@ fun TaskViewDonePreview() = Frame {
         {},
     )
 }
+
+/** The crew's wall at rough-in before the photo is in: the bath fan circuit and its switch on the plain wall (AC-C25). */
+@ThemePreviews
+@Composable
+fun JobWallOverlaysPreview() = Frame {
+    fun overlay(id: String, kind: com.kurtz.homerecord.housemodel.overlays.OverlayKind, label: String, vararg xy: Float) =
+        com.kurtz.homerecord.housemodel.overlays.Overlay(
+            id, "h1", "r2", "w5", kind, label, null, com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+            xy.toList().chunked(2).map { com.kurtz.homerecord.housemodel.overlays.OverlayPoint(it[0], it[1]) },
+            com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, null, null, 0L,
+        )
+    com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(
+        com.kurtz.homerecord.housemodel.ui.WallOverlaysUiState(
+            loading = false, roomName = "Hall bath", stage = com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN,
+            wall = com.kurtz.homerecord.housemodel.walls.RoomWall("w5", com.kurtz.homerecord.housemodel.walls.WallSide.EAST, null, 96, 96),
+            overlays = listOf(
+                overlay("o1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.ELECTRICAL_WIRE, "Bath fan circuit", 0.2f, 0f, 0.2f, 0.45f),
+                overlay("o2", com.kurtz.homerecord.housemodel.overlays.OverlayKind.SWITCH, "Fan and light", 0.2f, 0.5f),
+                overlay("o3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.VENT, "Vent stack", 0.75f, 1f, 0.75f, 0f),
+            ),
+        ),
+        {},
+    )
+}

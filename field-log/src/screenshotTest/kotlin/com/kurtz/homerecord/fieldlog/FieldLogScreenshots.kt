@@ -676,3 +676,8 @@ fun TaskViewScreenshot() = TaskViewPreview()
 @ThemePreviews
 @Composable
 fun TaskViewDoneScreenshot() = TaskViewDonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobWallOverlaysScreenshot() = JobWallOverlaysPreview()
