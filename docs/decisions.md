@@ -556,3 +556,19 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   may push and upload it), because the behind-the-wall photo is a crew job (AC-F49). Orphan cleanup already keys on
   the row, so both files live as long as the row.
 - House Manual passes no upload/fetch hooks yet: it has no media upload path until its cloud sync (T075a).
+
+## 2026-11-02 T049a: 3D mesh from the plan
+
+- `PlanMeshBuilder` (`:house-model` `scene`) is pure Kotlin with no SceneView types, so the geometry is unit-tested
+  on the JVM and the renderer (T049b) only uploads float/int arrays into Filament vertex and index buffers.
+- World frame: meters, y up, plan x → x, plan y → z, footprint centered on the origin; a camera looking down with
+  -z as screen-up sees the blueprint unmirrored. Floors take the floor record's `ceilingHeightIn` and `elevationIn`.
+- Walls are 4.5" thick (2×4 with drywall). Each room draws its own inside face set in half a thickness, so a
+  shared wall is two faces 4.5" apart with no z-fighting, and each face is a separate part keyed by
+  (room, edge) for its stage photo. Exterior edges also get the outside face; tops and jambs make walls read solid.
+- Wall-face UVs run u along the wall from its first corner and v from the top down, the orientation of the
+  straightened wall photo bitmap (`WallTextureBuilder`), so the texture maps with no flipping in our coordinates.
+- Windows have no sill height in the plan model: their head sits at 80" (a 6'8" door head) and they hang down by
+  their height; any opening stops 4" below the ceiling. A door drawn on one room's side of a shared wall opens the
+  neighbour's face too.
+- Floors are ear-clipped (own `PolygonTriangulator`, no library) so L-shaped and other concave rooms work.
