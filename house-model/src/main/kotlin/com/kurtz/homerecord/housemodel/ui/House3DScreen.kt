@@ -42,6 +42,8 @@ import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
+import com.kurtz.homerecord.coreui.shell.SharedKeys
+import com.kurtz.homerecord.coreui.shell.sharedScreenBounds
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.scene.FloorScene
 import com.kurtz.homerecord.housemodel.scene.FloorScenePicture
@@ -137,7 +139,11 @@ fun House3DScreen(
                 )
             }
         }
-        val body: @Composable (Modifier) -> Unit = { m ->
+        // Opened from a room page's "View in 3D": the view grows out of that button and shrinks back into it on Back
+        // (AC-C22). The key holds from the first frame (roomId comes from the nav key), through loading and the scene.
+        val sharedRoomId = state.roomId?.takeIf { state.openedOnRoom }
+        val body: @Composable (Modifier) -> Unit = { outer ->
+            val m = if (sharedRoomId != null) outer.sharedScreenBounds(SharedKeys.room3D(sharedRoomId)) else outer
             when {
                 state.loading -> LoadingState(m)
                 state.failed -> ErrorState(stringResource(R.string.house3d_failed), { onEvent(House3DEvent.Retry) }, m.testTag("${prefix}_3d_error"))

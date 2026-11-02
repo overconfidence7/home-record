@@ -654,3 +654,15 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   The still picture used for previews and screenshots shows only the chosen room, cut away.
 - The shared-element transition named in the plan is left for T051a.
 
+## 2026-11-02 T051a: shared-element transition into the 3D room view
+
+- The shell (`HomeRecordApp`) wraps each tab's NavDisplay in one `SharedTransitionLayout` and passes it to
+  NavDisplay's `sharedTransitionScope`; `LocalSharedTransitionScope` hands it to screens. `Modifier.sharedScreenBounds(key)`
+  in `:core-ui` applies `sharedBounds` with NavDisplay's `LocalNavAnimatedContentScope`, and is a no-op outside the
+  shell (previews, screenshot tests, catalog), so reference PNGs are unchanged.
+- Container transform, not a scaled snapshot: `ResizeMode.RemeasureToBounds`, so the button's label is not stretched
+  and the scene's surface is laid out at each animated size; bounds follow the theme's `MotionScheme.standard()`
+  spatial spring (settles in about 350 ms, inside rule 29's 400 ms).
+- Shared key `room-3d:<roomId>` (`SharedKeys.room3D`) sits on the room page's "View in 3D" button and on the 3D
+  screen's body while it was opened on that room; after "Back to floor" the key is dropped, so a later Back from the
+  whole floor uses the plain transition.

@@ -39,6 +39,8 @@ import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
+import com.kurtz.homerecord.coreui.shell.SharedKeys
+import com.kurtz.homerecord.coreui.shell.sharedScreenBounds
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 import com.kurtz.homerecord.housemodel.walls.RoomWall
@@ -99,7 +101,7 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                 if (state.showView3D) {
                     OutlinedButton(
                         onClick = { onEvent(RoomEvent.View3D) },
-                        modifier = Modifier.heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_room_view_3d"),
+                        modifier = Modifier.sharedScreenBounds(SharedKeys.room3D(room.id)).heightIn(min = 48.dp).testTag("${LocalTagPrefix.current}_room_view_3d"),
                     ) {
                         Icon(Icons.Rounded.ViewInAr, contentDescription = null)
                         Text(stringResource(R.string.room_view_3d), modifier = Modifier.padding(start = 8.dp))

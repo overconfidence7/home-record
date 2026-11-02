@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.coreui.shell
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -131,23 +132,28 @@ fun HomeRecordApp(
             }
         },
     ) {
-        Box {
-            NavDisplay(
-                backStack = stack,
-                // Scopes each screen's ViewModel to its back stack entry, so it is cleared on pop.
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-                onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
-                entryProvider = entryProvider {
-                    entries(object : ShellNav {
-                        override fun push(key: NavKey) { stack.add(key) }
-                        override fun pop() { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
-                        override fun selectTab(id: String) { if (tabs.any { it.id == id }) selectedId = id }
-                    })
-                },
-            )
+        // One shared-transition scope over the tab's stack, so a screen can grow out of the element that opened it
+        // (room page "View in 3D" into the room view, AC-C22); see sharedScreenBounds.
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                NavDisplay(
+                    backStack = stack,
+                    sharedTransitionScope = this,
+                    // Scopes each screen's ViewModel to its back stack entry, so it is cleared on pop.
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
+                    entryProvider = entryProvider {
+                        entries(object : ShellNav {
+                            override fun push(key: NavKey) { stack.add(key) }
+                            override fun pop() { if (stack.size > 1) stack.removeAt(stack.lastIndex) }
+                            override fun selectTab(id: String) { if (tabs.any { it.id == id }) selectedId = id }
+                        })
+                    },
+                )
+            }
         }
     }
 }
