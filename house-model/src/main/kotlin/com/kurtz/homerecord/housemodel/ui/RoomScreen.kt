@@ -348,7 +348,7 @@ private val RecordListItemChevron: @Composable () -> Unit = { Icon(Icons.AutoMir
 
 /** 56 dp picture of the wall at the chosen stage over a plain tile, which shows when the stage has no photo or it fails to load (rule 27). */
 @Composable
-private fun WallThumbnail(path: String?, description: String) {
+internal fun WallThumbnail(path: String?, description: String) {
     Box(
         Modifier.size(56.dp).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surface),
         contentAlignment = Alignment.Center,

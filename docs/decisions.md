@@ -795,3 +795,7 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - From above a wall overlay keeps only its position along the wall: each wall-space x lands on the wall line (left end per `WallWinding`, like the 3D faces) and the mark is drawn 7 dp inside the room so it reads beside the wall stroke at any zoom. A run spanning under 6" along the wall (a riser, a drop to an outlet) is drawn as a spot of its kind.
 - Items draw as a disc in the Items layer color carrying the item's category icon (rule 26); `ItemSpot` carries the icon name. Draw order: wall marks, then plan overlays, then items on top.
 - Marks are not tappable on the blueprint yet (the room under them opens); TalkBack gets one node per mark naming it. Tapping a mark is T055a.
+
+## 2026-11-03 — Behind the wall capture (T054)
+- The capture stage is a pure rule (`BehindTheWall.captureStage`): Rough-in until the wall has a Rough-in photo, then Finished. It is fixed when the camera opens and kept in SavedStateHandle, so a result after process death lands at the same stage even if another phone added a photo meanwhile.
+- FL-BehindWall lives in `:house-model` `ui` beside the room page and outline screen it hands off to; only Field Log opens it (`HouseScreen.onBehindWall`). No new dependencies.

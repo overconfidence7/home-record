@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Polyline
 import androidx.compose.material.icons.rounded.GridView
@@ -74,6 +75,8 @@ fun HouseScreen(
     onOpenPin: (String) -> Unit = {},
     /** Opens HM-3D on this floor (AC-C20); no button when null. */
     on3D: (() -> Unit)? = null,
+    /** Field Log's "Behind the wall" capture: pick a room, then a wall, then the camera (AC-F49); no button when null. */
+    onBehindWall: (() -> Unit)? = null,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -134,6 +137,12 @@ fun HouseScreen(
     val layerRow: @Composable () -> Unit = { LayerToggleRow(state.layers, { onEvent(HouseEvent.ToggleLayer(it)) }) }
     val actions: @Composable () -> Unit = {
         val buttons: @Composable (Modifier) -> Unit = { m ->
+            if (onBehindWall != null && state.rooms.isNotEmpty()) {
+                OutlinedButton(onClick = onBehindWall, modifier = m.testTag("${LocalTagPrefix.current}_house_behind_wall")) {
+                    Icon(Icons.Rounded.PhotoCamera, contentDescription = null)
+                    Text(stringResource(R.string.house_behind_wall), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
+                }
+            }
             // An empty floor already offers Edit plan in its empty state; one primary action only.
             if (state.rooms.isNotEmpty()) {
                 OutlinedButton(onClick = onEditPlan, modifier = m.testTag("${LocalTagPrefix.current}_house_edit_plan")) {

@@ -36,6 +36,8 @@ class JobHouseDeps(
     val on3D: (homeId: String, title: String, floorId: String?) -> Unit,
     /** The job's plan overlays on the blueprint (AC-C25). */
     val overlays: com.kurtz.homerecord.housemodel.overlays.OverlayRepository? = null,
+    /** Opens "Behind the wall" for the job's house: room, wall, camera (AC-F49). */
+    val onBehindWall: ((homeId: String, title: String) -> Unit)? = null,
 )
 
 @Composable
@@ -104,6 +106,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     modifier = Modifier.fillMaxSize(),
                     on3D = { floorId -> house.on3D(homeId, state.name, floorId) },
                     overlays = house.overlays,
+                    onBehindWall = house.onBehindWall?.let { open -> { open(homeId, state.name) } },
                     pins = { floorId ->
                         TaskPins.onFloor(jobTasks, floorId, canManageTasks, tasks?.me).mapIndexed { i, t ->
                             val pin = t.planPin ?: return@mapIndexed null

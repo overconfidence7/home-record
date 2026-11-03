@@ -1,4 +1,4 @@
-# Walkthrough H9: photograph a kitchen wall and outline its corners (AC-C17, AC-C18). Builds on H02 (Kitchen drawn).
+# Walkthrough H9: photograph a kitchen wall and outline its corners (AC-C17, AC-C18, AC-H8). Builds on H02 (Kitchen drawn).
 # The camera and the system photo picker are other apps, so the steps inside the picker run only when the picker shows
 # the fixture; the sheet, the outline screen and the saved thumbnail are checked whenever the app reaches them.
 appId: com.kurtz.homerecord.housemanual
@@ -58,3 +58,24 @@ appId: com.kurtz.homerecord.housemanual
       - assertVisible:
           text: "Retake"
       - takeScreenshot: H09-wall-thumbnail
+      # AC-H8: one navigation from the room ("View in 3D") shows the kitchen in 3D at the Finished stage, the photo on its wall
+      - scrollUntilVisible:
+          element:
+            id: "hm_room_view_3d"
+          direction: UP
+      - tapOn:
+          id: "hm_room_view_3d"
+      - extendedWaitUntil:
+          visible: "Kitchen in 3D"
+          timeout: 15000
+      - assertVisible:
+          id: "hm_3d_scene"
+      - assertVisible:
+          id: "hm_3d_stage_finished"
+          checked: true
+      - takeScreenshot: H09-wall-in-3d
+      - tapOn:
+          id: "hm_back"
+      - extendedWaitUntil:
+          visible: ".*Photos: Finished"
+          timeout: 10000

@@ -681,3 +681,18 @@ fun TaskViewDoneScreenshot() = TaskViewDonePreview()
 @ThemePreviews
 @Composable
 fun JobWallOverlaysScreenshot() = JobWallOverlaysPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BehindWallRoomsScreenshot() = BehindWallRoomsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BehindWallWallsScreenshot() = BehindWallWallsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BehindWallEmptyScreenshot() = BehindWallEmptyPreview()

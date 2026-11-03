@@ -1,5 +1,5 @@
 # Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
-# (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9 wall part). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
+# (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
 # in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the plan editor's
 # Overlays mode draws a gas line on the floor plan, picks it and deletes it (T052c2); the 3D half (T053b) and the blueprint Plumbing layer (T053c) show the pipe.
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
@@ -141,7 +141,7 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_wall_selection"
     timeout: 10000
-# AC-C15: on the blueprint the pipe lies along the kitchen's north wall once the Plumbing layer chip is on
+# AC-C15, AC-H9: on the blueprint the pipe lies along the kitchen's north wall once the Plumbing layer chip is on
 - tapOn:
     id: "hm_back"
 - tapOn:

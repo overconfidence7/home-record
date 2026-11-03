@@ -44,6 +44,8 @@ fun HouseRoute(
     on3D: ((floorId: String?) -> Unit)? = null,
     /** Draws the floor's plan overlays on the blueprint (AC-C25). */
     overlays: com.kurtz.homerecord.housemodel.overlays.OverlayRepository? = null,
+    /** Field Log's "Behind the wall" capture (AC-F49). */
+    onBehindWall: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -82,5 +84,6 @@ fun HouseRoute(
         pins = pins(state.floorId),
         onOpenPin = onOpenPin,
         on3D = on3D?.let { open -> { open(state.floorId) } },
+        onBehindWall = onBehindWall,
     )
 }

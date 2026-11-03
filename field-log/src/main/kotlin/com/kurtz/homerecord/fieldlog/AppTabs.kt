@@ -168,6 +168,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenFloors = { homeId, title -> nav.push(JobFloorsKey(homeId, title)) },
                     on3D = { homeId, title, floorId -> nav.push(JobHouse3DKey(homeId, title, floorId)) },
                     overlays = container.overlays,
+                    onBehindWall = { homeId, title -> nav.push(JobBehindWallKey(homeId, title)) },
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
@@ -290,6 +291,14 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         container.homes.roomLocation(key.roomId)?.let { nav.push(JobPlanKey(it.homeId, it.homeName, it.floorId, overlayId = overlayId)) }
                     }
                 },
+            )
+        }
+        entry<JobBehindWallKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.BehindWallRoute(
+                container.homes, container.wallPhotos, container.media, key.homeId, key.title, onBack = nav::pop,
+                onOutline = { roomId, it -> nav.push(JobWallOutlineKey(roomId, it.wallId, it.stage.name, it.photoPath)) },
+                onOpenRoom = { nav.push(JobRoomKey(it)) },
+                onEditPlan = { nav.push(JobPlanKey(key.homeId, key.title)) },
             )
         }
         entry<JobWallKey> { key ->

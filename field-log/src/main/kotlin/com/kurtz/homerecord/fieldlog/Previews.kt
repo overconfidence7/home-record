@@ -1429,7 +1429,7 @@ private fun JobHousePinsContent() {
             ),
             floorId = "f1", rooms = pinRooms,
         ),
-        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {}, on3D = {},
+        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {}, on3D = {}, onBehindWall = {},
         pins = listOf(
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t1", "Task 1: Move the outlet behind the range", 60, 30, 1),
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t2", "Task 2: Replace cracked cover plate by the back door", 216, 110, 2),
@@ -1637,6 +1637,78 @@ fun JobWallOverlaysPreview() = Frame {
                 overlay("o3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.VENT, "Vent stack", 0.75f, 1f, 0.75f, 0f),
             ),
         ),
+        {},
+    )
+}
+
+private fun behindWall(id: String, side: com.kurtz.homerecord.housemodel.walls.WallSide, lengthIn: Int, vararg stages: com.kurtz.homerecord.housemodel.walls.WallStage) =
+    com.kurtz.homerecord.housemodel.walls.RoomWall(id, side, null, lengthIn, 96, stages.associateWith { "/media/$id-${it.name.lowercase()}.jpg" })
+
+private val behindWallRooms = listOf(
+    com.kurtz.homerecord.housemodel.ui.BehindWallRoom(
+        "r3", "Basement", "Basement",
+        listOf(
+            behindWall("b1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, 264, com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN),
+            behindWall("b2", com.kurtz.homerecord.housemodel.walls.WallSide.EAST, 276, com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN),
+        ),
+    ),
+    com.kurtz.homerecord.housemodel.ui.BehindWallRoom(
+        "r1", "Kitchen", "Main floor",
+        listOf(
+            behindWall("w1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, 168, com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, com.kurtz.homerecord.housemodel.walls.WallStage.FINISHED),
+            behindWall("w2", com.kurtz.homerecord.housemodel.walls.WallSide.EAST, 144, com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN),
+            behindWall("w3", com.kurtz.homerecord.housemodel.walls.WallSide.SOUTH, 168),
+            behindWall("w4", com.kurtz.homerecord.housemodel.walls.WallSide.WEST, 144),
+        ),
+    ),
+    com.kurtz.homerecord.housemodel.ui.BehindWallRoom(
+        "r2", "Mudroom", "Main floor",
+        listOf(
+            behindWall("m1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, 96),
+            behindWall("m2", com.kurtz.homerecord.housemodel.walls.WallSide.EAST, 144),
+            behindWall("m3", com.kurtz.homerecord.housemodel.walls.WallSide.SOUTH, 96),
+            behindWall("m4", com.kurtz.homerecord.housemodel.walls.WallSide.WEST, 144),
+        ),
+    ),
+    com.kurtz.homerecord.housemodel.ui.BehindWallRoom("r5", "Pantry", "Main floor"),
+)
+
+/** FL-BehindWall: the job's rooms by floor, the basement done at Rough-in, the kitchen half way (AC-F49). */
+@ThemePreviews
+@Composable
+fun BehindWallRoomsPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.BehindWallScreen(
+        com.kurtz.homerecord.housemodel.ui.BehindWallUiState(loading = false, title = "Hale kitchen", rooms = behindWallRooms),
+        {},
+    )
+}
+
+/** FL-BehindWall on the kitchen: the north wall has both photos, the east wall waits for its after-drywall photo (AC-F49). */
+@ThemePreviews
+@Composable
+fun BehindWallWallsPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.BehindWallScreen(
+        com.kurtz.homerecord.housemodel.ui.BehindWallUiState(loading = false, title = "Hale kitchen", rooms = behindWallRooms, roomId = "r1"),
+        {},
+    )
+}
+
+/** FL-BehindWall before any room is drawn: one line and Edit plan (rule 10). */
+@ThemePreviews
+@Composable
+fun BehindWallEmptyPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.BehindWallScreen(
+        com.kurtz.homerecord.housemodel.ui.BehindWallUiState(loading = false, title = "Hale kitchen"),
+        {},
+    )
+}
+
+/** FL-BehindWall with the photo sheet open on the kitchen's east wall, whose next photo is the Finished one. */
+@ThemePreviews
+@Composable
+fun BehindWallSheetPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.BehindWallScreen(
+        com.kurtz.homerecord.housemodel.ui.BehindWallUiState(loading = false, title = "Hale kitchen", rooms = behindWallRooms, roomId = "r1", photoSheetFor = "w2"),
         {},
     )
 }

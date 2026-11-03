@@ -463,4 +463,19 @@
     <string name="overlay_form_photo_helper">A close-up of the pipe, wire or box before the wall is closed.</string>
     <string name="wall_overlay_serves">Serves %1$s</string>
     <string name="wall_overlay_photo_description">Photo of %1$s</string>
+    <!-- FL-BehindWall (AC-F49) -->
+    <string name="house_behind_wall">Behind the wall</string>
+    <string name="behind_wall_title">Behind the wall</string>
+    <string name="behind_wall_intro">Pick a room, then a wall. Before drywall the photo is the wall\'s Rough-in photo. After drywall, photograph the same wall again for the Finished photo.</string>
+    <string name="behind_wall_room_progress">Rough-in %1$d of %2$d walls · Finished %3$d of %2$d</string>
+    <string name="behind_wall_room_no_walls">Not on the plan yet</string>
+    <string name="behind_wall_empty_title">No rooms on the plan yet</string>
+    <string name="behind_wall_empty_body">Draw the job\'s rooms on the plan. Each side of a room becomes a wall to photograph.</string>
+    <string name="behind_wall_walls_hint">Tap a wall to photograph it.</string>
+    <string name="behind_wall_next_rough_in">Next photo: Rough-in</string>
+    <string name="behind_wall_next_finished">Next photo: Finished, after drywall</string>
+    <string name="behind_wall_sheet_title">%1$s · %2$s photo</string>
+    <string name="behind_wall_open_room">Mark pipes and wires</string>
+    <string name="behind_wall_room_subtitle">Behind the wall · %1$s</string>
+    <string name="behind_wall_photograph">Photograph %1$s</string>
 </resources>

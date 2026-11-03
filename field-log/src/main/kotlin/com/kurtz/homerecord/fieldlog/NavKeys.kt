@@ -29,6 +29,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
 
+/** FL-BehindWall: the job's rooms, then a room's walls, then the camera; the photo is saved at Rough-in, then Finished (AC-F49). */
+@Serializable data class JobBehindWallKey(val homeId: String, val title: String) : NavKey
+
 /** The outline screen for a new "behind the wall" photo (AC-C17, AC-C18); [stage] is a `WallStage` name. */
 @Serializable data class JobWallOutlineKey(val roomId: String, val wallId: String, val stage: String, val photoPath: String) : NavKey
 /** FL wall: draw and edit overlays on one wall of the job's house (AC-C25..C28). */

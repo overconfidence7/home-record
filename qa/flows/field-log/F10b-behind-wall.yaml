@@ -1,0 +1,177 @@
+# Walkthrough F10 (T054): "Behind the wall" on the job's house (AC-F49). Builds a one-room plan on a new job like F10, then
+# House tab → Behind the wall → Kitchen → North wall: the sheet says the photo is the Rough-in one; the photo from the
+# gallery (`qa/fixtures/wall-rough-in.jpg`) is outlined and the wall now reads "Photos: Rough-in" with "Next photo:
+# Finished, after drywall". The same wall again is the Finished photo, and the room page shows both stages.
+# The photo picker is another app, so the steps after it run only when it shows the fixture.
+appId: com.kurtz.homerecord.fieldlog
+---
+- addMedia:
+    - "../../fixtures/wall-rough-in.jpg"
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f10b@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; the row keeps the selected
+# tab in view, so step along it by id (Files, then Time) the way F03 does instead of swiping
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-F49: room → wall → camera
+- scrollUntilVisible:
+    element:
+      id: "fl_house_behind_wall"
+- tapOn:
+    id: "fl_house_behind_wall"
+- extendedWaitUntil:
+    visible: "Pick a room, then a wall.*"
+    timeout: 10000
+- assertVisible: "Rough-in 0 of 4 walls.*"
+- takeScreenshot: F10b-behind-wall-rooms
+- tapOn: "Kitchen"
+- extendedWaitUntil:
+    visible: "North wall"
+    timeout: 10000
+- assertVisible:
+    text: "Next photo: Rough-in"
+    index: 0
+- tapOn: "North wall"
+- extendedWaitUntil:
+    visible: "North wall · Rough-in photo"
+    timeout: 10000
+- assertVisible:
+    id: "fl_sheet_wall_take"
+- tapOn:
+    id: "fl_sheet_wall_choose"
+- runFlow:
+    when:
+      visible: "Photo taken on.*"
+    commands:
+      - tapOn:
+          text: "Photo taken on.*"
+          index: 0
+- runFlow:
+    when:
+      visible:
+        id: "fl_wall_outline_use"
+    commands:
+      - tapOn:
+          id: "fl_wall_outline_use"
+      # Use goes back to the walls of the Kitchen with the Rough-in photo on the north wall
+      - extendedWaitUntil:
+          visible: ".*Photos: Rough-in"
+          timeout: 15000
+      - assertVisible: "Next photo: Finished, after drywall"
+      - takeScreenshot: F10b-behind-wall-rough-in
+      # After drywall: the same wall's next photo is the Finished one
+      - tapOn: "North wall"
+      - extendedWaitUntil:
+          visible: "North wall · Finished photo"
+          timeout: 10000
+      - tapOn:
+          id: "fl_sheet_wall_choose"
+      - runFlow:
+          when:
+            visible: "Photo taken on.*"
+          commands:
+            - tapOn:
+                text: "Photo taken on.*"
+                index: 0
+      - runFlow:
+          when:
+            visible:
+              id: "fl_wall_outline_use"
+          commands:
+            - tapOn:
+                id: "fl_wall_outline_use"
+            - extendedWaitUntil:
+                visible: ".*Photos: Rough-in, Finished"
+                timeout: 15000
+            - takeScreenshot: F10b-behind-wall-finished
+# The picker may leave the app behind it; come back to the walls either way
+- runFlow:
+    when:
+      notVisible: "North wall"
+    commands:
+      - pressKey: back
+- extendedWaitUntil:
+    visible:
+      id: "fl_behind_open_room"
+    timeout: 10000
+# Mark pipes and wires opens the Kitchen's room page, where the walls list their stages (AC-C17)
+- tapOn:
+    id: "fl_behind_open_room"
+- extendedWaitUntil:
+    visible:
+      id: "fl_room_walls"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "North wall"
+- takeScreenshot: F10b-room-stages
+- tapOn:
+    id: "fl_back"
+# Back from the walls goes to the rooms, then to the House tab
+- tapOn:
+    id: "fl_back"
+- extendedWaitUntil:
+    visible: "Pick a room, then a wall.*"
+    timeout: 10000
+- tapOn:
+    id: "fl_back"
+- extendedWaitUntil:
+    visible:
+      id: "fl_house_behind_wall"
+    timeout: 10000
+- stopApp
