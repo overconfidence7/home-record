@@ -2835,3 +2835,16 @@ Judged: 78 screenshots opened (5 failure shots, 34 House Manual crawler shots of
 
 - `[auto:instrumented:house-manual:house-manual]`: the crawler's back/close check hit `overlay-item-list`, a sheet's content shown bare. Sheet catalog entries (overlay item list x2, document form, warranty review, type and plate sheets) now draw in a preview `SheetFrame` and the overlay ones are `nonRoot = false` like the other sheets. Seen in the new PNGs: the item type sheet's rows keep the list surface colour, a lighter band inside the sheet (in the app too); left for a later UI pass.
 - Test-order flake: `SignOutDialogTest` failed with UncaughtExceptionsBeforeTest from a `LogViewModel` load that outlived `LogViewModelTest`'s closed database; both log ViewModel test classes now cancel their ViewModels in tearDown.
+
+## QA auto 2026-11-03 (commit 2d8eb4d6)
+
+Automated suite run at 2026-11-03 14:21 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow H11-overlay-pipe fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H11-overlay-pipe] - steps: automated, see qa-results branch latest/ for commit 2d8eb4d6 - expected: walkthrough step H11 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H11-overlay-pipe.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H01-home-after-onboarding.png
+- [ ] [Major] house-manual scroll jank (regression of a fixed item) [auto:jank:house-manual:house-manual] - steps: automated, see qa-results branch latest/ for commit 2d8eb4d6 - expected: under 10% janky frames (AC-U11) - actual: 11% of 116 frames ran the UI thread past the frame budget (AC-U11; software renderer, overall 76% janky of 116; 200-row list, benchmark build)
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F10 Pass, field-log F11 Pass, field-log F11b Pass, field-log F11c Pass, field-log F15 Pass, field-log F16 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H06 Pass, house-manual H09 Pass, house-manual H11 Fail, house-manual H17 Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 55 device stages, 1516 unit tests, 161 backend tests, coverage 328/328 ACs. Passed: 53. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
