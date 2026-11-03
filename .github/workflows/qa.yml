@@ -133,7 +133,10 @@ jobs:
           rc=0
           for t in testDebugUnitTest lintDebug validateDebugScreenshotTest; do
             { echo "== $t $(date -u +%H:%M:%S)"; free -m; df -h . | tail -1; } >> qa-out/jvm/gradle.log 2>&1
-            ./gradlew --no-daemon --console=plain --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process \
+            # each app's screenshot renderer JVM reaches ~6.5 GB resident (native layoutlib memory on a 2 GB
+            # heap); two side by side were OOM-killed locally, so that stage gets one worker
+            w=2; [ "$t" = validateDebugScreenshotTest ] && w=1
+            ./gradlew --no-daemon --console=plain --max-workers=$w -Pkotlin.compiler.execution.strategy=in-process \
               "$t" --continue >> qa-out/jvm/gradle.log 2>&1
             r=$?
             echo "== $t exit $r" >> qa-out/jvm/gradle.log
