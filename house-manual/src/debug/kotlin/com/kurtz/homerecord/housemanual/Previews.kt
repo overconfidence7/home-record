@@ -6,6 +6,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
@@ -80,6 +83,32 @@ annotation class ThemePreviews
 
 @Composable
 private fun Frame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { Surface { content() } }
+
+/**
+ * A sheet's content as the app shows it: scrim above, the sheet's container, top corners and drag handle at the bottom,
+ * clear of the status bar. Catalog sheet entries use it so the crawler sees what a user sees (QA rule 3).
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun SheetFrame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+    androidx.compose.foundation.layout.Box(
+        Modifier.fillMaxSize()
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f))
+            .statusBarsPadding(),
+        contentAlignment = androidx.compose.ui.Alignment.BottomCenter,
+    ) {
+        Surface(
+            shape = androidx.compose.material3.BottomSheetDefaults.ExpandedShape,
+            color = androidx.compose.material3.BottomSheetDefaults.ContainerColor,
+            modifier = Modifier.padding(top = 48.dp),
+        ) {
+            androidx.compose.foundation.layout.Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                androidx.compose.material3.BottomSheetDefaults.DragHandle()
+                content()
+            }
+        }
+    }
+}
 
 private val floors = listOf(
     FloorSummary("f1", "Basement", 96, false, 4),
@@ -518,15 +547,15 @@ fun House3DErrorPreview() = Frame { house3dScreen(house3dState({ copy(failed = t
 
 @ThemePreviews
 @Composable
-fun ItemEditTypeSheetPreview() = Frame { com.kurtz.homerecord.housemodel.ui.SubtypeList("furnace", {}) }
+fun ItemEditTypeSheetPreview() = SheetFrame { com.kurtz.homerecord.housemodel.ui.SubtypeList("furnace", {}) }
 
 @ThemePreviews
 @Composable
-fun ItemEditTypeSheetSearchPreview() = Frame { com.kurtz.homerecord.housemodel.ui.SubtypeList(null, {}, query = "water") }
+fun ItemEditTypeSheetSearchPreview() = SheetFrame { com.kurtz.homerecord.housemodel.ui.SubtypeList(null, {}, query = "water") }
 
 @ThemePreviews
 @Composable
-fun ItemEditPlateSheetPreview() = Frame {
+fun ItemEditPlateSheetPreview() = SheetFrame {
     com.kurtz.homerecord.housemodel.ui.PlateScanContent(
         com.kurtz.homerecord.housemodel.ui.PlateScan(
             lines = listOf("RHEEM", "MODEL NO: XG50T06EC36U1", "SERIAL NO: 1234567890", "50 GAL", "240 V AC"),
@@ -616,7 +645,7 @@ fun ItemDetailReviewBadgePreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun ItemDetailReviewSheetPreview() = Frame {
+fun ItemDetailReviewSheetPreview() = SheetFrame {
     com.kurtz.homerecord.housemanual.items.WarrantyReviewContent(
         com.kurtz.homerecord.core.warranty.WarrantyTerms(
             partsMonths = 120, laborMonths = 12, specialTerms = listOf("Heat exchanger: lifetime to the original owner"),
@@ -669,7 +698,7 @@ fun ItemDetailUpkeepPreview() = Frame {
 fun ItemDetailConsumableFormPreview() = Frame {
     FormScreenScaffold(stringResource(R.string.item_detail_consumable_add), "hm_item_detail_consumable_save", true, {}, {}) {
         com.kurtz.homerecord.housemanual.items.ConsumableFormContent(
-            com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft(id = "c1", spec = "", quantity = "2", reorderUrl = "https://example.com/filters"), true, {},
+            com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft(id = null, spec = "", quantity = "2", reorderUrl = "https://example.com/filters"), true, {},
         )
     }
 }
@@ -763,7 +792,7 @@ fun DocumentsUnsupportedPreview() = Frame { DocumentsScreen(DocumentsUiState(loa
 
 @ThemePreviews
 @Composable
-fun DocumentFormPreview() = Frame {
+fun DocumentFormPreview() = SheetFrame {
     DocumentFormContent(DocumentForm("d1", "Furnace manual.pdf", "Appliances"), false, {})
 }
 
@@ -1110,12 +1139,12 @@ fun OverlayFormLinkedPreview() = Frame {
 /** The linked-item sheet's list: the kitchen's items first, the chosen one marked, "Nothing linked" on top (AC-C26). */
 @ThemePreviews
 @Composable
-fun OverlayItemListPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPickList("", "i2", overlayItems, houseHasItems = true) {} }
+fun OverlayItemListPreview() = SheetFrame { com.kurtz.homerecord.housemodel.ui.ItemPickList("", "i2", overlayItems, houseHasItems = true) {} }
 
 /** The item sheet when a search matches nothing: says so and offers Clear search (rule 11). */
 @ThemePreviews
 @Composable
-fun OverlayItemListNoMatchPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPickList("garage door", null, emptyList(), houseHasItems = true) {} }
+fun OverlayItemListNoMatchPreview() = SheetFrame { com.kurtz.homerecord.housemodel.ui.ItemPickList("garage door", null, emptyList(), houseHasItems = true) {} }
 
 /** The sink drain picked on the wall: the dishwasher it serves and its photo beside it (AC-C26). */
 @ThemePreviews

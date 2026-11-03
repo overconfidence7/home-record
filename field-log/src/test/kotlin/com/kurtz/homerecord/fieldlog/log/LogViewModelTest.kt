@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -77,7 +79,12 @@ class LogViewModelTest {
         }
     }
 
+    /** Every ViewModel a test makes; their scopes stop before the database closes so no load outlives the test. */
+    private val made = mutableListOf<LogViewModel>()
+    private fun track(v: LogViewModel) = v.also { made += it }
+
     @After fun tearDown() {
+        made.forEach { it.viewModelScope.cancel() }
         db.close()
         Dispatchers.resetMain()
     }
@@ -85,7 +92,7 @@ class LogViewModelTest {
     private suspend fun punch(id: String, kind: String, at: Long) =
         db.punchDao().upsert(PunchEntity(id = id, companyId = "c1", memberId = "m1", jobId = "j1", kind = kind, at = at, createdAt = at, updatedAt = at))
 
-    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }), saved)
+    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }), saved))
 
     private suspend fun LogViewModel.settled(check: (LogUiState) -> Boolean = { true }): LogUiState =
         withTimeout(5_000) { state.first { !it.loading && check(it) } }
@@ -108,7 +115,7 @@ class LogViewModelTest {
     @AcceptanceCriterion("AC-F32")
     @Test fun aDelayTappedInReportsOpensItsDayNeverPastTodayAndTheDayChosenLaterWins() = runBlocking<Unit> {
         fun open(initial: LocalDate?, saved: SavedStateHandle = SavedStateHandle()) =
-            LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, initialDay = initial), saved)
+            track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, initialDay = initial), saved))
         assertThat(open(day.minusDays(3)).state.value.day).isEqualTo(day.minusDays(3))
         assertThat(open(day.plusDays(2)).state.value.day).isEqualTo(day)
         val saved = SavedStateHandle()
@@ -329,7 +336,7 @@ class LogViewModelTest {
     @Test fun todayMovesOnAtMidnightAndSomeoneOnTodayFollowsIt() = runBlocking<Unit> {
         var now = day
         val turns = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-        val v = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }, dayTurns = turns), SavedStateHandle())
+        val v = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }, dayTurns = turns), SavedStateHandle()))
         assertThat(v.settled { it.exists }.canGoForward).isFalse()
         now = day.plusDays(1)
         turns.emit(Unit)
@@ -348,7 +355,7 @@ class LogViewModelTest {
     // AC-F30 (R09d): an open sheet keeps its day, so the typing is not saved onto the new day
     @Test fun anOpenSheetKeepsItsDayWhenMidnightPasses() = runBlocking<Unit> {
         var now = day
-        val v = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }), SavedStateHandle())
+        val v = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { now }), SavedStateHandle()))
         v.settled { it.exists }
         v.onEvent(LogEvent.EditText(LogTextSection.SAFETY))
         now = day.plusDays(1)
@@ -363,7 +370,7 @@ class LogViewModelTest {
     @Test fun aSentLogChangedLaterSaysChangedSinceSent() = runBlocking<Unit> {
         var clock = at(17)
         val timed = DailyLogRepository(db, weatherApi = { _, _, _ -> weather }, now = { clock }, zone = { zone })
-        val v = LogViewModel(LogDeps("j1", timed, db.photoDao(), gates, today = { day }), SavedStateHandle())
+        val v = track(LogViewModel(LogDeps("j1", timed, db.photoDao(), gates, today = { day }), SavedStateHandle()))
         val id = v.settled { it.exists }.let { DailyLogRepository.idFor("j1", day) }
         clock = at(17, 30)
         timed.markSent(id, emptyList(), "/cache/a.pdf")

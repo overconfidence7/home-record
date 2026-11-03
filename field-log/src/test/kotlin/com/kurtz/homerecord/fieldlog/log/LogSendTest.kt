@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -86,12 +88,17 @@ class LogSendTest {
         }
     }
 
+    /** Every ViewModel a test makes; their scopes stop before the database closes so no load outlives the test. */
+    private val made = mutableListOf<LogViewModel>()
+    private fun track(v: LogViewModel) = v.also { made += it }
+
     @After fun tearDown() {
+        made.forEach { it.viewModelScope.cancel() }
         db.close()
         Dispatchers.resetMain()
     }
 
-    private fun vm(s: LogSender? = sender) = LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, sender = s), SavedStateHandle())
+    private fun vm(s: LogSender? = sender) = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, sender = s), SavedStateHandle()))
 
     private suspend fun LogViewModel.settled(check: (LogUiState) -> Boolean): LogUiState =
         // 20 s: under the full suite Room can take longer than 5 s to deliver the first state (same as ClockViewModelTest).
@@ -176,7 +183,7 @@ class LogSendTest {
     @AcceptanceCriterion("AC-F33")
     @Test fun aDayWithNothingLoggedAsksBeforeSendingAndCancelSendsNothing() = runBlocking<Unit> {
         runBlocking { db.jobDao().upsert(JobEntity(id = "j2", companyId = "c1", name = "Garage subpanel", lat = 40.06, lng = -75.4, createdAt = 1, updatedAt = 1)) }
-        val v = LogViewModel(LogDeps("j2", repo, db.photoDao(), gates, today = { day }, sender = sender), SavedStateHandle())
+        val v = track(LogViewModel(LogDeps("j2", repo, db.photoDao(), gates, today = { day }, sender = sender), SavedStateHandle()))
         val empty = v.settled { it.exists }
         assertThat(empty.nothingLogged).isTrue()
         v.onEvent(LogEvent.OpenSend)

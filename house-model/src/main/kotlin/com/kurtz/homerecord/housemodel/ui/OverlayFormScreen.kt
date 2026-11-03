@@ -274,6 +274,7 @@ fun ItemPickList(query: String, selectedId: String?, items: List<OverlayItemChoi
         }
         item(key = "none") {
             ListItem(
+                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                 headlineContent = { Text(stringResource(R.string.overlay_item_none)) },
                 supportingContent = { Text(stringResource(R.string.overlay_item_none_supporting)) },
                 leadingContent = { Icon(Icons.Rounded.LinkOff, contentDescription = null) },
@@ -306,6 +307,7 @@ fun ItemPickList(query: String, selectedId: String?, items: List<OverlayItemChoi
         }
         items(items, key = { it.id }) { item ->
             ListItem(
+                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                 headlineContent = { Text(item.name) },
                 supportingContent = item.roomName?.let { { Text(it) } },
                 trailingContent = if (item.id == selectedId) chosen else null,
@@ -371,6 +373,7 @@ fun KindList(selected: OverlayKind?, dark: Boolean, onPick: (OverlayKind) -> Uni
         }
         items(OverlayKind.entries, key = { it.wire }) { kind ->
             ListItem(
+                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                 headlineContent = { Text(stringResource(kind.nameRes)) },
                 leadingContent = { Icon(kind.icon, contentDescription = null, tint = kind.color(dark)) },
                 trailingContent = if (kind == selected) {
