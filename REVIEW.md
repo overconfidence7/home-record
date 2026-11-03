@@ -2754,3 +2754,74 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run); house-manual jank:house-manual (not measurable: 97 frames rendered while flinging the 200-row list (need 100))
 
 Tested: 57 device stages, 1454 unit tests, 161 backend tests, coverage 320/320 ACs. Passed: 51. New issues: 5. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-03 (commit c66e83a2)
+
+Judged the suite results for c66e83a2 (run of 2026-11-03 01:21 UTC, 57 stages, 51 passed). `build` HEAD 7c8f2a2f is ahead by the R10/R10a review fixes (overlays through wall splits and merges, 3D textures per part), which this run did not test. 26da2dea got an auto entry but no judge entry; its findings are all closed. New in this sha since the last judge: wall photos and outline (T048), HM-3D and FL-3D with floors stacked and room view (T049–T051a), wall overlays, overlay form, room Overlays section, overlay search and plan overlays (T052a–c2).
+
+Verdict: House Manual: the wall work is the first thing in weeks that feels like the product: photograph a wall, outline it, draw the sink supply on it, find it again from Home search. Nate's first complaint would be that the plan and the 3D view still don't say which room is which (Kitchen is "Other" on its own page, 3D rooms are unlabeled boxes, plan overlays have no key), and Reminders is still the placeholder. / Field Log: swipe-to-done finally works on device (F11 now gets 100 steps further, past tick, Undo and re-tick); the job's House tab with pins, walls and 3D reads as a crew tool. The biggest gap is still behind-the-wall capture on the job (T054) and change orders, schedule and materials, so F10 and F12–F14 are half or not there.
+
+- [ ] [Minor] Suite: the 3D view is blank on the emulator in every flow shot, so H10, F10's 3D steps and AC-C24 (30 fps) cannot be judged on device: `flow-H03-blueprint-room-H03-3d.png` is a white canvas, `H03-3d-room` and `H03-3d-all-floors` are solid black, FL `F10-3d` white and `F10-3d-room` black, while the crawler's catalog shots of the same screens draw the house. logcat shows Filament does render (`HomeRecord3D: first frame 3540 ms; 3.2 fps; 2 frames`) on `-gpu swiftshader_indirect` [judge:qa-3d-blank-emulator] - steps: H03 and F10 flows, 3D steps - expected: rule 36 / walkthrough H10 (textured wall visible, orbit, All floors) judgeable from the suite - actual: SurfaceView captured blank or black at ~3 fps; either wait for N frames (the perf log line) before `takeScreenshot`, try `-gpu host`/`guest_angle` on the runner, or have the flow assert the perf line, and record which in docs/decisions.md - screenshot: qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d-room.png
+- [ ] [Minor] Suite: landscape tour rotation is unreliable: this run House Manual's seven `tour-landscape-*.png` are 1080×2400 portrait (they were 2400×1080 on every earlier run), while Field Log's are landscape for the first time ([judge:qa-fl-tour-landscape-portrait] looks fixed this run). So the stage passes either way and the landscape check silently drops one app per run [judge:qa-tour-landscape-flaky] - steps: `identify` the tour-landscape shots of both apps - expected: `variant:landscape` fails when the screenshot is not wider than tall - actual: HM portrait, FL landscape, both "tour ok" - screenshot: qa-results:latest/house-manual/screenshots/tour-landscape-house.png
+- [ ] [UI] Minor: the overlay form's "What it serves" picker lists items as text only (Dishwasher, Kitchen sink faucet, Basement furnace, Water heater, Main panel) with no category icon, unlike Items and Home search; in the catalog its title "What it serves" is drawn under the status bar clock [judge:hm-overlay-item-picker-icons] - steps: wall → Add overlay → Serves - expected: rule 26 (every category has an icon), rule 7 (leading icon) - actual: bare two-line rows - screenshot: qa-results:latest/house-manual/crawler/house-manual/overlay-item-list-dark.png
+- [ ] [UI] Minor: plan overlays have no key: in Overlays mode the plan shows a green run and an orange-red run across Kitchen and Living room with nothing saying which is gas, water or wire until each one is tapped, and the House tab's layer chips still have no icons or colours to match ([judge:hm-layer-chips-no-icons] open) [judge:hm-plan-overlays-no-legend] - steps: House → Edit plan → Overlays - expected: walkthrough H11 ("on the blueprint Plumbing layer"), rule 26 - actual: coloured lines and kind icons on the plan, no legend - screenshot: qa-results:latest/house-manual/crawler/house-manual/plan-overlays-light.png
+- [ ] [Minor] 3D rooms carry no names: Main in 3D, All floors and the stacked view are rows of tinted boxes, and the hint says "Tap a room to stand inside it" without saying which box is the kitchen; the blueprint labels every room [judge:hm-3d-rooms-unlabeled] - steps: House → 3D view - expected: walkthrough H10 ("View the kitchen in 3D"), PRODUCT.md house model readable at a glance - actual: no labels in any 3D catalog state - screenshot: qa-results:latest/house-manual/crawler/house-manual/house-3d-light.png
+- [ ] [Minor] Suite: H11 draws the cold-water pipe on a plain wall ("No Finished photo of this wall. Overlays show on the plain wall.") although the walkthrough step is "draw a cold-water pipe on that wall photo" and H09 has the fixture; drawing on the photo, and the overlay staying put when the stage switches over a photo, are never exercised on device [judge:qa-h11-plain-wall] - steps: H11 flow - expected: walkthrough H11 - actual: grey wall in `H11-wall-drawing` and `H11-overlay-picked` - screenshot: qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-wall-drawing.png
+
+Auto entry review:
+- [auto:flow:house-manual:H11-overlay-pipe] is a real app problem, not a flow error: the room page opens the wall with "Sink cold supply" picked; one tap on the top-bar arrow only unpicks it (the failure shot is still North wall, nothing picked, no bottom bar), so `hm_tab_home` is not there. Rule 3: the arrow returns to the previous screen; if picking is a mode, it needs a contextual bar with its own close, not the screen's back arrow.
+- [auto:flow:field-log:F11-tasks] is a flow error [judge: flow error]: the failure shot shows Today with the "Everything is synced" chip in place; the step combines `id: fl_today_sync` with `text:` and the text sits on a child node of the tagged one. F16 checks the same chip by id and then by text, and passes. Split the selector the same way. The swipe fix (22991a5c) is confirmed on device: the flow is now past the tick, Undo and re-tick steps.
+- [auto:flow:field-log:F09b-log-send]: after saving Visitors the log is scrolled so the Visitors header sits on the pinned Preview PDF / Send again bar and the saved text is under it, out of the list's viewport. It passed on 26da2dea; the app should keep the edited section in view after Save (or the list needs bottom padding for the pinned bar).
+- [auto:flow:field-log:F10-house-3d]: at step 116 the wall shows a finished amber run from the picture's centre to 80%,25% (the two taps the flow made) and a new 1-point run started near the bottom, with "1 point" under it; the taps were not taken as one run. Check the log for a double tap on Add overlay or a retried step before treating it as the app.
+- [auto:instrumented:house-manual:house-manual] is the catalog, not the app [judge: flow error]: `overlay-item-list` is a bottom sheet rendered bare (no sheet container, title under the status bar), so the crawler's back/close check fails; wrap it like the other sheets ([judge:qa-catalog-sheets-bare-remaining] open).
+
+Seen this run and fine: wall outline (four handles, dashed shape, Reset corners, Use), room Walls section with stage pick and thumbnails, wall overlays list with kind icons and "Hot water · Behind drywall · Rough-in stage", overlay form (Kind, Label, Where it runs, Recorded at, Serves, Photo, Note), delete confirm dialog, Home search for "garage" returning room, item, overlay and document with kinds, FL job House tab with pins and the 3D view button, FL landscape roots on the rail.
+
+Still open and seen again: [judge:hm-room-kind-not-inferred] (Kitchen "14' by 12' 6" · Other" in H09/H11), [judge:hm-reminders-placeholder-button], [judge:fl-schedule-placeholder-button], [judge:hm-plan-editor-fit] (plan overlays drawn top-left, two thirds empty), [judge:hm-plan-name-over-stairs] ("Living room" through the stairs in every plan-overlays shot), [judge:nav-label-200-uneven] (Reminders and Schedule smaller at 200%).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding to Home; Home at 200% reads well | qa-results:latest/house-manual/screenshots/tour-font200-home.png |
+| H2 | Pass | H02 and H02b pass; editor fit and stairs-over-name still open | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint and room page fine; Kitchen still "Other" | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-walls.png |
+| H4 | Pass | Item form and detail | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-room.png |
+| H7 | Clunky | Unchanged: hero icon over the top third | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H8 | Pass | Stored warranty (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H9 | Pass | Take photo / gallery sheet, outline with four handles, thumbnail on the wall row | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-outline.png |
+| H10 | Clunky | Flow passes, but every device 3D shot is blank or black (suite); catalog shows the floors, rooms unlabeled | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d-room.png |
+| H11 | Blocked | Drawn on a plain wall, saved, edited and listed on the room page; the back arrow only unpicks the overlay, so the search half never ran | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-step-130-tapOnElement-hm_tab_home.png |
+| H17 | Clunky | Signed in; More still does not name the account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Paywall with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H12, H13 (Emergency card only), H14 (Reminders placeholder), H15, H16, H18.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview, House empty state with Start the plan | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-house-empty.png |
+| F4 | Pass | F04, F04b, F04c; landscape Today on the rail | qa-results:latest/field-log/screenshots/tour-landscape-today.png |
+| F5 | Pass | Catalog and unit tests | qa-results:latest/field-log/crawler/field-log/clock-changes-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-edit-light.png |
+| F7 | Pass | F07, F07b, F07c | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-markup-drawn.png |
+| F8 | Pass | Photo from Today lands in Recent photos | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Clunky | Daily log and send work; the saved Visitors entry ends up under the pinned send bar | qa-results:latest/field-log/screenshots/flow-F09b-log-send-step-077-assertCondition-fl_log_visitors_text.png |
+| F10 | Clunky | Rooms, wall photo at Rough-in and 3D open; the wire run's two taps came out as two runs; 3D blank on the emulator; installed items not built | qa-results:latest/field-log/screenshots/flow-F10-house-3d-step-116-assertCondition-2_points.png |
+| F11 | Pass | Swipe, Undo and re-tick work on device; failure is the sync-chip selector (flow error) | qa-results:latest/field-log/screenshots/flow-F11-tasks-step-109-assertCondition-Everything_is_synced.png |
+| F15 | Clunky | Hours report passes; Delays below the fold (open Minor) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F16 | Pass | Offline save, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F18 | Clunky | More fits at 200% and in landscape; Schedule is the placeholder | qa-results:latest/field-log/screenshots/tour-font200-more.png |
+
+Not built yet: F12 (T056–T058), F13 (T059), F14 (T060), F17 (T064); F10's behind-the-wall flow and installed items (T054, T062); push untestable without Firebase keys (Needs Nate).
+
+Focus check: nothing wrong. Walls, stages and overlays are shared, but House Manual shows them from the homeowner's room page and Field Log from the job's House tab, with the job name as subtitle and Rough-in as the default stage.
+
+Coverage note: the auto entry reports 320/320 claimed ACs covered across 179 ticked tasks and subtasks (0 gaps); handoff flows still not written (Q004).
+
+Judged: 78 screenshots opened (5 failure shots, 34 House Manual crawler shots of walls, overlays, 3D and plan overlays, 14 device flow shots from H03, H09, H11 and F10, 24 tour shots across both apps and variants), 167 device and 896 crawler PNGs present. 27 walkthrough steps. New issues: 6. Product gaps: 0.
