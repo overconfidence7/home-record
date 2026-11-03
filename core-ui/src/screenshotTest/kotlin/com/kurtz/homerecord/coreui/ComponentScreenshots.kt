@@ -69,3 +69,14 @@ fun WarrantyStatusLineScreenshot() = com.kurtz.homerecord.coreui.components.Warr
 @com.kurtz.homerecord.coreui.shell.ShellPreviews
 @Composable
 fun ShellNavBarScreenshot() = com.kurtz.homerecord.coreui.shell.ShellNavBarPreview()
+
+// AC-U12: every shared component group has reference PNGs (REVIEW: core-ui component screenshots).
+@PreviewTest
+@ThemeScreenshots
+@Composable
+fun LinkChipRowScreenshot() = com.kurtz.homerecord.coreui.components.LinkChipRowPreview()
+
+@PreviewTest
+@ThemeScreenshots
+@Composable
+fun FormFieldsScreenshot() = com.kurtz.homerecord.coreui.components.FormFieldsPreview()
