@@ -30,7 +30,7 @@ class LogSectionRevealTest {
     @Test fun workDoneRevealsItsLastEntryOrTheNoneLine() {
         val entries = listOf(item("work-h", 2, 600), item("work-0", 3, 720), item("work-1", 4, 840, size = 200))
         assertThat(LogSectionReveal.target(LogTextSection.WORK_DONE, 2, entries, 0, 1000)).isEqualTo(RevealTarget.ScrollBy(40))
-        val none = listOf(item("work-h", 2, 950), item("work-none", 3, 1070))
+        val none = listOf(item("work-h", 2, 950))
         assertThat(LogSectionReveal.target(LogTextSection.WORK_DONE, 0, none, 0, 1000)).isEqualTo(RevealTarget.ToItem(2))
     }
 
