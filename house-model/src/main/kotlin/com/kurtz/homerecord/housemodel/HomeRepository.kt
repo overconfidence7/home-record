@@ -277,7 +277,7 @@ class HomeRepository(
         match.removed.forEach { wallId ->
             dropped += softDeleteWallPhotos(wallId, at)
             db.itemDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach {
-                db.itemDao().upsert(it.copy(wallId = null, updatedAt = at))
+                db.itemDao().upsert(it.copy(wallId = null, wallX = null, wallY = null, updatedAt = at))
                 onChange("item", it.id)
             }
             db.wallDao().softDelete(wallId, at)
@@ -459,7 +459,7 @@ class HomeRepository(
         }
         db.breakerLinkDao().listForRoom(roomId).forEach { db.breakerLinkDao().softDelete(it.id, at); onChange("breaker_link", it.id) }
         db.itemDao().listForRoom(roomId).forEach {
-            db.itemDao().upsert(it.copy(roomId = PseudoRooms.WHOLE_HOUSE, wallId = null, planX = null, planY = null, updatedAt = at))
+            db.itemDao().upsert(it.copy(roomId = PseudoRooms.WHOLE_HOUSE, wallId = null, wallX = null, wallY = null, planX = null, planY = null, updatedAt = at))
             onChange("item", it.id)
         }
         db.photoDao().listForRoom(roomId).forEach { db.photoDao().upsert(it.copy(roomId = null, updatedAt = at)); onChange("photo", it.id) }

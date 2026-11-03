@@ -179,4 +179,43 @@ class SceneMarkersTest {
             MarkerTarget.OverlayMark("stud"),
         )
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun anItemHungOnAWallSitsOnThatWallAtTheSameSpotAsAnOverlayThere() {
+        val scene = FloorScene.build(listOf(kitchen, living), 96, emptyMap())
+        val walls = mapOf("w-k0" to WallKey("k", 0))
+        val pipe = overlay("o", OverlayKind.OUTLET, listOf(OverlayPoint(0.3f, 0.4f)), wallId = "w-k0")
+        val markers = SceneMarkers.place(
+            scene, listOf(pipe), walls,
+            items = listOf(ItemSpot("tstat", "k", 50, 6, "Thermostat", wallId = "w-k0", wallX = 0.3f, wallY = 0.4f)),
+        )
+        val outlet = markers.first { it.target == MarkerTarget.OverlayMark("o") }
+        val tstat = markers.first { it.target == MarkerTarget.ItemMark("tstat") }
+        assertThat(tstat.onWall).isTrue()
+        assertThat(tstat.layer).isEqualTo(BlueprintLayer.ITEMS)
+        assertThat(tstat.points).isEqualTo(outlet.points)
+        assertThat(tstat.facing).isEqualTo(outlet.facing)
+        // Above the floor, not lying on it.
+        assertThat(tstat.points.single().y).isGreaterThan(scene.rooms.getValue("k").floorY + 0.5f)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun anItemWhoseWallIsGoneOrInAnotherRoomFallsBackToItsFloorSpot() {
+        val scene = FloorScene.build(listOf(kitchen, living), 96, emptyMap())
+        val walls = mapOf("w-l0" to WallKey("l", 0))
+        val markers = SceneMarkers.place(
+            scene, emptyList(), walls,
+            items = listOf(
+                ItemSpot("gone", "k", 30, 30, wallId = "w-missing", wallX = 0.5f, wallY = 0.5f),
+                ItemSpot("other", "k", 40, 40, wallId = "w-l0", wallX = 0.5f, wallY = 0.5f),
+            ),
+        )
+        assertThat(markers).hasSize(2)
+        markers.forEach { m ->
+            assertThat(m.onWall).isFalse()
+            assertThat(m.facing).isEqualTo(ScenePoint(0f, 1f, 0f))
+        }
+    }
 }

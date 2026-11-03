@@ -62,4 +62,25 @@ class ItemPlacementTest {
         assertThat(ItemPlacement.onFloor(listOf(living), "k", 10, 20)).isNull()
         assertThat(ItemPlacement.onFloor(listOf(kitchen), "k", null, 20)).isNull()
     }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun anItemOnAWallSitsJustInsideThatWallAtItsSpotAlongIt() {
+        // Edge 0 of the kitchen is its north wall; seen from inside, wall x 0 is its west end.
+        assertThat(ItemPlacement.onWall(kitchen, 0, 0.25f)).isEqualTo(ItemPlace("k", 42, ItemPlacement.INSET_IN))
+        // The east wall (edge 1), halfway along.
+        assertThat(ItemPlacement.onWall(kitchen, 1, 0.5f)).isEqualTo(ItemPlace("k", 168 - ItemPlacement.INSET_IN, 72))
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun aRoomStoredCounterClockwiseReadsWallXFromTheOtherEnd() {
+        // Reversed corners: edge 0 is the south wall from west to east; seen from inside (facing south) its left end is east.
+        val reversed = PlanRoom("kr", "Kitchen", points = kitchen.points.reversed())
+        assertThat(ItemPlacement.onWall(reversed, 0, 0.25f)).isEqualTo(ItemPlace("kr", 126, 144 - ItemPlacement.INSET_IN))
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun anItemAtAWallsEndStaysClearOfTheCornerAndAMissingWallGivesNoSpot() {
+        assertThat(ItemPlacement.onWall(kitchen, 0, 0f)).isEqualTo(ItemPlace("k", ItemPlacement.INSET_IN, ItemPlacement.INSET_IN))
+        assertThat(ItemPlacement.onWall(kitchen, 7, 0.5f)).isNull()
+    }
 }

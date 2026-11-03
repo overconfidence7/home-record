@@ -78,6 +78,7 @@ class OverlayRepository(
                     item.id, roomId, x, y, item.name,
                     iconName = com.kurtz.homerecord.core.model.ItemCategory.subtype(item.subtype)?.iconName
                         ?: com.kurtz.homerecord.core.model.ItemCategory.fromId(item.category)?.icon ?: "Category",
+                    wallId = item.wallId, wallX = item.wallX, wallY = item.wallY,
                 )
             }
         }

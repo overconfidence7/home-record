@@ -814,3 +814,8 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - An item is in the room it is placed in: a tap inside another room on Place on plan moves the item to that room; a tap outside every room lands 6" inside the nearest room (`ItemPlacement`). Changing the room on Edit takes the item off the plan (its spot belonged to the old room).
 - Exterior and Whole house items have no floor, so the Where row says they stay off the plan and opens nothing.
 - Place on plan saves each tap right away, the way the plan editor saves each edit, so there is no unsaved state and Back never asks. The screen lives in `:house-model` `ui` so Field Log's item page (T062) can reuse it. A tap moves the marker; dragging it is T055d. No new dependencies.
+
+## 2026-11-03 — Items on a wall (T055c1)
+- An item's spot on a wall is stored like a wall overlay's: `item.wallX/wallY` in wall space (x 0..1 left to right seen from inside the room, y 0 ceiling to 1 floor), REAL columns added by Room auto-migration 8 → 9. Sync carries them with no backend change (rows are passed through as JSON).
+- Hanging an item on a wall also writes its plan spot 6" inside that wall (`ItemPlacement.onWall`), so the blueprint and its tap targets need no second code path; the 3D view uses the wall spot. A spot picked on the plan, a room change on Edit, or the wall's removal clears the wall spot.
+- T055c split: the data and 3D half first (testable without UI), the wall picker on Place on plan as T055c2.

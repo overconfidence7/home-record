@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemodel.items
 import com.kurtz.homerecord.housemodel.blueprint.RoomHitTester
 import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.plan.WallWinding
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
@@ -27,6 +28,34 @@ object ItemPlacement {
         val room = shaped.minByOrNull { PlanOverlayPlacer.distanceToWalls(it, x, y) } ?: return null
         val (px, py) = inside(room, x, y)
         return ItemPlace(room.id, px.roundToInt(), py.roundToInt())
+    }
+
+    /**
+     * The plan spot of an item hung on wall [edge] of [room] at wall-space x [wallX] (AC-C30 position): the point that
+     * far along the wall seen from inside the room ([WallWinding]), [INSET_IN] inside it, so the blueprint draws the
+     * item against its wall. Null when the room has no such wall.
+     */
+    fun onWall(room: PlanRoom, edge: Int, wallX: Float): ItemPlace? {
+        val pts = room.points
+        if (pts.size < 3 || edge !in pts.indices) return null
+        val a = pts[edge]
+        val b = pts[(edge + 1) % pts.size]
+        val dx = (b.x - a.x).toFloat()
+        val dy = (b.y - a.y).toFloat()
+        val len = hypot(dx, dy)
+        if (len == 0f) return null
+        val t = WallWinding.along(wallX.coerceIn(0f, 1f), WallWinding.runsBackward(pts))
+        val px = a.x + t * dx
+        val py = a.y + t * dy
+        // The wall's inward normal: the side a step off the wall's middle lands inside the room.
+        var nx = -dy / len
+        var ny = dx / len
+        if (!RoomHitTester.contains(room, a.x + dx / 2 + nx, a.y + dy / 2 + ny)) {
+            nx = -nx
+            ny = -ny
+        }
+        val (cx, cy) = nudgeFromCorner(room, px + nx * INSET_IN, py + ny * INSET_IN)
+        return ItemPlace(room.id, cx.roundToInt(), cy.roundToInt())
     }
 
     /** The spot of an item already placed in one of [rooms], or null when it is not on this floor. */

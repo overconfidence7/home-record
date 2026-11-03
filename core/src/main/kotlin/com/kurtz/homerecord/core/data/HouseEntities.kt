@@ -166,6 +166,9 @@ data class ItemEntity(
     val planX: Int? = null,
     val planY: Int? = null,
     val wallId: String? = null,
+    /** The item's spot on [wallId] in wall space (x 0..1 left to right seen from the room, y 0 ceiling to 1 floor). */
+    val wallX: Float? = null,
+    val wallY: Float? = null,
     val poweredByBreakerId: String? = null,
     val shutoffItemId: String? = null,
     val createdAt: Long,

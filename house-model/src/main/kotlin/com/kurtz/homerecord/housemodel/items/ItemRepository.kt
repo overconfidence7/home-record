@@ -11,6 +11,8 @@ import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.data.WarrantyEntity
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.model.WarrantyStatus
+import com.kurtz.homerecord.housemodel.plan.PlanCodec
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
@@ -158,10 +160,33 @@ class ItemRepository(
         db.itemDao().upsert(
             item.copy(
                 roomId = place?.roomId ?: item.roomId, planX = place?.xIn, planY = place?.yIn,
-                wallId = item.wallId.takeIf { !moved }, updatedAt = now(),
+                // A spot picked on the plan replaces a spot on a wall.
+                wallId = item.wallId.takeIf { !moved && place == null }, wallX = null, wallY = null, updatedAt = now(),
             ),
         )
         onChange("item", itemId)
+    }
+
+    /**
+     * Hangs item [itemId] on wall [wallId] at wall-space ([x], [y]) (AC-C30 position): the item moves into the wall's room,
+     * keeps the spot on the wall for the 3D view (AC-C23) and gets the plan spot just inside that wall for the blueprint.
+     * Returns false when the wall or its room is gone.
+     */
+    suspend fun setWallSpot(itemId: String, wallId: String, x: Float, y: Float): Boolean {
+        val item = get(itemId) ?: return false
+        val wall = db.wallDao().get(wallId) ?: return false
+        val room = db.roomDao().get(wall.roomId) ?: return false
+        val wx = x.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: return false
+        val wy = y.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: return false
+        val plan = PlanRoom(room.id, room.name, points = PlanCodec.decode(room.polygonJson))
+        val spot = ItemPlacement.onWall(plan, wall.edgeIndex, wx) ?: return false
+        db.itemDao().upsert(
+            item.copy(
+                roomId = room.id, planX = spot.xIn, planY = spot.yIn, wallId = wallId, wallX = wx, wallY = wy, updatedAt = now(),
+            ),
+        )
+        onChange("item", itemId)
+        return true
     }
 
     /** The Registered toggle on the warranty section (AC-C33). No-op when the item has no warranty row. */
@@ -201,6 +226,8 @@ class ItemRepository(
                     planX = existing?.planX?.takeIf { existing.roomId == draft.roomId },
                     planY = existing?.planY?.takeIf { existing.roomId == draft.roomId },
                     wallId = existing?.wallId?.takeIf { existing.roomId == draft.roomId },
+                    wallX = existing?.wallX?.takeIf { existing.roomId == draft.roomId },
+                    wallY = existing?.wallY?.takeIf { existing.roomId == draft.roomId },
                     poweredByBreakerId = existing?.poweredByBreakerId, shutoffItemId = existing?.shutoffItemId,
                     createdAt = existing?.createdAt ?: at, updatedAt = at, source = existing?.source ?: com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
                 ),

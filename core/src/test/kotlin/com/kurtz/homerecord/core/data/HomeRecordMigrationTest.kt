@@ -113,6 +113,16 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T055c (AC-C30 position): v9 adds an item's spot on its wall; items placed before keep their plan spot and wall.
+    @Test fun v8ToV9AddsTheItemWallSpot() {
+        helper.createDatabase(8).use { db ->
+            db.execSQL("INSERT INTO item (id, homeId, roomId, category, subtype, name, planX, planY, wallId, createdAt, updatedAt, source) VALUES ('i1', 'h1', 'r1', 'HVAC', 'thermostat', 'Thermostat', 30, 40, 'w1', 1, 1, 'HOUSE_MANUAL')")
+        }
+        helper.runMigrationsAndValidate(9).use { db ->
+            assertThat(db.texts("SELECT wallId FROM item WHERE id = 'i1' AND planX = 30 AND wallX IS NULL AND wallY IS NULL")).containsExactly("w1")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -151,6 +161,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 8
+        const val LATEST = 9
     }
 }

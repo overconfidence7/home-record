@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -67,6 +67,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 6, to = 7),
         // v8 (T048d): R2 keys of a wall photo and its straightened copy, so other phones can fetch them.
         AutoMigration(from = 7, to = 8),
+        // v9: item.wallX/wallY, an item's spot on its wall (T055c, AC-C30 position).
+        AutoMigration(from = 8, to = 9),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

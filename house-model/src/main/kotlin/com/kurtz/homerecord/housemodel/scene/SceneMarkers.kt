@@ -24,6 +24,10 @@ data class ItemSpot(
     val name: String = "",
     /** The category icon name (`ItemCategory` icon) the blueprint draws on the marker (rule 26). */
     val iconName: String = "Category",
+    /** The wall the item hangs on, and its spot there in wall space; the 3D view puts it on that wall (AC-C23). */
+    val wallId: String? = null,
+    val wallX: Float? = null,
+    val wallY: Float? = null,
 )
 
 /**
@@ -49,8 +53,8 @@ data class SceneMarker(
  * Places overlays and item markers on the wall or floor they belong to in a [FloorScene] (AC-C23). A wall overlay's
  * points are in wall space (x 0..1 left to right seen from inside the room, y 0 at the ceiling to 1 at the floor) and
  * land on the wall's inside face exactly where the mesh puts the wall photo: along the face set in by half the wall
- * thickness, the left end chosen by [com.kurtz.homerecord.housemodel.plan.WallWinding]. A plan overlay or an item spot
- * sits just above its room's floor. Rooms not solid in the scene (faded floors below) get no markers.
+ * thickness, the left end chosen by [com.kurtz.homerecord.housemodel.plan.WallWinding]; an item hung on a wall lands there
+ * the same way. A plan overlay or an item on the floor sits just above its room's floor. Rooms not solid in the scene (faded floors below) get no markers.
  */
 object SceneMarkers {
     /** How far a marker stands off its surface so it never fights the wall or floor for depth, in meters. */
@@ -82,6 +86,10 @@ object SceneMarkers {
         }
         for (item in items) {
             val room = scene.rooms[item.roomId] ?: continue
+            onWallFace(item, walls, scene, wallThicknessIn)?.let { (at, face) ->
+                out += SceneMarker(MarkerTarget.ItemMark(item.id), room.id, BlueprintLayer.ITEMS, null, listOf(at), face.inward, onWall = true, label = item.name)
+                continue
+            }
             val at = floorPoint(scene, room, item.planXIn.toFloat(), item.planYIn.toFloat())
             out += SceneMarker(MarkerTarget.ItemMark(item.id), room.id, BlueprintLayer.ITEMS, null, listOf(at), UP, onWall = false, label = item.name)
         }
@@ -91,6 +99,16 @@ object SceneMarkers {
     /** The markers shown with [layers] on, the same rule as the blueprint: a marker on no layer always shows. */
     fun visible(markers: List<SceneMarker>, layers: LayerSet): List<SceneMarker> =
         markers.filter { m -> m.layer?.let { it in layers } ?: true }
+
+    /** An item hung on a wall of its own room, at its spot on that wall's face; null puts it on the floor instead. */
+    private fun onWallFace(item: ItemSpot, walls: Map<String, WallKey>, scene: FloorScene, wallThicknessIn: Double): Pair<ScenePoint, WallFaceFrame>? {
+        val key = item.wallId?.let { walls[it] }?.takeIf { it.roomId == item.roomId } ?: return null
+        val x = item.wallX ?: return null
+        val y = item.wallY ?: return null
+        val room = scene.rooms[key.roomId] ?: return null
+        val face = WallFaceFrame.of(room, key.edgeIndex, wallThicknessIn) ?: return null
+        return face.at(x, y) to face
+    }
 
     private fun floorPoint(scene: FloorScene, room: SceneRoom, xIn: Float, yIn: Float) = ScenePoint(
         (xIn + scene.mesh.offsetXIn) * M_PER_IN,

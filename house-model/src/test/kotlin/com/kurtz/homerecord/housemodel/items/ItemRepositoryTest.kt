@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.RoomEntity
+import com.kurtz.homerecord.core.data.WallEntity
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -176,5 +178,27 @@ class ItemRepositoryTest {
         repo.save("h1", checkNotNull(repo.draftFor(id)).copy(roomId = "l"))
         val moved = checkNotNull(repo.get(id))
         assertThat(listOf(moved.roomId, moved.planX, moved.planY)).containsExactly("l", null, null).inOrder()
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun hangingAnItemOnAWallMovesItIntoThatRoomBesideTheWallAndAPlanTapTakesItOff() = runTest {
+        db.roomDao().upsert(RoomEntity(id = "k", floorId = "f1", name = "Kitchen", polygonJson = "[{\"x\":0,\"y\":0},{\"x\":168,\"y\":0},{\"x\":168,\"y\":144},{\"x\":0,\"y\":144}]", createdAt = 1, updatedAt = 1))
+        db.wallDao().upsert(WallEntity(id = "w-k0", roomId = "k", edgeIndex = 0, orientation = "N", lengthIn = 168, heightIn = 96, createdAt = 1, updatedAt = 1))
+        val id = checkNotNull(repo.save("h1", furnace().copy(roomId = "l")))
+        changes.clear()
+        assertThat(repo.setWallSpot(id, "w-k0", 0.25f, 1.4f)).isTrue()
+        val hung = checkNotNull(repo.get(id))
+        assertThat(listOf(hung.roomId, hung.wallId, hung.wallX, hung.wallY)).containsExactly("k", "w-k0", 0.25f, 1f).inOrder()
+        // The blueprint draws it just inside the north wall, a quarter of the way along.
+        assertThat(listOf(hung.planX, hung.planY)).containsExactly(42, ItemPlacement.INSET_IN).inOrder()
+        assertThat(changes).containsExactly("item/$id")
+        // An edit in the same room keeps the wall spot.
+        repo.save("h1", checkNotNull(repo.draftFor(id)).copy(make = "Honeywell"))
+        assertThat(repo.get(id)?.wallX).isEqualTo(0.25f)
+        // A spot picked on the plan replaces it.
+        repo.setPlanSpot(id, ItemPlace("k", 80, 80))
+        val onPlan = checkNotNull(repo.get(id))
+        assertThat(listOf(onPlan.wallId, onPlan.wallX, onPlan.wallY, onPlan.planX)).containsExactly(null, null, null, 80).inOrder()
+        assertThat(repo.setWallSpot(id, "w-gone", 0.5f, 0.5f)).isFalse()
     }
 }
