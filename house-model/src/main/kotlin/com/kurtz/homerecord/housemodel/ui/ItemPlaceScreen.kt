@@ -1,10 +1,27 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.CropPortrait
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import coil3.compose.AsyncImage
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -38,6 +55,7 @@ import com.kurtz.homerecord.housemodel.blueprint.BlueprintCanvas
  * Place on plan (AC-C30 position): the floor chips, a hint that says where the item is, the floor's blueprint with the
  * item's marker, and Remove from plan once it is placed. A tap anywhere on the plan moves the marker there.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, modifier: Modifier = Modifier) {
     val prefix = LocalTagPrefix.current
@@ -64,7 +82,7 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                 modifier = Modifier.padding(padding),
             )
             else -> Column(modifier.fillMaxSize().padding(padding)) {
-                if (state.floors.size > 1) {
+                if (state.floors.size > 1 && !state.wallMode) {
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -79,7 +97,9 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                         }
                     }
                 }
-                if (state.rooms.isEmpty()) {
+                if (state.wallMode) {
+                    WallPicker(state, onEvent, Modifier.weight(1f))
+                } else if (state.rooms.isEmpty()) {
                     EmptyState(
                         icon = Icons.Rounded.Map,
                         headline = stringResource(R.string.item_place_empty_title, state.floorName.orEmpty()),
@@ -107,18 +127,99 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                         onPlanTap = { x, y -> onEvent(ItemPlaceEvent.Place(x, y)) },
                     )
                 }
-                if (state.spot != null) {
-                    Row(
-                        Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                FlowRow(
+                    Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    if (state.wallMode) {
+                        TextButton({ onEvent(ItemPlaceEvent.WallMode(false)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_back_to_plan")) {
+                            Icon(Icons.Rounded.Map, null, Modifier.padding(end = 8.dp))
+                            Text(stringResource(R.string.item_place_back_to_plan))
+                        }
+                    } else if (state.canHang) {
+                        TextButton({ onEvent(ItemPlaceEvent.WallMode(true)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_on_wall")) {
+                            Icon(Icons.Rounded.CropPortrait, null, Modifier.padding(end = 8.dp))
+                            Text(stringResource(R.string.item_place_on_wall))
+                        }
+                    }
+                    if (state.spot != null) {
                         TextButton({ onEvent(ItemPlaceEvent.Remove) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_remove")) {
                             Icon(Icons.Rounded.Delete, null, Modifier.padding(end = 8.dp))
                             Text(stringResource(R.string.item_place_remove))
                         }
                     }
-                } else {
-                    Box(Modifier.navigationBarsPadding())
+                }
+            }
+        }
+    }
+}
+
+/**
+ * On a wall (AC-C30 position): chips for the walls of the item's room, a hint that says where it hangs, and the wall
+ * drawn to its length and height with its photo when there is one; a tap hangs the item there.
+ */
+@Composable
+private fun WallPicker(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, modifier: Modifier) {
+    val prefix = LocalTagPrefix.current
+    val wall = state.wall ?: return
+    val name = wallName(wall)
+    Column(modifier.fillMaxWidth()) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(state.walls, key = { it.id }) { w ->
+                FilterChip(
+                    selected = w.id == wall.id,
+                    onClick = { onEvent(ItemPlaceEvent.PickWall(w.id)) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_wall_${w.id}"),
+                    label = { Text(wallName(w)) },
+                    leadingIcon = { Icon(Icons.Rounded.CropPortrait, null, Modifier.size(18.dp)) },
+                )
+            }
+        }
+        val spot = state.wallSpotHere
+        Text(
+            if (spot != null) stringResource(R.string.item_place_wall_hint_set, name) else stringResource(R.string.item_place_wall_hint, name),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("${prefix}_item_place_wall_hint"),
+        )
+        val ratio = (wall.lengthIn.toFloat() / wall.heightIn.coerceAtLeast(1)).coerceIn(0.4f, 6f)
+        val picture = wall.thumbnails.maxByOrNull { it.key.ordinal }?.value
+        val description = stringResource(R.string.item_place_wall_canvas, name)
+        Box(Modifier.weight(1f).fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+            BoxWithConstraints(
+                Modifier
+                    .aspectRatio(ratio, matchHeightConstraintsFirst = ratio < 1f)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(2.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
+                    .semantics { contentDescription = description }
+                    .testTag("${prefix}_item_place_wall")
+                    .pointerInput(wall.id) {
+                        detectTapGestures { p ->
+                            onEvent(ItemPlaceEvent.HangOnWall(wall.id, p.x / size.width, p.y / size.height))
+                        }
+                    },
+            ) {
+                if (picture != null) {
+                    AsyncImage(model = File(picture), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.matchParentSize())
+                }
+                if (spot != null) {
+                    val marker = 40.dp
+                    Box(
+                        Modifier
+                            .offset(x = maxWidth * spot.x - marker / 2, y = maxHeight * spot.y - marker / 2)
+                            .size(marker)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
+                            .testTag("${prefix}_item_place_wall_marker"),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(itemIcon(state.iconName), contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    }
                 }
             }
         }

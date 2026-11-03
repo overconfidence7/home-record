@@ -9,6 +9,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.walls.RoomWall
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /** Place on plan for item [itemId] (AC-C30 position). [onEditPlan] opens the plan editor on a floor with no rooms drawn. */
 @Composable
@@ -20,10 +23,11 @@ fun ItemPlaceRoute(
     onBack: () -> Unit,
     onEditPlan: (floorId: String?) -> Unit,
     system: UnitSystem = UnitSystem.IMPERIAL,
+    roomWalls: (roomId: String) -> Flow<List<RoomWall>> = { flowOf(emptyList()) },
 ) {
     val vm = viewModel<ItemPlaceViewModel>(
         key = "item-place:$itemId",
-        factory = viewModelFactory { initializer { ItemPlaceViewModel(homes, items, homeId, itemId, createSavedStateHandle(), system) } },
+        factory = viewModelFactory { initializer { ItemPlaceViewModel(homes, items, homeId, itemId, createSavedStateHandle(), system, roomWalls) } },
     )
     val state = vm.state.collectAsState().value
     ItemPlaceScreen(state, onEvent = {

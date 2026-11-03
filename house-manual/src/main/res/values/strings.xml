@@ -262,6 +262,7 @@
     <!-- Item page Where section (AC-C30 position) -->
     <string name="item_detail_where">Where</string>
     <string name="item_detail_where_placed">On the plan</string>
+    <string name="item_detail_where_on_wall">On the plan, hangs on %1$s</string>
     <string name="item_detail_where_not_placed">Not on the plan yet. Tap to place it.</string>
     <string name="item_detail_where_off_plan">Not on a floor, so it stays off the plan.</string>
     <string name="item_detail_where_no_room">No room</string>

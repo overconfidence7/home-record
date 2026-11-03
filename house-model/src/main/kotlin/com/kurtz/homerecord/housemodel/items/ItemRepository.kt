@@ -80,6 +80,8 @@ data class ItemDetail(
     val warranty: WarrantyEntity?,
     val status: WarrantyStatus,
     val photos: List<PhotoEntity>,
+    /** The wall the item hangs on (AC-C30 position), named as the room page names it; null when it is not on a wall. */
+    val wall: com.kurtz.homerecord.housemodel.walls.RoomWall? = null,
 )
 
 /**
@@ -137,6 +139,9 @@ class ItemRepository(
                 item = item, category = ItemCategory.orOther(item.category), subtypeLabel = subtype?.let { strings(it.labelRes) } ?: item.subtype,
                 roomName = item.roomId?.let { rid -> rooms.firstOrNull { it.id == rid }?.name ?: pseudoNames[rid] }.orEmpty(),
                 warranty = warranty, status = WarrantyStatus.of(warranty?.endsOn, today().toString()), photos = photos,
+                wall = item.wallId?.let { wid ->
+                    item.roomId?.let { rid -> com.kurtz.homerecord.housemodel.walls.RoomWalls.build(db.wallDao().listFor(rid), emptyList()).firstOrNull { it.id == wid } }
+                },
             )
         }
 

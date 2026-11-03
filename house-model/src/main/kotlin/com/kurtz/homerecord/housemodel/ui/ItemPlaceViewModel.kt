@@ -12,7 +12,9 @@ import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.items.ItemPlace
 import com.kurtz.homerecord.housemodel.items.ItemPlacement
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.walls.RoomWall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,8 +38,12 @@ class ItemPlaceViewModel(
     private val itemId: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val system: UnitSystem = UnitSystem.IMPERIAL,
+    /** The walls of a room with their pictures ([com.kurtz.homerecord.housemodel.walls.WallPhotoRepository.observeRoomWalls]). */
+    private val roomWalls: (roomId: String) -> Flow<List<RoomWall>> = { flowOf(emptyList()) },
 ) : ViewModel() {
     private val picked = MutableStateFlow<String?>(saved[FLOOR])
+    private val wallMode = MutableStateFlow(saved[WALL_MODE] ?: false)
+    private val pickedWall = MutableStateFlow<String?>(saved[WALL])
 
     /** The floor of the item's room as first seen, so the screen opens where the item is. */
     private val itemFloor = MutableStateFlow<String?>(null)
@@ -62,19 +68,31 @@ class ItemPlaceViewModel(
         if (id == null) flowOf(choice to emptyList()) else homes.observePlan(id).map { choice to it.placed }
     }
 
-    val state: StateFlow<ItemPlaceUiState> = combine(floorWithRooms, items.observeItem(itemId)) { (choice, rooms), item ->
+    private val base = combine(floorWithRooms, items.observeItem(itemId)) { (choice, rooms), item ->
         val (floors, floorId, known) = choice
-        build(floors, floorId, rooms, item, loading = !known)
+        build(floors, floorId, rooms, item, loading = !known) to item
+    }
+
+    /** The plan state with the walls of the item's room when that room is on the shown floor. */
+    private val withWalls = base.flatMapLatest { (s, item) ->
+        val roomId = item?.roomId?.takeIf { r -> s.rooms.any { it.id == r } }
+        if (roomId == null) flowOf(s) else roomWalls(roomId).map { walls -> s.copy(walls = walls) }
+    }
+
+    val state: StateFlow<ItemPlaceUiState> = combine(withWalls, wallMode, pickedWall) { s, mode, wall ->
+        val on = mode && s.canHang
+        s.copy(wallMode = on, wallId = wall?.takeIf { w -> s.walls.any { it.id == w } } ?: s.hungOn?.wallId?.takeIf { w -> s.walls.any { it.id == w } } ?: s.walls.firstOrNull()?.id)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemPlaceUiState(itemId = itemId, system = system))
 
     private fun build(floors: List<FloorSummary>, floorId: String?, rooms: List<com.kurtz.homerecord.housemodel.plan.PlanRoom>, item: ItemEntity?, loading: Boolean): ItemPlaceUiState {
         if (loading) return ItemPlaceUiState(itemId = itemId, system = system)
         if (item == null) return ItemPlaceUiState(loading = false, missing = true, itemId = itemId, system = system)
         val spot = item.roomId?.let { r -> item.planX?.let { x -> item.planY?.let { y -> ItemPlace(r, x, y) } } }
+        val hung = item.wallId?.let { w -> item.wallX?.let { x -> item.wallY?.let { y -> WallSpot(w, x, y) } } }
         return ItemPlaceUiState(
             loading = false, itemId = itemId, itemName = item.name,
             iconName = ItemCategory.subtype(item.subtype)?.iconName ?: ItemCategory.fromId(item.category)?.icon ?: "Category",
-            floors = floors, floorId = floorId, rooms = rooms, spot = spot, system = system,
+            floors = floors, floorId = floorId, rooms = rooms, spot = spot, system = system, hungOn = hung,
         )
     }
 
@@ -89,11 +107,22 @@ class ItemPlaceViewModel(
                 items.setPlanSpot(itemId, place)
             }
             ItemPlaceEvent.Remove -> viewModelScope.launch { items.setPlanSpot(itemId, null) }
+            is ItemPlaceEvent.WallMode -> {
+                wallMode.value = e.on
+                saved[WALL_MODE] = e.on
+            }
+            is ItemPlaceEvent.PickWall -> {
+                pickedWall.value = e.wallId
+                saved[WALL] = e.wallId
+            }
+            is ItemPlaceEvent.HangOnWall -> viewModelScope.launch { items.setWallSpot(itemId, e.wallId, e.x, e.y) }
             ItemPlaceEvent.Done, ItemPlaceEvent.EditPlan -> Unit
         }
     }
 
     private companion object {
         const val FLOOR = "item_place_floor"
+        const val WALL_MODE = "item_place_wall_mode"
+        const val WALL = "item_place_wall"
     }
 }

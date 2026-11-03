@@ -283,13 +283,14 @@ internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit
     Section(stringResource(R.string.item_detail_where), Modifier.testTag("hm_item_detail_where")) {
         RecordListItem(
             headline = detail.roomName.ifBlank { stringResource(R.string.item_detail_where_no_room) },
-            supporting = stringResource(
-                when {
-                    pseudo -> R.string.item_detail_where_off_plan
-                    placed -> R.string.item_detail_where_placed
-                    else -> R.string.item_detail_where_not_placed
-                },
-            ),
+            supporting = detail.wall?.takeIf { !pseudo }?.let { stringResource(R.string.item_detail_where_on_wall, com.kurtz.homerecord.housemodel.ui.wallName(it)) }
+                ?: stringResource(
+                    when {
+                        pseudo -> R.string.item_detail_where_off_plan
+                        placed -> R.string.item_detail_where_placed
+                        else -> R.string.item_detail_where_not_placed
+                    },
+                ),
             leading = { Icon(if (placed) Icons.Rounded.PinDrop else Icons.Rounded.Place, contentDescription = null) },
             trailing = if (pseudo) null else ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }),
             onClick = if (pseudo) null else ({ onEvent(ItemDetailEvent.Place) }),

@@ -25,6 +25,9 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.ui.ItemPlaceEvent
 import com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen
 import com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState
+import com.kurtz.homerecord.housemodel.ui.WallSpot
+import com.kurtz.homerecord.housemodel.walls.RoomWall
+import com.kurtz.homerecord.housemodel.walls.WallSide
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -80,6 +83,45 @@ class ItemPlaceScreenTest {
 
     @Test
     @AcceptanceCriterion("AC-C30")
+    fun onAWallShowsTheRoomsWallsAndATapHangsTheItem() {
+        val events = mutableListOf<ItemPlaceEvent>()
+        val walls = listOf(
+            RoomWall("w1", WallSide.NORTH, null, 168, 96),
+            RoomWall("w2", WallSide.WEST, null, 144, 96),
+        )
+        show(state(spot = ItemPlace("k", 40, 50)).copy(walls = walls, wallMode = true, wallId = "w2"), events)
+        rule.onNodeWithText("West wall: tap the wall where this item hangs.").assertExists()
+        rule.onNodeWithTag("hm_item_place_plan").assertDoesNotExist()
+        rule.onNodeWithTag("hm_item_place_wall").performTouchInput { click(center) }
+        val hang = events.filterIsInstance<ItemPlaceEvent.HangOnWall>().single()
+        assertThat(hang.wallId).isEqualTo("w2")
+        assertThat(hang.x).isWithin(0.05f).of(0.5f)
+        assertThat(hang.y).isWithin(0.05f).of(0.5f)
+        rule.onNodeWithTag("hm_item_place_wall_w1").performClick()
+        rule.onNodeWithTag("hm_item_place_back_to_plan").performClick()
+        assertThat(events).containsAtLeast(ItemPlaceEvent.PickWall("w1"), ItemPlaceEvent.WallMode(false)).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C30")
+    fun onAWallIsOfferedOnceTheRoomHasWalls() {
+        val events = mutableListOf<ItemPlaceEvent>()
+        show(state(spot = ItemPlace("k", 40, 50)).copy(walls = listOf(RoomWall("w1", WallSide.NORTH, null, 168, 96))), events)
+        rule.onNodeWithTag("hm_item_place_on_wall").performClick()
+        assertThat(events).containsExactly(ItemPlaceEvent.WallMode(true))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C30")
+    fun aHungItemShowsItsMarkerOnItsWall() {
+        val walls = listOf(RoomWall("w1", WallSide.NORTH, null, 168, 96))
+        show(state(spot = ItemPlace("k", 40, 6)).copy(walls = walls, wallMode = true, hungOn = WallSpot("w1", 0.3f, 0.4f)), mutableListOf())
+        rule.onNodeWithText("Hangs on North wall. Tap the wall to move it.").assertExists()
+        rule.onNodeWithTag("hm_item_place_wall_marker").assertExists()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C30")
     fun aFloorWithNoRoomsOffersTheEditor() {
         val events = mutableListOf<ItemPlaceEvent>()
         show(state(rooms = emptyList()), events)
@@ -92,6 +134,14 @@ class ItemPlaceScreenTest {
         item = ItemEntity(id = "i1", homeId = "h1", roomId = roomId, category = "APPLIANCES", subtype = "refrigerator", name = "Refrigerator", planX = x, planY = x, createdAt = 0, updatedAt = 0),
         category = ItemCategory.APPLIANCES, subtypeLabel = "Refrigerator", roomName = roomName, warranty = null, status = WarrantyStatus.Unknown, photos = emptyList(),
     )
+
+    @Test
+    @AcceptanceCriterion("AC-C30")
+    fun theWhereRowNamesTheWallAHungItemIsOn() {
+        val hung = detail("k", "Kitchen", x = 40).copy(wall = RoomWall("w2", WallSide.EAST, null, 144, 96))
+        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { WhereSection(hung) {} } }
+        rule.onNodeWithText("On the plan, hangs on East wall").assertExists()
+    }
 
     @Test
     @AcceptanceCriterion("AC-C30")
