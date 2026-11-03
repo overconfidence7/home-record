@@ -58,6 +58,9 @@ class HouseViewModel(
 
     private val floorIds = MutableStateFlow<String?>(saved[FLOOR])
 
+    /** The home's overlays by id as last seen, so a tapped blueprint mark opens the overlay it draws (T055a). */
+    private var latestOverlays: Map<String, Overlay> = emptyMap()
+
     init {
         viewModelScope.launch {
             repo.observeFloors(homeId).collect { floors ->
@@ -73,10 +76,14 @@ class HouseViewModel(
             val planWithWalls = floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }
                 .flatMapLatest { plan -> wallKeys(plan.placed.map { it.id }).map { walls -> plan.placed to walls } }
             combine(planWithWalls, homeOverlays, itemSpots) { (rooms, walls), overlays, items ->
+                latestOverlays = overlays.associateBy { it.id }
                 Triple(rooms, PlanOverlayPlacer.onFloor(overlays, rooms), PlanMarks.place(rooms, overlays, walls, items))
             }.collect { (rooms, overlays, marks) -> _state.update { it.copy(rooms = rooms, overlays = overlays, marks = marks) } }
         }
     }
+
+    /** The overlay a blueprint mark draws, or null when it is gone. */
+    fun overlay(id: String): Overlay? = latestOverlays[id]
 
     fun onEvent(event: HouseEvent) {
         when (event) {

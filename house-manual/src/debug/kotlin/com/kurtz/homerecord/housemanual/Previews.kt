@@ -319,7 +319,7 @@ private fun houseState(vararg changes: HouseUiState.() -> HouseUiState): HouseUi
     ) { acc, f -> acc.f() }
 
 @Composable
-private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {}, on3D = {})
+private fun houseScreen(state: HouseUiState) = HouseScreen(state, {}, {}, {}, {}, {}, on3D = {}, onOpenMark = {})
 
 @ThemePreviews
 @Composable

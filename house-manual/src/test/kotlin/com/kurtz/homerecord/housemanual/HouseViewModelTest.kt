@@ -195,5 +195,9 @@ class HouseViewModelTest {
         val item = state.marks.first { it.isItem }
         assertThat(item.points.single()).isEqualTo(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(40f, 30f))
         assertThat(item.iconName).isEqualTo("Kitchen")
+        // T055a: a tap on the run's mark finds the overlay it draws, to open its wall with it picked.
+        val target = run.target as com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark
+        assertThat(vm.overlay(target.overlayId)?.wallId).isEqualTo(wall)
+        assertThat(vm.overlay("gone")).isNull()
     }
 }

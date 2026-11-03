@@ -117,6 +117,8 @@ fun DrawScope.drawBlueprint(
     dimStyle: TextStyle,
     colors: BlueprintColors,
     system: UnitSystem,
+    /** What the layers draw over the plan (marks and plan overlays), in canvas pixels; room names keep clear of it. */
+    obstacles: List<LabelBox> = emptyList(),
 ) {
     val z = view.scale
     val ox = view.originX
@@ -136,20 +138,15 @@ fun DrawScope.drawBlueprint(
     rooms.forEach { room ->
         val layout = measurer.measure(room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text))
         val (clx, cly) = labelAnchor(room)
-        var cx = clx * z + ox
-        val cy = cly * z + oy
         val half = layout.size.width / 2f
-        // Keep the name off any stairs: slide it left of them when it would overlap.
-        room.stairs.forEach { st ->
-            if (st.points.isEmpty()) return@forEach
-            val left = st.points.minOf { it.x } * z + ox
-            val right = st.points.maxOf { it.x } * z + ox
-            val top = st.points.minOf { it.y } * z + oy
-            val bottom = st.points.maxOf { it.y } * z + oy
-            if (cx + half > left && cx - half < right && cy + layout.size.height / 2f > top && cy - layout.size.height / 2f < bottom) {
-                cx = left - 4f * density - half
-            }
+        val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
+        // Keep the name off any stairs, and off the overlays and items the layers show where there is room for it.
+        val stairs = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
+            LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
+        val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
+            ?: return@forEach
+        val (cx, cy) = at
         val fits = layout.size.width < room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
         if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
     }

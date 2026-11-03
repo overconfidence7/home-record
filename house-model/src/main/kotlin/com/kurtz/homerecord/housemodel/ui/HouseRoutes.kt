@@ -46,6 +46,10 @@ fun HouseRoute(
     overlays: com.kurtz.homerecord.housemodel.overlays.OverlayRepository? = null,
     /** Field Log's "Behind the wall" capture (AC-F49). */
     onBehindWall: (() -> Unit)? = null,
+    /** A tapped overlay on the blueprint: its wall or plan with it picked, as from 3D (T055a). Marks stay inert when null. */
+    onOpenOverlay: ((com.kurtz.homerecord.housemodel.overlays.Overlay) -> Unit)? = null,
+    /** A tapped item on the blueprint: the item, and the room it stands in. */
+    onOpenItem: (itemId: String, roomId: String) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -85,5 +89,13 @@ fun HouseRoute(
         onOpenPin = onOpenPin,
         on3D = on3D?.let { open -> { open(state.floorId) } },
         onBehindWall = onBehindWall,
+        onOpenMark = onOpenOverlay?.let { openOverlay ->
+            { mark ->
+                when (val target = mark.target) {
+                    is com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark -> vm.overlay(target.overlayId)?.let(openOverlay)
+                    is com.kurtz.homerecord.housemodel.scene.MarkerTarget.ItemMark -> onOpenItem(target.itemId, mark.roomId)
+                }
+            }
+        },
     )
 }

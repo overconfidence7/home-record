@@ -58,6 +58,9 @@ import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintCanvas
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintPin
 import com.kurtz.homerecord.housemodel.blueprint.LayerToggleRow
+import com.kurtz.homerecord.housemodel.blueprint.PlanMark
+import com.kurtz.homerecord.housemodel.blueprint.PlanMarks
+import com.kurtz.homerecord.housemodel.blueprint.shows
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
 /** HM-House: the blueprint of the selected floor. Tap a room to open it, long press for Rename, Edit shape, Delete. */
@@ -77,6 +80,8 @@ fun HouseScreen(
     on3D: (() -> Unit)? = null,
     /** Field Log's "Behind the wall" capture: pick a room, then a wall, then the camera (AC-F49); no button when null. */
     onBehindWall: (() -> Unit)? = null,
+    /** A tapped wall overlay, plan overlay or item on the blueprint (T055a); marks are not tappable when null. */
+    onOpenMark: ((PlanMark) -> Unit)? = null,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -120,14 +125,18 @@ fun HouseScreen(
                     onPinClick = onOpenPin,
                     onRoomClick = onOpenRoom,
                     onRoomLongClick = { onEvent(HouseEvent.LongPressRoom(it)) },
+                    onMarkClick = onOpenMark,
                 )
             }
         }
     }
     val hint: @Composable () -> Unit = {
         if (state.rooms.isNotEmpty()) {
+            val base = stringResource(if (pins.isEmpty()) R.string.house_blueprint_hint else R.string.house_blueprint_hint_pins)
+            val marksShown = onOpenMark != null &&
+                (PlanMarks.visible(state.marks, state.layers).isNotEmpty() || state.overlays.any { state.layers.shows(it) })
             Text(
-                stringResource(if (pins.isEmpty()) R.string.house_blueprint_hint else R.string.house_blueprint_hint_pins),
+                if (marksShown) base + " " + stringResource(R.string.house3d_marker_hint) else base,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),

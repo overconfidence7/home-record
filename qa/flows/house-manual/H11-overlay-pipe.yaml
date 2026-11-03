@@ -157,6 +157,19 @@ appId: com.kurtz.homerecord.housemanual
     visible: "Sink cold supply"
     timeout: 10000
 - takeScreenshot: H11-blueprint-pipe
+# T055a (AC-C15): a tap on the pipe drawn on the blueprint opens its wall with it picked; back returns to the House tab
+- tapOn: "Sink cold supply"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_selection"
+    timeout: 10000
+- assertVisible: "Sink cold supply"
+- takeScreenshot: H11-blueprint-mark-opened
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_layer_plumbing"
+    timeout: 10000
 - tapOn:
     id: "hm_layer_plumbing"
 - extendedWaitUntil:

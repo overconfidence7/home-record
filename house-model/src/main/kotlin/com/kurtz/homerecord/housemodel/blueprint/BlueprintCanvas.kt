@@ -61,6 +61,11 @@ fun BlueprintCanvas(
     onPlanTap: ((xIn: Int, yIn: Int) -> Unit)? = null,
     onRoomClick: (PlanRoom) -> Unit = {},
     onRoomLongClick: (PlanRoom) -> Unit = {},
+    /**
+     * A tap on a shown wall overlay, item or plan overlay (T055a); a plan overlay comes as a mark with no inward side.
+     * Null keeps marks out of the way, taps landing on the room beneath.
+     */
+    onMarkClick: ((PlanMark) -> Unit)? = null,
 ) {
     val density = LocalDensity.current.density
     val measurer = rememberTextMeasurer()
@@ -80,10 +85,17 @@ fun BlueprintCanvas(
     val currentPins by rememberUpdatedState(pins)
     val pinClick by rememberUpdatedState(onPinClick)
     val planTap by rememberUpdatedState(onPlanTap)
+    val markClick by rememberUpdatedState(onMarkClick)
     val overlayIcons = rememberOverlayIcons()
     val itemIcons = rememberItemIcons()
     val shownOverlays = overlays.filter { layers.shows(it) }
     val shownMarks = PlanMarks.visible(marks, layers)
+    // Everything a tap can open, in the order it is drawn: wall overlays, plan overlays, then items on top.
+    val tappable = shownMarks.filter { !it.isItem } +
+        shownOverlays.map { PlanMark(com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(it.id), it.roomId.orEmpty(), it.kind.layer, it.kind, it.points, label = it.label) } +
+        shownMarks.filter { it.isItem }
+    val currentTappable by rememberUpdatedState(tappable)
+    val insetPx = PLAN_WALL_INSET_DP * density
     val pinColors = PinColors(scheme.tertiary, scheme.onTertiary, scheme.surface)
     // The number sits inside a fixed-size head, so it does not grow with the font scale; TalkBack reads the task title.
     val fontScale = LocalDensity.current.fontScale
@@ -109,7 +121,10 @@ fun BlueprintCanvas(
                             return@detectTapGestures
                         }
                         val pin = PinHitTester.pinAt(currentPins, view, at.x, at.y, liftPx, hitPx)
+                        val openMark = markClick
+                        val mark = if (pin == null && openMark != null) PlanMarkHitTester.markAt(currentTappable, view, at.x, at.y, insetPx, hitPx) else null
                         if (pin != null) pinClick(pin.id)
+                        else if (mark != null && openMark != null) openMark(mark)
                         else RoomHitTester.roomAt(currentRooms, view.planX(at.x), view.planY(at.y))?.let(click)
                     },
                     onLongPress = { at ->
@@ -121,7 +136,11 @@ fun BlueprintCanvas(
             },
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
-        drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system)
+        val obstacles = tappable.flatMap { m ->
+            val half = (if (m.isItem) PLAN_ITEM_RADIUS_DP + 2f else if (m.isRun) 4f else PLAN_SPOT_RADIUS_DP + 2f) * density
+            LabelPlacer.alongRun(PlanMarkHitTester.placed(m, view, insetPx), half)
+        }
+        drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, obstacles)
         val toScreen = { p: com.kurtz.homerecord.housemodel.overlays.OverlayPoint -> Offset(p.x * view.scale + view.originX, p.y * view.scale + view.originY) }
         drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = false)
         drawPlanOverlays(shownOverlays, toScreen, density, colors.dark, scheme.surface, overlayIcons)
@@ -154,16 +173,23 @@ fun BlueprintCanvas(
             )
         }
         val prefix = LocalTagPrefix.current
-        // One 48 dp node per wall overlay and item shown, so TalkBack names what each layer draws (rule 13).
+        // One 48 dp node per wall overlay and item shown, so TalkBack names what each layer draws and opens it (rule 13).
         shownMarks.forEach { mark ->
-            val p = mark.points[mark.points.size / 2]
+            val (px, py) = PlanMarkHitTester.placed(mark, view, insetPx).let { it[it.size / 2] }
             val kindName = mark.overlayKind?.let { stringResource(it.nameRes) } ?: stringResource(R.string.layer_items)
+            val open = onMarkClick
             Box(
                 Modifier
-                    .offset(toDp(p.x * view.scale + view.originX - hitPx), toDp(p.y * view.scale + view.originY - hitPx))
+                    .offset(toDp(px - hitPx), toDp(py - hitPx))
                     .size(toDp(2 * hitPx))
                     .testTag("${prefix}_plan_mark")
-                    .semantics { contentDescription = mark.label.ifBlank { kindName } },
+                    .semantics {
+                        contentDescription = mark.label.ifBlank { kindName }
+                        if (open != null && planTap == null) {
+                            role = Role.Button
+                            onClick { open(mark); true }
+                        }
+                    },
             )
         }
         // One 48 dp node per pin over its head, after the rooms so TalkBack reads them last (rule 13).

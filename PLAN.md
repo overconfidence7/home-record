@@ -326,7 +326,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T053c: blueprint layers show wall overlays along their wall and item markers at their plan spot (AC-C15 overlays part)
 - [x] T054: Field Log behind the wall: room → wall → capture writes Rough-in; second capture after drywall writes Finished; overlays carry stage; HM-Room shows stages (acceptance: AC-F49, AC-H8, AC-H9)
 - [ ] T055: Item positions: place an item on the plan (drag marker) and on a wall; item page "Where" section; markers in blueprint and 3D (acceptance: AC-C30 position, AC-C23)
-  - [ ] T055a: blueprint layer marks open their record on tap (overlay: its wall with it picked; item: its page), as the 3D markers do, and room names keep clear of marks the way they keep clear of stairs
+  - [x] T055a: blueprint layer marks open their record on tap (overlay: its wall with it picked; item: its page), as the 3D markers do, and room names keep clear of marks the way they keep clear of stairs
 - [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
 
 ## M5 Field Log complete

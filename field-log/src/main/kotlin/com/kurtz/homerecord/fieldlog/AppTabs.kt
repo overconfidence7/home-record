@@ -169,6 +169,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     on3D = { homeId, title, floorId -> nav.push(JobHouse3DKey(homeId, title, floorId)) },
                     overlays = container.overlays,
                     onBehindWall = { homeId, title -> nav.push(JobBehindWallKey(homeId, title)) },
+                    onOpenOverlay = { homeId, title, o -> openJobOverlay(scope, container, nav, homeId, title, null, o) },
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
@@ -262,18 +263,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 overlays = container.overlays,
                 layerStore = container.layers,
                 // A wall overlay opens its wall with it picked; a plan overlay the plan of its room's floor (AC-C23).
-                onOpenOverlay = { o ->
-                    val wallId = o.wallId
-                    val roomId = o.roomId
-                    if (wallId != null && roomId != null) {
-                        nav.push(JobWallKey(roomId, wallId, o.stage.name, o.id))
-                    } else {
-                        sceneScope.launch {
-                            val floorId = roomId?.let { container.homes.roomLocation(it)?.floorId } ?: key.floorId
-                            nav.push(JobPlanKey(key.homeId, key.title, floorId, overlayId = o.id))
-                        }
-                    }
-                },
+                onOpenOverlay = { o -> openJobOverlay(sceneScope, container, nav, key.homeId, key.title, key.floorId, o) },
                 // Field Log has no item page yet (T062): an item marker opens the room it stands in.
                 onOpenItem = { _, roomId -> nav.push(JobRoomKey(roomId)) },
             )
@@ -369,5 +359,27 @@ private fun NotificationPermissionAsk(container: AppContainer) {
             container.shouldAskNotifications().also { if (it) container.markNotificationsAsked() }
         }
         if (ask) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
+
+/** A tapped overlay (3D or blueprint): a wall overlay opens its wall with it picked, a plan overlay the job plan of its floor (AC-C23). */
+private fun openJobOverlay(
+    scope: kotlinx.coroutines.CoroutineScope,
+    container: AppContainer,
+    nav: com.kurtz.homerecord.coreui.shell.ShellNav,
+    homeId: String,
+    title: String,
+    floorId: String?,
+    o: com.kurtz.homerecord.housemodel.overlays.Overlay,
+) {
+    val wallId = o.wallId
+    val roomId = o.roomId
+    if (wallId != null && roomId != null) {
+        nav.push(JobWallKey(roomId, wallId, o.stage.name, o.id))
+    } else {
+        scope.launch {
+            val floor = roomId?.let { container.homes.roomLocation(it)?.floorId } ?: floorId
+            nav.push(JobPlanKey(homeId, title, floor, overlayId = o.id))
+        }
     }
 }

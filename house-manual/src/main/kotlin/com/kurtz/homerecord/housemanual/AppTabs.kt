@@ -121,6 +121,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenFloors = { nav.push(FloorsKey) },
                 on3D = { nav.push(House3DKey(it)) },
                 overlays = container.overlays,
+                onOpenOverlay = { openOverlay(nav, it) },
+                onOpenItem = { itemId, _ -> nav.push(ItemDetailKey(itemId)) },
             )
         }
         entry<House3DKey> { key ->
