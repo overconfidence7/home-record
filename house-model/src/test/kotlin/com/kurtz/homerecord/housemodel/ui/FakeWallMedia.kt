@@ -36,10 +36,10 @@ class FakeTextureMaker(var size: TextureSize? = TextureSize(4032, 3024), var fai
 
     override suspend fun photoSize(path: String): TextureSize? = size
 
-    override suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int): String? {
+    override suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int, destPath: String?): String? {
         gate?.await()
         if (fails) return null
         made += Triple(path, outline, lengthIn to heightIn)
-        return path.removeSuffix(".jpg") + "-wall.jpg"
+        return destPath ?: (path.removeSuffix(".jpg") + "-wall.jpg")
     }
 }

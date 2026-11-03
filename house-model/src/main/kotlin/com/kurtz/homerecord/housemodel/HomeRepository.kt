@@ -7,6 +7,13 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.OpeningEntity
 import com.kurtz.homerecord.core.data.StairEntity
 import com.kurtz.homerecord.core.data.WallEntity
+import com.kurtz.homerecord.core.data.WallPhotoEntity
+import com.kurtz.homerecord.housemodel.walls.CarriedPhoto
+import com.kurtz.homerecord.housemodel.walls.PhotoMove
+import com.kurtz.homerecord.housemodel.walls.WallOutline
+import com.kurtz.homerecord.housemodel.walls.WallPhotoCarrier
+import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
+import com.kurtz.homerecord.housemodel.walls.WallStage
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanCodec
@@ -64,6 +71,11 @@ class HomeRepository(
     private val strings: (Int) -> String,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    /**
+     * Called after a plan save with the wall photos whose outline the save cut or stretched (R10a, WallPhotoCarrier):
+     * their straightened copies are gone and need making again from the photo with the new outline.
+     */
+    private val onWallPhotosRecut: suspend (photoIds: List<String>) -> Unit = {},
 ) {
     /** The device's home. House Manual holds one home until Pro lifts the limit (T032). */
     fun observeHome(): Flow<HomeEntity?> = db.homeDao().observeAll().map { it.firstOrNull() }
@@ -246,7 +258,7 @@ class HomeRepository(
      * Wall overlays follow WallOverlayCarrier: onto the wall now running where they sat (a split or merged wall), else
      * onto the floor plan (R10). Runs before the room row itself is written.
      */
-    private suspend fun saveOpeningsAndStairs(room: PlanRoom, allRooms: List<PlanRoom>, ceilingHeightIn: Int, at: Long) {
+    private suspend fun saveOpeningsAndStairs(room: PlanRoom, allRooms: List<PlanRoom>, ceilingHeightIn: Int, at: Long): List<String> {
         val derived = WallDeriver().derive(allRooms).filter { it.roomId == room.id }.associateBy { it.edgeIndex }
         val stored = db.wallDao().listFor(room.id)
         val oldOutline = db.roomDao().get(room.id)?.let { PlanCodec.decode(it.polygonJson) }.orEmpty()
@@ -258,6 +270,7 @@ class HomeRepository(
             db.openingDao().softDelete(it.id, at)
             onChange("opening", it.id)
         }
+        val oldPhotos = stored.flatMap { WallPhotoRepository.latestRowByStage(db.wallPhotoDao().listFor(it.id)).values }
         match.removed.forEach { wallId ->
             db.wallPhotoDao().listFor(wallId).forEach { db.wallPhotoDao().softDelete(it.id, at); onChange("wall_photo", it.id) }
             db.itemDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach {
@@ -285,6 +298,7 @@ class HomeRepository(
             wall.id
         }
         carryWallOverlays(room, oldOutline, stored, match, wallOfEdge, at)
+        val recut = carryWallPhotos(room, oldOutline, stored, wallOfEdge, oldPhotos, at)
         room.openings.forEach { o ->
             val wallId = wallOfEdge[o.edgeIndex] ?: return@forEach
             val row = existingOpenings[o.id]
@@ -312,6 +326,50 @@ class HomeRepository(
                 onChange("stair", st.id)
             }
         }
+        return recut
+    }
+
+    /**
+     * Cuts or stretches the outlines of the room's wall photos to the walls of its new outline, copying a photo onto the
+     * new part of a split wall (WallPhotoCarrier, R10a). Returns the photos whose straightened copy must be made again.
+     */
+    private suspend fun carryWallPhotos(
+        room: PlanRoom,
+        oldOutline: List<Pt>,
+        stored: List<WallEntity>,
+        wallOfEdge: Map<Int, String>,
+        oldPhotos: List<WallPhotoEntity>,
+        at: Long,
+    ): List<String> {
+        if (oldPhotos.isEmpty()) return emptyList()
+        val byId = oldPhotos.associateBy { it.id }
+        val moves = WallPhotoCarrier.carry(
+            WallMatcher.alignedOutline(oldOutline, room.points),
+            stored.associate { it.id to it.edgeIndex },
+            wallOfEdge,
+            room.points,
+            oldPhotos.map { CarriedPhoto(it.id, it.wallId, WallStage.fromStored(it.stage), WallOutline.decode(it.cornersJson)) },
+        )
+        return moves.mapNotNull { move ->
+            when (move) {
+                is PhotoMove.Recrop -> {
+                    val row = byId[move.rowId] ?: return@mapNotNull null
+                    db.wallPhotoDao().upsert(row.copy(cornersJson = move.outline.encode(), texturePath = null, textureR2Key = null, updatedAt = at))
+                    onChange(WallPhotoRepository.ENTITY, row.id)
+                    row.id
+                }
+                is PhotoMove.Copy -> {
+                    val row = byId[move.rowId] ?: return@mapNotNull null
+                    val copy = row.copy(
+                        id = Ids.newId(), wallId = move.toWallId, cornersJson = move.outline.encode(), texturePath = null,
+                        textureR2Key = null, createdAt = at, updatedAt = at, deletedAt = null,
+                    )
+                    db.wallPhotoDao().upsert(copy)
+                    onChange(WallPhotoRepository.ENTITY, copy.id)
+                    copy.id
+                }
+            }
+        }
     }
 
     /**
@@ -319,13 +377,13 @@ class HomeRepository(
      * rooms that never had a shape are left alone. One transaction, so a half-saved plan is never synced.
      */
     suspend fun savePlan(floorId: String, rooms: List<PlanRoom>) {
-        db.withTransaction {
+        val recut = db.withTransaction {
             val at = now()
             val existing = db.roomDao().listFor(floorId).associateBy { it.id }
             val keep = rooms.map { it.id }.toSet()
             val ceiling = db.floorDao().get(floorId)?.ceilingHeightIn ?: DEFAULT_CEILING_IN
             existing.values.filter { it.id !in keep && PlanCodec.decode(it.polygonJson).isNotEmpty() }.forEach { deleteRoomRows(it.id, at) }
-            rooms.forEach { saveOpeningsAndStairs(it, rooms, ceiling, at) }
+            val recut = rooms.flatMap { saveOpeningsAndStairs(it, rooms, ceiling, at) }
             rooms.forEach { room ->
                 val json = PlanCodec.encode(room.points)
                 val row = existing[room.id]
@@ -338,7 +396,9 @@ class HomeRepository(
                 }
                 onChange("room", room.id)
             }
+            recut
         }
+        if (recut.isNotEmpty()) onWallPhotosRecut(recut)
     }
 
     /** Every room of the home, bottom floor first, for pickers. */

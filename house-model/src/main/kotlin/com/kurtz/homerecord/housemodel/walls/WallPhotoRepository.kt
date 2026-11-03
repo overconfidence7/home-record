@@ -126,6 +126,35 @@ class WallPhotoRepository(
         return id
     }
 
+    /**
+     * Makes the straightened copies of photos [ids] again after a plan save cut or stretched their outlines (R10a). Each
+     * copy gets its own file (two parts of a split wall share one photo), named after the row. A photo whose file is not
+     * on this phone yet, or whose outline changed again meanwhile, is skipped; the walls show the photo until then.
+     */
+    suspend fun remakeTextures(ids: List<String>, maker: WallTextureMaker) {
+        for (id in ids) {
+            val row = db.wallPhotoDao().get(id) ?: continue
+            if (row.originalPath.isBlank() || row.texturePath != null) continue
+            val outline = WallOutline.decode(row.cornersJson) ?: continue
+            val wall = db.wallDao().get(row.wallId) ?: continue
+            val dest = row.originalPath.substringBeforeLast('.', row.originalPath) + "-" + row.id.take(8) + "-wall.jpg"
+            val texture = try {
+                maker.make(row.originalPath, outline, wall.lengthIn, wall.heightIn, dest)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Wall texture remake failed", e)
+                null
+            } ?: continue
+            val current = db.wallPhotoDao().get(id) ?: continue
+            if (current.cornersJson != row.cornersJson || current.texturePath != null) continue
+            val updated = current.copy(texturePath = texture, updatedAt = now())
+            db.wallPhotoDao().upsert(updated)
+            onChange(ENTITY, id)
+            upload(updated)
+        }
+    }
+
     suspend fun delete(id: String) {
         db.wallPhotoDao().get(id) ?: return
         db.wallPhotoDao().softDelete(id, now())

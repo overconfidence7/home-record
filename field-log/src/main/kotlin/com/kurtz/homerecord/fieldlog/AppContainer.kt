@@ -424,7 +424,11 @@ class AppContainer(private val app: Application) {
         }
     }
 
-    val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(db, app.resources::getString, onChange = ::recordChange) }
+    val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(
+            db, app.resources::getString, onChange = ::recordChange,
+            onWallPhotosRecut = { ids -> scope.launch { wallPhotos.remakeTextures(ids, wallTextures) } },
+        )
+    }
 
     val media: com.kurtz.homerecord.core.media.MediaFiles by lazy { com.kurtz.homerecord.housemodel.ui.AndroidMediaFiles(app) }
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()

@@ -745,3 +745,17 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   gone, and no longer keeps the decoded bitmaps after upload: switching floors back and forth used to pile up every
   floor's textures past the 64 MB budget sized for one scene. A rotation rebuilds the view and its engine and releases
   everything as before.
+
+## 2026-11-03 R10a: wall photos through a split or merged wall
+- A split wall's photo is cut at the new corner through the photo's perspective (`WallPhotoCarrier`, wall space to
+  photo with `WallSpaceMapper.wallToPhoto`): the part that kept the wall's id keeps the photo row with the cut outline,
+  the new part gets a copy of the row (same photo file and R2 key, its own outline). Each stage is cut on its own, and
+  overlays (cut the same way by `WallOverlayCarrier`) stay over the same spot of the picture.
+- A merged wall keeps its own photo per stage (else the one of the old wall that covered most of it), its outline
+  stretched over the whole merged wall when the photo saw that far, else kept as it was (decision to confirm).
+- The straightened copies of recut photos are cleared in the plan save's transaction and made again afterwards on the
+  app scope (`HomeRepository.onWallPhotosRecut` → `WallPhotoRepository.remakeTextures`), each in its own file
+  `<photo>-<row id prefix>-wall.jpg` so the two parts of a split wall never share one; Field Log then uploads the new
+  texture as for a new photo. Until the copy is made the wall shows the photo as taken. A copied photo whose file is
+  not on this phone yet keeps no straightened copy until it is photographed again (rare: a reshape on a phone that
+  never downloaded the photo). Old texture files are left on disk (R10c deletes replaced media).

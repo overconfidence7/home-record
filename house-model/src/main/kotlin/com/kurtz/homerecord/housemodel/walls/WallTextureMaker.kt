@@ -8,16 +8,19 @@ interface WallTextureMaker {
     /** The photo's upright size, or null when the file is not a readable image. */
     suspend fun photoSize(path: String): TextureSize?
 
-    /** Straightens the outlined wall in [path] to the wall's [lengthIn] × [heightIn]; the texture's path, or null on failure. */
-    suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int): String?
+    /**
+     * Straightens the outlined wall in [path] to the wall's [lengthIn] × [heightIn] into [destPath] (default: beside the
+     * photo as `<name>-wall.jpg`); the texture's path, or null on failure.
+     */
+    suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int, destPath: String? = null): String?
 }
 
 /** [WallTextureMaker] on [WallTextureBuilder]; the texture sits beside the photo as `<name>-wall.jpg`. */
 class AndroidWallTextureMaker : WallTextureMaker {
     override suspend fun photoSize(path: String): TextureSize? = withContext(Dispatchers.IO) { WallTextureBuilder.uprightSize(path) }
 
-    override suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int): String? = withContext(Dispatchers.Default) {
-        WallTextureBuilder.build(path, outline, lengthIn, heightIn, texturePathFor(path))?.path
+    override suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int, destPath: String?): String? = withContext(Dispatchers.Default) {
+        WallTextureBuilder.build(path, outline, lengthIn, heightIn, destPath ?: texturePathFor(path))?.path
     }
 
     companion object {

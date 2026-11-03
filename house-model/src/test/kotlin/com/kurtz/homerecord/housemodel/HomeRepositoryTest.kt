@@ -377,4 +377,63 @@ class HomeRepositoryTest {
         val pts = listOf(Pt(0, 0), Pt(10, 0), Pt(10, 10))
         assertThat(PlanCodec.decode(PlanCodec.encode(pts))).isEqualTo(pts)
     }
+
+    // R10a: a split wall's photo is cut at the new corner, the new part gets a copy, and the textures are made again.
+    @AcceptanceCriterion("AC-C19")
+    @Test fun aSplitWallsPhotoIsCutAtTheNewCornerAndBothPartsGetTheirOwnTexture() = runTest {
+        val recut = mutableListOf<String>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onChange = { entity, id -> changes += "$entity/$id" }, onWallPhotosRecut = { recut += it })
+        val id = homes.createHome(NewHome("Maple St", "", HouseType.COLONIAL, Foundation.BASEMENT, false))
+        val main = homes.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        homes.savePlan(main.id, listOf(kitchen))
+        val north = db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id
+        val outline = com.kurtz.homerecord.housemodel.walls.WallOutline(
+            com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.1f, 0.2f), com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.9f, 0.2f),
+            com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.9f, 0.8f), com.kurtz.homerecord.housemodel.walls.PhotoPoint(0.1f, 0.8f),
+        )
+        db.wallPhotoDao().upsert(
+            com.kurtz.homerecord.core.data.WallPhotoEntity(
+                id = "wp1", wallId = north, originalPath = "/m/n.jpg", texturePath = "/m/n-wall.jpg", cornersJson = outline.encode(),
+                textureR2Key = "t", takenAt = 1, createdAt = 1, updatedAt = 1,
+            ),
+        )
+
+        homes.savePlan(main.id, listOf(kitchen.withCornerOnEdge(0, Pt(72, 0))))
+
+        val walls = db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }
+        val left = db.wallPhotoDao().listFor(checkNotNull(walls[0])).single()
+        val right = db.wallPhotoDao().listFor(checkNotNull(walls[1])).single()
+        assertThat(setOf(left.id, right.id)).contains("wp1")
+        assertThat(left.originalPath).isEqualTo("/m/n.jpg")
+        assertThat(right.originalPath).isEqualTo("/m/n.jpg")
+        val l = checkNotNull(com.kurtz.homerecord.housemodel.walls.WallOutline.decode(left.cornersJson))
+        val r = checkNotNull(com.kurtz.homerecord.housemodel.walls.WallOutline.decode(right.cornersJson))
+        assertThat(l.topLeft.x).isWithin(1e-4f).of(0.1f)
+        assertThat(l.topRight.x).isWithin(1e-4f).of(0.5f)
+        assertThat(r.topLeft.x).isWithin(1e-4f).of(0.5f)
+        assertThat(r.topRight.x).isWithin(1e-4f).of(0.9f)
+        assertThat(listOf(left.texturePath, right.texturePath, left.textureR2Key, right.textureR2Key)).containsExactly(null, null, null, null)
+        assertThat(recut).containsExactly(left.id, right.id)
+        assertThat(changes).containsAtLeast("wall_photo/${left.id}", "wall_photo/${right.id}")
+
+        val maker = com.kurtz.homerecord.housemodel.ui.FakeTextureMaker()
+        val uploaded = mutableListOf<String>()
+        com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, now = { clock++ }, upload = { uploaded += it.id }).remakeTextures(recut, maker)
+        val textures = listOf(left.id, right.id).map { checkNotNull(checkNotNull(db.wallPhotoDao().get(it)).texturePath) }
+        assertThat(textures.toSet()).hasSize(2)
+        assertThat(maker.made.map { it.third }).containsExactly(72 to 96, 72 to 96)
+        assertThat(uploaded).containsExactly(left.id, right.id)
+
+        // Removing the corner again: the merged wall keeps its own half, stretched back over the whole wall.
+        recut.clear()
+        homes.savePlan(main.id, listOf(kitchen))
+        val merged = db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id
+        val back = db.wallPhotoDao().listFor(merged).single()
+        val o = checkNotNull(com.kurtz.homerecord.housemodel.walls.WallOutline.decode(back.cornersJson))
+        assertThat(o.topLeft.x).isWithin(1e-4f).of(0.1f)
+        assertThat(o.topRight.x).isWithin(1e-4f).of(0.9f)
+        assertThat(recut).containsExactly(back.id)
+    }
 }
