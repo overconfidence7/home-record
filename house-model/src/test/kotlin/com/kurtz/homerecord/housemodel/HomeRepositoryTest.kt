@@ -307,7 +307,7 @@ class HomeRepositoryTest {
         )
         db.overlayDao().upsert(overlay("west", 0.25f, 0.5f))
         db.overlayDao().upsert(overlay("east", 0.75f, 0.5f))
-        fun points(oid: String) = com.kurtz.homerecord.housemodel.overlays.OverlayPoints.decode(checkNotNull(db.overlayDao().get(oid)).pointsJson)
+        suspend fun points(oid: String) = com.kurtz.homerecord.housemodel.overlays.OverlayPoints.decode(checkNotNull(db.overlayDao().get(oid)).pointsJson)
 
         // Dragging the east side out stretches the north wall; both overlays keep their wall-space points.
         val wider = kitchen.resizedEdge(1, 168)
