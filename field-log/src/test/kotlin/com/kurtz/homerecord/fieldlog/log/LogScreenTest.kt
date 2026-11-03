@@ -1,5 +1,12 @@
 package com.kurtz.homerecord.fieldlog.log
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
@@ -161,5 +168,23 @@ class LogScreenTest {
         rule.onNodeWithTag("fl_close").performClick()
         rule.onNodeWithTag("fl_discard").performClick()
         assertThat(events).containsExactly(LogWeatherEvent.Conditions("thunderstorm"), LogWeatherEvent.Close).inOrder()
+    }
+
+    /** QA F09b: after Save, the saved Visitors text is in view, not left under the pinned Send bar. */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun savedSectionIsBroughtBackIntoView() {
+        var state by mutableStateOf(ready.copy(sentAt = 1_000L))
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                Box(Modifier.height(420.dp)) { LogScreen(state, {}) }
+            }
+        }
+        rule.onNodeWithTag("fl_log_list").performScrollToNode(hasTestTag("fl_log_visitors_edit"))
+        state = state.copy(editor = LogEditor.Text(LogTextSection.VISITORS, "Township inspector"))
+        rule.waitForIdle()
+        state = state.copy(editor = null, visitors = "Township inspector, rough-in passed")
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_log_visitors_text").assertIsDisplayed()
+        rule.onNodeWithTag("fl_log_visitors_edit").assertIsDisplayed()
     }
 }

@@ -82,6 +82,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.withTimeoutOrNull
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -180,6 +188,7 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
     LaunchedEffect(state.sentAt) {
         if (state.sentAt != null && list.firstVisibleItemIndex <= 1) list.scrollToItem(0)
     }
+    RevealSavedSection(state, list)
     LazyColumn(Modifier.fillMaxSize().testTag("fl_log_list"), state = list, contentPadding = PaddingValues(bottom = 24.dp)) {
         state.sentAt?.let { sent ->
             item(key = "sent") {
@@ -226,6 +235,41 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
         typed("client", R.string.log_section_client, state.clientNotes, Icons.AutoMirrored.Rounded.EventNote, LogTextSection.CLIENT_NOTES, state.canEdit, onEvent)
     }
 }
+
+/**
+ * After a typed section's sheet closes, the keyboard drops and the saved text arrives from the database; the list can be
+ * left with the section's header at the bottom edge and its text below the pinned Send bar (QA F09b). For a moment after
+ * the sheet closes, bring the edited section's header and its last line back into view, then leave the list alone.
+ */
+@Composable
+private fun RevealSavedSection(state: LogUiState, list: LazyListState) {
+    val editing = (state.editor as? LogEditor.Text)?.section
+    var pending by remember { mutableStateOf<LogTextSection?>(null) }
+    val workCount by rememberUpdatedState(state.workDone.size)
+    LaunchedEffect(editing) {
+        if (editing != null) {
+            pending = editing
+            return@LaunchedEffect
+        }
+        val section = pending ?: return@LaunchedEffect
+        pending = null
+        withTimeoutOrNull(REVEAL_WINDOW_MS) {
+            snapshotFlow { list.layoutInfo }.collect { info ->
+                val target = LogSectionReveal.target(
+                    section, workCount, info.visibleItemsInfo.map { RevealItem(it.key, it.index, it.offset, it.size) },
+                    info.viewportStartOffset, info.viewportEndOffset,
+                )
+                when (target) {
+                    is RevealTarget.ScrollBy -> if (!list.isScrollInProgress) list.scrollBy(target.px.toFloat())
+                    is RevealTarget.ToItem -> if (!list.isScrollInProgress) list.scrollToItem(target.index)
+                    RevealTarget.None -> Unit
+                }
+            }
+        }
+    }
+}
+
+private const val REVEAL_WINDOW_MS = 1500L
 
 /**
  * Preview PDF for everyone who reads the log; Send (Send again once sent) for whoever runs the job (AC-F33). Kept under
