@@ -332,7 +332,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T055c1: data and 3D half: Room v9 `item.wallX/wallY` (wall space), `ItemPlacement.onWall` `[unit]` (plan spot 6" inside the wall, both windings), `ItemRepository.setWallSpot` (moves the item into the wall's room; a plan tap or room change clears it), `SceneMarkers` draws wall-hung items on the wall face (AC-C30 position, AC-C23)
     - [x] T055c2: UI half: "On a wall" on Place on plan (wall picker from the room's walls, tap the wall to set the spot, shows the wall photo when there is one), item page Where says which wall, debug seed hangs the thermostat on a wall, H07 flow step (AC-C30 position, AC-C23)
   - [x] T055d: drag the marker on Place on plan (today a tap moves it) and show the home's other placed items faintly for reference
-- [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
+- [x] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames) (screens reviewed, two Minors fixed; no 3D recording exists yet, filed as a suite Minor `[v4:no-3d-recording]` in REVIEW.md)
 
 ## N Nate's corrections (added 2026-11-03 after the decisions pass; do these after T055 and V4, before M5)
 

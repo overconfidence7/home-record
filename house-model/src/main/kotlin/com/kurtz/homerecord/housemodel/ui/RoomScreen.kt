@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.ui.platform.testTag
@@ -48,6 +49,8 @@ import com.kurtz.homerecord.housemodel.walls.WallSide
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.SegmentedButton
@@ -243,7 +246,20 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
 @Composable
 internal fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit, modifier: Modifier = Modifier, screen: String = "room_wall") {
     val prefix = LocalTagPrefix.current
-    SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
+    val labels = WallStage.entries.map { stringResource(it.labelRes) }
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val labelStyle = MaterialTheme.typography.labelLarge
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+    // One size for all four labels (V4): sized one by one, "Insulation" stepped down alone and the
+    // row read as four different fonts. Each Text keeps autoSize under this cap as a safety net.
+    val segmentWidthPx = with(density) { (maxWidth / labels.size - SegmentLabelInset).toPx() }
+    val sharedSize = remember(labels, segmentWidthPx, labelStyle, density) {
+        SegmentLabelSize.largestFitting(minSp = 7f, maxSp = labelStyle.fontSize.value, stepSp = 0.25f) { sp ->
+            labels.all { label -> measurer.measure(label, labelStyle.copy(fontSize = sp.sp), maxLines = 1, softWrap = false).size.width <= segmentWidthPx }
+        }.sp
+    }
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
         WallStage.entries.forEachIndexed { index, stage ->
             SegmentedButton(
                 selected = stage == selected,
@@ -257,12 +273,16 @@ internal fun WallStagePicker(selected: WallStage, onSelect: (WallStage) -> Unit,
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Ellipsis,
-                    autoSize = TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = MaterialTheme.typography.labelLarge.fontSize),
+                    autoSize = TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = sharedSize),
                 )
             }
         }
     }
+    }
 }
+
+/** Space a segment's label cannot use: the button's 12 dp padding each side and its 1 dp borders. */
+private val SegmentLabelInset = 26.dp
 
 @Composable
 private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, canPhotograph: Boolean, canOpen: Boolean, onEvent: (RoomEvent) -> Unit) {

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -368,7 +369,14 @@ internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOve
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp),
         )
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        // FlowRow, not Row: at 200% Edit and Delete fill the row and a Row clipped Done to "Don" (V4);
+        // Done now wraps to its own line and keeps its whole label.
+        FlowRow(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             OutlinedButton(onClick = { onEvent(WallOverlaysEvent.EditSelected) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_edit")) {
                 Icon(Icons.Rounded.Edit, contentDescription = null)
                 Text(stringResource(R.string.wall_overlay_edit), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
