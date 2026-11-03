@@ -21,8 +21,8 @@ import com.kurtz.homerecord.housemodel.walls.WallTextureMaker
 
 /**
  * HM-Wall for [wallId] in [roomId] (AC-C25..C28), opened on [stage] with overlay [selectId] picked when it came from the
- * room's Overlays list or an item's Links. Back steps out of the form, the drawing or the selection before it leaves the
- * wall. With [media] the form takes a photo from the camera or the gallery (AC-C26).
+ * room's Overlays list or an item's Links. Back follows [WallBack]: it steps out of the form or the drawing first, and
+ * unpicks only an overlay picked on this screen. With [media] the form takes a photo from the camera or the gallery (AC-C26).
  */
 @Composable
 fun WallOverlaysRoute(
@@ -45,17 +45,18 @@ fun WallOverlaysRoute(
     )
     val state = vm.state.collectAsState().value
     OverlayPhotoLaunchers(state.photoLaunch, vm::onEvent)
-    val back = {
-        when {
-            state.form != null -> vm.onEvent(WallOverlaysEvent.CloseForm)
-            state.drawing != null -> vm.onEvent(WallOverlaysEvent.CancelDrawing)
-            state.selectedId != null -> vm.onEvent(WallOverlaysEvent.Select(null))
-            else -> onBack()
+    fun back(fromArrow: Boolean) {
+        when (WallBack.step(state.form != null, state.drawing != null, state.selectedId, selectId, fromArrow)) {
+            WallBackStep.CloseForm -> vm.onEvent(WallOverlaysEvent.CloseForm)
+            WallBackStep.CancelDrawing -> vm.onEvent(WallOverlaysEvent.CancelDrawing)
+            WallBackStep.Unpick -> vm.onEvent(WallOverlaysEvent.Select(null))
+            WallBackStep.Leave -> onBack()
         }
     }
     // The form's own handler, composed later, asks before discarding changes.
-    BackHandler(enabled = state.form != null || state.drawing != null || state.selectedId != null, onBack = back)
-    WallOverlaysScreen(state, { event -> if (event == WallOverlaysEvent.Back) back() else vm.onEvent(event) })
+    val backSteps = WallBack.step(state.form != null, state.drawing != null, state.selectedId, selectId, fromArrow = false) != WallBackStep.Leave
+    BackHandler(enabled = backSteps) { back(fromArrow = false) }
+    WallOverlaysScreen(state, { event -> if (event == WallOverlaysEvent.Back) back(fromArrow = true) else vm.onEvent(event) })
 }
 
 /**

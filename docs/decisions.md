@@ -759,3 +759,11 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   texture as for a new photo. Until the copy is made the wall shows the photo as taken. A copied photo whose file is
   not on this phone yet keeps no straightened copy until it is photographed again (rare: a reshape on a phone that
   never downloaded the photo). Old texture files are left on disk (R10c deletes replaced media).
+
+## 2026-11-03 Back on the wall screen (H11)
+
+- The top bar's back arrow on HM-Wall / FL-Wall always goes up (after stepping out of an open form or drawing);
+  Done unpicks an overlay. The system back unpicks an overlay picked on this screen, but leaves when the picked
+  overlay is the one the wall was opened on (from the room's Overlays list, an item's Links or Home search), since
+  that is what the person came to look at. Rule in pure `WallBack` (house-model). Found by the H11 flow, whose
+  `hm_back` only unpicked the overlay and left it on the wall screen.
