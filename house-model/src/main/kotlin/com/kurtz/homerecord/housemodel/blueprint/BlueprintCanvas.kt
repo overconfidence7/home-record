@@ -2,7 +2,11 @@ package com.kurtz.homerecord.housemodel.blueprint
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -66,6 +70,11 @@ fun BlueprintCanvas(
      * Null keeps marks out of the way, taps landing on the room beneath.
      */
     onMarkClick: ((PlanMark) -> Unit)? = null,
+    /**
+     * A drag that starts on a shown item mark (T055d, Place on plan): called with the plan inches under the finger as
+     * it moves ([end] false) and once more where it is let go ([end] true). Null leaves drags alone.
+     */
+    onMarkDrag: ((mark: PlanMark, xIn: Int, yIn: Int, end: Boolean) -> Unit)? = null,
 ) {
     val density = LocalDensity.current.density
     val measurer = rememberTextMeasurer()
@@ -86,10 +95,14 @@ fun BlueprintCanvas(
     val pinClick by rememberUpdatedState(onPinClick)
     val planTap by rememberUpdatedState(onPlanTap)
     val markClick by rememberUpdatedState(onMarkClick)
+    val markDrag by rememberUpdatedState(onMarkDrag)
     val overlayIcons = rememberOverlayIcons()
     val itemIcons = rememberItemIcons()
     val shownOverlays = overlays.filter { layers.shows(it) }
-    val shownMarks = PlanMarks.visible(marks, layers)
+    val visibleMarks = PlanMarks.visible(marks, layers)
+    // Faint reference items are drawn but never opened, dragged or read out.
+    val shownMarks = visibleMarks.filter { !it.faint }
+    val faintMarks = visibleMarks.filter { it.faint }
     // Everything a tap can open, in the order it is drawn: wall overlays, plan overlays, then items on top.
     val tappable = shownMarks.filter { !it.isItem } +
         shownOverlays.map { PlanMark(com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(it.id), it.roomId.orEmpty(), it.kind.layer, it.kind, it.points, label = it.label) } +
@@ -133,10 +146,28 @@ fun BlueprintCanvas(
                         RoomHitTester.roomAt(currentRooms, view.planX(at.x), view.planY(at.y))?.let(longClick)
                     },
                 )
+            }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val move = markDrag ?: return@awaitEachGesture
+                    val view = BlueprintView.fit(currentRooms, size.width.toFloat(), size.height.toFloat(), marginPx)
+                    val mark = PlanMarkHitTester.markAt(currentTappable.filter { it.isItem }, view, down.position.x, down.position.y, insetPx, hitPx)
+                        ?: return@awaitEachGesture
+                    val start = awaitTouchSlopOrCancellation(down.id) { change, _ -> change.consume() } ?: return@awaitEachGesture
+                    var last = start.position
+                    move(mark, Math.round(view.planX(last.x)), Math.round(view.planY(last.y)), false)
+                    drag(start.id) { change ->
+                        last = change.position
+                        change.consume()
+                        move(mark, Math.round(view.planX(last.x)), Math.round(view.planY(last.y)), false)
+                    }
+                    move(mark, Math.round(view.planX(last.x)), Math.round(view.planY(last.y)), true)
+                }
             },
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
-        val obstacles = tappable.flatMap { m ->
+        val obstacles = (tappable + faintMarks).flatMap { m ->
             val half = (if (m.isItem) PLAN_ITEM_RADIUS_DP + 2f else if (m.isRun) 4f else PLAN_SPOT_RADIUS_DP + 2f) * density
             LabelPlacer.alongRun(PlanMarkHitTester.placed(m, view, insetPx), half)
         }
@@ -144,7 +175,7 @@ fun BlueprintCanvas(
         val toScreen = { p: com.kurtz.homerecord.housemodel.overlays.OverlayPoint -> Offset(p.x * view.scale + view.originX, p.y * view.scale + view.originY) }
         drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = false)
         drawPlanOverlays(shownOverlays, toScreen, density, colors.dark, scheme.surface, overlayIcons)
-        drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = true)
+        drawPlanMarks(faintMarks + shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = true)
         pins.forEach { drawPin(it, view, density, measurer, pinStyle, pinColors) }
     }
     // Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its bounds.

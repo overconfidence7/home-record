@@ -159,7 +159,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         entry<ItemPlaceKey> { key ->
             ItemPlaceRoute(
                 container.homes, container.items, home.id, key.itemId, onBack = nav::pop, onEditPlan = { nav.push(PlanKey(floorId = it)) },
-                roomWalls = container.wallPhotos::observeRoomWalls,
+                roomWalls = container.wallPhotos::observeRoomWalls, homeItems = container.overlays.observeItemSpots(home.id),
             )
         }
         entry<ItemEditKey> { key ->

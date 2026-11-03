@@ -38,11 +38,23 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_item_place_plan"
     point: "25%,40%"
 - extendedWaitUntil:
-    visible: "In .*\\. Tap the plan to move it\\."
+    visible: "In .*\\. Drag it, or tap the plan to move it\\."
     timeout: 5000
 - assertVisible:
     id: "hm_item_place_remove"
 - takeScreenshot: H07-placed
+# T055d: the marker drags to a new spot (the drop is saved like a tap); the home's other items show faintly
+- swipe:
+    from:
+      id: "hm_plan_mark"
+    direction: RIGHT
+    duration: 800
+- extendedWaitUntil:
+    visible: "In .*\\. Drag it, or tap the plan to move it\\."
+    timeout: 5000
+- assertVisible:
+    id: "hm_plan_mark"
+- takeScreenshot: H07-dragged
 - tapOn:
     id: "hm_item_place_done"
 - extendedWaitUntil:

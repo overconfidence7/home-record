@@ -128,16 +128,21 @@ fun DrawScope.drawPlanMarks(
     }
     val fill = LayerPalette.color(BlueprintLayer.ITEMS, dark)
     val r = PLAN_ITEM_RADIUS_DP * density
-    marks.filter { it.isItem }.forEach { m ->
+    // Faint reference items first, so the item being placed always draws on top of them.
+    marks.filter { it.isItem }.sortedBy { !it.faint }.forEach { m ->
         val at = placed(m)[0]
-        drawCircle(halo, r + 2f * density, at)
-        drawCircle(fill, r, at)
+        val alpha = if (m.faint) FAINT_ITEM_ALPHA else 1f
+        drawCircle(halo, r + 2f * density, at, alpha = alpha)
+        drawCircle(fill, r, at, alpha = alpha)
         val icon = itemIcons[m.iconName] ?: itemIcons["Category"]
         if (icon != null) {
             val s = r * 1.3f
             translate(at.x - s / 2f, at.y - s / 2f) {
-                with(icon) { draw(Size(s, s), colorFilter = ColorFilter.tint(halo)) }
+                with(icon) { draw(Size(s, s), alpha = alpha, colorFilter = ColorFilter.tint(halo)) }
             }
         }
     }
 }
+
+/** How strongly a reference item (a [PlanMark.faint] one) is drawn. */
+const val FAINT_ITEM_ALPHA = 0.38f

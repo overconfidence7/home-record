@@ -3,6 +3,8 @@ package com.kurtz.homerecord.housemanual
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -69,12 +71,35 @@ class ItemPlaceScreenTest {
         assertThat(events).contains(ItemPlaceEvent.PickFloor("f0"))
     }
 
+    // T055d: dragging the marker reports where it goes and where it is let go; other items show faintly but are not marks.
+    @Test
+    @AcceptanceCriterion("AC-C30")
+    fun theMarkerDragsAndOtherItemsAreNotTappable() {
+        val events = mutableListOf<ItemPlaceEvent>()
+        val others = listOf(com.kurtz.homerecord.housemodel.scene.ItemSpot("i2", "k", 140, 120, "Dishwasher", iconName = "Kitchen"))
+        show(state(spot = ItemPlace("k", 40, 40)).copy(others = others), events)
+        rule.onAllNodesWithTag("hm_plan_mark").assertCountEquals(1)
+        rule.onNodeWithTag("hm_plan_mark").performTouchInput {
+            down(center)
+            moveBy(androidx.compose.ui.geometry.Offset(120f, 80f))
+            moveBy(androidx.compose.ui.geometry.Offset(120f, 80f))
+            up()
+        }
+        val drags = events.filterIsInstance<ItemPlaceEvent.Drag>()
+        assertThat(drags).isNotEmpty()
+        val drop = events.filterIsInstance<ItemPlaceEvent.Drop>().single()
+        assertThat(drop.xIn).isGreaterThan(40)
+        assertThat(drop.yIn).isGreaterThan(40)
+        // A drag is not a tap: nothing is placed at the finger's first spot.
+        assertThat(events.filterIsInstance<ItemPlaceEvent.Place>()).isEmpty()
+    }
+
     @Test
     @AcceptanceCriterion("AC-C30")
     fun aPlacedItemSaysWhereItIsAndCanBeRemoved() {
         val events = mutableListOf<ItemPlaceEvent>()
         show(state(spot = ItemPlace("k", 40, 50)), events)
-        rule.onNodeWithText("In Kitchen. Tap the plan to move it.").assertExists()
+        rule.onNodeWithText("In Kitchen. Drag it, or tap the plan to move it.").assertExists()
         rule.onNodeWithTag("hm_plan_mark").assertExists()
         rule.onNodeWithTag("hm_item_place_remove").performClick()
         rule.onNodeWithTag("hm_item_place_done").performClick()

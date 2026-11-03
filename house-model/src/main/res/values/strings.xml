@@ -482,7 +482,7 @@
     <string name="item_place_title">Place on plan</string>
     <string name="item_place_done">Done</string>
     <string name="item_place_hint">Tap the plan where this item sits.</string>
-    <string name="item_place_hint_set">In %1$s. Tap the plan to move it.</string>
+    <string name="item_place_hint_set">In %1$s. Drag it, or tap the plan to move it.</string>
     <string name="item_place_remove">Remove from plan</string>
     <string name="item_place_empty_title">No rooms on %1$s yet</string>
     <string name="item_place_empty_body">Draw the rooms on this floor, then come back and tap where the item sits.</string>

@@ -85,7 +85,8 @@ class ItemPlaceViewModelTest {
 
     private fun vm(h: Home, itemId: String, saved: SavedStateHandle = SavedStateHandle()): ItemPlaceViewModel {
         val walls = WallPhotoRepository(db)
-        val vm = ItemPlaceViewModel(homes, items, h.id, itemId, saved, roomWalls = walls::observeRoomWalls).also { created += it }
+        val spots = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db).observeItemSpots(h.id)
+        val vm = ItemPlaceViewModel(homes, items, h.id, itemId, saved, roomWalls = walls::observeRoomWalls, homeItems = spots).also { created += it }
         // Collected in the ViewModel's own scope, so the test block can finish; tearDown cancels it.
         collectors += vm.viewModelScope.launch { vm.state.collect {} }
         return vm
@@ -203,5 +204,48 @@ class ItemPlaceViewModelTest {
         val other = vm.settled { it.floorId == h.basement && it.rooms.isNotEmpty() }
         assertThat(other.canHang).isFalse()
         assertThat(other.wallMode).isFalse()
+    }
+
+    // T055d: a drag moves the marker with the finger and saves nothing until the drop, which lands like a tap.
+    @AcceptanceCriterion("AC-C30")
+    @Test fun aDragMovesTheMarkerAndTheDropSavesTheSpot() = test {
+        val h = home()
+        val id = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "refrigerator", roomId = "k", name = "Refrigerator")))
+        items.setPlanSpot(id, ItemPlace("k", 30, 30))
+        val vm = vm(h, id)
+        vm.settled { it.spotHere != null }
+
+        vm.onEvent(ItemPlaceEvent.Drag(90, 70))
+        val dragging = vm.settled { it.dragAt != null }
+        assertThat(dragging.marks.single { !it.faint }.points.single().x).isEqualTo(90f)
+        assertThat(items.get(id)?.planX).isEqualTo(30)
+
+        // Let go in the Living room: the item moves there, and the marker no longer follows a finger.
+        vm.onEvent(ItemPlaceEvent.Drop(220, 60))
+        val dropped = vm.settled { it.dragAt == null && it.spot?.xIn == 220 }
+        assertThat(dropped.spotRoomName).isEqualTo("Living room")
+        assertThat(dropped.marks.single { !it.faint }.points.single().x).isEqualTo(220f)
+        assertThat(items.get(id)?.roomId).isEqualTo("l")
+    }
+
+    // T055d: the floor's other placed items are drawn faintly; the item itself and items on other floors are not.
+    @AcceptanceCriterion("AC-C30")
+    @Test fun theFloorsOtherPlacedItemsShowFaintly() = test {
+        val h = home()
+        val id = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "refrigerator", roomId = "k", name = "Refrigerator")))
+        val sofa = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "thermostat", roomId = "l", name = "Thermostat")))
+        val heater = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "water_heater", roomId = "u", name = "Water heater")))
+        items.setPlanSpot(sofa, ItemPlace("l", 250, 70))
+        items.setPlanSpot(heater, ItemPlace("u", 40, 40))
+        items.setPlanSpot(id, ItemPlace("k", 30, 30))
+        val vm = vm(h, id)
+        val open = vm.settled { s -> s.spotHere != null && s.marks.any { it.faint } }
+        val faint = open.marks.filter { it.faint }
+        assertThat(faint.map { it.label }).containsExactly("Thermostat")
+        assertThat(open.marks.single { !it.faint }.label).isEqualTo("Refrigerator")
+
+        vm.onEvent(ItemPlaceEvent.PickFloor(h.basement))
+        val basement = vm.settled { s -> s.floorId == h.basement && s.rooms.isNotEmpty() }
+        assertThat(basement.marks.map { it.label to it.faint }).containsExactly("Water heater" to true)
     }
 }

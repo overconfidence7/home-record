@@ -12,6 +12,8 @@ import com.kurtz.homerecord.housemodel.defaultFloor
 import com.kurtz.homerecord.housemodel.items.ItemPlace
 import com.kurtz.homerecord.housemodel.items.ItemPlacement
 import com.kurtz.homerecord.housemodel.items.ItemRepository
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
+import com.kurtz.homerecord.housemodel.scene.ItemSpot
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -40,10 +42,14 @@ class ItemPlaceViewModel(
     private val system: UnitSystem = UnitSystem.IMPERIAL,
     /** The walls of a room with their pictures ([com.kurtz.homerecord.housemodel.walls.WallPhotoRepository.observeRoomWalls]). */
     private val roomWalls: (roomId: String) -> Flow<List<RoomWall>> = { flowOf(emptyList()) },
+    /** The home's placed items ([com.kurtz.homerecord.housemodel.overlays.OverlayRepository.observeItemSpots]), drawn faintly. */
+    private val homeItems: Flow<List<ItemSpot>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val picked = MutableStateFlow<String?>(saved[FLOOR])
     private val wallMode = MutableStateFlow(saved[WALL_MODE] ?: false)
     private val pickedWall = MutableStateFlow<String?>(saved[WALL])
+    /** The marker under the finger during a drag; kept until the drop is saved so it never jumps back first. */
+    private val dragAt = MutableStateFlow<OverlayPoint?>(null)
 
     /** The floor of the item's room as first seen, so the screen opens where the item is. */
     private val itemFloor = MutableStateFlow<String?>(null)
@@ -79,9 +85,14 @@ class ItemPlaceViewModel(
         if (roomId == null) flowOf(s) else roomWalls(roomId).map { walls -> s.copy(walls = walls) }
     }
 
-    val state: StateFlow<ItemPlaceUiState> = combine(withWalls, wallMode, pickedWall) { s, mode, wall ->
+    val state: StateFlow<ItemPlaceUiState> = combine(withWalls, wallMode, pickedWall, homeItems, dragAt) { s, mode, wall, others, drag ->
         val on = mode && s.canHang
-        s.copy(wallMode = on, wallId = wall?.takeIf { w -> s.walls.any { it.id == w } } ?: s.hungOn?.wallId?.takeIf { w -> s.walls.any { it.id == w } } ?: s.walls.firstOrNull()?.id)
+        s.copy(
+            wallMode = on,
+            wallId = wall?.takeIf { w -> s.walls.any { it.id == w } } ?: s.hungOn?.wallId?.takeIf { w -> s.walls.any { it.id == w } } ?: s.walls.firstOrNull()?.id,
+            others = if (s.loading || s.missing) emptyList() else others,
+            dragAt = drag,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemPlaceUiState(itemId = itemId, system = system))
 
     private fun build(floors: List<FloorSummary>, floorId: String?, rooms: List<com.kurtz.homerecord.housemodel.plan.PlanRoom>, item: ItemEntity?, loading: Boolean): ItemPlaceUiState {
@@ -105,6 +116,14 @@ class ItemPlaceViewModel(
             is ItemPlaceEvent.Place -> viewModelScope.launch {
                 val place = ItemPlacement.place(state.value.rooms, e.xIn, e.yIn) ?: return@launch
                 items.setPlanSpot(itemId, place)
+            }
+            is ItemPlaceEvent.Drag -> dragAt.value = OverlayPoint(e.xIn.toFloat(), e.yIn.toFloat())
+            is ItemPlaceEvent.Drop -> viewModelScope.launch {
+                try {
+                    ItemPlacement.place(state.value.rooms, e.xIn, e.yIn)?.let { items.setPlanSpot(itemId, it) }
+                } finally {
+                    dragAt.value = null
+                }
             }
             ItemPlaceEvent.Remove -> viewModelScope.launch { items.setPlanSpot(itemId, null) }
             is ItemPlaceEvent.WallMode -> {

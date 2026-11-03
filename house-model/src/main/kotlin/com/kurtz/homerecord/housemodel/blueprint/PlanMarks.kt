@@ -26,6 +26,8 @@ data class PlanMark(
     /** The item's category icon name (`ItemCategory` icon), for item marks. */
     val iconName: String? = null,
     val label: String = "",
+    /** Drawn faintly for reference (the home's other items on Place on plan, T055d); not tappable there. */
+    val faint: Boolean = false,
 ) {
     val isRun: Boolean get() = points.size >= 2
     val isItem: Boolean get() = target is MarkerTarget.ItemMark

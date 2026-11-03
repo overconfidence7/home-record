@@ -1258,13 +1258,19 @@ fun RoomOverlaysPreview() = Frame {
         canOpenWalls = true, overlays = sinkWallOverlays.take(3) + sinkWallOverlays[4]), {})
 }
 
-/** Place on plan (AC-C30 position): the refrigerator placed against the Kitchen's left wall on the Main floor. */
+/** Place on plan (AC-C30 position): the refrigerator placed against the Kitchen's left wall on the Main floor, the floor's other items faint. */
 private fun itemPlaceState(spot: com.kurtz.homerecord.housemodel.items.ItemPlace?, rooms: List<PlanRoom> = houseRooms) =
     com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(
         loading = false, itemId = "i9", itemName = "Refrigerator",
         iconName = ItemCategory.subtype("refrigerator")?.iconName ?: "Kitchen",
         floors = floors, floorId = "f2", rooms = rooms, spot = spot,
         walls = if (spot?.roomId == "r1") kitchenWalls else emptyList(),
+        // The floor's other placed items, drawn faintly for reference (T055d).
+        others = listOf(
+            com.kurtz.homerecord.housemodel.scene.ItemSpot("i1", "r3", 130, 240, "Chest freezer", iconName = "Kitchen"),
+            com.kurtz.homerecord.housemodel.scene.ItemSpot("i2", "r6", 262, 310, "Water heater", iconName = "WaterDrop"),
+            com.kurtz.homerecord.housemodel.scene.ItemSpot("i3", "r2", 220, 150, "Thermostat", iconName = "Thermostat"),
+        ),
     )
 
 @ThemePreviews

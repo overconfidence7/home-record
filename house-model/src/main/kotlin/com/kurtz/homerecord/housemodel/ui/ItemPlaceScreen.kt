@@ -53,7 +53,8 @@ import com.kurtz.homerecord.housemodel.blueprint.BlueprintCanvas
 
 /**
  * Place on plan (AC-C30 position): the floor chips, a hint that says where the item is, the floor's blueprint with the
- * item's marker, and Remove from plan once it is placed. A tap anywhere on the plan moves the marker there.
+ * item's marker over the floor's other items drawn faintly, and Remove from plan once it is placed. A tap anywhere on the
+ * plan moves the marker there, and the marker can be dragged (T055d).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -125,6 +126,7 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                         marks = state.marks,
                         system = state.system,
                         onPlanTap = { x, y -> onEvent(ItemPlaceEvent.Place(x, y)) },
+                        onMarkDrag = { _, x, y, end -> onEvent(if (end) ItemPlaceEvent.Drop(x, y) else ItemPlaceEvent.Drag(x, y)) },
                     )
                 }
                 FlowRow(

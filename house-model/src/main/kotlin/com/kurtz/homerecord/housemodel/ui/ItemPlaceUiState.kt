@@ -8,6 +8,7 @@ import com.kurtz.homerecord.housemodel.blueprint.PlanMark
 import com.kurtz.homerecord.housemodel.items.ItemPlace
 import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.scene.ItemSpot
 import com.kurtz.homerecord.housemodel.scene.MarkerTarget
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 
@@ -35,6 +36,10 @@ data class ItemPlaceUiState(
     val wallId: String? = null,
     /** The wall the item hangs on and its spot there in wall space (x 0..1 left to right, y 0 ceiling to 1 floor). */
     val hungOn: WallSpot? = null,
+    /** The home's other placed items (T055d), drawn faintly on their floor so the user can place this one beside them. */
+    val others: List<ItemSpot> = emptyList(),
+    /** Where the marker is while the user drags it, in plan inches; null when no drag is under way. */
+    val dragAt: OverlayPoint? = null,
 ) {
     /** The wall shown in wall mode, if the room still has it. */
     val wall: RoomWall? get() = walls.firstOrNull { it.id == wallId } ?: walls.firstOrNull()
@@ -53,16 +58,24 @@ data class ItemPlaceUiState(
     /** The name of the room the item sits in, when that room is on the shown floor. */
     val spotRoomName: String? get() = spotHere?.let { s -> rooms.firstOrNull { it.id == s.roomId }?.name }
 
-    /** The item's marker, drawn on the Items layer. */
+    /** The item's marker on the Items layer (under the finger while it is dragged), over the floor's other items drawn faintly. */
     val marks: List<PlanMark>
-        get() = listOfNotNull(
-            spotHere?.let {
+        get() {
+            val roomIds = rooms.mapTo(HashSet()) { it.id }
+            val reference = others.filter { it.id != itemId && it.roomId in roomIds }.map {
+                PlanMark(
+                    MarkerTarget.ItemMark(it.id), it.roomId, BlueprintLayer.ITEMS, null,
+                    listOf(OverlayPoint(it.planXIn.toFloat(), it.planYIn.toFloat())), iconName = it.iconName, label = it.name, faint = true,
+                )
+            }
+            val own = spotHere?.let {
                 PlanMark(
                     MarkerTarget.ItemMark(itemId), it.roomId, BlueprintLayer.ITEMS, null,
-                    listOf(OverlayPoint(it.xIn.toFloat(), it.yIn.toFloat())), iconName = iconName, label = itemName,
+                    listOf(dragAt ?: OverlayPoint(it.xIn.toFloat(), it.yIn.toFloat())), iconName = iconName, label = itemName,
                 )
-            },
-        )
+            }
+            return reference + listOfNotNull(own)
+        }
 
     val layers: LayerSet get() = LayerSet(setOf(BlueprintLayer.ITEMS))
 }
@@ -74,6 +87,10 @@ sealed interface ItemPlaceEvent {
     data class PickFloor(val floorId: String) : ItemPlaceEvent
     /** A tap on the plan at ([xIn], [yIn]) plan inches: the item moves there and is saved right away. */
     data class Place(val xIn: Int, val yIn: Int) : ItemPlaceEvent
+    /** The marker is being dragged and is now at ([xIn], [yIn]) plan inches; nothing is saved yet. */
+    data class Drag(val xIn: Int, val yIn: Int) : ItemPlaceEvent
+    /** The marker was let go at ([xIn], [yIn]): the item moves there as a tap would put it, saved right away. */
+    data class Drop(val xIn: Int, val yIn: Int) : ItemPlaceEvent
     data object Remove : ItemPlaceEvent
     /** Show the walls of the item's room ([on] true) or the plan again. */
     data class WallMode(val on: Boolean) : ItemPlaceEvent
