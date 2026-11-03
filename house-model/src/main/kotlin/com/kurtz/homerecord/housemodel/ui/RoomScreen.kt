@@ -360,8 +360,9 @@ internal fun WallThumbnail(path: String?, description: String) {
     }
 }
 
+/** "North wall", or "North wall 2" when the room has more than one wall on that side. */
 @Composable
-internal fun wallName(wall: RoomWall): String {
+fun wallName(wall: RoomWall): String {
     val side = stringResource(
         when (wall.side) {
             WallSide.NORTH -> R.string.room_wall_north

@@ -157,7 +157,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             )
         }
         entry<ItemPlaceKey> { key ->
-            ItemPlaceRoute(container.homes, container.items, home.id, key.itemId, onBack = nav::pop, onEditPlan = { nav.push(PlanKey(floorId = it)) })
+            ItemPlaceRoute(
+                container.homes, container.items, home.id, key.itemId, onBack = nav::pop, onEditPlan = { nav.push(PlanKey(floorId = it)) },
+                roomWalls = container.wallPhotos::observeRoomWalls,
+            )
         }
         entry<ItemEditKey> { key ->
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)

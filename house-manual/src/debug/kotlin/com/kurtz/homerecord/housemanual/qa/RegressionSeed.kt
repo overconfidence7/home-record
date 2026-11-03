@@ -125,6 +125,10 @@ object RegressionSeed {
             val draft = ItemDraft(subtypeId = seed.subtype, roomId = seed.roomId, name = seed.name, make = seed.make, model = seed.model)
             seed.name to checkNotNull(itemRepo.save(homeId, draft)) { "seed item ${seed.name} did not save" }
         }
+        // The thermostat hangs on the living room's north wall at eye height, so Place on plan's On a wall and the 3D view have one
+        db.wallDao().listFor("qa-living").let { walls -> walls.firstOrNull { it.orientation == "N" } ?: walls.firstOrNull() }?.let { wall ->
+            itemRepo.setWallSpot(ids.getValue("Thermostat"), wall.id, 0.5f, 0.45f)
+        }
         items.filter { it.warrantyDays != null }.forEach { seed ->
             val endsOn = today.plusDays(seed.warrantyDays ?: 0)
             db.warrantyDao().upsert(

@@ -61,3 +61,46 @@ appId: com.kurtz.homerecord.housemanual
 - extendedWaitUntil:
     visible: "Not on the plan yet.*"
     timeout: 5000
+# AC-C30 position on a wall: the seed hangs the thermostat on the Living room's north wall; its Where row names the wall,
+# and On a wall moves it along that wall
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_search"
+    timeout: 5000
+- tapOn:
+    id: "hm_items_search"
+- eraseText
+- inputText: "EB-STATE6P"
+- extendedWaitUntil:
+    visible: "Thermostat"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Thermostat"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_place"
+- assertVisible: "On the plan, hangs on North wall.*"
+- tapOn:
+    id: "hm_item_detail_place"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_place_on_wall"
+    timeout: 5000
+- tapOn:
+    id: "hm_item_place_on_wall"
+- extendedWaitUntil:
+    visible: "Hangs on North wall.*Tap the wall to move it\\."
+    timeout: 5000
+- assertVisible:
+    id: "hm_item_place_wall_marker"
+- tapOn:
+    id: "hm_item_place_wall"
+    point: "25%,50%"
+- takeScreenshot: H07-on-a-wall
+- tapOn:
+    id: "hm_item_place_done"
+- extendedWaitUntil:
+    visible: "On the plan, hangs on North wall.*"
+    timeout: 5000

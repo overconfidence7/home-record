@@ -1264,12 +1264,30 @@ private fun itemPlaceState(spot: com.kurtz.homerecord.housemodel.items.ItemPlace
         loading = false, itemId = "i9", itemName = "Refrigerator",
         iconName = ItemCategory.subtype("refrigerator")?.iconName ?: "Kitchen",
         floors = floors, floorId = "f2", rooms = rooms, spot = spot,
+        walls = if (spot?.roomId == "r1") kitchenWalls else emptyList(),
     )
 
 @ThemePreviews
 @Composable
 fun ItemPlacePreview() = Frame {
     com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(com.kurtz.homerecord.housemodel.items.ItemPlace("r1", 24, 110)), {})
+}
+
+/** On a wall (AC-C30 position): the thermostat hung on the Kitchen's south wall, the wall drawn to its 14' x 8'. */
+@ThemePreviews
+@Composable
+fun ItemPlaceOnWallPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(
+        com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(
+            loading = false, itemId = "i12", itemName = "Hallway thermostat",
+            iconName = ItemCategory.subtype("thermostat")?.iconName ?: "Thermostat",
+            floors = floors, floorId = "f2", rooms = houseRooms,
+            spot = com.kurtz.homerecord.housemodel.items.ItemPlace("r1", 84, 138),
+            walls = kitchenWalls, wallMode = true, wallId = "w3",
+            hungOn = com.kurtz.homerecord.housemodel.ui.WallSpot("w3", 0.5f, 0.45f),
+        ),
+        {},
+    )
 }
 
 /** Place on plan before the item has a spot: the hint asks for a tap. */

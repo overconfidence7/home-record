@@ -568,4 +568,9 @@ fun ItemPlaceUnplacedScreenshot() = ItemPlaceUnplacedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemPlaceOnWallScreenshot() = ItemPlaceOnWallPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemPlaceEmptyFloorScreenshot() = ItemPlaceEmptyFloorPreview()

@@ -489,4 +489,9 @@
     <string name="item_place_missing_title">Item not found</string>
     <string name="item_place_missing_body">This item was deleted.</string>
     <string name="item_place_back">Go back</string>
+    <string name="item_place_on_wall">On a wall</string>
+    <string name="item_place_back_to_plan">Back to plan</string>
+    <string name="item_place_wall_hint">%1$s: tap the wall where this item hangs.</string>
+    <string name="item_place_wall_hint_set">Hangs on %1$s. Tap the wall to move it.</string>
+    <string name="item_place_wall_canvas">%1$s. Tap where the item hangs.</string>
 </resources>

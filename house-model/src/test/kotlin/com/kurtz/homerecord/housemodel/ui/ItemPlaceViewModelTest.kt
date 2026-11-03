@@ -16,6 +16,8 @@ import com.kurtz.homerecord.housemodel.items.ItemDraft
 import com.kurtz.homerecord.housemodel.items.ItemPlace
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.walls.WallPhotoRepository
+import com.kurtz.homerecord.housemodel.walls.WallSide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,7 +84,8 @@ class ItemPlaceViewModelTest {
     }
 
     private fun vm(h: Home, itemId: String, saved: SavedStateHandle = SavedStateHandle()): ItemPlaceViewModel {
-        val vm = ItemPlaceViewModel(homes, items, h.id, itemId, saved).also { created += it }
+        val walls = WallPhotoRepository(db)
+        val vm = ItemPlaceViewModel(homes, items, h.id, itemId, saved, roomWalls = walls::observeRoomWalls).also { created += it }
         // Collected in the ViewModel's own scope, so the test block can finish; tearDown cancels it.
         collectors += vm.viewModelScope.launch { vm.state.collect {} }
         return vm
@@ -151,5 +154,54 @@ class ItemPlaceViewModelTest {
         vm.settled { it.rooms.isNotEmpty() }
         items.delete(id)
         assertThat(vm.settled { it.missing }.spot).isNull()
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun onAWallHangsTheItemOnThePickedWallAndSurvivesProcessDeath() = test {
+        val h = home()
+        val id = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "thermostat", roomId = "k", name = "Thermostat")))
+        val saved = SavedStateHandle()
+        val vm = vm(h, id, saved)
+        val open = vm.settled { it.walls.isNotEmpty() }
+        assertThat(open.canHang).isTrue()
+        assertThat(open.wallMode).isFalse()
+        assertThat(open.walls).hasSize(4)
+
+        vm.onEvent(ItemPlaceEvent.WallMode(true))
+        val west = open.walls.single { it.side == WallSide.WEST }
+        vm.onEvent(ItemPlaceEvent.PickWall(west.id))
+        val picking = vm.settled { it.wallMode && it.wall?.id == west.id }
+        assertThat(picking.wallSpotHere).isNull()
+
+        vm.onEvent(ItemPlaceEvent.HangOnWall(west.id, 0.25f, 0.4f))
+        val hung = vm.settled { it.hungOn != null }
+        assertThat(hung.hungOn?.wallId).isEqualTo(west.id)
+        assertThat(hung.wallSpotHere?.x).isEqualTo(0.25f)
+        assertThat(hung.wallSpotHere?.y).isEqualTo(0.4f)
+        // The plan spot sits just inside the west wall (x = 0) for the blueprint.
+        assertThat(hung.spot?.roomId).isEqualTo("k")
+        assertThat(hung.spot?.xIn).isEqualTo(6)
+        assertThat(items.get(id)?.wallId).isEqualTo(west.id)
+
+        val again = vm(h, id, SavedStateHandle(saved.keys().associateWith { saved.get<Any>(it) }))
+        assertThat(again.settled { it.wallMode && it.walls.isNotEmpty() }.wall?.id).isEqualTo(west.id)
+
+        // A tap on the plan takes it off the wall.
+        vm.onEvent(ItemPlaceEvent.WallMode(false))
+        vm.onEvent(ItemPlaceEvent.Place(40, 40))
+        assertThat(vm.settled { it.hungOn == null && it.spot?.xIn == 40 }.wallMode).isFalse()
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun anItemWithNoRoomOnTheShownFloorCannotHang() = test {
+        val h = home()
+        val id = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "refrigerator", roomId = "k", name = "Refrigerator")))
+        val vm = vm(h, id)
+        vm.settled { it.walls.isNotEmpty() }
+        vm.onEvent(ItemPlaceEvent.WallMode(true))
+        vm.onEvent(ItemPlaceEvent.PickFloor(h.basement))
+        val other = vm.settled { it.floorId == h.basement && it.rooms.isNotEmpty() }
+        assertThat(other.canHang).isFalse()
+        assertThat(other.wallMode).isFalse()
     }
 }
