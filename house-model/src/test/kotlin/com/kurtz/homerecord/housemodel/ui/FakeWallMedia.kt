@@ -31,10 +31,13 @@ class FakeWallMedia : MediaFiles {
 /** [WallTextureMaker] that records what it was asked to straighten. */
 class FakeTextureMaker(var size: TextureSize? = TextureSize(4032, 3024), var fails: Boolean = false) : WallTextureMaker {
     val made = mutableListOf<Triple<String, WallOutline, Pair<Int, Int>>>()
+    /** When set, [make] waits for it, so a test can act while the texture is being made. */
+    var gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
     override suspend fun photoSize(path: String): TextureSize? = size
 
     override suspend fun make(path: String, outline: WallOutline, lengthIn: Int, heightIn: Int): String? {
+        gate?.await()
         if (fails) return null
         made += Triple(path, outline, lengthIn to heightIn)
         return path.removeSuffix(".jpg") + "-wall.jpg"

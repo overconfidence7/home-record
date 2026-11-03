@@ -123,7 +123,8 @@ class WallOverlaysViewModel(
     }
 
     private suspend fun refreshPicture() {
-        val photo = photos[_state.value.stage]
+        val stage = _state.value.stage
+        val photo = photos[stage]
         val picture = when {
             photo == null -> null
             photo.texturePath != null -> WallPicture(photo.texturePath, null, wallAspect())
@@ -132,6 +133,8 @@ class WallOverlaysViewModel(
                 WallPicture(photo.originalPath, photo.outline, size?.let { it.width.toFloat() / it.height.coerceAtLeast(1) } ?: (4f / 3f))
             }
         }
+        // A later stage switch or photo list may have finished first while this one read the photo's size (R10).
+        if (photo != photos[_state.value.stage] || stage != _state.value.stage) return
         _state.update { it.copy(picture = picture) }
     }
 

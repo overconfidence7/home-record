@@ -8,6 +8,8 @@ import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** What a new overlay or an edit sets (AC-C26). */
 data class OverlayDraft(
@@ -41,6 +43,7 @@ class OverlayRepository(
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     private val dao get() = db.overlayDao()
+    private val moves = Mutex()
 
     fun observeForWall(wallId: String): Flow<List<Overlay>> = dao.observeForWall(wallId).map { rows -> rows.map { it.toOverlay() } }
 
@@ -95,14 +98,15 @@ class OverlayRepository(
     }
 
     /** Point [index] dragged to [to] (AC-C28). False when the overlay or the point is gone. */
-    suspend fun movePoint(id: String, index: Int, to: OverlayPoint): Boolean {
+    suspend fun movePoint(id: String, index: Int, to: OverlayPoint): Boolean = moves.withLock {
+        // One move at a time: two drags lifting together on one overlay each read the row before writing it (R10).
         val row = dao.get(id) ?: return false
         val points = OverlayPoints.decode(row.pointsJson)
         if (index !in points.indices) return false
         val moved = points.toMutableList().also { it[index] = if (row.wallId != null) clamp(to) else to }
         dao.upsert(row.copy(pointsJson = OverlayPoints.encode(moved), updatedAt = now()))
         onChange(ENTITY, id)
-        return true
+        true
     }
 
     /** Soft deletes the overlay (AC-C28). */

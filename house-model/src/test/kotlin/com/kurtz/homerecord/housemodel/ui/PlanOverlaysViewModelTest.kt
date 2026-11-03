@@ -243,4 +243,22 @@ class PlanOverlaysViewModelTest {
         assertThat(third.state.value.overlayForm?.label).isEqualTo("Kitchen circuit")
         assertThat(third.state.value.overlayForm?.points).hasSize(2)
     }
+
+    // R10: a run being drawn on one floor is dropped when another floor is picked, never filed under its rooms.
+    @Test
+    @AcceptanceCriterion("AC-C25")
+    fun switchingFloorsWhileDrawingDropsTheRun() = test {
+        val model = vm()
+        loaded(model)
+        model.onEvent(PlanEditorEvent.SetOverlayMode(true))
+        model.overlay(WallOverlaysEvent.StartDrawing)
+        model.overlay(WallOverlaysEvent.AddPoint(OverlayPoint(300f, 72f)))
+        assertThat(model.state.value.drawing).isNotNull()
+        model.onEvent(PlanEditorEvent.SelectFloor(upperFloor))
+        withTimeout(10_000) { model.state.first { it.floorId == upperFloor && it.rooms.isNotEmpty() } }
+        assertThat(model.state.value.drawing).isNull()
+        model.overlay(WallOverlaysEvent.FinishDrawing)
+        assertThat(model.state.value.overlayForm).isNull()
+        assertThat(stored()).isEmpty()
+    }
 }

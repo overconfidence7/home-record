@@ -129,6 +129,24 @@ class WallOutlineViewModelTest {
         assertThat(media.discarded).isEmpty()
     }
 
+    // R10: Back pressed while Use is still straightening the photo must not delete the photo being saved.
+    @Test
+    @AcceptanceCriterion("AC-C18")
+    fun backWhileUseIsSavingKeepsThePhotoAndTheSaveFinishes() = test {
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        maker.gate = gate
+        val model = vm()
+        loaded(model)
+        model.onEvent(WallOutlineEvent.Use)
+        assertThat(model.state.value.saving).isTrue()
+        model.onEvent(WallOutlineEvent.Back)
+        assertThat(media.discarded).isEmpty()
+        gate.complete(Unit)
+        withTimeout(10_000) { model.state.first { it.done } }
+        assertThat(wallPhotos.byStage(northWall).getValue(WallStage.FINISHED).originalPath).isEqualTo("media/7.jpg")
+        assertThat(media.discarded).isEmpty()
+    }
+
     @Test
     fun crossedCornersAreNotSaved() = test {
         val model = vm()

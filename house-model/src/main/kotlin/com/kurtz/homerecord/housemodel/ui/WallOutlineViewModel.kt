@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 
 /**
@@ -65,8 +66,9 @@ class WallOutlineViewModel(
             WallOutlineEvent.DragEnd -> _state.update { it.copy(dragging = null) }
             WallOutlineEvent.Reset -> setOutline(WallOutline.Initial, dragging = null)
             WallOutlineEvent.Use -> use()
-            // The route leaves the screen; the photo was taken only for this outline, so it goes too.
-            WallOutlineEvent.Back -> if (!_state.value.done) media.discard(photoPath)
+            // The route leaves the screen; the photo was taken only for this outline, so it goes too. Not while Use is
+            // saving it: the save finishes on its own (R10) and the photo is the wall's.
+            WallOutlineEvent.Back -> if (!_state.value.done && !_state.value.saving) media.discard(photoPath)
         }
     }
 
@@ -93,7 +95,7 @@ class WallOutlineViewModel(
             return
         }
         _state.update { it.copy(saving = true, error = null) }
-        viewModelScope.launch {
+        viewModelScope.launch(NonCancellable) {
             val texture = maker.make(photoPath, s.outline, wall.lengthIn, wall.heightIn)
             if (texture == null) {
                 _state.update { it.copy(saving = false, error = WallOutlineError.TextureFailed) }

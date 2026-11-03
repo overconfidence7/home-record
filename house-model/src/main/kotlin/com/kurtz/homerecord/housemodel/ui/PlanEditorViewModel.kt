@@ -317,6 +317,13 @@ class PlanEditorViewModel(
     private fun selectedId(): String? = _state.value.selectedId?.takeIf { id -> editor.rooms.any { it.id == id } }
 
     private suspend fun loadFloor(floor: FloorSummary) {
+        // A run being drawn belongs to the floor it was started on: switching floors drops it (R10), or Save would
+        // file it under a room of the new floor.
+        val previous = _state.value.floorId
+        if (previous != null && previous != floor.id) {
+            if (_state.value.drawing != null) setDrawing(null)
+            if (_state.value.overlaySelectedId != null) selectOverlay(null)
+        }
         val plan = repo.loadPlan(floor.id)
         editor = PlanEditor(plan.placed, snapper)
         saved[FLOOR] = floor.id
