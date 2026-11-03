@@ -6,6 +6,8 @@ import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.data.WallPhotoEntity
 import android.util.Log
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -158,6 +160,19 @@ class WallPhotoRepository(
             db.wallPhotoDao().upsert(updated)
             onChange(ENTITY, id)
             upload(updated)
+        }
+    }
+
+    /**
+     * Follows a plan save or floor delete (R10a, R10d): makes the recut photos' straightened copies again, then deletes
+     * the files the write dropped that no live row uses. The sweep waits for the remake so a new copy is never written
+     * beside a file still being cleaned up, and runs even when a remake fails (the walls show the photo meanwhile).
+     */
+    suspend fun afterPlanChange(changes: PlanPhotoChanges, maker: WallTextureMaker) {
+        try {
+            remakeTextures(changes.recutIds, maker)
+        } finally {
+            if (changes.droppedFiles.isNotEmpty()) withContext(NonCancellable) { sweep(changes.droppedFiles) }
         }
     }
 

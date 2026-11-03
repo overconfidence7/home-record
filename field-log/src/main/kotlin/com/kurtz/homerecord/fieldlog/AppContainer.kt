@@ -426,7 +426,7 @@ class AppContainer(private val app: Application) {
 
     val homes by lazy { com.kurtz.homerecord.housemodel.HomeRepository(
             db, app.resources::getString, onChange = ::recordChange,
-            onWallPhotosRecut = { ids -> scope.launch { wallPhotos.remakeTextures(ids, wallTextures) } },
+            onPlanPhotosChanged = { changes -> scope.launch { wallPhotos.afterPlanChange(changes, wallTextures) } },
         )
     }
 

@@ -107,7 +107,7 @@ class AppContainer(app: Application) {
 
     val homes = HomeRepository(
         db, app.resources::getString, onChange = { entity, id -> recordHomeChange(entity, id) },
-        onWallPhotosRecut = { ids -> scope.launch { wallPhotos.remakeTextures(ids, wallTextures) } },
+        onPlanPhotosChanged = { changes -> scope.launch { wallPhotos.afterPlanChange(changes, wallTextures) } },
     )
 
     val items = ItemRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }

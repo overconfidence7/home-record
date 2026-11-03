@@ -776,3 +776,12 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   on the plan, the default for drawn rectangles) or its second (counter-clockwise, e.g. after a corner is dragged
   across). `PlanMeshBuilder` and both reshape carriers (`WallPhotoCarrier`, `WallOverlayCarrier`) go through it. The
   2D wall screens already show the photo as taken, so stored data needs no migration.
+
+## 2026-11-03 R10d: plan saves hand on the photo files they drop
+
+- A plan save or floor delete returns `PlanPhotoChanges` (recut photo ids plus dropped files) through
+  `HomeRepository.onPlanPhotosChanged`; `WallPhotoRepository.afterPlanChange` remakes the straightened copies first and
+  then sweeps the dropped files through `ReplacedFiles` (only files no live wall photo or overlay still uses). Besides
+  the recut copies the task named, the same path now covers the photos of walls a reshape removed and the wall and
+  overlay photos of rooms and floors deleted from the plan, which leaked the same way. The sweep runs even when a remake
+  fails: the dropped copy is wrong for the new outline either way and no row points at it.

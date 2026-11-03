@@ -383,7 +383,7 @@ class HomeRepositoryTest {
     @Test fun aSplitWallsPhotoIsCutAtTheNewCornerAndBothPartsGetTheirOwnTexture() = runTest {
         val recut = mutableListOf<String>()
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onChange = { entity, id -> changes += "$entity/$id" }, onWallPhotosRecut = { recut += it })
+        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onChange = { entity, id -> changes += "$entity/$id" }, onPlanPhotosChanged = { recut += it.recutIds })
         val id = homes.createHome(NewHome("Maple St", "", HouseType.COLONIAL, Foundation.BASEMENT, false))
         val main = homes.observeFloors(id).first().single { it.name == "Main" }
         val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
@@ -435,5 +435,109 @@ class HomeRepositoryTest {
         assertThat(o.topLeft.x).isWithin(1e-4f).of(0.1f)
         assertThat(o.topRight.x).isWithin(1e-4f).of(0.9f)
         assertThat(recut).containsExactly(back.id)
+    }
+
+    // R10d: a plan save hands on the files its rows stopped pointing at; only the ones no live row uses are deleted.
+    @AcceptanceCriterion("AC-C19")
+    @Test fun aRecutPhotosOldStraightenedCopyIsDeletedAfterTheRemake() = runTest {
+        val handed = mutableListOf<com.kurtz.homerecord.housemodel.walls.PlanPhotoChanges>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onPlanPhotosChanged = { handed += it })
+        val deleted = mutableListOf<String>()
+        val photos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
+            db, now = { clock++ }, sweep = com.kurtz.homerecord.housemodel.walls.ReplacedFiles(db) { deleted += it }::sweep,
+        )
+        val id = homes.createHome(NewHome("Maple St", "", HouseType.COLONIAL, Foundation.BASEMENT, false))
+        val main = homes.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        homes.savePlan(main.id, listOf(kitchen))
+        assertThat(handed).isEmpty()
+        val north = db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id
+        db.wallPhotoDao().upsert(
+            com.kurtz.homerecord.core.data.WallPhotoEntity(
+                id = "wp1", wallId = north, originalPath = "/m/n.jpg", texturePath = "/m/n-wall.jpg",
+                cornersJson = com.kurtz.homerecord.housemodel.walls.WallOutline.Initial.encode(), takenAt = 1, createdAt = 1, updatedAt = 1,
+            ),
+        )
+
+        // Split: the kept part is recut (its old copy dropped), the new part shares the photo as taken.
+        homes.savePlan(main.id, listOf(kitchen.withCornerOnEdge(0, Pt(72, 0))))
+        val split = handed.single()
+        assertThat(split.droppedFiles).containsExactly("/m/n-wall.jpg")
+        assertThat(split.recutIds).hasSize(2)
+        val maker = com.kurtz.homerecord.housemodel.ui.FakeTextureMaker()
+        photos.afterPlanChange(split, maker)
+        assertThat(deleted).containsExactly("/m/n-wall.jpg")
+        val newCopies = split.recutIds.map { checkNotNull(checkNotNull(db.wallPhotoDao().get(it)).texturePath) }
+
+        // Merge: the removed part's photo row goes; the shared photo stays, both parts' new copies go.
+        handed.clear()
+        deleted.clear()
+        homes.savePlan(main.id, listOf(kitchen))
+        val merge = handed.single()
+        assertThat(merge.droppedFiles).containsAtLeastElementsIn(newCopies)
+        photos.afterPlanChange(merge, maker)
+        // The kept row's copy is made again under its own name (photo + row id), so that file is live and stays;
+        // the removed part's copy and nothing else is deleted.
+        val kept = db.wallPhotoDao().listFor(db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id).single()
+        val remade = checkNotNull(kept.texturePath)
+        assertThat(remade).isIn(newCopies)
+        assertThat(deleted).containsExactlyElementsIn(newCopies - remade)
+        assertThat(deleted).doesNotContain("/m/n.jpg")
+    }
+
+    @AcceptanceCriterion("AC-C19")
+    @Test fun aFailedRemakeStillDeletesTheDroppedCopy() = runTest {
+        val deleted = mutableListOf<String>()
+        val photos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
+            db, now = { clock++ }, sweep = com.kurtz.homerecord.housemodel.walls.ReplacedFiles(db) { deleted += it }::sweep,
+        )
+        val changes = com.kurtz.homerecord.housemodel.walls.PlanPhotoChanges(listOf("missing-row"), listOf("/m/old-wall.jpg"))
+
+        photos.afterPlanChange(changes, com.kurtz.homerecord.housemodel.ui.FakeTextureMaker(fails = true))
+
+        assertThat(deleted).containsExactly("/m/old-wall.jpg")
+    }
+
+    @AcceptanceCriterion("AC-C17")
+    @Test fun removingARoomOrFloorHandsOnItsWallAndOverlayPhotoFiles() = runTest {
+        val handed = mutableListOf<com.kurtz.homerecord.housemodel.walls.PlanPhotoChanges>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onPlanPhotosChanged = { handed += it })
+        val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, now = { clock++ })
+        val id = homes.createHome(NewHome("Maple St", "", HouseType.COLONIAL, Foundation.BASEMENT, false))
+        val main = homes.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        val pantry = PlanRoom.rectangle("p1", "Pantry", "OTHER", 144, 0, 48, 120)
+        homes.savePlan(main.id, listOf(kitchen, pantry))
+        val pantryWall = db.wallDao().listFor("p1").first().id
+        db.wallPhotoDao().upsert(
+            com.kurtz.homerecord.core.data.WallPhotoEntity(
+                id = "wp-p", wallId = pantryWall, originalPath = "/m/p.jpg", texturePath = "/m/p-wall.jpg",
+                cornersJson = com.kurtz.homerecord.housemodel.walls.WallOutline.Initial.encode(), takenAt = 1, createdAt = 1, updatedAt = 1,
+            ),
+        )
+        overlays.addOnWall(
+            id, pantryWall,
+            com.kurtz.homerecord.housemodel.overlays.OverlayDraft(
+                com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.5f, 0.5f)),
+                com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, photoPath = "/m/gas.jpg",
+            ),
+        )
+
+        homes.savePlan(main.id, listOf(kitchen))
+        assertThat(handed.single().droppedFiles).containsExactly("/m/p.jpg", "/m/p-wall.jpg", "/m/gas.jpg")
+        assertThat(handed.single().recutIds).isEmpty()
+
+        handed.clear()
+        val kitchenWall = db.wallDao().listFor("k1").first().id
+        db.wallPhotoDao().upsert(
+            com.kurtz.homerecord.core.data.WallPhotoEntity(
+                id = "wp-k", wallId = kitchenWall, originalPath = "/m/k.jpg", texturePath = null,
+                cornersJson = com.kurtz.homerecord.housemodel.walls.WallOutline.Initial.encode(), takenAt = 1, createdAt = 1, updatedAt = 1,
+            ),
+        )
+        homes.deleteFloor(main.id)
+        assertThat(handed.single().droppedFiles).containsExactly("/m/k.jpg")
     }
 }
