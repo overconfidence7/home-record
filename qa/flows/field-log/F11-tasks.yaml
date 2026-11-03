@@ -171,7 +171,10 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible:
       id: fl_today_sync
-      text: "Everything is synced"
+    timeout: 20000
+# the chip's text sits on a child of the tagged node, so match it by text alone (as F16 does)
+- extendedWaitUntil:
+    visible: "Everything is synced"
     timeout: 60000
 - tapOn:
     id: fl_today_sync
