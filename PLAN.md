@@ -329,6 +329,14 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T055a: blueprint layer marks open their record on tap (overlay: its wall with it picked; item: its page), as the 3D markers do, and room names keep clear of marks the way they keep clear of stairs
 - [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
 
+## N Nate's corrections (added 2026-11-03 after the decisions pass; do these after T055 and V4, before M5)
+
+- [ ] N001: Reverse CR2n2: when a plan edit removes a wall (corner deleted, two sides made a diagonal), its wall photos and wall overlays are kept on the room with no wall (`wallId` cleared, room kept), never deleted; the room page lists them under "Photos of removed walls" with the stage and date; a later wall in the same place does not reclaim them. Migration if the delete already ran in a released schema; `[unit]` tests for the plan recut path (R10d sweep must stop dropping them) (acceptance: AC-C17, AC-C18)
+- [ ] N002: Company settings readable by every member: a `GET /company/settings` (or the existing profile route) that returns the clock rules (require GPS, far-from-job distance, time zone) to Crew, Lead and Sub while keeping the rest of the company profile Owner/Office only; the clock uses them for every role so AC-F18 and AC-F9 hold for crew; vitest for the route and `[unit]` tests for the clock (acceptance: AC-F9, AC-F18)
+- [ ] N003: Crew and Sub may delete their own job photos: `authorMemberId` on photo (Room version bump, migration backfilling null), delete allowed when author = self or role is Owner/Office/the job's Lead, the same rule in backend/src/sync/policy.ts; photo row shows the author; `[unit]` and vitest (acceptance: AC-F3)
+- [ ] N004: Tasks private on the server: policy.ts `visibleRow` sends Crew and Sub only tasks assigned to them (Owner, Office and Leads still get every task of their jobs); a Lead's on-site handout reaches its recipient because it is assigned to them; the app's client-side hide stays as a second guard; vitest and `[unit]` (acceptance: AC-F3)
+- [ ] N005: Housekeeping Nate approved on 2026-11-03: reword CLAUDE.md Definition of done item 2 per CR2m ("the newest commit that changes anything other than REVIEW.md, PROGRESS.md and qa/last-tested.txt"); change `npx wrangler dev` to `npm run dev` in CLAUDE.md Commands and qa/nightly-qa-prompt.md step 4; add the `x-<screen>.yaml` rule and the AC-comment rule to qa/README.md; add `lifecycle-viewmodel-compose` and `room-testing` (test-only) to CLAUDE.md's approved table
+
 ## M5 Field Log complete
 
 - [ ] T056: Change orders: entity, `MoneyMath` `[unit]`, FL-ChangeOrder form with voice description, photos, line items, total (acceptance: AC-F37)
