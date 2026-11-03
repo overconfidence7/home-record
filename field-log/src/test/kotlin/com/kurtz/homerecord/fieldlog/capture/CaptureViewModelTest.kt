@@ -26,7 +26,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
@@ -79,7 +78,8 @@ class CaptureViewModelTest {
     @After fun tearDown() {
         // The photo observer still collecting when the database closes would throw into the next test class.
         runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
-        appScope.cancel()
+        // A photo save still writing on the app scope would hit the closed database and throw into a later test class.
+        runBlocking { appScope.coroutineContext[Job]?.cancelAndJoin() }
         db.close()
         Dispatchers.resetMain()
     }
