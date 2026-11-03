@@ -71,6 +71,8 @@ interface WallPhotoDao {
     @Query("UPDATE wall_photo SET originalPath = :path WHERE id = :id") suspend fun setOriginalPath(id: String, path: String)
     /** Device-local: where this phone keeps the downloaded straightened copy. */
     @Query("UPDATE wall_photo SET texturePath = :path WHERE id = :id") suspend fun setTexturePath(id: String, path: String)
+    /** How many live photos still use the file at [path], as taken or straightened (two parts of a split wall share one). */
+    @Query("SELECT COUNT(*) FROM wall_photo WHERE deletedAt IS NULL AND (originalPath = :path OR texturePath = :path)") suspend fun countUsing(path: String): Int
 }
 
 @Dao
@@ -103,6 +105,8 @@ interface OverlayDao {
     @Query("SELECT * FROM overlay WHERE wallId = :wallId AND deletedAt IS NULL ORDER BY createdAt") fun observeForWall(wallId: String): Flow<List<OverlayEntity>>
     @Query("SELECT * FROM overlay WHERE roomId = :roomId AND deletedAt IS NULL ORDER BY createdAt") fun observeForRoom(roomId: String): Flow<List<OverlayEntity>>
     @Query("SELECT * FROM overlay WHERE itemId = :itemId AND deletedAt IS NULL ORDER BY createdAt") fun observeForItem(itemId: String): Flow<List<OverlayEntity>>
+    /** How many live overlays still show the photo at [path]. */
+    @Query("SELECT COUNT(*) FROM overlay WHERE deletedAt IS NULL AND photoPath = :path") suspend fun countUsing(path: String): Int
 }
 
 @Dao

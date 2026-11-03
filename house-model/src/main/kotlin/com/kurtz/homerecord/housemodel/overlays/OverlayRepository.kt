@@ -34,13 +34,15 @@ sealed interface OverlaySave {
 /**
  * Overlays on walls and the floor plan (AC-C25..C28). Wall overlays keep their points in wall space, clamped to 0..1, so
  * they stay put whichever stage's photo is shown (AC-C27); plan overlays keep plan inches. Edits move points and change
- * fields; delete is soft so sync carries it. [onChange] feeds the sync outbox after every write.
+ * fields; delete is soft so sync carries it. [onChange] feeds the sync outbox after every write. [sweep] gets the photo
+ * an edit replaced or removed, or a deleted overlay's photo, to delete the file once nothing uses it (R10c).
  */
 class OverlayRepository(
     private val db: HomeRecordDatabase,
     private val source: String = Sources.HOUSE_MANUAL,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    private val sweep: suspend (paths: List<String?>) -> Unit = {},
 ) {
     private val dao get() = db.overlayDao()
     private val moves = Mutex()
@@ -94,6 +96,7 @@ class OverlayRepository(
             updatedAt = now(),
         ))
         onChange(ENTITY, id)
+        if (row.photoPath != null && row.photoPath != draft.photoPath) sweep(listOf(row.photoPath))
         return OverlaySave.Saved(id)
     }
 
@@ -109,11 +112,12 @@ class OverlayRepository(
         true
     }
 
-    /** Soft deletes the overlay (AC-C28). */
+    /** Soft deletes the overlay (AC-C28) and its photo file unless something else shows it. */
     suspend fun delete(id: String): Boolean {
-        dao.get(id) ?: return false
+        val row = dao.get(id) ?: return false
         dao.softDelete(id, now())
         onChange(ENTITY, id)
+        if (row.photoPath != null) sweep(listOf(row.photoPath))
         return true
     }
 

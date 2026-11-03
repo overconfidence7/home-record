@@ -436,8 +436,15 @@ class AppContainer(private val app: Application) {
     val wallPhotos by lazy {
         com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
             db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange,
-            upload = ::uploadWallPhoto, fetchMissing = { mediaDownloads.wallPhotos(it) },
+            upload = ::uploadWallPhoto, fetchMissing = { mediaDownloads.wallPhotos(it) }, sweep = { replacedFiles.sweep(it) },
         )
+    }
+
+    /** Deletes the files of replaced or removed wall and overlay photos once no live row uses them (R10c). */
+    private val replacedFiles by lazy {
+        com.kurtz.homerecord.housemodel.walls.ReplacedFiles(db) { path ->
+            kotlinx.coroutines.withContext(Dispatchers.IO) { media.discard(path) }
+        }
     }
 
     private suspend fun uploadWallPhoto(row: com.kurtz.homerecord.core.data.WallPhotoEntity) {
@@ -448,7 +455,10 @@ class AppContainer(private val app: Application) {
     }
 
     /** Pipes, wires and boxes the crew draws on walls and the plan (AC-C25..C28). */
-    val overlays by lazy { com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange) }
+    val overlays by lazy { com.kurtz.homerecord.housemodel.overlays.OverlayRepository(
+            db, com.kurtz.homerecord.core.data.Sources.FIELD_LOG, onChange = ::recordChange, sweep = { replacedFiles.sweep(it) },
+        )
+    }
 
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 

@@ -38,6 +38,9 @@ fun WallPhotoEntity.toWallPhoto(): WallPhoto =
  * Files to the cloud (T048d): [upload] queues a new photo's files for R2 (the upload records their keys on the row);
  * [fetchMissing] brings the files of photos taken on another phone onto this one, and runs whenever the room page's
  * photos change, after the page has its rows, so a wall shows its plain tile until the picture arrives.
+ *
+ * [sweep] gets the files of photos replaced or deleted here, after the write, to delete the ones no live row still uses
+ * ([ReplacedFiles], R10c).
  */
 class WallPhotoRepository(
     private val db: HomeRecordDatabase,
@@ -46,6 +49,7 @@ class WallPhotoRepository(
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
     private val upload: suspend (WallPhotoEntity) -> Unit = {},
     private val fetchMissing: suspend (List<WallPhotoEntity>) -> Unit = {},
+    private val sweep: suspend (paths: List<String?>) -> Unit = {},
 ) {
     /** The wall's photos keyed by stage, the newest at each stage. */
     fun observeByStage(wallId: String): Flow<Map<WallStage, WallPhoto>> = db.wallPhotoDao().observeFor(wallId).map(::latestByStage)
@@ -97,7 +101,8 @@ class WallPhotoRepository(
 
     /**
      * Saves the photo at [originalPath] outlined by [outline] and straightened into [texturePath] as the wall's [stage]
-     * picture; any earlier photo of that wall at that stage is removed. Returns the new photo's id, or null when the wall
+     * picture; any earlier photo of that wall at that stage is removed, and its files with it unless another live photo
+     * shares them. Returns the new photo's id, or null when the wall
      * does not exist (it was deleted while the camera was open).
      */
     suspend fun save(
@@ -123,6 +128,7 @@ class WallPhotoRepository(
             db.wallPhotoDao().softDelete(it.id, at)
             onChange(ENTITY, it.id)
         }
+        if (replaced.isNotEmpty()) sweep(replaced.flatMap { listOf(it.originalPath, it.texturePath) })
         return id
     }
 
@@ -155,10 +161,12 @@ class WallPhotoRepository(
         }
     }
 
+    /** Deletes the photo, and its files unless another live photo shares them. */
     suspend fun delete(id: String) {
-        db.wallPhotoDao().get(id) ?: return
+        val row = db.wallPhotoDao().get(id) ?: return
         db.wallPhotoDao().softDelete(id, now())
         onChange(ENTITY, id)
+        sweep(listOf(row.originalPath, row.texturePath))
     }
 
     companion object {

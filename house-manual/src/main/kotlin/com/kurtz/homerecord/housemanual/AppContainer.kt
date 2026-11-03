@@ -112,10 +112,19 @@ class AppContainer(app: Application) {
 
     val items = ItemRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
-    val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
+    /** Deletes the files of replaced or removed wall and overlay photos once no live row uses them (R10c). */
+    private val replacedFiles = com.kurtz.homerecord.housemodel.walls.ReplacedFiles(db) { path ->
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { media.discard(path) }
+    }
+
+    val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
+        db, onChange = { entity, id -> recordHomeChange(entity, id) }, sweep = replacedFiles::sweep,
+    )
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()
     /** Pipes, wires and boxes drawn on walls and the plan (AC-C25..C28). */
-    val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
+    val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(
+        db, onChange = { entity, id -> recordHomeChange(entity, id) }, sweep = replacedFiles::sweep,
+    )
 
     val search = com.kurtz.homerecord.housemodel.search.SearchRepository(
         db, overlayKindName = { app.resources.getString(it.nameRes) }, subtypeName = items::subtypeName,
