@@ -80,6 +80,14 @@ class WallPhotoRepository(
         return combine(perRoom) { rooms -> rooms.flatMap { it.toList() }.toMap() }.distinctUntilChanged()
     }
 
+    /** Each wall of [roomIds] by id with its room and plan edge, so wall overlays find their face in 3D (AC-C23). */
+    fun observeWallKeys(roomIds: List<String>): Flow<Map<String, WallKey>> {
+        if (roomIds.isEmpty()) return flowOf(emptyMap())
+        val perRoom = roomIds.distinct().map { roomId -> db.wallDao().observeFor(roomId) }
+        return combine(perRoom) { rooms -> rooms.flatMap { it.toList() }.associate { it.id to WallKey(it.roomId, it.edgeIndex) } }
+            .distinctUntilChanged()
+    }
+
     /**
      * Passes [photos] on unchanged and, after each list, fetches the missing files of the photos the page shows (the
      * newest per wall and stage). A fetched file changes the row, the list comes again and the picture appears; a newer

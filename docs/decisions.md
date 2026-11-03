@@ -785,3 +785,8 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   the recut copies the task named, the same path now covers the photos of walls a reshape removed and the wall and
   overlay photos of rooms and floors deleted from the plan, which leaked the same way. The sweep runs even when a remake
   fails: the dropped copy is wrong for the new outline either way and no row points at it.
+
+## 2026-11-03 — 3D markers (T053b)
+- Wall overlays show in 3D at every stage, not only the stage they were recorded at: the point of a rough-in pipe is to see it behind the finished wall. Markers use the light layer palette in both themes because they sit on the scene's pale wall tints, not on the app surface.
+- One Filament node per marker (not batched) so a tap can name the marker; homes carry tens of overlays, not thousands. TalkBack reaches markers through custom "Open …" actions on the scene, since a 3D node cannot be focused.
+- Field Log has no item page yet (T062): an item marker opens the room it stands in.

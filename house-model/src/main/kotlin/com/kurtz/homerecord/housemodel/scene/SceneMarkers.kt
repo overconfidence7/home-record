@@ -16,7 +16,7 @@ sealed interface MarkerTarget {
 }
 
 /** An installed item with a spot on the plan (AC-C30 position): plan inches, on its room's floor. */
-data class ItemSpot(val id: String, val roomId: String, val planXIn: Int, val planYIn: Int)
+data class ItemSpot(val id: String, val roomId: String, val planXIn: Int, val planYIn: Int, val name: String = "")
 
 /**
  * One overlay or item placed in the 3D scene (AC-C23), in world meters like the mesh. A run has two or more [points],
@@ -31,6 +31,8 @@ data class SceneMarker(
     val points: List<ScenePoint>,
     val facing: ScenePoint,
     val onWall: Boolean,
+    /** What the marker is called: the overlay's label (blank when it has none) or the item's name. */
+    val label: String = "",
 ) {
     val isRun: Boolean get() = points.size >= 2
 }
@@ -63,17 +65,17 @@ object SceneMarkers {
                 val key = walls[wallId] ?: continue
                 val room = scene.rooms[key.roomId] ?: continue
                 val face = WallFaceFrame.of(room, key.edgeIndex, wallThicknessIn) ?: continue
-                out += SceneMarker(target, room.id, o.kind.layer, o.kind, o.points.map { face.at(it.x, it.y) }, face.inward, onWall = true)
+                out += SceneMarker(target, room.id, o.kind.layer, o.kind, o.points.map { face.at(it.x, it.y) }, face.inward, onWall = true, label = o.label)
             } else {
                 val room = o.roomId?.let { scene.rooms[it] } ?: continue
                 val pts = o.points.map { floorPoint(scene, room, it.x, it.y) }
-                out += SceneMarker(target, room.id, o.kind.layer, o.kind, pts, UP, onWall = false)
+                out += SceneMarker(target, room.id, o.kind.layer, o.kind, pts, UP, onWall = false, label = o.label)
             }
         }
         for (item in items) {
             val room = scene.rooms[item.roomId] ?: continue
             val at = floorPoint(scene, room, item.planXIn.toFloat(), item.planYIn.toFloat())
-            out += SceneMarker(MarkerTarget.ItemMark(item.id), room.id, BlueprintLayer.ITEMS, null, listOf(at), UP, onWall = false)
+            out += SceneMarker(MarkerTarget.ItemMark(item.id), room.id, BlueprintLayer.ITEMS, null, listOf(at), UP, onWall = false, label = item.name)
         }
         return out
     }

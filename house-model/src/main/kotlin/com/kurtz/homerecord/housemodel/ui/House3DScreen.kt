@@ -34,7 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.EmptyState
@@ -46,7 +48,10 @@ import com.kurtz.homerecord.coreui.shell.SharedKeys
 import com.kurtz.homerecord.coreui.shell.sharedScreenBounds
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.scene.FloorScene
+import com.kurtz.homerecord.housemodel.blueprint.LayerToggleRow
+import com.kurtz.homerecord.housemodel.overlays.nameRes
 import com.kurtz.homerecord.housemodel.scene.FloorScenePicture
+import com.kurtz.homerecord.housemodel.scene.SceneMarker
 import com.kurtz.homerecord.housemodel.walls.WallStage
 
 /** How the scene is to be drawn: the stage's photos, the Reset view count, the room the camera stands in, room taps. */
@@ -55,13 +60,19 @@ data class SceneCamera(
     val resetCount: Int,
     val roomId: String? = null,
     val onRoomTap: (String) -> Unit = {},
+    /** Overlays and items to draw on their walls and floors, already filtered by the layer toggles (AC-C23). */
+    val markers: List<SceneMarker> = emptyList(),
+    val onMarkerTap: (SceneMarker) -> Unit = {},
 )
 
 /** Draws the floor; the route passes the live SceneView, previews and tests the still picture. */
 typealias SceneSlot = @Composable (scene: FloorScene, camera: SceneCamera, modifier: Modifier) -> Unit
 
 /** The still picture; standing in a room it shows that room on its own, cut away from the rest of the floor. */
-val StillScene: SceneSlot = { scene, camera, modifier -> FloorScenePicture(scene.only(camera.roomId), camera.stage, modifier) }
+val StillScene: SceneSlot = { scene, camera, modifier ->
+    val markers = camera.roomId?.let { id -> camera.markers.filter { it.roomId == id } } ?: camera.markers
+    FloorScenePicture(scene.only(camera.roomId), camera.stage, modifier, markers)
+}
 
 private fun FloorScene.only(roomId: String?): FloorScene {
     if (roomId == null || roomId !in rooms) return this
@@ -73,7 +84,9 @@ private fun FloorScene.only(roomId: String?): FloorScene {
  * HM-3D (AC-C20, AC-C21): the chosen floor's rooms as walls over the faded floors below it, wall photos at the chosen
  * stage painted on, Reset view over the scene. Floor chips and All floors when the home has more than one floor; the
  * stage picker matches the room page's. Tapping a room stands the camera inside it (AC-C22): the title names the room,
- * Back to floor (and the system Back, unless the screen opened on the room) returns to the whole floor.
+ * Back to floor (and the system Back, unless the screen opened on the room) returns to the whole floor. The blueprint's
+ * layer chips show or hide overlays and item markers drawn on their walls and floors; tapping one opens it, and TalkBack
+ * offers each shown marker as an "Open …" action on the scene (AC-C23).
  */
 @Composable
 fun House3DScreen(
@@ -81,6 +94,7 @@ fun House3DScreen(
     onEvent: (House3DEvent) -> Unit,
     onBack: () -> Unit,
     onEditPlan: (floorId: String?) -> Unit,
+    onOpenMarker: (SceneMarker) -> Unit = {},
     sceneSlot: SceneSlot = StillScene,
 ) {
     val prefix = LocalTagPrefix.current
@@ -94,6 +108,11 @@ fun House3DScreen(
         onBack = onBack,
     ) { padding ->
         val scene = state.scene
+        val markers = state.visibleMarkers.let { all -> if (room != null) all.filter { it.roomId == room.id } else all }
+        val markerActions = markers.map { marker ->
+            val name = marker.label.ifBlank { marker.overlayKind?.let { stringResource(it.nameRes) } ?: "" }
+            CustomAccessibilityAction(stringResource(R.string.house3d_open_marker, name)) { onOpenMarker(marker); true }
+        }
         val controls: @Composable () -> Unit = {
             if (state.floors.size > 1) {
                 LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -117,6 +136,7 @@ fun House3DScreen(
                 }
             }
             WallStagePicker(state.stage, { onEvent(House3DEvent.SelectStage(it)) }, Modifier.padding(horizontal = 16.dp, vertical = 4.dp), screen = "3d")
+            LayerToggleRow(state.layers, { onEvent(House3DEvent.ToggleLayer(it)) })
             if (scene != null && !scene.isEmpty) {
                 Text(
                     stringResource(R.string.house3d_walls_photographed, state.photographedWalls, scene.wallCount, stringResource(state.stage.labelRes)),
@@ -131,8 +151,9 @@ fun House3DScreen(
                         modifier = Modifier.padding(horizontal = 16.dp).testTag("${prefix}_3d_ghost_hint"),
                     )
                 }
+                val hint = stringResource(if (room != null) R.string.house3d_room_hint else R.string.house3d_hint)
                 Text(
-                    stringResource(if (room != null) R.string.house3d_room_hint else R.string.house3d_hint),
+                    if (markers.isEmpty()) hint else hint + " " + stringResource(R.string.house3d_marker_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
@@ -165,10 +186,22 @@ fun House3DScreen(
                     // The tag and description sit on a plain Compose box around the scene: SceneView is an AndroidView,
                     // whose own accessibility node replaces the semantics set on it, so Maestro and TalkBack would never
                     // see `<app>_3d_scene` or the description on the view itself.
-                    Box(Modifier.fillMaxSize().semantics { contentDescription = description }.testTag("${prefix}_3d_scene")) {
+                    Box(
+                        Modifier.fillMaxSize()
+                            .semantics {
+                                contentDescription = description
+                                if (markerActions.isNotEmpty()) customActions = markerActions
+                            }
+                            .testTag("${prefix}_3d_scene"),
+                    ) {
                         sceneSlot(
                             scene,
-                            SceneCamera(state.stage, state.resetCount, room?.id) { onEvent(House3DEvent.ViewRoom(it)) },
+                            SceneCamera(
+                                state.stage, state.resetCount, room?.id,
+                                onRoomTap = { onEvent(House3DEvent.ViewRoom(it)) },
+                                markers = markers,
+                                onMarkerTap = onOpenMarker,
+                            ),
                             Modifier.fillMaxSize(),
                         )
                     }

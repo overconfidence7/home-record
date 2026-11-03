@@ -1,7 +1,11 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.housemodel.FloorSummary
+import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
+import com.kurtz.homerecord.housemodel.blueprint.LayerSet
 import com.kurtz.homerecord.housemodel.scene.FloorScene
+import com.kurtz.homerecord.housemodel.scene.SceneMarker
+import com.kurtz.homerecord.housemodel.scene.SceneMarkers
 import com.kurtz.homerecord.housemodel.scene.SceneRoom
 import com.kurtz.homerecord.housemodel.walls.WallStage
 
@@ -24,7 +28,14 @@ data class House3DUiState(
     val roomId: String? = null,
     /** The screen opened straight into [roomId] ("View in 3D" on a room page), so Back leaves the screen. */
     val openedOnRoom: Boolean = false,
+    /** The blueprint's layer toggles for this home, shared with the House tab (AC-C15, AC-C23). */
+    val layers: LayerSet = LayerSet(),
+    /** Every overlay and placed item in the scene, on its wall or floor (AC-C23); [visibleMarkers] applies [layers]. */
+    val markers: List<SceneMarker> = emptyList(),
 ) {
+    /** The markers drawn with the layers that are on; studs, blocking and other marks on no layer always show. */
+    val visibleMarkers: List<SceneMarker> get() = SceneMarkers.visible(markers, layers)
+
     /** The room the camera stands in, once the scene holds it. */
     val room: SceneRoom? get() = roomId?.let { scene?.rooms?.get(it) }
 
@@ -40,6 +51,9 @@ sealed interface House3DEvent {
     data object ShowAllFloors : House3DEvent
     data object ResetView : House3DEvent
     data object Retry : House3DEvent
+
+    /** A layer chip: shows or hides that layer's markers, remembered for the home like the blueprint's (AC-C23). */
+    data class ToggleLayer(val layer: BlueprintLayer) : House3DEvent
 
     /** A room tapped in the 3D floor: stand inside it (AC-C22). */
     data class ViewRoom(val roomId: String) : House3DEvent

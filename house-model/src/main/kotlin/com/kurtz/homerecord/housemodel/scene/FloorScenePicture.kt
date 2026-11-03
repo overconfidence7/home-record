@@ -5,7 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import com.kurtz.homerecord.housemodel.blueprint.RoomPalette
@@ -16,11 +19,16 @@ import kotlin.math.min
 /**
  * The 3D floor as a still picture from the starting camera, flat-shaded in the same colors as the live view (walls with
  * a photo at [stage] in a photo tone, floors below the chosen one faded). Used where Filament cannot draw: previews, screenshot tests and the screen catalog.
+ * [markers] (AC-C23) are drawn over the house in their layer colors, the same width as in the live view; those on a wall
+ * face turned away from the camera are left out, as the live view hides them behind the wall.
  */
 @Composable
-fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = Modifier) {
+fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = Modifier, markers: List<SceneMarker> = emptyList()) {
     val triangles = remember(scene.mesh) { SceneProjection.project(scene.mesh) }
     val pictured = remember(scene, stage) { scene.picturesAt(stage).keys }
+    val projected = remember(markers) {
+        markers.filter { it.points.isNotEmpty() && SceneProjection.faces(it.facing) }.map { m -> m to m.points.map { SceneProjection.projectPoint(it) } }
+    }
     Canvas(modifier) {
         if (triangles.isEmpty()) return@Canvas
         var minX = Float.MAX_VALUE
@@ -58,5 +66,21 @@ fun FloorScenePicture(scene: FloorScene, stage: WallStage, modifier: Modifier = 
             // A hairline in the same color closes the anti-aliased seams between neighbouring triangles.
             if (key !is MeshPartKey.Glass && !ghost) drawPath(path, color, style = Stroke(width = 1f))
         }
+        projected.forEach { (marker, pts) ->
+            val color = MarkerColors.of(marker)
+            val at = pts.map { (x, y) -> Offset(ox + x * scale, oy + y * scale) }
+            if (marker.isRun) {
+                val width = max(MarkerMeshBuilder.RUN_WIDTH_M * scale, MIN_STROKE_PX)
+                path.reset()
+                path.moveTo(at[0].x, at[0].y)
+                at.drop(1).forEach { path.lineTo(it.x, it.y) }
+                drawPath(path, color, style = Stroke(width = width, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            } else {
+                val r = if (marker.target is MarkerTarget.ItemMark) MarkerMeshBuilder.ITEM_RADIUS_M else MarkerMeshBuilder.SPOT_RADIUS_M
+                drawCircle(color, radius = max(r * scale, MIN_STROKE_PX), center = at[0])
+            }
+        }
     }
 }
+
+private const val MIN_STROKE_PX = 3f

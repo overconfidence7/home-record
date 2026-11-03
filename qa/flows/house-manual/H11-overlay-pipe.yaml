@@ -108,6 +108,34 @@ appId: com.kurtz.homerecord.housemanual
     element: "Sink cold supply"
 - assertVisible: "Sink cold supply"
 - takeScreenshot: H11-room-overlays
+# AC-C23: in 3D the pipe shows on the kitchen wall once the Plumbing layer chip is on; the chip turns it off again
+- scrollUntilVisible:
+    element:
+      id: "hm_room_view_3d"
+    direction: UP
+- tapOn:
+    id: "hm_room_view_3d"
+- extendedWaitUntil:
+    visible: "Kitchen in 3D"
+    timeout: 15000
+- assertVisible:
+    id: "hm_layer_plumbing"
+- assertNotVisible: ".*Tap a pipe, wire or item to open it.*"
+- tapOn:
+    id: "hm_layer_plumbing"
+- extendedWaitUntil:
+    visible: ".*Tap a pipe, wire or item to open it.*"
+    timeout: 10000
+- takeScreenshot: H11-3d-pipe
+- tapOn:
+    id: "hm_layer_plumbing"
+- extendedWaitUntil:
+    notVisible: ".*Tap a pipe, wire or item to open it.*"
+    timeout: 10000
+- tapOn:
+    id: "hm_back"
+- scrollUntilVisible:
+    element: "Sink cold supply"
 - tapOn: "Sink cold supply"
 - extendedWaitUntil:
     visible:

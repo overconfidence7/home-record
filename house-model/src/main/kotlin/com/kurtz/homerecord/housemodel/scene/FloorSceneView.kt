@@ -75,6 +75,13 @@ fun FloorSceneView(
     }
     val geometries = remember(engine, batches) { batches.map { it to it.mesh.toGeometry(engine) } }
     DisposableEffect(geometries) { onDispose { geometries.forEach { (_, g) -> engine.safeDestroyGeometry(g) } } }
+    // Overlays and items on their walls and floors (AC-C23): one small node each, named so a tap finds its marker.
+    val markerGeometries = remember(engine, camera.markers) {
+        camera.markers.mapNotNull { m -> MarkerMeshBuilder.build(m).takeIf { it.triangleCount > 0 }?.let { m to it.toGeometry(engine) } }
+    }
+    DisposableEffect(markerGeometries) { onDispose { markerGeometries.forEach { (_, g) -> engine.safeDestroyGeometry(g) } } }
+    val markerByName by rememberUpdatedState(markerGeometries.mapIndexed { i, (m, _) -> "$MARKER_PREFIX$i" to m }.toMap())
+    val onMarkerTap by rememberUpdatedState(camera.onMarkerTap)
 
     // Sized for every picture the scene may show at any stage, so switching stages never needs a bigger budget.
     val texturePx = remember(scene) { TextureBudget.maxSidePx(scene.pictures.values.flatMap { it.values }.distinct().size) }
@@ -128,9 +135,17 @@ fun FloorSceneView(
         materialLoader = materialLoader,
         cameraManipulator = manipulator,
         autoCenterContent = false,
-        // A tap on a room's walls or floor stands the camera inside it; taps inside a room do nothing.
+        // A tap on a marker opens it (AC-C23); a tap on a room's walls or floor stands the camera inside it; other taps
+        // inside a room do nothing.
         onGestureListener = rememberOnGestureListener(
-            onSingleTapConfirmed = { _, node -> if (room == null) node?.name?.let(onRoomTap) },
+            onSingleTapConfirmed = { _, node ->
+                val name = node?.name
+                val marker = name?.let(markerByName::get)
+                when {
+                    marker != null -> onMarkerTap(marker)
+                    name != null && room == null && !name.startsWith(MARKER_PREFIX) -> onRoomTap(name)
+                }
+            },
         ),
         // Timed once the scene is on screen: the first frame counted is the first with the house in it.
         onFrame = { nanos -> if (draws > 0) stats.onFrame(nanos) },
@@ -150,6 +165,16 @@ fun FloorSceneView(
                 boundingBox = geometry.boundingBox,
                 materialInstance = material,
                 apply = { name = batch.roomId },
+            )
+        }
+        markerGeometries.forEachIndexed { i, (marker, geometry) ->
+            MeshNode(
+                primitiveType = RenderableManager.PrimitiveType.TRIANGLES,
+                vertexBuffer = geometry.vertexBuffer,
+                indexBuffer = geometry.indexBuffer,
+                boundingBox = geometry.boundingBox,
+                materialInstance = resources.marker(MarkerColors.of(marker)),
+                apply = { name = "$MARKER_PREFIX$i" },
             )
         }
     }
@@ -206,6 +231,12 @@ private class SceneResources(private val engine: Engine, private val loader: Mat
     val glass: MaterialInstance by lazy { loader.createColorInstance(RoomPalette.glass, roughness = 0.1f) }
     val ghost: MaterialInstance by lazy { loader.createColorInstance(RoomPalette.ghost, roughness = 1f) }
 
+    private val markers = HashMap<ULong, MaterialInstance>()
+
+    /** A marker's flat layer color, a little glossy so it reads as a pipe or wire over the matte wall. */
+    fun marker(color: androidx.compose.ui.graphics.Color): MaterialInstance =
+        markers.getOrPut(color.value) { loader.createColorInstance(color, roughness = 0.5f) }
+
     fun tint(index: Int): MaterialInstance = tints.getOrPut(index) { loader.createColorInstance(RoomPalette.tint(index), roughness = 0.8f) }
 
     fun hasTexture(path: String) = path in textures
@@ -243,6 +274,8 @@ private class SceneResources(private val engine: Engine, private val loader: Mat
         textures.clear()
         tints.values.forEach(loader::destroyMaterialInstance)
         tints.clear()
+        markers.values.forEach(loader::destroyMaterialInstance)
+        markers.clear()
     }
 }
 
@@ -252,6 +285,17 @@ private fun MeshPart.toGeometry(engine: Engine): Geometry {
             position = Position(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
             normal = Direction(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]),
             uvCoordinate = Float2(uvs[i * 2], uvs[i * 2 + 1]),
+        )
+    }
+    return Geometry.Builder().vertices(vertices).indices(indices.toList()).build(engine)
+}
+
+private fun MarkerMesh.toGeometry(engine: Engine): Geometry {
+    val vertices = List(vertexCount) { i ->
+        Geometry.Vertex(
+            position = Position(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
+            normal = Direction(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]),
+            uvCoordinate = Float2(0f, 0f),
         )
     }
     return Geometry.Builder().vertices(vertices).indices(indices.toList()).build(engine)
@@ -269,6 +313,8 @@ private fun decode(path: String, maxSidePx: Int): Bitmap? = try {
 }
 
 private const val TAG = "FloorScene"
+/** Marker nodes are named with this prefix and their index; room nodes carry the room id. */
+private const val MARKER_PREFIX = "marker:"
 /** Logcat tag of the AC-C24 measurement line: `adb logcat -s HomeRecord3D`. */
 const val PERF_TAG = "HomeRecord3D"
 private const val PERF_LOG_MS = 2_000L

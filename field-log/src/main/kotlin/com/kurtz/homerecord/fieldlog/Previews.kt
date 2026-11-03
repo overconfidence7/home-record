@@ -1441,6 +1441,32 @@ private fun JobHousePinsContent() {
 @ThemePreviews
 @Composable
 fun JobHouse3DPreview() = Frame {
+    val scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(
+        pinRooms, 108,
+        mapOf(
+            com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0) to
+                mapOf(com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN to "/media/kitchen-north-rough.jpg"),
+        ),
+    )
+    // The crew's rough-in drain and wire on the kitchen's north wall, Drain and vent and Electrical on (AC-C23).
+    val markers = com.kurtz.homerecord.housemodel.scene.SceneMarkers.place(
+        scene,
+        listOf(
+            com.kurtz.homerecord.housemodel.overlays.Overlay(
+                "ov1", "h1", "r1", "w1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DRAIN, "Sink drain", null,
+                com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+                listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.3f, 0.7f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.3f, 1f)),
+                com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, null, null, 0L,
+            ),
+            com.kurtz.homerecord.housemodel.overlays.Overlay(
+                "ov2", "h1", "r1", "w1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.ELECTRICAL_WIRE, "Counter circuit", null,
+                com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+                listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.05f, 0.55f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.9f, 0.55f)),
+                com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, null, null, 0L,
+            ),
+        ),
+        mapOf("w1" to com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0)),
+    )
     com.kurtz.homerecord.housemodel.ui.House3DScreen(
         com.kurtz.homerecord.housemodel.ui.House3DUiState(
             loading = false, homeName = "Hale kitchen",
@@ -1450,11 +1476,12 @@ fun JobHouse3DPreview() = Frame {
             ),
             floorId = "f1",
             stage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
-            scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(
-                pinRooms, 108,
-                mapOf(
-                    com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0) to
-                        mapOf(com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN to "/media/kitchen-north-rough.jpg"),
+            scene = scene,
+            markers = markers,
+            layers = com.kurtz.homerecord.housemodel.blueprint.LayerSet(
+                setOf(
+                    com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.DRAIN_VENT,
+                    com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ELECTRICAL,
                 ),
             ),
         ),

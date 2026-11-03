@@ -479,6 +479,53 @@ fun House3DRoomPreview() = Frame { house3dScreen(house3dState({ copy(roomId = "r
 @Composable
 fun House3DLandscapePreview() = Frame { house3dScreen(house3dState()) }
 
+/** Overlays and items in 3D (AC-C23): Plumbing, Electrical and Items on; the kitchen's supply lines and outlets on its
+ * north wall, the living room's gas line across the floor, the fridge and furnace at their plan spots. */
+private fun house3dOverlay(id: String, room: String, wall: String?, kind: com.kurtz.homerecord.housemodel.overlays.OverlayKind, label: String, vararg pts: Pair<Float, Float>) =
+    com.kurtz.homerecord.housemodel.overlays.Overlay(
+        id, "h1", room, wall, kind, label, null, com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+        pts.map { com.kurtz.homerecord.housemodel.overlays.OverlayPoint(it.first, it.second) }, WallStage.ROUGH_IN, null, null, 0L,
+    )
+
+private val house3dMarkers = com.kurtz.homerecord.housemodel.scene.SceneMarkers.place(
+    house3dScene,
+    listOf(
+        house3dOverlay("ov1", "r1", "w-r1-0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Cold to sink", 0.1f to 0.95f, 0.1f to 0.6f, 0.55f to 0.6f),
+        house3dOverlay("ov2", "r1", "w-r1-0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_HOT, "Hot to sink", 0.15f to 0.95f, 0.15f to 0.68f, 0.55f to 0.68f),
+        house3dOverlay("ov3", "r1", "w-r1-0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.OUTLET, "Counter outlet", 0.8f to 0.62f),
+        house3dOverlay("ov4", "r2", "w-r2-0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.ELECTRICAL_WIRE, "Living room circuit", 0.05f to 0.85f, 0.95f to 0.85f),
+        house3dOverlay("ov5", "r2", null, com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, "Gas to fireplace", 190f to 180f, 300f to 180f, 300f to 30f),
+    ),
+    mapOf(
+        "w-r1-0" to com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0),
+        "w-r2-0" to com.kurtz.homerecord.housemodel.walls.WallKey("r2", 0),
+    ),
+    listOf(
+        com.kurtz.homerecord.housemodel.scene.ItemSpot("i1", "r1", 30, 30, "Refrigerator"),
+        com.kurtz.homerecord.housemodel.scene.ItemSpot("i2", "r3", 120, 200, "Dining room light"),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun House3DMarkersPreview() = Frame {
+    house3dScreen(
+        house3dState({
+            copy(
+                markers = house3dMarkers,
+                layers = com.kurtz.homerecord.housemodel.blueprint.LayerSet(
+                    setOf(
+                        com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.PLUMBING,
+                        com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ELECTRICAL,
+                        com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.GAS,
+                        com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ITEMS,
+                    ),
+                ),
+            )
+        }),
+    )
+}
+
 /** Rough-in chosen: one wall has a rough-in photo. */
 @ThemePreviews
 @Composable

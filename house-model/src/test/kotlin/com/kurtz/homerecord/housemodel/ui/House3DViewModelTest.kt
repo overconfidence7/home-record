@@ -251,4 +251,84 @@ class House3DViewModelTest {
         assertThat(restored.roomId).isNull()
         assertThat(restored.openedOnRoom).isFalse()
     }
+
+    private class MemoryLayers : com.kurtz.homerecord.housemodel.blueprint.LayerStore {
+        val stored = mutableMapOf<String, com.kurtz.homerecord.housemodel.blueprint.LayerSet>()
+        override fun read(homeId: String) = stored[homeId] ?: com.kurtz.homerecord.housemodel.blueprint.LayerSet()
+        override fun write(homeId: String, layers: com.kurtz.homerecord.housemodel.blueprint.LayerSet) { stored[homeId] = layers }
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun overlaysAndPlacedItemsBecomeMarkersShownByTheSharedLayerToggles() = test {
+        val (homeId, _) = home()
+        val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db)
+        val north = db.wallDao().listFor("k").single { it.edgeIndex == 0 }
+        val pipe = overlays.addOnWall(
+            homeId, north.id,
+            com.kurtz.homerecord.housemodel.overlays.OverlayDraft(
+                com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD,
+                listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.2f, 0.5f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.8f, 0.5f)),
+                WallStage.ROUGH_IN, label = "Cold to sink",
+            ),
+        ) as com.kurtz.homerecord.housemodel.overlays.OverlaySave.Saved
+        val stud = overlays.addOnWall(
+            homeId, north.id,
+            com.kurtz.homerecord.housemodel.overlays.OverlayDraft(
+                com.kurtz.homerecord.housemodel.overlays.OverlayKind.STUD,
+                listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.5f, 0f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.5f, 1f)),
+                WallStage.ROUGH_IN,
+            ),
+        ) as com.kurtz.homerecord.housemodel.overlays.OverlaySave.Saved
+        db.itemDao().upsert(
+            com.kurtz.homerecord.core.data.ItemEntity(
+                id = "fridge", homeId = homeId, roomId = "k", category = "appliances", subtype = "refrigerator", name = "Fridge",
+                planX = 40, planY = 30, createdAt = 0L, updatedAt = 0L,
+            ),
+        )
+        // An item with no spot on the plan has no marker.
+        db.itemDao().upsert(
+            com.kurtz.homerecord.core.data.ItemEntity(id = "toaster", homeId = homeId, roomId = "k", category = "appliances", subtype = "other", name = "Toaster", createdAt = 0L, updatedAt = 0L),
+        )
+        val layers = MemoryLayers()
+        val model = House3DViewModel(
+            repo, wallPhotos, homeId, "Maple St", null, SavedStateHandle(),
+            overlays = overlays.observeForHome(homeId), itemSpots = overlays.observeItemSpots(homeId), layerStore = layers,
+        ).also { created += it }
+        val state = withTimeout(10_000) { model.state.first { it.markers.size == 3 } }
+        assertThat(state.markers.map { it.target }).containsExactly(
+            com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(pipe.id),
+            com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(stud.id),
+            com.kurtz.homerecord.housemodel.scene.MarkerTarget.ItemMark("fridge"),
+        )
+        assertThat(state.markers.single { it.target == com.kurtz.homerecord.housemodel.scene.MarkerTarget.ItemMark("fridge") }.label).isEqualTo("Fridge")
+        // Layers off: only the stud (on no layer) shows, as on the blueprint.
+        assertThat(state.visibleMarkers.map { it.target }).containsExactly(com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(stud.id))
+
+        model.onEvent(House3DEvent.ToggleLayer(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.PLUMBING))
+        model.onEvent(House3DEvent.ToggleLayer(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ITEMS))
+        assertThat(model.state.value.visibleMarkers).hasSize(3)
+        // The toggles are the home's, shared with the House tab's blueprint.
+        assertThat(layers.read(homeId).on).containsExactly(
+            com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.PLUMBING,
+            com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ITEMS,
+        )
+        assertThat(model.overlay(pipe.id)?.label).isEqualTo("Cold to sink")
+
+        // A deleted overlay leaves the scene.
+        overlays.delete(pipe.id)
+        val after = withTimeout(10_000) { model.state.first { it.markers.size == 2 } }
+        assertThat(after.markers.map { it.target }).doesNotContain(com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark(pipe.id))
+        assertThat(model.overlay(pipe.id)).isNull()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun theLayersOpenAsTheHouseTabLeftThem() = test {
+        val (homeId, _) = home()
+        val layers = MemoryLayers()
+        layers.write(homeId, com.kurtz.homerecord.housemodel.blueprint.LayerSet(setOf(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ELECTRICAL)))
+        val model = House3DViewModel(repo, wallPhotos, homeId, "Maple St", null, SavedStateHandle(), layerStore = layers).also { created += it }
+        assertThat(model.state.value.layers.on).containsExactly(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ELECTRICAL)
+    }
 }

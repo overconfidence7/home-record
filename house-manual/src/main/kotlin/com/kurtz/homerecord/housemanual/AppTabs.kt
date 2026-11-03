@@ -128,6 +128,10 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 container.homes, container.wallPhotos, home.id, home.name, key.floorId, onBack = nav::pop,
                 onEditPlan = { nav.push(PlanKey(floorId = it)) },
                 roomId = key.roomId,
+                overlays = container.overlays,
+                layerStore = container.layers,
+                onOpenOverlay = { openOverlay(nav, it) },
+                onOpenItem = { itemId, _ -> nav.push(ItemDetailKey(itemId)) },
             )
         }
         entry<PlanKey> { key ->

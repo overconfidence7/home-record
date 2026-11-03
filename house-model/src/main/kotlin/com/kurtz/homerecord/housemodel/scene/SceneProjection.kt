@@ -19,16 +19,7 @@ object SceneProjection {
     const val START_PITCH_DEG = 40f
 
     fun project(mesh: PlanMesh, yawDeg: Float = START_YAW_DEG, pitchDeg: Float = START_PITCH_DEG): List<ProjectedTriangle> {
-        val yaw = Math.toRadians(yawDeg.toDouble())
-        val pitch = Math.toRadians(pitchDeg.toDouble())
-        val cy = cos(yaw).toFloat()
-        val sy = sin(yaw).toFloat()
-        val cp = cos(pitch).toFloat()
-        val sp = sin(pitch).toFloat()
-        // Camera basis: right, up and toward-viewer, from a camera south of the house (+z) raised by pitch.
-        val right = floatArrayOf(cy, 0f, -sy)
-        val toViewer = floatArrayOf(sy * cp, sp, cy * cp)
-        val up = cross(toViewer, right)
+        val (right, up, toViewer) = basis(yawDeg, pitchDeg)
         val sun = normalize(floatArrayOf(0.4f, 1f, 0.6f))
         val out = ArrayList<ProjectedTriangle>()
         for (part in mesh.parts) {
@@ -64,6 +55,30 @@ object SceneProjection {
         // Far first; floors under walls at equal depth.
         out.sortWith(compareBy<ProjectedTriangle>({ it.depth }, { if (it.key is MeshPartKey.Floor) 0 else 1 }))
         return out
+    }
+
+    /** Where world point [p] lands in the still, in the same picture units as [project]'s triangles. */
+    fun projectPoint(p: ScenePoint, yawDeg: Float = START_YAW_DEG, pitchDeg: Float = START_PITCH_DEG): Pair<Float, Float> {
+        val (right, up, _) = basis(yawDeg, pitchDeg)
+        val v = floatArrayOf(p.x, p.y, p.z)
+        return dot(v, right) to -dot(v, up)
+    }
+
+    /** Whether a surface facing [facing] is seen from the still's camera (a wall's back is not). */
+    fun faces(facing: ScenePoint, yawDeg: Float = START_YAW_DEG, pitchDeg: Float = START_PITCH_DEG): Boolean =
+        dot(floatArrayOf(facing.x, facing.y, facing.z), basis(yawDeg, pitchDeg).third) > 0f
+
+    /** Camera basis: right, up and toward-viewer, from a camera south of the house (+z) raised by pitch. */
+    private fun basis(yawDeg: Float, pitchDeg: Float): Triple<FloatArray, FloatArray, FloatArray> {
+        val yaw = Math.toRadians(yawDeg.toDouble())
+        val pitch = Math.toRadians(pitchDeg.toDouble())
+        val cy = cos(yaw).toFloat()
+        val sy = sin(yaw).toFloat()
+        val cp = cos(pitch).toFloat()
+        val sp = sin(pitch).toFloat()
+        val right = floatArrayOf(cy, 0f, -sy)
+        val toViewer = floatArrayOf(sy * cp, sp, cy * cp)
+        return Triple(right, cross(toViewer, right), toViewer)
     }
 
     private fun dot(a: FloatArray, b: FloatArray) = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]

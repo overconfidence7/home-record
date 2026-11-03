@@ -364,6 +364,8 @@
     <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move. Tap a room to stand inside it.</string>
     <string name="house3d_room_hint">Drag to look around, pinch to step closer.</string>
     <string name="house3d_back_to_floor">Back to floor</string>
+    <string name="house3d_marker_hint">Tap a pipe, wire or item to open it.</string>
+    <string name="house3d_open_marker">Open %1$s</string>
     <string name="house3d_room_description">Inside %1$s in 3D, looking at its longest wall</string>
     <string name="room_view_3d">View in 3D</string>
     <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>

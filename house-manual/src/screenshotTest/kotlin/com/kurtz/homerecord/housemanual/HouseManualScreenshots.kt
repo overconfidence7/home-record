@@ -443,6 +443,11 @@ fun House3DScreenshot() = House3DPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun House3DMarkersScreenshot() = House3DMarkersPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun House3DRoughInScreenshot() = House3DRoughInPreview()
 
 @PreviewTest

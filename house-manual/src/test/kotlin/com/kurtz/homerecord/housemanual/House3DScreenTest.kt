@@ -236,4 +236,63 @@ class House3DScreenTest {
         rule.onNodeWithTag("hm_room_view_3d").performClick()
         assertThat(events).containsExactly(RoomEvent.View3D)
     }
+
+    private fun markerScene(): House3DUiState {
+        val walls = mapOf("w-k0" to WallKey("k", 0))
+        val pipe = com.kurtz.homerecord.housemodel.overlays.Overlay(
+            "o1", "h", "k", "w-k0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Cold to sink", null,
+            com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+            listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.2f, 0.6f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.8f, 0.6f)),
+            WallStage.ROUGH_IN, null, null, 0L,
+        )
+        val markers = com.kurtz.homerecord.housemodel.scene.SceneMarkers.place(
+            scene, listOf(pipe), walls, listOf(com.kurtz.homerecord.housemodel.scene.ItemSpot("fridge", "k", 30, 30, "Fridge")),
+        )
+        return ready.copy(markers = markers)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun layerChipsToggleTheMarkersAndEachShownMarkerOffersAnOpenAction() {
+        val events = mutableListOf<House3DEvent>()
+        val opened = mutableListOf<com.kurtz.homerecord.housemodel.scene.SceneMarker>()
+        val state = markerScene()
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    House3DScreen(state, { events += it }, {}, {}, onOpenMarker = { opened += it })
+                }
+            }
+        }
+        // Layers off: nothing to open, no marker hint.
+        rule.onNodeWithTag("hm_3d_scene").assert(SemanticsMatcher.keyNotDefined(androidx.compose.ui.semantics.SemanticsActions.CustomActions))
+        rule.onNodeWithTag("hm_layer_plumbing").performClick()
+        assertThat(events).containsExactly(House3DEvent.ToggleLayer(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.PLUMBING))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C23")
+    fun tappingAShownMarkerOpensIt() {
+        val opened = mutableListOf<com.kurtz.homerecord.housemodel.scene.SceneMarker>()
+        val state = markerScene().copy(
+            layers = com.kurtz.homerecord.housemodel.blueprint.LayerSet(
+                setOf(com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.PLUMBING, com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer.ITEMS),
+            ),
+        )
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                    House3DScreen(state, {}, {}, {}, onOpenMarker = { opened += it })
+                }
+            }
+        }
+        rule.onNodeWithText("Tap a pipe, wire or item to open it.", substring = true).assertExists()
+        val actions = rule.onNodeWithTag("hm_3d_scene").fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsActions.CustomActions]
+        assertThat(actions.map { it.label }).containsExactly("Open Cold to sink", "Open Fridge").inOrder()
+        actions.forEach { it.action() }
+        assertThat(opened.map { it.target }).containsExactly(
+            com.kurtz.homerecord.housemodel.scene.MarkerTarget.OverlayMark("o1"),
+            com.kurtz.homerecord.housemodel.scene.MarkerTarget.ItemMark("fridge"),
+        ).inOrder()
+    }
 }

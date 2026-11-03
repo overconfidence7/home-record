@@ -62,6 +62,17 @@ class OverlayRepository(
             items.map { OverlayItemChoice(it.id, it.name, it.roomId, it.roomId?.let(roomNames::get)) }
         }
 
+    /** The home's items placed on the plan (AC-C30 position), as markers for the 3D view (AC-C23). */
+    fun observeItemSpots(homeId: String): Flow<List<com.kurtz.homerecord.housemodel.scene.ItemSpot>> =
+        db.itemDao().observeFor(homeId).map { items ->
+            items.mapNotNull { item ->
+                val roomId = item.roomId ?: return@mapNotNull null
+                val x = item.planX ?: return@mapNotNull null
+                val y = item.planY ?: return@mapNotNull null
+                com.kurtz.homerecord.housemodel.scene.ItemSpot(item.id, roomId, x, y, item.name)
+            }
+        }
+
     /** The overlays linked to item [itemId] with their rooms' names, for the item page's Links (AC-C26). */
     fun observeLinks(itemId: String): Flow<List<OverlayLink>> = dao.observeForItem(itemId).map { rows ->
         val names = mutableMapOf<String, String?>()

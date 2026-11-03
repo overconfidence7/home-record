@@ -252,11 +252,29 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<JobHouse3DKey> { key ->
+            val sceneScope = androidx.compose.runtime.rememberCoroutineScope()
             com.kurtz.homerecord.housemodel.ui.House3DRoute(
                 container.homes, container.wallPhotos, key.homeId, key.title, key.floorId, onBack = nav::pop,
                 onEditPlan = { nav.push(JobPlanKey(key.homeId, key.title, it)) },
                 defaultStage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
                 roomId = key.roomId,
+                overlays = container.overlays,
+                layerStore = container.layers,
+                // A wall overlay opens its wall with it picked; a plan overlay the plan of its room's floor (AC-C23).
+                onOpenOverlay = { o ->
+                    val wallId = o.wallId
+                    val roomId = o.roomId
+                    if (wallId != null && roomId != null) {
+                        nav.push(JobWallKey(roomId, wallId, o.stage.name, o.id))
+                    } else {
+                        sceneScope.launch {
+                            val floorId = roomId?.let { container.homes.roomLocation(it)?.floorId } ?: key.floorId
+                            nav.push(JobPlanKey(key.homeId, key.title, floorId, overlayId = o.id))
+                        }
+                    }
+                },
+                // Field Log has no item page yet (T062): an item marker opens the room it stands in.
+                onOpenItem = { _, roomId -> nav.push(JobRoomKey(roomId)) },
             )
         }
         entry<JobRoomKey> { key ->
