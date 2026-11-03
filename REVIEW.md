@@ -2852,3 +2852,14 @@ Tested: 55 device stages, 1516 unit tests, 161 backend tests, coverage 328/328 A
 ## Builder notes 2026-11-03 (H11 on 2d8eb4d6)
 
 - `[auto:flow:house-manual:H11-overlay-pipe]`: the wall-back fix held on device (steps 140-156 ran: one arrow off the wall, Home search found "Sink cold supply · Overlay · Cold water · Kitchen", opened its wall, deleted it, back to Home). The failure was the next step: the tested flow had left the House tab on the Kitchen page, and per-tab back stacks (AC-U2) bring that page back on `hm_tab_house`, so `hm_house_edit_plan` (the blueprint's button) was not on screen (`step-158` shot: Kitchen page with House selected). The flow at a4a4984e (T053c) steps back to the blueprint for the Plumbing layer check before Home search, so it returns to the House tab's root. No app or flow change in this run; QA should confirm on the next run.
+
+## QA auto 2026-11-03 (commit c6e9b307)
+
+Automated suite run at 2026-11-03 22:33 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Critical] device suite produced no results for field-log (regression of a fixed item) [auto:device:field-log:no-results] - steps: automated, see qa-results branch latest/ for commit c6e9b307 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
+- [ ] [Critical] device suite produced no results for house-manual (regression of a fixed item) [auto:device:house-manual:no-results] - steps: automated, see qa-results branch latest/ for commit c6e9b307 - expected: a device job that produces no results is a finding, and the run does not count as tested - actual: output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run
+
+Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
+
+Tested: 0 device stages, 0 unit tests, 0 backend tests, coverage 0/0 ACs. Passed: 0. New issues: 2. Critical: 2. Product gaps: n/a (judge entry follows).
