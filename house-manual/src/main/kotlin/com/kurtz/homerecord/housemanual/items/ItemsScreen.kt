@@ -1,6 +1,9 @@
 package com.kurtz.homerecord.housemanual.items
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,7 +62,7 @@ import com.kurtz.homerecord.housemodel.items.labelRes
 import com.kurtz.homerecord.housemodel.ui.itemIcon
 
 /** Items tab (AC-H6): grouped by category or room, filtered by category, room and warranty status, one tap to open. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
@@ -81,7 +84,13 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                 modifier = Modifier.padding(padding),
                 actionModifier = Modifier.testTag("hm_items_add"),
             )
-            else -> LazyColumn(Modifier.padding(padding).fillMaxWidth(), contentPadding = PaddingValues(bottom = 88.dp)) {
+            // Rows a screen ahead are composed in idle frame time, so a fling through 200 items lays out rows that
+            // already exist instead of composing several in one frame (AC-U11).
+            else -> LazyColumn(
+                Modifier.padding(padding).fillMaxWidth(),
+                state = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 360.dp, behind = 120.dp)),
+                contentPadding = PaddingValues(bottom = 88.dp),
+            ) {
                 item { Controls(state, onEvent) }
                 if (state.groups.isEmpty()) {
                     item {

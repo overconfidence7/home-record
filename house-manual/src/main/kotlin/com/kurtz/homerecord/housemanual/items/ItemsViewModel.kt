@@ -10,17 +10,22 @@ import com.kurtz.homerecord.housemodel.items.ItemListBuilder
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.items.WarrantyFilter
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
 /** Items tab (AC-H6): grouping, filters and folded groups live in [SavedStateHandle] so they survive process death. */
 class ItemsViewModel(
     rows: Flow<List<ItemRow>>,
     private val saved: SavedStateHandle = SavedStateHandle(),
+    /** Grouping, filtering and sorting every row runs here, off the main thread, so scrolling never waits on it (AC-U11). */
+    mapping: CoroutineDispatcher = Dispatchers.Default,
     /** The category's display name, so a search for "heating" finds the furnace. */
     private val categoryName: (ItemCategory) -> String,
 ) : ViewModel() {
@@ -30,7 +35,7 @@ class ItemsViewModel(
         pseudoNames: Map<String, String>,
         saved: SavedStateHandle,
         categoryName: (ItemCategory) -> String,
-    ) : this(repo.observeRows(homeId, pseudoNames), saved, categoryName)
+    ) : this(repo.observeRows(homeId, pseudoNames), saved, Dispatchers.Default, categoryName)
 
     private val grouping = MutableStateFlow(saved.get<String>(GROUPING)?.let { runCatching { ItemGrouping.valueOf(it) }.getOrNull() } ?: ItemGrouping.CATEGORY)
     private val filter = MutableStateFlow(
@@ -50,7 +55,7 @@ class ItemsViewModel(
             categoryOptions = all.map { it.category }.distinct().sorted(),
             roomOptions = all.filter { it.roomId != null }.map { RoomOption(it.roomId.orEmpty(), it.roomName) }.distinct().sortedBy { it.name.lowercase() },
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsUiState())
+    }.flowOn(mapping).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsUiState())
 
     fun onEvent(e: ItemsEvent) {
         when (e) {

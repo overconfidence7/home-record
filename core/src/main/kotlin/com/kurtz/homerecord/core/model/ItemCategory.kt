@@ -131,7 +131,12 @@ enum class ItemCategory(val icon: String, subtypes: List<SubtypeSpec>) {
     val subtypes: List<ItemSubtype> = subtypes.map { it.build(this) }
 
     companion object {
-        fun subtype(id: String): ItemSubtype? = entries.firstNotNullOfOrNull { c -> c.subtypes.find { it.id == id } }
+        /** Built once: the Items list looks a subtype up for every row it composes while scrolling (AC-U11). */
+        private val byId: Map<String, ItemSubtype> by lazy {
+            buildMap { ItemCategory.entries.forEach { c -> c.subtypes.forEach { st -> if (st.id !in this) put(st.id, st) } } } // first wins, as before
+        }
+
+        fun subtype(id: String): ItemSubtype? = byId[id]
         fun fromId(name: String): ItemCategory? = entries.find { it.name == name }
         fun all(): List<ItemSubtype> = entries.flatMap { it.subtypes }
     }

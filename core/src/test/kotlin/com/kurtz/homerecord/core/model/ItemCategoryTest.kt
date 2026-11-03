@@ -49,4 +49,9 @@ class ItemCategoryTest {
         assertThat(checkNotNull(ItemCategory.subtype("water_main")).category).isEqualTo(ItemCategory.SHUTOFFS)
         assertThat(ItemCategory.subtype("nope")).isNull()
     }
+
+    // AC-U11: the lookup the Items list makes per row is a map now; it still finds every subtype in its own category
+    @Test fun everySubtypeIsFoundByIdInItsCategory() {
+        ItemCategory.all().forEach { st -> assertThat(ItemCategory.subtype(st.id)?.category).isEqualTo(ItemCategory.all().first { it.id == st.id }.category) }
+    }
 }

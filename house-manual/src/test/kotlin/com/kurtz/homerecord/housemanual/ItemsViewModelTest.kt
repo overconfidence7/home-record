@@ -12,7 +12,12 @@ import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.items.WarrantyFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import java.util.concurrent.Executors
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -32,7 +37,7 @@ class ItemsViewModelTest {
         ItemRow("2", "Dishwasher", "Bosch", null, ItemCategory.APPLIANCES, "dishwasher", "r2", "Kitchen", WarrantyStatus.Unknown),
     )
 
-    private fun vm(saved: SavedStateHandle) = ItemsViewModel(MutableStateFlow(rows), saved) {
+    private fun vm(saved: SavedStateHandle) = ItemsViewModel(MutableStateFlow(rows), saved, Dispatchers.Main) {
         if (it == ItemCategory.HEATING_COOLING) "Heating and cooling" else it.name
     }
 
@@ -95,5 +100,29 @@ class ItemsViewModelTest {
         again.onEvent(ItemsEvent.ToggleGroup("APPLIANCES"))
         assertThat(again.state.value.isCollapsed("APPLIANCES")).isFalse()
         job.cancel(); job2.cancel()
+    }
+
+    // AC-H6, AC-U11: the Items list's 200 rows are filtered, grouped and sorted on the mapping dispatcher, never on
+    // the main thread the list scrolls on
+    @Test @AcceptanceCriterion("AC-U11")
+    fun twoHundredItemsAreGroupedOnTheMappingDispatcher() {
+        val mapping = Executors.newSingleThreadExecutor { Thread(it, "items-mapping") }.asCoroutineDispatcher()
+        val mappedOn = mutableSetOf<String>()
+        val many = (1..200).map { i ->
+            ItemRow("$i", "Item $i", "Make", null, if (i % 2 == 0) ItemCategory.APPLIANCES else ItemCategory.HEATING_COOLING,
+                "dishwasher", "r${i % 5}", "Room ${i % 5}", WarrantyStatus.Unknown)
+        }
+        val vm = ItemsViewModel(MutableStateFlow(many), SavedStateHandle(), mapping) {
+            synchronized(mappedOn) { mappedOn += Thread.currentThread().name.substringBefore(" @") }
+            it.name
+        }
+        try {
+            vm.onEvent(ItemsEvent.SetQuery("item"))
+            val state = runBlocking { withTimeout(10_000) { vm.state.first { !it.loading && it.filter.query == "item" } } }
+            assertThat(state.groups.sumOf { it.items.size }).isEqualTo(200)
+            assertThat(synchronized(mappedOn) { mappedOn.toSet() }).containsExactly("items-mapping")
+        } finally {
+            mapping.close()
+        }
     }
 }

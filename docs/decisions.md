@@ -799,3 +799,7 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 ## 2026-11-03 — Behind the wall capture (T054)
 - The capture stage is a pure rule (`BehindTheWall.captureStage`): Rough-in until the wall has a Rough-in photo, then Finished. It is fixed when the camera opens and kept in SavedStateHandle, so a result after process death lands at the same stage even if another phone added a photo meanwhile.
 - FL-BehindWall lives in `:house-model` `ui` beside the room page and outline screen it hands off to; only Field Log opens it (`HouseScreen.onBehindWall`). No new dependencies.
+
+## 2026-11-03 — Items list scroll cost (QA fix auto:jank:house-manual)
+- The House Manual Items list uses `LazyLayoutCacheWindow(ahead = 360.dp, behind = 120.dp)` (foundation 1.12, `@ExperimentalFoundationApi`, part of the approved Compose BOM; no new dependency). The suite's framestats put the over-budget frames in Compose's animation phase (rows composed as they scroll in, up to 38 ms); the cache window composes about a screen ahead in idle frame time. If the API changes in a later BOM, the fallback is the default prefetch.
+- `ItemsViewModel` maps rows on `Dispatchers.Default` (injectable), as FL-Jobs does; `ItemCategory.subtype` is a map lookup; the warranty line keeps one date formatter per locale instead of building one per row.
