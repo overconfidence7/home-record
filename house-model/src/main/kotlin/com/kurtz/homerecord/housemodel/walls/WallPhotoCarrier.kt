@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.walls
 
 import com.kurtz.homerecord.housemodel.plan.Pt
+import com.kurtz.homerecord.housemodel.plan.WallWinding
 
 /** A wall photo as the carrier sees it: its row, the wall it is on, its stage and outline. */
 data class CarriedPhoto(val rowId: String, val wallId: String, val stage: WallStage, val outline: WallOutline?)
@@ -42,6 +43,8 @@ object WallPhotoCarrier {
         photos: List<CarriedPhoto>,
     ): List<PhotoMove> {
         if (oldOutline.size < 2 || newPoints.size < 2 || photos.isEmpty()) return emptyList()
+        // Spans run along the old edge from its first corner; the photo's outline is in wall space (WallWinding, R10b).
+        val backward = WallWinding.runsBackward(oldOutline)
         val spans = newPoints.indices.associateWith { e -> spansOf(oldOutline, newPoints, e) }
         val piecesOfOld = spans.entries.flatMap { (e, list) -> list.map { it.oldEdge to e } }.groupBy({ it.first }, { it.second })
         val wallOfOldEdge = oldEdgeOfWall.entries.associate { (id, edge) -> edge to id }
@@ -70,7 +73,9 @@ object WallPhotoCarrier {
                     photo = best.second
                 }
                 val outline = photo.outline ?: FULL
-                val cut = crop(outline, span.start, span.end) ?: outline
+                val start = WallWinding.wallX(if (backward) span.end else span.start, backward)
+                val end = WallWinding.wallX(if (backward) span.start else span.end, backward)
+                val cut = crop(outline, start, end) ?: outline
                 if (photo.wallId == wallId) {
                     if (photo.outline == null || cut != photo.outline) moves += PhotoMove.Recrop(photo.rowId, cut)
                 } else {

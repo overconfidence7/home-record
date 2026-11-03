@@ -127,6 +127,27 @@ class PlanMeshBuilderTest {
     }
 
     @AcceptanceCriterion("AC-C20")
+    @Test fun wallPhotoIsNotMirroredWhenTheRoomsCornersRunCounterClockwise() {
+        // R10b: the same kitchen stored the other way round; its north wall is edge 2, running east to west. Facing it
+        // from inside, the photo's left edge is still the west end, so u grows with x.
+        val ccw = kitchen.copy(points = kitchen.points.reversed())
+        val face = builder.build(listOf(ccw), wallHeightIn = 96).part(MeshPartKey.WallFace("k", 2)).must()
+        for (v in 0 until face.vertexCount) {
+            val x = face.positions[v * 3]
+            val z = face.positions[v * 3 + 2]
+            assertTrue("north wall", z < 0)
+            assertEquals((x + m(72.0 - 2.25)) / m(144.0 - 4.5), face.uvs[v * 2].toDouble(), 1e-4)
+        }
+        // Every wall of both windings reads left to right from inside: the east wall's u grows southward (+z).
+        val east = builder.build(listOf(ccw), wallHeightIn = 96).part(MeshPartKey.WallFace("k", 1)).must()
+        val eastCw = builder.build(listOf(kitchen), wallHeightIn = 96).part(MeshPartKey.WallFace("k", 1)).must()
+        listOf(east, eastCw).forEach { f ->
+            val byZ = (0 until f.vertexCount).sortedBy { f.positions[it * 3 + 2] }
+            assertTrue(f.uvs[byZ.first() * 2] < f.uvs[byZ.last() * 2])
+        }
+    }
+
+    @AcceptanceCriterion("AC-C20")
     @Test fun aDoorIsAnOpeningFromTheFloor() {
         val withDoor = kitchen.copy(openings = listOf(PlanOpening("d", 0, OpeningKind.DOOR, 56, 32, 80)))
         val face = builder.build(listOf(withDoor), wallHeightIn = 96).part(MeshPartKey.WallFace("k", 0)).must()

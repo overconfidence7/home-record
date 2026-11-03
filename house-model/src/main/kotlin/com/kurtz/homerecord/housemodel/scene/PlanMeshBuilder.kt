@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemodel.scene
 import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.WallDeriver
+import com.kurtz.homerecord.housemodel.plan.WallWinding
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
@@ -12,8 +13,9 @@ import kotlin.math.min
  * Extrudes one floor's room outlines into 3D geometry for the 3D view:
  *
  * - every room edge becomes an inside wall face set in from the plan line by half the wall's thickness, facing into
- *   the room, with its own [MeshPartKey.WallFace] part so the wall's stage photo can texture it (u along the wall from
- *   its first corner, v from the top down);
+ *   the room, with its own [MeshPartKey.WallFace] part so the wall's stage photo can texture it (u in wall space,
+ *   left to right as you face the wall from inside the room whichever way the corners run ([WallWinding]), v from the
+ *   top down);
  * - an exterior edge (no other room shares it) also gets an outside face a further half thickness out, so the shell
  *   is a full wall seen from outside; a shared edge is half of a wall on each room's side;
  * - doors are openings from the floor up to the door's height; windows are openings whose head sits at
@@ -68,7 +70,7 @@ class PlanMeshBuilder(
                 val s0 = (inset[i] - a).dot(dir)
                 val s1 = (inset[(i + 1) % n] - a).dot(dir)
                 val faceStart = inset[i]
-                surface(face, faceStart, dir, s0, s1, holes, nIn, height, textured = true)
+                surface(face, faceStart, dir, s0, s1, holes, nIn, height, textured = true, backward = sign < 0)
                 if (face.hasTriangles()) parts += face.build()
 
                 val depth = if (isExterior) wallThicknessIn else half
@@ -175,7 +177,7 @@ class PlanMeshBuilder(
 
     /**
      * A wall surface from [start] along [dir] covering along-edge coordinates [s0]..[s1], full [height], with the
-     * [holes] left open. Textured surfaces get u along the wall and v from its top.
+     * [holes] left open. Textured surfaces get u in wall space (from the far corner when [backward]) and v from its top.
      */
     private fun surface(
         part: PartBuilder,
@@ -187,6 +189,7 @@ class PlanMeshBuilder(
         normal: V2,
         height: Double,
         textured: Boolean,
+        backward: Boolean = false,
     ) {
         // A wall shorter than the wall thickness has its inside face folded over by the corners: nothing to draw.
         if (s1 - s0 < EPS) return
@@ -195,7 +198,11 @@ class PlanMeshBuilder(
         val cuts = (listOf(lo, hi) + holes.flatMap { listOf(it.s0, it.s1) }.filter { it > lo && it < hi }).distinct().sorted()
         val n3 = V3(normal.x, 0.0, normal.y)
         fun point(s: Double) = start + dir * (s - s0)
-        fun uv(s: Double, y: Double) = if (textured) floatArrayOf(((s - s0) / (s1 - s0)).toFloat(), (1 - y / height).toFloat()) else ZERO_UV
+        fun uv(s: Double, y: Double) = if (textured) {
+            floatArrayOf(WallWinding.wallX(((s - s0) / (s1 - s0)).toFloat(), backward), (1 - y / height).toFloat())
+        } else {
+            ZERO_UV
+        }
         fun band(sa: Double, sb: Double, ya: Double, yb: Double) {
             if (yb - ya < EPS) return
             part.quad(

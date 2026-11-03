@@ -35,6 +35,17 @@ class WallOverlayCarrierTest {
         assertThat(WallOverlayCarrier.carry(rect, 2, 2, deeper, pts(0.5f, 0.5f))).isEqualTo(CarriedOverlay.Unchanged)
     }
 
+    @Test fun aSplitWallInARoomDrawnCounterClockwiseKeepsOverlaysLeftToRightFromInside() {
+        // R10b: corners stored the other way round; the north wall is edge 2, running east to west, and wall x still
+        // grows from the west (left) end as you face it from inside.
+        val ccw = rect.reversed()
+        val split = listOf(Pt(0, 120), Pt(144, 120), Pt(144, 0), Pt(72, 0), Pt(0, 0))
+        // 18" from the west corner: the west part is the new edge 3, a quarter along it from its left end.
+        assertOnWall(WallOverlayCarrier.carry(ccw, 2, 2, split, pts(0.125f, 0.4f)), 3, 0.25f, 0.4f)
+        // 126" from the west corner: the east part (edge 2), three quarters along from its left end at 72".
+        assertOnWall(WallOverlayCarrier.carry(ccw, 2, 2, split, pts(0.875f, 0.6f)), 2, 0.75f, 0.6f)
+    }
+
     @Test fun aSplitWallHandsEachOverlayToThePartItSatOn() {
         val split = listOf(Pt(0, 0), Pt(72, 0), Pt(144, 0), Pt(144, 120), Pt(0, 120))
         // 36" from the west corner stays on the first part, halfway along it.

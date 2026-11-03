@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.overlays
 
 import com.kurtz.homerecord.housemodel.plan.Pt
+import com.kurtz.homerecord.housemodel.plan.WallWinding
 import kotlin.math.roundToInt
 
 /** Where a wall overlay goes when its room is reshaped (R10). */
@@ -53,7 +54,13 @@ object WallOverlayCarrier {
             if (!merged) return CarriedOverlay.Unchanged
         }
 
-        val plan = points.map { p -> (a.x + p.x * (b.x - a.x)) to (a.y + p.x * (b.y - a.y)) }
+        // Overlay x is wall space, left to right from inside the room (WallWinding, R10b); the edge runs from a to b.
+        val oldBackward = WallWinding.runsBackward(oldOutline)
+        val newBackward = WallWinding.runsBackward(newPoints)
+        val plan = points.map { p ->
+            val t = WallWinding.along(p.x, oldBackward)
+            (a.x + t * (b.x - a.x)) to (a.y + t * (b.y - a.y))
+        }
         fun along(edge: Int, x: Float, y: Float): Float {
             val c = newPoints[edge]
             val d = newPoints[(edge + 1) % newPoints.size]
@@ -72,7 +79,7 @@ object WallOverlayCarrier {
             ?: matchedEdge
             ?: return CarriedOverlay.OnPlan(plan.map { (x, y) -> OverlayPoint(x.roundToInt().toFloat(), y.roundToInt().toFloat()) })
 
-        return CarriedOverlay.OnWall(target, plan.zip(points) { (x, y), p -> OverlayPoint(along(target, x, y).coerceIn(0f, 1f), p.y) })
+        return CarriedOverlay.OnWall(target, plan.zip(points) { (x, y), p -> OverlayPoint(WallWinding.wallX(along(target, x, y).coerceIn(0f, 1f), newBackward), p.y) })
     }
 
     private fun onLine(a: Pt, b: Pt, p: Pt): Boolean =

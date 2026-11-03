@@ -37,6 +37,23 @@ class WallPhotoCarrierTest {
         assertOutline(copy.outline, box(0.5f, 0.2f, 0.9f, 0.8f))
     }
 
+    @AcceptanceCriterion("AC-C17")
+    @Test fun aSplitWallInARoomDrawnCounterClockwiseKeepsTheHalfOnItsSide() {
+        // R10b: corners stored the other way round, north wall on edge 2 running east to west. The photo's left half
+        // is the west end as you face the wall from inside, so the part on the west (new edge 3) gets it.
+        val ccw = square.reversed()
+        val split = listOf(Pt(0, 120), Pt(144, 120), Pt(144, 0), Pt(72, 0), Pt(0, 0))
+        val photo = CarriedPhoto("p1", "north", WallStage.FINISHED, box(0.1f, 0.2f, 0.9f, 0.8f))
+        val moves = WallPhotoCarrier.carry(
+            ccw, mapOf("south" to 0, "east" to 1, "north" to 2, "west" to 3),
+            mapOf(0 to "south", 1 to "east", 2 to "north", 3 to "new", 4 to "west"), split, listOf(photo),
+        )
+        assertOutline(moves.filterIsInstance<PhotoMove.Recrop>().single().outline, box(0.5f, 0.2f, 0.9f, 0.8f))
+        val copy = moves.filterIsInstance<PhotoMove.Copy>().single()
+        assertThat(copy.toWallId).isEqualTo("new")
+        assertOutline(copy.outline, box(0.1f, 0.2f, 0.5f, 0.8f))
+    }
+
     @AcceptanceCriterion("AC-C27")
     @Test fun theCutFollowsThePhotosPerspectiveSoOverlaysStayOnTheirPart() {
         // A wall shot at an angle: the far end is smaller, so the wall's midpoint is not the outline's midpoint.

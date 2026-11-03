@@ -767,3 +767,12 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   overlay is the one the wall was opened on (from the room's Overlays list, an item's Links or Home search), since
   that is what the person came to look at. Rule in pure `WallBack` (house-model). Found by the H11 flow, whose
   `hm_back` only unpicked the overlay and left it on the wall screen.
+
+## 2026-11-03 Wall space follows the inside face, not the corner order (R10b)
+
+- Wall space (wall photo outline, overlay points, the 3D wall face's u) runs left to right as you stand in the room
+  facing the wall. Rooms are not normalized to one winding (that would renumber edges, walls, openings and overlays);
+  instead the pure `WallWinding` rule says whether an edge's wall space starts at its first corner (corners clockwise
+  on the plan, the default for drawn rectangles) or its second (counter-clockwise, e.g. after a corner is dragged
+  across). `PlanMeshBuilder` and both reshape carriers (`WallPhotoCarrier`, `WallOverlayCarrier`) go through it. The
+  2D wall screens already show the photo as taken, so stored data needs no migration.
