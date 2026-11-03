@@ -730,3 +730,18 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
   layer color over a surface halo, spots as discs with the kind's icon. Wall overlays on the blueprint and 3D stay T053.
 - `OverlayTarget.Room` became `OverlayTarget.Plan`: a search result or a room-page row for a plan overlay opens the plan
   editor in Overlays mode on the overlay's floor with it picked (`PlanKey.overlayId`, `JobPlanKey.overlayId`).
+
+## 2026-11-03 R10: overlays through a plan reshape, 3D texture memory
+- Wall overlays are stored in wall space (AC-C27), so a wall whose corners move (a side dragged, a length typed) keeps
+  its overlays at the same place between its corners, the way the wall photo outlined corner to corner stretches with
+  it. A plan edit that changes which wall runs along a stretch moves the overlays by their place along the line
+  instead (`WallOverlayCarrier`): a wall split by a new corner hands each overlay to the part it sat on (a run across
+  the corner goes where most of its points are and stops at the corner); two walls merged by removing the corner
+  between them keep every overlay where it was on the longer wall; an overlay whose wall is gone with nothing left on
+  its line (a notch removed) goes onto the floor plan at its place along the old wall. Before R10 a split stretched the
+  overlays over the shorter part and a removed wall deleted them.
+- A split wall's photo still stays whole on one part (R10a crops it per part).
+- The 3D view releases the textures of pictures the shown scene no longer has (another floor) once their nodes are
+  gone, and no longer keeps the decoded bitmaps after upload: switching floors back and forth used to pile up every
+  floor's textures past the 64 MB budget sized for one scene. A rotation rebuilds the view and its engine and releases
+  everything as before.

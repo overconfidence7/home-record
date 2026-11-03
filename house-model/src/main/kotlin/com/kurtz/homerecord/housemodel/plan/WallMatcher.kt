@@ -20,7 +20,7 @@ data class WallMatch(val wallOfEdge: Map<Int, String>, val removed: List<String>
  */
 class WallMatcher {
     fun match(oldOutline: List<Pt>, saved: List<SavedWall>, newPoints: List<Pt>): WallMatch {
-        val oldPoints = aligned(oldOutline, newPoints)
+        val oldPoints = alignedOutline(oldOutline, newPoints)
         val oldEdges = saved.filter { it.edgeIndex in oldPoints.indices }.distinctBy { it.edgeIndex }
             .map { Edge(it.id, oldPoints, it.edgeIndex) }
         val unusable = saved.map { it.id } - oldEdges.map { it.id }.toSet()
@@ -47,19 +47,21 @@ class WallMatcher {
         return WallMatch(wallOfEdge, unusable + oldEdges.map { it.id }.filter { it !in used })
     }
 
-    /** The old outline shifted by the room's move, when lining up the corner nearest the origin explains more edges. */
-    private fun aligned(old: List<Pt>, new: List<Pt>): List<Pt> {
-        if (old.isEmpty() || new.isEmpty()) return old
-        val dx = new.minOf { it.x } - old.minOf { it.x }
-        val dy = new.minOf { it.y } - old.minOf { it.y }
-        if (dx == 0 && dy == 0) return old
-        val moved = old.map { Pt(it.x + dx, it.y + dy) }
-        return if (unmovedEdges(moved, new) > unmovedEdges(old, new)) moved else old
-    }
+    companion object {
+        /** The old outline shifted by the room's move, when lining up the corner nearest the origin explains more edges. */
+        fun alignedOutline(old: List<Pt>, new: List<Pt>): List<Pt> {
+            if (old.isEmpty() || new.isEmpty()) return old
+            val dx = new.minOf { it.x } - old.minOf { it.x }
+            val dy = new.minOf { it.y } - old.minOf { it.y }
+            if (dx == 0 && dy == 0) return old
+            val moved = old.map { Pt(it.x + dx, it.y + dy) }
+            return if (unmovedEdges(moved, new) > unmovedEdges(old, new)) moved else old
+        }
 
-    private fun unmovedEdges(old: List<Pt>, new: List<Pt>): Int {
-        val edges = new.indices.map { setOf(new[it], new[(it + 1) % new.size]) }.toSet()
-        return old.indices.count { setOf(old[it], old[(it + 1) % old.size]) in edges }
+        private fun unmovedEdges(old: List<Pt>, new: List<Pt>): Int {
+            val edges = new.indices.map { setOf(new[it], new[(it + 1) % new.size]) }.toSet()
+            return old.indices.count { setOf(old[it], old[(it + 1) % old.size]) in edges }
+        }
     }
 
     private class Edge(val id: String, points: List<Pt>, index: Int) {

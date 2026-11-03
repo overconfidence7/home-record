@@ -315,7 +315,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T052c: overlays on the floor plan (draw in the plan editor in plan inches, edit and delete) and overlay search on the Search screen through `SearchEngine` (AC-C25, AC-C28, AC-C38 overlays part)
     - [x] T052c1: overlay search on Home through `SearchEngine`: `SearchIndexBuilder` indexes overlays (label, kind name, kind search words, room; unlabeled ones titled by kind), result rows show the kind's icon in its layer color, a result opens its wall with it picked (`OverlayTarget`; a plan overlay opens its room); H11 searches "cold water" and opens the pipe (AC-C28, AC-C38 overlays part)
     - [x] T052c2: overlays on the floor plan: draw in the plan editor in plan inches (run or spot, same form), pick, drag points, edit and delete; blueprint draws them (AC-C25, AC-C28)
-- [ ] R10: Review T048–T052; texture memory under rotation; overlay coordinates after a wall is resized in the editor
+- [x] R10: Review T048–T052; texture memory under rotation; overlay coordinates after a wall is resized in the editor
+  - [ ] R10a: a wall split by a new corner keeps its photos whole on the part that kept its id: crop each stage's outline to the part (`WallSpaceMapper.wallToPhoto` sub-quad), copy the photo row to the new part with its own crop, rebuild both textures; merged walls likewise (AC-C17, AC-C19, AC-C27)
 - [ ] T053: Overlays and item markers in 3D with layer toggles; tap marker opens the record; blueprint layers show overlays and items (acceptance: AC-C23, AC-C15 overlays part)
 - [ ] T054: Field Log behind the wall: room → wall → capture writes Rough-in; second capture after drywall writes Finished; overlays carry stage; HM-Room shows stages (acceptance: AC-F49, AC-H8, AC-H9)
 - [ ] T055: Item positions: place an item on the plan (drag marker) and on a wall; item page "Where" section; markers in blueprint and 3D (acceptance: AC-C30 position, AC-C23)

@@ -79,12 +79,17 @@ fun FloorSceneView(
     // Sized for every picture the scene may show at any stage, so switching stages never needs a bigger budget.
     val texturePx = remember(scene) { TextureBudget.maxSidePx(scene.pictures.values.flatMap { it.values }.distinct().size) }
     val pictures = remember(batches) { batches.mapNotNull { (it.material as? DrawMaterial.Picture)?.path }.distinct() }
-    val bitmaps by produceState(emptyMap<String, Bitmap>(), pictures, texturePx) {
-        value = withContext(Dispatchers.IO) {
-            pictures.filterNot(resources::hasTexture).mapNotNull { path -> decode(path, texturePx)?.let { path to it } }.toMap()
+    // Decoded pictures are handed to Filament and not kept: the GPU copy is the only one held while the screen is open.
+    LaunchedEffect(pictures, texturePx) {
+        pictures.filterNot(resources::hasTexture).forEach { path ->
+            val bitmap = withContext(Dispatchers.IO) { decode(path, texturePx) } ?: return@forEach
+            resources.addTexture(path, bitmap)
         }
     }
-    LaunchedEffect(bitmaps) { bitmaps.forEach { (path, bitmap) -> resources.addTexture(path, bitmap) } }
+    // Another floor's pictures are released once its nodes are gone (R10): flipping floors, rotating or coming back
+    // never holds more than this scene's pictures (every stage, so a stage switch needs no reload) within the budget.
+    val keep = remember(scene, pictures) { scene.pictures.values.flatMap { it.values }.toSet() + pictures }
+    LaunchedEffect(keep) { resources.retainOnly(keep) }
 
     val stats = remember(openedAtNanos) { FrameStats(openedAtNanos) }
     val draws by rememberUpdatedState(geometries.size)
@@ -217,6 +222,15 @@ private class SceneResources(private val engine: Engine, private val loader: Mat
         } catch (e: Exception) {
             // A picture the GPU refuses leaves the wall in its tint.
             Log.w(TAG, "Wall texture not loaded", e)
+        }
+    }
+
+    /** Releases the textures of pictures not in [paths]; called after the nodes that drew them are gone. */
+    fun retainOnly(paths: Set<String>) {
+        textures.keys.filter { it !in paths }.forEach { path ->
+            val (texture, material) = textures.remove(path) ?: return@forEach
+            loader.destroyMaterialInstance(material)
+            engine.safeDestroyTexture(texture)
         }
     }
 

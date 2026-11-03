@@ -290,6 +290,77 @@ class HomeRepositoryTest {
         }
     }
 
+    // R10: overlay coordinates after a wall is resized, split or removed in the editor.
+    @AcceptanceCriterion("AC-C27")
+    @Test fun wallOverlaysFollowTheirWallThroughAResizeASplitAndARemovedCorner() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val kitchen = PlanRoom.rectangle("k1", "Kitchen", "KITCHEN", 0, 0, 144, 120)
+        repo.savePlan(main.id, listOf(kitchen))
+        val north = db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id
+        fun overlay(oid: String, vararg xy: Float) = com.kurtz.homerecord.core.data.OverlayEntity(
+            id = oid, homeId = id, roomId = "k1", wallId = north, kind = "WATER_COLD",
+            pointsJson = com.kurtz.homerecord.housemodel.overlays.OverlayPoints.encode(
+                xy.toList().chunked(2).map { (x, y) -> com.kurtz.homerecord.housemodel.overlays.OverlayPoint(x, y) },
+            ),
+            createdAt = 1, updatedAt = 1,
+        )
+        db.overlayDao().upsert(overlay("west", 0.25f, 0.5f))
+        db.overlayDao().upsert(overlay("east", 0.75f, 0.5f))
+        fun points(oid: String) = com.kurtz.homerecord.housemodel.overlays.OverlayPoints.decode(checkNotNull(db.overlayDao().get(oid)).pointsJson)
+
+        // Dragging the east side out stretches the north wall; both overlays keep their wall-space points.
+        val wider = kitchen.resizedEdge(1, 168)
+        repo.savePlan(main.id, listOf(wider))
+        assertThat(checkNotNull(db.overlayDao().get("west")).wallId).isEqualTo(north)
+        assertThat(points("west").single().x).isEqualTo(0.25f)
+        assertThat(points("east").single().x).isEqualTo(0.75f)
+
+        // A corner at 84" splits the 168" north wall: each overlay goes to the part it sat on, at the same place.
+        changes.clear()
+        repo.savePlan(main.id, listOf(wider.withCornerOnEdge(0, Pt(84, 0))))
+        val walls = db.wallDao().listFor("k1").associate { it.edgeIndex to it.id }
+        val west = checkNotNull(db.overlayDao().get("west"))
+        val east = checkNotNull(db.overlayDao().get("east"))
+        assertThat(setOf(west.wallId, east.wallId)).containsExactly(walls[0], walls[1])
+        assertThat(west.wallId).isEqualTo(walls[0])
+        assertThat(points("west").single().x).isWithin(1e-4f).of(0.5f)
+        assertThat(points("east").single().x).isWithin(1e-4f).of(0.5f)
+        assertThat(changes).contains("overlay/east")
+
+        // Removing that corner again merges the two parts; nothing is deleted and both sit where they were.
+        repo.savePlan(main.id, listOf(wider))
+        val merged = db.wallDao().listFor("k1").single { it.edgeIndex == 0 }.id
+        assertThat(checkNotNull(db.overlayDao().get("west")).wallId).isEqualTo(merged)
+        assertThat(checkNotNull(db.overlayDao().get("east")).wallId).isEqualTo(merged)
+        assertThat(points("west").single().x).isWithin(1e-4f).of(0.25f)
+        assertThat(points("east").single().x).isWithin(1e-4f).of(0.75f)
+    }
+
+    @AcceptanceCriterion("AC-C27")
+    @Test fun anOverlayOnAWallThatIsGoneMovesOntoThePlanInsteadOfBeingDeleted() = runTest {
+        val id = colonial()
+        val main = repo.observeFloors(id).first().single { it.name == "Main" }
+        val den = PlanRoom("d1", "Den", "OFFICE", listOf(Pt(0, 0), Pt(144, 0), Pt(144, 60), Pt(96, 60), Pt(96, 120), Pt(0, 120)))
+        repo.savePlan(main.id, listOf(den))
+        val notch = db.wallDao().listFor("d1").single { it.edgeIndex == 2 }.id
+        db.overlayDao().upsert(
+            com.kurtz.homerecord.core.data.OverlayEntity(
+                id = "gas", homeId = id, roomId = "d1", wallId = notch, kind = "GAS",
+                pointsJson = """[{"x":0.5,"y":0.5}]""", createdAt = 1, updatedAt = 1,
+            ),
+        )
+
+        repo.savePlan(main.id, listOf(den.withoutCorner(3)))
+
+        val gas = checkNotNull(db.overlayDao().get("gas"))
+        assertThat(gas.wallId).isNull()
+        assertThat(gas.roomId).isEqualTo("d1")
+        val p = com.kurtz.homerecord.housemodel.overlays.OverlayPoints.decode(gas.pointsJson).single()
+        assertThat(p.x).isEqualTo(120f)
+        assertThat(p.y).isEqualTo(60f)
+    }
+
     @Test fun savePlanOnlyRecordsRowsThatChanged() = runTest {
         val id = colonial()
         val main = repo.observeFloors(id).first().single { it.name == "Main" }

@@ -15,7 +15,12 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.SavedWall
 import com.kurtz.homerecord.housemodel.plan.WallDeriver
+import com.kurtz.homerecord.housemodel.plan.WallMatch
 import com.kurtz.homerecord.housemodel.plan.WallMatcher
+import com.kurtz.homerecord.housemodel.plan.Pt
+import com.kurtz.homerecord.housemodel.overlays.CarriedOverlay
+import com.kurtz.homerecord.housemodel.overlays.OverlayPoints
+import com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrier
 import com.kurtz.homerecord.core.data.RoomEntity
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
@@ -204,11 +209,42 @@ class HomeRepository(
         return FloorPlan(placed, unplaced)
     }
 
+    /** Moves the room's wall overlays onto the walls of its new outline (WallOverlayCarrier, AC-C27, R10). */
+    private suspend fun carryWallOverlays(
+        room: PlanRoom,
+        oldOutline: List<Pt>,
+        stored: List<WallEntity>,
+        match: WallMatch,
+        wallOfEdge: Map<Int, String>,
+        at: Long,
+    ) {
+        val oldEdgeOfWall = stored.associate { it.id to it.edgeIndex }
+        val newEdgeOfWall = match.wallOfEdge.entries.associate { (edge, id) -> id to edge }
+        val aligned = WallMatcher.alignedOutline(oldOutline, room.points)
+        db.overlayDao().listForRoom(room.id).forEach { row ->
+            val wallId = row.wallId ?: return@forEach
+            val oldEdge = oldEdgeOfWall[wallId] ?: return@forEach
+            val points = OverlayPoints.decode(row.pointsJson)
+            val moved = when (val carried = WallOverlayCarrier.carry(aligned, oldEdge, newEdgeOfWall[wallId], room.points, points)) {
+                CarriedOverlay.Unchanged -> return@forEach
+                is CarriedOverlay.OnWall -> {
+                    val target = wallOfEdge[carried.edgeIndex] ?: return@forEach
+                    if (target == wallId && carried.points == points) return@forEach
+                    row.copy(wallId = target, pointsJson = OverlayPoints.encode(carried.points))
+                }
+                is CarriedOverlay.OnPlan -> row.copy(wallId = null, pointsJson = OverlayPoints.encode(carried.points))
+            }
+            db.overlayDao().upsert(moved.copy(updatedAt = at))
+            onChange("overlay", row.id)
+        }
+    }
+
     /**
      * Writes the walls, doors, windows and stairs of [room]. Every edge has a wall row; a wall keeps its id through a
      * reshape by matching the stored outline to the new one by endpoints (WallMatcher), so its photos stay on it.
-     * Walls whose edge is gone are soft deleted with their wall photos and wall overlays, and items on them stay in the
-     * room off the wall. Runs before the room row itself is written.
+     * Walls whose edge is gone are soft deleted with their wall photos, and items on them stay in the room off the wall.
+     * Wall overlays follow WallOverlayCarrier: onto the wall now running where they sat (a split or merged wall), else
+     * onto the floor plan (R10). Runs before the room row itself is written.
      */
     private suspend fun saveOpeningsAndStairs(room: PlanRoom, allRooms: List<PlanRoom>, ceilingHeightIn: Int, at: Long) {
         val derived = WallDeriver().derive(allRooms).filter { it.roomId == room.id }.associateBy { it.edgeIndex }
@@ -224,7 +260,6 @@ class HomeRepository(
         }
         match.removed.forEach { wallId ->
             db.wallPhotoDao().listFor(wallId).forEach { db.wallPhotoDao().softDelete(it.id, at); onChange("wall_photo", it.id) }
-            db.overlayDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach { db.overlayDao().softDelete(it.id, at); onChange("overlay", it.id) }
             db.itemDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach {
                 db.itemDao().upsert(it.copy(wallId = null, updatedAt = at))
                 onChange("item", it.id)
@@ -249,6 +284,7 @@ class HomeRepository(
             }
             wall.id
         }
+        carryWallOverlays(room, oldOutline, stored, match, wallOfEdge, at)
         room.openings.forEach { o ->
             val wallId = wallOfEdge[o.edgeIndex] ?: return@forEach
             val row = existingOpenings[o.id]
