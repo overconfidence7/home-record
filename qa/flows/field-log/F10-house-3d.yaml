@@ -214,10 +214,13 @@ appId: com.kurtz.homerecord.fieldlog
 # AC-C25, AC-C26: a drain run with its own photo (camera or gallery) and depth
 - tapOn:
     id: "fl_wall_add_overlay"
+# Both taps must land on fl_wall_picture: with the Rough-in photo it spans
+# y 472-1136 of 2400 (20%-47%) on the 1080x2400 emulator; 60% was below it.
+# x 25% stays clear of the wire run drawn above (x 50%-80%).
 - tapOn:
-    point: "40%,45%"
+    point: "25%,28%"
 - tapOn:
-    point: "40%,60%"
+    point: "25%,42%"
 - assertVisible: "2 points.*"
 - tapOn:
     id: "fl_wall_draw_next"
