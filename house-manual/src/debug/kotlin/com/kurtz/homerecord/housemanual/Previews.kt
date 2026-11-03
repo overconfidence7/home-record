@@ -1257,3 +1257,27 @@ fun RoomOverlaysPreview() = Frame {
     RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", walls = kitchenWalls, wallStage = WallStage.ROUGH_IN,
         canOpenWalls = true, overlays = sinkWallOverlays.take(3) + sinkWallOverlays[4]), {})
 }
+
+/** Place on plan (AC-C30 position): the refrigerator placed against the Kitchen's left wall on the Main floor. */
+private fun itemPlaceState(spot: com.kurtz.homerecord.housemodel.items.ItemPlace?, rooms: List<PlanRoom> = houseRooms) =
+    com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(
+        loading = false, itemId = "i9", itemName = "Refrigerator",
+        iconName = ItemCategory.subtype("refrigerator")?.iconName ?: "Kitchen",
+        floors = floors, floorId = "f2", rooms = rooms, spot = spot,
+    )
+
+@ThemePreviews
+@Composable
+fun ItemPlacePreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(com.kurtz.homerecord.housemodel.items.ItemPlace("r1", 24, 110)), {})
+}
+
+/** Place on plan before the item has a spot: the hint asks for a tap. */
+@ThemePreviews
+@Composable
+fun ItemPlaceUnplacedPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(null), {}) }
+
+/** Place on plan on a floor with no rooms drawn: the editor is one tap away. */
+@ThemePreviews
+@Composable
+fun ItemPlaceEmptyFloorPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(null, emptyList()), {}) }

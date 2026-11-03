@@ -259,4 +259,12 @@
     <string name="search_kind_overlay">Overlay</string>
     <string name="item_detail_links">Links</string>
     <string name="item_detail_link_open">Open wall</string>
+    <!-- Item page Where section (AC-C30 position) -->
+    <string name="item_detail_where">Where</string>
+    <string name="item_detail_where_placed">On the plan</string>
+    <string name="item_detail_where_not_placed">Not on the plan yet. Tap to place it.</string>
+    <string name="item_detail_where_off_plan">Not on a floor, so it stays off the plan.</string>
+    <string name="item_detail_where_no_room">No room</string>
+    <string name="item_detail_where_place">Place on plan</string>
+    <string name="item_detail_where_move">Move on plan</string>
 </resources>

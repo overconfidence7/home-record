@@ -112,6 +112,8 @@ sealed interface ItemDetailEvent {
     data class OpenDocument(val id: String) : ItemDetailEvent
     /** A Links row: open the wall of [link]'s overlay with it picked. */
     data class OpenOverlay(val link: OverlayLink) : ItemDetailEvent
+    /** The Where row: open Place on plan (AC-C30 position). */
+    data object Place : ItemDetailEvent
     data object ShowAttach : ItemDetailEvent
     data object HideAttach : ItemDetailEvent
     data class AttachDocument(val id: String) : ItemDetailEvent

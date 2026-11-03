@@ -478,4 +478,15 @@
     <string name="behind_wall_open_room">Mark pipes and wires</string>
     <string name="behind_wall_room_subtitle">Behind the wall · %1$s</string>
     <string name="behind_wall_photograph">Photograph %1$s</string>
+    <!-- Place on plan (AC-C30 position) -->
+    <string name="item_place_title">Place on plan</string>
+    <string name="item_place_done">Done</string>
+    <string name="item_place_hint">Tap the plan where this item sits.</string>
+    <string name="item_place_hint_set">In %1$s. Tap the plan to move it.</string>
+    <string name="item_place_remove">Remove from plan</string>
+    <string name="item_place_empty_title">No rooms on %1$s yet</string>
+    <string name="item_place_empty_body">Draw the rooms on this floor, then come back and tap where the item sits.</string>
+    <string name="item_place_missing_title">Item not found</string>
+    <string name="item_place_missing_body">This item was deleted.</string>
+    <string name="item_place_back">Go back</string>
 </resources>

@@ -25,6 +25,8 @@ import kotlinx.serialization.Serializable
 @Serializable data object ItemsKey : NavKey
 
 @Serializable data class ItemDetailKey(val itemId: String) : NavKey
+/** Place on plan for one item (AC-C30 position). */
+@Serializable data class ItemPlaceKey(val itemId: String) : NavKey
 @Serializable data class ItemEditKey(val itemId: String? = null, val roomId: String? = null, val subtypeId: String? = null, val scanPlate: Boolean = false) : NavKey
 
 @Serializable data object ContactsKey : NavKey

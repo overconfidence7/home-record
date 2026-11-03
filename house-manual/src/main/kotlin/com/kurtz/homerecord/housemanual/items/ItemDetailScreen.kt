@@ -42,6 +42,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.PinDrop
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.SearchOff
@@ -126,6 +128,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 Hero(detail)
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
                 DetailsSection(detail, onEvent)
+                WhereSection(detail, onEvent)
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
                 ConsumablesSection(state.consumables, onEvent)
@@ -265,6 +268,34 @@ private fun DetailsSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Uni
                 modifier = Modifier.testTag("hm_item_detail_manual"),
             )
         }
+    }
+}
+
+/**
+ * Where the item is (AC-C30 position): its room and whether it is on the plan. The row opens Place on plan; items filed
+ * under Exterior or Whole house have no spot on a floor, so their row only says so.
+ */
+@Composable
+internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
+    val i = detail.item
+    val pseudo = com.kurtz.homerecord.housemodel.items.PseudoRooms.isPseudo(i.roomId) || i.roomId == null
+    val placed = !pseudo && i.planX != null && i.planY != null
+    Section(stringResource(R.string.item_detail_where), Modifier.testTag("hm_item_detail_where")) {
+        RecordListItem(
+            headline = detail.roomName.ifBlank { stringResource(R.string.item_detail_where_no_room) },
+            supporting = stringResource(
+                when {
+                    pseudo -> R.string.item_detail_where_off_plan
+                    placed -> R.string.item_detail_where_placed
+                    else -> R.string.item_detail_where_not_placed
+                },
+            ),
+            leading = { Icon(if (placed) Icons.Rounded.PinDrop else Icons.Rounded.Place, contentDescription = null) },
+            trailing = if (pseudo) null else ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }),
+            onClick = if (pseudo) null else ({ onEvent(ItemDetailEvent.Place) }),
+            onClickLabel = stringResource(if (placed) R.string.item_detail_where_move else R.string.item_detail_where_place),
+            modifier = Modifier.testTag("hm_item_detail_place"),
+        )
     }
 }
 

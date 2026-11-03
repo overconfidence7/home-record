@@ -809,3 +809,8 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - Changed (tasks N001–N005 in PLAN.md): CR2n2 reversed, a removed wall's photos and overlays stay on the room with no wall; T034b gets a settings endpoint readable by every member so crew clock-ins obey require-GPS and distance; CR2l3 crew and sub may delete their own photos (author column, Room bump, server rule); R09 tasks become private on the server (crew/sub receive only tasks assigned to them); the builder may make the four housekeeping edits to Nate's files named in CR1/CR2f2/CR2m1/CR2m3 and add the two dependencies to CLAUDE.md's table.
 - Process: a "Decision to confirm" unanswered for 7 days is confirmed and moves here (Nate, 2026-11-03).
 
+
+## 2026-11-03 — Item positions on the plan (T055b)
+- An item is in the room it is placed in: a tap inside another room on Place on plan moves the item to that room; a tap outside every room lands 6" inside the nearest room (`ItemPlacement`). Changing the room on Edit takes the item off the plan (its spot belonged to the old room).
+- Exterior and Whole house items have no floor, so the Where row says they stay off the plan and opens nothing.
+- Place on plan saves each tap right away, the way the plan editor saves each edit, so there is no unsaved state and Back never asks. The screen lives in `:house-model` `ui` so Field Log's item page (T062) can reuse it. A tap moves the marker; dragging it is T055d. No new dependencies.

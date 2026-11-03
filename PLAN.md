@@ -327,6 +327,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T054: Field Log behind the wall: room → wall → capture writes Rough-in; second capture after drywall writes Finished; overlays carry stage; HM-Room shows stages (acceptance: AC-F49, AC-H8, AC-H9)
 - [ ] T055: Item positions: place an item on the plan (drag marker) and on a wall; item page "Where" section; markers in blueprint and 3D (acceptance: AC-C30 position, AC-C23)
   - [x] T055a: blueprint layer marks open their record on tap (overlay: its wall with it picked; item: its page), as the 3D markers do, and room names keep clear of marks the way they keep clear of stairs
+  - [x] T055b: place an item on the plan: `ItemPlacement` `[unit]` (a tap puts the item in the room under it, a tap outside lands 6" inside the nearest room), `ItemRepository.setPlanSpot` (moving the item to another room on Edit takes it off the plan), shared Place on plan screen (floor chips, tap to place or move, Remove from plan, empty floor offers Edit plan), item page Where section (AC-C30 position)
+  - [ ] T055c: place an item on a wall (wall picker from the room's walls, spot in wall space like overlays; needs a migration for the item's wall x/y) and draw wall items in 3D on their wall (AC-C30 position, AC-C23)
+  - [ ] T055d: drag the marker on Place on plan (today a tap moves it) and show the home's other placed items faintly for reference
 - [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
 
 ## N Nate's corrections (added 2026-11-03 after the decisions pass; do these after T055 and V4, before M5)

@@ -39,6 +39,8 @@ fun ItemDetailRoute(
     overlays: OverlayRepository? = null,
     /** Opens the wall of a linked overlay with it picked; only overlays on a wall in a room come here. */
     onOpenOverlay: (OverlayLink) -> Unit = {},
+    /** Opens Place on plan for this item (AC-C30 position). */
+    onPlace: () -> Unit = {},
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -76,6 +78,7 @@ fun ItemDetailRoute(
             ItemDetailEvent.Edit -> onEdit()
             is ItemDetailEvent.OpenDocument -> onOpenDocument(it.id)
             is ItemDetailEvent.OpenOverlay -> onOpenOverlay(it.link)
+            ItemDetailEvent.Place -> onPlace()
             ItemDetailEvent.UploadDocument -> picker.launch(arrayOf("application/pdf", "image/*"))
             ItemDetailEvent.ScanDocument -> scan()
             is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }

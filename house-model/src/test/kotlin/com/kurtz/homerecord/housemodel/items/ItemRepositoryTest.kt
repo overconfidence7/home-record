@@ -152,4 +152,29 @@ class ItemRepositoryTest {
         assertThat(tasksLeft).containsExactly(other)
         assertThat(repo.observeHomeSummary("h1", emptyMap()).first().attention.map { it.itemId }).doesNotContain(id)
     }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun placingAnItemSavesItsSpotAndRoomAndRemovingKeepsTheRoom() = runTest {
+        val id = checkNotNull(repo.save("h1", furnace().copy(roomId = "k")))
+        changes.clear()
+        repo.setPlanSpot(id, ItemPlace("l", 200, 30))
+        val placed = checkNotNull(repo.get(id))
+        assertThat(listOf(placed.roomId, placed.planX, placed.planY)).containsExactly("l", 200, 30).inOrder()
+        assertThat(changes).containsExactly("item/$id")
+        assertThat(repo.observeItem(id).first()?.planX).isEqualTo(200)
+        repo.setPlanSpot(id, null)
+        val removed = checkNotNull(repo.get(id))
+        assertThat(listOf(removed.roomId, removed.planX, removed.planY)).containsExactly("l", null, null).inOrder()
+    }
+
+    @AcceptanceCriterion("AC-C30")
+    @Test fun editingKeepsTheSpotUnlessTheRoomChanges() = runTest {
+        val id = checkNotNull(repo.save("h1", furnace().copy(roomId = "k")))
+        repo.setPlanSpot(id, ItemPlace("k", 40, 50))
+        repo.save("h1", checkNotNull(repo.draftFor(id)).copy(make = "Carrier"))
+        assertThat(repo.get(id)?.planX).isEqualTo(40)
+        repo.save("h1", checkNotNull(repo.draftFor(id)).copy(roomId = "l"))
+        val moved = checkNotNull(repo.get(id))
+        assertThat(listOf(moved.roomId, moved.planX, moved.planY)).containsExactly("l", null, null).inOrder()
+    }
 }

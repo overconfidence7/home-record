@@ -145,6 +145,25 @@ class ItemRepository(
         return save(item.homeId, draft.copy(name = "${draft.name} $copySuffix"))
     }
 
+    /** One item as it changes; null once it is deleted. */
+    fun observeItem(id: String): Flow<ItemEntity?> = db.itemDao().observeOne(id)
+
+    /**
+     * Places item [itemId] at [place] on the plan, moving it into that room (AC-C30 position), or takes it off the plan
+     * when [place] is null (it keeps its room).
+     */
+    suspend fun setPlanSpot(itemId: String, place: ItemPlace?) {
+        val item = get(itemId) ?: return
+        val moved = place != null && place.roomId != item.roomId
+        db.itemDao().upsert(
+            item.copy(
+                roomId = place?.roomId ?: item.roomId, planX = place?.xIn, planY = place?.yIn,
+                wallId = item.wallId.takeIf { !moved }, updatedAt = now(),
+            ),
+        )
+        onChange("item", itemId)
+    }
+
     /** The Registered toggle on the warranty section (AC-C33). No-op when the item has no warranty row. */
     suspend fun setRegistered(itemId: String, registered: Boolean) {
         val w = db.warrantyDao().listFor(itemId).firstOrNull() ?: return
@@ -178,7 +197,10 @@ class ItemRepository(
                     manufacturedOn = draft.manufacturedOn.clean(), purchasedOn = draft.purchasedOn.clean(),
                     inServiceOn = draft.inServiceOn.clean(), priceCents = draft.priceCents, vendor = draft.vendor.clean(),
                     manualUrl = draft.manualUrl.clean(), notes = draft.notes.clean(),
-                    planX = existing?.planX, planY = existing?.planY, wallId = existing?.wallId,
+                    // The spot belongs to the room it was placed in: moving the item to another room takes it off the plan.
+                    planX = existing?.planX?.takeIf { existing.roomId == draft.roomId },
+                    planY = existing?.planY?.takeIf { existing.roomId == draft.roomId },
+                    wallId = existing?.wallId?.takeIf { existing.roomId == draft.roomId },
                     poweredByBreakerId = existing?.poweredByBreakerId, shutoffItemId = existing?.shutoffItemId,
                     createdAt = existing?.createdAt ?: at, updatedAt = at, source = existing?.source ?: com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
                 ),

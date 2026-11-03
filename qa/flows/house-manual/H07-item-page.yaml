@@ -1,0 +1,63 @@
+# Walkthrough H7: open an item and its Where section (AC-C30 position). Starts from the regression seed (_seed.yaml):
+# the refrigerator is in the Kitchen on the Main floor and not on the plan yet.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 15000
+- tapOn:
+    id: "hm_items_search"
+- inputText: "LRMVS"
+- extendedWaitUntil:
+    visible: "Refrigerator"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Refrigerator"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+# AC-C30: the Where row says the item is not on the plan yet and opens Place on plan on the Kitchen's floor
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_place"
+- assertVisible: "Not on the plan yet.*"
+- tapOn:
+    id: "hm_item_detail_place"
+- extendedWaitUntil:
+    visible: "Tap the plan where this item sits."
+    timeout: 5000
+- assertVisible: "Main"
+- takeScreenshot: H07-place-on-plan
+# The Kitchen is the top-left room of the seeded Main floor
+- tapOn:
+    id: "hm_item_place_plan"
+    point: "25%,40%"
+- extendedWaitUntil:
+    visible: "In .*\\. Tap the plan to move it\\."
+    timeout: 5000
+- assertVisible:
+    id: "hm_item_place_remove"
+- takeScreenshot: H07-placed
+- tapOn:
+    id: "hm_item_place_done"
+- extendedWaitUntil:
+    visible: "On the plan"
+    timeout: 5000
+# Remove from plan puts it back to not placed
+- tapOn:
+    id: "hm_item_detail_place"
+- tapOn:
+    id: "hm_item_place_remove"
+- extendedWaitUntil:
+    visible: "Tap the plan where this item sits."
+    timeout: 5000
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible: "Not on the plan yet.*"
+    timeout: 5000

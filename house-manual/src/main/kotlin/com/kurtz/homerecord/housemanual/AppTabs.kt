@@ -30,6 +30,7 @@ import com.kurtz.homerecord.housemodel.ui.FloorsRoute
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
 import com.kurtz.homerecord.housemodel.ui.RoomRoute
 import com.kurtz.homerecord.housemodel.ui.ItemEditRoute
+import com.kurtz.homerecord.housemodel.ui.ItemPlaceRoute
 import com.kurtz.homerecord.housemanual.home.HomeRoute
 import com.kurtz.homerecord.housemanual.items.ItemDetailRoute
 import com.kurtz.homerecord.housemanual.items.ItemsRoute
@@ -152,7 +153,11 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 recalls = container.lookupApi,
                 overlays = container.overlays,
                 onOpenOverlay = { link -> openOverlay(nav, link.overlay) },
+                onPlace = { nav.push(ItemPlaceKey(key.itemId)) },
             )
+        }
+        entry<ItemPlaceKey> { key ->
+            ItemPlaceRoute(container.homes, container.items, home.id, key.itemId, onBack = nav::pop, onEditPlan = { nav.push(PlanKey(floorId = it)) })
         }
         entry<ItemEditKey> { key ->
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)

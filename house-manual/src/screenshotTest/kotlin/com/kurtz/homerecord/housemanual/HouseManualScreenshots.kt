@@ -554,3 +554,18 @@ fun OverlayKindListScreenshot() = OverlayKindListPreview()
 @ThemePreviews
 @Composable
 fun RoomOverlaysScreenshot() = RoomOverlaysPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemPlaceScreenshot() = ItemPlacePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemPlaceUnplacedScreenshot() = ItemPlaceUnplacedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemPlaceEmptyFloorScreenshot() = ItemPlaceEmptyFloorPreview()
