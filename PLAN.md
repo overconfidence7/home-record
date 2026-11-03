@@ -320,12 +320,13 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] R10b: wall photos show mirrored in 3D on a room whose corners run counter-clockwise (a corner dragged across flips its winding): `PlanMeshBuilder` runs u from the edge's first corner whatever the winding; use the inside-face direction (or store every room with one winding) (AC-C20)
   - [x] R10c: replaced media files are never deleted: retaking a wall photo leaves the old photo and its `-wall.jpg`, replacing or removing a saved overlay photo leaves the old file; delete them after the save (keeping files another row still points at) (AC-C17, AC-C26)
   - [x] R10d: a plan save that recuts a wall photo (split, merge, resize) nulls its straightened copy and `remakeTextures` writes a new `-<id>-wall.jpg`, so the old copy stays on disk; sweep the old texture paths through `ReplacedFiles` once the remake lands (AC-C19)
-- [ ] T053: Overlays and item markers in 3D with layer toggles; tap marker opens the record; blueprint layers show overlays and items (acceptance: AC-C23, AC-C15 overlays part)
+- [x] T053: Overlays and item markers in 3D with layer toggles; tap marker opens the record; blueprint layers show overlays and items (acceptance: AC-C23, AC-C15 overlays part)
   - [x] T053a: `SceneMarkers` `[unit]`: wall overlays placed on the wall's inside face where the mesh paints that spot of the photo (both windings), plan overlays and item spots on their room's floor on their own storey, faded floors and unknown walls skipped, layer visibility as on the blueprint; JVM tests only, the 3D criterion is claimed by T053b once the markers render
   - [x] T053b: HM-3D/FL-3D draw the markers (runs as strips, spots as discs in the layer color, still picture too), layer chips on the 3D screen sharing the home's `LayerStore`, tap a marker opens the overlay (`OverlayTarget`) or item; previews, screenshots, catalog, flow step (AC-C23)
-  - [ ] T053c: blueprint layers show wall overlays along their wall and item markers at their plan spot (AC-C15 overlays part)
+  - [x] T053c: blueprint layers show wall overlays along their wall and item markers at their plan spot (AC-C15 overlays part)
 - [ ] T054: Field Log behind the wall: room → wall → capture writes Rough-in; second capture after drywall writes Finished; overlays carry stage; HM-Room shows stages (acceptance: AC-F49, AC-H8, AC-H9)
 - [ ] T055: Item positions: place an item on the plan (drag marker) and on a wall; item page "Where" section; markers in blueprint and 3D (acceptance: AC-C30 position, AC-C23)
+  - [ ] T055a: blueprint layer marks open their record on tap (overlay: its wall with it picked; item: its page), as the 3D markers do, and room names keep clear of marks the way they keep clear of stairs
 - [ ] V4: Visual review of M4 screenshots and a recorded 3D screen capture (QA records the video; builder reviews the frames)
 
 ## M5 Field Log complete

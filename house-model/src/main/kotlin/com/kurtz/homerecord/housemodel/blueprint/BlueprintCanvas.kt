@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.overlays.nameRes
 
 /**
  * Read-only blueprint of one floor, fitted to the space it gets. Tap opens a room, long press asks for its menu.
@@ -50,9 +51,10 @@ fun BlueprintCanvas(
     rooms: List<PlanRoom>,
     modifier: Modifier = Modifier,
     layers: LayerSet = LayerSet(),
-    markers: List<BlueprintMarker> = emptyList(),
     /** The floor's plan overlays (AC-C25), each drawn when its layer is on. */
     overlays: List<com.kurtz.homerecord.housemodel.overlays.Overlay> = emptyList(),
+    /** The floor's wall overlays along their walls and its placed items (AC-C15), each drawn when its layer is on. */
+    marks: List<PlanMark> = emptyList(),
     system: UnitSystem = UnitSystem.IMPERIAL,
     pins: List<BlueprintPin> = emptyList(),
     onPinClick: (String) -> Unit = {},
@@ -79,7 +81,9 @@ fun BlueprintCanvas(
     val pinClick by rememberUpdatedState(onPinClick)
     val planTap by rememberUpdatedState(onPlanTap)
     val overlayIcons = rememberOverlayIcons()
+    val itemIcons = rememberItemIcons()
     val shownOverlays = overlays.filter { layers.shows(it) }
+    val shownMarks = PlanMarks.visible(marks, layers)
     val pinColors = PinColors(scheme.tertiary, scheme.onTertiary, scheme.surface)
     // The number sits inside a fixed-size head, so it does not grow with the font scale; TalkBack reads the task title.
     val fontScale = LocalDensity.current.fontScale
@@ -117,8 +121,11 @@ fun BlueprintCanvas(
             },
     ) {
         val view = BlueprintView.fit(rooms, size.width, size.height, marginPx)
-        drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, layers, markers)
-        drawPlanOverlays(shownOverlays, { Offset(it.x * view.scale + view.originX, it.y * view.scale + view.originY) }, density, colors.dark, scheme.surface, overlayIcons)
+        drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system)
+        val toScreen = { p: com.kurtz.homerecord.housemodel.overlays.OverlayPoint -> Offset(p.x * view.scale + view.originX, p.y * view.scale + view.originY) }
+        drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = false)
+        drawPlanOverlays(shownOverlays, toScreen, density, colors.dark, scheme.surface, overlayIcons)
+        drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = true)
         pins.forEach { drawPin(it, view, density, measurer, pinStyle, pinColors) }
     }
     // Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its bounds.
@@ -146,8 +153,20 @@ fun BlueprintCanvas(
                     },
             )
         }
-        // One 48 dp node per pin over its head, after the rooms so TalkBack reads them last (rule 13).
         val prefix = LocalTagPrefix.current
+        // One 48 dp node per wall overlay and item shown, so TalkBack names what each layer draws (rule 13).
+        shownMarks.forEach { mark ->
+            val p = mark.points[mark.points.size / 2]
+            val kindName = mark.overlayKind?.let { stringResource(it.nameRes) } ?: stringResource(R.string.layer_items)
+            Box(
+                Modifier
+                    .offset(toDp(p.x * view.scale + view.originX - hitPx), toDp(p.y * view.scale + view.originY - hitPx))
+                    .size(toDp(2 * hitPx))
+                    .testTag("${prefix}_plan_mark")
+                    .semantics { contentDescription = mark.label.ifBlank { kindName } },
+            )
+        }
+        // One 48 dp node per pin over its head, after the rooms so TalkBack reads them last (rule 13).
         pins.forEach { pin ->
             val (hx, hy) = PinHitTester.head(pin, view, liftPx)
             Box(

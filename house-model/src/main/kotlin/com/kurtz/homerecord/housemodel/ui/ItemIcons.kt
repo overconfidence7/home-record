@@ -15,6 +15,12 @@ import androidx.compose.material.icons.rounded.Thermostat
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** Every icon name [itemIcon] knows; any other name draws the Category icon. */
+val ItemIconNames: List<String> = listOf(
+    "ElectricalServices", "FormatPaint", "Garage", "HealthAndSafety", "Home", "Kitchen", "Plumbing", "PowerOff", "Router",
+    "Thermostat", "WaterDrop", "Category",
+)
+
 /** Resolves the icon names kept in :core's ItemCategory (which has no Compose) to vectors. */
 fun itemIcon(name: String): ImageVector = when (name) {
     "ElectricalServices" -> Icons.Rounded.ElectricalServices

@@ -1,7 +1,7 @@
 # Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
 # (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9 wall part). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
 # in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the plan editor's
-# Overlays mode draws a gas line on the floor plan, picks it and deletes it (T052c2); the blueprint layers and 3D halves of H11 arrive with T053.
+# Overlays mode draws a gas line on the floor plan, picks it and deletes it (T052c2); the 3D half (T053b) and the blueprint Plumbing layer (T053c) show the pipe.
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
 appId: com.kurtz.homerecord.housemanual
 ---
@@ -141,9 +141,28 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_wall_selection"
     timeout: 10000
-# AC-C28: Home search finds the overlay by its kind's name and opens its wall with it picked
+# AC-C15: on the blueprint the pipe lies along the kitchen's north wall once the Plumbing layer chip is on
 - tapOn:
     id: "hm_back"
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_layer_plumbing"
+    timeout: 10000
+- assertNotVisible: "Sink cold supply"
+- tapOn:
+    id: "hm_layer_plumbing"
+- extendedWaitUntil:
+    visible: "Sink cold supply"
+    timeout: 10000
+- takeScreenshot: H11-blueprint-pipe
+- tapOn:
+    id: "hm_layer_plumbing"
+- extendedWaitUntil:
+    notVisible: "Sink cold supply"
+    timeout: 10000
+# AC-C28: Home search finds the overlay by its kind's name and opens its wall with it picked
 - tapOn:
     id: "hm_tab_home"
 - tapOn:

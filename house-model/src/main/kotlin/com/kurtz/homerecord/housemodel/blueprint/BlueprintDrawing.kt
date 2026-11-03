@@ -45,9 +45,6 @@ fun DrawScope.drawPin(pin: BlueprintPin, view: BlueprintView, density: Float, me
     drawText(text, topLeft = Offset(head.x - text.size.width / 2f, head.y - text.size.height / 2f))
 }
 
-/** A layer marker at a plan position; items and overlays supply these as they are added. */
-data class BlueprintMarker(val layer: BlueprintLayer, val xIn: Int, val yIn: Int)
-
 /** A door is a gap in the wall with its swing arc; a window is three thin lines across the wall. */
 fun DrawScope.drawOpening(room: PlanRoom, o: PlanOpening, z: Float, ox: Float, oy: Float, density: Float, line: Color, gap: Color) {
     val a = room.points[o.edgeIndex]
@@ -110,7 +107,7 @@ class BlueprintColors(
     val dark: Boolean,
 )
 
-/** The clean plan (AC-C13): filled rooms, wall outlines, names, outer dimensions, openings, stairs, north arrow, layer markers. */
+/** The clean plan (AC-C13): filled rooms, wall outlines, names, outer dimensions, openings, stairs, north arrow. Layers draw on top. */
 fun DrawScope.drawBlueprint(
     rooms: List<PlanRoom>,
     view: BlueprintView,
@@ -120,8 +117,6 @@ fun DrawScope.drawBlueprint(
     dimStyle: TextStyle,
     colors: BlueprintColors,
     system: UnitSystem,
-    layers: LayerSet = LayerSet(),
-    markers: List<BlueprintMarker> = emptyList(),
 ) {
     val z = view.scale
     val ox = view.originX
@@ -159,9 +154,6 @@ fun DrawScope.drawBlueprint(
         if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
-    markers.filter { it.layer in layers }.forEach { m ->
-        drawCircle(LayerPalette.color(m.layer, colors.dark), 6f * density, Offset(view.x(m.xIn), view.y(m.yIn)))
-    }
     drawNorthArrow(measurer, dimStyle, colors, density)
 }
 

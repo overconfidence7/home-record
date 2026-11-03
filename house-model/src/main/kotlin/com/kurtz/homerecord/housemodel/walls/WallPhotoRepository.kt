@@ -19,6 +19,14 @@ import kotlinx.coroutines.flow.map
 /** A wall by its room and plan edge, the way the 3D mesh names wall faces. */
 data class WallKey(val roomId: String, val edgeIndex: Int)
 
+/** Each wall of [roomIds] by id with its room and plan edge, so wall overlays find their wall (3D AC-C23, blueprint AC-C15). */
+fun HomeRecordDatabase.observeWallKeys(roomIds: List<String>): Flow<Map<String, WallKey>> {
+    if (roomIds.isEmpty()) return flowOf(emptyMap())
+    val perRoom = roomIds.distinct().map { roomId -> wallDao().observeFor(roomId) }
+    return combine(perRoom) { rooms -> rooms.flatMap { it.toList() }.associate { it.id to WallKey(it.roomId, it.edgeIndex) } }
+        .distinctUntilChanged()
+}
+
 /** One wall photo at one stage (AC-C17); [texturePath] is the straightened copy the 3D view uses (AC-C19). */
 data class WallPhoto(
     val id: String,
@@ -81,12 +89,7 @@ class WallPhotoRepository(
     }
 
     /** Each wall of [roomIds] by id with its room and plan edge, so wall overlays find their face in 3D (AC-C23). */
-    fun observeWallKeys(roomIds: List<String>): Flow<Map<String, WallKey>> {
-        if (roomIds.isEmpty()) return flowOf(emptyMap())
-        val perRoom = roomIds.distinct().map { roomId -> db.wallDao().observeFor(roomId) }
-        return combine(perRoom) { rooms -> rooms.flatMap { it.toList() }.associate { it.id to WallKey(it.roomId, it.edgeIndex) } }
-            .distinctUntilChanged()
-    }
+    fun observeWallKeys(roomIds: List<String>): Flow<Map<String, WallKey>> = db.observeWallKeys(roomIds)
 
     /**
      * Passes [photos] on unchanged and, after each list, fetches the missing files of the photos the page shows (the

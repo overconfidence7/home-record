@@ -4,6 +4,7 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.FloorSummary
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintLayer
 import com.kurtz.homerecord.housemodel.blueprint.LayerSet
+import com.kurtz.homerecord.housemodel.blueprint.PlanMark
 import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
@@ -24,6 +25,8 @@ data class HouseUiState(
     val rooms: List<PlanRoom> = emptyList(),
     /** The floor's plan overlays (AC-C25), drawn on the blueprint with their layers. */
     val overlays: List<Overlay> = emptyList(),
+    /** The floor's wall overlays laid along their walls and its placed items (AC-C15), drawn when their layer is on. */
+    val marks: List<PlanMark> = emptyList(),
     val layers: LayerSet = LayerSet(),
     val system: UnitSystem = UnitSystem.IMPERIAL,
     val dialog: HouseDialog? = null,

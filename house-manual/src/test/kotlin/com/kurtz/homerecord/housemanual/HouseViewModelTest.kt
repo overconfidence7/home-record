@@ -158,4 +158,42 @@ class HouseViewModelTest {
         val state = withTimeout(10_000) { vm.state.first { it.overlays.isNotEmpty() } }
         assertThat(state.overlays.map { it.kind }).containsExactly(com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS)
     }
+
+    @Test @com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-C15")
+    fun theBlueprintLaysWallOverlaysAlongTheirWallAndPlacesItems() = test {
+        val (homeId, floorId) = setUpHome()
+        val overlays = com.kurtz.homerecord.housemodel.overlays.OverlayRepository(db)
+        val wall = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db).observeRoomWalls("k").first { it.isNotEmpty() }.first().id
+        overlays.addOnWall(
+            homeId, wall,
+            com.kurtz.homerecord.housemodel.overlays.OverlayDraft(
+                com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD,
+                listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.25f, 0.7f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.75f, 0.7f)),
+                com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN,
+            ),
+        )
+        db.itemDao().upsert(
+            com.kurtz.homerecord.core.data.ItemEntity(
+                id = "i1", homeId = homeId, roomId = "k", category = "APPLIANCES", subtype = "dishwasher", name = "Dishwasher",
+                planX = 40, planY = 30, createdAt = 1L, updatedAt = 1L,
+            ),
+        )
+        val vm = HouseViewModel(
+            repo, homeId, store, SavedStateHandle(mapOf("floor" to floorId)), "Maple St", "Colonial",
+            homeOverlays = overlays.observeForHome(homeId),
+            wallKeys = overlays::observeWallKeys,
+            itemSpots = overlays.observeItemSpots(homeId),
+        ).also { created += it }
+        val state = withTimeout(10_000) { vm.state.first { it.marks.size == 2 } }
+        // The wall run is no plan overlay; it lies on one of the kitchen's walls, 72" long (half of a 144" wall or of a 120" wall).
+        assertThat(state.overlays).isEmpty()
+        val run = state.marks.first { it.overlayKind == com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD }
+        assertThat(run.layer).isEqualTo(BlueprintLayer.PLUMBING)
+        assertThat(run.points).hasSize(2)
+        val (a, b) = run.points
+        assertThat(kotlin.math.hypot(b.x - a.x, b.y - a.y)).isAnyOf(72f, 60f)
+        val item = state.marks.first { it.isItem }
+        assertThat(item.points.single()).isEqualTo(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(40f, 30f))
+        assertThat(item.iconName).isEqualTo("Kitchen")
+    }
 }

@@ -16,7 +16,15 @@ sealed interface MarkerTarget {
 }
 
 /** An installed item with a spot on the plan (AC-C30 position): plan inches, on its room's floor. */
-data class ItemSpot(val id: String, val roomId: String, val planXIn: Int, val planYIn: Int, val name: String = "")
+data class ItemSpot(
+    val id: String,
+    val roomId: String,
+    val planXIn: Int,
+    val planYIn: Int,
+    val name: String = "",
+    /** The category icon name (`ItemCategory` icon) the blueprint draws on the marker (rule 26). */
+    val iconName: String = "Category",
+)
 
 /**
  * One overlay or item placed in the 3D scene (AC-C23), in world meters like the mesh. A run has two or more [points],

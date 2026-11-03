@@ -52,6 +52,8 @@ fun HouseRoute(
                 HouseViewModel(
                     repo, homeId, layerStore, createSavedStateHandle(), homeName, summary, exporter = PdfFileExporter(context),
                     homeOverlays = overlays?.observeForHome(homeId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
+                    wallKeys = { ids -> overlays?.observeWallKeys(ids) ?: kotlinx.coroutines.flow.flowOf(emptyMap()) },
+                    itemSpots = overlays?.observeItemSpots(homeId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
                 )
             }
         },

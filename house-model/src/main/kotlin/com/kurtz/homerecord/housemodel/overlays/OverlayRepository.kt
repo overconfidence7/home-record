@@ -4,7 +4,9 @@ import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.OverlayEntity
 import com.kurtz.homerecord.core.data.Sources
+import com.kurtz.homerecord.housemodel.walls.WallKey
 import com.kurtz.homerecord.housemodel.walls.WallStage
+import com.kurtz.homerecord.housemodel.walls.observeWallKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -53,6 +55,9 @@ class OverlayRepository(
 
     fun observeForHome(homeId: String): Flow<List<Overlay>> = dao.observeFor(homeId).map { rows -> rows.map { it.toOverlay() } }
 
+    /** The walls of [roomIds] by id, so the blueprint lays wall overlays along their wall (AC-C15). */
+    fun observeWallKeys(roomIds: List<String>): Flow<Map<String, WallKey>> = db.observeWallKeys(roomIds)
+
     suspend fun get(id: String): Overlay? = dao.get(id)?.toOverlay()
 
     /** The home's items an overlay can serve, with their rooms (AC-C26). */
@@ -62,14 +67,18 @@ class OverlayRepository(
             items.map { OverlayItemChoice(it.id, it.name, it.roomId, it.roomId?.let(roomNames::get)) }
         }
 
-    /** The home's items placed on the plan (AC-C30 position), as markers for the 3D view (AC-C23). */
+    /** The home's items placed on the plan (AC-C30 position), as markers for the 3D view (AC-C23) and the blueprint (AC-C15). */
     fun observeItemSpots(homeId: String): Flow<List<com.kurtz.homerecord.housemodel.scene.ItemSpot>> =
         db.itemDao().observeFor(homeId).map { items ->
             items.mapNotNull { item ->
                 val roomId = item.roomId ?: return@mapNotNull null
                 val x = item.planX ?: return@mapNotNull null
                 val y = item.planY ?: return@mapNotNull null
-                com.kurtz.homerecord.housemodel.scene.ItemSpot(item.id, roomId, x, y, item.name)
+                com.kurtz.homerecord.housemodel.scene.ItemSpot(
+                    item.id, roomId, x, y, item.name,
+                    iconName = com.kurtz.homerecord.core.model.ItemCategory.subtype(item.subtype)?.iconName
+                        ?: com.kurtz.homerecord.core.model.ItemCategory.fromId(item.category)?.icon ?: "Category",
+                )
             }
         }
 

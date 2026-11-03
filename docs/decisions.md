@@ -790,3 +790,8 @@ same 6 h so a cell with no data does not call Open-Meteo on every open.
 - Wall overlays show in 3D at every stage, not only the stage they were recorded at: the point of a rough-in pipe is to see it behind the finished wall. Markers use the light layer palette in both themes because they sit on the scene's pale wall tints, not on the app surface.
 - One Filament node per marker (not batched) so a tap can name the marker; homes carry tens of overlays, not thousands. TalkBack reaches markers through custom "Open …" actions on the scene, since a 3D node cannot be focused.
 - Field Log has no item page yet (T062): an item marker opens the room it stands in.
+
+## 2026-11-03 — Blueprint layer marks (T053c)
+- From above a wall overlay keeps only its position along the wall: each wall-space x lands on the wall line (left end per `WallWinding`, like the 3D faces) and the mark is drawn 7 dp inside the room so it reads beside the wall stroke at any zoom. A run spanning under 6" along the wall (a riser, a drop to an outlet) is drawn as a spot of its kind.
+- Items draw as a disc in the Items layer color carrying the item's category icon (rule 26); `ItemSpot` carries the icon name. Draw order: wall marks, then plan overlays, then items on top.
+- Marks are not tappable on the blueprint yet (the room under them opens); TalkBack gets one node per mark naming it. Tapping a mark is T055a.

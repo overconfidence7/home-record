@@ -111,6 +111,7 @@ fun HouseScreen(
                     modifier = Modifier.fillMaxSize(),
                     layers = state.layers,
                     overlays = state.overlays,
+                    marks = state.marks,
                     system = state.system,
                     pins = pins,
                     onPinClick = onOpenPin,

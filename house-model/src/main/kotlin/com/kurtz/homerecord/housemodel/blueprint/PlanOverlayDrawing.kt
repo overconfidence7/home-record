@@ -85,3 +85,59 @@ private fun DrawScope.drawHandle(at: Offset, color: Color, ring: Color, density:
     drawCircle(ring, 12f * density, at)
     drawCircle(color, 9f * density, at)
 }
+
+/** Radius of an item's marker on the plan, in dp; the disc carries the item's category icon (rule 26). */
+const val PLAN_ITEM_RADIUS_DP = 12f
+
+/** How far inside its wall a wall overlay is drawn on the plan, in dp, so it reads beside the wall stroke. */
+const val PLAN_WALL_INSET_DP = 7f
+
+/** One painter per item icon name, for drawing item marks on a canvas. */
+@Composable
+fun rememberItemIcons(): Map<String, VectorPainter> =
+    com.kurtz.homerecord.housemodel.ui.ItemIconNames.associateWith { rememberVectorPainter(com.kurtz.homerecord.housemodel.ui.itemIcon(it)) }
+
+/**
+ * Wall overlays and items on the blueprint (AC-C15). A wall overlay is drawn [PLAN_WALL_INSET_DP] inside its wall in its
+ * kind's color, a run as a line and a spot as a disc with the kind's icon, like a plan overlay; an item is a disc in the
+ * Items layer color with its category icon. [toScreen] maps plan inches to canvas pixels. Pass [items] false to draw the
+ * wall overlays only and true for the items only, so items can sit above the plan overlays.
+ */
+fun DrawScope.drawPlanMarks(
+    marks: List<PlanMark>,
+    toScreen: (OverlayPoint) -> Offset,
+    density: Float,
+    dark: Boolean,
+    halo: Color,
+    overlayIcons: Map<OverlayKind, VectorPainter>,
+    itemIcons: Map<String, VectorPainter>,
+    items: Boolean,
+) {
+    val inset = PLAN_WALL_INSET_DP * density
+    val placed = { m: PlanMark -> m.points.map(toScreen).map { p -> m.inward?.let { Offset(p.x + it.x * inset, p.y + it.y * inset) } ?: p } }
+    if (!items) {
+        marks.filter { !it.isItem && it.isRun }.forEach { m ->
+            val kind = m.overlayKind ?: return@forEach
+            drawRun(placed(m), kind.color(dark), halo, density, selected = false)
+        }
+        marks.filter { !it.isItem && !it.isRun }.forEach { m ->
+            val kind = m.overlayKind ?: return@forEach
+            drawSpot(placed(m)[0], kind, dark, halo, density, overlayIcons[kind], selected = false)
+        }
+        return
+    }
+    val fill = LayerPalette.color(BlueprintLayer.ITEMS, dark)
+    val r = PLAN_ITEM_RADIUS_DP * density
+    marks.filter { it.isItem }.forEach { m ->
+        val at = placed(m)[0]
+        drawCircle(halo, r + 2f * density, at)
+        drawCircle(fill, r, at)
+        val icon = itemIcons[m.iconName] ?: itemIcons["Category"]
+        if (icon != null) {
+            val s = r * 1.3f
+            translate(at.x - s / 2f, at.y - s / 2f) {
+                with(icon) { draw(Size(s, s), colorFilter = ColorFilter.tint(halo)) }
+            }
+        }
+    }
+}

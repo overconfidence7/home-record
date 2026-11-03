@@ -332,8 +332,38 @@ fun HouseBlueprintLandscapePreview() = Frame { houseScreen(houseState()) }
 @ThemePreviews
 @Composable
 fun HouseLayersPreview() = Frame {
-    houseScreen(houseState({ copy(layers = LayerSet(setOf(BlueprintLayer.PLUMBING, BlueprintLayer.ELECTRICAL, BlueprintLayer.GAS, BlueprintLayer.DRAIN_VENT)), overlays = planOverlays) }))
+    houseScreen(
+        houseState({
+            copy(
+                layers = LayerSet(setOf(BlueprintLayer.ITEMS, BlueprintLayer.PLUMBING, BlueprintLayer.ELECTRICAL, BlueprintLayer.GAS, BlueprintLayer.DRAIN_VENT)),
+                overlays = planOverlays,
+                marks = houseMarks,
+            )
+        }),
+    )
 }
+
+/** Wall overlays laid along their walls and placed items on the blueprint (AC-C15). */
+private val houseMarks = com.kurtz.homerecord.housemodel.blueprint.PlanMarks.place(
+    houseRooms,
+    listOf(
+        house3dOverlay("wm1", "r1", "w-r1-0", com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Cold to sink", 0.1f to 0.95f, 0.1f to 0.6f, 0.55f to 0.6f),
+        house3dOverlay("wm2", "r1", "w-r1-3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.OUTLET, "Counter outlet", 0.3f to 0.62f),
+        house3dOverlay("wm3", "r3", "w-r3-3", com.kurtz.homerecord.housemodel.overlays.OverlayKind.ELECTRICAL_WIRE, "Dining circuit", 0.1f to 0.85f, 0.9f to 0.85f),
+        house3dOverlay("wm4", "r4", "w-r4-1", com.kurtz.homerecord.housemodel.overlays.OverlayKind.DRAIN, "Vanity drain", 0.5f to 0.9f, 0.5f to 0.2f),
+    ),
+    mapOf(
+        "w-r1-0" to com.kurtz.homerecord.housemodel.walls.WallKey("r1", 0),
+        "w-r1-3" to com.kurtz.homerecord.housemodel.walls.WallKey("r1", 3),
+        "w-r3-3" to com.kurtz.homerecord.housemodel.walls.WallKey("r3", 3),
+        "w-r4-1" to com.kurtz.homerecord.housemodel.walls.WallKey("r4", 1),
+    ),
+    listOf(
+        com.kurtz.homerecord.housemodel.scene.ItemSpot("i1", "r3", 130, 240, "Chest freezer", iconName = "Kitchen"),
+        com.kurtz.homerecord.housemodel.scene.ItemSpot("i2", "r6", 262, 310, "Water heater", iconName = "WaterDrop"),
+        com.kurtz.homerecord.housemodel.scene.ItemSpot("i3", "r2", 220, 150, "Thermostat", iconName = "Thermostat"),
+    ),
+)
 
 @ThemePreviews
 @Composable

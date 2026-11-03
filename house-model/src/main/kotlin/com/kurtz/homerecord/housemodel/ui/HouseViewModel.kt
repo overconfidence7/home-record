@@ -2,6 +2,10 @@ package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
+import com.kurtz.homerecord.housemodel.blueprint.PlanMarks
+import com.kurtz.homerecord.housemodel.scene.ItemSpot
+import com.kurtz.homerecord.housemodel.walls.WallKey
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -42,6 +46,10 @@ class HouseViewModel(
     private val exporter: BlueprintExporter = BlueprintExporter { _, _ -> null },
     /** The home's overlays; the floor's plan overlays among them show on the blueprint (AC-C25). */
     homeOverlays: Flow<List<Overlay>> = flowOf(emptyList()),
+    /** The walls of a floor's rooms by id, so its wall overlays lie along their wall on the blueprint (AC-C15). */
+    private val wallKeys: (roomIds: List<String>) -> Flow<Map<String, WallKey>> = { flowOf(emptyMap()) },
+    /** The home's items with a spot on the plan, drawn on the Items layer (AC-C15). */
+    itemSpots: Flow<List<ItemSpot>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], layers = layerStore.read(homeId), system = system),
@@ -62,9 +70,11 @@ class HouseViewModel(
             }
         }
         viewModelScope.launch {
-            floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }
-                .combine(homeOverlays) { plan, overlays -> plan.placed to PlanOverlayPlacer.onFloor(overlays, plan.placed) }
-                .collect { (rooms, overlays) -> _state.update { it.copy(rooms = rooms, overlays = overlays) } }
+            val planWithWalls = floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }
+                .flatMapLatest { plan -> wallKeys(plan.placed.map { it.id }).map { walls -> plan.placed to walls } }
+            combine(planWithWalls, homeOverlays, itemSpots) { (rooms, walls), overlays, items ->
+                Triple(rooms, PlanOverlayPlacer.onFloor(overlays, rooms), PlanMarks.place(rooms, overlays, walls, items))
+            }.collect { (rooms, overlays, marks) -> _state.update { it.copy(rooms = rooms, overlays = overlays, marks = marks) } }
         }
     }
 
@@ -72,7 +82,7 @@ class HouseViewModel(
         when (event) {
             is HouseEvent.SelectFloor -> {
                 saved[FLOOR] = event.floorId
-                _state.update { it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList()) }
+                _state.update { it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList(), marks = emptyList()) }
                 floorIds.value = event.floorId
             }
             is HouseEvent.ToggleLayer -> {
