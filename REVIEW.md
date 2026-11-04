@@ -3053,9 +3053,9 @@ Tested: 67 device stages, 1723 unit tests, 174 backend tests, coverage 372/372 A
 ## Builder review R11 (T056–T060)
 
 Read the change orders, share links, schedule, clients and materials code against AC-F37–F45 and AC-B35/B36. Fixed in this commit:
-- [x] [Major] A change order the client signed on the share page could be put back to Draft by any phone write with a later updatedAt (an offline phone's edit, or a second offline signature), dropping the signature: the backend merge was per-field last-writer-wins. A Signed change order is now sealed on the server (`isSealed` in backend/src/sync/merge.ts, conflict reason `signed`) [r11:co-signed-overwritten] - fixed in R11 commit
-- [x] [Minor] FL-Schedule: a day scheduled on a job that has since moved to Done could not be moved or taken off (chip taps were gated on the Active/Upcoming picker list) [r11:schedule-done-job-stuck] - fixed in R11 commit
-- [x] [Minor] FL-Clients sorted and labelled jobs by the stored status, not the date-derived one the rest of Field Log uses (an Upcoming job past its start date showed Upcoming) [r11:clients-stored-status] - fixed in R11 commit
+- [x] [Major] A change order the client signed on the share page could be put back to Draft by any phone write with a later updatedAt (an offline phone's edit, or a second offline signature), dropping the signature: the backend merge was per-field last-writer-wins. A Signed change order is now sealed on the server (`isSealed` in backend/src/sync/merge.ts, conflict reason `signed`) [r11:co-signed-overwritten] - fixed in 47830383
+- [x] [Minor] FL-Schedule: a day scheduled on a job that has since moved to Done could not be moved or taken off (chip taps were gated on the Active/Upcoming picker list) [r11:schedule-done-job-stuck] - fixed in 47830383
+- [x] [Minor] FL-Clients sorted and labelled jobs by the stored status, not the date-derived one the rest of Field Log uses (an Upcoming job past its start date showed Upcoming) [r11:clients-stored-status] - fixed in 47830383
 
 Open, found in the review:
 - [ ] [Minor] FL-Schedule and the Today "Tomorrow" line work out "today" once, when the screen opens; if the app stays open past midnight, This week, the selected day and the next-day line stay on yesterday until the screen is opened again [r11:schedule-today-frozen] - steps: open Schedule at 23:59, wait until 00:01 - expected: AC-F41 (today's row and "Tomorrow" move with the clock) - actual: they stay on the old day
