@@ -13,10 +13,12 @@ import com.kurtz.homerecord.core.changeorder.ChangeOrderDraft
 import com.kurtz.homerecord.core.changeorder.JobChangeOrders
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.model.ChangeOrderLineItem
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -57,8 +59,14 @@ class ChangeOrderFormViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val jobPhotos = MutableStateFlow<List<CoPhoto>>(emptyList())
+    private var clock = 1_000L
+
     private fun vm(id: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle()): ChangeOrderFormViewModel {
-        val deps = ChangeOrderFormDeps("j1", id, orders, flowOf(manage), clientName = { "Dana Hale" }, canDictate = true, newLineId = { "n${lineIds++}" })
+        val deps = ChangeOrderFormDeps(
+            "j1", id, orders, flowOf(manage), clientName = { "Dana Hale" }, canDictate = true, newLineId = { "n${lineIds++}" },
+            photos = jobPhotos, now = { clock },
+        )
         return ViewModelProvider.create(store, viewModelFactory { initializer { ChangeOrderFormViewModel(deps, saved) } })["vm${made++}", ChangeOrderFormViewModel::class]
     }
 
@@ -136,6 +144,44 @@ class ChangeOrderFormViewModelTest {
         again.onEvent(ChangeOrderFormEvent.Delete)
         again.current { it.done }
         assertThat(runBlocking { orders.get(id) }).isNull()
+    }
+
+    // T056b: job photos picked in the sheet, a photo taken from the form joins once, and the order saves them in order.
+    @Test fun photosArePickedTakenAndSavedInOrder() {
+        fun photo(id: String, at: Long) = CoPhoto(id, "/m/$id.jpg", at)
+        runBlocking {
+            for (id in listOf("p1", "p2", "p3", "p4")) {
+                db.photoDao().upsert(PhotoEntity(id = id, homeId = "h1", jobId = "j1", path = "/m/$id.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+            }
+        }
+        jobPhotos.value = listOf(photo("p2", 600), photo("p1", 500))
+        val saved = SavedStateHandle()
+        val vm = vm(saved = saved)
+        vm.current()
+        vm.onEvent(ChangeOrderFormEvent.Title("Island outlet"))
+        vm.onEvent(ChangeOrderFormEvent.OpenPhotos)
+        assertThat(vm.current().pickingPhotos).isTrue()
+        vm.onEvent(ChangeOrderFormEvent.TogglePhoto("p1"))
+        vm.onEvent(ChangeOrderFormEvent.TogglePhoto("p2"))
+        vm.onEvent(ChangeOrderFormEvent.TogglePhoto("p1"))
+        vm.onEvent(ChangeOrderFormEvent.TogglePhoto("p1"))
+        assertThat(vm.current().photos.map { it.id }).containsExactly("p2", "p1").inOrder()
+
+        clock = 2_000
+        vm.onEvent(ChangeOrderFormEvent.TakePhoto)
+        assertThat(vm.current().pickingPhotos).isFalse()
+        jobPhotos.value = listOf(photo("p3", 2_100)) + jobPhotos.value
+        assertThat(vm.current().draft.photoIds).containsExactly("p2", "p1", "p3").inOrder()
+        // Taken off again, it stays off when the list changes; a later shot from the same trip still joins.
+        vm.onEvent(ChangeOrderFormEvent.RemovePhoto("p3"))
+        jobPhotos.value = listOf(photo("p4", 2_200)) + jobPhotos.value
+        assertThat(vm.current().draft.photoIds).containsExactly("p2", "p1", "p4").inOrder()
+        // The picks survive process death with the rest of the typing.
+        assertThat(vm(saved = saved).current().draft.photoIds).containsExactly("p2", "p1", "p4").inOrder()
+
+        vm.onEvent(ChangeOrderFormEvent.Save)
+        vm.current { it.done }
+        assertThat(runBlocking { orders.observeForJob("j1").first().single().photoIds }).containsExactly("p2", "p1", "p4").inOrder()
     }
 
     @Test fun typingSurvivesProcessDeath() {

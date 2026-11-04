@@ -756,6 +756,17 @@
     <string name="co_form_line_remove">Remove line</string>
     <string name="co_form_line_remove_description">Remove line %1$d</string>
     <string name="co_form_line_add">Add line</string>
+    <string name="co_form_photos">Photos</string>
+    <string name="co_form_no_photos">No photos yet. Add job photos or take one.</string>
+    <string name="co_form_photos_add">Add job photos</string>
+    <string name="co_form_photo_take">Take photo</string>
+    <string name="co_form_photos_sheet">Job photos</string>
+    <string name="co_form_photos_done">Done</string>
+    <string name="co_form_photos_none_on_job">This job has no photos yet.</string>
+    <string name="co_form_photo_description">Photo %1$d</string>
+    <string name="co_form_photo_remove_description">Remove photo %1$d</string>
+    <string name="co_form_photo_pick">Add to the change order</string>
+    <string name="co_form_photo_picked">On the change order. Tap to take it off.</string>
     <string name="co_form_no_lines">No line items yet. Add one for each part of the work and its price.</string>
     <string name="co_form_total">Total</string>
     <string name="co_form_delete">Delete change order</string>

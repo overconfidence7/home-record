@@ -240,6 +240,8 @@ data class ChangeOrderEntity(
     val title: String,
     val description: String? = null,
     val linesJson: String = "[]",
+    /** The job photos on the change order, in order, as a JSON array of photo ids (v12, T056b). */
+    @ColumnInfo(defaultValue = "[]") val photoIdsJson: String = "[]",
     val totalCents: Long = 0,
     val clientName: String? = null,
     val status: String = "DRAFT",

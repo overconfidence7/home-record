@@ -838,3 +838,8 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 - The change order's line items live in `change_order.linesJson`; photos need a new column and come with T056b (Room v12).
 - "Speak" for the description uses the platform speech-to-text screen (`RecognizerIntent`, result appended to the text) instead of recording a file: no new dependency and no audio kept; hidden when the phone has no recognizer.
 - Only Draft change orders can be edited or deleted; Signed and Declined stay on record (AC-F38).
+
+## 2026-11-04 — Change order photos (T056b)
+- Photos on a change order are references to the job's own photos (`change_order.photoIdsJson`, a JSON array of photo ids, Room v12 auto-migration with default `[]`), not copies: one picture, one upload, and the same photo shows in the job gallery. The repository keeps only live photos of that job, once each, in the order added.
+- "Take photo" opens the existing job camera (`CaptureKey`) rather than a second camera; the form notes the time in its saved state and every job photo taken after that joins the change order once (one the person removes stays off). No new permission or dependency.
+- The sync backend stores rows generically (`sync_rows`), so the new column needs no backend change.

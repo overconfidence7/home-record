@@ -35,6 +35,8 @@ data class ChangeOrderFormDraft(
     val clientName: String = "",
     val description: String = "",
     val lines: List<FormLine> = emptyList(),
+    /** Job photos on the change order, in the order added (T056b). */
+    val photoIds: List<String> = emptyList(),
 ) {
     val titleOk: Boolean get() = title.isNotBlank()
     val linesOk: Boolean get() = lines.all { it.blank || it.ok }
@@ -44,12 +46,16 @@ data class ChangeOrderFormDraft(
     fun toDraft(): ChangeOrderDraft = ChangeOrderDraft(
         title = title.trim(), description = description, clientName = clientName,
         lines = lines.filterNot { it.blank }.mapNotNull { it.toItem() },
+        photoIds = photoIds,
     )
 
     companion object {
-        fun of(c: JobChangeOrder) = ChangeOrderFormDraft(c.title, c.clientName.orEmpty(), c.description.orEmpty(), c.lines.map(FormLine::of))
+        fun of(c: JobChangeOrder) = ChangeOrderFormDraft(c.title, c.clientName.orEmpty(), c.description.orEmpty(), c.lines.map(FormLine::of), c.photoIds)
     }
 }
+
+/** A job photo the change order can show; [path] is "" while the photo is not on this phone yet. */
+data class CoPhoto(val id: String, val path: String, val createdAt: Long)
 
 /** FL-ChangeOrder form: title, client, description (keyboard or voice), line items, total (AC-F37, rule 15). */
 @Immutable
@@ -65,12 +71,18 @@ data class ChangeOrderFormUiState(
     /** The phone has speech to text; hides Speak when not. */
     val canDictate: Boolean = false,
     val confirmDelete: Boolean = false,
+    /** The job's photos, newest first, for the picker and the thumbnails. */
+    val jobPhotos: List<CoPhoto> = emptyList(),
+    /** The "Add job photos" sheet is open. */
+    val pickingPhotos: Boolean = false,
     val working: Boolean = false,
     val done: Boolean = false,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The title error shows once someone has typed and cleared it (rule 21). */
     val titleError: Boolean get() = !draft.titleOk && draft.title != initial.title
+    /** The photos on the change order, in order; one no longer on the job drops out. */
+    val photos: List<CoPhoto> get() = draft.photoIds.mapNotNull { id -> jobPhotos.firstOrNull { it.id == id } }
     val canSave: Boolean get() = !loading && !failed && !locked && !working && draft.titleOk && draft.linesOk
 }
 
@@ -87,6 +99,13 @@ sealed interface ChangeOrderFormEvent {
     data class LineQty(val id: String, val text: String) : ChangeOrderFormEvent
     data class LinePrice(val id: String, val text: String) : ChangeOrderFormEvent
     data class RemoveLine(val id: String) : ChangeOrderFormEvent
+    data object OpenPhotos : ChangeOrderFormEvent
+    data object ClosePhotos : ChangeOrderFormEvent
+    /** Put a job photo on the change order, or take it off. */
+    data class TogglePhoto(val id: String) : ChangeOrderFormEvent
+    data class RemovePhoto(val id: String) : ChangeOrderFormEvent
+    /** Take photo: the route opens the job camera; photos taken from now on join the change order. */
+    data object TakePhoto : ChangeOrderFormEvent
     data object Save : ChangeOrderFormEvent
     data object AskDelete : ChangeOrderFormEvent
     data object DismissDelete : ChangeOrderFormEvent

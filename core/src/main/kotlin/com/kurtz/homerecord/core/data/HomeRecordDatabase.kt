@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -73,6 +73,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 9, to = 10, spec = HomeRecordDatabase.V9ToV10::class),
         // v11 (N003): photo.authorMemberId, so Crew and Sub may delete the job photos they took; older rows stay null.
         AutoMigration(from = 10, to = 11),
+        // v12 (T056b): change_order.photoIdsJson, the job photos on a change order; older rows have none.
+        AutoMigration(from = 11, to = 12),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

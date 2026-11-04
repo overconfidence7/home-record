@@ -1,5 +1,30 @@
 package com.kurtz.homerecord.fieldlog.changes
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import coil3.compose.AsyncImage
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -96,6 +121,7 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
                 Text(stringResource(R.string.co_form_speak))
             }
         }
+        PhotosSection(state, editable, onEvent)
         Text(
             stringResource(R.string.co_form_lines),
             style = MaterialTheme.typography.titleMedium,
@@ -133,6 +159,7 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
             }
         }
     }
+    if (state.pickingPhotos && editable) PhotoSheet(state, onEvent)
     if (state.confirmDelete) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),
@@ -223,6 +250,136 @@ private fun LineCard(index: Int, line: FormLine, editable: Boolean, onEvent: (Ch
                         onClick = { onEvent(ChangeOrderFormEvent.RemoveLine(line.id)) },
                         modifier = Modifier.semantics { contentDescription = remove }.testTag("fl_co_form_line_${index}_remove"),
                     ) { Icon(Icons.Rounded.RemoveCircleOutline, contentDescription = null) }
+                }
+            }
+        }
+    }
+}
+
+/** Photos on the change order (T056b): thumbnails in order with Remove, then Add job photos and Take photo. */
+@Composable
+private fun PhotosSection(state: ChangeOrderFormUiState, editable: Boolean, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    val photos = state.photos
+    if (!editable && photos.isEmpty()) return
+    Text(
+        stringResource(R.string.co_form_photos),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 8.dp).semantics { heading() },
+    )
+    if (photos.isEmpty()) {
+        Text(stringResource(R.string.co_form_no_photos), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    } else {
+        FlowRow(
+            Modifier.fillMaxWidth().testTag("fl_co_form_photos"),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            photos.forEachIndexed { index, p ->
+                val label = stringResource(R.string.co_form_photo_description, index + 1)
+                Box(
+                    Modifier.size(112.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .semantics { contentDescription = label }.testTag("fl_co_form_photo_${p.id}"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (p.path.isEmpty()) Icon(Icons.Rounded.PhotoLibrary, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    else AsyncImage(File(p.path), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                    if (editable) {
+                        val remove = stringResource(R.string.co_form_photo_remove_description, index + 1)
+                        FilledTonalIconButton(
+                            onClick = { onEvent(ChangeOrderFormEvent.RemovePhoto(p.id)) },
+                            // 32 dp to the eye so the photo shows; the button keeps its 48 dp touch target (rule 30).
+                            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp).size(32.dp)
+                                .semantics { contentDescription = remove }.testTag("fl_co_form_photo_${p.id}_remove"),
+                        ) { Icon(Icons.Rounded.Close, contentDescription = null, Modifier.size(18.dp)) }
+                    }
+                }
+            }
+        }
+    }
+    if (editable) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { onEvent(ChangeOrderFormEvent.OpenPhotos) },
+                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_co_form_photos_add"),
+            ) {
+                Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, Modifier.padding(end = 8.dp))
+                Text(stringResource(R.string.co_form_photos_add))
+            }
+            OutlinedButton(
+                onClick = { onEvent(ChangeOrderFormEvent.TakePhoto) },
+                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_co_form_photo_take"),
+            ) {
+                Icon(Icons.Rounded.PhotoCamera, contentDescription = null, Modifier.padding(end = 8.dp))
+                Text(stringResource(R.string.co_form_photo_take))
+            }
+        }
+    }
+}
+
+/** The job's photos three across (rule 27); a tap puts one on the change order or takes it off; Done closes. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PhotoSheet(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ChangeOrderFormEvent.ClosePhotos) }) {
+        PhotoSheetContent(state, onEvent)
+    }
+}
+
+/** What the Add job photos sheet holds; public so the catalog can show it (a sheet does not draw in a preview). */
+@Composable
+fun PhotoSheetContent(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    run {
+        LazyVerticalGrid(
+            GridCells.Fixed(3),
+            Modifier.widthIn(max = 640.dp).navigationBarsPadding().testTag("fl_co_form_photo_sheet"),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }, key = "title") {
+                Row(Modifier.padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.co_form_photos_sheet), style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f).semantics { heading() },
+                    )
+                    TextButton({ onEvent(ChangeOrderFormEvent.ClosePhotos) }, Modifier.heightIn(min = 48.dp).testTag("fl_co_form_photo_sheet_done")) {
+                        Text(stringResource(R.string.co_form_photos_done))
+                    }
+                }
+            }
+            if (state.jobPhotos.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.co_form_photos_none_on_job), style = MaterialTheme.typography.bodyMedium)
+                        OutlinedButton(
+                            onClick = { onEvent(ChangeOrderFormEvent.TakePhoto) },
+                            modifier = Modifier.heightIn(min = 56.dp).testTag("fl_co_form_photo_sheet_take"),
+                        ) {
+                            Icon(Icons.Rounded.PhotoCamera, contentDescription = null, Modifier.padding(end = 8.dp))
+                            Text(stringResource(R.string.co_form_photo_take))
+                        }
+                    }
+                }
+            }
+            items(state.jobPhotos, key = { it.id }) { p ->
+                val picked = p.id in state.draft.photoIds
+                val label = stringResource(if (picked) R.string.co_form_photo_picked else R.string.co_form_photo_pick)
+                Box(
+                    Modifier.aspectRatio(1f).clip(RoundedCornerShape(if (picked) 16.dp else 0.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .toggleable(value = picked, role = Role.Checkbox, onValueChange = { onEvent(ChangeOrderFormEvent.TogglePhoto(p.id)) })
+                        .semantics { contentDescription = label }.testTag("fl_co_form_pick_${p.id}"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (p.path.isEmpty()) Icon(Icons.Rounded.PhotoLibrary, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    else AsyncImage(File(p.path), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                    if (picked) {
+                        Icon(
+                            Icons.Rounded.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(28.dp)
+                                .background(MaterialTheme.colorScheme.surface, CircleShape),
+                        )
+                    }
                 }
             }
         }

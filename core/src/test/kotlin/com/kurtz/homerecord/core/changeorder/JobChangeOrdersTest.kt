@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
+import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.model.ChangeOrderLineItem
 import com.kurtz.homerecord.core.model.ChangeOrderStatus
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
@@ -53,6 +54,22 @@ class JobChangeOrdersTest {
         assertThat(db.changeOrderDao().get(id)?.totalCents).isEqualTo(33_500)
         assertThat(co.status).isEqualTo(ChangeOrderStatus.DRAFT)
         assertThat(changes).containsExactly("change_order/$id")
+    }
+
+    // T056b: photos on a change order are the job's own, once each, in the order added; an edit replaces them.
+    @Test fun photosKeepTheJobsOwnInOrderOnce() = runBlocking<Unit> {
+        fun photo(id: String, job: String, deleted: Long? = null) =
+            PhotoEntity(id = id, homeId = "h1", jobId = job, path = "/m/$id.jpg", takenAt = 1, createdAt = 1, updatedAt = 1, deletedAt = deleted)
+        db.photoDao().upsert(photo("p1", "j1"))
+        db.photoDao().upsert(photo("p2", "j1"))
+        db.photoDao().upsert(photo("other", "j2"))
+        db.photoDao().upsert(photo("gone", "j1", deleted = 5))
+        val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", photoIds = listOf("p2", "other", "p1", "p2", "gone", "nope"))))
+        assertThat(checkNotNull(orders.get(id)).photoIds).containsExactly("p2", "p1").inOrder()
+        assertThat(orders.update(id, ChangeOrderDraft("Island outlet", photoIds = listOf("p1")))).isTrue()
+        assertThat(checkNotNull(orders.get(id)).photoIds).containsExactly("p1")
+        assertThat(orders.update(id, ChangeOrderDraft("Island outlet"))).isTrue()
+        assertThat(checkNotNull(orders.get(id)).photoIds).isEmpty()
     }
 
     @Test fun blankTitleOrMissingJobSavesNothing() = runBlocking<Unit> {

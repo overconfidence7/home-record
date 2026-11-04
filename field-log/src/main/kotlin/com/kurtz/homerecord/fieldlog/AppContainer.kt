@@ -198,6 +198,9 @@ class AppContainer(private val app: Application) {
         canManage = roleGates.map { it.leads(jobId) },
         clientName = { db.jobDao().get(jobId)?.clientId?.let { db.clientDao().get(it)?.name } },
         canDictate = android.speech.SpeechRecognizer.isRecognitionAvailable(app),
+        photos = db.photoDao().observeForJob(jobId).map { rows ->
+            rows.map { com.kurtz.homerecord.fieldlog.changes.CoPhoto(it.id, it.thumbPath ?: it.path, it.createdAt) }
+        },
     )
 
     /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */

@@ -1750,16 +1750,55 @@ private val coDraft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft
         com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "LED fixture and motion switch", "1", "185.00"),
         com.kurtz.homerecord.fieldlog.changes.FormLine("l2", "Labor", "2.5", "96"),
     ),
+    photoIds = listOf("ph-pantry", "ph-switch"),
 )
+
+/** The job's photos as the picker lists them, newest first; not downloaded, so the placeholder shows. */
+private val coJobPhotos = listOf("ph-switch", "ph-pantry", "ph-island", "ph-panel", "ph-hall").mapIndexed { i, id ->
+    com.kurtz.homerecord.fieldlog.changes.CoPhoto(id, "", 1_000L - i)
+}
 
 /** Editing a draft: two lines, the total from MoneyMath, Speak under the description, Delete at the end (AC-F37). */
 @ThemePreviews
 @Composable
 fun ChangeOrderFormEditPreview() = Frame {
     com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
-        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, draft = coDraft, initial = coDraft, canDictate = true),
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, draft = coDraft, initial = coDraft, canDictate = true, jobPhotos = coJobPhotos,
+        ),
         {},
     )
+}
+
+/** The form with Add job photos open, as the app shows it; the catalog uses it (a sheet draws on a device, not in a preview). */
+@Composable
+fun ChangeOrderFormPhotoSheetOpen() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, draft = coDraft, initial = coDraft, jobPhotos = coJobPhotos, pickingPhotos = true,
+        ),
+        {},
+    )
+}
+
+/** Add job photos: the job's photos three across, the two on the change order ticked (T056b). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormPhotoSheetPreview() = Frame {
+    androidx.compose.material3.Surface(
+        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        modifier = androidx.compose.ui.Modifier.padding(top = 120.dp),
+    ) {
+        androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.padding(top = 16.dp)) {
+            com.kurtz.homerecord.fieldlog.changes.PhotoSheetContent(
+                com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+                    isNew = false, loading = false, draft = coDraft, initial = coDraft, jobPhotos = coJobPhotos, pickingPhotos = true,
+                ),
+                {},
+            )
+        }
+    }
 }
 
 /** A new change order with the client filled in from the job, one line typed and a quantity that is not a number yet (rule 21). */
@@ -1781,7 +1820,9 @@ fun ChangeOrderFormNewPreview() = Frame {
 @Composable
 fun ChangeOrderFormSignedPreview() = Frame {
     com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
-        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, locked = true, draft = coDraft, initial = coDraft),
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, locked = true, draft = coDraft, initial = coDraft, jobPhotos = coJobPhotos,
+        ),
         {},
     )
 }

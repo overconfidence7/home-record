@@ -5,6 +5,7 @@ import com.kurtz.homerecord.core.data.ChangeOrderEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.Sources
 import com.kurtz.homerecord.core.model.ChangeOrderLineItem
+import com.kurtz.homerecord.core.model.ChangeOrderPhotos
 import com.kurtz.homerecord.core.model.ChangeOrderStatus
 import com.kurtz.homerecord.core.model.JobChangeOrder
 import com.kurtz.homerecord.core.model.MoneyMath
@@ -17,6 +18,8 @@ data class ChangeOrderDraft(
     val description: String? = null,
     val lines: List<ChangeOrderLineItem> = emptyList(),
     val clientName: String? = null,
+    /** Job photos on the change order, in order (T056b). */
+    val photoIds: List<String> = emptyList(),
 )
 
 fun ChangeOrderEntity.toModel(): JobChangeOrder {
@@ -26,7 +29,7 @@ fun ChangeOrderEntity.toModel(): JobChangeOrder {
         // The stored total is what was signed; a draft's total is always its lines'.
         totalCents = if (ChangeOrderStatus.of(status) == ChangeOrderStatus.DRAFT) MoneyMath.totalCents(lines) else totalCents,
         clientName = clientName, status = ChangeOrderStatus.of(status), signedAt = signedAt, signedBy = signedBy,
-        createdAt = createdAt, updatedAt = updatedAt,
+        createdAt = createdAt, updatedAt = updatedAt, photoIds = ChangeOrderPhotos.decode(photoIdsJson),
     )
 }
 
@@ -57,6 +60,7 @@ class JobChangeOrders(
             ChangeOrderEntity(
                 id = id, jobId = jobId, title = clean.title, description = clean.description,
                 linesJson = ChangeOrderLineItem.encode(clean.lines), totalCents = MoneyMath.totalCents(clean.lines),
+                photoIdsJson = ChangeOrderPhotos.encode(jobPhotos(jobId, clean.photoIds)),
                 clientName = clean.clientName, status = ChangeOrderStatus.DRAFT.name, createdAt = stamp, updatedAt = stamp,
                 source = Sources.FIELD_LOG,
             ),
@@ -73,7 +77,8 @@ class JobChangeOrders(
         dao.upsert(
             row.copy(
                 title = clean.title, description = clean.description, linesJson = ChangeOrderLineItem.encode(clean.lines),
-                totalCents = MoneyMath.totalCents(clean.lines), clientName = clean.clientName, updatedAt = now(),
+                totalCents = MoneyMath.totalCents(clean.lines), clientName = clean.clientName,
+                photoIdsJson = ChangeOrderPhotos.encode(jobPhotos(row.jobId, clean.photoIds)), updatedAt = now(),
             ),
         )
         onChange(ENTITY, id)
@@ -88,6 +93,13 @@ class JobChangeOrders(
         onChange(ENTITY, id)
         return true
     }
+
+    /**
+     * The ids that are photos of this job, once each, in the order given. A photo deleted since or from another job
+     * is left off, so the PDF (T057) never asks for a picture that is not the job's.
+     */
+    private suspend fun jobPhotos(jobId: String, ids: List<String>): List<String> =
+        ids.distinct().filter { id -> db.photoDao().get(id)?.jobId == jobId }
 
     private fun ChangeOrderDraft.cleaned(): ChangeOrderDraft? {
         val t = title.trim()

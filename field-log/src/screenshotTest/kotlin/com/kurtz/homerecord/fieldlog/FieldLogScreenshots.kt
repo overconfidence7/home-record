@@ -720,6 +720,11 @@ fun ChangeOrderFormEditScreenshot() = ChangeOrderFormEditPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ChangeOrderFormPhotoSheetScreenshot() = ChangeOrderFormPhotoSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ChangeOrderFormNewScreenshot() = ChangeOrderFormNewPreview()
 
 @PreviewTest

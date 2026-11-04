@@ -28,6 +28,9 @@ class ChangeOrderFormDeps(
     /** Whether this phone has speech to text (Speak button). */
     val canDictate: Boolean = false,
     val newLineId: () -> String = Ids::newId,
+    /** The job's photos, newest first (T056b). */
+    val photos: Flow<List<CoPhoto>> = flowOf(emptyList()),
+    val now: () -> Long = System::currentTimeMillis,
 )
 
 /** Add or edit one change order (AC-F37). The total is MoneyMath over the lines; the typing survives process death. */
@@ -38,6 +41,22 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
 
     init {
         load()
+        viewModelScope.launch { d.photos.collect(::onJobPhotos) }
+    }
+
+    /**
+     * New job photos. After Take photo, a photo taken since then joins the change order once (T056b); one the person
+     * takes off again stays off. The time and the photos already handled live in the saved state, so a camera trip
+     * that outlives the process still lands.
+     */
+    private fun onJobPhotos(photos: List<CoPhoto>) {
+        _state.update { it.copy(jobPhotos = photos) }
+        val since = saved.get<Long>(TAKING_SINCE) ?: return
+        val handled = saved.get<ArrayList<String>>(HANDLED).orEmpty()
+        val fresh = photos.filter { it.createdAt >= since && it.id !in handled }.sortedBy { it.createdAt }.map { it.id }
+        if (fresh.isEmpty() || !ready()) return
+        saved[HANDLED] = ArrayList(handled + fresh)
+        edit { dr -> dr.copy(photoIds = dr.photoIds + fresh.filterNot { it in dr.photoIds }) }
     }
 
     private fun load() {
@@ -54,6 +73,7 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             val draft = if (locked) initial else saved.get<String>(DRAFT)
                 ?.let { runCatching { json.decodeFromString(ChangeOrderFormDraft.serializer(), it) }.getOrNull() } ?: initial
             _state.update { it.copy(loading = false, locked = locked, draft = draft, initial = initial) }
+            onJobPhotos(_state.value.jobPhotos)
         }
     }
 
@@ -70,6 +90,16 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             is ChangeOrderFormEvent.LineQty -> line(e.id) { it.copy(qty = e.text) }
             is ChangeOrderFormEvent.LinePrice -> line(e.id) { it.copy(price = e.text) }
             is ChangeOrderFormEvent.RemoveLine -> edit { it.copy(lines = it.lines.filterNot { l -> l.id == e.id }) }
+            ChangeOrderFormEvent.OpenPhotos -> if (ready()) _state.update { it.copy(pickingPhotos = true) }
+            ChangeOrderFormEvent.ClosePhotos -> _state.update { it.copy(pickingPhotos = false) }
+            is ChangeOrderFormEvent.TogglePhoto -> edit { dr ->
+                dr.copy(photoIds = if (e.id in dr.photoIds) dr.photoIds - e.id else dr.photoIds + e.id)
+            }
+            is ChangeOrderFormEvent.RemovePhoto -> edit { it.copy(photoIds = it.photoIds - e.id) }
+            ChangeOrderFormEvent.TakePhoto -> if (ready()) {
+                if (saved.get<Long>(TAKING_SINCE) == null) saved[TAKING_SINCE] = d.now()
+                _state.update { it.copy(pickingPhotos = false) }
+            }
             ChangeOrderFormEvent.Save -> save()
             ChangeOrderFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             ChangeOrderFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
@@ -112,10 +142,14 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
 
     private fun finish() {
         saved.remove<String>(DRAFT)
+        saved.remove<Long>(TAKING_SINCE)
+        saved.remove<ArrayList<String>>(HANDLED)
         _state.update { it.copy(working = false, done = true) }
     }
 
     private companion object {
         const val DRAFT = "changeOrderDraft"
+        const val TAKING_SINCE = "changeOrderTakingSince"
+        const val HANDLED = "changeOrderPhotosHandled"
     }
 }

@@ -80,4 +80,26 @@ class ChangesScreenTest {
         rule.onNodeWithText("Enter a number above 0.").assertExists()
         rule.onNodeWithTag("fl_save").assertIsNotEnabled()
     }
+
+    // T056b: photos on the form, Remove, Add job photos, Take photo, and ticking one in the sheet.
+    @Test fun photosShowWithRemoveAndTheSheetTicksAPhoto() {
+        val events = mutableListOf<ChangeOrderFormEvent>()
+        val photos = listOf(CoPhoto("p2", "", 2), CoPhoto("p1", "", 1))
+        val draft = ChangeOrderFormDraft(title = "Pantry light", photoIds = listOf("p1"))
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                ChangeOrderFormScreen(ChangeOrderFormUiState(isNew = false, loading = false, draft = draft, initial = draft, jobPhotos = photos), { events += it })
+                PhotoSheetContent(ChangeOrderFormUiState(loading = false, draft = draft, jobPhotos = photos), { events += it })
+            }
+        }
+        rule.onNodeWithTag("fl_co_form_photo_p1").assertExists()
+        rule.onNodeWithTag("fl_co_form_photo_p2").assertDoesNotExist()
+        rule.onNodeWithTag("fl_co_form_photo_p1_remove").performScrollTo().performClick()
+        rule.onNodeWithTag("fl_co_form_photos_add").performScrollTo().performClick()
+        rule.onNodeWithTag("fl_co_form_photo_take").performScrollTo().performClick()
+        rule.onNodeWithTag("fl_co_form_pick_p2").performClick()
+        assertThat(events).containsExactly(
+            ChangeOrderFormEvent.RemovePhoto("p1"), ChangeOrderFormEvent.OpenPhotos, ChangeOrderFormEvent.TakePhoto, ChangeOrderFormEvent.TogglePhoto("p2"),
+        ).inOrder()
+    }
 }

@@ -114,6 +114,7 @@ object ScreenCatalog {
         QaScreen("changes-empty", nonRoot = true) { ChangesEmptyPreview() },
         QaScreen("changes-crew", nonRoot = true) { ChangesCrewPreview() },
         QaScreen("co-form-edit", nonRoot = true) { ChangeOrderFormEditPreview() },
+        QaScreen("co-form-photo-sheet", nonRoot = true) { ChangeOrderFormPhotoSheetOpen() },
         QaScreen("co-form-new", nonRoot = true) { ChangeOrderFormNewPreview() },
         QaScreen("co-form-signed", nonRoot = true) { ChangeOrderFormSignedPreview() },
         QaScreen("co-form-delete", nonRoot = true) { ChangeOrderFormDeletePreview() },

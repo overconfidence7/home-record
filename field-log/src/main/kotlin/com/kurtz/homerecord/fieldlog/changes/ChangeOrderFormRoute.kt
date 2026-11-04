@@ -21,9 +21,9 @@ internal fun dictationIntent(prompt: String): Intent = Intent(RecognizerIntent.A
     .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
     .putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
 
-/** The change order form; closes itself once saved or deleted. */
+/** The change order form; closes itself once saved or deleted. [onTakePhoto] opens the job camera (T056b). */
 @Composable
-fun ChangeOrderFormRoute(deps: ChangeOrderFormDeps, onClose: () -> Unit) {
+fun ChangeOrderFormRoute(deps: ChangeOrderFormDeps, onClose: () -> Unit, onTakePhoto: () -> Unit = {}) {
     val vm = viewModel<ChangeOrderFormViewModel>(
         key = "co-form-${deps.jobId}-${deps.changeOrderId ?: "new"}",
         factory = viewModelFactory { initializer { ChangeOrderFormViewModel(deps, createSavedStateHandle()) } },
@@ -40,6 +40,10 @@ fun ChangeOrderFormRoute(deps: ChangeOrderFormDeps, onClose: () -> Unit) {
         when (e) {
             ChangeOrderFormEvent.Close -> onClose()
             ChangeOrderFormEvent.Speak -> runCatching { dictate.launch(dictationIntent(prompt)) }
+            ChangeOrderFormEvent.TakePhoto -> {
+                vm.onEvent(e)
+                onTakePhoto()
+            }
             else -> vm.onEvent(e)
         }
     })

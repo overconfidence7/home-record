@@ -60,6 +60,26 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_co_form_description
 - inputText: "Outlet on the end facing the dining room"
 - hideKeyboard
+# T056b: Photos: a new job has none yet, so the sheet says so and offers the camera
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_photos_add
+    direction: DOWN
+- assertVisible:
+    id: fl_co_form_photo_take
+- tapOn:
+    id: fl_co_form_photos_add
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_photo_sheet
+    timeout: 10000
+- assertVisible: "This job has no photos yet."
+- assertVisible:
+    id: fl_co_form_photo_sheet_take
+- tapOn:
+    id: fl_co_form_photo_sheet_done
+- assertNotVisible:
+    id: fl_co_form_photo_sheet
 # Line 1: one outlet at 185
 - scrollUntilVisible:
     element:

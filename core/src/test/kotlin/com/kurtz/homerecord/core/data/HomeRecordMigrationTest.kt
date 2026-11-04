@@ -148,6 +148,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T056b (AC-F37): a change order from before v12 has no photos; a new one keeps its photo ids.
+    @Test fun v11ToV12GivesEveryChangeOrderNoPhotos() {
+        helper.createDatabase(11).use { db ->
+            db.execSQL("INSERT INTO change_order (id, jobId, title, linesJson, totalCents, status, createdAt, updatedAt, source) VALUES ('c1', 'j1', 'Extra outlet', '[]', 18500, 'DRAFT', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(12).use { db ->
+            assertThat(db.texts("SELECT photoIdsJson FROM change_order WHERE id = 'c1'")).containsExactly("[]")
+            db.execSQL("INSERT INTO change_order (id, jobId, title, linesJson, photoIdsJson, totalCents, status, createdAt, updatedAt, source) VALUES ('c2', 'j1', 'Move sink', '[]', '[\"p1\"]', 0, 'DRAFT', 1, 1, 'FIELD_LOG')")
+            assertThat(db.texts("SELECT photoIdsJson FROM change_order WHERE id = 'c2'")).containsExactly("[\"p1\"]")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -186,6 +198,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 11
+        const val LATEST = 12
     }
 }

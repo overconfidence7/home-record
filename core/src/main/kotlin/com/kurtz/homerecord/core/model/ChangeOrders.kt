@@ -2,6 +2,7 @@ package com.kurtz.homerecord.core.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -83,4 +84,17 @@ data class JobChangeOrder(
     val signedBy: String?,
     val createdAt: Long,
     val updatedAt: Long,
+    /** The job photos on it, in the order they were added (T056b). */
+    val photoIds: List<String> = emptyList(),
 )
+
+/** `change_order.photoIdsJson`: a JSON array of photo ids; an unreadable value reads as no photos. */
+object ChangeOrderPhotos {
+    private val json = Json { ignoreUnknownKeys = true }
+    private val LIST = ListSerializer(String.serializer())
+
+    fun decode(text: String?): List<String> =
+        text?.let { runCatching { json.decodeFromString(LIST, it) }.getOrNull() }.orEmpty()
+
+    fun encode(ids: List<String>): String = json.encodeToString(LIST, ids)
+}

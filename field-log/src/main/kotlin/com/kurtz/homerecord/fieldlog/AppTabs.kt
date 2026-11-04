@@ -242,7 +242,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 ), onClose = nav::pop)
         }
         entry<ChangeOrderKey> { key ->
-            com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormRoute(container.changeOrderFormDeps(key.jobId, key.changeOrderId), onClose = nav::pop)
+            com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormRoute(
+                container.changeOrderFormDeps(key.jobId, key.changeOrderId), onClose = nav::pop,
+                onTakePhoto = { nav.push(CaptureKey(key.jobId)) },
+            )
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)
