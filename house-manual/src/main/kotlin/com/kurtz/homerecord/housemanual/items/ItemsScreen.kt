@@ -38,6 +38,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -183,7 +185,21 @@ private fun Controls(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit) {
                 ) { Text(stringResource(label)) }
             }
         }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // rule 11: the chip narrowing the list stays readable; picking one past the edge scrolls it fully into view
+        val chips = rememberLazyListState()
+        val warranty = state.filter.warranty
+        LaunchedEffect(warranty) {
+            if (warranty == null) return@LaunchedEffect
+            val index = MENU_CHIPS + warranty.ordinal
+            val info = chips.layoutInfo
+            val shown = info.visibleItemsInfo.firstOrNull { it.index == index }
+            when {
+                shown == null -> chips.animateScrollToItem(index)
+                shown.offset + shown.size > info.viewportEndOffset -> chips.animateScrollBy((shown.offset + shown.size - info.viewportEndOffset).toFloat())
+                shown.offset < info.viewportStartOffset -> chips.animateScrollBy((shown.offset - info.viewportStartOffset).toFloat())
+            }
+        }
+        LazyRow(state = chips, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("hm_items_filters")) {
             item {
                 MenuChip(
                     label = state.filter.category?.let { stringResource(it.labelRes) } ?: stringResource(R.string.items_filter_category),
@@ -214,6 +230,9 @@ private fun Controls(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit) {
         }
     }
 }
+
+/** Category and Room come before the warranty chips in the filter row. */
+private const val MENU_CHIPS = 2
 
 private fun WarrantyFilter.label() = when (this) {
     WarrantyFilter.ACTIVE -> R.string.items_warranty_active
