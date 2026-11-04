@@ -58,7 +58,7 @@ sealed interface MoreEvent {
     data object SignOut : MoreEvent
 }
 
-/** FL-More. Team and Company are shown only to Owner and Office; Crew never sees them (AC-F3). */
+/** FL-More. Team and Company are shown only to Owner and Office; Crew never sees them (AC-F3). A Lead gets Materials. */
 @Composable
 fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier) {
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
@@ -106,6 +106,15 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Business, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenCompany) },
                 modifier = Modifier.testTag("fl_more_company"),
+            )
+        }
+        if (state.role == CompanyRole.Lead) {
+            // A Lead logs receipts on the jobs they run (T060c2, AC-F44).
+            RecordListItem(
+                headline = stringResource(R.string.more_materials),
+                leading = { Icon(Icons.AutoMirrored.Rounded.ReceiptLong, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenMaterials) },
+                modifier = Modifier.testTag("fl_more_materials"),
             )
         }
         RecordListItem(

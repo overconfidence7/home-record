@@ -93,6 +93,11 @@ fun MoreOwnerScreenshot() = MoreOwnerPreview()
 @Composable
 fun MoreCrewScreenshot() = MoreCrewPreview()
 
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreLeadScreenshot() = MoreLeadPreview()
+
 
 @PreviewTest
 @ThemePreviews

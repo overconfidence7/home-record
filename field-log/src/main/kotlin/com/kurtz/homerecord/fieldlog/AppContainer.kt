@@ -191,8 +191,9 @@ class AppContainer(private val app: Application) {
         })
     }
 
-    private fun jobOptions(companyId: String) = db.jobDao().observeFor(companyId).map { jobs ->
-        jobs.sortedBy { it.name.lowercase() }.map { com.kurtz.homerecord.fieldlog.materials.JobOption(it.id, it.name) }
+    /** The jobs this member may log receipts on: every job for Owner and Office, the jobs a Lead runs (T060c2). */
+    private fun jobOptions(companyId: String) = kotlinx.coroutines.flow.combine(db.jobDao().observeFor(companyId), roleGates) { jobs, gates ->
+        jobs.filter { gates.leads(it.id) }.sortedBy { it.name.lowercase() }.map { com.kurtz.homerecord.fieldlog.materials.JobOption(it.id, it.name) }
     }
 
     /** FL-Materials (AC-F44). */

@@ -162,6 +162,7 @@ object ScreenCatalog {
         QaScreen("annotate-measure", nonRoot = true) { AnnotateTextPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
+        QaScreen("more-lead", nonRoot = false) { MoreLeadPreview() },
         QaScreen("clients-list", nonRoot = true) { ClientsListPreview() },
         QaScreen("clients-empty", nonRoot = true) { ClientsEmptyPreview() },
         QaScreen("materials-list", nonRoot = true) { MaterialsListPreview() },
