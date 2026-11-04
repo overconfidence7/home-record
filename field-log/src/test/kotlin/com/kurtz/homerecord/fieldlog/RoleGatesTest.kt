@@ -92,6 +92,12 @@ class RoleGatesTest {
         rule.onNodeWithText("No jobs yet at Kurtz Electric").assertIsDisplayed()
         rule.onNodeWithText("Invite crew").performClick()
         assertThat(events).containsExactly(TodayEvent.InviteCrew)
+        // judge:fl-today-invite-crew-orphan: Invite crew sits directly under Add a job, not pinned to the bottom.
+        val add = rule.onNodeWithTag("fl_today_add_job").fetchSemanticsNode().boundsInRoot
+        val invite = rule.onNodeWithTag("fl_today_invite_crew").fetchSemanticsNode().boundsInRoot
+        val gapDp = (invite.top - add.bottom) / rule.density.density
+        assertThat(gapDp).isAtLeast(0f)
+        assertThat(gapDp).isLessThan(24f)
     }
 
     // AC-F1

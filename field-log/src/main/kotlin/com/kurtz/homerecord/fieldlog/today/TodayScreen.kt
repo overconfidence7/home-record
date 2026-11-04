@@ -389,20 +389,21 @@ private fun elapsedText(ms: Long): String {
 @Composable
 private fun TodayBody(state: TodayUiState, onEvent: (TodayEvent) -> Unit, modifier: Modifier) {
     if (state.role.isAdmin) {
-        Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            EmptyState(
-                icon = Icons.Rounded.Work,
-                headline = stringResource(R.string.today_empty_title, state.companyName),
-                body = stringResource(R.string.today_empty_admin),
-                actionLabel = stringResource(R.string.today_add_job),
-                onAction = { onEvent(TodayEvent.AddJob) },
-                modifier = Modifier.weight(1f),
-                actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_today_add_job"),
-            )
-            TextButton(onClick = { onEvent(TodayEvent.InviteCrew) }, Modifier.heightIn(min = 56.dp).padding(bottom = 16.dp).testTag("fl_today_invite_crew")) {
-                Text(stringResource(R.string.today_invite_crew))
-            }
-        }
+        EmptyState(
+            icon = Icons.Rounded.Work,
+            headline = stringResource(R.string.today_empty_title, state.companyName),
+            body = stringResource(R.string.today_empty_admin),
+            actionLabel = stringResource(R.string.today_add_job),
+            onAction = { onEvent(TodayEvent.AddJob) },
+            modifier = modifier,
+            actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_today_add_job"),
+            // Directly under Add a job, the second half of "Add a job or invite your crew" (judge:fl-today-invite-crew-orphan).
+            secondaryAction = {
+                TextButton(onClick = { onEvent(TodayEvent.InviteCrew) }, Modifier.heightIn(min = 56.dp).testTag("fl_today_invite_crew")) {
+                    Text(stringResource(R.string.today_invite_crew))
+                }
+            },
+        )
     } else {
         Column(
             modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),

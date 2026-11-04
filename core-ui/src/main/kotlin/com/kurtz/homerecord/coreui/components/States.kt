@@ -37,6 +37,8 @@ fun EmptyState(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     actionModifier: Modifier = Modifier,
+    /** A second, quieter action drawn directly under the primary one (rule 10), such as a text button. */
+    secondaryAction: (@Composable () -> Unit)? = null,
 ) {
     CenteredColumn(modifier) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
@@ -46,6 +48,7 @@ fun EmptyState(
             Spacer(Modifier.height(8.dp))
             Button(onClick = onAction, modifier = actionModifier) { Text(actionLabel) }
         }
+        secondaryAction?.invoke()
     }
 }
 
