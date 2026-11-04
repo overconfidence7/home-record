@@ -268,7 +268,9 @@ private fun PlanArea(
                 canvasHeightDp = canvasHeightDp,
                 onSized = onSized,
             )
-            if (state.overlayMode) PlanOverlayNodes(state, onEvent) else PlanRoomNodes(state, onEvent)
+            // In Overlays mode the rooms stay named for TalkBack (where am I drawing?) but only overlays pick.
+            PlanRoomNodes(state, onEvent, pickable = !state.overlayMode)
+            if (state.overlayMode) PlanOverlayNodes(state, onEvent)
             if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
                 Text(
                     stringResource(R.string.plan_empty_hint),
@@ -542,10 +544,11 @@ private fun PlanCanvas(
 
 /**
  * Rooms are drawn, so TalkBack and UI tests get one pointer-transparent node per room laid over its
- * bounds, clipped to the canvas (same as the blueprint). Touches still reach the canvas below.
+ * bounds, clipped to the canvas (same as the blueprint). Touches still reach the canvas below. With [pickable]
+ * false (Overlays mode) a node only names its room: no click action, so it never picks a room there.
  */
 @Composable
-private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -> Unit) {
+private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -> Unit, pickable: Boolean = true) {
     val send by rememberUpdatedState(onEvent)
     val unnamed = stringResource(R.string.plan_unnamed_room)
     Box(Modifier.fillMaxSize().clipToBounds()) {
@@ -566,11 +569,13 @@ private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
                         .size((right - left).coerceAtLeast(0f).dp, (bottom - top).coerceAtLeast(0f).dp)
                         .testTag("${LocalTagPrefix.current}_plan_room_${room.id}")
                         .semantics {
-                            role = Role.Button
                             contentDescription = room.name.ifBlank { unnamed }
                             stateDescription = size
-                            selected = room.id == state.selectedId
-                            onClick { send(PlanEditorEvent.Select(room.id)); true }
+                            if (pickable) {
+                                role = Role.Button
+                                selected = room.id == state.selectedId
+                                onClick { send(PlanEditorEvent.Select(room.id)); true }
+                            }
                         },
                 )
             }

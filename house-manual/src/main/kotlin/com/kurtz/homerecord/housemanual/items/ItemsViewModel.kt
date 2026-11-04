@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.housemanual.items
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,6 +48,15 @@ class ItemsViewModel(
         ),
     )
 
+    /**
+     * What the search field shows, held as snapshot state so the field reads each keystroke on the same frame.
+     * [state] reaches the screen through `combine` on [mapping], a frame or more late; a field fed from it
+     * edits a stale value when keys come fast, dropping and reordering letters ("JGB735" became "GB75J" on the
+     * QA emulator, H06/H07). The filter flow still drives the list.
+     */
+    var query: String by mutableStateOf(filter.value.query)
+        private set
+
     private val collapsed = MutableStateFlow(saved.get<ArrayList<String>>(COLLAPSED)?.toSet().orEmpty())
 
     val state: StateFlow<ItemsUiState> = combine(rows, grouping, filter, collapsed) { all, g, f, c ->
@@ -77,6 +89,7 @@ class ItemsViewModel(
     private fun update(change: ItemFilter.() -> ItemFilter) {
         val f = filter.value.change()
         filter.value = f
+        query = f.query
         saved[CATEGORY] = f.category?.name; saved[ROOM] = f.roomId; saved[QUERY] = f.query; saved[WARRANTY] = f.warranty?.name
     }
 

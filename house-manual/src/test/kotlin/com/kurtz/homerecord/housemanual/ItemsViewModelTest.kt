@@ -61,6 +61,25 @@ class ItemsViewModelTest {
         job.cancel(); job2.cancel()
     }
 
+    // AC-H6, [auto:flow:house-manual:H06-items]: the search field reads the query on the same frame as each key, so
+    // fast typing keeps every letter even while the filtered list is still being built off the main thread
+    @Test @AcceptanceCriterion("AC-H6")
+    fun fastTypingKeepsEveryLetterWhileTheListLags() {
+        val saved = SavedStateHandle()
+        val slow = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        try {
+            val vm = ItemsViewModel(MutableStateFlow(rows), saved, slow) { it.name }
+            "JGB735".forEach { c -> vm.onEvent(ItemsEvent.SetQuery(vm.query + c)) }
+            assertThat(vm.query).isEqualTo("JGB735")
+            assertThat(saved.get<String>("query")).isEqualTo("JGB735")
+            assertThat(ItemsViewModel(MutableStateFlow(rows), saved, slow) { it.name }.query).isEqualTo("JGB735")
+            vm.onEvent(ItemsEvent.ClearFilters)
+            assertThat(vm.query).isEmpty()
+        } finally {
+            slow.close()
+        }
+    }
+
     @Test @AcceptanceCriterion("AC-H6")
     fun filtersAndGroupingApplyAndSurviveRecreation() {
         val saved = SavedStateHandle()

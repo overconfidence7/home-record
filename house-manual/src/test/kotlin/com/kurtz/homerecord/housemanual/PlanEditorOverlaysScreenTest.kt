@@ -2,6 +2,8 @@ package com.kurtz.homerecord.housemanual
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -87,6 +89,18 @@ class PlanEditorOverlaysScreenTest {
         assertThat(added.y).isWithin(0.5f).of(60f)
         rule.onNodeWithTag("hm_plan_draw_cancel").performClick()
         assertThat(events.overlayEvents().last()).isEqualTo(WallOverlaysEvent.CancelDrawing)
+    }
+
+    // AC-C25, [auto:flow:house-manual:H11-overlay-pipe]: while drawing, the rooms stay named (TalkBack, Maestro's
+    // tapOn "Kitchen") without a click action, and a tap on a room still lands on the canvas as a point
+    @Test @AcceptanceCriterion("AC-C25")
+    fun whileDrawingTheRoomsAreNamedButDoNotPick() {
+        val events = mutableListOf<PlanEditorEvent>()
+        show(state.copy(overlayMode = true, drawing = emptyList()), events)
+        rule.onNodeWithContentDescription("Kitchen").assertExists().assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+        rule.onNodeWithContentDescription("Kitchen").performTouchInput { click(center) }
+        assertThat(events.filterIsInstance<PlanEditorEvent.Select>()).isEmpty()
+        assertThat(events.overlayEvents().filterIsInstance<WallOverlaysEvent.AddPoint>()).hasSize(1)
     }
 
     @Test @AcceptanceCriterion("AC-C28")

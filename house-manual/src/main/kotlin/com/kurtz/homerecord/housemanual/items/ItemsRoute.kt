@@ -25,7 +25,7 @@ fun ItemsRoute(repo: ItemRepository, homeId: String, onAdd: () -> Unit, onOpen: 
             initializer { ItemsViewModel(repo, homeId, pseudo, createSavedStateHandle()) { resources.getString(it.labelRes) } }
         },
     )
-    ItemsScreen(vm.state.collectAsState().value, onEvent = {
+    ItemsScreen(vm.state.collectAsState().value.let { it.copy(filter = it.filter.copy(query = vm.query)) }, onEvent = {
         when (it) {
             ItemsEvent.Add -> onAdd()
             is ItemsEvent.Open -> onOpen(it.itemId)

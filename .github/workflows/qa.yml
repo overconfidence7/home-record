@@ -202,7 +202,10 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Field Log's suite passed 60 minutes on 0a2059ec (instrumented 18 min + 21 flows, cancelled in F16
+    # before crawler/jank/monkey/release ran). The step below stops 10 minutes before the job does so the
+    # upload always has a closed output directory to zip.
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -256,6 +259,7 @@ jobs:
           script: echo "AVD created"
       - name: Run the device suite
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 108
         with:
           api-level: ${{ env.QA_API_LEVEL }}
           target: ${{ env.QA_TARGET }}
