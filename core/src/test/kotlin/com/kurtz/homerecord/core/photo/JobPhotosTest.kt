@@ -50,6 +50,13 @@ class JobPhotosTest {
         assertThat(uploads).containsExactly("photo/$id/a.jpg")
     }
 
+    // N003, AC-F3: the signed-in member is stamped as the author so they may delete it later
+    @Test fun stampsTheSignedInMemberAsAuthor() = runBlocking<Unit> {
+        val mine = JobPhotos(db, { _, _, _, _, _, _ -> }, { company }, { clock }, authorId = { "u-crew" })
+        val id = checkNotNull(mine.save("/media/c.jpg", CaptureTags("j1"), null))
+        assertThat(db.photoDao().get(id)?.authorMemberId).isEqualTo("u-crew")
+    }
+
     @Test fun noPermissionStillSavesWithoutGps() = runBlocking<Unit> {
         val id = checkNotNull(photos.save("/media/b.jpg", CaptureTags("j1"), null))
         assertThat(checkNotNull(db.photoDao().get(id)).lat).isNull()

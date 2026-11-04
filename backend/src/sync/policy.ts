@@ -54,6 +54,16 @@ export function canPush(access: Access, entity: string, stored: Row | null, inco
     if (after(stored, incoming, "memberId") === access.userId) return true;
     return onLeadJob(access, stored, incoming);
   }
+  if (entity === "photo") {
+    // N003: the author is stamped once by the member who takes the photo; deleting it is for whoever runs the job
+    // (Owner, Office, the job's Lead) or its author. Other edits (caption, tags, markup) stay open to everyone.
+    if (!unchanged(stored, incoming, "authorMemberId")) return false;
+    if (stored === null && "authorMemberId" in incoming && str(incoming.authorMemberId) !== null && str(incoming.authorMemberId) !== access.userId) return false;
+    if (incoming.deletedAt != null && stored !== null && stored.deletedAt == null) {
+      return str(stored.authorMemberId) === access.userId || onLeadJob(access, stored, incoming);
+    }
+    return true;
+  }
   if (CAPTURE.has(entity)) return true;
   if (entity === "task") {
     // A Lead runs the tasks of the jobs they are on. Anyone else (Crew, Sub, or a Lead off that job) marks their own

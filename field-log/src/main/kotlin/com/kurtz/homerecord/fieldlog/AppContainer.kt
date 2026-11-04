@@ -163,6 +163,7 @@ class AppContainer(private val app: Application) {
     val jobPhotos by lazy {
         com.kurtz.homerecord.core.photo.JobPhotos(
             db, queueUpload = ::uploadMedia, companyId = { company.current?.companyId }, onChange = ::recordChange,
+            authorId = { (auth.state.value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of) },
         )
     }
 
@@ -314,6 +315,7 @@ class AppContainer(private val app: Application) {
     fun photoDetailDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.PhotoDetailDeps(
         photoId, db.photoDao(), db.jobDao(), db.roomDao(), photoEdits, roleGates,
         isOnPhone = mediaDownloads::isOnPhone, download = mediaDownloads::photo,
+        memberName = { id -> db.memberDao().get(id)?.name?.takeIf { it.isNotBlank() } },
     )
 
     fun annotateDeps(photoId: String) = com.kurtz.homerecord.fieldlog.photos.AnnotateDeps(

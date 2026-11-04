@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flowOf
  * Owner and Office do everything. A Lead manages files and photos and clocks in the crew only on the jobs they are on
  * (job crew or a scheduled day). Crew and Sub view files and add captures; they never edit jobs or delete others' work.
  */
-data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet()) {
+data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet(), val selfId: String? = null) {
     /** New job, edit job and its client, crew and rooms: Owner and Office only. */
     val canEditJobs: Boolean get() = role.isAdmin
 
@@ -23,8 +23,9 @@ data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet
     /** Add, rename, delete files and make folders on the job's Files tab. */
     fun canManageFiles(jobId: String?): Boolean = leads(jobId)
 
-    /** Delete a job photo. */
-    fun canDeletePhoto(jobId: String?): Boolean = leads(jobId)
+    /** Delete a job photo: whoever runs the job, or the member who took it (N003, backend policy.ts). */
+    fun canDeletePhoto(jobId: String?, authorMemberId: String? = null): Boolean =
+        leads(jobId) || (selfId != null && authorMemberId == selfId)
 
     /** Add, edit, assign, reorder and delete tasks on [jobId]; Crew and Sub only tick their own (AC-F34, backend policy.ts). */
     fun canManageTasks(jobId: String?): Boolean = leads(jobId)
@@ -35,7 +36,7 @@ data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet
     companion object {
         /** Live gates for [memberId]; the job list is only read for a Lead. */
         fun observe(role: CompanyRole, memberId: String?, crew: JobCrewDao, assignments: AssignmentDao): Flow<RoleGates> =
-            if (role != CompanyRole.Lead || memberId == null) flowOf(RoleGates(role))
-            else combine(crew.observeJobIdsForMember(memberId), assignments.observeJobIdsForMember(memberId)) { a, b -> RoleGates(role, (a + b).toSet()) }
+            if (role != CompanyRole.Lead || memberId == null) flowOf(RoleGates(role, selfId = memberId))
+            else combine(crew.observeJobIdsForMember(memberId), assignments.observeJobIdsForMember(memberId)) { a, b -> RoleGates(role, (a + b).toSet(), memberId) }
     }
 }

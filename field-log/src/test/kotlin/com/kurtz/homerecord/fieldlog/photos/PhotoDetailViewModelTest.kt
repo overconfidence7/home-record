@@ -179,4 +179,20 @@ class PhotoDetailViewModelTest {
         assertThat(s.imagePath).isEqualTo("/m/p1.jpg")
         assertThat(asked).isFalse()
     }
+
+    // N003, AC-F3: a crew member may delete the photo they took, and the page says who took it
+    @Test fun `crew may delete their own photo and sees who took it`() = runBlocking {
+        db.photoDao().upsert(PhotoEntity(id = "p2", homeId = "h1", jobId = "j1", path = "/m/p2.jpg", takenAt = 6, createdAt = 6, updatedAt = 6, authorMemberId = "u-crew"))
+        val crew = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Crew, selfId = "u-crew")
+        fun deps(id: String) = PhotoDetailDeps(
+            id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }, kotlinx.coroutines.flow.flowOf(crew),
+            memberName = { if (it == "u-crew") "Marco Diaz" else null },
+        )
+        val mine = loaded(PhotoDetailViewModel(deps("p2")))
+        assertThat(mine.canDelete).isTrue()
+        assertThat(mine.takenBy).isEqualTo("Marco Diaz")
+        val other = loaded(PhotoDetailViewModel(deps("p1")))
+        assertThat(other.canDelete).isFalse()
+        assertThat(other.takenBy).isNull()
+    }
 }

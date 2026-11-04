@@ -803,7 +803,7 @@ fun PhotosLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.Photos
 private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(
     loading = false, imagePath = "/none/a1.jpg", caption = "New subpanel in, breakers labeled",
     rooms = listOf("Kitchen", "Garage", "Main bath", "Basement").mapIndexed { i, n -> com.kurtz.homerecord.fieldlog.photos.PhotoRoomOption("r$i", n) },
-    roomId = "r0", phases = listOf("Rough-in", "Finish", "Inspection"), phase = "Finish", takenAt = 1_792_000_000_000, annotated = true, isBefore = true,
+    roomId = "r0", phases = listOf("Rough-in", "Finish", "Inspection"), phase = "Finish", takenAt = 1_792_000_000_000, takenBy = "Marco Diaz", annotated = true, isBefore = true,
 )
 
 @ThemePreviews

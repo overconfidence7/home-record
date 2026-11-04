@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -71,6 +71,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 8, to = 9),
         // v10 (N001): wall_photo.wallId nullable and wall_photo.roomId, so a removed wall's photos stay on its room.
         AutoMigration(from = 9, to = 10, spec = HomeRecordDatabase.V9ToV10::class),
+        // v11 (N003): photo.authorMemberId, so Crew and Sub may delete the job photos they took; older rows stay null.
+        AutoMigration(from = 10, to = 11),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

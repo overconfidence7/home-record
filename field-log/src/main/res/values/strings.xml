@@ -361,6 +361,7 @@
     <string name="photos_before">Before</string>
     <string name="photos_after">After</string>
     <string name="photos_marked">Marked up</string>
+    <string name="photo_taken_by">Taken by %1$s</string>
     <string name="photo_title">Photo</string>
     <string name="photo_caption">Caption</string>
     <string name="photo_room">Room</string>

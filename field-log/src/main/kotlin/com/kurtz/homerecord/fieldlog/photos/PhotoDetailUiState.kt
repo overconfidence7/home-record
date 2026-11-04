@@ -17,11 +17,13 @@ data class PhotoDetailUiState(
     val phases: List<String> = emptyList(),
     val phase: String? = null,
     val takenAt: Long = 0,
+    /** Name of the member who took it, shown after the time; null for photos from before N003 or an unknown member. */
+    val takenBy: String? = null,
     val annotated: Boolean = false,
     val isBefore: Boolean = false,
     val confirmDelete: Boolean = false,
     val deleted: Boolean = false,
-    /** Delete is for Owner, Office and the job's Lead (AC-F3). */
+    /** Delete is for Owner, Office, the job's Lead and whoever took the photo (AC-F3, N003). */
     val canDelete: Boolean = true,
 )
 

@@ -272,6 +272,8 @@ data class PhotoEntity(
     val updatedAt: Long,
     val deletedAt: Long? = null,
     val source: String = Sources.HOUSE_MANUAL,
+    /** Field Log member (user id) who took the photo; null for House Manual photos and ones taken before v11 (N003). */
+    val authorMemberId: String? = null,
 )
 
 @Entity(tableName = "contact", indices = [Index("homeId")])

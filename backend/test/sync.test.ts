@@ -257,6 +257,38 @@ describe("AC-B3 sync role gates (AC-F3)", () => {
     expect(owner.some((r: any) => r.entity === "timesheet_approval" || r.entity === "company")).toBe(false);
   });
 
+  // N003, AC-F3: Crew and Sub delete the job photos they took; others' photos only Owner, Office or the job's Lead
+  it("Crew deletes only their own photos, cannot claim or re-author one; a Lead deletes photos on their jobs", async () => {
+    const t = await company("n003");
+    await push(t.owner, t.co, "office", [
+      op(1, "jc1", { jobId: "j1", memberId: t.leadId }, 1, "job_crew"),
+      op(2, "ph-owner", { jobId: "j1", authorMemberId: t.ownerId, takenAt: 1 }, 1, "photo"),
+      op(3, "ph-old", { jobId: "j2", takenAt: 1 }, 1, "photo"),
+    ]);
+    const crew = await json(await push(t.crew, t.co, "phone", [
+      op(1, "ph-mine", { jobId: "j1", authorMemberId: t.crewId, takenAt: 2 }, 2, "photo"),
+      op(2, "ph-fake", { jobId: "j1", authorMemberId: t.leadId, takenAt: 2 }, 2, "photo"),
+      { ...op(3, "ph-mine", { deletedAt: 5 }, 5, "photo"), op: "delete" },
+      { ...op(4, "ph-owner", { deletedAt: 5 }, 5, "photo"), op: "delete" },
+      { ...op(5, "ph-old", { deletedAt: 5 }, 5, "photo"), op: "delete" },
+      op(6, "ph-owner", { authorMemberId: t.crewId }, 6, "photo"),
+      op(7, "ph-owner", { caption: "Panel before" }, 7, "photo"),
+    ]));
+    expect(crew.accepted.map((a: any) => a.outboxId)).toEqual([1, 3, 7]);
+    expect(crew.rejected).toEqual([2, 4, 5, 6].map((outboxId) => ({ outboxId, reason: "role" })));
+    const lead = await json(await push(t.lead, t.co, "lead-phone", [
+      { ...op(1, "ph-owner", { deletedAt: 8 }, 8, "photo"), op: "delete" },
+      { ...op(2, "ph-old", { deletedAt: 8 }, 8, "photo"), op: "delete" },
+    ]));
+    expect(lead.accepted.map((a: any) => a.outboxId)).toEqual([1]);
+    expect(lead.rejected).toEqual([{ outboxId: 2, reason: "role" }]);
+    const rows = (await pull(t.owner, t.co)).rows.filter((r: any) => r.entity === "photo");
+    const byId = Object.fromEntries(rows.map((r: any) => [r.entityId, r.row]));
+    expect(byId["ph-mine"].deletedAt).toBe(5);
+    expect(byId["ph-owner"]).toMatchObject({ deletedAt: 8, authorMemberId: t.ownerId, caption: "Panel before" });
+    expect(byId["ph-old"].deletedAt ?? null).toBeNull();
+  });
+
   it("Crew may only mark their own tasks; Lead edits tasks and files on their jobs only", async () => {
     const t = await company("b3c");
     await push(t.owner, t.co, "office", [

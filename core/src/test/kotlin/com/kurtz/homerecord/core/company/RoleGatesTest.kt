@@ -57,6 +57,20 @@ class RoleGatesTest {
         }
     }
 
+    // N003, AC-F3: Crew and Sub delete the photos they took, never someone else's or an unattributed one
+    @Test fun crewAndSubDeleteOnlyTheirOwnPhotos() {
+        for (role in listOf(CompanyRole.Crew, CompanyRole.Sub)) {
+            val g = RoleGates(role, selfId = "u-me")
+            assertThat(g.canDeletePhoto("j1", "u-me")).isTrue()
+            assertThat(g.canDeletePhoto("j1", "u-other")).isFalse()
+            assertThat(g.canDeletePhoto("j1", null)).isFalse()
+        }
+        assertThat(RoleGates(CompanyRole.Crew).canDeletePhoto("j1", null)).isFalse()
+        val lead = RoleGates(CompanyRole.Lead, setOf("j1"), "u-lead")
+        assertThat(lead.canDeletePhoto("j2", "u-lead")).isTrue()
+        assertThat(lead.canDeletePhoto("j2", "u-crew")).isFalse()
+    }
+
     @Test fun leadJobsComeFromJobCrewAndScheduledDaysLive() = runBlocking<Unit> {
         val db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
@@ -78,7 +92,7 @@ class RoleGatesTest {
             .allowMainThreadQueries().build()
         try {
             db.jobCrewDao().upsert(JobCrewEntity("c1", "j1", "m1", 1, 1))
-            assertThat(RoleGates.observe(CompanyRole.Crew, "m1", db.jobCrewDao(), db.assignmentDao()).first()).isEqualTo(RoleGates(CompanyRole.Crew))
+            assertThat(RoleGates.observe(CompanyRole.Crew, "m1", db.jobCrewDao(), db.assignmentDao()).first()).isEqualTo(RoleGates(CompanyRole.Crew, selfId = "m1"))
             assertThat(RoleGates.observe(CompanyRole.Lead, null, db.jobCrewDao(), db.assignmentDao()).first().leadJobs).isEmpty()
         } finally {
             db.close()

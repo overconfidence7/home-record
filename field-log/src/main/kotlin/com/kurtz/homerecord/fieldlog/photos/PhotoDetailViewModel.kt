@@ -31,6 +31,8 @@ class PhotoDetailDeps(
     val isOnPhone: suspend (String) -> Boolean = { true },
     /** Fetches a photo pulled from another phone by its R2 key ([com.kurtz.homerecord.core.media.MediaDownloads.photo]). */
     val download: suspend (String) -> OnPhone = { OnPhone.Ready },
+    /** A member's name by id, for "taken by" (N003). */
+    val memberName: suspend (String) -> String? = { null },
 )
 
 /** FL-Photo: caption, room and phase tags, the Before mark (its own tag, cr:fl-before-phase) and delete for one job photo (AC-F25). */
@@ -42,10 +44,11 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
     private val writes = Mutex()
 
     @Volatile private var jobId: String? = null
+    @Volatile private var author: String? = null
     @Volatile private var gates: com.kurtz.homerecord.core.company.RoleGates? = null
 
     init {
-        viewModelScope.launch { d.gates.collect { g -> gates = g; _state.update { it.copy(canDelete = g.canDeletePhoto(jobId)) } } }
+        viewModelScope.launch { d.gates.collect { g -> gates = g; _state.update { it.copy(canDelete = g.canDeletePhoto(jobId, author)) } } }
         viewModelScope.launch { load() }
     }
 
@@ -56,6 +59,8 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
             return
         }
         jobId = p.jobId
+        author = p.authorMemberId
+        val takenBy = p.authorMemberId?.let { d.memberName(it) }
         val job = p.jobId?.let { d.jobs.get(it) }
         val rooms = (job?.homeId ?: p.homeId).let { d.rooms.listForHome(it) }.map { PhotoRoomOption(it.id, it.name) }
         val onPhone = d.isOnPhone(p.path)
@@ -63,8 +68,8 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
         _state.update {
             PhotoDetailUiState(
                 loading = false, imagePath = if (onPhone) p.path else "", image = if (onPhone) PhotoImage.Ready else PhotoImage.Downloading, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
-                phases = phases, phase = p.stage, takenAt = p.takenAt, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
-                isBefore = p.pairRole == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId) ?: false,
+                phases = phases, phase = p.stage, takenAt = p.takenAt, takenBy = takenBy, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
+                isBefore = p.pairRole == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId, p.authorMemberId) ?: false,
             )
         }
         if (!onPhone) download()

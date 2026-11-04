@@ -136,6 +136,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // N003, AC-F3: photos taken before v11 have no author (only Owner, Office and the job's Lead may delete them)
+    @Test fun v10ToV11AddsANullPhotoAuthor() {
+        helper.createDatabase(10).use { db ->
+            db.execSQL("INSERT INTO photo (id, homeId, jobId, path, takenAt, tagsJson, annotationsJson, createdAt, updatedAt, source) VALUES ('p1', 'h1', 'j1', '/m/p.jpg', 1, '[]', '[]', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(11).use { db ->
+            assertThat(db.texts("SELECT id FROM photo WHERE authorMemberId IS NULL")).containsExactly("p1")
+            db.execSQL("INSERT INTO photo (id, homeId, jobId, path, takenAt, tagsJson, annotationsJson, createdAt, updatedAt, source, authorMemberId) VALUES ('p2', 'h1', 'j1', '/m/q.jpg', 1, '[]', '[]', 1, 1, 'FIELD_LOG', 'u-crew')")
+            assertThat(db.texts("SELECT authorMemberId FROM photo WHERE id = 'p2'")).containsExactly("u-crew")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -174,6 +186,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 10
+        const val LATEST = 11
     }
 }

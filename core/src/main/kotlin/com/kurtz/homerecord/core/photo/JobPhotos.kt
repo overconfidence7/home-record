@@ -51,6 +51,8 @@ class JobPhotos(
     private val companyId: () -> String?,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    /** The signed-in member, stamped on each photo as its author so they may delete it later (N003). */
+    private val authorId: () -> String? = { null },
 ) {
     /** Returns the new photo id, or null when the job is gone. [beforeOf] marks this as the "after" of that photo (AC-F25). */
     suspend fun save(path: String, tags: CaptureTags, fix: GeoFix?, beforeOf: String? = null, takenAt: Long? = null): String? {
@@ -61,7 +63,7 @@ class JobPhotos(
             PhotoEntity(
                 id = id, homeId = job.homeId ?: job.id, roomId = tags.roomId, jobId = job.id, stage = tags.phase,
                 path = path, takenAt = takenAt ?: stamp, lat = fix?.lat, lng = fix?.lng, beforeOfPhotoId = beforeOf,
-                createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG,
+                createdAt = stamp, updatedAt = stamp, source = Sources.FIELD_LOG, authorMemberId = authorId(),
             ),
         )
         onChange("photo", id)

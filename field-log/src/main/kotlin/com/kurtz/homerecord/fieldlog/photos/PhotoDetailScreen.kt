@@ -70,7 +70,9 @@ fun PhotoDetailScreen(
 ) {
     ScreenScaffold(
         title = stringResource(R.string.photo_title),
-        subtitle = if (state.takenAt > 0) DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).format(Instant.ofEpochMilli(state.takenAt).atZone(zone)) else null,
+        subtitle = if (state.takenAt > 0) {
+            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).format(Instant.ofEpochMilli(state.takenAt).atZone(zone))
+        } else null,
         onBack = { onEvent(PhotoDetailEvent.Back) },
         actions = {
             if (!state.loading && !state.missing && state.image == PhotoImage.Ready) {
@@ -95,6 +97,14 @@ fun PhotoDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 PhotoFrame(state, onEvent)
+                state.takenBy?.let {
+                    Text(
+                        stringResource(R.string.photo_taken_by, it),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("fl_photo_taken_by"),
+                    )
+                }
                 OutlinedTextField(
                     state.caption, { onEvent(PhotoDetailEvent.Caption(it)) },
                     Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_photo_caption").onFocusChanged { if (!it.isFocused) onEvent(PhotoDetailEvent.SaveCaption) },
