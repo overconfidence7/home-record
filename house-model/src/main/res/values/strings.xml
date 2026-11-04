@@ -137,6 +137,10 @@
     <string name="room_wall_west">West wall</string>
     <string name="room_wall_angled">Angled wall</string>
     <string name="room_wall_numbered">%1$s %2$d</string>
+    <string name="room_removed_wall_photos">Photos of removed walls</string>
+    <string name="room_removed_wall_photo_stage">%1$s photo</string>
+    <string name="room_removed_wall_photo_taken">Taken %1$s</string>
+    <string name="room_removed_wall_photo_description">%1$s photo of a removed wall, taken %2$s</string>
     <string name="room_wall_no_photos">%1$s long · No photos yet</string>
     <string name="room_wall_photos">%1$s long · Photos: %2$s</string>
     <string name="room_wall_photo_description">%2$s, %1$s photo</string>

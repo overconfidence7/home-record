@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -69,6 +69,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 7, to = 8),
         // v9: item.wallX/wallY, an item's spot on its wall (T055c, AC-C30 position).
         AutoMigration(from = 8, to = 9),
+        // v10 (N001): wall_photo.wallId nullable and wall_photo.roomId, so a removed wall's photos stay on its room.
+        AutoMigration(from = 9, to = 10, spec = HomeRecordDatabase.V9ToV10::class),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
@@ -130,6 +132,13 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     class V4ToV5 : AutoMigrationSpec {
         override fun onPostMigrate(connection: SQLiteConnection) {
             connection.execSQL("UPDATE task SET doneAt = updatedAt WHERE done = 1")
+        }
+    }
+
+    /** v10 (N001): every wall photo learns its wall's room. */
+    class V9ToV10 : AutoMigrationSpec {
+        override fun onPostMigrate(connection: SQLiteConnection) {
+            connection.execSQL("UPDATE wall_photo SET roomId = (SELECT wall.roomId FROM wall WHERE wall.id = wall_photo.wallId) WHERE roomId IS NULL")
         }
     }
 

@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,8 @@ class RoomViewModel(
     canView3D: Boolean = false,
     /** The room's overlays (AC-C25); with it, wall rows open HM-Wall. */
     overlays: Flow<List<Overlay>>? = null,
+    /** Photos of the room's removed walls (N001). */
+    removedWallPhotos: Flow<List<RemovedWallPhoto>>? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(
@@ -60,6 +63,9 @@ class RoomViewModel(
         }
         if (walls != null) {
             viewModelScope.launch { walls.collect { list -> _state.update { it.copy(walls = list) } } }
+        }
+        if (removedWallPhotos != null) {
+            viewModelScope.launch { removedWallPhotos.collect { list -> _state.update { it.copy(removedWallPhotos = list) } } }
         }
         if (overlays != null) {
             viewModelScope.launch { overlays.collect { list -> _state.update { it.copy(overlays = list) } } }

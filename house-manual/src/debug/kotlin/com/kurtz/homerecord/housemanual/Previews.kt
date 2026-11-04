@@ -75,6 +75,7 @@ import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanStair
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.Pt
+import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 
 @Preview(name = "Light", showBackground = true)
 @Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
@@ -405,6 +406,22 @@ private val kitchenWalls = listOf(
 @Composable
 fun RoomWallsPreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", canAddItem = true,
     walls = kitchenWalls, wallStage = WallStage.ROUGH_IN, canPhotograph = true,
+), {}) }
+
+/**
+ * The kitchen after its pantry notch was squared off on the plan (N001): three walls left, and the removed walls'
+ * Rough-in and Finished photos kept under "Photos of removed walls" with their stage and date. Tall so the list shows.
+ */
+@Preview(name = "Light", showBackground = true, heightDp = 1300)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, heightDp = 1300)
+@Preview(name = "200% font", fontScale = 2f, showBackground = true, heightDp = 2200)
+@Composable
+fun RoomRemovedWallPhotosPreview() = Frame { RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St",
+    walls = kitchenWalls.take(3), wallStage = WallStage.FINISHED, canPhotograph = true,
+    removedWallPhotos = listOf(
+        RemovedWallPhoto("rp1", WallStage.FINISHED, "/preview/pantry.jpg", java.time.LocalDate.of(2026, 9, 2).atTime(12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli()),
+        RemovedWallPhoto("rp2", WallStage.ROUGH_IN, "/preview/pantry-rough.jpg", java.time.LocalDate.of(2025, 4, 18).atTime(12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli()),
+    ),
 ), {}) }
 
 @ThemePreviews

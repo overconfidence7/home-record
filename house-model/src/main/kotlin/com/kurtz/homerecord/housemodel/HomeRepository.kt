@@ -256,7 +256,8 @@ class HomeRepository(
     /**
      * Writes the walls, doors, windows and stairs of [room]. Every edge has a wall row; a wall keeps its id through a
      * reshape by matching the stored outline to the new one by endpoints (WallMatcher), so its photos stay on it.
-     * Walls whose edge is gone are soft deleted with their wall photos, and items on them stay in the room off the wall.
+     * Walls whose edge is gone are soft deleted; their wall photos stay on the room with no wall (N001), and items on
+     * them stay in the room off the wall.
      * Wall overlays follow WallOverlayCarrier: onto the wall now running where they sat (a split or merged wall), else
      * onto the floor plan (R10). Runs before the room row itself is written.
      */
@@ -273,9 +274,8 @@ class HomeRepository(
             onChange("opening", it.id)
         }
         val oldPhotos = stored.flatMap { WallPhotoRepository.latestRowByStage(db.wallPhotoDao().listFor(it.id)).values }
-        val dropped = mutableListOf<String>()
+        val removedPhotos = match.removed.flatMap { db.wallPhotoDao().listFor(it) }
         match.removed.forEach { wallId ->
-            dropped += softDeleteWallPhotos(wallId, at)
             db.itemDao().listForRoom(room.id).filter { it.wallId == wallId }.forEach {
                 db.itemDao().upsert(it.copy(wallId = null, wallX = null, wallY = null, updatedAt = at))
                 onChange("item", it.id)
@@ -302,6 +302,7 @@ class HomeRepository(
         }
         carryWallOverlays(room, oldOutline, stored, match, wallOfEdge, at)
         val carried = carryWallPhotos(room, oldOutline, stored, wallOfEdge, oldPhotos, at)
+        val dropped = keepPhotosOffWall(removedPhotos, room.id, wallOfEdge.values, at)
         room.openings.forEach { o ->
             val wallId = wallOfEdge[o.edgeIndex] ?: return@forEach
             val row = existingOpenings[o.id]
@@ -333,6 +334,29 @@ class HomeRepository(
     }
 
     /**
+     * A removed wall's photos stay on its room with no wall (N001), listed on the room page under "Photos of removed
+     * walls"; their files are kept. A later wall in the same place is a new wall and does not take them back. The one
+     * exception is a photo a merge carried onto the wall now covering that stretch, which is the same picture already
+     * shown there. Returns the files of those duplicates, for the sweep (it keeps any file a live row still uses).
+     */
+    private suspend fun keepPhotosOffWall(photos: List<WallPhotoEntity>, roomId: String, liveWalls: Collection<String>, at: Long): List<String> {
+        if (photos.isEmpty()) return emptyList()
+        // A merge already carried the photo onto the wall now running there (same picture, same stage): no second copy.
+        val shown = liveWalls.flatMap { db.wallPhotoDao().listFor(it) }.filter { it.originalPath.isNotBlank() }.map { it.stage to it.originalPath }.toSet()
+        val dropped = mutableListOf<String>()
+        photos.forEach {
+            if (it.originalPath.isNotBlank() && (it.stage to it.originalPath) in shown) {
+                db.wallPhotoDao().softDelete(it.id, at)
+                dropped += listOfNotNull(it.originalPath, it.texturePath)
+            } else {
+                db.wallPhotoDao().upsert(it.copy(wallId = null, roomId = roomId, updatedAt = at))
+            }
+            onChange(WallPhotoRepository.ENTITY, it.id)
+        }
+        return dropped
+    }
+
+    /**
      * Cuts or stretches the outlines of the room's wall photos to the walls of its new outline, copying a photo onto the
      * new part of a split wall (WallPhotoCarrier, R10a). Returns the photos whose straightened copy must be made again,
      * and the straightened copies the recut rows dropped (R10d).
@@ -352,7 +376,7 @@ class HomeRepository(
             stored.associate { it.id to it.edgeIndex },
             wallOfEdge,
             room.points,
-            oldPhotos.map { CarriedPhoto(it.id, it.wallId, WallStage.fromStored(it.stage), WallOutline.decode(it.cornersJson)) },
+            oldPhotos.mapNotNull { p -> p.wallId?.let { p to it } }.map { (it, wallId) -> CarriedPhoto(it.id, wallId, WallStage.fromStored(it.stage), WallOutline.decode(it.cornersJson)) },
         )
         val dropped = mutableListOf<String>()
         val recut = moves.mapNotNull { move ->
@@ -367,7 +391,7 @@ class HomeRepository(
                 is PhotoMove.Copy -> {
                     val row = byId[move.rowId] ?: return@mapNotNull null
                     val copy = row.copy(
-                        id = Ids.newId(), wallId = move.toWallId, cornersJson = move.outline.encode(), texturePath = null,
+                        id = Ids.newId(), wallId = move.toWallId, roomId = room.id, cornersJson = move.outline.encode(), texturePath = null,
                         textureR2Key = null, createdAt = at, updatedAt = at, deletedAt = null,
                     )
                     db.wallPhotoDao().upsert(copy)
@@ -439,7 +463,7 @@ class HomeRepository(
     }
 
     /**
-     * Soft deletes a room with its walls (their doors, windows and wall photos), stairs, overlays and breaker links
+     * Soft deletes a room with its walls (their doors, windows and wall photos), its removed walls' photos, stairs, overlays and breaker links
      * (cr:room-delete-cascade). Items in it move to Whole house; photos and documents stay in the home with no room.
      * Callers hold the transaction. Returns the files of the wall and overlay photos it removed (R10d).
      */
@@ -450,6 +474,11 @@ class HomeRepository(
             dropped += softDeleteWallPhotos(wall.id, at)
             db.wallDao().softDelete(wall.id, at)
             onChange("wall", wall.id)
+        }
+        db.wallPhotoDao().listRemovedForRoom(roomId).forEach {
+            db.wallPhotoDao().softDelete(it.id, at)
+            onChange(WallPhotoRepository.ENTITY, it.id)
+            dropped += listOfNotNull(it.originalPath, it.texturePath)
         }
         db.stairDao().listFor(roomId).forEach { db.stairDao().softDelete(it.id, at); onChange("stair", it.id) }
         db.overlayDao().listForRoom(roomId).forEach {

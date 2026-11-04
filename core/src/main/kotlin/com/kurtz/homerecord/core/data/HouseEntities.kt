@@ -78,10 +78,11 @@ data class WallEntity(
     val source: String = Sources.HOUSE_MANUAL,
 )
 
-@Entity(tableName = "wall_photo", indices = [Index("wallId")])
+@Entity(tableName = "wall_photo", indices = [Index("wallId"), Index("roomId")])
 data class WallPhotoEntity(
     @PrimaryKey val id: String,
-    val wallId: String,
+    /** The wall it shows; null once a plan edit removed that wall (N001): the photo then stays on [roomId]. */
+    val wallId: String?,
     val stage: String = "FINISHED",
     val originalPath: String,
     val texturePath: String? = null,
@@ -96,6 +97,8 @@ data class WallPhotoEntity(
     val updatedAt: Long,
     val deletedAt: Long? = null,
     val source: String = Sources.HOUSE_MANUAL,
+    /** The room of the wall (v10, N001), so a photo whose wall was removed is still listed on its room page. */
+    val roomId: String? = null,
 )
 
 @Entity(tableName = "opening", indices = [Index("wallId")])

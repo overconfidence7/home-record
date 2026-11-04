@@ -48,6 +48,7 @@ object ScreenCatalog {
         QaScreen("house-3d-loading", nonRoot = true) { House3DLoadingPreview() },
         QaScreen("house-3d-error", nonRoot = true) { House3DErrorPreview() },
         QaScreen("room-walls", nonRoot = true) { RoomWallsPreview() },
+        QaScreen("room-removed-wall-photos", nonRoot = true) { RoomRemovedWallPhotosPreview() },
         QaScreen("wall-outline", nonRoot = true) { WallOutlinePreview() },
         QaScreen("wall-overlays", nonRoot = true) { WallOverlaysPreview() },
         QaScreen("wall-overlays-drawing", nonRoot = true) { WallOverlaysDrawingPreview() },

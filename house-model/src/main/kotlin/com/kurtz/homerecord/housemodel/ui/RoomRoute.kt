@@ -43,6 +43,7 @@ fun RoomRoute(
                     repo, roomId, walls = wallPhotos.observeRoomWalls(roomId), defaultStage = WallStage.BehindTheWall,
                     savedState = createSavedStateHandle(), media = media, canView3D = onView3D != null,
                     overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
+                    removedWallPhotos = wallPhotos.observeRemovedWallPhotos(roomId),
                 )
             }
         },
@@ -91,6 +92,7 @@ fun RoomRoute(
                     repo, roomId, items.observeRows(homeId, emptyMap()), wallPhotos.observeRoomWalls(roomId),
                     WallStage.HouseManualDefault, createSavedStateHandle(), media, canView3D = onView3D != null,
                     overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
+                    removedWallPhotos = wallPhotos.observeRemovedWallPhotos(roomId),
                 )
             }
         },

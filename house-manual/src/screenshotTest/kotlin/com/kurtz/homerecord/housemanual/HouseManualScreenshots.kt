@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
@@ -159,6 +160,13 @@ fun RoomPageScreenshot() = RoomPagePreview()
 @ThemePreviews
 @Composable
 fun RoomWallsScreenshot() = RoomWallsPreview()
+
+@PreviewTest
+@Preview(name = "Light", showBackground = true, heightDp = 1300)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, heightDp = 1300)
+@Preview(name = "200% font", fontScale = 2f, showBackground = true, heightDp = 2200)
+@Composable
+fun RoomRemovedWallPhotosScreenshot() = RoomRemovedWallPhotosPreview()
 
 @PreviewTest
 @ThemePreviews

@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
+import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallStage
 
@@ -25,6 +26,8 @@ data class RoomUiState(
     val canAddItem: Boolean = false,
     /** The room's walls by side and length with a picture per photographed stage (AC-C17). */
     val walls: List<RoomWall> = emptyList(),
+    /** Photos of walls a plan edit removed, kept on the room (N001); listed under the walls, newest first. */
+    val removedWallPhotos: List<RemovedWallPhoto> = emptyList(),
     /** The stage whose photos the Walls section shows; House Manual starts on Finished, Field Log on Rough-in. */
     val wallStage: WallStage = WallStage.HouseManualDefault,
     /** True where the app can take a wall photo ("Photograph" on each wall). */

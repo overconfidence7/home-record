@@ -66,6 +66,11 @@ interface WallPhotoDao {
             "WHERE wall.roomId = :roomId AND wall.deletedAt IS NULL AND wall_photo.deletedAt IS NULL ORDER BY wall_photo.createdAt",
     )
     fun observeForRoom(roomId: String): Flow<List<WallPhotoEntity>>
+    /** Photos of the room's removed walls (N001), newest first. */
+    @Query("SELECT * FROM wall_photo WHERE roomId = :roomId AND wallId IS NULL AND deletedAt IS NULL ORDER BY takenAt DESC, createdAt DESC")
+    fun observeRemovedForRoom(roomId: String): Flow<List<WallPhotoEntity>>
+    @Query("SELECT * FROM wall_photo WHERE roomId = :roomId AND wallId IS NULL AND deletedAt IS NULL ORDER BY takenAt DESC, createdAt DESC")
+    suspend fun listRemovedForRoom(roomId: String): List<WallPhotoEntity>
     @Query("UPDATE wall_photo SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
     /** Device-local: where this phone keeps the downloaded photo; no sync, no updatedAt (cr:sync-local-columns). */
     @Query("UPDATE wall_photo SET originalPath = :path WHERE id = :id") suspend fun setOriginalPath(id: String, path: String)

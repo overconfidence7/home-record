@@ -256,7 +256,7 @@ class HomeRepositoryTest {
     }
 
     @AcceptanceCriterion("AC-C17")
-    @Test fun aWallWhoseEdgeIsGoneIsDeletedWithItsPhotosAndItemsLeaveIt() = runTest {
+    @Test fun aWallWhoseEdgeIsGoneIsDeletedButItsPhotosStayOnTheRoomAndItemsLeaveIt() = runTest {
         val id = colonial()
         val main = repo.observeFloors(id).first().single { it.name == "Main" }
         val den = PlanRoom("d1", "Den", "OFFICE", listOf(Pt(0, 0), Pt(144, 0), Pt(144, 60), Pt(96, 60), Pt(96, 120), Pt(0, 120)))
@@ -278,8 +278,14 @@ class HomeRepositoryTest {
         assertThat(after).hasSize(5)
         assertThat(kept).hasSize(4)
         assertThat(gone).hasSize(2)
+        // N001: the removed walls' photos stay on the room with no wall, never deleted.
+        assertThat(db.wallPhotoDao().listRemovedForRoom("d1").map { it.id }).containsExactlyElementsIn(gone.map { "p-$it" })
         gone.forEach { lost ->
             assertThat(db.wallPhotoDao().listFor(lost)).isEmpty()
+            val kept = checkNotNull(db.wallPhotoDao().get("p-$lost"))
+            assertThat(kept.wallId).isNull()
+            assertThat(kept.roomId).isEqualTo("d1")
+            assertThat(kept.originalPath).isEqualTo("/m/$lost.jpg")
             assertThat(checkNotNull(db.itemDao().get("i-$lost")).wallId).isNull()
             assertThat(checkNotNull(db.itemDao().get("i-$lost")).roomId).isEqualTo("d1")
             assertThat(changes).containsAtLeast("wall/$lost", "wall_photo/p-$lost", "item/i-$lost")
@@ -288,6 +294,45 @@ class HomeRepositoryTest {
             assertThat(db.wallPhotoDao().listFor(w)).hasSize(1)
             assertThat(checkNotNull(db.itemDao().get("i-$w")).wallId).isEqualTo(w)
         }
+    }
+
+    // N001: removed walls' photos are kept, their files are not handed to the sweep, a later wall in the same place does
+    // not reclaim them, and they go only with their room.
+    @AcceptanceCriterion("AC-C17")
+    @Test fun removedWallsPhotosAreKeptUntilTheirRoomGoesAndANewWallThereDoesNotReclaimThem() = runTest {
+        val handed = mutableListOf<com.kurtz.homerecord.housemodel.walls.PlanPhotoChanges>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val homes = HomeRepository(db, context.resources::getString, now = { clock++ }, onPlanPhotosChanged = { handed += it })
+        val id = homes.createHome(NewHome("Maple St", "", HouseType.COLONIAL, Foundation.BASEMENT, false))
+        val main = homes.observeFloors(id).first().single { it.name == "Main" }
+        val den = PlanRoom("d1", "Den", "OFFICE", listOf(Pt(0, 0), Pt(144, 0), Pt(144, 60), Pt(96, 60), Pt(96, 120), Pt(0, 120)))
+        homes.savePlan(main.id, listOf(den))
+        val notch = db.wallDao().listFor("d1").single { it.edgeIndex == 2 }.id
+        val photos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(db, now = { clock++ })
+        val photoId = checkNotNull(
+            photos.save(notch, com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, "/m/notch.jpg", "/m/notch-wall.jpg",
+                com.kurtz.homerecord.housemodel.walls.WallOutline.Initial),
+        )
+        assertThat(checkNotNull(db.wallPhotoDao().get(photoId)).roomId).isEqualTo("d1")
+
+        homes.savePlan(main.id, listOf(den.withoutCorner(3)))
+        assertThat(handed.flatMap { it.droppedFiles }).containsNoneOf("/m/notch.jpg", "/m/notch-wall.jpg")
+        val removed = photos.observeRemovedWallPhotos("d1").first()
+        assertThat(removed.map { it.id }).containsExactly(photoId)
+        assertThat(removed.single().stage).isEqualTo(com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN)
+        assertThat(removed.single().path).isEqualTo("/m/notch.jpg")
+
+        // The notch drawn back: new walls run where the old one was; the photo stays with the removed walls.
+        homes.savePlan(main.id, listOf(den))
+        assertThat(checkNotNull(db.wallPhotoDao().get(photoId)).wallId).isNull()
+        db.wallDao().listFor("d1").forEach { assertThat(db.wallPhotoDao().listFor(it.id)).isEmpty() }
+        assertThat(db.wallPhotoDao().listRemovedForRoom("d1").map { it.id }).containsExactly(photoId)
+
+        // Deleting the room takes them, and hands their files on.
+        handed.clear()
+        homes.savePlan(main.id, emptyList())
+        assertThat(db.wallPhotoDao().get(photoId)).isNull()
+        assertThat(handed.single().droppedFiles).containsAtLeast("/m/notch.jpg", "/m/notch-wall.jpg")
     }
 
     // R10: overlay coordinates after a wall is resized, split or removed in the editor.

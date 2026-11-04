@@ -123,6 +123,19 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // N001: v10 lets a wall photo outlive its wall; every photo learns its wall's room, its wall kept.
+    @Test fun v9ToV10GivesEveryWallPhotoItsRoom() {
+        helper.createDatabase(9).use { db ->
+            db.execSQL("INSERT INTO wall (id, roomId, edgeIndex, orientation, lengthIn, heightIn, exterior, createdAt, updatedAt, source) VALUES ('w1', 'r1', 0, 'N', 144, 96, 0, 1, 1, 'HOUSE_MANUAL')")
+            db.execSQL("INSERT INTO wall_photo (id, wallId, stage, originalPath, cornersJson, takenAt, createdAt, updatedAt, source) VALUES ('p1', 'w1', 'ROUGH_IN', '/m/p.jpg', '[]', 1, 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(10).use { db ->
+            assertThat(db.texts("SELECT roomId FROM wall_photo WHERE id = 'p1' AND wallId = 'w1' AND originalPath = '/m/p.jpg'")).containsExactly("r1")
+            db.execSQL("INSERT INTO wall_photo (id, wallId, roomId, stage, originalPath, cornersJson, takenAt, createdAt, updatedAt, source) VALUES ('p2', NULL, 'r1', 'FINISHED', '/m/q.jpg', '[]', 1, 1, 1, 'HOUSE_MANUAL')")
+            assertThat(db.texts("SELECT id FROM wall_photo WHERE wallId IS NULL")).containsExactly("p2")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -161,6 +174,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 9
+        const val LATEST = 10
     }
 }

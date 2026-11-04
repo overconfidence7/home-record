@@ -26,6 +26,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.material3.HorizontalDivider
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.ui.platform.testTag
@@ -44,6 +49,7 @@ import com.kurtz.homerecord.coreui.shell.SharedKeys
 import com.kurtz.homerecord.coreui.shell.sharedScreenBounds
 import com.kurtz.homerecord.housemodel.R
 import com.kurtz.homerecord.housemodel.plan.RoomKind
+import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallSide
 import com.kurtz.homerecord.housemodel.walls.WallStage
@@ -226,6 +232,7 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                 )
             }
             state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, state.canOpenWalls, onEvent) }
+            if (state.removedWallPhotos.isNotEmpty()) RemovedWallPhotos(state.removedWallPhotos)
         }
     }
     val sheetWall = state.photoSheetFor?.let { id -> state.walls.firstOrNull { it.id == id } }
@@ -239,6 +246,35 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
             onDismiss = { onEvent(RoomEvent.ClosePhotoSheet) },
             onPick = { onEvent(if (it.id == "wall_take") RoomEvent.TakeWallPhoto else RoomEvent.ChooseWallPhoto) },
         )
+    }
+}
+
+/**
+ * "Photos of removed walls" (N001): photos whose wall a plan edit took away stay on the room, each with its stage and the
+ * day it was taken, so a picture of what is behind a wall is never lost to a plan change.
+ */
+@Composable
+private fun RemovedWallPhotos(photos: List<RemovedWallPhoto>) {
+    val prefix = LocalTagPrefix.current
+    val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
+    Column(Modifier.testTag("${prefix}_room_removed_wall_photos")) {
+        HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+        Text(
+            stringResource(R.string.room_removed_wall_photos),
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).semantics { heading() },
+        )
+        photos.forEach { photo ->
+            val stage = stringResource(photo.stage.labelRes)
+            val date = Instant.ofEpochMilli(photo.takenAt).atZone(ZoneId.systemDefault()).toLocalDate().format(formatter)
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.room_removed_wall_photo_stage, stage), style = MaterialTheme.typography.bodyLarge) },
+                supportingContent = { Text(stringResource(R.string.room_removed_wall_photo_taken, date), style = MaterialTheme.typography.bodyMedium) },
+                leadingContent = { WallThumbnail(photo.path, stringResource(R.string.room_removed_wall_photo_description, stage, date)) },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                modifier = Modifier.heightIn(min = 72.dp).testTag("${prefix}_room_removed_wall_photo_${photo.id}"),
+            )
+        }
     }
 }
 

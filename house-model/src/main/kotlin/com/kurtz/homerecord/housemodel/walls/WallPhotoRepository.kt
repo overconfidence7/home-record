@@ -38,8 +38,11 @@ data class WallPhoto(
     val takenAt: Long,
 )
 
+/** A photo whose wall a plan edit removed (N001), listed on its room page with its stage and date. */
+data class RemovedWallPhoto(val id: String, val stage: WallStage, val path: String?, val takenAt: Long)
+
 fun WallPhotoEntity.toWallPhoto(): WallPhoto =
-    WallPhoto(id, wallId, WallStage.fromStored(stage), originalPath, texturePath, WallOutline.decode(cornersJson), takenAt)
+    WallPhoto(id, wallId.orEmpty(), WallStage.fromStored(stage), originalPath, texturePath, WallOutline.decode(cornersJson), takenAt)
 
 /**
  * Wall photos per stage. A wall keeps one photo per stage: photographing it again at the same stage replaces the earlier
@@ -67,6 +70,15 @@ class WallPhotoRepository(
     /** The room's walls with a picture per photographed stage, following plan edits and new photos (AC-C17). */
     fun observeRoomWalls(roomId: String): Flow<List<RoomWall>> =
         combine(db.wallDao().observeFor(roomId), withMissingFetched(db.wallPhotoDao().observeForRoom(roomId)), RoomWalls::build)
+            .distinctUntilChanged()
+
+    /**
+     * Photos of the room's removed walls (N001): a plan edit that takes a wall away keeps its photos on the room with no
+     * wall, newest first, the picture shown being the photo as taken.
+     */
+    fun observeRemovedWallPhotos(roomId: String): Flow<List<RemovedWallPhoto>> =
+        withMissingFetched(db.wallPhotoDao().observeRemovedForRoom(roomId))
+            .map { rows -> rows.map { RemovedWallPhoto(it.id, WallStage.fromStored(it.stage), it.originalPath.ifBlank { null }, it.takenAt) } }
             .distinctUntilChanged()
 
     /**
@@ -126,13 +138,13 @@ class WallPhotoRepository(
         outline: WallOutline,
         takenAt: Long = now(),
     ): String? {
-        if (db.wallDao().get(wallId) == null) return null
+        val wall = db.wallDao().get(wallId) ?: return null
         val at = now()
         val replaced = db.wallPhotoDao().listFor(wallId).filter { WallStage.fromStored(it.stage) == stage }
         val id = Ids.newId()
         val row = WallPhotoEntity(
             id = id, wallId = wallId, stage = stage.name, originalPath = originalPath, texturePath = texturePath,
-            cornersJson = outline.encode(), takenAt = takenAt, createdAt = at, updatedAt = at, source = source,
+            cornersJson = outline.encode(), takenAt = takenAt, createdAt = at, updatedAt = at, source = source, roomId = wall.roomId,
         )
         db.wallPhotoDao().upsert(row)
         onChange(ENTITY, id)
@@ -155,7 +167,7 @@ class WallPhotoRepository(
             val row = db.wallPhotoDao().get(id) ?: continue
             if (row.originalPath.isBlank() || row.texturePath != null) continue
             val outline = WallOutline.decode(row.cornersJson) ?: continue
-            val wall = db.wallDao().get(row.wallId) ?: continue
+            val wall = row.wallId?.let { db.wallDao().get(it) } ?: continue
             val dest = row.originalPath.substringBeforeLast('.', row.originalPath) + "-" + row.id.take(8) + "-wall.jpg"
             val texture = try {
                 maker.make(row.originalPath, outline, wall.lengthIn, wall.heightIn, dest)

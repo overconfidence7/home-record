@@ -16,6 +16,7 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.ui.RoomEvent
 import com.kurtz.homerecord.housemodel.ui.RoomScreen
 import com.kurtz.homerecord.housemodel.ui.RoomUiState
+import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 import com.kurtz.homerecord.housemodel.walls.RoomWall
 import com.kurtz.homerecord.housemodel.walls.WallSide
 import com.kurtz.homerecord.housemodel.walls.WallStage
@@ -73,6 +74,25 @@ class RoomWallsSectionTest {
         assertThat(events).containsExactly(RoomEvent.PhotographWall("w2"))
         rule.onNodeWithTag("hm_room_wall_photograph_w1").performScrollTo()
         rule.onNodeWithText("Retake").assertExists()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C17")
+    fun removedWallsPhotosListWithStageAndDate() {
+        // N001: a plan edit that removed a wall keeps its photos on the room, listed with stage and date.
+        val noon = java.time.LocalDate.of(2026, 9, 2).atTime(12, 0).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val removed = listOf(RemovedWallPhoto("p1", WallStage.ROUGH_IN, null, noon))
+        show(base.copy(removedWallPhotos = removed), mutableListOf())
+        rule.onNodeWithTag("hm_room_removed_wall_photos").performScrollTo()
+        rule.onNodeWithText("Photos of removed walls").assertExists()
+        rule.onNodeWithText("Rough-in photo").assertExists()
+        val date = java.time.LocalDate.of(2026, 9, 2).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
+        rule.onNodeWithText("Taken $date").assertExists()
+    }
+
+    @Test fun noRemovedWallsMeansNoRemovedSection() {
+        show(base, mutableListOf())
+        rule.onNodeWithTag("hm_room_removed_wall_photos").assertDoesNotExist()
     }
 
     @Test fun aRoomWithNoWallsSaysHowToGetThem() {
