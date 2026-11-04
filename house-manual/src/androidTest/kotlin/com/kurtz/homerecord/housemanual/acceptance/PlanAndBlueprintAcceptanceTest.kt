@@ -156,6 +156,8 @@ class PlanAndBlueprintAcceptanceTest {
             rule.onNodeWithTag("hm_layers").performScrollToNode(hasTestTag("hm_layer_${it.wire}"))
             rule.onNodeWithTag("hm_layer_${it.wire}").assertExists()
         }
+        // the chips carry icons now, so the row scrolls; bring Plumbing back before tapping it
+        rule.onNodeWithTag("hm_layers").performScrollToNode(hasTestTag("hm_layer_${BlueprintLayer.PLUMBING.wire}"))
         rule.onNodeWithTag("hm_layer_${BlueprintLayer.PLUMBING.wire}").performClick()
         assertThat(events).contains(HouseEvent.ToggleLayer(BlueprintLayer.PLUMBING))
     }

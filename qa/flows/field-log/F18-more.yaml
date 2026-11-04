@@ -78,7 +78,7 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - assertVisible: "Hale kitchen"
 - tapOn:
-    id: fl_material_form_save
+    id: fl_save
 - assertVisible: "Enter the amount on the receipt."
 - tapOn:
     id: fl_material_form_vendor
@@ -90,7 +90,7 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_material_form_cat_tools
 - tapOn:
-    id: fl_material_form_save
+    id: fl_save
 - extendedWaitUntil:
     visible:
       id: fl_materials_list

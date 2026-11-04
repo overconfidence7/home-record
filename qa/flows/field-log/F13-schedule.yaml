@@ -5,7 +5,7 @@
 appId: com.kurtz.homerecord.fieldlog
 ---
 - evalScript: ${output.tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
-- evalScript: ${output.sunday = new Date().getUTCDay() === 0 ? "yes" : "no"}
+- evalScript: ${output.sunday = String(new Date().getUTCDay() === 0)}
 - launchApp:
     clearState: true
 - runFlow:
@@ -42,7 +42,7 @@ appId: com.kurtz.homerecord.fieldlog
 # Tomorrow is in next week when today is Sunday.
 - runFlow:
     when:
-      true: ${output.sunday == "yes"}
+      true: ${output.sunday == "true"}
     commands:
       - tapOn:
           id: fl_schedule_next

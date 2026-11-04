@@ -187,4 +187,19 @@ class LogScreenTest {
         rule.onNodeWithTag("fl_log_visitors_text").assertIsDisplayed()
         rule.onNodeWithTag("fl_log_visitors_edit").assertIsDisplayed()
     }
+
+    /** QA F09b: a send while the list sits at the top shows the new Sent line, not the row under it. */
+    @AcceptanceCriterion("AC-F33")
+    @Test fun sendAtTheTopShowsTheSentLine() {
+        var state by mutableStateOf(ready)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                Box(Modifier.height(420.dp)) { LogScreen(state, {}) }
+            }
+        }
+        rule.waitForIdle()
+        state = state.copy(sentAt = 1_000L)
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_log_sent").assertIsDisplayed()
+    }
 }

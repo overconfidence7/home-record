@@ -21,7 +21,15 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_save
 - tapOn: "Hale kitchen"
-# The tab row scrolls; picking House brings Changes, the last tab, into view.
+# The tab row scrolls (as in F03): picking Files brings Time into view, Time brings House, and House brings Changes.
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
 - extendedWaitUntil:
     visible:
       id: fl_job_tab_house

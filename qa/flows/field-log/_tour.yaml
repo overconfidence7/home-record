@@ -41,6 +41,11 @@ appId: com.kurtz.homerecord.fieldlog
       - takeScreenshot: tour-${output.variant}-team
       - tapOn:
           id: "fl_back"
+      # Materials and receipts pushed Company below the fold in landscape
+      - scrollUntilVisible:
+          element: "Company"
+          direction: DOWN
+          timeout: 10000
       - tapOn: "Company"
       - takeScreenshot: tour-${output.variant}-company
       - tapOn:

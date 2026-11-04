@@ -82,6 +82,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
@@ -186,13 +187,27 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
     val list = rememberLazyListState()
     // The Sent line is a new first row. A lazy list keeps its first visible row by key, so a send while the list sits
     // at the top would leave the line just above the viewport; bring it into view when the log has just been sent.
+    // The effect can run before the list has measured the new row (or while the share sheet covers the app and no
+    // frame is drawn), so it waits for real layouts: while the top of the list is the row under Sent, scroll to Sent;
+    // stop once Sent is first or the person has scrolled away.
     LaunchedEffect(state.sentAt) {
-        if (state.sentAt != null && list.firstVisibleItemIndex <= 1) list.scrollToItem(0)
+        if (state.sentAt == null || list.firstVisibleItemIndex > 1) return@LaunchedEffect
+        snapshotFlow { list.layoutInfo }.first { info ->
+            val first = info.visibleItemsInfo.firstOrNull() ?: return@first false
+            when {
+                first.key == SENT_KEY -> true
+                first.index > 1 -> true
+                else -> {
+                    if (!list.isScrollInProgress) list.scrollToItem(0)
+                    false
+                }
+            }
+        }
     }
     RevealSavedSection(state, list)
     LazyColumn(Modifier.fillMaxSize().testTag("fl_log_list"), state = list, contentPadding = PaddingValues(bottom = 24.dp)) {
         state.sentAt?.let { sent ->
-            item(key = "sent") {
+            item(key = SENT_KEY) {
                 val time = Instant.ofEpochMilli(sent).atZone(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.log_sent_at, time), style = MaterialTheme.typography.bodyLarge) },
@@ -279,6 +294,7 @@ private fun RevealSavedSection(state: LogUiState, list: LazyListState) {
 }
 
 private const val REVEAL_WINDOW_MS = 1500L
+private const val SENT_KEY = "sent"
 
 /**
  * Preview PDF for everyone who reads the log; Send (Send again once sent) for whoever runs the job (AC-F33). Kept under
@@ -398,7 +414,7 @@ private fun LazyListScope.lines(
         Line(
             icon, line.headline, Modifier.testTag("fl_log_${key}_${line.id}"), supporting = line.supporting,
             trailing = if (state.canEdit) ({
-                IconButton(onClick = { onEvent(LogEvent.AskDrop(kind, line.id)) }, modifier = Modifier.testTag("fl_log_${key}_drop_${line.id}")) {
+                IconButton(onClick = { onEvent(LogEvent.AskDrop(kind, line.id)) }, modifier = Modifier.size(48.dp).testTag("fl_log_${key}_drop_${line.id}")) {
                     Icon(Icons.Rounded.RemoveCircleOutline, contentDescription = stringResource(R.string.log_drop_line, line.headline))
                 }
             }) else null,
@@ -457,7 +473,7 @@ private fun LazyListScope.photos(state: LogUiState, onEvent: (LogEvent) -> Unit)
                         // a small badge on a 48 dp target in the corner, readable over any photo
                         IconButton(
                             onClick = { onEvent(LogEvent.AskDrop(LogLineKind.PHOTO, photo.id)) },
-                            modifier = Modifier.align(Alignment.TopEnd).testTag("fl_log_photos_drop_${photo.id}"),
+                            modifier = Modifier.align(Alignment.TopEnd).size(48.dp).testTag("fl_log_photos_drop_${photo.id}"),
                         ) {
                             Icon(
                                 Icons.Rounded.Close, contentDescription = stringResource(R.string.log_drop_photo, index + 1),
