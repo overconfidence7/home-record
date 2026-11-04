@@ -15,6 +15,11 @@ import kotlinx.serialization.Serializable
 /** FL-Clients (AC-F45). */
 @Serializable data object ClientsKey : NavKey
 
+/** FL-Materials: receipts by job with totals (AC-F44). */
+@Serializable data object MaterialsKey : NavKey
+/** Add ([materialId] null) or edit a receipt (AC-F44). */
+@Serializable data class MaterialFormKey(val materialId: String? = null) : NavKey
+
 /** More > Sync: sync status and the conflict log (AC-F52, AC-F53). */
 @Serializable data object SyncLogKey : NavKey
 
@@ -76,6 +81,6 @@ import kotlinx.serialization.Serializable
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is JobWallOutlineKey, is JobWallKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is MaterialFormKey, is JobWallOutlineKey, is JobWallKey, CompanyKey -> true
     else -> false
 }

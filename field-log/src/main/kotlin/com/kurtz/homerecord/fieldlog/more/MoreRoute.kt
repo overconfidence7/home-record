@@ -16,6 +16,7 @@ fun MoreRoute(
     onOpenReports: () -> Unit,
     onOpenCompany: () -> Unit,
     onOpenClients: () -> Unit,
+    onOpenMaterials: () -> Unit,
     onOpenSync: () -> Unit,
     onSignOut: () -> Unit,
 ) {
@@ -29,6 +30,7 @@ fun MoreRoute(
             MoreEvent.OpenReports -> onOpenReports()
             MoreEvent.OpenCompany -> onOpenCompany()
             MoreEvent.OpenClients -> onOpenClients()
+            MoreEvent.OpenMaterials -> onOpenMaterials()
             MoreEvent.OpenSync -> onOpenSync()
             MoreEvent.FreeUp -> vm.freeUp()
             MoreEvent.SignOut -> onSignOut()

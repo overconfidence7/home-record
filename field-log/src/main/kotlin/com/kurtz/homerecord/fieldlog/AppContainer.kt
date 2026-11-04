@@ -184,6 +184,23 @@ class AppContainer(private val app: Application) {
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
     /** A job's tasks and punch list (AC-F34), each change queued for sync (AC-F36). */
+    val jobMaterials by lazy { com.kurtz.homerecord.core.material.JobMaterials(db, onChange = ::recordChange) }
+
+    private fun jobOptions(companyId: String) = db.jobDao().observeFor(companyId).map { jobs ->
+        jobs.sortedBy { it.name.lowercase() }.map { com.kurtz.homerecord.fieldlog.materials.JobOption(it.id, it.name) }
+    }
+
+    /** FL-Materials (AC-F44). */
+    fun materialsDeps(companyId: String) = com.kurtz.homerecord.fieldlog.materials.MaterialsDeps(
+        materials = jobMaterials.observeForCompany(companyId),
+        jobs = jobOptions(companyId),
+        exporter = com.kurtz.homerecord.fieldlog.materials.AndroidMaterialsExporter(app),
+        categoryLabel = { app.getString(com.kurtz.homerecord.fieldlog.materials.categoryLabelRes(it)) },
+    )
+
+    fun materialFormDeps(companyId: String, materialId: String?) =
+        com.kurtz.homerecord.fieldlog.materials.MaterialFormDeps(materialId, jobMaterials, jobOptions(companyId))
+
     val jobSchedule by lazy { com.kurtz.homerecord.core.schedule.JobSchedule(db, onChange = ::recordChange) }
 
     /** The day a tapped schedule push asks FL-Schedule to show (AC-F42). */

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Business
 import androidx.compose.material.icons.rounded.CloudSync
@@ -51,6 +52,7 @@ sealed interface MoreEvent {
     data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
     data object OpenClients : MoreEvent
+    data object OpenMaterials : MoreEvent
     data object OpenSync : MoreEvent
     data object FreeUp : MoreEvent
     data object SignOut : MoreEvent
@@ -92,6 +94,12 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Handshake, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenClients) },
                 modifier = Modifier.testTag("fl_more_clients"),
+            )
+            RecordListItem(
+                headline = stringResource(R.string.more_materials),
+                leading = { Icon(Icons.AutoMirrored.Rounded.ReceiptLong, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenMaterials) },
+                modifier = Modifier.testTag("fl_more_materials"),
             )
             RecordListItem(
                 headline = stringResource(R.string.more_company),
