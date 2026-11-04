@@ -1,7 +1,7 @@
 # Walkthrough F12 (T056a): change order on a job's Changes tab: empty state, the full-screen form with title, client,
 # description, two line items with quantity and price, and the total MoneyMath works out; saved as a Draft with its
-# total on the list; reopened, a line removed, the new total saved (AC-F37). Photos (T056b), signing (T057) and the
-# share link (T058) extend this flow.
+# total on the list; reopened, a line removed, the new total saved (AC-F37); signed on the phone, read only with
+# Duplicate (AC-F38, T057a). Photos (T056b), the PDF (T057b) and the share link (T058) extend this flow.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -147,3 +147,71 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - assertVisible: "\\$185\\.00"
 - takeScreenshot: F12-change-order-list
+# AC-F38: Sign on phone: the pad opens with the client as signer; Sign stays off until something is drawn
+- tapOn: "Second outlet on the island"
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_sign
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_sign
+- extendedWaitUntil:
+    visible:
+      id: fl_co_sign_pad
+    timeout: 10000
+- assertVisible: "Dana Hale"
+- assertVisible:
+    id: fl_co_sign_sign
+    enabled: false
+- swipe:
+    from:
+      id: fl_co_sign_pad
+    direction: RIGHT
+    duration: 600
+- assertVisible:
+    id: fl_co_sign_clear
+    enabled: true
+- tapOn:
+    id: fl_co_sign_clear
+- assertVisible:
+    id: fl_co_sign_sign
+    enabled: false
+- swipe:
+    from:
+      id: fl_co_sign_pad
+    direction: RIGHT
+    duration: 600
+- takeScreenshot: F12-change-order-signing
+- tapOn:
+    id: fl_co_sign_sign
+# Signed: read only, who signed and when, the signature, Duplicate to change
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_locked
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_duplicate
+    direction: DOWN
+- assertVisible: "Signed by Dana Hale.*"
+- assertVisible:
+    id: fl_co_form_signature_image
+- assertNotVisible:
+    id: fl_co_form_delete
+- takeScreenshot: F12-change-order-signed
+- tapOn:
+    id: fl_co_form_duplicate
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_sign
+    timeout: 10000
+- tapOn:
+    id: fl_close
+- extendedWaitUntil:
+    visible: "Signed · Dana Hale · 1 line"
+    timeout: 10000
+- assertVisible: "Draft · Dana Hale · 1 line"

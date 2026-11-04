@@ -86,6 +86,8 @@ data class JobChangeOrder(
     val updatedAt: Long,
     /** The job photos on it, in the order they were added (T056b). */
     val photoIds: List<String> = emptyList(),
+    /** The signature image (PNG in filesDir/media) once signed on the phone (AC-F38). */
+    val signaturePath: String? = null,
 )
 
 /** `change_order.photoIdsJson`: a JSON array of photo ids; an unreadable value reads as no photos. */

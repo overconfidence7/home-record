@@ -57,6 +57,9 @@ data class ChangeOrderFormDraft(
 /** A job photo the change order can show; [path] is "" while the photo is not on this phone yet. */
 data class CoPhoto(val id: String, val path: String, val createdAt: Long)
 
+/** Who signed a Signed order, when, and the signature image (AC-F38). */
+data class CoSignature(val signedBy: String, val signedAt: Long, val imagePath: String?)
+
 /** FL-ChangeOrder form: title, client, description (keyboard or voice), line items, total (AC-F37, rule 15). */
 @Immutable
 data class ChangeOrderFormUiState(
@@ -77,6 +80,12 @@ data class ChangeOrderFormUiState(
     val pickingPhotos: Boolean = false,
     val working: Boolean = false,
     val done: Boolean = false,
+    /** Set on a Signed order (AC-F38). */
+    val signature: CoSignature? = null,
+    /** Saved for signing: the route opens Sign on phone for this id. */
+    val signId: String? = null,
+    /** Duplicated: the route opens the new Draft. */
+    val duplicateId: String? = null,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The title error shows once someone has typed and cleared it (rule 21). */
@@ -84,6 +93,8 @@ data class ChangeOrderFormUiState(
     /** The photos on the change order, in order; one no longer on the job drops out. */
     val photos: List<CoPhoto> get() = draft.photoIds.mapNotNull { id -> jobPhotos.firstOrNull { it.id == id } }
     val canSave: Boolean get() = !loading && !failed && !locked && !working && draft.titleOk && draft.linesOk
+    /** Sign on phone saves first, so it needs what Save needs; an order with no lines has nothing to sign for. */
+    val canSign: Boolean get() = canSave && draft.lines.any { !it.blank }
 }
 
 sealed interface ChangeOrderFormEvent {
@@ -107,6 +118,10 @@ sealed interface ChangeOrderFormEvent {
     /** Take photo: the route opens the job camera; photos taken from now on join the change order. */
     data object TakePhoto : ChangeOrderFormEvent
     data object Save : ChangeOrderFormEvent
+    /** Sign on phone: saves, then the route opens the signature pad (AC-F38). */
+    data object SignOnPhone : ChangeOrderFormEvent
+    /** On a Signed order: a new Draft copy to change (AC-F38). */
+    data object Duplicate : ChangeOrderFormEvent
     data object AskDelete : ChangeOrderFormEvent
     data object DismissDelete : ChangeOrderFormEvent
     data object Delete : ChangeOrderFormEvent

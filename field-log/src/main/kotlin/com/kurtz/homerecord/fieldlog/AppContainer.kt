@@ -192,6 +192,13 @@ class AppContainer(private val app: Application) {
     /** The job's Changes tab: Owner, Office and the job's Lead write change orders (AC-F3). */
     fun changesDeps(jobId: String) = com.kurtz.homerecord.fieldlog.changes.ChangesDeps(jobId, jobChangeOrders, roleGates.map { it.leads(jobId) })
 
+    /** Sign on phone (AC-F38): the signature is drawn into a PNG in filesDir/media. */
+    fun changeOrderSignDeps(jobId: String, changeOrderId: String) = com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignDeps(
+        jobId, changeOrderId, jobChangeOrders,
+        canManage = roleGates.map { it.leads(jobId) },
+        writeImage = com.kurtz.homerecord.fieldlog.changes.AndroidSignatureImage({ java.io.File(app.filesDir, "media") })::write,
+    )
+
     /** The change order form (AC-F37): a new one starts with the job's client; Speak shows when the phone has speech to text. */
     fun changeOrderFormDeps(jobId: String, changeOrderId: String?) = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDeps(
         jobId, changeOrderId, jobChangeOrders,

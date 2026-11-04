@@ -19,8 +19,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-// AC-F37 (create from a job: title, description, line items, total in cents, client name), AC-F52 (each write queues a sync change)
-@AcceptanceCriterion("AC-F37", "AC-F52")
+// AC-F37 (create from a job: title, description, line items, total in cents, client name), AC-F52 (each write queues a sync change),
+// AC-F38 (sign stores the image, signer and time, makes it Signed and read only; duplicate to change)
+@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F52")
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class JobChangeOrdersTest {
@@ -115,5 +116,49 @@ class JobChangeOrdersTest {
         assertThat(orders.delete(first)).isTrue()
         assertThat(orders.observeForJob("j1").first().map { it.id }).containsExactly(second)
         assertThat(changes.last()).isEqualTo("change_order/$first")
+    }
+
+    // AC-F38: signing stores the signature image, the signer and the time, freezes the total and locks the order.
+    @Test fun signStoresSignerTimeAndImageAndLocksTheOrder() = runBlocking<Unit> {
+        val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", lines = lines, clientName = "Dana Hale")))
+        changes.clear()
+        clock = 5_000
+        assertThat(orders.sign(id, "  ", "/m/sig.png")).isFalse()
+        assertThat(orders.sign(id, " Dana Hale ", "/m/sig.png")).isTrue()
+        val co = checkNotNull(orders.get(id))
+        assertThat(co.status).isEqualTo(ChangeOrderStatus.SIGNED)
+        assertThat(co.signedBy).isEqualTo("Dana Hale")
+        assertThat(co.signedAt).isEqualTo(5_000)
+        assertThat(co.signaturePath).isEqualTo("/m/sig.png")
+        assertThat(co.totalCents).isEqualTo(33_500)
+        assertThat(changes).containsExactly("change_order/$id")
+        // Read only from here: no edit, no delete, no second signature.
+        assertThat(orders.update(id, ChangeOrderDraft("Changed"))).isFalse()
+        assertThat(orders.delete(id)).isFalse()
+        assertThat(orders.sign(id, "Someone else", "/m/other.png")).isFalse()
+        assertThat(checkNotNull(orders.get(id)).signedBy).isEqualTo("Dana Hale")
+        assertThat(orders.sign("nope", "Dana", "/m/x.png")).isFalse()
+    }
+
+    // AC-F38: a Signed order is changed by duplicating it into a new Draft with the same content and no signature.
+    @Test fun duplicateMakesADraftCopyWithoutTheSignature() = runBlocking<Unit> {
+        db.photoDao().upsert(PhotoEntity(id = "p1", homeId = "h1", jobId = "j1", path = "/m/p1.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+        val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", "Second outlet", lines, "Dana Hale", listOf("p1"))))
+        assertThat(orders.sign(id, "Dana Hale", "/m/sig.png")).isTrue()
+        var n = 0
+        val copyId = checkNotNull(orders.duplicate(id) { "new${n++}" })
+        assertThat(copyId).isNotEqualTo(id)
+        val copy = checkNotNull(orders.get(copyId))
+        assertThat(copy.status).isEqualTo(ChangeOrderStatus.DRAFT)
+        assertThat(copy.title).isEqualTo("Island outlet")
+        assertThat(copy.description).isEqualTo("Second outlet")
+        assertThat(copy.clientName).isEqualTo("Dana Hale")
+        assertThat(copy.lines.map { it.id }).containsExactly("new0", "new1").inOrder()
+        assertThat(copy.totalCents).isEqualTo(33_500)
+        assertThat(copy.photoIds).containsExactly("p1")
+        assertThat(copy.signedBy).isNull()
+        assertThat(copy.signaturePath).isNull()
+        assertThat(checkNotNull(orders.get(id)).status).isEqualTo(ChangeOrderStatus.SIGNED)
+        assertThat(orders.duplicate("nope")).isNull()
     }
 }

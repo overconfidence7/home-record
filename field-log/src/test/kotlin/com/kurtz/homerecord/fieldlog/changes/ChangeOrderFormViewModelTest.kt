@@ -34,7 +34,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 // AC-F37: create from a job: title, description (keyboard or voice), line items with quantity and price, total in cents, client name
-@AcceptanceCriterion("AC-F37")
+// AC-F38: Sign on phone saves first; a Signed order shows who signed and when, read only, and duplicates to change
+@AcceptanceCriterion("AC-F37", "AC-F38")
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -204,5 +205,42 @@ class ChangeOrderFormViewModelTest {
         assertThat(locked.current().canSave).isFalse()
 
         assertThat(vm(manage = false).current().failed).isTrue()
+    }
+
+    // AC-F38: Sign on phone saves what is typed (a new order is added first) and hands its id to the pad.
+    @Test fun signOnPhoneSavesThenOpensThePad() {
+        val m = vm()
+        m.current()
+        assertThat(m.state.value.canSign).isFalse()
+        m.onEvent(ChangeOrderFormEvent.Title("Island outlet"))
+        m.onEvent(ChangeOrderFormEvent.LineDescription("n0", "Outlet, box and wire"))
+        m.onEvent(ChangeOrderFormEvent.LinePrice("n0", "185"))
+        assertThat(m.state.value.canSign).isTrue()
+        m.onEvent(ChangeOrderFormEvent.SignOnPhone)
+        val id = checkNotNull(m.current { it.signId != null }.signId)
+        val saved = runBlocking { checkNotNull(orders.get(id)) }
+        assertThat(saved.title).isEqualTo("Island outlet")
+        assertThat(saved.totalCents).isEqualTo(18_500)
+    }
+
+    // AC-F38: a Signed order shows the signer, the time and the image, and Duplicate opens a new Draft copy.
+    @Test fun signedOrderShowsTheSignatureAndDuplicates() {
+        val id = runBlocking {
+            val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", lines = listOf(ChangeOrderLineItem("l1", "Outlet", 1_000, 18_500)))))
+            check(orders.sign(id, "Dana Hale", "/m/sig.png"))
+            id
+        }
+        val m = vm(id)
+        val st = m.current()
+        assertThat(st.locked).isTrue()
+        assertThat(st.signature?.signedBy).isEqualTo("Dana Hale")
+        assertThat(st.signature?.imagePath).isEqualTo("/m/sig.png")
+        m.onEvent(ChangeOrderFormEvent.SignOnPhone)
+        assertThat(m.state.value.signId).isNull()
+        m.onEvent(ChangeOrderFormEvent.Duplicate)
+        val copyId = checkNotNull(m.current { it.duplicateId != null }.duplicateId)
+        val copy = runBlocking { checkNotNull(orders.get(copyId)) }
+        assertThat(copy.title).isEqualTo("Island outlet")
+        assertThat(copy.signedBy).isNull()
     }
 }

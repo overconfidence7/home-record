@@ -736,3 +736,23 @@ fun ChangeOrderFormSignedScreenshot() = ChangeOrderFormSignedPreview()
 @ThemePreviews
 @Composable
 fun ChangeOrderFormDeleteScreenshot() = ChangeOrderFormDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderSignBlankScreenshot() = ChangeOrderSignBlankPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormSignedShortScreenshot() = ChangeOrderFormSignedShortPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderSignDrawnScreenshot() = ChangeOrderSignDrawnPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderSignErrorScreenshot() = ChangeOrderSignErrorPreview()

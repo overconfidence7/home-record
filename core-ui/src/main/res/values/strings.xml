@@ -88,4 +88,8 @@
     <string name="warranty_expired">Warranty expired %1$s</string>
     <string name="pdf_viewer_page">Page %1$d of %2$d</string>
     <string name="pdf_viewer_go_to_page">Go to page %1$d</string>
+    <string name="signature_pad_description">Signature pad. Sign with your finger.</string>
+    <string name="signature_pad_hint">Sign here with your finger</string>
+    <string name="signature_pad_blank">Not signed yet</string>
+    <string name="signature_pad_signed">Signature drawn</string>
 </resources>

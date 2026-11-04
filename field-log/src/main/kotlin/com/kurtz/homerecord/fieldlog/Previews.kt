@@ -1383,6 +1383,54 @@ fun TaskFormFailedPreview() = Frame {
     com.kurtz.homerecord.fieldlog.tasks.TaskFormScreen(com.kurtz.homerecord.fieldlog.tasks.TaskFormUiState(isNew = false, loading = false, failed = true), {})
 }
 
+/** A hand-drawn looking signature for the pad previews: a looping first stroke and a crossing second one. */
+private val coSignatureStrokes: List<com.kurtz.homerecord.core.model.SignatureStroke> = run {
+    val loops = (0..60).flatMap { i ->
+        val t = i / 60f
+        listOf(0.12f + 0.55f * t + 0.03f * kotlin.math.sin(t * 25f), 0.52f - 0.18f * kotlin.math.sin(t * 12.5f) * (1f - 0.4f * t))
+    }
+    val tail = (0..20).flatMap { i ->
+        val t = i / 20f
+        listOf(0.6f + 0.28f * t, 0.6f - 0.22f * t + 0.05f * kotlin.math.sin(t * 6f))
+    }
+    listOf(com.kurtz.homerecord.core.model.SignatureStroke(loops), com.kurtz.homerecord.core.model.SignatureStroke(tail))
+}
+
+/** Sign on phone with the client's name filled in and nothing drawn yet: Sign is off (AC-F38). */
+@ThemePreviews
+@Composable
+fun ChangeOrderSignBlankPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignUiState(
+            loading = false, title = "Pantry light on a motion switch", totalCents = 42_500, lineCount = 2, signerName = "Dana Hale",
+        ),
+        {},
+    )
+}
+
+/** Signed on the pad: Clear and Sign are on (AC-F38). */
+@ThemePreviews
+@Composable
+fun ChangeOrderSignDrawnPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignUiState(
+            loading = false, title = "Pantry light on a motion switch", totalCents = 42_500, lineCount = 2, signerName = "Dana Hale",
+            strokes = coSignatureStrokes,
+        ),
+        {},
+    )
+}
+
+/** The signature did not save: the pad keeps the drawing and says to try again. */
+@ThemePreviews
+@Composable
+fun ChangeOrderSignErrorPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignUiState(
+        loading = false, title = "Pantry light on a motion switch", totalCents = 42_500, lineCount = 2, signerName = "",
+        strokes = coSignatureStrokes, saveFailed = true,
+    ).let { com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreen(it, {}) }
+}
+
 /** Delete asks first (rule 16). */
 @ThemePreviews
 @Composable
@@ -1822,6 +1870,24 @@ fun ChangeOrderFormSignedPreview() = Frame {
     com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
         com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
             isNew = false, loading = false, locked = true, draft = coDraft, initial = coDraft, jobPhotos = coJobPhotos,
+            signature = com.kurtz.homerecord.fieldlog.changes.CoSignature("Dana Hale", 1_793_808_000_000L, null),
+        ),
+        {},
+    )
+}
+
+/** A short signed order, so the signature, who signed and when, and Duplicate are on screen (AC-F38). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormSignedShortPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+        title = "Second outlet on the island", clientName = "Dana Hale",
+        lines = listOf(com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "Outlet, box and wire", "1", "185.00")),
+    )
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, locked = true, draft = draft, initial = draft,
+            signature = com.kurtz.homerecord.fieldlog.changes.CoSignature("Dana Hale", 1_793_808_000_000L, null),
         ),
         {},
     )

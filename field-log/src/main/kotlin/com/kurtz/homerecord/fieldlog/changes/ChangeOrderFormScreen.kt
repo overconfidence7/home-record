@@ -42,6 +42,15 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.RemoveCircleOutline
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Draw
+import androidx.compose.runtime.remember
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -148,6 +157,20 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
             Text(stringResource(R.string.co_form_total), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
             Text(dollars(state.draft.totalCents), style = MaterialTheme.typography.titleLarge)
         }
+        if (!state.locked) {
+            Button(
+                onClick = { onEvent(ChangeOrderFormEvent.SignOnPhone) },
+                enabled = state.canSign,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_co_form_sign"),
+            ) {
+                Icon(Icons.Rounded.Draw, contentDescription = null, Modifier.padding(end = 8.dp))
+                Text(stringResource(R.string.co_form_sign))
+            }
+            if (!state.canSign && state.canSave) {
+                Text(stringResource(R.string.co_form_sign_needs_lines), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        state.signature?.let { SignedBlock(it, state.working, onEvent) }
         if (!state.isNew && !state.locked) {
             OutlinedButton(
                 onClick = { onEvent(ChangeOrderFormEvent.AskDelete) },
@@ -178,6 +201,47 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
             },
         )
     }
+}
+
+/** Who signed, when, the signature itself, and Duplicate to change it (AC-F38). */
+@Composable
+private fun SignedBlock(sig: CoSignature, working: Boolean, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    val whenSigned = remember(sig.signedAt) {
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault())
+            .format(Instant.ofEpochMilli(sig.signedAt).atZone(ZoneId.systemDefault()))
+    }
+    Text(
+        stringResource(R.string.co_form_signature),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 8.dp).semantics { heading() },
+    )
+    OutlinedCard(Modifier.fillMaxWidth().testTag("fl_co_form_signature")) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!sig.imagePath.isNullOrBlank()) {
+                val described = stringResource(R.string.co_form_signature_image, sig.signedBy)
+                Box(
+                    Modifier.fillMaxWidth().aspectRatio(2.5f).clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.inverseOnSurface),
+                ) {
+                    // Black ink on a light card in both themes, as it prints on the PDF.
+                    AsyncImage(
+                        model = File(sig.imagePath), contentDescription = described, contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize().testTag("fl_co_form_signature_image"),
+                    )
+                }
+            }
+            Text(stringResource(R.string.co_form_signed_by, sig.signedBy, whenSigned), style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+    OutlinedButton(
+        onClick = { onEvent(ChangeOrderFormEvent.Duplicate) },
+        enabled = !working,
+        modifier = Modifier.heightIn(min = 48.dp).testTag("fl_co_form_duplicate"),
+    ) {
+        Icon(Icons.Rounded.ContentCopy, contentDescription = null, Modifier.padding(end = 8.dp))
+        Text(stringResource(R.string.co_form_duplicate))
+    }
+    Text(stringResource(R.string.co_form_duplicate_help), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable

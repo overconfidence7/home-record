@@ -245,6 +245,23 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormRoute(
                 container.changeOrderFormDeps(key.jobId, key.changeOrderId), onClose = nav::pop,
                 onTakePhoto = { nav.push(CaptureKey(key.jobId)) },
+                onSign = { id ->
+                    nav.pop()
+                    nav.push(ChangeOrderSignKey(key.jobId, id))
+                },
+                onOpenOrder = { id ->
+                    nav.pop()
+                    nav.push(ChangeOrderKey(key.jobId, id))
+                },
+            )
+        }
+        entry<ChangeOrderSignKey> { key ->
+            com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignRoute(
+                container.changeOrderSignDeps(key.jobId, key.changeOrderId), onBack = nav::pop,
+                onSigned = { id ->
+                    nav.pop()
+                    nav.push(ChangeOrderKey(key.jobId, id))
+                },
             )
         }
         entry<AnnotateKey> { key ->

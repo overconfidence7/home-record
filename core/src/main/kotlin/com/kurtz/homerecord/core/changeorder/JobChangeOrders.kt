@@ -30,6 +30,7 @@ fun ChangeOrderEntity.toModel(): JobChangeOrder {
         totalCents = if (ChangeOrderStatus.of(status) == ChangeOrderStatus.DRAFT) MoneyMath.totalCents(lines) else totalCents,
         clientName = clientName, status = ChangeOrderStatus.of(status), signedAt = signedAt, signedBy = signedBy,
         createdAt = createdAt, updatedAt = updatedAt, photoIds = ChangeOrderPhotos.decode(photoIdsJson),
+        signaturePath = signaturePath,
     )
 }
 
@@ -92,6 +93,41 @@ class JobChangeOrders(
         dao.softDelete(id, now())
         onChange(ENTITY, id)
         return true
+    }
+
+    /**
+     * Signs a Draft on the phone (AC-F38): stores the signature image, the signer's name and the time, freezes the
+     * total and makes it Signed, after which it is read only. False when gone, not a Draft, or the name is blank.
+     */
+    suspend fun sign(id: String, signerName: String, signaturePath: String): Boolean {
+        val name = signerName.trim()
+        if (name.isEmpty() || signaturePath.isBlank()) return false
+        val row = dao.get(id) ?: return false
+        if (ChangeOrderStatus.of(row.status) != ChangeOrderStatus.DRAFT) return false
+        val stamp = now()
+        dao.upsert(
+            row.copy(
+                status = ChangeOrderStatus.SIGNED.name, signedBy = name, signedAt = stamp, signaturePath = signaturePath,
+                totalCents = MoneyMath.totalCents(ChangeOrderLineItem.decode(row.linesJson)), updatedAt = stamp,
+            ),
+        )
+        onChange(ENTITY, id)
+        return true
+    }
+
+    /**
+     * "Duplicate to change" (AC-F38): a new Draft on the same job with the title, description, client, lines and
+     * photos of [id], new line ids, no signature. Returns the new id, or null when [id] is gone.
+     */
+    suspend fun duplicate(id: String, newLineId: () -> String = Ids::newId): String? {
+        val src = dao.get(id)?.toModel() ?: return null
+        return add(
+            src.jobId,
+            ChangeOrderDraft(
+                title = src.title, description = src.description, clientName = src.clientName,
+                lines = src.lines.map { it.copy(id = newLineId()) }, photoIds = src.photoIds,
+            ),
+        )
     }
 
     /**

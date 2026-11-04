@@ -72,7 +72,8 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             val locked = existing != null && existing.status != ChangeOrderStatus.DRAFT
             val draft = if (locked) initial else saved.get<String>(DRAFT)
                 ?.let { runCatching { json.decodeFromString(ChangeOrderFormDraft.serializer(), it) }.getOrNull() } ?: initial
-            _state.update { it.copy(loading = false, locked = locked, draft = draft, initial = initial) }
+            val signature = existing?.takeIf { locked }?.let { CoSignature(it.signedBy.orEmpty(), it.signedAt ?: it.updatedAt, it.signaturePath) }
+            _state.update { it.copy(loading = false, locked = locked, draft = draft, initial = initial, signature = signature) }
             onJobPhotos(_state.value.jobPhotos)
         }
     }
@@ -101,6 +102,8 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
                 _state.update { it.copy(pickingPhotos = false) }
             }
             ChangeOrderFormEvent.Save -> save()
+            ChangeOrderFormEvent.SignOnPhone -> signOnPhone()
+            ChangeOrderFormEvent.Duplicate -> duplicate()
             ChangeOrderFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             ChangeOrderFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
             ChangeOrderFormEvent.Delete -> delete()
@@ -130,6 +133,38 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
         }
     }
 
+    /** Saves what is typed (nothing to write when an existing Draft is unchanged), then hands its id to the pad. */
+    private fun signOnPhone() {
+        val st = _state.value
+        if (!st.canSign) return
+        _state.update { it.copy(working = true) }
+        viewModelScope.launch {
+            val id = when {
+                d.changeOrderId == null -> d.orders.add(d.jobId, st.draft.toDraft())
+                !st.dirty -> d.changeOrderId
+                d.orders.update(d.changeOrderId, st.draft.toDraft()) -> d.changeOrderId
+                else -> null
+            }
+            if (id == null) {
+                _state.update { it.copy(working = false, failed = true) }
+                return@launch
+            }
+            clearSaved()
+            _state.update { it.copy(working = false, signId = id) }
+        }
+    }
+
+    private fun duplicate() {
+        val id = d.changeOrderId ?: return
+        val st = _state.value
+        if (!st.locked || st.working || st.duplicateId != null) return
+        _state.update { it.copy(working = true) }
+        viewModelScope.launch {
+            val copy = d.orders.duplicate(id, d.newLineId)
+            _state.update { if (copy == null) it.copy(working = false, failed = true) else it.copy(working = false, duplicateId = copy) }
+        }
+    }
+
     private fun delete() {
         val id = d.changeOrderId ?: return
         if (!ready()) return
@@ -141,10 +176,14 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
     }
 
     private fun finish() {
+        clearSaved()
+        _state.update { it.copy(working = false, done = true) }
+    }
+
+    private fun clearSaved() {
         saved.remove<String>(DRAFT)
         saved.remove<Long>(TAKING_SINCE)
         saved.remove<ArrayList<String>>(HANDLED)
-        _state.update { it.copy(working = false, done = true) }
     }
 
     private companion object {

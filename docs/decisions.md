@@ -843,3 +843,9 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 - Photos on a change order are references to the job's own photos (`change_order.photoIdsJson`, a JSON array of photo ids, Room v12 auto-migration with default `[]`), not copies: one picture, one upload, and the same photo shows in the job gallery. The repository keeps only live photos of that job, once each, in the order added.
 - "Take photo" opens the existing job camera (`CaptureKey`) rather than a second camera; the form notes the time in its saved state and every job photo taken after that joins the change order once (one the person removes stays off). No new permission or dependency.
 - The sync backend stores rows generically (`sync_rows`), so the new column needs no backend change.
+
+## 2026-11-04 — T057a change order signing
+- Signature strokes are kept normalised (0..1 of the pad) and drawn into a 1200×480 PNG with black ink on transparent, stored as `change_order.signaturePath` in filesDir/media; the PDF (T057b) uses the same PNG. A signature needs ink of at least a fifth of the pad's width so a tap cannot sign.
+- "Sign on phone" saves the form first and needs at least one priced line; the signer name starts as the client's name and is required.
+- The signature PNG is local to the signing phone for now (it is not uploaded through media sync); the signed status, signer and time sync. Uploading the image rides with the share links work (T058), where the web signature also needs a stored image.
+- Duplicate copies title, description, client, lines (new ids) and photos into a new Draft and opens it.

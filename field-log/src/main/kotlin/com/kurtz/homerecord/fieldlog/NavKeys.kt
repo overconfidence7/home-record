@@ -65,12 +65,14 @@ import kotlinx.serialization.Serializable
 
 /** The change order form for [jobId]; [changeOrderId] null writes a new one (AC-F37). */
 @Serializable data class ChangeOrderKey(val jobId: String, val changeOrderId: String? = null) : NavKey
+/** Sign on phone for a Draft change order (AC-F38). */
+@Serializable data class ChangeOrderSignKey(val jobId: String, val changeOrderId: String) : NavKey
 
 /**
  * Full-screen editors and the camera: the tab bar is hidden while one is on top, so Close/Save
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is JobWallOutlineKey, is JobWallKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is JobWallOutlineKey, is JobWallKey, CompanyKey -> true
     else -> false
 }
