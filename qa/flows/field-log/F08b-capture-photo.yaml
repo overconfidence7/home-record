@@ -62,6 +62,30 @@ appId: com.kurtz.homerecord.fieldlog
 - assertNotVisible:
     id: fl_photos_empty
 - takeScreenshot: F08b-photos-today
+# AC-F28 gallery link, AC-B35: the owner shares the job's gallery; the share sheet opens, Back shows "Link is on";
+# Turn off link asks first and the line goes
+- tapOn:
+    id: fl_photos_share_link
+- extendedWaitUntil:
+    notVisible:
+      id: fl_photos_share_link
+    timeout: 15000
+- takeScreenshot: F08b-gallery-link-sheet
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_photos_link_on
+    timeout: 10000
+- assertNotVisible:
+    id: fl_photos_link_failed
+- tapOn:
+    id: fl_photos_link_off
+- tapOn:
+    id: fl_photos_link_off_confirm
+- extendedWaitUntil:
+    notVisible:
+      id: fl_photos_link_on
+    timeout: 10000
 # SPEC FL-Today, AC-F24: Today shows the new photo under Recent photos; a tap opens it
 - back
 - tapOn:

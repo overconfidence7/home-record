@@ -217,6 +217,9 @@ class AppContainer(private val app: Application) {
     /** Share links for job galleries, daily logs and change orders (T058b, AC-B35), each queued for sync. */
     val shareLinks by lazy { com.kurtz.homerecord.core.share.ShareLinks(db, BuildConfig.API_BASE_URL, onChange = ::recordChange) }
 
+    /** Gallery and daily-log share links for the job screens (T058b2, AC-F28, AC-B35). */
+    val jobLinks: com.kurtz.homerecord.fieldlog.share.JobLinks by lazy { com.kurtz.homerecord.fieldlog.share.AndroidJobLinks(app, shareLinks, db.jobDao()) }
+
     private val signatureImages by lazy { com.kurtz.homerecord.fieldlog.changes.AndroidSignatureImage({ java.io.File(app.filesDir, "media") }) }
 
     /** A Signed order's signature PNG on this phone, drawn once from the synced strokes when it was signed elsewhere. */

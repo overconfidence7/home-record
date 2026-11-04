@@ -119,6 +119,7 @@ import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.SectionHeader
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
+import com.kurtz.homerecord.fieldlog.share.ShareLinkSection
 import com.kurtz.homerecord.fieldlog.clock.WeekSheetBuilder
 import java.io.File
 import java.time.Instant
@@ -215,6 +216,14 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
                     leadingContent = { Icon(Icons.Rounded.MarkEmailRead, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                     modifier = Modifier.heightIn(min = 56.dp).testTag("fl_log_sent"),
                 )
+            }
+            if (state.link.allowed) {
+                item(key = "link") {
+                    ShareLinkSection(
+                        state.link, R.string.log_link_on, "fl_log", { onEvent(LogEvent.Link(it)) },
+                        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
+                }
             }
         }
         crew(state, onEvent)

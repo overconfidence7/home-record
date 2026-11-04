@@ -250,4 +250,39 @@ class LogSendTest {
         assertThat(failing.made.single().day).isEqualTo(day)
         assertThat(opens).isEqualTo(1)
     }
+
+    // AC-B35: a sent log gets a share link the owner can turn off; before the send there is none
+    @AcceptanceCriterion("AC-B35")
+    @Test fun aSentLogOffersAShareLinkWithItsDayAndTurnOff() = runBlocking<Unit> {
+        val links = com.kurtz.homerecord.fieldlog.share.FakeJobLinks()
+        val v = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, sender = sender, links = links), SavedStateHandle()))
+        assertThat(v.settled { it.exists }.link.allowed).isFalse()
+        v.onEvent(LogEvent.OpenSend)
+        v.settled { it.editor is LogEditor.Send }
+        v.onEvent(LogEvent.SendShare)
+        v.settled { it.sentAt != null && it.link.allowed }
+        v.onEvent(LogEvent.Link(com.kurtz.homerecord.fieldlog.share.ShareLinkEvent.Share))
+        val on = v.settled { it.link.url != null }
+        val logId = checkNotNull(repo.observe("j1", day).first()).id
+        val (target, url, detail) = links.shared.single()
+        assertThat(target).isEqualTo(com.kurtz.homerecord.core.share.ShareTarget(com.kurtz.homerecord.core.share.ShareLinkKind.LOG, "j1", logId))
+        assertThat(on.link.url).isEqualTo(url)
+        assertThat(detail).contains("2026")
+        v.onEvent(LogEvent.Link(com.kurtz.homerecord.fieldlog.share.ShareLinkEvent.AskOff))
+        v.settled { it.link.confirmOff }
+        v.onEvent(LogEvent.Link(com.kurtz.homerecord.fieldlog.share.ShareLinkEvent.TurnOff))
+        assertThat(v.settled { it.link.url == null && !it.link.confirmOff }.link.allowed).isTrue()
+    }
+
+    @Test fun crewSeeNoShareLinkOnASentLog() = runBlocking<Unit> {
+        val links = com.kurtz.homerecord.fieldlog.share.FakeJobLinks()
+        val v = track(LogViewModel(LogDeps("j1", repo, db.photoDao(), gates, today = { day }, sender = sender, links = links), SavedStateHandle()))
+        v.settled { it.exists }
+        v.onEvent(LogEvent.OpenSend)
+        v.settled { it.editor is LogEditor.Send }
+        v.onEvent(LogEvent.SendShare)
+        v.settled { it.sentAt != null && it.link.allowed }
+        gates.value = RoleGates(CompanyRole.Lead, leadJobs = setOf("j1"))
+        assertThat(v.settled { !it.link.allowed }.canSend).isTrue()
+    }
 }

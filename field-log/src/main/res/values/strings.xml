@@ -786,6 +786,17 @@
     <string name="co_form_share">Share PDF</string>
     <string name="co_form_share_failed">Couldn\'t make the PDF. Try again.</string>
     <string name="co_pdf_share_title">Share change order</string>
+    <string name="share_link">Share link</string>
+    <string name="share_link_off">Turn off link</string>
+    <string name="share_link_off_title">Turn off this link?</string>
+    <string name="share_link_off_body">The page stops working for anyone who has the link. Sharing again makes a new one.</string>
+    <string name="share_link_off_confirm">Turn off</string>
+    <string name="share_link_failed">Couldn\'t make the link. Try again.</string>
+    <string name="share_link_share_title">Share link</string>
+    <string name="gallery_link_on">Link is on. Anyone with it can see this job\'s photos.</string>
+    <string name="gallery_link_share_text">Photos from %1$s: %2$s</string>
+    <string name="log_link_on">Link is on. Anyone with it can read this day\'s log.</string>
+    <string name="log_link_share_text">Daily log for %1$s, %2$s: %3$s</string>
     <string name="co_form_share_link_sign">Send link to sign</string>
     <string name="co_form_share_link">Share link</string>
     <string name="co_form_link_on_sign">Link is on. Anyone with it can read this order and sign it.</string>

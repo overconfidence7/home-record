@@ -10,6 +10,14 @@ import com.kurtz.homerecord.core.photo.AnnotationCodec
 import com.kurtz.homerecord.core.photo.GalleryCell
 import com.kurtz.homerecord.core.photo.OnPhone
 import com.kurtz.homerecord.core.photo.PhotoGallery
+import com.kurtz.homerecord.core.share.ShareLinkKind
+import com.kurtz.homerecord.core.share.ShareTarget
+import com.kurtz.homerecord.fieldlog.share.JobLinks
+import com.kurtz.homerecord.fieldlog.share.ShareLinkController
+import com.kurtz.homerecord.fieldlog.share.ShareLinkEvent
+import com.kurtz.homerecord.fieldlog.share.ShareLinkUi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,6 +37,10 @@ class PhotosDeps(
     val missing: suspend (Collection<String?>) -> Set<String?> = { emptySet() },
     /** Fetches a photo pulled from another phone by its R2 key; the row's path is set when it lands. */
     val download: suspend (String) -> OnPhone = { OnPhone.Ready },
+    /** The job gallery's share link (AC-F28, AC-B35); null hides Share link. */
+    val links: JobLinks? = null,
+    /** RoleGates.canEditJobs: only Owner and Office write share links. */
+    val canLink: Flow<Boolean> = flowOf(false),
 )
 
 /**
@@ -46,7 +58,13 @@ class PhotosViewModel(private val d: PhotosDeps) : ViewModel() {
         rows to rows.filter { it.path in gone }.mapTo(mutableSetOf()) { it.id }
     }
 
-    val state: StateFlow<PhotosUiState> = combine(withMissing, roomNames()) { (photos, notHere), names ->
+    /** Share link shows once the job has a photo to show the client. */
+    private val link = d.links?.let { links ->
+        val target = d.photos.observeForJob(d.jobId).map { rows -> ShareTarget(ShareLinkKind.GALLERY, d.jobId).takeIf { rows.isNotEmpty() } }
+        ShareLinkController(viewModelScope, links, d.canLink, target)
+    }
+
+    val state: StateFlow<PhotosUiState> = combine(withMissing, roomNames(), link?.state ?: flowOf(ShareLinkUi())) { (photos, notHere), names, linkUi ->
         val days = PhotoGallery.build(photos, d.zone).map { day ->
             PhotoDayUi(
                 day.day,
@@ -58,8 +76,12 @@ class PhotosViewModel(private val d: PhotosDeps) : ViewModel() {
                 },
             )
         }
-        PhotosUiState(loading = false, days = days, count = photos.size)
+        PhotosUiState(loading = false, days = days, count = photos.size, link = linkUi)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PhotosUiState())
+
+    fun onLink(e: ShareLinkEvent) {
+        link?.onEvent(e)
+    }
 
     private fun roomNames() = flow {
         val homeId = d.jobs.get(d.jobId)?.homeId

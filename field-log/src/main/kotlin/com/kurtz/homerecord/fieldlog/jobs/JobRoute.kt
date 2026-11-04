@@ -20,6 +20,7 @@ import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.housemodel.blueprint.BlueprintPin
 import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.ui.HouseRoute
 
@@ -45,7 +46,7 @@ class JobHouseDeps(
 )
 
 @Composable
-fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, onEditWeather: (java.time.LocalDate) -> Unit = {}, logSender: com.kurtz.homerecord.fieldlog.log.LogSender? = null, onPreviewLog: (java.time.LocalDate) -> Unit = {}, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>, initialTab: JobTab = JobTab.OVERVIEW, initialLogDay: java.time.LocalDate? = null, tasks: com.kurtz.homerecord.fieldlog.tasks.TasksDeps? = null, onOpenTask: (String?) -> Unit = {}, changes: com.kurtz.homerecord.fieldlog.changes.ChangesDeps? = null, onOpenChange: (String?) -> Unit = {}) {
+fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: JobHouseDeps, onEdit: () -> Unit, onBack: () -> Unit, onCapture: (() -> Unit)? = null, onOpenPhoto: ((String) -> Unit)? = null, onOpenFile: ((String) -> Unit)? = null, files: com.kurtz.homerecord.fieldlog.files.FilesDeps? = null, downloads: com.kurtz.homerecord.core.media.MediaDownloads? = null, logs: com.kurtz.homerecord.core.log.DailyLogRepository? = null, onEditWeather: (java.time.LocalDate) -> Unit = {}, logSender: com.kurtz.homerecord.fieldlog.log.LogSender? = null, onPreviewLog: (java.time.LocalDate) -> Unit = {}, gates: kotlinx.coroutines.flow.Flow<com.kurtz.homerecord.core.company.RoleGates>, initialTab: JobTab = JobTab.OVERVIEW, initialLogDay: java.time.LocalDate? = null, tasks: com.kurtz.homerecord.fieldlog.tasks.TasksDeps? = null, onOpenTask: (String?) -> Unit = {}, changes: com.kurtz.homerecord.fieldlog.changes.ChangesDeps? = null, onOpenChange: (String?) -> Unit = {}, jobLinks: com.kurtz.homerecord.fieldlog.share.JobLinks? = null) {
     val vm = viewModel<JobOverviewViewModel>(
         key = jobId,
         factory = viewModelFactory {
@@ -70,17 +71,19 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
         },
         onBack,
         photosContent = {
+            val canLink = remember(gates) { gates.map { it.canEditJobs } }
             com.kurtz.homerecord.fieldlog.photos.PhotosRoute(
-                if (downloads == null) com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao())
+                if (downloads == null) com.kurtz.homerecord.fieldlog.photos.PhotosDeps(jobId, db.photoDao(), db.jobDao(), db.roomDao(), links = jobLinks, canLink = canLink)
                 else com.kurtz.homerecord.fieldlog.photos.PhotosDeps(
                     jobId, db.photoDao(), db.jobDao(), db.roomDao(), missing = downloads::missing, download = downloads::photo,
+                    links = jobLinks, canLink = canLink,
                 ),
                 onCapture = { onCapture?.invoke() },
                 onOpen = { onOpenPhoto?.invoke(it) },
             )
         },
         logContent = {
-            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, dayTurns = com.kurtz.homerecord.core.log.Midnight.ticks(), initialDay = initialLogDay, sender = logSender), onEditWeather = onEditWeather, onPreview = onPreviewLog)
+            if (logs != null) com.kurtz.homerecord.fieldlog.log.LogRoute(com.kurtz.homerecord.fieldlog.log.LogDeps(jobId, logs, db.photoDao(), gates, dayTurns = com.kurtz.homerecord.core.log.Midnight.ticks(), initialDay = initialLogDay, sender = logSender, links = jobLinks), onEditWeather = onEditWeather, onPreview = onPreviewLog)
         },
         tasksContent = {
             if (tasks != null) com.kurtz.homerecord.fieldlog.tasks.TasksRoute(tasks, onOpenTask = { onOpenTask(it) }, onAddTask = { onOpenTask(null) })

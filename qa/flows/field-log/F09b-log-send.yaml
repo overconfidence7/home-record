@@ -94,6 +94,34 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible: "Through the share sheet"
 - assertVisible: "Send again"
 - takeScreenshot: F09b-log-sent
+# AC-B35: a sent log has a share link for the owner; the share sheet opens, Back shows "Link is on"; Turn off link
+# asks first and the line goes
+- scrollUntilVisible:
+    element:
+      id: fl_log_share_link
+    direction: UP
+- tapOn:
+    id: fl_log_share_link
+- extendedWaitUntil:
+    notVisible:
+      id: fl_log_share_link
+    timeout: 15000
+- takeScreenshot: F09b-log-link-sheet
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_log_link_on
+    timeout: 10000
+- assertNotVisible:
+    id: fl_log_link_failed
+- tapOn:
+    id: fl_log_link_off
+- tapOn:
+    id: fl_log_link_off_confirm
+- extendedWaitUntil:
+    notVisible:
+      id: fl_log_link_on
+    timeout: 10000
 # R09d (AC-F33): an edit after the send says the client's copy is out of date
 - scrollUntilVisible:
     element:

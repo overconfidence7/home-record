@@ -790,6 +790,16 @@ private val photosReady = com.kurtz.homerecord.fieldlog.photos.PhotosUiState(
 @Composable
 fun PhotosTabPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(photosReady, {}) }
 
+/** The owner shared the job's gallery with the client; the link is on, with Turn off link (AC-F28, AC-B35). */
+@ThemePreviews
+@Composable
+fun PhotosTabLinkPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotosScreen(
+        photosReady.copy(link = com.kurtz.homerecord.fieldlog.share.ShareLinkUi(allowed = true, url = "https://api.homerecord.app/share/gallery/Hk2mW9qT")),
+        {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun PhotosEmptyPreview() = Frame {
@@ -1153,6 +1163,19 @@ fun LogLeftOutPreview() = Frame {
 fun LogSentPreview() = Frame {
     com.kurtz.homerecord.fieldlog.log.LogScreen(
         logReady.copy(sentAt = 1_793_478_600_000, sentTo = listOf("jen.hale@example.com", "office@ortizbuild.com")),
+        {}, zone = java.time.ZoneId.of("UTC"),
+    )
+}
+
+/** Sent, and the owner also shared a link to the day's log; the link is on (AC-B35). */
+@ThemePreviews
+@Composable
+fun LogSentLinkPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.log.LogScreen(
+        logReady.copy(
+            sentAt = 1_793_478_600_000, sentTo = listOf("jen.hale@example.com"),
+            link = com.kurtz.homerecord.fieldlog.share.ShareLinkUi(allowed = true, url = "https://api.homerecord.app/share/log/Zp4Rt7cN"),
+        ),
         {}, zone = java.time.ZoneId.of("UTC"),
     )
 }

@@ -12,7 +12,13 @@ fun PhotosRoute(deps: PhotosDeps, onCapture: () -> Unit, onOpen: (String) -> Uni
     val vm = viewModel<PhotosViewModel>(key = "photos-${deps.jobId}", factory = viewModelFactory { initializer { PhotosViewModel(deps) } })
     PhotosScreen(
         vm.state.collectAsState().value,
-        { if (it is PhotosEvent.Open) onOpen(it.photoId) else onCapture() },
+        {
+            when (it) {
+                is PhotosEvent.Open -> onOpen(it.photoId)
+                is PhotosEvent.Link -> vm.onLink(it.event)
+                PhotosEvent.Capture -> onCapture()
+            }
+        },
         modifier,
     )
 }

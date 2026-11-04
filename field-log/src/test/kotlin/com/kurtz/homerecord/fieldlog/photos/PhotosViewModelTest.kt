@@ -127,4 +127,20 @@ class PhotosViewModelTest {
         assertThat(done.count).isEqualTo(3)
         assertThat(asked).containsExactly("theirs")
     }
+
+    // AC-F28: the job gallery's share link; Owner and Office only, once the job has a photo
+    @Test fun `owner gets a gallery link once there is a photo and crew never do`() = runBlocking<Unit> {
+        val links = com.kurtz.homerecord.fieldlog.share.FakeJobLinks()
+        val canLink = kotlinx.coroutines.flow.MutableStateFlow(true)
+        val model = PhotosViewModel(PhotosDeps("j1", db.photoDao(), db.jobDao(), db.roomDao(), zone, links = links, canLink = canLink))
+        assertThat(model.state.filter { !it.loading }.first().link.allowed).isFalse()
+        db.photoDao().upsert(photo("a", at(21, 9)))
+        model.state.filter { it.link.allowed }.first()
+        model.onLink(com.kurtz.homerecord.fieldlog.share.ShareLinkEvent.Share)
+        val on = model.state.filter { it.link.url != null }.first()
+        assertThat(on.link.url).isEqualTo("https://api.example/share/gallery/tok1")
+        assertThat(links.shared.single().first.kind).isEqualTo(com.kurtz.homerecord.core.share.ShareLinkKind.GALLERY)
+        canLink.value = false
+        assertThat(model.state.filter { !it.link.allowed }.first().link.allowed).isFalse()
+    }
 }

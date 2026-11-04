@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
+import com.kurtz.homerecord.fieldlog.share.ShareLinkSection
 import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -91,6 +92,14 @@ private fun PhotoGrid(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(gap),
         verticalArrangement = Arrangement.spacedBy(gap),
     ) {
+        if (state.link.allowed) {
+            item(key = "link", span = { GridItemSpan(maxLineSpan) }) {
+                ShareLinkSection(
+                    state.link, R.string.gallery_link_on, "fl_photos", { onEvent(PhotosEvent.Link(it)) },
+                    Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp),
+                )
+            }
+        }
         state.days.forEach { day ->
             item(key = "d-${day.day}", span = { GridItemSpan(maxLineSpan) }) {
                 Text(

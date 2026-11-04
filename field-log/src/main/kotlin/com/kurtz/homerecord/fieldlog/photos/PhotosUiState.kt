@@ -24,9 +24,12 @@ data class PhotosUiState(
     val loading: Boolean = true,
     val days: List<PhotoDayUi> = emptyList(),
     val count: Int = 0,
+    /** The job gallery's share link (AC-F28): Owner and Office, once the job has photos. */
+    val link: com.kurtz.homerecord.fieldlog.share.ShareLinkUi = com.kurtz.homerecord.fieldlog.share.ShareLinkUi(),
 )
 
 sealed interface PhotosEvent {
     data object Capture : PhotosEvent
     data class Open(val photoId: String) : PhotosEvent
+    data class Link(val event: com.kurtz.homerecord.fieldlog.share.ShareLinkEvent) : PhotosEvent
 }

@@ -29,6 +29,13 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flowOf
+import com.kurtz.homerecord.core.share.ShareLinkKind
+import com.kurtz.homerecord.core.share.ShareTarget
+import com.kurtz.homerecord.fieldlog.share.ShareLinkUi
+import com.kurtz.homerecord.fieldlog.share.ShareLinkController
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -44,10 +51,15 @@ class LogDeps(
     val initialDay: LocalDate? = null,
     /** Makes and hands off the PDF; null leaves Send out (previews). */
     val sender: LogSender? = null,
+    /** Share links for a sent log (AC-B35); null hides Share link. */
+    val links: com.kurtz.homerecord.fieldlog.share.JobLinks? = null,
 )
 
 /** The open sheet and its transient flags, bundled so the state combine stays at five flows. */
-private data class Editing(val editor: LogEditor?, val hoursInvalid: Boolean, val sending: Boolean, val sendFailed: Boolean)
+private data class Editing(
+    val editor: LogEditor?, val hoursInvalid: Boolean, val sending: Boolean, val sendFailed: Boolean,
+    val link: com.kurtz.homerecord.fieldlog.share.ShareLinkUi,
+)
 
 /** How far the day's draft has got: [Running] while the records are read and the weather looked up. */
 private sealed interface Assembly {
@@ -83,6 +95,17 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
     private val log = day.flatMapLatest { d.logs.observe(d.jobId, it).map { log -> it to log } }
     private var current: DailyLog? = null
 
+    /** A sent log's share link (AC-B35): Owner and Office, for the shown day once its log has gone out. */
+    private val link = d.links?.let { links ->
+        val target = combine(day, log) { dd, (logDay, l) ->
+            l?.takeIf { logDay == dd && it.sentAt != null }?.let { ShareTarget(ShareLinkKind.LOG, d.jobId, it.id) }
+        }
+        ShareLinkController(
+            viewModelScope, links, d.gates.map { it.canEditJobs }, target,
+            detail = { state.value.day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) },
+        )
+    }
+
     private val thumbs = d.photos.observeForJob(d.jobId).map { rows -> rows.associate { it.id to (it.thumbPath ?: it.path) } }
 
     val state: StateFlow<LogUiState> = combine(
@@ -90,8 +113,8 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
         canEdit,
         assembly,
         thumbs,
-        combine(editor, hoursInvalid, sending, sendFailed) { e, h, s, f -> Editing(e, h, s, f) },
-    ) { (dd, dayLog, now), edit, asm, photos, (open, badHours, isSending, failedSend) ->
+        combine(editor, hoursInvalid, sending, sendFailed, link?.state ?: flowOf(ShareLinkUi())) { e, h, s, f, l -> Editing(e, h, s, f, l) },
+    ) { (dd, dayLog, now), edit, asm, photos, (open, badHours, isSending, failedSend, linkUi) ->
         val (logDay, saved) = dayLog
         val fresh = logDay == dd
         val savedLog = saved.takeIf { fresh }
@@ -99,6 +122,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
         val running = edit && (asm.day != dd || asm is Assembly.Running)
         val base = LogUiState(
             day = dd, today = now, canEdit = edit, editor = open, hoursInvalid = badHours, sending = isSending, sendFailed = failedSend,
+            link = linkUi,
         )
         when {
             edit && asm is Assembly.Failed && asm.day == dd && savedLog == null -> base.copy(loading = false, failed = true)
@@ -193,6 +217,7 @@ class LogViewModel(private val d: LogDeps, private val saved: SavedStateHandle) 
             LogEvent.SendAnyway -> if (openEditor() == LogEditor.SendEmpty) openSend(st, confirmed = true)
             LogEvent.SendEmail -> send(email = true)
             LogEvent.SendShare -> send(email = false)
+            is LogEvent.Link -> link?.onEvent(event.event)
             is LogEvent.EditorText -> when (val e = openEditor()) {
                 is LogEditor.Text -> open(e.copy(text = event.text))
                 is LogEditor.Hours -> {

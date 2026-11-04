@@ -325,6 +325,11 @@ fun PhotosTabScreenshot() = PhotosTabPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PhotosTabLinkScreenshot() = PhotosTabLinkPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PhotosEmptyScreenshot() = PhotosEmptyPreview()
 
 @PreviewTest
@@ -521,6 +526,11 @@ fun LogLeftOutScreenshot() = LogLeftOutPreview()
 @ThemePreviews
 @Composable
 fun LogSentScreenshot() = LogSentPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun LogSentLinkScreenshot() = LogSentLinkPreview()
 
 @PreviewTest
 @ThemePreviews

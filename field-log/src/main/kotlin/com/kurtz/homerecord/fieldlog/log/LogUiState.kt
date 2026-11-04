@@ -79,6 +79,8 @@ data class LogUiState(
     val editor: LogEditor? = null,
     /** The hours typed in the crew sheet do not read as a time. */
     val hoursInvalid: Boolean = false,
+    /** A sent log's share link (AC-B35); shown to Owner and Office once the log has gone out. */
+    val link: com.kurtz.homerecord.fieldlog.share.ShareLinkUi = com.kurtz.homerecord.fieldlog.share.ShareLinkUi(),
 ) {
     val totalMinutes: Int get() = crew.sumOf { it.minutes }
     val canGoForward: Boolean get() = day < today
@@ -124,4 +126,6 @@ sealed interface LogEvent {
     data object SendEmail : LogEvent
     /** Hand the PDF to the share sheet (text, another email account, a drive). */
     data object SendShare : LogEvent
+    /** Share link, Turn off link and its confirm on a sent log (AC-B35). */
+    data class Link(val event: com.kurtz.homerecord.fieldlog.share.ShareLinkEvent) : LogEvent
 }

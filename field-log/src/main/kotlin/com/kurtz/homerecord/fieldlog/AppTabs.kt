@@ -187,6 +187,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 logs = container.dailyLogs,
                 onEditWeather = { day -> nav.push(LogWeatherKey(key.jobId, day.toString())) },
                 logSender = container.logSender,
+                jobLinks = container.jobLinks,
                 onPreviewLog = { day -> nav.push(LogPdfKey(key.jobId, day.toString())) },
                 files = container.filesDeps(
                     key.jobId,
