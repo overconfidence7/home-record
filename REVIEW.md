@@ -2892,3 +2892,55 @@ Walkthrough steps exercised by flows: house-manual H01 Pass, house-manual H01b P
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 28 device stages, 1590 unit tests, 161 backend tests, coverage 343/343 ACs. Passed: 25. New issues: 4. Critical: 1. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-04 (commit 0a2059ec)
+
+Judged the suite results for 0a2059ec (run of 2026-11-04 01:05 UTC). `build` HEAD 04481d8d is ahead by aeed33fb (Items search keystrokes, plan rooms named in Overlays mode, 120 min device job), N001 and the Field Log tour fix, none of which this run tested. Field Log produced no device results (job timed out in F16, per the builder's note), so only House Manual is judged on device; Field Log has no screenshots, crawler or flow results this run. New since the last judge entry for House Manual: Place on plan with drag and "On a wall" (T055b–d), blueprint marks that open their record (T055a), 3D markers (T053), plan overlays tappable.
+
+Verdict: House Manual: Nate's first reaction would be that Items search scrambles what he types ("JGB735" became "GB75J", "LRMVS" became "RMVSL", then "No items match"), which makes the one-tap model lookup look broken; the builder's fix is in HEAD but not yet seen on a device. Beyond that the wall-to-blueprint loop now holds together (pipe drawn on the wall shows on the Plumbing layer and opens back to the wall), but Place on plan and the plan editor fall apart in landscape, and Reminders is still a placeholder. / Field Log: nothing to judge on device this run: the suite ran out of time, so every step is untested at this sha. The last judged state stands: behind-the-wall exists, change orders, schedule and materials (F12–F14) do not.
+
+- [ ] [UI] Minor: Place on plan in landscape draws the whole floor plan about 40 px wide in the middle of the screen, the refrigerator marker and three faded item dots piled on top of each other, so tapping or dragging to a spot is impossible; the blueprint in landscape fills the right pane at a usable size. The builder's references have no landscape variant for this screen, so they hide it [judge:hm-place-plan-landscape-tiny] - steps: item page → Where → Place on plan, rotate - expected: rule 30 (targets ≥ 48 dp), rule 33 (rotation keeps the work usable), same plan scale as House tab landscape - actual: postage-stamp plan, markers overlapping - screenshot: qa-results:latest/house-manual/crawler/house-manual/item-place-landscape.png
+- [ ] [UI] Minor: the plan editor in landscape leaves almost no plan: in Overlays mode the hint panel ("Tap a line or a spot to pick it." with Add overlay) covers the lower half of the plan and stops at about two-thirds of the width, and in Rooms mode the plan runs off the bottom with the right half of the screen empty grid; the plan is not fitted to the landscape pane ([judge:hm-plan-editor-fit] is the portrait case) [judge:hm-plan-editor-landscape-panel] - steps: House → Edit plan, rotate; switch to Overlays - expected: rule 33, rule 28; plan fitted beside or above the panel - actual: a strip of plan between the mode toggle and the panel - screenshot: qa-results:latest/house-manual/crawler/house-manual/plan-overlays-landscape.png
+
+Auto entry review:
+- [auto:device:field-log:no-results]: not an app failure (device job timeout); agreed with the builder's fix.
+- [auto:flow:house-manual:H06-items] and [H07-item-page] are real app bugs, not flow errors: the failure shots show the Items search field holding "GB75J" and "RMVS" with the keyboard's own suggestions agreeing, i.e. the field dropped and reordered keys. A homeowner typing a model number would hit this.
+- [auto:flow:house-manual:H11-overlay-pipe] is a real app bug: the step-178 shot is the plan editor in Overlays mode with Kitchen and Living room drawn but not findable; the wall half of H11 (draw, save, edit, room Overlays list, Home search, blueprint Plumbing mark opening the wall) all passed before it.
+
+Seen this run and fine: blueprint Plumbing layer draws the cold-water run on the Kitchen's north wall and tapping it opens North wall with the overlay picked and Done; Home search "cold water" finds the overlay with room and kind; Place on plan portrait (Kitchen, drag hint, On a wall, Remove from plan), On a wall with wall chips and the item on the wall; 3D markers in layer colours in portrait and landscape; H09 wall thumbnail now shows the photo on the wall row; HM landscape tour is landscape this run (2400×1080, all seven).
+
+Still open and seen again: [judge:hm-room-kind-not-inferred] ("14' by 12' 6" · Other" in H03/H09), [judge:qa-3d-blank-emulator] (H03-3d white, H03-3d-room and H09-wall-in-3d black, H11-3d-pipe white), [judge:hm-reminders-placeholder-button], [judge:hm-item-hero-icon-too-tall], [judge:nav-label-200-uneven] (Reminders smaller at 200%), [judge:hm-plan-shape-corners-hidden] (H02b edit-shape and stairs: the room sits under the panel), [v4:editor-marks-over-names] (lines through "Living room" and "Dining room" in plan-overlays), [judge:qa-crawler-blank-shots] (item-place-dark, item-place-unplaced-light, home-loading-light and others blank), [judge:qa-crawler-no-scroll] (the eight item-detail variants show the same top half), [judge:qa-h11-plain-wall].
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding to Home | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; shape editing hides the room under the panel (open) | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint, long-press menu, room page fine; Kitchen still "Other" | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | Item form | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item | qa-results:latest/house-manual/crawler/house-manual/items-by-category-light.png |
+| H6 | Blocked | Search by model scrambles the typed text ("GB75J"), no match; fixed in aeed33fb, untested | qa-results:latest/house-manual/screenshots/flow-H06-items-step-014-assertCondition-Gas_range.png |
+| H7 | Blocked | Same search bug before reaching the item ("RMVS") | qa-results:latest/house-manual/screenshots/flow-H07-item-page-step-013-assertCondition-Refrigerator.png |
+| H8 | Pass | Stored warranty (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H9 | Pass | Outline with four handles; thumbnail shows the photo on the wall row | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Clunky | 3D blank or black on the emulator; catalog draws floors and markers, rooms unlabeled | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png |
+| H11 | Clunky | Pipe drawn, saved, on the Plumbing layer, opens from the blueprint and Home search; plan-overlay half failed (rooms unnamed in Overlays mode, fixed in aeed33fb); still a plain wall; 3D blank | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-blueprint-pipe.png |
+| H17 | Clunky | Signed in; More still does not name the account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Paywall with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H12, H13 (Emergency card only), H14 (Reminders placeholder), H15, H16, H18.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1–F11, F15, F16, F18 | Blocked | No device results at 0a2059ec (device job timed out in F16; builder reports every reached stage passed, but nothing was published); see the c66e83a2 judge entry for the last judged state | none |
+
+Not built yet: F12 (T056–T058), F13 (T059), F14 (T060), F17 (T064); installed items (T062).
+
+Focus check: nothing wrong in House Manual; Field Log not seen this run.
+
+Coverage note: the auto entry reports 343/343 claimed ACs covered across 192 ticked tasks and subtasks (0 gaps); handoff flows still not written (Q004).
+
+Judged: 181 screenshots opened (3 failure shots, 46 House Manual flow shots, 21 tour shots, 113 crawler light shots plus 17 dark, 200% and landscape shots of the new screens), 563 PNGs present, 0 for Field Log. 27 walkthrough steps. New issues: 2. Product gaps: 0.
