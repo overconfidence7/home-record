@@ -111,9 +111,13 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_log_visitors_text
     timeout: 10000
+# Scroll to the line itself: the Sent row's bounds are clipped to the viewport, so waiting for fl_log_sent
+# stopped on a 24 px sliver of it with the line still above the list (suite run on af9d9a7d).
 - scrollUntilVisible:
     element:
-      id: fl_log_sent
+      id: fl_log_changed_since_sent
     direction: UP
 - assertVisible: "Changed since sent.*"
+- assertVisible:
+    id: fl_log_sent
 - takeScreenshot: F09b-log-changed-since-sent
