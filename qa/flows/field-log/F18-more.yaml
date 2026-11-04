@@ -36,6 +36,7 @@ appId: com.kurtz.homerecord.fieldlog
     id: fl_save
 - tapOn:
     id: fl_tab_more
+# AC-F45: the job's client is on Clients with Call, Email and the job
 - tapOn:
     id: fl_more_clients
 - extendedWaitUntil:
@@ -49,6 +50,7 @@ appId: com.kurtz.homerecord.fieldlog
     id: "fl_clients_email_.*"
 - assertVisible: "Hale kitchen"
 - takeScreenshot: F18-clients
+# AC-F45: the job row opens the job and Back returns
 - tapOn: "Hale kitchen"
 - extendedWaitUntil:
     visible:
