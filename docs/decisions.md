@@ -854,3 +854,9 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 - The change order PDF reuses the daily log's drawing ops (`LogPdfOp`, `LogPdfPage`, `AndroidLogPdfWriter`); `LogPdfOp.Image` gained `fit` (drawn whole, for logo and signature) so one writer draws both documents. Layout is the pure `ChangeOrderPdfLayout` in `:core`.
 - Share PDF shows on every saved order, Draft included (a contractor often sends a priced draft before the client signs); a Draft's typed changes are saved first so the PDF matches the form. An unsigned PDF prints "Not signed yet" and a blank X line to sign on paper.
 - The PDF is written to `cache/change-orders/` and shared through the existing FileProvider; it is not stored on the change order (`pdfPath` stays unused until the share link work in T058 needs a stored copy).
+
+## 2026-11-04 — Share links (T058a)
+
+- A share link is the synced `share_link` row the app writes (Owner/Office only, existing sync rule); the backend serves pages from it rather than a separate create/revoke API, so a link made offline works once the phone syncs and revoking is the same row edit. The row gains `targetId` (the daily log or change order the link names; empty for a job gallery) because one job has many logs and orders. Reason: one source of truth, no extra endpoint, revocation follows the normal sync path.
+- A web signature is stored on the change order as `signatureJson` (the same normalised stroke JSON as the app's `Signature`) with `signedVia: "web"`, not as an uploaded PNG, so it needs no R2 credentials and the phone draws the PNG and PDF from the strokes exactly as for a signature taken on the phone. The server writes the row as a server change (next seq, field times = now), so a phone's older draft edit cannot undo a signature.
+- Share pages stream photos through the Worker's `MEDIA` binding (no presigned URLs), and a log or change order link only reaches the photos on that log or order.

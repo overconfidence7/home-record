@@ -8,6 +8,7 @@ import { media, removeOrphanedMedia } from "./routes/media";
 import { pruneLimits } from "./auth/rateLimit";
 import { prunePushLog } from "./push/notify";
 import { me } from "./routes/me";
+import { share } from "./routes/share";
 import { pruneSync, sync } from "./routes/sync";
 import { tenants } from "./routes/tenants";
 
@@ -23,6 +24,7 @@ app.route("/", tenants);
 app.route("/", sync);
 app.route("/", lookup);
 app.route("/", media);
+app.route("/", share);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 app.onError((err, c) => {

@@ -55,6 +55,15 @@ One bucket, `homerecord-media`: the `MEDIA` binding in `wrangler.toml` (the orph
 
 Every row belongs to a company (Field Log) or a home (House Manual). `requireSession` loads the caller's memberships; tenant routes use `requireTenant()`, which answers 404 for any tenant the caller is not in, so other tenants are indistinguishable from missing ones.
 
+## Share links (AC-B35, AC-B36)
+
+A link is a synced `share_link` row (Owner and Office only): `kind` `gallery`, `log` or `co`, `jobId`, `targetId` (the daily log or change order id; none for a gallery), a random `token` (16–64 of `A-Za-z0-9_-`) and `revoked`. Migration 0013 indexes the token. No account is needed to open one; a revoked or deleted link, or one whose job or record is deleted, answers 404 "This link is turned off."
+
+- `GET /share/gallery/:token` the job's uploaded photos by day (newest day first) with captions.
+- `GET /share/log/:token` one daily log: weather, crew hours, work done, tasks, change orders, delays, visitors, safety, client notes and the log's photos.
+- `GET /share/co/:token` the change order (lines, total, photos); while it is not signed, a name field and a signature pad. `POST /share/co/:token` `{name, aspect, strokes: [{points: [x, y, ...]}]}` (0..1 pad coordinates, as the app's `Signature`; at least 0.2 pad widths of ink) marks it `SIGNED` with `signedBy`, `signedAt`, `signatureJson`, `signedVia: "web"` as a server write (next seq, so phones pull it; Owner and Office get the `change_order_signed` push). 409 once signed or declined.
+- `GET /share/:kind/:token/photo/:photoId` streams a photo from the `MEDIA` binding: for a gallery any live photo of the job, for a log or change order only the photos on it.
+
 ## Push notifications (AC-B30)
 
 - `PUT /me/push-token` `{token, app: "field-log" | "house-manual"}` registers a phone's FCM token for the caller (204); a token already on another account moves to the caller. `DELETE /me/push-token` `{token}` removes the caller's own token. `POST /auth/revoke` drops all of the account's tokens.
