@@ -4,6 +4,7 @@ import java.io.IOException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.kurtz.homerecord.core.net.LazyCallFactory
+import com.kurtz.homerecord.core.net.NetLog
 import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -35,20 +36,22 @@ interface AuthService {
 /** Maps the backend's auth endpoints (AC-B1) onto [AuthResult]. */
 class RetrofitAuthApi(private val service: AuthService) : AuthApi {
     override suspend fun startEmailCode(email: String): AuthResult =
-        call { service.start(EmailBody(email)); null }.error
+        call("auth/email/start") { service.start(EmailBody(email)); null }.error
 
     override suspend fun verifyEmailCode(email: String, code: String): TokenOrError =
-        call { service.verify(VerifyBody(email, code)).token }
+        call("auth/email/verify") { service.verify(VerifyBody(email, code)).token }
 
     override suspend fun signInWithGoogle(idToken: String): TokenOrError =
-        call { service.google(GoogleBody(idToken)).token }
+        call("auth/google") { service.google(GoogleBody(idToken)).token }
 
-    private suspend fun call(block: suspend () -> String?): TokenOrError =
+    private suspend fun call(name: String, block: suspend () -> String?): TokenOrError =
         try {
             TokenOrError(block(), AuthResult.Success)
         } catch (e: HttpException) {
+            NetLog.failed(name, e)
             TokenOrError(null, mapError(e))
         } catch (e: IOException) {
+            NetLog.failed(name, e)
             TokenOrError(null, AuthResult.Offline)
         }
 

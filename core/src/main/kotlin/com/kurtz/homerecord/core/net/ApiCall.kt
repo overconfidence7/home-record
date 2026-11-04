@@ -22,10 +22,13 @@ suspend fun <T> apiCall(onHttp: (HttpException) -> ApiFailure = ::failureForStat
     try {
         ApiResult.Ok(block())
     } catch (e: HttpException) {
+        NetLog.failed(e.response()?.raw()?.request?.url?.encodedPath ?: "api call", e)
         ApiResult.Err(onHttp(e))
     } catch (e: IOException) {
+        NetLog.failed("api call", e)
         ApiResult.Err(ApiFailure.Offline)
     } catch (e: SerializationException) {
+        NetLog.failed("api call", e)
         ApiResult.Err(ApiFailure.Failed)
     }
 

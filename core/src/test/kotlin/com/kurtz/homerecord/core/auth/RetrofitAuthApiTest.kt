@@ -67,4 +67,23 @@ class RetrofitAuthApiTest {
         assertThat(store.t).isNull()
         assertThat(repo.state.value).isEqualTo(AuthState.SignedOut)
     }
+
+    // REVIEW: a failed sign-in call leaves a logcat trace (call and status), never the email or code
+    @Test fun failedCallsAreLoggedWithoutTheEmailOrCode() = runTest {
+        val logged = mutableListOf<String>()
+        val previous = com.kurtz.homerecord.core.net.NetLog.sink
+        com.kurtz.homerecord.core.net.NetLog.sink = { message, _ -> logged += message }
+        try {
+            RetrofitAuthApi.create("http://x.test", client { throw IOException("no route to host") }).verifyEmailCode("a@b.com", "123456")
+            RetrofitAuthApi.create("http://x.test", client { reply(it, 429, """{"error":"rate_limited"}""") }).startEmailCode("a@b.com")
+        } finally {
+            com.kurtz.homerecord.core.net.NetLog.sink = previous
+        }
+        assertThat(logged).hasSize(2)
+        assertThat(logged[0]).contains("auth/email/verify failed")
+        assertThat(logged[0]).contains("IOException: no route to host")
+        assertThat(logged[1]).contains("auth/email/start failed: HTTP 429")
+        assertThat(logged.joinToString()).doesNotContain("a@b.com")
+        assertThat(logged.joinToString()).doesNotContain("123456")
+    }
 }

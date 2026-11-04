@@ -96,6 +96,7 @@ class RetrofitMediaTransferApi(
                 }
             }
         } catch (e: IOException) {
+            com.kurtz.homerecord.core.net.NetLog.failed("media upload", e)
             PutOutcome.Offline
         }
     }
