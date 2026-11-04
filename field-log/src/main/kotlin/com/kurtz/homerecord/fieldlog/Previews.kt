@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,32 @@ annotation class ThemePreviews
 
 @Composable
 private fun Frame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { Surface { content() } }
+
+/**
+ * A sheet's content as the app shows it: scrim above, the sheet's container, top corners and drag handle at the bottom,
+ * clear of the status bar. Catalog sheet entries use it so the crawler sees what a user sees (QA rule 3).
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun SheetFrame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+    androidx.compose.foundation.layout.Box(
+        androidx.compose.ui.Modifier.fillMaxSize()
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f))
+            .statusBarsPadding(),
+        contentAlignment = androidx.compose.ui.Alignment.BottomCenter,
+    ) {
+        Surface(
+            shape = androidx.compose.material3.BottomSheetDefaults.ExpandedShape,
+            color = androidx.compose.material3.BottomSheetDefaults.ContainerColor,
+            modifier = androidx.compose.ui.Modifier.padding(top = 48.dp),
+        ) {
+            androidx.compose.foundation.layout.Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                androidx.compose.material3.BottomSheetDefaults.DragHandle()
+                content()
+            }
+        }
+    }
+}
 
 private val crew = listOf(
     TeamMember("u1", "Nate Kurtz", "nate@kurtzelectric.com", CompanyRole.Owner, null),
@@ -1130,7 +1157,7 @@ fun LogFailedPreview() = Frame {
 /** The delay sheet's content with Materials picked (AC-F32). */
 @ThemePreviews
 @Composable
-fun LogDelaySheetPreview() = Frame {
+fun LogDelaySheetPreview() = SheetFrame {
     com.kurtz.homerecord.fieldlog.log.LogDelaySheetContent(
         com.kurtz.homerecord.fieldlog.log.LogEditor.Delay(com.kurtz.homerecord.core.model.DelayReason.INSPECTION, "Inspector moved us to Tuesday"), {},
     )
@@ -1138,7 +1165,7 @@ fun LogDelaySheetPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun LogTextSheetPreview() = Frame {
+fun LogTextSheetPreview() = SheetFrame {
     com.kurtz.homerecord.fieldlog.log.LogTextSheetContent(
         com.kurtz.homerecord.fieldlog.log.LogEditor.Text(
             com.kurtz.homerecord.fieldlog.log.LogTextSection.CLIENT_NOTES, "Cabinets are in. Countertops get templated Monday.",
@@ -1199,7 +1226,7 @@ fun LogSentChangedPreview() = Frame {
 /** The Send sheet for a job with a client email and an office address (AC-F33). */
 @ThemePreviews
 @Composable
-fun LogSendSheetPreview() = Frame {
+fun LogSendSheetPreview() = SheetFrame {
     com.kurtz.homerecord.fieldlog.log.LogSendSheetContent(
         com.kurtz.homerecord.fieldlog.log.LogEditor.Send(listOf("jen.hale@example.com", "office@ortizbuild.com")), sending = false, failed = false, {},
     )
@@ -1208,7 +1235,7 @@ fun LogSendSheetPreview() = Frame {
 /** No emails on the job, and the last try found no app to take the PDF: Share PDF is the one action. */
 @ThemePreviews
 @Composable
-fun LogSendSheetNoEmailsPreview() = Frame {
+fun LogSendSheetNoEmailsPreview() = SheetFrame {
     com.kurtz.homerecord.fieldlog.log.LogSendSheetContent(com.kurtz.homerecord.fieldlog.log.LogEditor.Send(emptyList()), sending = false, failed = true, {})
 }
 
