@@ -1,4 +1,4 @@
-# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours; a job's summary PDF goes to the share sheet (AC-F15, AC-F46, AC-F47).
+# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours; a job's summary PDF goes to the share sheet; Photo reports lists jobs with photos in the range (AC-F15, AC-F46, AC-F47, AC-F28 report).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -26,6 +26,11 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible:
     id: fl_reports_export_quickbooks
     enabled: false
+# AC-F28 (report part): Photo reports sits under the delays; with no photos in the range it says so
+- scrollUntilVisible:
+    element:
+      id: fl_reports_photos_none
+- assertVisible: "No photos in these dates."
 # AC-F47: Job summaries sits under the delays; with no job it says so
 - scrollUntilVisible:
     element: "No jobs yet."
@@ -62,3 +67,8 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - assertNotVisible:
     id: fl_reports_summary_failed
+# a job with no photos this week is not offered a photo report
+- scrollUntilVisible:
+    element:
+      id: fl_reports_photos_none
+    direction: UP

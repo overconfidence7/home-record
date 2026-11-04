@@ -745,6 +745,27 @@ fun ReportsSummariesPreview() = Frame {
     )
 }
 
+/** Photo reports (AC-F28): a quiet week so the section shows; two jobs with photos in the range, one PDF being made. */
+@ThemePreviews
+@Composable
+fun ReportsPhotosPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(
+        com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
+            loading = false, range = com.kurtz.homerecord.fieldlog.reports.ReportRange.ThisWeek, from = TS_MONDAY, to = TS_MONDAY.plusDays(6),
+            byPerson = listOf(com.kurtz.homerecord.core.model.HoursLine("m1", "Dana Whitfield", hrs(8))),
+            byJob = listOf(com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(8))),
+            totalMillis = hrs(8), regularMillis = hrs(8),
+            photoJobs = listOf(
+                com.kurtz.homerecord.fieldlog.reports.PhotoJob("j2", "Ortiz kitchen remodel", 23),
+                com.kurtz.homerecord.fieldlog.reports.PhotoJob("j1", "Garage subpanel", 1),
+            ),
+            photoBusy = "j1",
+            summaries = repState.summaries,
+        ),
+        {}, {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun ReportsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.reports.ReportsScreen(com.kurtz.homerecord.fieldlog.reports.ReportsUiState(), {}, {}) }

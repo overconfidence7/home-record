@@ -8,6 +8,8 @@ import com.kurtz.homerecord.core.data.ClientEntity
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.log.PhotoReportPicker
+import com.kurtz.homerecord.core.log.ReportPhoto
 import com.kurtz.homerecord.core.model.DelayDay
 import com.kurtz.homerecord.core.model.DelayTimeline
 import com.kurtz.homerecord.core.model.HoursReport
@@ -45,6 +47,10 @@ class ReportsDeps(
     val delays: (from: LocalDate, to: LocalDate) -> Flow<List<DelayDay>> = { _, _ -> flowOf(emptyList()) },
     /** Makes the job's summary PDF and opens the share sheet; false when it could not (AC-F47). */
     val shareJobSummary: suspend (jobId: String) -> Boolean = { false },
+    /** Every job photo of the company, for the photo report counts (AC-F28). */
+    val photos: Flow<List<ReportPhoto>> = flowOf(emptyList()),
+    /** Makes the job's photo report for the days from one to the other and opens the share sheet; false when it could not (AC-F28). */
+    val sharePhotoReport: suspend (jobId: String, from: LocalDate, to: LocalDate) -> Boolean = { _, _, _ -> false },
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
 )
@@ -111,6 +117,18 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
         }
     }
 
+    init {
+        viewModelScope.launch {
+            combine(range, d.photos, d.jobs) { r, photos, jobs ->
+                val weeks = weeksOf(r)
+                val counts = PhotoReportPicker.countsByJob(photos, weeks.first(), weeks.last().plusDays(6), d.zone)
+                jobs.filter { it.deletedAt == null && (counts[it.id] ?: 0) > 0 }
+                    .sortedWith(compareBy<JobEntity>({ it.status != ACTIVE }, { it.name.lowercase() }))
+                    .map { PhotoJob(it.id, it.name, counts[it.id] ?: 0) }
+            }.collect { rows -> _state.update { it.copy(photoJobs = rows) } }
+        }
+    }
+
     fun onEvent(event: ReportsEvent) {
         when (event) {
             is ReportsEvent.SelectRange -> {
@@ -121,6 +139,7 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
             ReportsEvent.ExportQuickBooks -> export(TimeExportKind.QuickBooksCsv)
             ReportsEvent.DismissNotice -> _state.update { it.copy(notice = null) }
             is ReportsEvent.ShareJobSummary -> shareSummary(event.jobId)
+            is ReportsEvent.SharePhotoReport -> sharePhotos(event.jobId)
         }
     }
 
@@ -136,6 +155,22 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
                 false
             }
             _state.update { it.copy(summaryBusy = null, summaryFailed = !ok) }
+        }
+    }
+
+    private fun sharePhotos(jobId: String) {
+        if (_state.value.photoBusy != null) return
+        val weeks = weeksOf(range.value)
+        _state.update { it.copy(photoBusy = jobId, photoFailed = false) }
+        viewModelScope.launch {
+            val ok = try {
+                d.sharePhotoReport(jobId, weeks.first(), weeks.last().plusDays(6))
+            } catch (e: java.io.IOException) {
+                false
+            } catch (e: android.content.ActivityNotFoundException) {
+                false
+            }
+            _state.update { it.copy(photoBusy = null, photoFailed = !ok) }
         }
     }
 

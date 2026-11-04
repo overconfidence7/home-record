@@ -467,6 +467,7 @@ class AppContainer(private val app: Application) {
             delays = { jobId -> dailyLogs.observeDays(jobId).map { logs -> logs.map { com.kurtz.homerecord.core.model.DelayDay(it.jobId, it.day, it.sections.delays) } } },
             membership = { company.current },
         )
+        val photoReports = com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfMaker(app, db, membership = { company.current })
         return com.kurtz.homerecord.fieldlog.reports.ReportsDeps(
             members = db.memberDao().observeFor(membership.companyId),
             punches = db.punchDao().observeFor(membership.companyId),
@@ -475,6 +476,10 @@ class AppContainer(private val app: Application) {
             settings = company.settings,
             share = { sharer.share(sharer.write(it)) },
             shareJobSummary = { jobId -> summaries.make(jobId)?.let(summaries::share) ?: false },
+            photos = db.photoDao().observeForCompanyJobs(membership.companyId).map { rows ->
+                with(com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfMaker) { rows.map { it.toReportPhoto(exists = { true }) } }
+            },
+            sharePhotoReport = { jobId, from, to -> photoReports.make(jobId, from, to)?.let(photoReports::share) ?: false },
             delays = { from, to ->
                 dailyLogs.observeRange(from, to).map { logs ->
                     logs.map { com.kurtz.homerecord.core.model.DelayDay(it.jobId, it.day, it.sections.delays) }

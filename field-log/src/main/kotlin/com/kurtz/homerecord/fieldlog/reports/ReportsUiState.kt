@@ -29,6 +29,11 @@ data class ReportsUiState(
     /** The job whose summary PDF is being made, or null. */
     val summaryBusy: String? = null,
     val summaryFailed: Boolean = false,
+    /** Jobs with photos in the range, with how many, for the photo report PDF (AC-F28). */
+    val photoJobs: List<PhotoJob> = emptyList(),
+    /** The job whose photo report is being made, or null. */
+    val photoBusy: String? = null,
+    val photoFailed: Boolean = false,
 ) {
     val isEmpty: Boolean get() = byPerson.isEmpty() && byJob.isEmpty()
 }
@@ -36,7 +41,11 @@ data class ReportsUiState(
 /** A job row under Job summaries; [line] is its address, or null. */
 data class SummaryJob(val id: String, val name: String, val line: String?)
 
+/** A job row under Photo reports: [photos] taken in the range. */
+data class PhotoJob(val id: String, val name: String, val photos: Int)
+
 sealed interface ReportsEvent {
+    data class SharePhotoReport(val jobId: String) : ReportsEvent
     data class ShareJobSummary(val jobId: String) : ReportsEvent
     data class SelectRange(val range: ReportRange) : ReportsEvent
     data object ExportShifts : ReportsEvent

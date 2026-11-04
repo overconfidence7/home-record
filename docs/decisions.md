@@ -894,3 +894,8 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 - The job summary (AC-F47) runs from the job's first punch to today, not the Reports week range: "hours vs budget" only means something against all the hours. Days on site are the days someone started work on the job (clock in, switch to it, back from a break). Change orders show signed (count and total) apart from drafts and declined, so the total is what the client agreed to. Delays come from the job's saved daily logs, counted by days and by reason.
 - Reports lists every job (Active first, then by name) under Job summaries; a tap makes the PDF with the daily log's layout and opens the share sheet. No new dependency.
+
+## 2026-11-04 — T061b: photo report PDF uses the Reports range
+
+- The photo report (AC-F28) takes its dates from the Reports range chips (This week, Last week, Last 4 weeks) instead of a separate date picker; "Photo reports" lists the jobs with photos in that range (Active first, with the count) and a tap makes that job's PDF and opens the share sheet. One range for the whole screen keeps it to one control.
+- Layout: US Letter, company header on page one, photos two across and two down (never more than four to a page), cropped to 4:3 like the daily log, oldest first. Each caption: date and time (bold), room · phase, the photo's note; at most three lines, a cut note ends in "…". Later pages carry the job name at the top. A photo that is neither downloaded nor has a thumbnail on this phone is left out and page one says how many. Pure layout `PhotoReportLayout` and `PhotoReportPicker` in :core `log`; no new dependency.

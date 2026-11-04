@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.company.CompanySettings
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.MemberEntity
 import com.kurtz.homerecord.core.data.PunchEntity
+import com.kurtz.homerecord.core.log.ReportPhoto
 import com.kurtz.homerecord.core.model.DelayDay
 import com.kurtz.homerecord.core.model.DelayReason
 import com.kurtz.homerecord.core.model.LogDelay
@@ -36,6 +37,14 @@ class ReportsViewModelTest {
     private val delayRanges = mutableListOf<Pair<LocalDate, LocalDate>>()
     private val summariesAsked = mutableListOf<String>()
     private var summaryWorks = true
+    private val photoReportsAsked = mutableListOf<Triple<String, LocalDate, LocalDate>>()
+    private var photoReportWorks = true
+    private val photos = listOf(
+        ReportPhoto("p1", "j1", at(0, 1, 10), "/p1.jpg"),
+        ReportPhoto("p2", "j1", at(0, 2, 11), ""),
+        ReportPhoto("p3", "j2", at(0, 0, 9), "/p3.jpg"),
+        ReportPhoto("p4", "j3", at(1, 2, 9), "/p4.jpg"),
+    )
     private val jobs = listOf(
         JobEntity(id = "j1", companyId = "c1", name = "Garage subpanel", createdAt = 1, updatedAt = 1),
         JobEntity(id = "j2", companyId = "c1", name = "Bath fan", address = "22 Birch Ct", status = "DONE", createdAt = 1, updatedAt = 1),
@@ -66,6 +75,8 @@ class ReportsViewModelTest {
             share = { if (shareFails) throw IOException("disk") else shared += it },
             delays = { from, to -> delayRanges += from to to; flowOf(delayDays) },
             shareJobSummary = { summariesAsked += it; summaryWorks },
+            photos = flowOf(photos),
+            sharePhotoReport = { job, from, to -> photoReportsAsked += Triple(job, from, to); photoReportWorks },
             zone = zone, now = { now },
         )
         return ReportsViewModel(deps, saved)
@@ -140,5 +151,21 @@ class ReportsViewModelTest {
         summaryWorks = true
         vm.onEvent(ReportsEvent.ShareJobSummary("j3"))
         assertThat(vm.state.value.summaryFailed).isFalse()
+    }
+
+    // AC-F28: jobs with photos in the range, Active first, with counts; the PDF is asked for the range's days
+    @Test fun photoReportsFollowTheRangeAndShareThePdf() {
+        val vm = vm()
+        assertThat(vm.state.value.photoJobs).containsExactly(PhotoJob("j1", "Garage subpanel", 2), PhotoJob("j2", "Bath fan", 1)).inOrder()
+        vm.onEvent(ReportsEvent.SharePhotoReport("j1"))
+        assertThat(photoReportsAsked).containsExactly(Triple("j1", monday, monday.plusDays(6)))
+        assertThat(vm.state.value.photoBusy).isNull()
+        assertThat(vm.state.value.photoFailed).isFalse()
+        vm.onEvent(ReportsEvent.SelectRange(ReportRange.LastWeek))
+        assertThat(vm.state.value.photoJobs).containsExactly(PhotoJob("j3", "Attic run", 1))
+        photoReportWorks = false
+        vm.onEvent(ReportsEvent.SharePhotoReport("j3"))
+        assertThat(photoReportsAsked.last()).isEqualTo(Triple("j3", monday.minusWeeks(1), monday.minusDays(1)))
+        assertThat(vm.state.value.photoFailed).isTrue()
     }
 }

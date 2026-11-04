@@ -143,6 +143,22 @@
     </plurals>
     <string name="rep_delay_line">%1$s · %2$s</string>
     <string name="rep_delay_open">Open the daily log</string>
+    <string name="rep_photos">Photo reports</string>
+    <string name="rep_photos_hint">The job\'s photos from these dates, four to a page with the date, room, phase and note under each, as a PDF.</string>
+    <string name="rep_photos_none">No photos in these dates.</string>
+    <plurals name="rep_photos_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <string name="rep_photos_make">Share photo report PDF</string>
+    <string name="rep_photos_failed">Couldn\'t make the photo report. Try again.</string>
+    <string name="rep_photos_share_title">Share photo report</string>
+    <string name="rep_photos_title">Photo report, %1$s – %2$s</string>
+    <plurals name="rep_photos_missing">
+        <item quantity="one">%d photo is still on another phone and is not in this report.</item>
+        <item quantity="other">%d photos are still on another phone and are not in this report.</item>
+    </plurals>
+    <string name="rep_photos_place">%1$s · %2$s</string>
     <string name="rep_summaries">Job summaries</string>
     <string name="rep_summaries_hint">Hours against the budget, change orders, tasks, days on site and delays, from the first day to today, as a PDF.</string>
     <string name="rep_summaries_none">No jobs yet.</string>

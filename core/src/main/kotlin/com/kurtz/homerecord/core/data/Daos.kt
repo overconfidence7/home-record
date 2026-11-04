@@ -180,6 +180,12 @@ interface PhotoDao {
     @Query("SELECT * FROM photo WHERE roomId = :roomId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listForRoom(roomId: String): List<PhotoEntity>
     @Query("SELECT * FROM photo WHERE jobId = :jobId AND deletedAt IS NULL ORDER BY takenAt DESC") fun observeForJob(jobId: String): Flow<List<PhotoEntity>>
     @Query("SELECT COUNT(*) FROM photo WHERE jobId = :jobId AND deletedAt IS NULL") fun observeCountForJob(jobId: String): Flow<Int>
+    /** Every live job photo of the company, for the Reports photo counts (AC-F28). */
+    @Query(
+        "SELECT photo.* FROM photo JOIN job ON photo.jobId = job.id WHERE job.companyId = :companyId " +
+            "AND photo.deletedAt IS NULL AND job.deletedAt IS NULL",
+    )
+    fun observeForCompanyJobs(companyId: String): Flow<List<PhotoEntity>>
     /** The company's newest job photos, newest first, for Today's Recent photos row. */
     @Query(
         "SELECT photo.* FROM photo JOIN job ON photo.jobId = job.id WHERE job.companyId = :companyId " +

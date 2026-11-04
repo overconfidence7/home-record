@@ -20,6 +20,8 @@
 
 - 2026-11-04 (T060b): FL-Materials is Owner/Office only for now, and the receipt total read by OCR is offered as a "Use $x" chip rather than filled in. Leads logging receipts and receipt images on other phones are T060c. Details in docs/decisions.md.
 
+- 2026-11-04 (T061b): the photo report PDF uses the Reports range chips (This week, Last week, Last 4 weeks) rather than its own date picker; say if you want any start and end date. Details in docs/decisions.md.
+
 - 2026-11-04 (T061a): the job summary PDF covers the whole job (first punch to today), not the Reports week range, and signed change orders are totalled apart from drafts. Details in docs/decisions.md.
 
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction. Since 2026-11-03 a line older than 7 days with no reply is confirmed and moves to docs/decisions.md.)

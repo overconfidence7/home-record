@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.CircularProgressIndicator
@@ -87,6 +88,7 @@ fun ReportsScreen(
                 }
                 item { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
                 delayTimeline(state, onOpenLog)
+                photoReports(state, onEvent)
                 jobSummaries(state, onEvent)
             }
         }
@@ -213,6 +215,45 @@ private fun LazyListScope.delayTimeline(state: ReportsUiState, onOpenLog: (Strin
                 modifier = Modifier.fillMaxWidth().testTag("fl_reports_delay_${job.jobId}_${entry.day}_${entry.index}"),
             )
         }
+    }
+}
+
+/**
+ * Photo reports (AC-F28): the jobs with photos in the range, Active first, with how many; tapping one makes its photo
+ * report PDF for the range (four to a page with captions) and opens the share sheet.
+ */
+private fun LazyListScope.photoReports(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit) {
+    item(key = "photos-h") { SectionHeading(stringResource(R.string.rep_photos)) }
+    item(key = "photos-hint") {
+        Text(
+            stringResource(if (state.photoJobs.isEmpty()) R.string.rep_photos_none else R.string.rep_photos_hint),
+            Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag(if (state.photoJobs.isEmpty()) "fl_reports_photos_none" else "fl_reports_photos_hint"),
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (state.photoFailed) {
+        item(key = "photos-failed") {
+            Text(
+                stringResource(R.string.rep_photos_failed),
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("fl_reports_photos_failed"),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    items(state.photoJobs, key = { "photos-${it.id}" }) { job ->
+        val busy = state.photoBusy == job.id
+        RecordListItem(
+            headline = job.name,
+            supporting = if (busy) stringResource(R.string.rep_summary_making) else pluralStringResource(R.plurals.rep_photos_count, job.photos, job.photos),
+            leading = { Icon(Icons.Rounded.PhotoLibrary, contentDescription = null) },
+            trailing = {
+                if (busy) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 3.dp)
+                else Icon(Icons.Rounded.Share, contentDescription = null)
+            },
+            onClick = { onEvent(ReportsEvent.SharePhotoReport(job.id)) },
+            onClickLabel = stringResource(R.string.rep_photos_make),
+            modifier = Modifier.fillMaxWidth().testTag("fl_reports_photos_${job.id}"),
+        )
     }
 }
 

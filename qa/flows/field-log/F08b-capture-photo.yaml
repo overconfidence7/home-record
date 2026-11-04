@@ -1,5 +1,5 @@
 # Walkthrough F8: with the camera allowed, the shutter takes a photo tagged to the job, and the job's Photos tab
-# shows it under today's date (AC-F24). The CI emulator has an emulated back camera.
+# shows it under today's date (AC-F24); Reports then offers the job's photo report for this week (AC-F28 report). The CI emulator has an emulated back camera.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -117,3 +117,32 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 15000
 - assertVisible: "Garage subpanel"
 - takeScreenshot: F08b-today-capture
+# AC-F28 (report part): this week's photo report lists the job with its photo; tapping it makes the PDF and opens the share sheet
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_today_capture
+    timeout: 10000
+- tapOn: "More"
+- tapOn:
+    id: fl_more_reports
+- extendedWaitUntil:
+    visible:
+      id: fl_reports_list
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "fl_reports_photos_[0-9a-f-]{36}"
+    timeout: 15000
+- assertVisible: "Photo reports"
+- assertVisible: "1 photo"
+- takeScreenshot: F08b-photo-report
+- tapOn:
+    id: "fl_reports_photos_[0-9a-f-]{36}"
+# the system share sheet is on top; leave it like a person who picked nothing
+- back
+- extendedWaitUntil:
+    visible: "Photo reports"
+    timeout: 10000
+- assertNotVisible:
+    id: fl_reports_photos_failed
