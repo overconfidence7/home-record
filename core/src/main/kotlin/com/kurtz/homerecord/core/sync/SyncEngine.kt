@@ -18,6 +18,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -217,7 +218,11 @@ class SyncEngine(
      * fields in this row's unsent outbox payloads count as this device's edits (cr:sync-merge-race). The server row's
      * device-local columns (sent by older builds) are ignored, so this phone keeps its own path and offline choice.
      */
-    private suspend fun apply(tenant: TenantRef, pulledRow: PulledRow) = store.inTransaction {
+    private suspend fun apply(tenant: TenantRef, pulledRow: PulledRow): Unit = store.inTransaction {
+        if (pulledRow.row[REDACTED]?.jsonPrimitive?.booleanOrNull == true) {
+            applyRedacted(pulledRow)
+            return@inTransaction
+        }
         val serverRow = LocalColumns.strip(pulledRow.entity, pulledRow.row)
         val local = store.read(pulledRow.entity, pulledRow.entityId)
         val payloads = outbox.pendingPayloadsFor(pulledRow.entity, pulledRow.entityId)
@@ -229,6 +234,17 @@ class SyncEngine(
         base.set(SyncBaseEntity("${pulledRow.entity}/${pulledRow.entityId}", serverRow.toString(), tenant.key))
     }
 
+    /**
+     * N004: a task handed from this member to someone else arrives as a stub (id, job, new assignee). It only corrects
+     * a row this phone already has, so the old assignee's phone stops listing it as theirs; it never inserts a row and
+     * is not kept as the sync base (this member may no longer edit the task).
+     */
+    private suspend fun applyRedacted(pulledRow: PulledRow) {
+        val local = store.read(pulledRow.entity, pulledRow.entityId) ?: return
+        val merged = JsonObject(local + pulledRow.row.filterKeys { it != REDACTED && it in local })
+        if (merged != local) store.write(pulledRow.entity, merged)
+    }
+
     private fun fail(failure: ApiFailure): ApiResult<SyncResult> {
         _phase.value = if (failure == ApiFailure.Offline) SyncPhase.Offline else SyncPhase.Failed
         return ApiResult.Err(failure)
@@ -237,5 +253,8 @@ class SyncEngine(
     companion object {
         /** `serverSeq` of an outbox row the server refused: marked sent so it stops blocking, kept for the log. */
         const val REFUSED = -1L
+
+        /** Marks a pulled stub row; must match `REDACTED` in backend/src/sync/policy.ts. */
+        const val REDACTED = "redacted"
     }
 }

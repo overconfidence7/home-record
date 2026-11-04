@@ -11,6 +11,9 @@ import type { Row } from "./merge";
  * - Nobody but Owner and Office writes the company, members, clients, jobs, crew lists, approvals or share links.
  * - Pull: Crew and Sub get only their own punches, shifts and approvals (Lead also the time on their jobs), and
  *   nobody but Owner and Office sees pay rates.
+ * - Pull, tasks (N004): Crew and Sub get only the tasks assigned to them, a Lead also every task of the jobs they are
+ *   on. A task handed from a member to someone else reaches the former assignee as a [REDACTED] stub carrying only
+ *   id, job and the new assignee, so their phone stops listing it; nobody else learns it exists.
  */
 export const ADMIN_ROLES = new Set(["owner", "office"]);
 
@@ -21,12 +24,17 @@ const CAPTURE = new Set(["photo", "note", "wall_photo"]);
 const JOB_HOUSE = new Set(["home", "floor", "room", "wall", "opening", "stair"]);
 const PRIVATE_TO_MEMBER = new Set(["punch", "shift", "timesheet_approval"]);
 const ADMIN_FIELDS: Record<string, string[]> = { member: ["rateCents", "fcmToken"] };
+/** Marks a pulled row that only tells a former assignee where the task went; the phone never inserts one. */
+export const REDACTED = "redacted";
+const TASK_STUB_FIELDS = ["id", "jobId", "assigneeId"];
 
 export interface Access {
   role: string;
   userId: string;
   /** Jobs this member is on through job_crew or assignment rows; only loaded for Lead. */
   leadJobs: Set<string>;
+  /** Tasks this member has ever been assigned (task_seen); only loaded for Lead, Crew and Sub. */
+  seenTasks?: Set<string>;
 }
 
 const str = (value: unknown): string | null => (typeof value === "string" && value !== "" ? value : null);
@@ -93,6 +101,13 @@ export function canUpload(access: Access, entity: string, stored: Row | null): b
 /** The row as this caller may see it on pull, or null when it is not theirs to see. */
 export function visibleRow(access: Access, entity: string, row: Row): Row | null {
   if (ADMIN_ROLES.has(access.role)) return row;
+  if (entity === "task" && !seesTask(access, row)) {
+    const id = str(row.id);
+    if (id === null || !access.seenTasks?.has(id)) return null;
+    const stub: Row = { [REDACTED]: true };
+    for (const field of TASK_STUB_FIELDS) if (field in row) stub[field] = row[field];
+    return stub;
+  }
   if (PRIVATE_TO_MEMBER.has(entity) && str(row.memberId) !== access.userId) {
     const jobId = str(row.jobId);
     if (!(access.role === "lead" && entity !== "timesheet_approval" && jobId !== null && access.leadJobs.has(jobId))) return null;
@@ -104,8 +119,27 @@ export function visibleRow(access: Access, entity: string, row: Row): Row | null
   return copy;
 }
 
-/** Field times for hidden fields are dropped too, so a client cannot learn when a rate changed. */
-export function visibleTimes(access: Access, entity: string, times: Record<string, number>): Record<string, number> {
+/** N004: a task's assignee sees it, and so does a Lead on its job. */
+function seesTask(access: Access, row: Row): boolean {
+  if (str(row.assigneeId) === access.userId) return true;
+  const jobId = str(row.jobId);
+  return access.role === "lead" && jobId !== null && access.leadJobs.has(jobId);
+}
+
+/** The row as pulled is a full row this caller may see; false for nothing and for a [REDACTED] stub (media gate). */
+export function seesFullRow(access: Access, entity: string, row: Row): boolean {
+  const visible = visibleRow(access, entity, row);
+  return visible !== null && visible[REDACTED] !== true;
+}
+
+/**
+ * Field times for hidden fields are dropped too, so a client cannot learn when a rate changed; a task stub keeps only
+ * the times of the fields it carries.
+ */
+export function visibleTimes(access: Access, entity: string, times: Record<string, number>, row?: Row): Record<string, number> {
+  if (row?.[REDACTED] === true) {
+    return Object.fromEntries(Object.entries(times).filter(([field]) => field in row));
+  }
   const hidden = ADMIN_FIELDS[entity];
   if (ADMIN_ROLES.has(access.role) || !hidden) return times;
   const copy = { ...times };
@@ -126,6 +160,21 @@ export async function loadLeadJobs(db: D1Database, tenantId: string, userId: str
   return new Set(results.map((r) => r.job_id).filter((j): j is string => typeof j === "string"));
 }
 
+/** Tasks this member has been assigned at some point (N004), for the former-assignee stub. */
+export async function loadSeenTasks(db: D1Database, tenantId: string, userId: string): Promise<Set<string>> {
+  const { results } = await db
+    .prepare("SELECT task_id FROM task_seen WHERE tenant_id = ? AND member_id = ?")
+    .bind(tenantId, userId)
+    .all<{ task_id: string }>();
+  return new Set(results.map((r) => r.task_id));
+}
+
 export async function accessFor(db: D1Database, tenantId: string, userId: string, role: string): Promise<Access> {
-  return { role, userId, leadJobs: role === "lead" ? await loadLeadJobs(db, tenantId, userId) : new Set() };
+  if (ADMIN_ROLES.has(role)) return { role, userId, leadJobs: new Set() };
+  return {
+    role,
+    userId,
+    leadJobs: role === "lead" ? await loadLeadJobs(db, tenantId, userId) : new Set(),
+    seenTasks: await loadSeenTasks(db, tenantId, userId),
+  };
 }

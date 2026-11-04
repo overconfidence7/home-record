@@ -318,6 +318,51 @@ describe("AC-B3 sync role gates (AC-F3)", () => {
     expect(crewRoom.rejected).toEqual([{ outboxId: 6, reason: "role" }]);
   });
 
+  it("N004 AC-F3 tasks are private on pull: Crew and Sub get their own, a Lead every task of their jobs", async () => {
+    const t = await company("n004");
+    const sub = await seedUser("n004-s", "n004-s@x.com");
+    await member("n004-s", t.co, "sub");
+    await push(t.owner, t.co, "office", [
+      op(1, "jc1", { jobId: "j1", memberId: t.leadId }, 1, "job_crew"),
+      op(2, "t-crew", { jobId: "j1", title: "Hang door", note: "Hinges in van", assigneeId: t.crewId }, 1, "task"),
+      op(3, "t-sub", { jobId: "j1", title: "Rough-in drain", assigneeId: "n004-s" }, 1, "task"),
+      op(4, "t-none", { jobId: "j1", title: "Order trim" }, 1, "task"),
+      op(5, "t-off", { jobId: "j2", title: "Patch wall", assigneeId: t.crewId }, 1, "task"),
+      op(6, "t-j2", { jobId: "j2", title: "Pull permit", assigneeId: t.ownerId }, 1, "task"),
+    ]);
+    const tasks = async (token: string) =>
+      Object.fromEntries((await pull(token, t.co)).rows.filter((r: any) => r.entity === "task").map((r: any) => [r.entityId, r]));
+    expect(Object.keys(await tasks(t.crew)).sort()).toEqual(["t-crew", "t-off"]);
+    expect((await tasks(t.crew))["t-crew"].row).toMatchObject({ title: "Hang door", note: "Hinges in van" });
+    expect(Object.keys(await tasks(sub))).toEqual(["t-sub"]);
+    // The Lead is on j1 only: every j1 task, none of j2's.
+    expect(Object.keys(await tasks(t.lead)).sort()).toEqual(["t-crew", "t-none", "t-sub"]);
+    expect(Object.keys(await tasks(t.owner)).sort()).toEqual(["t-crew", "t-j2", "t-none", "t-off", "t-sub"]);
+  });
+
+  it("N004 a task handed to someone else reaches its former assignee as a stub with no title", async () => {
+    const t = await company("n004b");
+    await push(t.owner, t.co, "office", [
+      op(1, "t-move", { jobId: "j1", title: "Hang door", note: "Hinges in van", assigneeId: t.crewId }, 1, "task"),
+      op(2, "t-never", { jobId: "j1", title: "Patch wall", assigneeId: t.leadId }, 1, "task"),
+    ]);
+    const first = await pull(t.crew, t.co);
+    expect(first.rows.map((r: any) => r.entityId)).toContain("t-move");
+    await push(t.owner, t.co, "office", [op(3, "t-move", { assigneeId: t.leadId, title: "Hang both doors" }, 5, "task")]);
+    const after = await pull(t.crew, t.co, first.serverSeq);
+    const stub = after.rows.find((r: any) => r.entityId === "t-move");
+    expect(stub.row).toEqual({ redacted: true, id: "t-move", jobId: "j1", assigneeId: t.leadId });
+    expect(Object.keys(stub.times).sort()).toEqual(["assigneeId", "id", "jobId"]);
+    expect(after.rows.map((r: any) => r.entityId)).not.toContain("t-never");
+    // A task the crew never had stays unknown to them, from scratch too.
+    expect((await pull(t.crew, t.co)).rows.map((r: any) => r.entityId)).not.toContain("t-never");
+    // Handed back, the full row returns.
+    await push(t.owner, t.co, "office", [op(4, "t-move", { assigneeId: t.crewId }, 7, "task")]);
+    const back = (await pull(t.crew, t.co, after.serverSeq)).rows.find((r: any) => r.entityId === "t-move");
+    expect(back.row).toMatchObject({ title: "Hang both doors", note: "Hinges in van", assigneeId: t.crewId });
+    expect(back.row).not.toHaveProperty("redacted");
+  });
+
   it("R09 a Lead ticks their own task on a job they are not on, but cannot hand it on there", async () => {
     const t = await company("b3c2");
     await push(t.owner, t.co, "office", [

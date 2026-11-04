@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { AppEnv, Membership } from "../env";
 import { membershipFor, notFound, requireSession } from "../tenancy";
 import { MEDIA_BUCKET, presignUrl, type R2Credentials } from "../media/presign";
-import { ADMIN_ROLES, accessFor, canUpload, visibleRow } from "../sync/policy";
+import { ADMIN_ROLES, accessFor, canUpload, seesFullRow } from "../sync/policy";
 import type { Row } from "../sync/merge";
 
 export const media = new Hono<AppEnv>();
@@ -131,7 +131,7 @@ media.post("/media/presign-get", async (c) => {
   if (!owner || owner.deleted) return notFound(c);
   if (m.tenantKind === "company") {
     const access = await accessFor(c.env.DB, m.tenantId, session.userId, m.role);
-    if (visibleRow(access, parts.entity, owner.row) === null) return notFound(c);
+    if (!seesFullRow(access, parts.entity, owner.row)) return notFound(c);
   }
   const now = new Date();
   return c.json({

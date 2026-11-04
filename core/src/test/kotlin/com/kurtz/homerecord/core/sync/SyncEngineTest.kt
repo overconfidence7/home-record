@@ -328,6 +328,22 @@ class SyncEngineTest {
         assertThat(a.phase.value).isEqualTo(SyncPhase.Idle)
     }
 
+    // N004 (AC-F3): a task handed to someone else reaches the old assignee as a stub that only corrects their copy
+    @Test fun redactedTaskStubMovesAKnownTaskAwayAndNeverInsertsOne() = runTest {
+        fun obj(vararg pairs: Pair<String, Any>) = JsonObject(pairs.associate { (k, v) -> k to if (v is Boolean) JsonPrimitive(v) else JsonPrimitive(v.toString()) })
+        dbA.taskDao().upsert(TaskEntity(id = "t1", jobId = "j1", title = "Hang door", assigneeId = "crew-1", createdAt = 1, updatedAt = 3))
+        server.extraPulled += PulledRow("task", "t1", obj("redacted" to true, "id" to "t1", "jobId" to "j1", "assigneeId" to "lead-1"), serverSeq = 101)
+        server.extraPulled += PulledRow("task", "t2", obj("redacted" to true, "id" to "t2", "jobId" to "j1", "assigneeId" to "lead-1"), serverSeq = 102)
+        val result = a.sync(tenant)
+        assertThat(result).isInstanceOf(ApiResult.Ok::class.java)
+        assertThat((result as ApiResult.Ok).value.conflicts).isEmpty()
+        val moved = dbA.taskDao().get("t1")
+        assertThat(moved?.assigneeId).isEqualTo("lead-1")
+        assertThat(moved?.title).isEqualTo("Hang door")
+        assertThat(dbA.taskDao().get("t2")).isNull()
+        assertThat(dbA.outboxDao().pending()).isEmpty()
+    }
+
     // A local column the server row does not carry is kept
     @Test fun pulledRowWithoutALocalColumnKeepsTheLocalValue() {
         val local = JsonObject(mapOf("id" to JsonPrimitive("t1"), "title" to JsonPrimitive("Old"), "note" to JsonPrimitive("Local only"), "updatedAt" to JsonPrimitive(1)))

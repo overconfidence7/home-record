@@ -120,6 +120,16 @@ async function applyOp(
            SELECT ?1, ?2, ?5, ?6, ?8, ?9, ?10, ?11, ?3, ?12 WHERE ${CLAIMED}`,
         ).bind(...key, x.field, JSON.stringify(x.kept ?? null), JSON.stringify(x.dropped ?? null), x.reason, Date.now()),
       ),
+      // N004: every member a task is (or was, before this write) assigned to may later get its stub on pull.
+      ...(kind === "company" && op.entity === "task"
+        ? [...new Set([storedRow?.assigneeId, merged.row.assigneeId])]
+            .filter((m): m is string => typeof m === "string" && m !== "")
+            .map((member) =>
+              db.prepare(
+                `INSERT OR IGNORE INTO task_seen (tenant_id, task_id, member_id) SELECT ?2, ?6, ?8 WHERE ${CLAIMED}`,
+              ).bind(...key, member),
+            )
+        : []),
       // Last, because writing the row moves its version and ends the claim.
       db.prepare(
         `INSERT INTO sync_rows (tenant_kind, tenant_id, entity, entity_id, row_json, times_json, authoritative, server_seq)
@@ -235,7 +245,7 @@ sync.get("/:kind{companies|homes}/:tenantId/sync/pull", requireSession, requireT
   const rows = page.flatMap((r) => {
     const row = visibleRow(access, r.entity, JSON.parse(r.row_json) as Row);
     if (!row) return [];
-    return [{ entity: r.entity, entityId: r.entity_id, row, times: visibleTimes(access, r.entity, JSON.parse(r.times_json)), serverSeq: r.server_seq }];
+    return [{ entity: r.entity, entityId: r.entity_id, row, times: visibleTimes(access, r.entity, JSON.parse(r.times_json), row), serverSeq: r.server_seq }];
   });
   return c.json({ rows, serverSeq: page.length ? page[page.length - 1].server_seq : since, more });
 });
