@@ -2,6 +2,8 @@ package com.kurtz.homerecord.housemanual.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -178,7 +180,7 @@ private fun SearchBar(query: String, onChange: (String) -> Unit) {
 @Composable
 private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
     if (state.results.isEmpty()) {
-        Text(stringResource(R.string.home_search_none, state.query.trim()), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_home_search_none"))
+        NoResults(state.query.trim(), onEvent)
         return
     }
     Column {
@@ -190,6 +192,24 @@ private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
                 onClick = { onEvent(HomeEvent.OpenResult(r.kind, r.id)) },
                 modifier = Modifier.testTag("hm_home_result_${r.id}"),
             )
+        }
+    }
+}
+
+/** Rule 11: no results says so and offers to clear the search or add the thing as an item. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NoResults(query: String, onEvent: (HomeEvent) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.home_search_none, query), style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("hm_home_search_none"))
+        Text(stringResource(R.string.home_search_none_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { onEvent(HomeEvent.QueryChanged("")) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_search_none_clear")) {
+                Text(stringResource(R.string.home_search_clear))
+            }
+            Button(onClick = { onEvent(HomeEvent.AddItem) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_search_none_add")) {
+                Text(stringResource(R.string.items_add))
+            }
         }
     }
 }

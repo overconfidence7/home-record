@@ -18,8 +18,11 @@ appId: com.kurtz.homerecord.housemanual
 - inputText: "zzzz"
 - assertVisible:
     id: "hm_home_search_none"
+# rule 11: no results offers Clear search and Add item; the Clear search button brings Home back
+- assertVisible:
+    id: "hm_home_search_none_add"
 - tapOn:
-    id: "hm_home_search_clear"
+    id: "hm_home_search_none_clear"
 - assertVisible:
     id: "hm_home_add_item"
 - tapOn:
