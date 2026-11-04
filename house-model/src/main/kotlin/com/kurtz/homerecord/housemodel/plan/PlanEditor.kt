@@ -95,11 +95,14 @@ class PlanEditor(initial: List<PlanRoom>, private val snapper: GridSnapper = Gri
         return true
     }
 
-    fun rename(id: String, name: String) = change(id) { it.copy(name = name) }
+    fun rename(id: String, name: String) = change(id) { it.copy(name = name, kind = RoomKindGuess.afterRename(RoomKind.parse(it.kind), it.name, name).name) }
 
     /** Shows room [id] renamed while the name is being typed; [commit] makes it one undo step. */
     fun previewRename(id: String, name: String) {
-        draft = (draft ?: history.current).map { if (it.id == id) it.copy(name = name) else it }
+        // The kind follows the name until the person picks one ([RoomKindGuess.afterRename]).
+        draft = (draft ?: history.current).map {
+            if (it.id == id) it.copy(name = name, kind = RoomKindGuess.afterRename(RoomKind.parse(it.kind), it.name, name).name) else it
+        }
     }
 
     fun setKind(id: String, kind: RoomKind) = change(id) { it.copy(kind = kind.name) }
