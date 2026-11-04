@@ -39,6 +39,10 @@ appId: com.kurtz.homerecord.housemanual
 - takeScreenshot: tour-${output.variant}-items
 - tapOn:
     id: "hm_tab_reminders"
+- extendedWaitUntil:
+    visible:
+      id: "hm_reminders_empty"
+    timeout: 10000
 - takeScreenshot: tour-${output.variant}-reminders
 - tapOn:
     id: "hm_tab_more"

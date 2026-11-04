@@ -40,7 +40,8 @@ import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
 import com.kurtz.homerecord.coreui.shell.PlaceholderDetail
 import com.kurtz.homerecord.coreui.shell.PlaceholderKey
-import com.kurtz.homerecord.coreui.shell.PlaceholderRoot
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.platform.testTag
 
 private data class TabDef(val id: String, val label: Int, val icon: ImageVector, val selected: ImageVector)
 
@@ -150,7 +151,14 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
                     else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) })
                 }
-                key.depth == 0 -> PlaceholderRoot(title, onOpenDetail = { nav.push(key.copy(depth = 1)) })
+                // Schedule arrives with T059; until then the tab says what it will hold, with no demo navigation.
+                key.depth == 0 -> com.kurtz.homerecord.coreui.components.EmptyState(
+                    icon = tabDefs.firstOrNull { it.id == key.title }?.icon ?: Icons.Outlined.CalendarMonth,
+                    headline = stringResource(R.string.schedule_empty_title),
+                    body = stringResource(R.string.schedule_empty_body),
+                    actionLabel = null, onAction = {},
+                    modifier = Modifier.fillMaxSize().testTag("fl_${key.title}_empty"),
+                )
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }
         }

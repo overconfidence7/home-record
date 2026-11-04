@@ -802,4 +802,6 @@
         <item quantity="one">%1$d line</item>
         <item quantity="other">%1$d lines</item>
     </plurals>
+    <string name="schedule_empty_title">No days scheduled yet</string>
+    <string name="schedule_empty_body">When crew are assigned to jobs by day, the week shows here.</string>
 </resources>

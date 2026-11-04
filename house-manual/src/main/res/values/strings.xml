@@ -269,4 +269,6 @@
     <string name="item_detail_where_no_room">No room</string>
     <string name="item_detail_where_place">Place on plan</string>
     <string name="item_detail_where_move">Move on plan</string>
+    <string name="reminders_empty_title">No reminders yet</string>
+    <string name="reminders_empty_body">Filter changes, service visits and warranty dates for your items will show here.</string>
 </resources>
