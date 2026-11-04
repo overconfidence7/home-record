@@ -186,6 +186,21 @@ describe("FL-Company profile", () => {
     expect(after.settings).toEqual({ otRule: "daily8", breakRule: true, requireGps: true, punchDistanceFt: 300, photoOnPunch: false });
     expect(after.role).toBe("crew");
   });
+  // N002, AC-F9, AC-F18: Lead and Sub get the clock rules, time zone included, while the profile stays Owner/Office only
+  it("Lead and Sub read the clock rules and time zone from /me and GET /companies/:id but not the profile", async () => {
+    const { owner, id, code } = await setup("prof4");
+    await call("PATCH", `/companies/${id}/profile`, owner, { settings: { requireGps: true, punchDistanceFt: 250, photoOnPunch: true, timeZone: "America/Denver" } });
+    const member = await joinAs("prof4", code);
+    const rules = { otRule: "none", breakRule: false, requireGps: true, punchDistanceFt: 250, photoOnPunch: true, timeZone: "America/Denver" };
+    for (const role of ["lead", "sub", "crew"]) {
+      await call("PATCH", `/companies/${id}/members/${member.userId}`, owner, { role });
+      const me = (await json(await call("GET", "/me", member.token))).memberships[0];
+      expect(me.role).toBe(role);
+      expect(me.settings).toEqual(rules);
+      expect((await json(await call("GET", `/companies/${id}`, member.token))).settings).toEqual(rules);
+      expect((await call("GET", `/companies/${id}/profile`, member.token)).status).toBe(404);
+    }
+  });
 });
 
 describe("invite landing page", () => {

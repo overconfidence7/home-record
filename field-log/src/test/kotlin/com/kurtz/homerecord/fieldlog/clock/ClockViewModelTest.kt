@@ -249,6 +249,21 @@ class ClockViewModelTest {
         assertThat(p.reason).isEqualTo("supply_house")
     }
 
+    // N002, AC-F9: a crew member's far-from-job check uses the company's distance from /me, not the 500 ft default
+    @Test fun crewFarFromJobUsesTheCompanyDistance() = runBlocking<Unit> {
+        location.fix = GeoFix(34.0011, -118.0, 5f) // about 400 ft north of the job
+        val near = vm(CompanyRole.Crew)
+        near.onEvent(ClockEvent.SelectJob("j1")); near.onEvent(ClockEvent.ClockIn)
+        assertThat(await(near) { it.status is ClockStatus.Working }.farReason).isNull()
+        clock += 1000; near.onEvent(ClockEvent.ClockOut)
+        await(near) { it.status is ClockStatus.Out }
+
+        settings.value = CompanySettings(punchDistanceFt = 300)
+        val far = vm(CompanyRole.Crew)
+        far.onEvent(ClockEvent.SelectJob("j1")); far.onEvent(ClockEvent.ClockIn)
+        assertThat(await(far) { it.farReason != null }.farReason).isNotNull()
+    }
+
     @Test fun otherReasonNeedsText() {
         assertThat(FarReasonSheet(900, FarReason.Other, "  ").canSave).isFalse()
         assertThat(FarReasonSheet(900, FarReason.Other, " Dropping off a ladder ").reason).isEqualTo("Dropping off a ladder")
