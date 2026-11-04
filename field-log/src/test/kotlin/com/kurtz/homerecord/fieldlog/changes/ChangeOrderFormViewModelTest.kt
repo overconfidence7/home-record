@@ -35,7 +35,8 @@ import org.robolectric.annotation.Config
 
 // AC-F37: create from a job: title, description (keyboard or voice), line items with quantity and price, total in cents, client name
 // AC-F38: Sign on phone saves first; a Signed order shows who signed and when, read only, and duplicates to change
-@AcceptanceCriterion("AC-F37", "AC-F38")
+// AC-F39: Share PDF makes the order's PDF (saving a Draft's typing first) and opens the share sheet
+@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F39")
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -61,12 +62,31 @@ class ChangeOrderFormViewModelTest {
     }
 
     private val jobPhotos = MutableStateFlow<List<CoPhoto>>(emptyList())
+
+    /** Records what was made and shared; [fail] makes no PDF. */
+    private class FakeSharer(private val orders: JobChangeOrders) : ChangeOrderSharer {
+        var fail = false
+        val made = mutableListOf<String>()
+        val shared = mutableListOf<java.io.File>()
+        /** The title saved at the moment the PDF was made. */
+        val titles = mutableListOf<String>()
+        override suspend fun make(changeOrderId: String): java.io.File? {
+            made += changeOrderId
+            titles += orders.get(changeOrderId)?.title.orEmpty()
+            return if (fail) null else java.io.File("Change order $changeOrderId.pdf")
+        }
+        override fun share(pdf: java.io.File): Boolean {
+            shared += pdf
+            return true
+        }
+    }
+    private val sharer by lazy { FakeSharer(orders) }
     private var clock = 1_000L
 
     private fun vm(id: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle()): ChangeOrderFormViewModel {
         val deps = ChangeOrderFormDeps(
             "j1", id, orders, flowOf(manage), clientName = { "Dana Hale" }, canDictate = true, newLineId = { "n${lineIds++}" },
-            photos = jobPhotos, now = { clock },
+            photos = jobPhotos, sharer = sharer, now = { clock },
         )
         return ViewModelProvider.create(store, viewModelFactory { initializer { ChangeOrderFormViewModel(deps, saved) } })["vm${made++}", ChangeOrderFormViewModel::class]
     }
@@ -242,5 +262,44 @@ class ChangeOrderFormViewModelTest {
         val copy = runBlocking { checkNotNull(orders.get(copyId)) }
         assertThat(copy.title).isEqualTo("Island outlet")
         assertThat(copy.signedBy).isNull()
+    }
+
+    // AC-F39: a Signed order shares its PDF; a failed PDF says so and Share works again.
+    @Test fun shareMakesThePdfAndOpensTheShareSheetAndCanBeRetried() {
+        val id = runBlocking {
+            val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", lines = listOf(ChangeOrderLineItem("l1", "Outlet", 1_000, 18_500)))))
+            check(orders.sign(id, "Dana Hale", "/m/sig.png"))
+            id
+        }
+        val m = vm(id)
+        assertThat(m.current().canShare).isTrue()
+        sharer.fail = true
+        m.onEvent(ChangeOrderFormEvent.Share)
+        assertThat(m.current { !it.sharing }.shareFailed).isTrue()
+        assertThat(sharer.shared).isEmpty()
+        sharer.fail = false
+        m.onEvent(ChangeOrderFormEvent.Share)
+        val st = m.current { !it.sharing && !it.shareFailed }
+        assertThat(st.done).isFalse()
+        assertThat(sharer.made).containsExactly(id, id)
+        assertThat(sharer.shared.map { it.name }).containsExactly("Change order $id.pdf")
+    }
+
+    // AC-F39: a Draft with typed changes is saved before its PDF is made, so the PDF shows what the form shows; a new
+    // order has nothing saved to share.
+    @Test fun shareSavesADraftsTypingFirstAndANewOrderCannotShare() {
+        assertThat(vm().current().canShare).isFalse()
+        val id = checkNotNull(runBlocking { orders.add("j1", ChangeOrderDraft("Island outlet")) })
+        val m = vm(id)
+        m.current()
+        m.onEvent(ChangeOrderFormEvent.Title("Island outlet and USB"))
+        assertThat(m.state.value.dirty).isTrue()
+        m.onEvent(ChangeOrderFormEvent.Share)
+        val st = m.current { !it.sharing }
+        assertThat(sharer.titles).containsExactly("Island outlet and USB")
+        assertThat(st.dirty).isFalse()
+        assertThat(st.shareFailed).isFalse()
+        m.onEvent(ChangeOrderFormEvent.Title(""))
+        assertThat(m.state.value.canShare).isFalse()
     }
 }

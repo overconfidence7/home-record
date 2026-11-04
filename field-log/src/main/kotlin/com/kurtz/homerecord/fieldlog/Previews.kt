@@ -1876,6 +1876,23 @@ fun ChangeOrderFormSignedPreview() = Frame {
     )
 }
 
+/** Share PDF on a short signed order after the PDF could not be made: the message under the button (AC-F39). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormShareFailedPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+        title = "Second outlet on the island", clientName = "Dana Hale",
+        lines = listOf(com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "Outlet, box and wire", "1", "185.00")),
+    )
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, locked = true, draft = draft, initial = draft, shareFailed = true,
+            signature = com.kurtz.homerecord.fieldlog.changes.CoSignature("Dana Hale", 1_793_808_000_000L, null),
+        ),
+        {},
+    )
+}
+
 /** A short signed order, so the signature, who signed and when, and Duplicate are on screen (AC-F38). */
 @ThemePreviews
 @Composable

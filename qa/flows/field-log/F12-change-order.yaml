@@ -1,7 +1,7 @@
 # Walkthrough F12 (T056a): change order on a job's Changes tab: empty state, the full-screen form with title, client,
 # description, two line items with quantity and price, and the total MoneyMath works out; saved as a Draft with its
 # total on the list; reopened, a line removed, the new total saved (AC-F37); signed on the phone, read only with
-# Duplicate (AC-F38, T057a). Photos (T056b), the PDF (T057b) and the share link (T058) extend this flow.
+# Duplicate (AC-F38, T057a); its PDF through the share sheet (AC-F39, T057b). The share link (T058) extends this flow.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -203,6 +203,22 @@ appId: com.kurtz.homerecord.fieldlog
 - assertNotVisible:
     id: fl_co_form_delete
 - takeScreenshot: F12-change-order-signed
+# Share PDF (AC-F39, T057b): the PDF is made and the system share sheet opens over the form; Back returns to the
+# form with no "Couldn't make the PDF" message
+- tapOn:
+    id: fl_co_form_share
+- extendedWaitUntil:
+    notVisible:
+      id: fl_co_form_share
+    timeout: 15000
+- takeScreenshot: F12-change-order-share-sheet
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_share
+    timeout: 10000
+- assertNotVisible:
+    id: fl_co_form_share_failed
 - tapOn:
     id: fl_co_form_duplicate
 - extendedWaitUntil:

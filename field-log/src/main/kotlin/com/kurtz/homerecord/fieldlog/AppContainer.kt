@@ -208,7 +208,13 @@ class AppContainer(private val app: Application) {
         photos = db.photoDao().observeForJob(jobId).map { rows ->
             rows.map { com.kurtz.homerecord.fieldlog.changes.CoPhoto(it.id, it.thumbPath ?: it.path, it.createdAt) }
         },
+        sharer = changeOrderSharer,
     )
+
+    /** Makes a change order's PDF and opens the share sheet (AC-F39). */
+    val changeOrderSharer: com.kurtz.homerecord.fieldlog.changes.ChangeOrderSharer by lazy {
+        com.kurtz.homerecord.fieldlog.changes.AndroidChangeOrderSharer(app, com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfMaker(app, db, membership = { company.current }))
+    }
 
     /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */
     val dailyLogs by lazy {

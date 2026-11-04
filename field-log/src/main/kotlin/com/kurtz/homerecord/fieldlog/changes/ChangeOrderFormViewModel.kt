@@ -30,6 +30,8 @@ class ChangeOrderFormDeps(
     val newLineId: () -> String = Ids::newId,
     /** The job's photos, newest first (T056b). */
     val photos: Flow<List<CoPhoto>> = flowOf(emptyList()),
+    /** Makes the PDF and opens the share sheet (AC-F39). */
+    val sharer: ChangeOrderSharer? = null,
     val now: () -> Long = System::currentTimeMillis,
 )
 
@@ -104,6 +106,7 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             ChangeOrderFormEvent.Save -> save()
             ChangeOrderFormEvent.SignOnPhone -> signOnPhone()
             ChangeOrderFormEvent.Duplicate -> duplicate()
+            ChangeOrderFormEvent.Share -> share()
             ChangeOrderFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             ChangeOrderFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
             ChangeOrderFormEvent.Delete -> delete()
@@ -151,6 +154,31 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             }
             clearSaved()
             _state.update { it.copy(working = false, signId = id) }
+        }
+    }
+
+    /**
+     * Saves a Draft's typed changes (the PDF shows what is saved), then makes the PDF and opens the share sheet. The
+     * form stays open; a PDF that could not be made says so and Share can be tried again.
+     */
+    private fun share() {
+        val id = d.changeOrderId ?: return
+        val sharer = d.sharer ?: return
+        val st = _state.value
+        if (!st.canShare) return
+        _state.update { it.copy(sharing = true, shareFailed = false) }
+        viewModelScope.launch {
+            if (!st.locked && st.dirty) {
+                if (!d.orders.update(id, st.draft.toDraft())) {
+                    _state.update { it.copy(sharing = false, failed = true) }
+                    return@launch
+                }
+                saved.remove<String>(DRAFT)
+                _state.update { it.copy(initial = st.draft) }
+            }
+            val pdf = sharer.make(id)
+            val shared = pdf != null && sharer.share(pdf)
+            _state.update { it.copy(sharing = false, shareFailed = !shared) }
         }
     }
 

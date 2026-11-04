@@ -86,6 +86,10 @@ data class ChangeOrderFormUiState(
     val signId: String? = null,
     /** Duplicated: the route opens the new Draft. */
     val duplicateId: String? = null,
+    /** The PDF is being made (AC-F39). */
+    val sharing: Boolean = false,
+    /** The PDF could not be made; Share PDF can be tried again. */
+    val shareFailed: Boolean = false,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The title error shows once someone has typed and cleared it (rule 21). */
@@ -95,6 +99,8 @@ data class ChangeOrderFormUiState(
     val canSave: Boolean get() = !loading && !failed && !locked && !working && draft.titleOk && draft.linesOk
     /** Sign on phone saves first, so it needs what Save needs; an order with no lines has nothing to sign for. */
     val canSign: Boolean get() = canSave && draft.lines.any { !it.blank }
+    /** Share PDF: a saved order; a Draft with typed changes saves them first, so it needs what Save needs (AC-F39). */
+    val canShare: Boolean get() = !isNew && !loading && !failed && !working && !sharing && (locked || !dirty || canSave)
 }
 
 sealed interface ChangeOrderFormEvent {
@@ -120,6 +126,8 @@ sealed interface ChangeOrderFormEvent {
     data object Save : ChangeOrderFormEvent
     /** Sign on phone: saves, then the route opens the signature pad (AC-F38). */
     data object SignOnPhone : ChangeOrderFormEvent
+    /** Share PDF: saves typed changes on a Draft, makes the PDF and opens the share sheet (AC-F39). */
+    data object Share : ChangeOrderFormEvent
     /** On a Signed order: a new Draft copy to change (AC-F38). */
     data object Duplicate : ChangeOrderFormEvent
     data object AskDelete : ChangeOrderFormEvent

@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -170,7 +174,9 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
                 Text(stringResource(R.string.co_form_sign_needs_lines), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        state.signature?.let { SignedBlock(it, state.working, onEvent) }
+        state.signature?.let { SignatureCard(it) }
+        if (!state.isNew) ShareButton(state, onEvent)
+        if (state.signature != null) DuplicateButton(state.working, onEvent)
         if (!state.isNew && !state.locked) {
             OutlinedButton(
                 onClick = { onEvent(ChangeOrderFormEvent.AskDelete) },
@@ -203,9 +209,34 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
     }
 }
 
-/** Who signed, when, the signature itself, and Duplicate to change it (AC-F38). */
+/** Share PDF (AC-F39): the order as a PDF through the share sheet; says so when the PDF could not be made. */
 @Composable
-private fun SignedBlock(sig: CoSignature, working: Boolean, onEvent: (ChangeOrderFormEvent) -> Unit) {
+private fun ShareButton(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    OutlinedButton(
+        onClick = { onEvent(ChangeOrderFormEvent.Share) },
+        enabled = state.canShare,
+        modifier = Modifier.heightIn(min = 56.dp).testTag("fl_co_form_share"),
+    ) {
+        if (state.sharing) {
+            CircularProgressIndicator(Modifier.padding(end = 8.dp).size(18.dp), strokeWidth = 2.dp)
+        } else {
+            Icon(Icons.Rounded.Share, contentDescription = null, Modifier.padding(end = 8.dp))
+        }
+        Text(stringResource(R.string.co_form_share))
+    }
+    if (state.shareFailed) {
+        Text(
+            stringResource(R.string.co_form_share_failed),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("fl_co_form_share_failed"),
+        )
+    }
+}
+
+/** Who signed, when, and the signature itself (AC-F38). */
+@Composable
+private fun SignatureCard(sig: CoSignature) {
     val whenSigned = remember(sig.signedAt) {
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault())
             .format(Instant.ofEpochMilli(sig.signedAt).atZone(ZoneId.systemDefault()))
@@ -233,6 +264,11 @@ private fun SignedBlock(sig: CoSignature, working: Boolean, onEvent: (ChangeOrde
             Text(stringResource(R.string.co_form_signed_by, sig.signedBy, whenSigned), style = MaterialTheme.typography.bodyLarge)
         }
     }
+}
+
+/** Duplicate: a signed order is changed through a Draft copy (AC-F38). */
+@Composable
+private fun DuplicateButton(working: Boolean, onEvent: (ChangeOrderFormEvent) -> Unit) {
     OutlinedButton(
         onClick = { onEvent(ChangeOrderFormEvent.Duplicate) },
         enabled = !working,

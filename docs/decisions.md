@@ -849,3 +849,8 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 - "Sign on phone" saves the form first and needs at least one priced line; the signer name starts as the client's name and is required.
 - The signature PNG is local to the signing phone for now (it is not uploaded through media sync); the signed status, signer and time sync. Uploading the image rides with the share links work (T058), where the web signature also needs a stored image.
 - Duplicate copies title, description, client, lines (new ids) and photos into a new Draft and opens it.
+
+## 2026-11-04 — T057b change order PDF
+- The change order PDF reuses the daily log's drawing ops (`LogPdfOp`, `LogPdfPage`, `AndroidLogPdfWriter`); `LogPdfOp.Image` gained `fit` (drawn whole, for logo and signature) so one writer draws both documents. Layout is the pure `ChangeOrderPdfLayout` in `:core`.
+- Share PDF shows on every saved order, Draft included (a contractor often sends a priced draft before the client signs); a Draft's typed changes are saved first so the PDF matches the form. An unsigned PDF prints "Not signed yet" and a blank X line to sign on paper.
+- The PDF is written to `cache/change-orders/` and shared through the existing FileProvider; it is not stored on the change order (`pdfPath` stays unused until the share link work in T058 needs a stored copy).

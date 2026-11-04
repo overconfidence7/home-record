@@ -2,5 +2,6 @@
 <paths>
     <cache-path name="exports" path="exports/" />
     <cache-path name="logs" path="logs/" />
+    <cache-path name="change_orders" path="change-orders/" />
     <files-path name="media" path="media/" />
 </paths>

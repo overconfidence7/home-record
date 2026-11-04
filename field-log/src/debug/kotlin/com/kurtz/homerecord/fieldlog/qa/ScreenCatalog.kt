@@ -119,6 +119,7 @@ object ScreenCatalog {
         QaScreen("co-form-signed", nonRoot = true) { ChangeOrderFormSignedPreview() },
         QaScreen("co-form-delete", nonRoot = true) { ChangeOrderFormDeletePreview() },
         QaScreen("co-form-signed-short", nonRoot = true) { ChangeOrderFormSignedShortPreview() },
+        QaScreen("co-form-share-failed", nonRoot = true) { ChangeOrderFormShareFailedPreview() },
         QaScreen("co-sign-blank", nonRoot = true) { ChangeOrderSignBlankPreview() },
         QaScreen("co-sign-drawn", nonRoot = true) { ChangeOrderSignDrawnPreview() },
         QaScreen("co-sign-error", nonRoot = true) { ChangeOrderSignErrorPreview() },

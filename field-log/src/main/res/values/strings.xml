@@ -783,6 +783,15 @@
     <string name="co_form_signed_by">Signed by %1$s, %2$s</string>
     <string name="co_form_duplicate">Duplicate</string>
     <string name="co_form_duplicate_help">To change a signed order, duplicate it and edit the copy.</string>
+    <string name="co_form_share">Share PDF</string>
+    <string name="co_form_share_failed">Couldn\'t make the PDF. Try again.</string>
+    <string name="co_pdf_share_title">Share change order</string>
+    <string name="co_pdf_title">Change order: %1$s</string>
+    <string name="co_pdf_client">Client: %1$s</string>
+    <string name="co_pdf_date">Date: %1$s</string>
+    <string name="co_pdf_status">Status: %1$s</string>
+    <string name="co_pdf_amount">Amount</string>
+    <string name="co_pdf_not_signed">Not signed yet</string>
     <string name="co_sign_title">Sign change order</string>
     <string name="co_sign_summary">Total %1$s · %2$s</string>
     <plurals name="co_sign_lines">

@@ -39,12 +39,18 @@ class AndroidLogPdfWriter(private val pageFooter: (page: Int, pages: Int) -> Str
 
     fun pages(content: LogPdfContent): List<List<LogPdfOp>> = LogPdfLayout(measure, pageFooter, spec).layout(content)
 
-    fun write(content: LogPdfContent, out: OutputStream) {
+    /** Measures text with the paint it draws with; other PDF layouts (the change order, AC-F39) use it too. */
+    val measurer: LogPdfMeasure get() = measure
+
+    fun write(content: LogPdfContent, out: OutputStream) = write(pages(content), out, content.logoPath)
+
+    /** Draws pages laid out by any layout that speaks [LogPdfOp]. */
+    fun write(pages: List<List<LogPdfOp>>, out: OutputStream, logoPath: String? = null) {
         val doc = PdfDocument()
         try {
-            pages(content).forEachIndexed { index, ops ->
+            pages.forEachIndexed { index, ops ->
                 val page = doc.startPage(PdfDocument.PageInfo.Builder(spec.widthPt.toInt(), spec.heightPt.toInt(), index + 1).create())
-                draw(page.canvas, ops, content.logoPath)
+                draw(page.canvas, ops, logoPath)
                 doc.finishPage(page)
             }
             doc.writeTo(out)
@@ -63,7 +69,7 @@ class AndroidLogPdfWriter(private val pageFooter: (page: Int, pages: Int) -> Str
                 is LogPdfOp.Rule -> canvas.drawLine(op.x1, op.y, op.x2, op.y, rule)
                 is LogPdfOp.Image -> {
                     val box = RectF(op.left, op.top, op.right, op.bottom)
-                    val fit = op.path == logoPath
+                    val fit = op.fit || op.path == logoPath
                     val bmp = decode(op.path, box)
                     if (bmp == null) {
                         if (!fit) canvas.drawRect(box, missing)

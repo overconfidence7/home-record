@@ -32,7 +32,8 @@ data class LogPdfSection(val title: String, val lines: List<String>)
 sealed interface LogPdfOp {
     /** [y] is the text baseline. */
     data class Text(val x: Float, val y: Float, val text: String, val size: Float, val bold: Boolean = false, val muted: Boolean = false) : LogPdfOp
-    data class Image(val path: String, val left: Float, val top: Float, val right: Float, val bottom: Float) : LogPdfOp
+    /** [fit]: drawn whole inside the box, top left (a logo, a signature); otherwise cropped to fill it (a photo). */
+    data class Image(val path: String, val left: Float, val top: Float, val right: Float, val bottom: Float, val fit: Boolean = false) : LogPdfOp
     data class Rule(val x1: Float, val x2: Float, val y: Float) : LogPdfOp
 }
 
@@ -75,7 +76,7 @@ class LogPdfLayout(
         // header: logo square on the left, company name and its line beside it
         val logo = content.logoPath
         val textLeft = if (logo != null) left + LOGO + 12f else left
-        if (logo != null) ops() += LogPdfOp.Image(logo, left, y, left + LOGO, y + LOGO)
+        if (logo != null) ops() += LogPdfOp.Image(logo, left, y, left + LOGO, y + LOGO, fit = true)
         var base = y + COMPANY
         wrap(content.company, COMPANY, true, right - textLeft).forEachIndexed { i, line ->
             if (i > 0) base += COMPANY * LEADING
