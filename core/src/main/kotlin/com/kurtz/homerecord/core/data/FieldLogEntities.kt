@@ -280,12 +280,15 @@ data class MaterialEntity(
     val amountCents: Long = 0,
     val category: String? = null,
     val date: String,
+    /** Where the receipt image sits on this phone (local, never synced). */
     val receiptPath: String? = null,
     val note: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val deletedAt: Long? = null,
     val source: String = Sources.FIELD_LOG,
+    /** The receipt image in R2 once uploaded (v14, T060c); other phones download it by this key. */
+    val r2Key: String? = null,
 )
 
 @Entity(tableName = "share_link", indices = [Index("jobId")])

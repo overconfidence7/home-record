@@ -388,6 +388,8 @@ interface MaterialDao {
     @Query("SELECT material.* FROM material JOIN job ON job.id = material.jobId WHERE job.companyId = :companyId AND job.deletedAt IS NULL AND material.deletedAt IS NULL ORDER BY material.date DESC, material.createdAt DESC")
     fun observeForCompany(companyId: String): Flow<List<MaterialEntity>>
     @Query("UPDATE material SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    /** Where a downloaded receipt landed on this phone; local only, so no sync (T060c). */
+    @Query("UPDATE material SET receiptPath = :path WHERE id = :id") suspend fun setReceiptPath(id: String, path: String)
 }
 
 @Dao

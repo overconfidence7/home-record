@@ -130,6 +130,21 @@ class MediaDownloadsTest {
         assertThat(net.downloads).hasSize(1)
     }
 
+    // T060c (AC-F44): a receipt scanned on another phone arrives as a row with its key and downloads once.
+    @Test fun pulledReceiptDownloadsByKey() = runBlocking<Unit> {
+        db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m1", jobId = "j1", amountCents = 100, date = "2026-11-04", r2Key = "c1/material/m1/receipt.jpg", createdAt = 1, updatedAt = 4))
+        db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m2", jobId = "j1", amountCents = 100, date = "2026-11-04", createdAt = 1, updatedAt = 4))
+        assertThat(downloads.receipt("m1")).isEqualTo(OnPhone.Ready)
+        val row = checkNotNull(db.materialDao().get("m1"))
+        assertThat(row.receiptPath?.let { File(it).isFile }).isTrue()
+        assertThat(row.updatedAt).isEqualTo(4)
+        assertThat(downloads.receipt("m1")).isEqualTo(OnPhone.Ready)
+        assertThat(net.downloads).containsExactly("https://r2/get/c1/material/m1/receipt.jpg")
+        assertThat(downloads.receipt("m2")).isEqualTo(OnPhone.NotUploaded)
+        assertThat(downloads.receipt("gone")).isEqualTo(OnPhone.Failed)
+        assertThat(db.outboxDao().pending()).isEmpty()
+    }
+
     @Test fun missingListsPathsNotOnThePhone() = runBlocking<Unit> {
         val here = File(tmp.root, "a.jpg").apply { writeText("x") }.absolutePath
         assertThat(downloads.missing(listOf(here, "", null, "/nowhere/b.jpg"))).containsExactly("", null, "/nowhere/b.jpg")

@@ -59,8 +59,14 @@ class MaterialFormViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private var fetched: String? = null
+    private val fetches = mutableListOf<String>()
+
     private fun vm(id: String? = null, saved: SavedStateHandle = SavedStateHandle()): MaterialFormViewModel {
-        val deps = MaterialFormDeps(id, materials, flowOf(jobs), receipts = { uri -> read += uri; receipt }, today = { LocalDate.of(2026, 11, 4) })
+        val deps = MaterialFormDeps(
+            id, materials, flowOf(jobs), receipts = { uri -> read += uri; receipt }, today = { LocalDate.of(2026, 11, 4) },
+            fetchReceipt = { mid -> fetches += mid; fetched },
+        )
         return ViewModelProvider.create(store, viewModelFactory { initializer { MaterialFormViewModel(deps, saved) } })["vm${made++}", MaterialFormViewModel::class]
     }
 
@@ -154,5 +160,21 @@ class MaterialFormViewModelTest {
 
     @Test fun aDeletedReceiptShowsTheErrorState() {
         assertThat(vm("gone").current().failed).isTrue()
+    }
+
+    // T060c: a receipt scanned on another phone (key synced, no image here) is downloaded and shown on open, without
+    // making the form dirty; a receipt with no key is never fetched.
+    @Test fun receiptFromAnotherPhoneIsDownloadedAndShown() {
+        runBlocking {
+            db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m1", jobId = "j1", vendor = "City Electric", amountCents = 12_371, date = "2026-11-03", r2Key = "c1/material/m1/r.jpg", createdAt = 1, updatedAt = 1))
+            db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m2", jobId = "j1", amountCents = 500, date = "2026-11-03", createdAt = 1, updatedAt = 1))
+        }
+        fetched = "/cache/downloads/r.jpg"
+        val vm = vm("m1")
+        val s = vm.current { it.draft.receiptPath != null }
+        assertThat(s.draft.receiptPath).isEqualTo("/cache/downloads/r.jpg")
+        assertThat(s.dirty).isFalse()
+        vm("m2").current()
+        assertThat(fetches).containsExactly("m1")
     }
 }

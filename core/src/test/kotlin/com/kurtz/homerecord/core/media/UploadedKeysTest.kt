@@ -49,6 +49,15 @@ class UploadedKeysTest {
         assertThat(changes).containsExactly("photo" to "p1", "note" to "n1", "job_file" to "f1").inOrder()
     }
 
+    // T060c (AC-F44): a receipt's upload leaves its key on the material row and syncs it.
+    @Test fun receiptGetsItsKey() = runBlocking<Unit> {
+        db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m1", jobId = "j1", amountCents = 100, date = "2026-11-04", receiptPath = "/m/r.jpg", createdAt = 1, updatedAt = 1))
+        assertThat(keys.record("material", "m1", "c1/material/m1/r.jpg")).isTrue()
+        assertThat(db.materialDao().get("m1")?.r2Key).isEqualTo("c1/material/m1/r.jpg")
+        assertThat(keys.record("material", "m1", "c1/material/m1/r.jpg")).isFalse()
+        assertThat(changes).containsExactly("material" to "m1")
+    }
+
     @Test fun sameKeyAgainMissingRowOrUnknownEntityChangesNothing() = runBlocking<Unit> {
         db.photoDao().upsert(PhotoEntity(id = "p1", homeId = "j1", path = "/m/p1.jpg", r2Key = "k", takenAt = 1, createdAt = 1, updatedAt = 1))
         assertThat(keys.record("photo", "p1", "k")).isFalse()

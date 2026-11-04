@@ -74,6 +74,8 @@ class MaterialFormDeps(
     /** Null on a phone without the scanner: Scan receipt is hidden. */
     val receipts: ReceiptReader? = null,
     val today: () -> LocalDate = LocalDate::now,
+    /** Brings a receipt scanned on another phone onto this one by its R2 key (T060c); its path here, or null. */
+    val fetchReceipt: suspend (materialId: String) -> String? = { null },
 )
 
 /** Add or edit one receipt (AC-F44); the typing survives process death. */
@@ -100,7 +102,22 @@ class MaterialFormViewModel(private val d: MaterialFormDeps, private val saved: 
             } ?: MaterialFormDraft(jobId = jobs.singleOrNull()?.id, date = d.today().toString())
             val draft = saved.get<String>(DRAFT)?.let { runCatching { json.decodeFromString(MaterialFormDraft.serializer(), it) }.getOrNull() } ?: initial
             _state.update { it.copy(loading = false, jobs = jobs, initial = initial, draft = draft) }
+            if (existing != null && existing.receiptUploaded) showUploadedReceipt(existing.id, initial.receiptPath)
         }
+    }
+
+    /**
+     * A receipt in R2 whose image is not on this phone (scanned on another phone, or the cache was cleared) is
+     * downloaded and shown, unless the user already scanned another or removed it meanwhile (T060c, AC-F44).
+     */
+    private suspend fun showUploadedReceipt(id: String, known: String?) {
+        val path = d.fetchReceipt(id) ?: return
+        if (path == known) return
+        _state.update { s ->
+            val untouched = s.draft.receiptPath == known
+            s.copy(initial = s.initial.copy(receiptPath = path), draft = if (untouched) s.draft.copy(receiptPath = path) else s.draft)
+        }
+        if (_state.value.draft.receiptPath == path && saved.contains(DRAFT)) saved[DRAFT] = json.encodeToString(MaterialFormDraft.serializer(), _state.value.draft)
     }
 
     fun onEvent(e: MaterialFormEvent) {

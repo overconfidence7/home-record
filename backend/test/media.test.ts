@@ -122,6 +122,28 @@ describe("AC-B21 presign", () => {
     expect((await post(crew, { ...body, tenantId: "co-rule", entityId: "p-gone" })).status).toBe(404);
   });
 
+  // T060c (AC-F44): a receipt image is a material row's file: Owner and Office upload it, a Lead on the jobs they
+  // run, Crew never; the office's phones sign a GET for it.
+  it("signs a receipt image PUT and GET for a material row under its write and read rules", async () => {
+    const owner = await seedUser("u-rcpt", "rcpt@example.com");
+    await seedCompany("co-rcpt", "Receipt Co", "u-rcpt");
+    const office = await member("co-rcpt", "u-rcpt-office", "office");
+    const crew = await member("co-rcpt", "u-rcpt-crew", "crew");
+    const lead = await member("co-rcpt", "u-rcpt-lead", "lead");
+    await syncRow("co-rcpt", "job_crew", "jc1", { jobId: "j-lead", memberId: "u-rcpt-lead" });
+    await syncRow("co-rcpt", "material", "m-lead", { jobId: "j-lead" });
+    await syncRow("co-rcpt", "material", "m-other", { jobId: "j-other" });
+    const receipt = { ...body, tenantId: "co-rcpt", entity: "material", filename: "r.jpg" };
+    expect((await post(owner, { ...receipt, entityId: "m-other" })).status).toBe(200);
+    expect((await post(crew, { ...receipt, entityId: "m-new" })).status).toBe(403);
+    expect((await post(lead, { ...receipt, entityId: "m-lead" })).status).toBe(200);
+    expect((await post(lead, { ...receipt, entityId: "m-other" })).status).toBe(403);
+    expect((await post(owner, { ...receipt, entityId: "m-other", size: MEDIA_MAX_BYTES.material + 1 })).status).toBe(413);
+    const req = { tenantKind: "company", tenantId: "co-rcpt", key: "co-rcpt/material/m-other/r.jpg" };
+    expect((await get(office, req)).status).toBe(200);
+    expect((await get(owner, req)).status).toBe(200);
+  });
+
   it("presign-get signs only a GET for a live row of this tenant the caller may see", async () => {
     const token = await seedUser("u-get", "get@example.com");
     await seedCompany("co-get", "Get Co", "u-get");

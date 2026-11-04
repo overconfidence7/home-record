@@ -23,6 +23,8 @@ data class Material(
     val date: String,
     val receiptPath: String?,
     val note: String?,
+    /** The receipt image is in R2 (T060c), so a phone without [receiptPath] can download it. */
+    val receiptUploaded: Boolean = false,
 )
 
 /** One job's receipts, newest first, and their total. */

@@ -21,6 +21,7 @@ export const MEDIA_MAX_BYTES: Record<string, number> = {
   note: 25 * MB,
   document: 100 * MB,
   job_file: 100 * MB,
+  material: 25 * MB,
 };
 
 const segment = z.string().min(1).max(100).regex(/^[A-Za-z0-9._-]+$/).refine((s) => s !== "." && s !== "..");

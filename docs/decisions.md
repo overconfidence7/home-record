@@ -878,3 +878,9 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - Scan receipt uses the ML Kit document scanner in JPEG mode with one page (`rememberReceiptScanner` in :core-ui), copies the page to `filesDir/media/<uuid>.jpg` and reads it with the bundled ML Kit recognizer already used for data plates. `ReceiptTotal` takes the last "Total / Amount due / Balance due / Grand total" line with an amount (same line or the next), skipping subtotal, tax, savings and item counts. The total is offered as a "Use $x from the receipt" chip, never filled in silently, because a misread total would otherwise go to the bookkeeper unnoticed.
 - The CSV is Date, Job, Vendor, Category, Amount, Note, then a Total line per job and one for all jobs; cells go through the same quoting and formula defusing as the time exports.
 - `receiptPath` is a device-local column (LocalColumns), so the receipt image stays on the phone that scanned it until T060c uploads it.
+
+## 2026-11-04 — T060c1: receipt images in R2
+
+- `material` joins the media entities (25 MB like photos). The key is `<company>/material/<materialId>/<file>.jpg`, and every scan gets a new file name, so a rescan never overwrites the old receipt's object and the orphan cron collects it. No backend migration: the material row (with its new `r2Key`) is a synced JSON row and the upload policy (Owner/Office, Lead on their jobs, never Crew) was already the row's write rule.
+- Room v14 adds `material.r2Key` (auto-migration). Saving keeps the key while the receipt image is the same file, and drops it on a new scan or Remove; the new scan is queued once through the existing upload queue.
+- Another phone downloads the receipt when its form opens (`MediaDownloads.receipt`), into the download cache; the local `receiptPath` is set without a sync. The list does not show thumbnails, so nothing else needs the bytes.

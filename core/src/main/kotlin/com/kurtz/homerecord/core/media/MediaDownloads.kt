@@ -47,6 +47,13 @@ class MediaDownloads(
         fetch(row.r2Key) { db.noteDao().setVoicePath(id, it) }
     }
 
+    /** A receipt scanned on another phone (T060c, AC-F44): fetched by its R2 key into this phone's cache. */
+    suspend fun receipt(id: String): OnPhone = lock.withLock {
+        val row = db.materialDao().get(id) ?: return OnPhone.Failed
+        if (isOnPhone(row.receiptPath)) return OnPhone.Ready
+        fetch(row.r2Key) { db.materialDao().setReceiptPath(id, it) }
+    }
+
     /**
      * Fetches the wall photos among [rows] whose files are not on this phone but are in R2 (T048d): the straightened
      * copy first (the room page and the 3D view show it), then the photo as taken. Rows with nothing to fetch cost one

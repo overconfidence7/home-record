@@ -184,7 +184,12 @@ class AppContainer(private val app: Application) {
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
     /** A job's tasks and punch list (AC-F34), each change queued for sync (AC-F36). */
-    val jobMaterials by lazy { com.kurtz.homerecord.core.material.JobMaterials(db, onChange = ::recordChange) }
+    val jobMaterials by lazy {
+        com.kurtz.homerecord.core.material.JobMaterials(db, onChange = ::recordChange, upload = { id, path ->
+            // The receipt image goes to R2 so the office's phone shows it too (T060c).
+            company.current?.companyId?.let { uploadMedia(TenantRef(TenantKind.Company, it), "material", id, java.io.File(path).name, path, "image/jpeg") }
+        })
+    }
 
     private fun jobOptions(companyId: String) = db.jobDao().observeFor(companyId).map { jobs ->
         jobs.sortedBy { it.name.lowercase() }.map { com.kurtz.homerecord.fieldlog.materials.JobOption(it.id, it.name) }
@@ -202,6 +207,9 @@ class AppContainer(private val app: Application) {
         com.kurtz.homerecord.fieldlog.materials.MaterialFormDeps(
             materialId, jobMaterials, jobOptions(companyId),
             receipts = com.kurtz.homerecord.fieldlog.materials.AndroidReceiptReader(app, com.kurtz.homerecord.housemodel.ui.MlKitTextRecognizer(app)),
+            fetchReceipt = { id ->
+                if (mediaDownloads.receipt(id) == com.kurtz.homerecord.core.photo.OnPhone.Ready) db.materialDao().get(id)?.receiptPath else null
+            },
         )
 
     val jobSchedule by lazy { com.kurtz.homerecord.core.schedule.JobSchedule(db, onChange = ::recordChange) }

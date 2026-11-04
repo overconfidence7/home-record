@@ -174,6 +174,16 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T060c (AC-F44): older receipts have no R2 key until scanned again or uploaded.
+    @Test fun v13ToV14AddsMaterialReceiptKey() {
+        helper.createDatabase(13).use { db ->
+            db.execSQL("INSERT INTO material (id, jobId, amountCents, date, receiptPath, createdAt, updatedAt, source) VALUES ('m1', 'j1', 12371, '2026-11-04', '/media/r.jpg', 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(14).use { db ->
+            assertThat(db.texts("SELECT COALESCE(r2Key, 'none') || '/' || receiptPath FROM material WHERE id = 'm1'")).containsExactly("none//media/r.jpg")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -212,6 +222,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 13
+        const val LATEST = 14
     }
 }

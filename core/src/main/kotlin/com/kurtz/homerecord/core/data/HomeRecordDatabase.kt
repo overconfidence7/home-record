@@ -51,7 +51,7 @@ import androidx.sqlite.execSQL
         MediaUploadEntity::class,
         SyncConflictEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -77,6 +77,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 11, to = 12),
         // v13 (T058b): change_order.signatureJson/signedVia and share_link.targetId; older rows null.
         AutoMigration(from = 12, to = 13),
+        // v14 (T060c): material.r2Key, so a receipt scanned on one phone shows on the others; older rows null.
+        AutoMigration(from = 13, to = 14),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

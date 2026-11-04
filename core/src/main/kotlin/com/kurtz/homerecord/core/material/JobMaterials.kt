@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 fun MaterialEntity.toMaterial(): Material =
-    Material(id, jobId, vendor?.takeIf { it.isNotBlank() }, amountCents, MaterialCategory.of(category), date, receiptPath, note?.takeIf { it.isNotBlank() })
+    Material(id, jobId, vendor?.takeIf { it.isNotBlank() }, amountCents, MaterialCategory.of(category), date, receiptPath, note?.takeIf { it.isNotBlank() }, receiptUploaded = r2Key != null)
 
 /** A receipt as typed in the form; [save] checks it. */
 data class MaterialDraft(
@@ -33,12 +33,14 @@ sealed interface MaterialSaveResult {
 
 /**
  * Materials and receipts (AC-F44): log one against a job, edit it, delete it. Every write is one outbox change through
- * [onChange], so it works offline and syncs to the office.
+ * [onChange], so it works offline and syncs to the office. A newly scanned receipt image goes to [upload] (queued for
+ * R2, T060c); its key lands on the row when the upload finishes, so the office's phone can show the receipt too.
  */
 class JobMaterials(
     private val db: HomeRecordDatabase,
     private val now: () -> Long = System::currentTimeMillis,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    private val upload: suspend (id: String, path: String) -> Unit = { _, _ -> },
 ) {
     private val dao get() = db.materialDao()
 
@@ -52,6 +54,8 @@ class JobMaterials(
         val cents = draft.amountCents?.takeIf { it > 0 } ?: return MaterialSaveResult.NoAmount
         val stamp = now()
         val existing = id?.let { dao.get(it) ?: return MaterialSaveResult.Missing }
+        // The same receipt keeps its R2 key; a new scan or a removed one drops it (the new scan uploads below).
+        val sameReceipt = existing != null && existing.receiptPath == draft.receiptPath
         val row = MaterialEntity(
             id = existing?.id ?: Ids.newId(),
             jobId = jobId,
@@ -64,9 +68,11 @@ class JobMaterials(
             createdAt = existing?.createdAt ?: stamp,
             updatedAt = stamp,
             source = existing?.source ?: Sources.FIELD_LOG,
+            r2Key = existing?.r2Key?.takeIf { sameReceipt },
         )
         dao.upsert(row)
         onChange(ENTITY, row.id)
+        if (!sameReceipt && row.receiptPath != null) upload(row.id, row.receiptPath)
         return MaterialSaveResult.Saved(row.id)
     }
 

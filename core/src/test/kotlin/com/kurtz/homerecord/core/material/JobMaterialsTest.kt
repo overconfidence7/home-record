@@ -24,13 +24,14 @@ class JobMaterialsTest {
     private lateinit var db: HomeRecordDatabase
     private lateinit var materials: JobMaterials
     private val changes = mutableListOf<String>()
+    private val uploads = mutableListOf<String>()
     private fun draft(job: String? = "j1", cents: Long? = 12_371) =
         MaterialDraft(job, "  City Electric ", cents, MaterialCategory.MATERIALS, "2026-11-04", " ")
 
     @Before fun setUp() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
-        materials = JobMaterials(db, now = { 7_000L }, onChange = { e, id -> changes += "$e/$id" })
+        materials = JobMaterials(db, now = { 7_000L }, onChange = { e, id -> changes += "$e/$id" }, upload = { id, path -> uploads += "$id:$path" })
         runBlocking {
             db.jobDao().upsert(JobEntity(id = "j1", companyId = "c1", name = "Hale kitchen", createdAt = 1, updatedAt = 1))
             db.jobDao().upsert(JobEntity(id = "j2", companyId = "c2", name = "Other company", createdAt = 1, updatedAt = 1))
@@ -67,5 +68,31 @@ class JobMaterialsTest {
         assertThat(materials.save(draft(), id)).isEqualTo(MaterialSaveResult.Missing)
         assertThat(materials.observeForCompany("c1").first()).isEmpty()
         assertThat(changes).hasSize(3)
+    }
+
+    // T060c: a scanned receipt is queued for R2 once; editing other fields keeps its key, a new scan drops it and uploads again.
+    @Test fun receiptUploadsOnceAndKeepsItsKeyUntilReplaced() = runBlocking<Unit> {
+        val id = (materials.save(draft().copy(receiptPath = "/media/r1.jpg")) as MaterialSaveResult.Saved).id
+        assertThat(uploads).containsExactly("$id:/media/r1.jpg")
+        assertThat(checkNotNull(materials.get(id)).receiptUploaded).isFalse()
+        db.materialDao().upsert(checkNotNull(db.materialDao().get(id)).copy(r2Key = "c1/material/$id/r1.jpg"))
+
+        materials.save(draft(cents = 500).copy(receiptPath = "/media/r1.jpg"), id)
+        assertThat(uploads).hasSize(1)
+        assertThat(checkNotNull(db.materialDao().get(id)).r2Key).isEqualTo("c1/material/$id/r1.jpg")
+        assertThat(checkNotNull(materials.get(id)).receiptUploaded).isTrue()
+
+        materials.save(draft().copy(receiptPath = "/media/r2.jpg"), id)
+        assertThat(uploads).containsExactly("$id:/media/r1.jpg", "$id:/media/r2.jpg").inOrder()
+        assertThat(checkNotNull(db.materialDao().get(id)).r2Key).isNull()
+
+        materials.save(draft().copy(receiptPath = null), id)
+        assertThat(uploads).hasSize(2)
+        assertThat(checkNotNull(db.materialDao().get(id)).r2Key).isNull()
+    }
+
+    @Test fun noReceiptNoUpload() = runBlocking<Unit> {
+        materials.save(draft())
+        assertThat(uploads).isEmpty()
     }
 }
