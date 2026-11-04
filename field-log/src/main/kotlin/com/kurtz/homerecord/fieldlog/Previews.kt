@@ -68,13 +68,14 @@ private val crew = listOf(
 @ThemePreviews
 @Composable
 fun WelcomeCreatePreview() = Frame {
-    WelcomeScreen(WelcomeUiState(name = "Kurtz Electric", trade = "Electrical", phone = "(555) 014-2290"), {})
+    // As the app shows it: inside the gate's Scaffold, so the crawler sees the status bar inset (judge:fl-catalog-welcome-insets).
+    androidx.compose.material3.Scaffold { WelcomeScreen(WelcomeUiState(name = "Kurtz Electric", trade = "Electrical", phone = "(555) 014-2290"), {}, Modifier.padding(it)) }
 }
 
 @ThemePreviews
 @Composable
 fun WelcomeJoinErrorPreview() = Frame {
-    WelcomeScreen(WelcomeUiState(mode = WelcomeMode.Join, code = "K7M2QX9R", error = ApiFailure.InvalidCode), {})
+    androidx.compose.material3.Scaffold { WelcomeScreen(WelcomeUiState(mode = WelcomeMode.Join, code = "K7M2QX9R", error = ApiFailure.InvalidCode), {}, Modifier.padding(it)) }
 }
 
 @ThemePreviews

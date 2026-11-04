@@ -1,8 +1,18 @@
 {
- "ticked_tasks": 206,
- "acs_claimed": 368,
- "acs_missing": 0,
+ "ticked_tasks": 207,
+ "acs_claimed": 369,
+ "acs_missing": 1,
  "unit_test_files": 303,
  "device_test_files": 65,
- "tasks": []
+ "tasks": [
+  {
+   "task": "T060a",
+   "acs": [
+    "AC-F45"
+   ],
+   "missing": [
+    "AC-F45"
+   ]
+  }
+ ]
 }

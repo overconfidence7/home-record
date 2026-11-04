@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog.company
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,7 @@ import com.kurtz.homerecord.fieldlog.R
 @Composable
 fun WelcomeScreen(state: WelcomeUiState, onEvent: (WelcomeEvent) -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 24.dp),
+        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.welcome_title), style = MaterialTheme.typography.headlineMedium)
