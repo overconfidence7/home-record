@@ -40,6 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -83,6 +84,9 @@ data class TodayClock(val status: ClockStatus, val jobName: String?, val now: Lo
 
 data class TodayJob(val id: String, val name: String, val address: String?)
 
+/** My next scheduled day after today, within a week (AC-F41): "Tomorrow: Smith deck". */
+data class TodayNextDay(val date: java.time.LocalDate, val tomorrow: Boolean, val jobNames: List<String>)
+
 /** One of my open tasks due today or overdue, with the job it belongs to (AC-F34). */
 data class TodayTask(
     val id: String,
@@ -104,6 +108,8 @@ data class TodayUiState(
     val hasJobs: Boolean = false,
     val clock: TodayClock? = null,
     val jobs: List<TodayJob> = emptyList(),
+    /** My next scheduled day; the line is left out when nothing is scheduled in the coming week (AC-F41). */
+    val next: TodayNextDay? = null,
     /** Owner and Office only (AC-F16). */
     val onSite: List<OnSiteEntry> = emptyList(),
     /** A pull to refresh is running (AC-F16). */
@@ -130,6 +136,7 @@ sealed interface TodayEvent {
     /** The sync chip: opens FL-Sync with the pending count, Sync now and the conflict log (AC-F52, AC-F53). */
     data object OpenSync : TodayEvent
     data object OpenClock : TodayEvent
+    data object OpenSchedule : TodayEvent
     data class OpenJob(val jobId: String) : TodayEvent
     data object AddJob : TodayEvent
     data object Refresh : TodayEvent
@@ -237,6 +244,18 @@ private fun TodayContent(state: TodayUiState, clock: TodayClock, onEvent: (Today
                 onClick = { onEvent(TodayEvent.OpenJob(job.id)) },
                 modifier = Modifier.fillMaxWidth().testTag("fl_today_job_${job.id}"),
             )
+        }
+        state.next?.let { next ->
+            item(key = "next-day") {
+                val day = next.date.format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d"))
+                RecordListItem(
+                    headline = next.jobNames.joinToString(" · "),
+                    overline = if (next.tomorrow) stringResource(R.string.today_next_tomorrow) else stringResource(R.string.today_next_day, day),
+                    leading = { Icon(Icons.Rounded.CalendarMonth, contentDescription = null) },
+                    onClick = { onEvent(TodayEvent.OpenSchedule) },
+                    modifier = Modifier.fillMaxWidth().testTag("fl_today_next"),
+                )
+            }
         }
         if (state.tasks.isNotEmpty()) {
             item(key = "tasks-heading") { SectionHeading(stringResource(R.string.today_tasks)) }

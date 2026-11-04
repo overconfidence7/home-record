@@ -31,7 +31,7 @@ appId: com.kurtz.homerecord.fieldlog
           id: "fl_tab_schedule"
       - extendedWaitUntil:
           visible:
-            id: "fl_schedule_empty"
+            id: "fl_schedule_week"
           timeout: 10000
       - takeScreenshot: tour-${output.variant}-schedule
       - tapOn:

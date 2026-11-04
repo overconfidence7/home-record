@@ -781,3 +781,38 @@ fun ChangeOrderSignDrawnScreenshot() = ChangeOrderSignDrawnPreview()
 @ThemePreviews
 @Composable
 fun ChangeOrderSignErrorScreenshot() = ChangeOrderSignErrorPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun TodayCrewTomorrowScreenshot() = TodayCrewTomorrowPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleTeamScreenshot() = ScheduleTeamPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleNextWeekScreenshot() = ScheduleNextWeekPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SchedulePickJobScreenshot() = SchedulePickJobPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleNoJobsScreenshot() = ScheduleNoJobsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleCrewScreenshot() = ScheduleCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleCrewEmptyScreenshot() = ScheduleCrewEmptyPreview()

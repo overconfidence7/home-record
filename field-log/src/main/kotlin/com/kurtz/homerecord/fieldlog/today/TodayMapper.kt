@@ -11,6 +11,8 @@ import com.kurtz.homerecord.core.model.JobTask
 import com.kurtz.homerecord.core.model.MyTasksDue
 import com.kurtz.homerecord.core.model.TaskDue
 import java.time.LocalDate
+import com.kurtz.homerecord.core.model.ScheduleWeek
+import com.kurtz.homerecord.core.schedule.toEntry
 import com.kurtz.homerecord.core.model.OnSiteBuilder
 import com.kurtz.homerecord.core.model.effectiveStatus
 import com.kurtz.homerecord.core.punch.ClockStatus
@@ -45,11 +47,20 @@ object TodayMapper {
             hasJobs = liveJobs.isNotEmpty(),
             clock = TodayClock(status, mine?.jobName, now),
             jobs = myJobs,
+            next = nextDay(memberId, assignments, jobs, today),
             tasks = myTasks(tasks, memberId, jobs, today),
             photos = recentPhotos(photos, jobs, today),
             capture = TodayCapture.choose(mine?.jobId, myJobs, live),
             onSite = if (base.role == CompanyRole.Owner || base.role == CompanyRole.Office) onSite else emptyList(),
         )
+    }
+
+    /** My next scheduled day after [today] on a live job (AC-F41). */
+    fun nextDay(memberId: String, assignments: List<AssignmentEntity>, jobs: List<JobEntity>, today: String): TodayNextDay? {
+        val day = runCatching { LocalDate.parse(today) }.getOrNull() ?: return null
+        val names = jobs.filter { it.deletedAt == null && it.effectiveStatus(today) !in setOf(JobStatus.ARCHIVED, JobStatus.DONE) }.associate { it.id to it.name }
+        val entries = assignments.mapNotNull { it.toEntry() }
+        return ScheduleWeek.nextUp(memberId, entries, names, day)?.let { TodayNextDay(it.date, it.date == day.plusDays(1), it.jobNames) }
     }
 
     /** The newest [RECENT_PHOTOS] photos on the company's jobs, newest first; an archived or deleted job's are left out. */

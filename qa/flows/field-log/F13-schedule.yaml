@@ -1,0 +1,81 @@
+# Walkthrough F13 (T059b): Schedule. The owner opens the week, picks tomorrow, puts themself on the job with the
+# picker (AC-F41), sees the job chip on that day, and Today then shows "Tomorrow" with the job (AC-F41). Two jobs on
+# one day carry the "Two jobs this day" badge (AC-F43). The push to the crew phone (AC-F42) is covered by
+# ScheduleViewModelTest and PushDestinationTest; it needs a second device.
+appId: com.kurtz.homerecord.fieldlog
+---
+- evalScript: ${output.tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+- evalScript: ${output.sunday = new Date().getUTCDay() === 0 ? "yes" : "no"}
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f13@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Smith deck"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn:
+    id: fl_tab_jobs
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn:
+    id: fl_tab_schedule
+- extendedWaitUntil:
+    visible:
+      id: fl_schedule_week
+    timeout: 10000
+- assertVisible:
+    id: fl_schedule_title
+# Tomorrow is in next week when today is Sunday.
+- runFlow:
+    when:
+      true: ${output.sunday == "yes"}
+    commands:
+      - tapOn:
+          id: fl_schedule_next
+- tapOn:
+    id: "fl_schedule_day_${output.tomorrow}"
+- tapOn:
+    id: "fl_schedule_assign_.*"
+- extendedWaitUntil:
+    visible: "Smith deck"
+    timeout: 5000
+- tapOn: "Smith deck"
+- extendedWaitUntil:
+    visible:
+      id: "fl_schedule_chip_.*"
+    timeout: 5000
+- takeScreenshot: F13-schedule-assigned
+# AC-F43: a second job the same day is kept and flagged
+- tapOn:
+    id: "fl_schedule_assign_.*"
+- extendedWaitUntil:
+    visible: "Hale kitchen"
+    timeout: 5000
+- tapOn: "Hale kitchen"
+- extendedWaitUntil:
+    visible: "Two jobs this day"
+    timeout: 5000
+- takeScreenshot: F13-schedule-conflict
+# AC-F41: Today says what is next
+- tapOn:
+    id: fl_tab_today
+- scrollUntilVisible:
+    element:
+      id: fl_today_next
+    timeout: 10000
+- assertVisible: "Tomorrow"
+- takeScreenshot: F13-today-tomorrow

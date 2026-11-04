@@ -108,6 +108,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                         onInviteCrew = { nav.push(TeamKey) },
                         onOpenSync = { nav.push(SyncLogKey) },
                         onOpenClock = { nav.selectTab("clock") },
+                        onOpenSchedule = { nav.selectTab("schedule") },
                         onOpenJob = { nav.push(JobKey(it)) },
                         onAddJob = { nav.push(JobEditKey(null)) },
                         // The task's job opens on Tasks with the task over it: the form for those who manage the job's tasks,
@@ -151,14 +152,12 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
                     else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) })
                 }
-                // Schedule arrives with T059; until then the tab says what it will hold, with no demo navigation.
-                key.depth == 0 -> com.kurtz.homerecord.coreui.components.EmptyState(
-                    icon = tabDefs.firstOrNull { it.id == key.title }?.icon ?: Icons.Outlined.CalendarMonth,
-                    headline = stringResource(R.string.schedule_empty_title),
-                    body = stringResource(R.string.schedule_empty_body),
-                    actionLabel = null, onAction = {},
-                    modifier = Modifier.fillMaxSize().testTag("fl_${key.title}_empty"),
-                )
+                key.depth == 0 && key.title == "schedule" -> {
+                    val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
+                    val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+                    if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
+                    else com.kurtz.homerecord.fieldlog.schedule.ScheduleRoute({ container.scheduleDeps(membership, memberId) })
+                }
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }
         }
@@ -377,6 +376,7 @@ private fun PushOpener(container: AppContainer, membership: CompanyMembership) {
             val gates = container.roleGates.first()
             val request = com.kurtz.homerecord.fieldlog.push.PushDestination.of(message, membership.companyId, gates)
             container.pendingPush.value = null
+            com.kurtz.homerecord.fieldlog.push.PushDestination.scheduleDay(message, membership.companyId)?.let { container.scheduleOpenDay.value = it }
             // the row the push is about may not be on this phone yet (R09)
             container.syncCoordinator.requestSync()
             container.tabRequests.request(request.tabId, request.keys)

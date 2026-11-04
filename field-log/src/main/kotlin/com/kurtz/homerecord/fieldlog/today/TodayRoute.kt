@@ -19,6 +19,7 @@ class TodayNavigation(
     /** FL-Sync: where the pending count, Sync now and the conflict log live (AC-F52). */
     val onOpenSync: () -> Unit,
     val onOpenClock: () -> Unit = {},
+    val onOpenSchedule: () -> Unit = {},
     val onOpenJob: (String) -> Unit = {},
     val onAddJob: () -> Unit,
     val onOpenTask: (jobId: String, taskId: String) -> Unit = { _, _ -> },
@@ -65,6 +66,7 @@ fun todayEvent(event: TodayEvent, navigation: TodayNavigation, context: Context,
         TodayEvent.InviteCrew -> navigation.onInviteCrew()
         TodayEvent.OpenSync -> navigation.onOpenSync()
         TodayEvent.OpenClock -> navigation.onOpenClock()
+        TodayEvent.OpenSchedule -> navigation.onOpenSchedule()
         is TodayEvent.OpenJob -> navigation.onOpenJob(event.jobId)
         TodayEvent.AddJob -> navigation.onAddJob()
         TodayEvent.Refresh -> onRefresh()

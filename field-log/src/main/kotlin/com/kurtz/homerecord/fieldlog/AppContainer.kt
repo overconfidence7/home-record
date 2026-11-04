@@ -184,6 +184,25 @@ class AppContainer(private val app: Application) {
     val jobFiles by lazy { com.kurtz.homerecord.core.photo.JobFiles(db, onChange = ::recordChange) }
 
     /** A job's tasks and punch list (AC-F34), each change queued for sync (AC-F36). */
+    val jobSchedule by lazy { com.kurtz.homerecord.core.schedule.JobSchedule(db, onChange = ::recordChange) }
+
+    /** The day a tapped schedule push asks FL-Schedule to show (AC-F42). */
+    val scheduleOpenDay = kotlinx.coroutines.flow.MutableStateFlow<java.time.LocalDate?>(null)
+
+    fun scheduleDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership, memberId: String) =
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleDeps(
+            memberId = memberId,
+            members = db.memberDao().observeFor(membership.companyId),
+            jobs = db.jobDao().observeFor(membership.companyId),
+            entries = jobSchedule.observeForCompany(membership.companyId),
+            gates = roleGates,
+            assign = jobSchedule::assign,
+            move = { id, date -> jobSchedule.move(id, date) },
+            remove = jobSchedule::remove,
+            openDay = scheduleOpenDay,
+            consumeOpenDay = { scheduleOpenDay.value = null },
+        )
+
     val jobTasks by lazy { com.kurtz.homerecord.core.task.JobTasks(db, onChange = ::recordChange) }
 
     /** A job's change orders (AC-F37), each change queued for sync (AC-F52). */

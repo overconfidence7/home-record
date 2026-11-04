@@ -14,7 +14,7 @@ import com.kurtz.homerecord.fieldlog.jobs.JobTab
  *
  * - Task assigned: the job's Tasks tab; someone who manages the job's tasks lands in the task form over it, the way a
  *   task row on Today opens.
- * - Schedule changed: the Schedule tab (FL-Schedule opens the day once T059 builds it).
+ * - Schedule changed: the Schedule tab on the notified day ([scheduleDay]).
  * - Change order signed: the job's Changes tab.
  * - Timesheet approved: Owner and Office get Timesheets on that week; everyone else sees their own week on Clock.
  *
@@ -37,6 +37,10 @@ object PushDestination {
                 if (gates.role.isAdmin) TabRequest(MORE, listOf(TimesheetsKey(message.weekStart.toString()))) else TabRequest(CLOCK)
         }
     }
+
+    /** The day FL-Schedule should show for a tapped schedule push in this company (AC-F42); null for any other push. */
+    fun scheduleDay(message: PushMessage, companyId: String): java.time.LocalDate? =
+        (message as? PushMessage.ScheduleChanged)?.takeIf { it.companyId == companyId }?.date
 
     private const val TODAY = "today"
     private const val JOBS = "jobs"

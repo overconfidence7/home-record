@@ -121,4 +121,17 @@ class TodayMapperTest {
         assertThat(state.capture.target).isEqualTo("j2")
         assertThat(map(CompanyRole.Crew, emptyList()).capture.options.map { it.id }).containsExactly("j1", "j2").inOrder()
     }
+
+    // AC-F41: crew see their next day on Today ("Tomorrow: Deck Rebuild"); archived jobs and other people are left out
+    @Test fun nextDayIsTomorrowOrTheNextScheduledDay() {
+        fun a(id: String, job: String, member: String, date: String) =
+            com.kurtz.homerecord.core.data.AssignmentEntity(id, job, member, date, createdAt = 0, updatedAt = 0)
+        val today = "2026-11-04"
+        val tomorrow = TodayMapper.nextDay("me", listOf(a("a1", "j2", "me", "2026-11-05"), a("a2", "j1", "dev", "2026-11-05")), jobs, today)
+        assertThat(tomorrow).isEqualTo(TodayNextDay(java.time.LocalDate.of(2026, 11, 5), tomorrow = true, jobNames = listOf("Deck Rebuild")))
+        val later = TodayMapper.nextDay("me", listOf(a("a1", "j3", "me", "2026-11-05"), a("a2", "j1", "me", "2026-11-07")), jobs, today)
+        assertThat(later?.tomorrow).isFalse()
+        assertThat(later?.jobNames).containsExactly("Kitchen Remodel")
+        assertThat(TodayMapper.nextDay("me", listOf(a("a1", "j1", "me", today)), jobs, today)).isNull()
+    }
 }

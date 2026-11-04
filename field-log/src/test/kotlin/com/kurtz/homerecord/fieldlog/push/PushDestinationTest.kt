@@ -33,6 +33,10 @@ class PushDestinationTest {
     @Test fun scheduleOpensTheScheduleTab() {
         val day = PushMessage.ScheduleChanged("c1", LocalDate.of(2026, 11, 2), "j-hale", "Hale kitchen")
         assertThat(PushDestination.of(day, "c1", crew)).isEqualTo(TabRequest("schedule"))
+        // FL-Schedule then shows the notified day (T059a); another company's push or another kind carries no day.
+        assertThat(PushDestination.scheduleDay(day, "c1")).isEqualTo(LocalDate.of(2026, 11, 2))
+        assertThat(PushDestination.scheduleDay(day, "c2")).isNull()
+        assertThat(PushDestination.scheduleDay(task, "c1")).isNull()
     }
 
     @Test fun changeOrderOpensTheJobsChangesTab() {

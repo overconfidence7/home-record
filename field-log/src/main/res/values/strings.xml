@@ -43,6 +43,8 @@
     <string name="today_empty_title">No jobs yet at %1$s</string>
     <string name="today_empty_admin">Add a job or invite your crew. Anyone with your code can join from their own phone.</string>
     <string name="today_jobs">My jobs today</string>
+    <string name="today_next_tomorrow">Tomorrow</string>
+    <string name="today_next_day">Next: %1$s</string>
     <string name="today_no_jobs">Nothing scheduled for you today.</string>
     <string name="today_tasks">My tasks</string>
     <string name="today_photos">Recent photos</string>
@@ -835,6 +837,21 @@
         <item quantity="one">%1$d line</item>
         <item quantity="other">%1$d lines</item>
     </plurals>
-    <string name="schedule_empty_title">No days scheduled yet</string>
-    <string name="schedule_empty_body">When crew are assigned to jobs by day, the week shows here.</string>
+    <string name="schedule_week_of">Week of %1$s</string>
+    <string name="schedule_week_previous">Previous week</string>
+    <string name="schedule_week_next">Next week</string>
+    <string name="schedule_this_week">This week</string>
+    <string name="schedule_today">Today</string>
+    <string name="schedule_day_busy">crew scheduled</string>
+    <string name="schedule_not_scheduled">Not scheduled</string>
+    <string name="schedule_conflict">Two jobs this day</string>
+    <string name="schedule_assign">Put %1$s on a job for %2$s</string>
+    <string name="schedule_pick_title">Which job for %1$s on %2$s?</string>
+    <string name="schedule_day_title">%1$s on %2$s, %3$s</string>
+    <string name="schedule_move_to">Move to %1$s</string>
+    <string name="schedule_remove">Take off this day</string>
+    <string name="schedule_no_jobs_title">No jobs to schedule</string>
+    <string name="schedule_no_jobs_body">Add a job on the Jobs tab, then put your crew on it by day.</string>
+    <string name="schedule_own_empty_title">Nothing scheduled this week</string>
+    <string name="schedule_own_empty_body">Your days show here once you are put on a job.</string>
 </resources>

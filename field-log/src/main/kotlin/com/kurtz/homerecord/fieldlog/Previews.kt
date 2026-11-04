@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog
 
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.ui.graphics.asImageBitmap
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
@@ -1975,5 +1976,117 @@ fun ChangeOrderFormDeletePreview() = Frame {
     com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
         com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, draft = coDraft, initial = coDraft, confirmDelete = true),
         {},
+    )
+}
+
+// FL-Schedule (AC-F41, AC-F43): Kurtz Electric's week of Nov 2, seen on Wednesday Nov 4.
+private val schedWed = java.time.LocalDate.of(2026, 11, 4)
+private val schedMonday = com.kurtz.homerecord.core.model.ScheduleWeek.weekStart(schedWed)
+private val schedJobs = mapOf("j1" to "Hale kitchen", "j2" to "Smith deck", "j3" to "Garage subpanel")
+private val schedEntries = listOf(
+    com.kurtz.homerecord.core.model.ScheduleEntry("a1", "j1", "m1", schedMonday),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a2", "j1", "m1", schedWed),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a3", "j1", "m2", schedWed),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a4", "j2", "m2", schedWed),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a5", "j2", "m3", schedWed.plusDays(1)),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a6", "j3", "m3", schedWed.plusDays(2)),
+    com.kurtz.homerecord.core.model.ScheduleEntry("a7", "j2", "m2", schedWed.plusDays(1)),
+)
+private val schedPeople = listOf("m1" to "Nate Kurtz", "m2" to "Luis Romero", "m3" to "Casey Brooks", "m4" to "Dana Ortiz")
+private val schedOptions = schedJobs.map { (id, name) -> com.kurtz.homerecord.fieldlog.schedule.ScheduleJobOption(id, name) }.sortedBy { it.name }
+
+private fun schedTeam(sheet: com.kurtz.homerecord.fieldlog.schedule.ScheduleSheet? = null) = com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(
+    loading = false, today = schedWed, weekStart = schedMonday, selected = schedWed,
+    rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday, schedPeople, schedEntries, schedJobs),
+    jobs = schedOptions, sheet = sheet,
+)
+
+/** The owner on Wednesday: four people, Luis on two jobs (badge), Dana not scheduled; Add on every row. */
+@ThemePreviews
+@Composable
+fun ScheduleTeamPreview() = Frame { com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(schedTeam(), {}) }
+
+/** Next week from the owner's phone: "This week" brings today back. */
+@ThemePreviews
+@Composable
+fun ScheduleNextWeekPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(
+        schedTeam().copy(weekStart = schedMonday.plusWeeks(1), selected = schedWed.plusWeeks(1),
+            rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday.plusWeeks(1), schedPeople, schedEntries, schedJobs)),
+        {},
+    )
+}
+
+/** Add on Dana's row: which job for Wednesday. The sheet is drawn over a scrim, as the renderer cannot draw popups. */
+@ThemePreviews
+@Composable
+fun SchedulePickJobPreview() = Frame {
+    Box(Modifier.fillMaxSize()) {
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(schedTeam(), {})
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)))
+        Surface(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), tonalElevation = 1.dp,
+        ) {
+            Column(Modifier.padding(top = 16.dp)) {
+                com.kurtz.homerecord.coreui.components.OptionsSheetContent(
+                    "Which job for Dana Ortiz on Wed, Nov 4?",
+                    schedOptions.map { com.kurtz.homerecord.coreui.components.SheetOption(it.id, it.name, androidx.compose.material.icons.Icons.Rounded.Work) },
+                ) {}
+            }
+        }
+    }
+}
+
+/** The owner before any job is live: what to do first (rule 10). */
+@ThemePreviews
+@Composable
+fun ScheduleNoJobsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(
+            loading = false, today = schedWed, weekStart = schedMonday, selected = schedWed,
+            rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday, schedPeople.take(1), emptyList(), schedJobs),
+        ),
+        {},
+    )
+}
+
+/** Luis (Crew) sees his own week: today on two jobs with the badge, tomorrow on the Smith deck. */
+@ThemePreviews
+@Composable
+fun ScheduleCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(
+            loading = false, today = schedWed, weekStart = schedMonday, selected = schedWed, ownOnly = true,
+            rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday, listOf("m2" to "Luis Romero"), schedEntries, schedJobs),
+        ),
+        {},
+    )
+}
+
+/** Crew with nothing this week. */
+@ThemePreviews
+@Composable
+fun ScheduleCrewEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(
+            loading = false, today = schedWed, weekStart = schedMonday, selected = schedWed, ownOnly = true,
+            rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday, listOf("m4" to "Dana Ortiz"), emptyList(), schedJobs),
+        ),
+        {},
+    )
+}
+
+/** Crew clocked out with nothing today: Today says tomorrow is the Smith deck (AC-F41). */
+@ThemePreviews
+@Composable
+fun TodayCrewTomorrowPreview() = Frame {
+    TodayScreen(
+        TodayUiState(
+            "Kurtz Electric", CompanyRole.Crew, hasJobs = true,
+            clock = com.kurtz.homerecord.fieldlog.today.TodayClock(com.kurtz.homerecord.core.punch.ClockStatus.Out, null, TODAY_NOW),
+            next = com.kurtz.homerecord.fieldlog.today.TodayNextDay(schedWed.plusDays(1), tomorrow = true, jobNames = listOf("Smith deck")),
+        ),
+        onEvent = {},
     )
 }
