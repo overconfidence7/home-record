@@ -20,6 +20,8 @@
 
 - 2026-11-04 (T060b): FL-Materials is Owner/Office only for now, and the receipt total read by OCR is offered as a "Use $x" chip rather than filled in. Leads logging receipts and receipt images on other phones are T060c. Details in docs/decisions.md.
 
+- 2026-11-04 (T061a): the job summary PDF covers the whole job (first punch to today), not the Reports week range, and signed change orders are totalled apart from drafts. Details in docs/decisions.md.
+
 (Judgment calls the builder made. Nate deletes a line once confirmed or writes the correction. Since 2026-11-03 a line older than 7 days with no reply is confirmed and moves to docs/decisions.md.)
 
 - 2026-11-03 (Nate): all 43 decisions listed here through 2026-11-03 were reviewed. 38 are confirmed as built (recorded in docs/decisions.md under "2026-11-03 — Nate's decisions pass"). Five are corrections, filed as tasks N001–N005 in PLAN.md: CR2n2 (keep wall photos when a wall is removed), T034b (settings endpoint readable by every member), CR2l3 (crew may delete their own photos), R09 (tasks private on the server), and the housekeeping edits to CLAUDE.md, qa/README.md and qa/nightly-qa-prompt.md. Nothing else here is open.

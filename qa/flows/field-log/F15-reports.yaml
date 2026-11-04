@@ -1,4 +1,4 @@
-# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours (AC-F15, AC-F46).
+# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours; a job's summary PDF goes to the share sheet (AC-F15, AC-F46, AC-F47).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -26,3 +26,39 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible:
     id: fl_reports_export_quickbooks
     enabled: false
+# AC-F47: Job summaries sits under the delays; with no job it says so
+- scrollUntilVisible:
+    element: "No jobs yet."
+# with a job, Job summaries lists it; tapping it makes the job summary PDF and opens the share sheet
+- back
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Hale kitchen"
+    timeout: 10000
+- tapOn: "More"
+- tapOn:
+    id: fl_more_reports
+- extendedWaitUntil:
+    visible:
+      id: fl_reports_list
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Hale kitchen"
+- assertVisible: "Job summaries"
+- takeScreenshot: F15-job-summaries
+- tapOn: "Hale kitchen"
+# the system share sheet is on top; leave it like a person who picked nothing
+- back
+- extendedWaitUntil:
+    visible: "Job summaries"
+    timeout: 10000
+- assertNotVisible:
+    id: fl_reports_summary_failed

@@ -367,6 +367,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T060c2: Leads log receipts on the jobs they run: Materials entry for a Lead, job picker and list limited to their jobs (backend policy already allows it) (AC-F44)
 - [x] R11: Review T056–T060
 - [ ] T061: Reports: photo report PDF (range, 4 per page), job summary PDF (hours vs budget, COs, tasks, delays) (acceptance: AC-F28 report, AC-F47)
+  - [x] T061a: job summary PDF: `JobSummaryReport` `[unit]` in :core (hours vs budget from punches, signed/draft/declined change orders, tasks done/open, days on site, delays by reason); `JobSummaryPdfMaker` (daily log layout) and Reports → Job summaries (every job, Active first; tap shares the PDF) (AC-F47)
+  - [ ] T061b: photo report PDF from FL-Reports: pick a job and a date range, photos up to 4 per page with captions (room, phase, date, note) (AC-F28 report)
 - [ ] T062: Installed items on the job: FL-House rooms with items (same editor as HM), warranty lookup, data plate OCR (acceptance: AC-F50)
 - [ ] T063: `.homerecord` v2 bundle writer/reader `[unit]`, `ImportPlanner` `[unit]`, handoff summary and export from FL-House; `/handoff` backend with claim email; HM import (file, share, claim link) with preview and conflicts (acceptance: AC-C46, AC-C47, AC-F51, AC-B40, AC-H17)
 - [ ] T064: Field Log billing: trial clock from company creation, RevenueCat entitlements `fieldlog_solo`/`fieldlog_crew`, FL-Paywall (Owner), backend webhook + `/me` entitlement, crew-side read-only state (acceptance: AC-F56, AC-B50)

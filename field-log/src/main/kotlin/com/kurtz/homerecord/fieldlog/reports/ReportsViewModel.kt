@@ -43,6 +43,8 @@ class ReportsDeps(
     val share: suspend (TimeExportFile) -> Unit,
     /** The daily logs' delays from one day to another, inclusive (AC-F32). */
     val delays: (from: LocalDate, to: LocalDate) -> Flow<List<DelayDay>> = { _, _ -> flowOf(emptyList()) },
+    /** Makes the job's summary PDF and opens the share sheet; false when it could not (AC-F47). */
+    val shareJobSummary: suspend (jobId: String) -> Boolean = { false },
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
 )
@@ -98,6 +100,17 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
         }
     }
 
+    init {
+        viewModelScope.launch {
+            d.jobs.collect { jobs ->
+                val rows = jobs.filter { it.deletedAt == null }
+                    .sortedWith(compareBy<JobEntity>({ it.status != ACTIVE }, { it.name.lowercase() }))
+                    .map { SummaryJob(it.id, it.name, it.address?.trim()?.takeIf(String::isNotEmpty)) }
+                _state.update { it.copy(summaries = rows) }
+            }
+        }
+    }
+
     fun onEvent(event: ReportsEvent) {
         when (event) {
             is ReportsEvent.SelectRange -> {
@@ -107,6 +120,22 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
             ReportsEvent.ExportShifts -> export(TimeExportKind.ShiftCsv)
             ReportsEvent.ExportQuickBooks -> export(TimeExportKind.QuickBooksCsv)
             ReportsEvent.DismissNotice -> _state.update { it.copy(notice = null) }
+            is ReportsEvent.ShareJobSummary -> shareSummary(event.jobId)
+        }
+    }
+
+    private fun shareSummary(jobId: String) {
+        if (_state.value.summaryBusy != null) return
+        _state.update { it.copy(summaryBusy = jobId, summaryFailed = false) }
+        viewModelScope.launch {
+            val ok = try {
+                d.shareJobSummary(jobId)
+            } catch (e: java.io.IOException) {
+                false
+            } catch (e: android.content.ActivityNotFoundException) {
+                false
+            }
+            _state.update { it.copy(summaryBusy = null, summaryFailed = !ok) }
         }
     }
 
@@ -142,5 +171,6 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
 
     private companion object {
         const val RANGE = "range"
+        const val ACTIVE = "ACTIVE"
     }
 }

@@ -34,6 +34,13 @@ class ReportsViewModelTest {
     private val shared = mutableListOf<TimeExportFile>()
     private var shareFails = false
     private val delayRanges = mutableListOf<Pair<LocalDate, LocalDate>>()
+    private val summariesAsked = mutableListOf<String>()
+    private var summaryWorks = true
+    private val jobs = listOf(
+        JobEntity(id = "j1", companyId = "c1", name = "Garage subpanel", createdAt = 1, updatedAt = 1),
+        JobEntity(id = "j2", companyId = "c1", name = "Bath fan", address = "22 Birch Ct", status = "DONE", createdAt = 1, updatedAt = 1),
+        JobEntity(id = "j3", companyId = "c1", name = "Attic run", status = "ACTIVE", createdAt = 1, updatedAt = 1),
+    )
     private val delayDays = listOf(
         DelayDay("j1", monday.plusDays(1), listOf(LogDelay(DelayReason.WEATHER, "Rain held up the siding"))),
         DelayDay("j1", monday.minusWeeks(1).plusDays(2), listOf(LogDelay(DelayReason.INSPECTION))),
@@ -53,11 +60,12 @@ class ReportsViewModelTest {
         val deps = ReportsDeps(
             members = flowOf(listOf(MemberEntity(id = "m1", companyId = "c1", name = "Dana Whitfield", createdAt = 1, updatedAt = 1))),
             punches = flowOf(punches),
-            jobs = flowOf(listOf(JobEntity(id = "j1", companyId = "c1", name = "Garage subpanel", createdAt = 1, updatedAt = 1))),
+            jobs = flowOf(jobs),
             clients = flowOf(emptyList()),
             settings = flowOf(CompanySettings()),
             share = { if (shareFails) throw IOException("disk") else shared += it },
             delays = { from, to -> delayRanges += from to to; flowOf(delayDays) },
+            shareJobSummary = { summariesAsked += it; summaryWorks },
             zone = zone, now = { now },
         )
         return ReportsViewModel(deps, saved)
@@ -115,5 +123,22 @@ class ReportsViewModelTest {
         vm.onEvent(ReportsEvent.SelectRange(ReportRange.LastWeek))
         assertThat(delayRanges.last()).isEqualTo(monday.minusWeeks(1) to monday.minusDays(1))
         assertThat(vm.state.value.delays.single().entries.map { it.reason }).containsExactly(DelayReason.INSPECTION)
+    }
+
+    // AC-F47: every job offers its summary PDF, Active jobs first; a failure says so and the next try clears it
+    @Test fun jobSummariesListJobsAndShareThePdf() {
+        val vm = vm()
+        assertThat(vm.state.value.summaries.map { it.name }).containsExactly("Attic run", "Garage subpanel", "Bath fan").inOrder()
+        assertThat(vm.state.value.summaries.last().line).isEqualTo("22 Birch Ct")
+        vm.onEvent(ReportsEvent.ShareJobSummary("j1"))
+        assertThat(summariesAsked).containsExactly("j1")
+        assertThat(vm.state.value.summaryBusy).isNull()
+        assertThat(vm.state.value.summaryFailed).isFalse()
+        summaryWorks = false
+        vm.onEvent(ReportsEvent.ShareJobSummary("j3"))
+        assertThat(vm.state.value.summaryFailed).isTrue()
+        summaryWorks = true
+        vm.onEvent(ReportsEvent.ShareJobSummary("j3"))
+        assertThat(vm.state.value.summaryFailed).isFalse()
     }
 }

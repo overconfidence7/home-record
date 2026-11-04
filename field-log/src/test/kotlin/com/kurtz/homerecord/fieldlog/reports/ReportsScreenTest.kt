@@ -66,4 +66,16 @@ class ReportsScreenTest {
         rule.onNodeWithTag("fl_reports_list").performScrollToNode(hasTestTag("fl_reports_delays_none"))
         rule.onNodeWithText("No delays logged in these dates.").assertExists()
     }
+
+    @AcceptanceCriterion("AC-F47")
+    @Test fun aJobSummaryRowAsksForItsPdfAndAFailureSaysSo() {
+        val events = mutableListOf<ReportsEvent>()
+        val s = state.copy(summaries = listOf(SummaryJob("j1", "Hale kitchen", "14 Maple Ave")), summaryFailed = true)
+        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(s, { events += it }, {}) } }
+        rule.onNodeWithTag("fl_reports_list").performScrollToNode(hasTestTag("fl_reports_summary_j1"))
+        rule.onNodeWithText("Job summaries").assertExists()
+        rule.onNodeWithText("Couldn't make the job summary. Try again.").assertExists()
+        rule.onNodeWithTag("fl_reports_summary_j1").performClick()
+        assertThat(events).containsExactly(ReportsEvent.ShareJobSummary("j1"))
+    }
 }

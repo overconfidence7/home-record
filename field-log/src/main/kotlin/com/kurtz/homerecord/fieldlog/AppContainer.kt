@@ -462,6 +462,11 @@ class AppContainer(private val app: Application) {
 
     fun reportsDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership): com.kurtz.homerecord.fieldlog.reports.ReportsDeps {
         val sharer = com.kurtz.homerecord.fieldlog.reports.TimeExportSharer(app)
+        val summaries = com.kurtz.homerecord.fieldlog.reports.JobSummaryPdfMaker(
+            app, db,
+            delays = { jobId -> dailyLogs.observeDays(jobId).map { logs -> logs.map { com.kurtz.homerecord.core.model.DelayDay(it.jobId, it.day, it.sections.delays) } } },
+            membership = { company.current },
+        )
         return com.kurtz.homerecord.fieldlog.reports.ReportsDeps(
             members = db.memberDao().observeFor(membership.companyId),
             punches = db.punchDao().observeFor(membership.companyId),
@@ -469,6 +474,7 @@ class AppContainer(private val app: Application) {
             clients = db.clientDao().observeFor(membership.companyId),
             settings = company.settings,
             share = { sharer.share(sharer.write(it)) },
+            shareJobSummary = { jobId -> summaries.make(jobId)?.let(summaries::share) ?: false },
             delays = { from, to ->
                 dailyLogs.observeRange(from, to).map { logs ->
                     logs.map { com.kurtz.homerecord.core.model.DelayDay(it.jobId, it.day, it.sections.delays) }

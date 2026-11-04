@@ -143,6 +143,52 @@
     </plurals>
     <string name="rep_delay_line">%1$s · %2$s</string>
     <string name="rep_delay_open">Open the daily log</string>
+    <string name="rep_summaries">Job summaries</string>
+    <string name="rep_summaries_hint">Hours against the budget, change orders, tasks, days on site and delays, from the first day to today, as a PDF.</string>
+    <string name="rep_summaries_none">No jobs yet.</string>
+    <string name="rep_summary_make">Share job summary PDF</string>
+    <string name="rep_summary_making">Making the PDF…</string>
+    <string name="rep_summary_failed">Couldn\'t make the job summary. Try again.</string>
+    <string name="rep_summary_share_title">Share job summary</string>
+    <string name="rep_summary_title">Job summary, %1$s</string>
+    <string name="rep_summary_hours">Hours</string>
+    <string name="rep_summary_worked">Worked: %1$s</string>
+    <string name="rep_summary_budget">Budget: %1$s</string>
+    <string name="rep_summary_over">Over budget by %1$s</string>
+    <string name="rep_summary_left">Left in the budget: %1$s</string>
+    <string name="rep_summary_no_budget">No budget set for this job.</string>
+    <string name="rep_summary_changes">Change orders</string>
+    <string name="rep_summary_no_changes">No change orders.</string>
+    <plurals name="rep_summary_signed">
+        <item quantity="one">%1$d signed, %2$s</item>
+        <item quantity="other">%1$d signed, %2$s total</item>
+    </plurals>
+    <plurals name="rep_summary_drafts">
+        <item quantity="one">%1$d draft not signed yet, %2$s</item>
+        <item quantity="other">%1$d drafts not signed yet, %2$s total</item>
+    </plurals>
+    <plurals name="rep_summary_declined">
+        <item quantity="one">%1$d declined</item>
+        <item quantity="other">%1$d declined</item>
+    </plurals>
+    <string name="rep_summary_tasks">Tasks</string>
+    <string name="rep_summary_no_tasks">No tasks on this job.</string>
+    <string name="rep_summary_tasks_done">Done: %1$d</string>
+    <string name="rep_summary_tasks_open">Open: %1$d</string>
+    <string name="rep_summary_days_title">Days on site</string>
+    <string name="rep_summary_no_days">No one has clocked in on this job yet.</string>
+    <plurals name="rep_summary_days">
+        <item quantity="one">%1$d day on site</item>
+        <item quantity="other">%1$d days on site</item>
+    </plurals>
+    <string name="rep_summary_one_day">On %1$s</string>
+    <string name="rep_summary_span">From %1$s to %2$s</string>
+    <string name="rep_summary_no_delays">No delays logged.</string>
+    <plurals name="rep_summary_delay_days">
+        <item quantity="one">%1$d day with a delay</item>
+        <item quantity="other">%1$d days with a delay</item>
+    </plurals>
+    <string name="rep_summary_reason">%1$s: %2$d</string>
     <string name="more_timesheets">Timesheets</string>
     <string name="ts_title">Timesheets</string>
     <string name="ts_prev_week">Previous week</string>

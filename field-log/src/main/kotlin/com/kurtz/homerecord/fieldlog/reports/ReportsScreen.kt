@@ -5,11 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PictureAsPdf
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Button
@@ -83,6 +87,7 @@ fun ReportsScreen(
                 }
                 item { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
                 delayTimeline(state, onOpenLog)
+                jobSummaries(state, onEvent)
             }
         }
     }
@@ -208,5 +213,44 @@ private fun LazyListScope.delayTimeline(state: ReportsUiState, onOpenLog: (Strin
                 modifier = Modifier.fillMaxWidth().testTag("fl_reports_delay_${job.jobId}_${entry.day}_${entry.index}"),
             )
         }
+    }
+}
+
+/**
+ * Job summaries (AC-F47): every job, Active first; tapping one makes its summary PDF (hours against the budget,
+ * change orders, tasks, days on site, delays) and opens the share sheet.
+ */
+private fun LazyListScope.jobSummaries(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit) {
+    item(key = "summaries-h") { SectionHeading(stringResource(R.string.rep_summaries)) }
+    item(key = "summaries-hint") {
+        Text(
+            stringResource(if (state.summaries.isEmpty()) R.string.rep_summaries_none else R.string.rep_summaries_hint),
+            Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (state.summaryFailed) {
+        item(key = "summaries-failed") {
+            Text(
+                stringResource(R.string.rep_summary_failed),
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("fl_reports_summary_failed"),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    items(state.summaries, key = { "summary-${it.id}" }) { job ->
+        val busy = state.summaryBusy == job.id
+        RecordListItem(
+            headline = job.name,
+            supporting = if (busy) stringResource(R.string.rep_summary_making) else job.line,
+            leading = { Icon(Icons.Rounded.PictureAsPdf, contentDescription = null) },
+            trailing = {
+                if (busy) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 3.dp)
+                else Icon(Icons.Rounded.Share, contentDescription = null)
+            },
+            onClick = { onEvent(ReportsEvent.ShareJobSummary(job.id)) },
+            onClickLabel = stringResource(R.string.rep_summary_make),
+            modifier = Modifier.fillMaxWidth().testTag("fl_reports_summary_${job.id}"),
+        )
     }
 }

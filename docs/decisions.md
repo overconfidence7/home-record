@@ -889,3 +889,8 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 - `mergeRow` (backend/src/sync/merge.ts) treats a stored `change_order` whose status is SIGNED as sealed: every phone write to it is dropped and logged as a conflict with reason `signed`, whatever its updatedAt and whoever sends it. Before, per-field last-writer-wins let an offline phone's later Draft edit (or a second, offline signature) overwrite the client's web signature, putting the order back to Draft with no signature. AC-F38 already makes a Signed order read only in the app ("duplicate to change"), so no legitimate write is lost. The share page's own signing path (`serverWrite`) already refused a second signature.
 - Not mirrored in the app's `RowMerge`: the phone pushes before it pulls, so after the refused push the pull brings the sealed row with nothing pending and it lands as is.
+
+## 2026-11-04 — T061a: job summary PDF covers the whole job
+
+- The job summary (AC-F47) runs from the job's first punch to today, not the Reports week range: "hours vs budget" only means something against all the hours. Days on site are the days someone started work on the job (clock in, switch to it, back from a break). Change orders show signed (count and total) apart from drafts and declined, so the total is what the client agreed to. Delays come from the job's saved daily logs, counted by days and by reason.
+- Reports lists every job (Active first, then by name) under Job summaries; a tap makes the PDF with the daily log's layout and opens the share sheet. No new dependency.
