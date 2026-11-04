@@ -18,15 +18,20 @@ appId: com.kurtz.homerecord.fieldlog
     when:
       visible: "Today"
     commands:
-      - tapOn: "Today"
+      - tapOn:
+          id: "fl_tab_today"
       - takeScreenshot: tour-${output.variant}-today
-      - tapOn: "Jobs"
+      - tapOn:
+          id: "fl_tab_jobs"
       - takeScreenshot: tour-${output.variant}-jobs
-      - tapOn: "Clock"
+      - tapOn:
+          id: "fl_tab_clock"
       - takeScreenshot: tour-${output.variant}-clock
-      - tapOn: "Schedule"
+      - tapOn:
+          id: "fl_tab_schedule"
       - takeScreenshot: tour-${output.variant}-schedule
-      - tapOn: "More"
+      - tapOn:
+          id: "fl_tab_more"
       - takeScreenshot: tour-${output.variant}-more
       - tapOn: "Team"
       - takeScreenshot: tour-${output.variant}-team
@@ -36,7 +41,8 @@ appId: com.kurtz.homerecord.fieldlog
       - takeScreenshot: tour-${output.variant}-company
       - tapOn:
           id: "fl_close"
-      - tapOn: "Today"
+      - tapOn:
+          id: "fl_tab_today"
 - runFlow:
     when:
       true: ${output.variant == 'landscape'}
