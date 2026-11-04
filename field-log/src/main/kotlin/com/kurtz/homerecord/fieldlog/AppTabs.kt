@@ -140,6 +140,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenReports = { nav.push(ReportsKey) },
                     onOpenCompany = { nav.push(CompanyKey) },
                     onOpenClients = { nav.push(ClientsKey) },
+                    onOpenMaterials = { nav.push(MaterialsKey) },
                     onOpenSync = { nav.push(SyncLogKey) },
                     onSignOut = container::signOut,
                 )
@@ -366,6 +367,17 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 onBack = nav::pop,
                 onOpenJob = { nav.push(JobKey(it)) },
             )
+        }
+        entry<MaterialsKey> {
+            com.kurtz.homerecord.fieldlog.materials.MaterialsRoute(
+                { container.materialsDeps(membership.companyId) },
+                onBack = nav::pop,
+                onAdd = { nav.push(MaterialFormKey()) },
+                onOpen = { nav.push(MaterialFormKey(it)) },
+            )
+        }
+        entry<MaterialFormKey> { key ->
+            com.kurtz.homerecord.fieldlog.materials.MaterialFormRoute(container.materialFormDeps(membership.companyId, key.materialId), onClose = nav::pop)
         }
         entry<SyncLogKey> {
             com.kurtz.homerecord.fieldlog.sync.SyncLogRoute({ container.syncLogDeps() }, onBack = nav::pop)

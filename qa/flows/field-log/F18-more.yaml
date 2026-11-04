@@ -64,3 +64,69 @@ appId: com.kurtz.homerecord.fieldlog
 - back
 - assertVisible:
     id: fl_more_clients
+# AC-F44: Materials and receipts: empty, add a receipt to the job, the job's total and the total for all jobs
+- tapOn:
+    id: fl_more_materials
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_empty
+    timeout: 10000
+- tapOn: "Add receipt"
+- extendedWaitUntil:
+    visible:
+      id: fl_material_form_scan
+    timeout: 10000
+- assertVisible: "Hale kitchen"
+- tapOn:
+    id: fl_material_form_save
+- assertVisible: "Enter the amount on the receipt."
+- tapOn:
+    id: fl_material_form_vendor
+- inputText: "City Electric Supply"
+- tapOn:
+    id: fl_material_form_amount
+- inputText: "123.71"
+- hideKeyboard
+- tapOn:
+    id: fl_material_form_cat_tools
+- tapOn:
+    id: fl_material_form_save
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_list
+    timeout: 10000
+- assertVisible: "City Electric Supply"
+- assertVisible: "$123.71"
+- assertVisible:
+    id: fl_materials_total
+- takeScreenshot: F18-materials
+# AC-F44: Export CSV opens the share sheet
+- tapOn:
+    id: fl_materials_export
+- extendedWaitUntil:
+    notVisible:
+      id: fl_materials_export
+    timeout: 10000
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_list
+    timeout: 10000
+# AC-F44: the receipt opens for editing and deletes with a confirm
+- tapOn: "City Electric Supply"
+- scrollUntilVisible:
+    element:
+      id: fl_material_form_delete
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: fl_material_form_delete
+- tapOn:
+    id: fl_material_form_delete_confirm
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_empty
+    timeout: 10000
+- back
+- assertVisible:
+    id: fl_more_materials

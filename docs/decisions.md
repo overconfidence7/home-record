@@ -871,3 +871,10 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 
 ## 2026-11-04 — FL-Clients is Owner/Office only and lists clients named on live jobs
 SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left out, and the screen sits with Team and Company in More's admin rows, so Crew and Leads do not see client phone numbers and emails outside the jobs they work. Phone and email are edited on the job form (the client row is shared), so Clients is read-and-act only.
+
+## 2026-11-04 — FL-Materials (T060b): categories, admin-only for now, the OCR total is a suggestion
+- Categories are a fixed list stored by enum name in `material.category`: Materials, Tools, Equipment rental, Fuel, Permits, Other; an unknown stored value reads as Other.
+- More → Materials and receipts is Owner/Office only, like Clients. Backend policy also lets a Lead write materials on the jobs they run; the Lead entry comes with T060c.
+- Scan receipt uses the ML Kit document scanner in JPEG mode with one page (`rememberReceiptScanner` in :core-ui), copies the page to `filesDir/media/<uuid>.jpg` and reads it with the bundled ML Kit recognizer already used for data plates. `ReceiptTotal` takes the last "Total / Amount due / Balance due / Grand total" line with an amount (same line or the next), skipping subtotal, tax, savings and item counts. The total is offered as a "Use $x from the receipt" chip, never filled in silently, because a misread total would otherwise go to the bookkeeper unnoticed.
+- The CSV is Date, Job, Vendor, Category, Amount, Note, then a Total line per job and one for all jobs; cells go through the same quoting and formula defusing as the time exports.
+- `receiptPath` is a device-local column (LocalColumns), so the receipt image stays on the phone that scanned it until T060c uploads it.

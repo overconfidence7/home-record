@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.coreui.theme.Brand
@@ -47,8 +48,9 @@ class RoleGatesTest {
         more(CompanyRole.Owner) { events += it }
         rule.onNodeWithText("Team").assertIsDisplayed().performClick()
         rule.onNodeWithText("Clients").assertIsDisplayed().performClick()
-        rule.onNodeWithText("Company").assertIsDisplayed().performClick()
-        assertThat(events).containsExactly(MoreEvent.OpenTeam, MoreEvent.OpenClients, MoreEvent.OpenCompany).inOrder()
+        rule.onNodeWithText("Materials and receipts").performScrollTo().assertIsDisplayed().performClick()
+        rule.onNodeWithText("Company").performScrollTo().assertIsDisplayed().performClick()
+        assertThat(events).containsExactly(MoreEvent.OpenTeam, MoreEvent.OpenClients, MoreEvent.OpenMaterials, MoreEvent.OpenCompany).inOrder()
     }
 
     @Test fun officeSeesTeamAndCompany() {
@@ -62,6 +64,7 @@ class RoleGatesTest {
         rule.onNodeWithText("Team").assertDoesNotExist()
         rule.onNodeWithText("Company").assertDoesNotExist()
         rule.onNodeWithText("Clients").assertDoesNotExist()
+        rule.onNodeWithText("Materials and receipts").assertDoesNotExist()
         rule.onNodeWithText("Sign out").assertIsDisplayed()
     }
 

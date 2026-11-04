@@ -385,6 +385,8 @@ interface MaterialDao {
     @Query("SELECT * FROM material WHERE id = :id AND deletedAt IS NULL") suspend fun get(id: String): MaterialEntity?
     @Query("SELECT * FROM material WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<MaterialEntity>>
     @Query("SELECT * FROM material WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<MaterialEntity>
+    @Query("SELECT material.* FROM material JOIN job ON job.id = material.jobId WHERE job.companyId = :companyId AND job.deletedAt IS NULL AND material.deletedAt IS NULL ORDER BY material.date DESC, material.createdAt DESC")
+    fun observeForCompany(companyId: String): Flow<List<MaterialEntity>>
     @Query("UPDATE material SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
 }
 

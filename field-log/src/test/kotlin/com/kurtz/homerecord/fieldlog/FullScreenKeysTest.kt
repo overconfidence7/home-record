@@ -7,12 +7,12 @@ import org.junit.Test
 /** judge:fl-markup-nav-bar, judge:fl-capture-nav-bar: editors and the camera hide the tab bar (rules 3 and 30). */
 class FullScreenKeysTest {
     @Test fun editorsAndCaptureAreFullScreen() {
-        listOf(MarkupKey("f"), AnnotateKey("p"), CaptureKey("j"), LogWeatherKey("j", "2026-10-31"), JobEditKey(null), CompanyKey)
+        listOf(MarkupKey("f"), AnnotateKey("p"), CaptureKey("j"), LogWeatherKey("j", "2026-10-31"), JobEditKey(null), CompanyKey, MaterialFormKey(null), MaterialFormKey("m"))
             .forEach { assertTrue("$it", isFullScreen(it)) }
     }
 
     @Test fun viewersAndListsKeepTheTabBar() {
-        listOf(JobKey("j"), FileKey("f"), PhotoKey("p"), TeamKey, TimesheetsKey(), ReportsKey, ClientsKey, JobRoomKey("r"))
+        listOf(JobKey("j"), FileKey("f"), PhotoKey("p"), TeamKey, TimesheetsKey(), ReportsKey, ClientsKey, MaterialsKey, JobRoomKey("r"))
             .forEach { assertFalse("$it", isFullScreen(it)) }
     }
 }

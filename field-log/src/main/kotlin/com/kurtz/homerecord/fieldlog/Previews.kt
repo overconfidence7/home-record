@@ -2123,3 +2123,85 @@ fun ClientsListPreview() = Frame {
 fun ClientsEmptyPreview() = Frame {
     com.kurtz.homerecord.fieldlog.clients.ClientsScreen(com.kurtz.homerecord.fieldlog.clients.ClientsUiState(loading = false), {}, {})
 }
+
+private fun previewMaterial(id: String, job: String, vendor: String?, cents: Long, cat: com.kurtz.homerecord.core.material.MaterialCategory, date: String, note: String? = null) =
+    com.kurtz.homerecord.core.material.Material(id, job, vendor, cents, cat, date, null, note)
+
+private val previewMaterialGroups = com.kurtz.homerecord.core.material.MaterialsReport.group(
+    listOf(
+        previewMaterial("m1", "j1", "City Electric Supply", 12_371, com.kurtz.homerecord.core.material.MaterialCategory.MATERIALS, "2026-11-03", "12/2 NM-B and Wago 221s"),
+        previewMaterial("m2", "j1", "Sunbelt Rentals", 9_500, com.kurtz.homerecord.core.material.MaterialCategory.EQUIPMENT_RENTAL, "2026-11-04", "Rotary hammer, one day"),
+        previewMaterial("m3", "j1", null, 1_500, com.kurtz.homerecord.core.material.MaterialCategory.PERMITS, "2026-10-28"),
+        previewMaterial("m4", "j2", "Home Depot", 41_288, com.kurtz.homerecord.core.material.MaterialCategory.MATERIALS, "2026-11-02", "Deck screws and joist hangers"),
+        previewMaterial("m5", "j2", "Speedway", 6_214, com.kurtz.homerecord.core.material.MaterialCategory.FUEL, "2026-11-02"),
+    ),
+    mapOf("j1" to "Hale kitchen", "j2" to "Smith deck"),
+)
+
+private val previewMaterialJobs = listOf(
+    com.kurtz.homerecord.fieldlog.materials.JobOption("j1", "Hale kitchen"),
+    com.kurtz.homerecord.fieldlog.materials.JobOption("j2", "Smith deck"),
+)
+
+/** Receipts by job with each job's total and the total for all jobs (AC-F44). */
+@ThemePreviews
+@Composable
+fun MaterialsListPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.materials.MaterialsScreen(com.kurtz.homerecord.fieldlog.materials.MaterialsUiState(loading = false, groups = previewMaterialGroups), {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun MaterialsEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.materials.MaterialsScreen(com.kurtz.homerecord.fieldlog.materials.MaterialsUiState(loading = false), {}, {})
+}
+
+/** A new receipt: Scan receipt first, then the fields; Save tapped with no amount shows the error (AC-F44). */
+@ThemePreviews
+@Composable
+fun MaterialFormNewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.materials.MaterialFormScreen(
+        com.kurtz.homerecord.fieldlog.materials.MaterialFormUiState(
+            loading = false, canScan = true, jobs = previewMaterialJobs, showErrors = true,
+            draft = com.kurtz.homerecord.fieldlog.materials.MaterialFormDraft(jobId = "j1", vendor = "City Electric Supply", date = "2026-11-04"),
+        ),
+        {}, {},
+    )
+}
+
+/** A scanned receipt: the photo, Scan again, Remove, and "Use $123.71 from the receipt" (AC-F44). */
+@ThemePreviews
+@Composable
+fun MaterialFormScannedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.materials.MaterialFormScreen(
+        com.kurtz.homerecord.fieldlog.materials.MaterialFormUiState(
+            loading = false, canScan = true, jobs = previewMaterialJobs, suggestedCents = 12_371,
+            draft = com.kurtz.homerecord.fieldlog.materials.MaterialFormDraft(jobId = "j1", date = "2026-11-04", receiptPath = "/preview/receipt.jpg"),
+        ),
+        {}, {},
+    )
+}
+
+/** Editing a saved receipt whose scan had no readable total: the note, the typed amount, Delete receipt. */
+@ThemePreviews
+@Composable
+fun MaterialFormEditPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.materials.MaterialFormDraft(
+        jobId = "j2", vendor = "Home Depot", amount = "412.88", category = com.kurtz.homerecord.core.material.MaterialCategory.MATERIALS,
+        date = "2026-11-02", note = "Deck screws and joist hangers", receiptPath = "/preview/receipt.jpg",
+    )
+    com.kurtz.homerecord.fieldlog.materials.MaterialFormScreen(
+        com.kurtz.homerecord.fieldlog.materials.MaterialFormUiState(loading = false, isNew = false, canScan = true, jobs = previewMaterialJobs, noTotalFound = true, draft = draft, initial = draft),
+        {}, {},
+    )
+}
+
+/** The job picker sheet's list (AC-F44). */
+@ThemePreviews
+@Composable
+fun MaterialFormJobSheetPreview() = Frame {
+    com.kurtz.homerecord.coreui.components.OptionsSheetContent(
+        "Pick a job",
+        previewMaterialJobs.map { com.kurtz.homerecord.coreui.components.SheetOption(it.id, it.name, androidx.compose.material.icons.Icons.Rounded.Work) },
+    ) {}
+}

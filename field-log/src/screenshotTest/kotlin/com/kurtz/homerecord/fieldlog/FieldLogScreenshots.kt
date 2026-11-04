@@ -826,3 +826,33 @@ fun ClientsListScreenshot() = ClientsListPreview()
 @ThemePreviews
 @Composable
 fun ClientsEmptyScreenshot() = ClientsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialsListScreenshot() = MaterialsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialsEmptyScreenshot() = MaterialsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialFormNewScreenshot() = MaterialFormNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialFormScannedScreenshot() = MaterialFormScannedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialFormEditScreenshot() = MaterialFormEditPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MaterialFormJobSheetScreenshot() = MaterialFormJobSheetPreview()

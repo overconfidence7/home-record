@@ -36,3 +36,32 @@ fun rememberDocumentScanner(onPdf: (String) -> Unit, onFailed: () -> Unit): () -
         }
     }
 }
+
+/** Opens the ML Kit document scanner for one receipt page (FL Materials, AC-F44); [onImage] gets the page's JPEG uri for OCR. */
+@Composable
+fun rememberReceiptScanner(onImage: (String) -> Unit, onFailed: () -> Unit, onCancelled: () -> Unit): () -> Unit {
+    val activity = LocalActivity.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val page = GmsDocumentScanningResult.fromActivityResultIntent(result.data)?.pages?.firstOrNull()?.imageUri
+            if (page != null) onImage(page.toString()) else onFailed()
+        } else {
+            onCancelled()
+        }
+    }
+    return {
+        if (activity == null) {
+            onFailed()
+        } else {
+            val options = GmsDocumentScannerOptions.Builder()
+                .setGalleryImportAllowed(true)
+                .setPageLimit(1)
+                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                .build()
+            GmsDocumentScanning.getClient(options).getStartScanIntent(activity)
+                .addOnSuccessListener { launcher.launch(IntentSenderRequest.Builder(it).build()) }
+                .addOnFailureListener { onFailed() }
+        }
+    }
+}
