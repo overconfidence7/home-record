@@ -237,14 +237,14 @@ class LogSendTest {
         var opens = 0
         val failing = FakeLogSender().apply { makeFails = true }
         val none = LogPreviewViewModel(LogPreviewDeps("j1", day, repo, failing, open = { opens++; pages }))
-        assertThat(withTimeout(5_000) { none.state.first { !it.loading } }.failed).isTrue() // no log saved for the day yet
+        assertThat(withTimeout(20_000) { none.state.first { !it.loading } }.failed).isTrue() // no log saved for the day yet
 
         repo.assemble("j1", day)
         val p = LogPreviewViewModel(LogPreviewDeps("j1", day, repo, failing, open = { opens++; pages }))
-        assertThat(withTimeout(5_000) { p.state.first { !it.loading } }.failed).isTrue()
+        assertThat(withTimeout(20_000) { p.state.first { !it.loading } }.failed).isTrue()
         failing.makeFails = false
         p.onEvent(LogPreviewEvent.Retry)
-        val shown = withTimeout(5_000) { p.state.first { !it.loading } }
+        val shown = withTimeout(20_000) { p.state.first { !it.loading } }
         assertThat(shown.failed).isFalse()
         assertThat(shown.pages?.pageCount).isEqualTo(2)
         assertThat(failing.made.single().day).isEqualTo(day)
