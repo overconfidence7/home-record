@@ -36,7 +36,8 @@ import org.robolectric.annotation.Config
 // AC-F37: create from a job: title, description (keyboard or voice), line items with quantity and price, total in cents, client name
 // AC-F38: Sign on phone saves first; a Signed order shows who signed and when, read only, and duplicates to change
 // AC-F39: Share PDF makes the order's PDF (saving a Draft's typing first) and opens the share sheet
-@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F39")
+// AC-F40: Send link to sign makes the share link and opens the share sheet; a web-signed order shows Signed with its signature
+@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F39", "AC-F40")
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -83,10 +84,33 @@ class ChangeOrderFormViewModelTest {
     private val sharer by lazy { FakeSharer(orders) }
     private var clock = 1_000L
 
-    private fun vm(id: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle()): ChangeOrderFormViewModel {
+    private val shareLinks by lazy {
+        com.kurtz.homerecord.core.share.ShareLinks(db, "https://api.example.test", newToken = { "tok-${tokens++}-abcdefghijklmnop" })
+    }
+    private var tokens = 0
+
+    /** [ShareLinks] for job j1's change orders; records what the share sheet got. */
+    private inner class FakeLinks : CoLinks {
+        var failShare = false
+        val sent = mutableListOf<Triple<String, String, Boolean>>()
+        private fun t(id: String) = com.kurtz.homerecord.core.share.ShareTarget(com.kurtz.homerecord.core.share.ShareLinkKind.CHANGE_ORDER, "j1", id)
+        override fun observe(changeOrderId: String) = shareLinks.observeUrl(t(changeOrderId))
+        override suspend fun make(changeOrderId: String) = shareLinks.urlFor(t(changeOrderId))
+        override suspend fun turnOff(changeOrderId: String) = shareLinks.turnOff(t(changeOrderId))
+        override fun share(url: String, title: String, forSigning: Boolean): Boolean {
+            sent += Triple(url, title, forSigning)
+            return !failShare
+        }
+    }
+    private val links by lazy { FakeLinks() }
+    private var drawn = mutableListOf<String>()
+
+    private fun vm(id: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle(), admin: Boolean = true): ChangeOrderFormViewModel {
         val deps = ChangeOrderFormDeps(
             "j1", id, orders, flowOf(manage), clientName = { "Dana Hale" }, canDictate = true, newLineId = { "n${lineIds++}" },
-            photos = jobPhotos, sharer = sharer, now = { clock },
+            photos = jobPhotos, sharer = sharer, links = links, canLink = flowOf(admin),
+            signatureImage = { coId -> orders.signatureImage(coId) { drawn += coId; "/m/drawn-$coId.png" } },
+            now = { clock },
         )
         return ViewModelProvider.create(store, viewModelFactory { initializer { ChangeOrderFormViewModel(deps, saved) } })["vm${made++}", ChangeOrderFormViewModel::class]
     }
@@ -301,5 +325,65 @@ class ChangeOrderFormViewModelTest {
         assertThat(st.shareFailed).isFalse()
         m.onEvent(ChangeOrderFormEvent.Title(""))
         assertThat(m.state.value.canShare).isFalse()
+    }
+
+    // AC-F40: Send link to sign saves a Draft's typing, makes one link and opens the share sheet worded to sign; the
+    // link shows as on until turned off (AC-B35), and the next send makes a new one. Only Owner and Office see it.
+    @Test fun sendLinkToSignMakesOneLinkSharesItAndTurnsOff() {
+        val id = checkNotNull(runBlocking { orders.add("j1", ChangeOrderDraft("Island outlet", lines = listOf(ChangeOrderLineItem("l1", "Outlet", 1_000, 18_500)))) })
+        assertThat(vm(id, admin = false).current().canShareLink).isFalse()
+        val m = vm(id)
+        m.current()
+        m.onEvent(ChangeOrderFormEvent.Title("Island outlet and USB"))
+        assertThat(m.state.value.canShareLink).isTrue()
+        m.onEvent(ChangeOrderFormEvent.ShareLink)
+        val st = m.current { !it.linkWorking && it.linkUrl != null }
+        assertThat(st.linkFailed).isFalse()
+        assertThat(st.dirty).isFalse()
+        assertThat(runBlocking { orders.get(id) }?.title).isEqualTo("Island outlet and USB")
+        val url = "https://api.example.test/share/co/tok-0-abcdefghijklmnop"
+        assertThat(st.linkUrl).isEqualTo(url)
+        assertThat(links.sent).containsExactly(Triple(url, "Island outlet and USB", true))
+        // Sending again reuses the same link.
+        m.onEvent(ChangeOrderFormEvent.ShareLink)
+        m.current { !it.linkWorking && links.sent.size == 2 }
+        assertThat(links.sent.map { it.first }.distinct()).containsExactly(url)
+        // Turn off asks first, then the link is gone.
+        m.onEvent(ChangeOrderFormEvent.AskLinkOff)
+        assertThat(m.state.value.confirmLinkOff).isTrue()
+        m.onEvent(ChangeOrderFormEvent.LinkOff)
+        val off = m.current { !it.linkWorking && it.linkUrl == null }
+        assertThat(off.confirmLinkOff).isFalse()
+        assertThat(runBlocking { db.shareLinkDao().listFor("j1") }.single().revoked).isTrue()
+        m.onEvent(ChangeOrderFormEvent.ShareLink)
+        assertThat(m.current { it.linkUrl != null && !it.linkWorking }.linkUrl).isNotEqualTo(url)
+        // A share sheet that cannot open says so.
+        links.failShare = true
+        m.onEvent(ChangeOrderFormEvent.ShareLink)
+        assertThat(m.current { !it.linkWorking && it.linkFailed }.linkFailed).isTrue()
+    }
+
+    // AC-F40: an order the client signed on the share page arrives with strokes only; the form shows it Signed with
+    // the drawn signature and "Signed through the link", and its link is worded to read, not sign.
+    @Test fun aWebSignedOrderShowsItsDrawnSignature() {
+        runBlocking {
+            db.changeOrderDao().upsert(
+                com.kurtz.homerecord.core.data.ChangeOrderEntity(
+                    id = "web", jobId = "j1", title = "Fridge circuit", status = "SIGNED", signedBy = "Dana Hale", signedAt = 9_000,
+                    signatureJson = com.kurtz.homerecord.core.model.Signature.encode(listOf(com.kurtz.homerecord.core.model.SignatureStroke(listOf(0.1f, 0.5f, 0.7f, 0.4f)))),
+                    signedVia = "web", linesJson = "[]", createdAt = 1, updatedAt = 9_000,
+                ),
+            )
+        }
+        val m = vm("web")
+        val st = m.current { it.signature?.imagePath != null }
+        assertThat(st.locked).isTrue()
+        assertThat(st.signature?.signedBy).isEqualTo("Dana Hale")
+        assertThat(st.signature?.onWeb).isTrue()
+        assertThat(st.signature?.imagePath).isEqualTo("/m/drawn-web.png")
+        assertThat(drawn).containsExactly("web")
+        m.onEvent(ChangeOrderFormEvent.ShareLink)
+        m.current { !it.linkWorking && it.linkUrl != null }
+        assertThat(links.sent.single().third).isFalse()
     }
 }

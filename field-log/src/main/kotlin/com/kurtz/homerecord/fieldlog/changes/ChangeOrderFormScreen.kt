@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.LinkOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -176,6 +178,7 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
         }
         state.signature?.let { SignatureCard(it) }
         if (!state.isNew) ShareButton(state, onEvent)
+        if (!state.isNew && state.linkAllowed && !state.declined) LinkSection(state, onEvent)
         if (state.signature != null) DuplicateButton(state.working, onEvent)
         if (!state.isNew && !state.locked) {
             OutlinedButton(
@@ -189,6 +192,24 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
         }
     }
     if (state.pickingPhotos && editable) PhotoSheet(state, onEvent)
+    if (state.confirmLinkOff) {
+        AlertDialog(
+            modifier = Modifier.windowTestTags(),
+            onDismissRequest = { onEvent(ChangeOrderFormEvent.DismissLinkOff) },
+            title = { Text(stringResource(R.string.co_form_link_off_title)) },
+            text = { Text(stringResource(R.string.co_form_link_off_body)) },
+            confirmButton = {
+                TextButton({ onEvent(ChangeOrderFormEvent.LinkOff) }, Modifier.heightIn(min = 48.dp).testTag("fl_co_form_link_off_confirm")) {
+                    Text(stringResource(R.string.co_form_link_off_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton({ onEvent(ChangeOrderFormEvent.DismissLinkOff) }, Modifier.heightIn(min = 48.dp).testTag("fl_co_form_link_off_cancel")) {
+                    Text(stringResource(R.string.co_form_cancel))
+                }
+            },
+        )
+    }
     if (state.confirmDelete) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),
@@ -234,6 +255,50 @@ private fun ShareButton(state: ChangeOrderFormUiState, onEvent: (ChangeOrderForm
     }
 }
 
+/**
+ * Share link (AC-F40): the client opens it, reads the order and signs on their own phone; the order shows Signed here
+ * after the next sync. While a link is on it says so, with Turn off link (AC-B35).
+ */
+@Composable
+private fun LinkSection(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFormEvent) -> Unit) {
+    OutlinedButton(
+        onClick = { onEvent(ChangeOrderFormEvent.ShareLink) },
+        enabled = state.canShareLink,
+        modifier = Modifier.heightIn(min = 56.dp).testTag("fl_co_form_share_link"),
+    ) {
+        if (state.linkWorking) {
+            CircularProgressIndicator(Modifier.padding(end = 8.dp).size(18.dp), strokeWidth = 2.dp)
+        } else {
+            Icon(Icons.Rounded.Link, contentDescription = null, Modifier.padding(end = 8.dp))
+        }
+        Text(stringResource(if (state.signature == null) R.string.co_form_share_link_sign else R.string.co_form_share_link))
+    }
+    if (state.linkFailed) {
+        Text(
+            stringResource(R.string.co_form_link_failed),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("fl_co_form_link_failed"),
+        )
+    }
+    if (state.linkUrl != null) {
+        Text(
+            stringResource(if (state.signature == null) R.string.co_form_link_on_sign else R.string.co_form_link_on),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag("fl_co_form_link_on"),
+        )
+        TextButton(
+            onClick = { onEvent(ChangeOrderFormEvent.AskLinkOff) },
+            enabled = !state.linkWorking,
+            modifier = Modifier.heightIn(min = 48.dp).testTag("fl_co_form_link_off"),
+        ) {
+            Icon(Icons.Rounded.LinkOff, contentDescription = null, Modifier.padding(end = 8.dp))
+            Text(stringResource(R.string.co_form_link_off))
+        }
+    }
+}
+
 /** Who signed, when, and the signature itself (AC-F38). */
 @Composable
 private fun SignatureCard(sig: CoSignature) {
@@ -262,6 +327,12 @@ private fun SignatureCard(sig: CoSignature) {
                 }
             }
             Text(stringResource(R.string.co_form_signed_by, sig.signedBy, whenSigned), style = MaterialTheme.typography.bodyLarge)
+            if (sig.onWeb) {
+                Text(
+                    stringResource(R.string.co_form_signed_on_web), style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("fl_co_form_signed_on_web"),
+                )
+            }
         }
     }
 }

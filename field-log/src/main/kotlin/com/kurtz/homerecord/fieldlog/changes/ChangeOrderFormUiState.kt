@@ -57,8 +57,8 @@ data class ChangeOrderFormDraft(
 /** A job photo the change order can show; [path] is "" while the photo is not on this phone yet. */
 data class CoPhoto(val id: String, val path: String, val createdAt: Long)
 
-/** Who signed a Signed order, when, and the signature image (AC-F38). */
-data class CoSignature(val signedBy: String, val signedAt: Long, val imagePath: String?)
+/** Who signed a Signed order, when, and the signature image (AC-F38); [onWeb] when signed on the share page (AC-F40). */
+data class CoSignature(val signedBy: String, val signedAt: Long, val imagePath: String?, val onWeb: Boolean = false)
 
 /** FL-ChangeOrder form: title, client, description (keyboard or voice), line items, total (AC-F37, rule 15). */
 @Immutable
@@ -90,6 +90,16 @@ data class ChangeOrderFormUiState(
     val sharing: Boolean = false,
     /** The PDF could not be made; Share PDF can be tried again. */
     val shareFailed: Boolean = false,
+    /** Owner or Office: may make and turn off share links (AC-F40; the backend refuses anyone else). */
+    val linkAllowed: Boolean = false,
+    /** The live share link, or null while there is none. */
+    val linkUrl: String? = null,
+    val linkWorking: Boolean = false,
+    /** The link could not be made (the job is gone) or the share sheet could not open. */
+    val linkFailed: Boolean = false,
+    val confirmLinkOff: Boolean = false,
+    /** Declined orders have no link to sign. */
+    val declined: Boolean = false,
 ) {
     val dirty: Boolean get() = draft != initial
     /** The title error shows once someone has typed and cleared it (rule 21). */
@@ -101,6 +111,8 @@ data class ChangeOrderFormUiState(
     val canSign: Boolean get() = canSave && draft.lines.any { !it.blank }
     /** Share PDF: a saved order; a Draft with typed changes saves them first, so it needs what Save needs (AC-F39). */
     val canShare: Boolean get() = !isNew && !loading && !failed && !working && !sharing && (locked || !dirty || canSave)
+    /** Share link (AC-F40): like Share PDF, a Draft's typing is saved first; Owner and Office only; not on a Declined order. */
+    val canShareLink: Boolean get() = linkAllowed && !declined && !isNew && !loading && !failed && !working && !linkWorking && (locked || !dirty || canSave)
 }
 
 sealed interface ChangeOrderFormEvent {
@@ -128,6 +140,12 @@ sealed interface ChangeOrderFormEvent {
     data object SignOnPhone : ChangeOrderFormEvent
     /** Share PDF: saves typed changes on a Draft, makes the PDF and opens the share sheet (AC-F39). */
     data object Share : ChangeOrderFormEvent
+    /** Share link: makes the link if there is none, then opens the share sheet with it (AC-F40). */
+    data object ShareLink : ChangeOrderFormEvent
+    data object AskLinkOff : ChangeOrderFormEvent
+    data object DismissLinkOff : ChangeOrderFormEvent
+    /** Turn off link: the page stops working for anyone who has it (AC-B35). */
+    data object LinkOff : ChangeOrderFormEvent
     /** On a Signed order: a new Draft copy to change (AC-F38). */
     data object Duplicate : ChangeOrderFormEvent
     data object AskDelete : ChangeOrderFormEvent

@@ -16,6 +16,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
+/** The share link of one change order (AC-F40): the URL while live, make it, turn it off, and the share sheet. */
+interface CoLinks {
+    fun observe(changeOrderId: String): Flow<String?>
+    suspend fun make(changeOrderId: String): String?
+    suspend fun turnOff(changeOrderId: String): Boolean
+    /** Opens the share sheet with the link; [forSigning] words it as a request to sign. False when it could not open. */
+    fun share(url: String, title: String, forSigning: Boolean): Boolean
+}
+
 class ChangeOrderFormDeps(
     val jobId: String,
     /** Null for a new change order. */
@@ -32,6 +41,12 @@ class ChangeOrderFormDeps(
     val photos: Flow<List<CoPhoto>> = flowOf(emptyList()),
     /** Makes the PDF and opens the share sheet (AC-F39). */
     val sharer: ChangeOrderSharer? = null,
+    /** Share links for this order (AC-F40); null hides Share link. */
+    val links: CoLinks? = null,
+    /** RoleGates.isAdmin: only Owner and Office write share links. */
+    val canLink: Flow<Boolean> = flowOf(false),
+    /** The signature PNG of a Signed order, drawn from the synced strokes when signed elsewhere (T058b). */
+    val signatureImage: suspend (changeOrderId: String) -> String? = { null },
     val now: () -> Long = System::currentTimeMillis,
 )
 
@@ -44,6 +59,11 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
     init {
         load()
         viewModelScope.launch { d.photos.collect(::onJobPhotos) }
+        viewModelScope.launch { d.canLink.collect { ok -> _state.update { it.copy(linkAllowed = ok) } } }
+        val links = d.links
+        if (links != null && d.changeOrderId != null) {
+            viewModelScope.launch { links.observe(d.changeOrderId).collect { url -> _state.update { it.copy(linkUrl = url) } } }
+        }
     }
 
     /**
@@ -74,9 +94,19 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             val locked = existing != null && existing.status != ChangeOrderStatus.DRAFT
             val draft = if (locked) initial else saved.get<String>(DRAFT)
                 ?.let { runCatching { json.decodeFromString(ChangeOrderFormDraft.serializer(), it) }.getOrNull() } ?: initial
-            val signature = existing?.takeIf { locked }?.let { CoSignature(it.signedBy.orEmpty(), it.signedAt ?: it.updatedAt, it.signaturePath) }
-            _state.update { it.copy(loading = false, locked = locked, draft = draft, initial = initial, signature = signature) }
+            val signature = existing?.takeIf { it.status == ChangeOrderStatus.SIGNED }
+                ?.let { CoSignature(it.signedBy.orEmpty(), it.signedAt ?: it.updatedAt, it.signaturePath, it.signedOnWeb) }
+            _state.update {
+                it.copy(
+                    loading = false, locked = locked, draft = draft, initial = initial, signature = signature,
+                    declined = existing?.status == ChangeOrderStatus.DECLINED,
+                )
+            }
             onJobPhotos(_state.value.jobPhotos)
+            // Signed on another phone or on the share page: only the strokes came with sync; draw the image once.
+            if (signature != null && existing != null && existing.signature.isNotEmpty()) {
+                d.signatureImage(existing.id)?.let { path -> _state.update { st -> st.copy(signature = st.signature?.copy(imagePath = path)) } }
+            }
         }
     }
 
@@ -107,6 +137,10 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
             ChangeOrderFormEvent.SignOnPhone -> signOnPhone()
             ChangeOrderFormEvent.Duplicate -> duplicate()
             ChangeOrderFormEvent.Share -> share()
+            ChangeOrderFormEvent.ShareLink -> shareLink()
+            ChangeOrderFormEvent.AskLinkOff -> if (_state.value.linkUrl != null && _state.value.linkAllowed) _state.update { it.copy(confirmLinkOff = true) }
+            ChangeOrderFormEvent.DismissLinkOff -> _state.update { it.copy(confirmLinkOff = false) }
+            ChangeOrderFormEvent.LinkOff -> linkOff()
             ChangeOrderFormEvent.AskDelete -> if (ready() && !_state.value.isNew) _state.update { it.copy(confirmDelete = true) }
             ChangeOrderFormEvent.DismissDelete -> _state.update { it.copy(confirmDelete = false) }
             ChangeOrderFormEvent.Delete -> delete()
@@ -168,17 +202,53 @@ class ChangeOrderFormViewModel(private val d: ChangeOrderFormDeps, private val s
         if (!st.canShare) return
         _state.update { it.copy(sharing = true, shareFailed = false) }
         viewModelScope.launch {
-            if (!st.locked && st.dirty) {
-                if (!d.orders.update(id, st.draft.toDraft())) {
-                    _state.update { it.copy(sharing = false, failed = true) }
-                    return@launch
-                }
-                saved.remove<String>(DRAFT)
-                _state.update { it.copy(initial = st.draft) }
+            if (!saveTyped(id, st)) {
+                _state.update { it.copy(sharing = false, failed = true) }
+                return@launch
             }
             val pdf = sharer.make(id)
             val shared = pdf != null && sharer.share(pdf)
             _state.update { it.copy(sharing = false, shareFailed = !shared) }
+        }
+    }
+
+    /** A Draft's typed changes saved, so what is shared matches the form. False when the save failed. */
+    private suspend fun saveTyped(id: String, st: ChangeOrderFormUiState): Boolean {
+        if (st.locked || !st.dirty) return true
+        if (!d.orders.update(id, st.draft.toDraft())) return false
+        saved.remove<String>(DRAFT)
+        _state.update { it.copy(initial = st.draft) }
+        return true
+    }
+
+    /**
+     * Share link (AC-F40): saves a Draft's typing, makes the link if there is none (it works once it has synced),
+     * and opens the share sheet. The client opens it, reads the order and signs; the order shows Signed on next sync.
+     */
+    private fun shareLink() {
+        val id = d.changeOrderId ?: return
+        val links = d.links ?: return
+        val st = _state.value
+        if (!st.canShareLink) return
+        _state.update { it.copy(linkWorking = true, linkFailed = false) }
+        viewModelScope.launch {
+            if (!saveTyped(id, st)) {
+                _state.update { it.copy(linkWorking = false, failed = true) }
+                return@launch
+            }
+            val url = links.make(id)
+            val shared = url != null && links.share(url, st.draft.title.trim(), forSigning = st.signature == null)
+            _state.update { it.copy(linkWorking = false, linkFailed = !shared, linkUrl = url ?: it.linkUrl) }
+        }
+    }
+
+    private fun linkOff() {
+        val id = d.changeOrderId ?: return
+        val links = d.links ?: return
+        _state.update { it.copy(confirmLinkOff = false, linkWorking = true) }
+        viewModelScope.launch {
+            links.turnOff(id)
+            _state.update { it.copy(linkWorking = false, linkUrl = null, linkFailed = false) }
         }
     }
 

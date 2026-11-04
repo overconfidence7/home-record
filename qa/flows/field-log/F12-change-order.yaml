@@ -1,7 +1,8 @@
 # Walkthrough F12 (T056a): change order on a job's Changes tab: empty state, the full-screen form with title, client,
 # description, two line items with quantity and price, and the total MoneyMath works out; saved as a Draft with its
 # total on the list; reopened, a line removed, the new total saved (AC-F37); signed on the phone, read only with
-# Duplicate (AC-F38, T057a); its PDF through the share sheet (AC-F39, T057b). The share link (T058) extends this flow.
+# Duplicate (AC-F38, T057a); its PDF through the share sheet (AC-F39, T057b); its share link sent and turned off
+# (AC-F40, T058b).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -219,6 +220,40 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - assertNotVisible:
     id: fl_co_form_share_failed
+# Share link (AC-F40, T058b): the owner sends the order's link; the share sheet opens with the text, Back shows
+# "Link is on"; Turn off link asks first and the line goes
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_share_link
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_share_link
+- extendedWaitUntil:
+    notVisible:
+      id: fl_co_form_share_link
+    timeout: 15000
+- takeScreenshot: F12-change-order-link-sheet
+- back
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_link_off
+    direction: DOWN
+- assertVisible:
+    id: fl_co_form_link_on
+- assertNotVisible:
+    id: fl_co_form_link_failed
+- tapOn:
+    id: fl_co_form_link_off
+- tapOn:
+    id: fl_co_form_link_off_confirm
+- extendedWaitUntil:
+    notVisible:
+      id: fl_co_form_link_on
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_duplicate
+    direction: DOWN
 - tapOn:
     id: fl_co_form_duplicate
 - extendedWaitUntil:

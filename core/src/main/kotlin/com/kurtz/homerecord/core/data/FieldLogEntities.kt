@@ -250,6 +250,10 @@ data class ChangeOrderEntity(
     val signedBy: String? = null,
     val pdfPath: String? = null,
     val shareToken: String? = null,
+    /** The signature as normalised strokes (Signature.encode), synced so every phone and the PDF can draw it (v13, T058b). */
+    val signatureJson: String? = null,
+    /** "web" when the client signed through the share link (AC-F40); null when signed on a phone. */
+    val signedVia: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
     val deletedAt: Long? = null,
@@ -289,6 +293,8 @@ data class ShareLinkEntity(
     @PrimaryKey val id: String,
     val kind: String,
     val jobId: String,
+    /** The daily log or change order the link shows; null for a job's photo gallery (v13, T058b). */
+    val targetId: String? = null,
     val token: String,
     val revoked: Boolean = false,
     val createdAt: Long,

@@ -160,6 +160,20 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T058b (AC-F40): older change orders and share links get no strokes, no web flag and no target.
+    @Test fun v12ToV13AddsSignatureStrokesAndLinkTargets() {
+        helper.createDatabase(12).use { db ->
+            db.execSQL("INSERT INTO change_order (id, jobId, title, linesJson, photoIdsJson, totalCents, status, createdAt, updatedAt, source) VALUES ('c1', 'j1', 'Extra outlet', '[]', '[]', 18500, 'SIGNED', 1, 1, 'FIELD_LOG')")
+            db.execSQL("INSERT INTO share_link (id, kind, jobId, token, revoked, createdAt, updatedAt, source) VALUES ('s1', 'gallery', 'j1', 'tok', 0, 1, 1, 'FIELD_LOG')")
+        }
+        helper.runMigrationsAndValidate(13).use { db ->
+            assertThat(db.texts("SELECT COALESCE(signatureJson, 'none') || '/' || COALESCE(signedVia, 'none') FROM change_order WHERE id = 'c1'")).containsExactly("none/none")
+            assertThat(db.texts("SELECT COALESCE(targetId, 'none') FROM share_link WHERE id = 's1'")).containsExactly("none")
+            db.execSQL("INSERT INTO share_link (id, kind, jobId, targetId, token, revoked, createdAt, updatedAt, source) VALUES ('s2', 'co', 'j1', 'c1', 'tok2', 0, 1, 1, 'FIELD_LOG')")
+            assertThat(db.texts("SELECT targetId FROM share_link WHERE id = 's2'")).containsExactly("c1")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -198,6 +212,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 12
+        const val LATEST = 13
     }
 }

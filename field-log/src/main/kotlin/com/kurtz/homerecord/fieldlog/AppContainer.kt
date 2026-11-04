@@ -209,11 +209,22 @@ class AppContainer(private val app: Application) {
             rows.map { com.kurtz.homerecord.fieldlog.changes.CoPhoto(it.id, it.thumbPath ?: it.path, it.createdAt) }
         },
         sharer = changeOrderSharer,
+        links = com.kurtz.homerecord.fieldlog.changes.AndroidCoLinks(app, jobId, shareLinks),
+        canLink = roleGates.map { it.canEditJobs },
+        signatureImage = ::changeOrderSignatureImage,
     )
+
+    /** Share links for job galleries, daily logs and change orders (T058b, AC-B35), each queued for sync. */
+    val shareLinks by lazy { com.kurtz.homerecord.core.share.ShareLinks(db, BuildConfig.API_BASE_URL, onChange = ::recordChange) }
+
+    private val signatureImages by lazy { com.kurtz.homerecord.fieldlog.changes.AndroidSignatureImage({ java.io.File(app.filesDir, "media") }) }
+
+    /** A Signed order's signature PNG on this phone, drawn once from the synced strokes when it was signed elsewhere. */
+    suspend fun changeOrderSignatureImage(id: String): String? = jobChangeOrders.signatureImage(id, signatureImages::write)
 
     /** Makes a change order's PDF and opens the share sheet (AC-F39). */
     val changeOrderSharer: com.kurtz.homerecord.fieldlog.changes.ChangeOrderSharer by lazy {
-        com.kurtz.homerecord.fieldlog.changes.AndroidChangeOrderSharer(app, com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfMaker(app, db, membership = { company.current }))
+        com.kurtz.homerecord.fieldlog.changes.AndroidChangeOrderSharer(app, com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfMaker(app, db, membership = { company.current }, signatureImage = ::changeOrderSignatureImage))
     }
 
     /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */
