@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -44,6 +45,15 @@ class ScreenCrawlerTest {
 
     private fun shoot(id: String, variant: String) {
         compose.waitForIdle()
+        // A recreated activity can be idle before it has composed anything; a capture then was the bare window
+        // background ([judge:qa-crawler-blank-shots]). Wait for the screen's content, then for the frame to draw.
+        runCatching {
+            compose.waitUntil(10_000) {
+                runCatching { compose.onAllNodes(isRoot()).fetchSemanticsNodes().any { it.children.isNotEmpty() } }.getOrDefault(false)
+            }
+        }
+        compose.waitForIdle()
+        inst.waitForIdleSync()
         val bmp: Bitmap = inst.uiAutomation.takeScreenshot() ?: return
         File(outDir, "$id-$variant.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 90, it) }
     }

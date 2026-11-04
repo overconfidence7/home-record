@@ -13,6 +13,11 @@ appId: com.kurtz.homerecord.fieldlog
       true: ${output.variant == 'landscape'}
     commands:
       - setOrientation: LANDSCAPE_LEFT
+# The first frame takes 4-5 s on a cold emulator; a shot right after launchApp was blank and the
+# tour "passed" having seen nothing ([judge:qa-fl-tour-blank]). Wait for whichever root shows.
+- extendedWaitUntil:
+    visible: "Sign in|Set up your company|Today"
+    timeout: 20000
 - takeScreenshot: tour-${output.variant}-launch
 - runFlow:
     when:
