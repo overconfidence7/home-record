@@ -38,7 +38,7 @@ jobs:
   prepare:
     name: Build, JVM tests, coverage gate
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     outputs:
       skip: ${{ steps.probe.outputs.skip }}
       sha: ${{ steps.probe.outputs.sha }}
@@ -112,13 +112,37 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "api.baseUrl=http://10.0.2.2:8787" >> local.properties
 
+      - name: Add swap for the Gradle JVMs
+        if: steps.probe.outputs.skip != 'true'
+        run: |
+          sudo swapoff -a 2>/dev/null || true
+          sudo fallocate -l 6G /mnt/qa-swap && sudo chmod 600 /mnt/qa-swap && sudo mkswap /mnt/qa-swap >/dev/null && sudo swapon /mnt/qa-swap || true
+          free -m
+
       - name: JVM checks (unit, lint, screenshots)
         if: steps.probe.outputs.skip != 'true'
         run: |
           mkdir -p qa-out/jvm
           set +e
-          ./gradlew --no-daemon --console=plain testDebugUnitTest lintDebug validateDebugScreenshotTest --continue > qa-out/jvm/gradle.log 2>&1
-          echo $? > qa-out/jvm/exit-code
+          # One combined testDebugUnitTest+lintDebug+validateDebugScreenshotTest run got the runner killed
+          # ("received a shutdown signal", run 41730041438, 10 min in): Gradle daemon, Kotlin daemon, four
+          # Robolectric JVMs and the 2 GB screenshot renderers at once outgrow the 16 GB runner. Run the
+          # three checks one after another, two workers each, Kotlin compiling in-process, and log memory
+          # and disk between them so a kill leaves a trail. --continue keeps every module's result.
+          : > qa-out/jvm/gradle.log
+          rc=0
+          for t in testDebugUnitTest lintDebug validateDebugScreenshotTest; do
+            { echo "== $t $(date -u +%H:%M:%S)"; free -m; df -h . | tail -1; } >> qa-out/jvm/gradle.log 2>&1
+            # each app's screenshot renderer JVM reaches ~6.5 GB resident (native layoutlib memory on a 2 GB
+            # heap); two side by side were OOM-killed locally, so that stage gets one worker
+            w=2; [ "$t" = validateDebugScreenshotTest ] && w=1
+            ./gradlew --no-daemon --console=plain --max-workers=$w -Pkotlin.compiler.execution.strategy=in-process \
+              "$t" --continue >> qa-out/jvm/gradle.log 2>&1
+            r=$?
+            echo "== $t exit $r" >> qa-out/jvm/gradle.log
+            [ $r -ne 0 ] && rc=$r
+          done
+          echo $rc > qa-out/jvm/exit-code
           set -e
           find . -path '*/build/test-results/testDebugUnitTest/*.xml' -exec cp {} qa-out/jvm/ \; 2>/dev/null || true
           find . -path '*/build/reports/lint-results-debug.xml' -exec sh -c 'cp "$1" "qa-out/jvm/lint-$(echo "$1" | cut -d/ -f2).xml"' _ {} \; 2>/dev/null || true
