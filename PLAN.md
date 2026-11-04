@@ -114,8 +114,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] Q005a: Backend half of Q005: `/dev/last-code`, `/dev/seed`, `/dev/reset` only when `ENVIRONMENT=dev` (acceptance: AC-B2)
 - [x] Q005b: Android half of Q005: debug `<pkg>.qa.SEED` receivers (`regression`, `reset`) for both apps (Field Log seed signs in as the dev-backend owner; its job arrives with T018)
 - [x] Q005c: `qa/fixtures/` files per its README (images and plan.pdf), then tick Q005
-- [ ] Q006: First green run: read `origin/qa-results:latest/summary.md` and the `## QA auto` entries in REVIEW.md, fix every Critical and Major the suite found (app bugs, flow mistakes, coverage gaps), and record in PROGRESS.md which stages still skip and why (acceptance: newest `## QA auto` entry ends with `New issues: 0`)
+- [x] Q006: First green run: read `origin/qa-results:latest/summary.md` and the `## QA auto` entries in REVIEW.md, fix every Critical and Major the suite found (app bugs, flow mistakes, coverage gaps), and record in PROGRESS.md which stages still skip and why (acceptance: newest `## QA auto` entry ends with `New issues: 0`)
   - note 2026-10-31: every Critical and Major of the last run (6a0e6db4) is fixed; the only stage that still skips is the handoff job (no cross-app flows until the handoff tasks); acceptance waits on the next suite run of `build` HEAD
+  - note 2026-11-04: met: the `## QA auto` entry for aeed33fb (02:59 UTC run) passed 64/64 device stages and ends `New issues: 0`; only the handoff job still skips (no cross-app flows until Q004/T063)
 
 ## M1 House model
 
