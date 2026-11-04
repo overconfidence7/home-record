@@ -424,6 +424,9 @@
     <string name="photo_delete_title">Delete this photo?</string>
     <string name="photo_delete_body">It comes off the job for everyone on the crew.</string>
     <string name="photo_missing">This photo is gone.</string>
+    <string name="photo_missing_title">Photo not found</string>
+    <string name="photo_missing_body">This photo was deleted, maybe on another phone. Go back to the job\'s photos.</string>
+    <string name="photo_missing_back">Back to photos</string>
     <string name="photo_downloading">Downloading the photo…</string>
     <string name="photo_offline">Not on this phone yet. Connect to the internet and try again.</string>
     <string name="photo_not_uploaded">This photo is still uploading from the phone that took it. Try again in a minute.</string>

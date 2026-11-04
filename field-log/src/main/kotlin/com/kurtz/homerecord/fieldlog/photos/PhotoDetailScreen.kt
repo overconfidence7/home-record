@@ -88,9 +88,15 @@ fun PhotoDetailScreen(
     ) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
-            state.missing -> Text(
-                stringResource(R.string.photo_missing), Modifier.padding(padding).padding(24.dp).testTag("fl_photo_missing"),
-                style = MaterialTheme.typography.bodyLarge,
+            // rule 10: icon, headline, sentence and a way back, like House Manual's "Item not found"
+            state.missing -> com.kurtz.homerecord.coreui.components.EmptyState(
+                icon = Icons.Rounded.BrokenImage,
+                headline = stringResource(R.string.photo_missing_title),
+                body = stringResource(R.string.photo_missing_body),
+                actionLabel = stringResource(R.string.photo_missing_back),
+                onAction = { onEvent(PhotoDetailEvent.Back) },
+                modifier = Modifier.padding(padding).testTag("fl_photo_missing"),
+                actionModifier = Modifier.heightIn(min = 48.dp).testTag("fl_photo_missing_back"),
             )
             else -> Column(
                 Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp).testTag("fl_photo_body"),
