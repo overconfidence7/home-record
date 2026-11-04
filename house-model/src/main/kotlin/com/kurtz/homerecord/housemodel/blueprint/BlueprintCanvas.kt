@@ -13,6 +13,15 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ElectricBolt
+import androidx.compose.material.icons.rounded.GasMeter
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.Plumbing
+import androidx.compose.material.icons.rounded.SettingsEthernet
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
@@ -271,6 +280,24 @@ fun LayerToggleRow(layers: LayerSet, onToggle: (BlueprintLayer) -> Unit, modifie
                 onClick = { onToggle(layer) },
                 modifier = Modifier.testTag("${LocalTagPrefix.current}_layer_${layer.wire}"),
                 label = { Text(blueprintLayerLabel(layer)) },
+                // rule 26: every layer has its icon, in the layer's colour; a check marks the layers that are on so
+                // the state is not colour alone
+                leadingIcon = {
+                    androidx.compose.material3.Icon(
+                        blueprintLayerIcon(layer), contentDescription = null, tint = tint,
+                        modifier = Modifier.size(androidx.compose.material3.FilterChipDefaults.IconSize),
+                    )
+                },
+                trailingIcon = if (layer in layers) {
+                    {
+                        androidx.compose.material3.Icon(
+                            Icons.Rounded.Check, contentDescription = null,
+                            modifier = Modifier.size(androidx.compose.material3.FilterChipDefaults.IconSize),
+                        )
+                    }
+                } else {
+                    null
+                },
                 colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
                     selectedContainerColor = tint.copy(alpha = 0.22f),
                     selectedLabelColor = MaterialTheme.colorScheme.onSurface,
@@ -284,4 +311,15 @@ fun LayerToggleRow(layers: LayerSet, onToggle: (BlueprintLayer) -> Unit, modifie
             )
         }
     }
+}
+
+/** The icon for a layer's chip (rule 26), matching the overlay kinds drawn on it. */
+fun blueprintLayerIcon(layer: BlueprintLayer): androidx.compose.ui.graphics.vector.ImageVector = when (layer) {
+    BlueprintLayer.ITEMS -> Icons.Rounded.Inventory2
+    BlueprintLayer.ELECTRICAL -> Icons.Rounded.ElectricBolt
+    BlueprintLayer.PLUMBING -> Icons.Rounded.WaterDrop
+    BlueprintLayer.HVAC -> Icons.Rounded.Air
+    BlueprintLayer.LOW_VOLTAGE -> Icons.Rounded.SettingsEthernet
+    BlueprintLayer.GAS -> Icons.Rounded.GasMeter
+    BlueprintLayer.DRAIN_VENT -> Icons.Rounded.Plumbing
 }
