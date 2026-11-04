@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -297,7 +298,19 @@ private fun NoteDialog(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
 /** AC-F29: say why, link to Settings, and still offer the gallery so the job can get photos. */
 @Composable
 private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, modifier: Modifier) {
-    Column(modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
+    Column(
+        modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    ) {
+        // rule 10: icon, headline, one sentence, then the actions
+        Icon(
+            Icons.Rounded.NoPhotography, contentDescription = null,
+            Modifier.size(48.dp).align(Alignment.CenterHorizontally), tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            stringResource(if (state.access == CameraAccess.Denied) R.string.cap_denied_title else R.string.cap_no_camera_title),
+            style = MaterialTheme.typography.titleLarge, modifier = Modifier.align(Alignment.CenterHorizontally).testTag("fl_capture_denied_title"),
+        )
         Text(
             stringResource(if (state.access == CameraAccess.Denied) R.string.cap_denied else R.string.cap_no_camera),
             style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("fl_capture_denied"),

@@ -218,6 +218,7 @@
     <string name="jobs_empty_title">No jobs yet</string>
     <string name="jobs_empty_body">Jobs you add show up here, grouped by Active, Upcoming and Done.</string>
     <string name="jobs_search">Search jobs</string>
+    <string name="jobs_clear_search">Clear search</string>
     <string name="jobs_no_matches">No jobs match \"%1$s\".</string>
     <string name="jobs_group_active">Active</string>
     <string name="jobs_group_upcoming">Upcoming</string>
@@ -358,7 +359,8 @@
     <string name="markup_not_available_body">Only a PDF on this phone can be marked up. Open it once while online, then try again.</string>
     <string name="markup_back_to_file">Back to the file</string>
     <string name="files_add_failed">Couldn\'t read that file. Check free space and try again.</string>
-    <string name="photos_empty">No photos on this job yet. Photos you take show here by day.</string>
+    <string name="photos_empty_title">No photos yet</string>
+    <string name="photos_empty">Photos you take on this job show here by day.</string>
     <string name="photos_take">Take a photo</string>
     <string name="photos_before">Before</string>
     <string name="photos_after">After</string>
@@ -496,6 +498,8 @@
     <string name="cap_camera_failed">Couldn\'t start the camera. Go back and open it again, or add photos from the gallery.</string>
     <string name="cap_save_failed">Couldn\'t save the photo. Check free space and try again.</string>
     <string name="cap_job_gone">This job is gone, so the photo wasn\'t saved.</string>
+    <string name="cap_no_camera_title">No camera on this phone</string>
+    <string name="cap_denied_title">Camera is off for Field Log</string>
     <string name="cap_no_camera">This device has no camera. You can still add photos from the gallery.</string>
     <string name="cap_denied">Field Log uses the camera to take job photos. Without it you can still add photos from the gallery, notes and voice memos.</string>
     <string name="cap_note">Note</string>

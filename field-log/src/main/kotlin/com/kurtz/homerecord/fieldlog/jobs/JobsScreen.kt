@@ -49,7 +49,7 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
         )
         when {
             state.loading -> LoadingState(Modifier.weight(1f))
-            state.groups.isEmpty && !state.noMatches && state.query.isBlank() -> JobsEmpty(Modifier.weight(1f))
+            state.groups.isEmpty && !state.noMatches && state.query.isBlank() -> JobsEmpty(state.canAddJob, onEvent, Modifier.weight(1f))
             else -> JobsList(state, onEvent, Modifier.weight(1f))
         }
     }
@@ -68,7 +68,7 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
 }
 
 @Composable
-private fun JobsEmpty(modifier: Modifier) {
+private fun JobsEmpty(canAdd: Boolean, onEvent: (JobsEvent) -> Unit, modifier: Modifier) {
     Column(
         modifier.fillMaxWidth().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
@@ -77,6 +77,13 @@ private fun JobsEmpty(modifier: Modifier) {
         Icon(Icons.Rounded.Work, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Text(stringResource(R.string.jobs_empty_title), style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         Text(stringResource(R.string.jobs_empty_body), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+        // rule 10: the one action matches the FAB
+        if (canAdd) {
+            androidx.compose.material3.Button(
+                onClick = { onEvent(JobsEvent.New) },
+                modifier = Modifier.heightIn(min = 56.dp).testTag("fl_jobs_empty_new"),
+            ) { Text(stringResource(R.string.jobs_new)) }
+        }
     }
 }
 
@@ -98,8 +105,24 @@ private fun JobsList(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier:
                 Text(
                     stringResource(R.string.jobs_no_matches, state.query.trim()),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp).testTag("fl_jobs_no_matches"),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).testTag("fl_jobs_no_matches"),
                 )
+                // rule 10: "No results" offers to clear or create
+                androidx.compose.foundation.layout.FlowRow(
+                    Modifier.padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    androidx.compose.material3.TextButton(
+                        onClick = { onEvent(JobsEvent.Query("")) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("fl_jobs_no_matches_clear"),
+                    ) { Text(stringResource(R.string.jobs_clear_search)) }
+                    if (state.canAddJob) {
+                        androidx.compose.material3.TextButton(
+                            onClick = { onEvent(JobsEvent.New) },
+                            modifier = Modifier.heightIn(min = 48.dp).testTag("fl_jobs_no_matches_new"),
+                        ) { Text(stringResource(R.string.jobs_new)) }
+                    }
+                }
             }
         }
         section(R.string.jobs_group_active, state.groups.active, "active", onEvent)

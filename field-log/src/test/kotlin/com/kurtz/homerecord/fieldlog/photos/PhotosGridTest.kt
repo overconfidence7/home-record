@@ -62,7 +62,9 @@ class PhotosGridTest {
         show(PhotosUiState(loading = false), { events += it })
         rule.onNodeWithTag("fl_photos_empty").assertExists()
         rule.onNodeWithTag("fl_photos_fab").performClick()
-        assertThat(events).containsExactly(PhotosEvent.Capture)
+        // rule 10: the empty state's one action is the FAB's (judge:fl-photos-capture-empty-states)
+        rule.onNodeWithTag("fl_photos_empty_take", useUnmergedTree = true).performClick()
+        assertThat(events).containsExactly(PhotosEvent.Capture, PhotosEvent.Capture)
     }
 
     @Test fun noFabWhileLoading() {

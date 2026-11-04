@@ -56,14 +56,15 @@ fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier:
     Box(modifier.fillMaxSize()) {
         when {
             state.loading -> LoadingState(Modifier.fillMaxSize())
-            state.days.isEmpty() -> Column(
-                Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 96.dp).testTag("fl_photos_empty"),
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
-                Text(stringResource(R.string.photos_empty), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-            }
+            state.days.isEmpty() -> com.kurtz.homerecord.coreui.components.EmptyState(
+                icon = Icons.Rounded.PhotoLibrary,
+                headline = stringResource(R.string.photos_empty_title),
+                body = stringResource(R.string.photos_empty),
+                actionLabel = stringResource(R.string.photos_take),
+                onAction = { onEvent(PhotosEvent.Capture) },
+                modifier = Modifier.fillMaxSize().padding(bottom = 88.dp).testTag("fl_photos_empty"),
+                actionModifier = Modifier.heightIn(min = 56.dp).testTag("fl_photos_empty_take"),
+            )
             else -> PhotoGrid(state, onEvent)
         }
         if (!state.loading) {
