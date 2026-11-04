@@ -37,6 +37,8 @@ class ScheduleDeps(
     val consumeOpenDay: () -> Unit = {},
     val zone: ZoneId = ZoneId.systemDefault(),
     val now: () -> Long = System::currentTimeMillis,
+    /** Re-reads the clock, so a screen left open past midnight moves to the new day (R11). */
+    val ticks: Flow<Unit> = kotlinx.coroutines.flow.flow { while (true) { kotlinx.coroutines.delay(60_000); emit(Unit) } },
 )
 
 /**
@@ -45,7 +47,9 @@ class ScheduleDeps(
  * process death.
  */
 class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
-    private val today: LocalDate = Instant.ofEpochMilli(d.now()).atZone(d.zone).toLocalDate()
+    private fun clockDay(): LocalDate = Instant.ofEpochMilli(d.now()).atZone(d.zone).toLocalDate()
+    private val todayFlow = MutableStateFlow(clockDay())
+    private val today: LocalDate get() = todayFlow.value
     private val _state = MutableStateFlow(
         ScheduleUiState(
             today = today,
@@ -66,8 +70,21 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
             }
         }
         viewModelScope.launch {
-            combine(d.members, d.jobs, d.entries, d.gates, week) { members, jobs, entries, gates, weekStart ->
-                val day = today.toString()
+            d.ticks.collect {
+                val now = clockDay()
+                val before = todayFlow.value
+                if (now == before) return@collect
+                val s = _state.value
+                val followed = s.selected == before
+                todayFlow.value = now
+                _state.update { it.copy(today = now) }
+                // Someone looking at today keeps looking at today; a day they picked stays picked.
+                if (followed) showWeek(ScheduleWeek.weekStart(now), now)
+            }
+        }
+        viewModelScope.launch {
+            combine(d.members, d.jobs, d.entries, d.gates, combine(week, todayFlow, ::Pair)) { members, jobs, entries, gates, (weekStart, todayNow) ->
+                val day = todayNow.toString()
                 val shown = jobs.filter { it.deletedAt == null && it.effectiveStatus(day) != JobStatus.ARCHIVED }
                 val names = shown.associate { it.id to it.name }
                 val ownOnly = gates.role == CompanyRole.Crew || gates.role == CompanyRole.Sub

@@ -43,6 +43,9 @@ class ScheduleViewModelTest {
     private val openDay = MutableStateFlow<LocalDate?>(null)
     private val calls = mutableListOf<String>()
 
+    private var clock = noon
+    private val ticks = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     private fun vm(saved: SavedStateHandle = SavedStateHandle(), me: String = "m1", open: MutableStateFlow<LocalDate?> = MutableStateFlow(null)) = ScheduleViewModel(
         ScheduleDeps(
             me, members, jobs, entries, gates,
@@ -50,7 +53,7 @@ class ScheduleViewModelTest {
             move = { id, d -> calls += "move $id $d"; true },
             remove = { id -> calls += "remove $id"; true },
             openDay = open, consumeOpenDay = { open.value = null },
-            zone = ZoneOffset.UTC, now = { noon },
+            zone = ZoneOffset.UTC, now = { clock }, ticks = ticks,
         ),
         saved,
     )
@@ -92,6 +95,30 @@ class ScheduleViewModelTest {
         vm.onEvent(ScheduleEvent.OpenDay("m2", "a1"))
         vm.onEvent(ScheduleEvent.Remove)
         assertThat(calls).containsExactly("remove a1")
+    }
+
+    @Test fun leftOpenPastMidnightTheScreenMovesToTheNewDay() {
+        // R11: Sunday 23:59 → Monday 00:01: today, the selected day and This week follow the clock.
+        val sun = LocalDate.of(2026, 11, 8)
+        clock = sun.atTime(23, 59).toInstant(ZoneOffset.UTC).toEpochMilli()
+        val vm = vm()
+        assertThat(vm.state.value.selected).isEqualTo(sun)
+        clock = sun.plusDays(1).atTime(0, 1).toInstant(ZoneOffset.UTC).toEpochMilli()
+        ticks.tryEmit(Unit)
+        val s = vm.state.value
+        assertThat(s.today).isEqualTo(sun.plusDays(1))
+        assertThat(s.selected).isEqualTo(sun.plusDays(1))
+        assertThat(s.weekStart).isEqualTo(sun.plusDays(1))
+        assertThat(s.isThisWeek).isTrue()
+    }
+
+    @Test fun aPickedDayStaysPickedWhenTheDayChanges() {
+        val vm = vm()
+        vm.onEvent(ScheduleEvent.SelectDay(wed.plusDays(2)))
+        clock = wed.plusDays(1).atTime(0, 1).toInstant(ZoneOffset.UTC).toEpochMilli()
+        ticks.tryEmit(Unit)
+        assertThat(vm.state.value.today).isEqualTo(wed.plusDays(1))
+        assertThat(vm.state.value.selected).isEqualTo(wed.plusDays(2))
     }
 
     @Test fun twoJobsTheSameDayShowAConflict() {
