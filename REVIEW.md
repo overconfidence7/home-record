@@ -2968,3 +2968,66 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 64 device stages, 1601 unit tests, 163 backend tests, coverage 343/343 ACs. Passed: 63. New issues: 1. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-04 (commit af9d9a7d)
+
+Judged the suite results for af9d9a7d (run of 2026-11-04 04:16 UTC, 64 stages, 63 passed). `build` HEAD 83c76a2b is 20+ commits ahead (T056–T060: change orders, signatures, share links, Schedule, Clients, Materials; the Reminders/Schedule placeholder fixes; the F09b flow fix 72fbdc8f), none of which this run tested. The aeed33fb auto entry (64/64) got no judge entry; this one covers it. This is the first Field Log device run judged since c66e83a2.
+
+Verdict: House Manual: the Items search fix holds on device (H06 and H07 pass, model lookup finds the range and the fridge) and H11 now runs end to end: pipe on the wall, on the plan, on the Plumbing layer, found from Home search. Nate's first complaint would still be that the house doesn't know what its rooms are (Kitchen is "Other", 3D is black on the emulator) and that Reminders at this sha is still the "Open a detail screen" placeholder. / Field Log: the whole crew loop works on device for the first time in one run: invite and join, job, clock, files with markup, photos, daily log with an empty-log warning, behind-the-wall with Rough-in and Finished per wall, tasks pinned on plan and file, offline sync. The biggest gap at this sha is everything a paying owner asks about next (change orders, schedule, materials, Schedule tab still a placeholder); all of it landed after this sha and is untested.
+
+- [ ] [UI] Minor: the job's House tab loses its plan at 200% font: the tab repeats the job name and address as a second heading under a top bar that already names the job, then the layer chips and five full-width outline buttons (Behind the wall, Edit plan, 3D view, Floors, Export PDF) take the rest, so the plan collapses to nothing and only pin 2 floats above the hint text. House Manual's House tab keeps its plan at 200%. The builder's 200% reference shows a postage-stamp plan with no room names, which already hides how bad it gets [judge:fl-house-plan-font200] - steps: Jobs → Hale kitchen → House at 200% font - expected: rule 32 (nothing clipped), rule 2 (title names the record once), PRODUCT.md FL step 9 (the plan is the point of the tab) - actual: no plan, a lone pin, five buttons - screenshot: qa-results:latest/field-log/crawler/field-log/job-house-pins-font200.png
+- [ ] [Minor] Suite: Field Log's sheet catalog entries render bare, like House Manual's did before 2026-11-03: `log-send-sheet`, `log-send-sheet-no-emails`, `log-delay-sheet` and `log-text-sheet` draw their title through the status bar clock with no sheet container and a grey band below, and the dark variant of `log-send-sheet` is blank, so the crawler cannot check these sheets for rules 17 and 28 [judge:qa-fl-catalog-sheets-bare] - steps: open the four crawler shots - expected: the sheets drawn in a preview sheet frame as House Manual's are - actual: "Send the daily log" and "Add delay" over the status bar time - screenshot: qa-results:latest/field-log/crawler/field-log/log-delay-sheet-font200.png
+
+Auto entry review:
+- [auto:flow:field-log:F09b-log-send] is a flow error [judge: flow error]: the step-079 shot shows the log after the edit with "Crew on site" at the top and the Sent row scrolled up out of view, Send again in the bar; the app did mark the log sent (`F09b-log-sent`). Agree with the builder's fix in 72fbdc8f (scroll to the Changed since sent line itself).
+
+Seen this run and fine: Items search by model on device (H06, H07); Place on plan by drag, "On a wall" and back; H11 plan overlay drawn across Kitchen and picked as "Range gas line"; Home search "cold water" → "Sink cold supply"; Field Log Send an empty log? dialog ("The client gets a page with only the header") and the no-email Send sheet with Share PDF; Behind the wall rooms and walls with "Next photo: Finished, after drywall"; Rough-in wall photo with Range circuit and Sink drain overlays; drain form with photo; task pin on the plan and on a file page with the Pin which task? sheet; offline "1 change saved on this phone" then "Everything is synced"; Version history on a marked-up plan; Photo page "Taken by Marco Diaz" (N003) in the catalog; Field Log tours in light, dark, 200% and landscape (rail) all on the right tab.
+
+Still open and seen again: [judge:hm-room-kind-not-inferred] (H03/H09 "14' by 12' 6" · Other", FL Kitchen "12' by 12' · Other"), [judge:qa-3d-blank-emulator] (H03-3d-room, H09-wall-in-3d and F10-3d-room black, H03-3d and F10-3d white), [v4:editor-marks-over-names] (H11 plan overlay dot on "Ki●n"), [judge:qa-h11-plain-wall], [judge:hm-item-hero-icon-too-tall], [judge:hm-more-signed-in-no-account] (H17 "You are signed in."), [judge:nav-label-200-uneven] (Reminders and Schedule smaller at 200% in both apps), [judge:fl-house-pin-over-label] (F11b pin 1 on "Kitchen"), [judge:fl-jobs-rows-no-icon] (Jobs list, jank list), [judge:fl-clock-solo-owner-noise] ("Clock in 0 people"), [judge:fl-reports-delays-below-empty], [judge:qa-crawler-blank-shots] (behind-wall-rooms-dark, log-send-sheet-dark, home-quiet-light), [judge:qa-crawler-job-tab-insets] (log-* tab shots without the job bar). At this sha but fixed after it: the Reminders and Schedule placeholders with "Open a detail screen" (2bd82cd5), the owner's empty Today with Invite crew pinned to the bottom (b8ac9de1).
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding to Home | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; shape editing still hides the room under the panel (open) | qa-results:latest/house-manual/screenshots/flow-H02-draw-plan-H02-blueprint-after-edit.png |
+| H3 | Clunky | Blueprint, long-press menu, Floors, room page fine; Kitchen still "Other" | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | Item form | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired; search by model works on device | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Clunky | Search reaches the fridge; Place on plan drag and On a wall work; hero icon still over the top third (open) | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-placed.png |
+| H8 | Pass | Stored warranty (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H9 | Pass | Outline with four handles, thumbnail on the wall row | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Clunky | 3D black or white on the emulator; catalog draws floors and markers, rooms unlabeled | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png |
+| H11 | Clunky | Whole flow passes (wall, plan, Plumbing layer, room list, Home search); still a plain wall, plan dot over the room name, 3D blank | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-plan-overlay-picked.png |
+| H17 | Clunky | Signed in; More does not name the account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Paywall with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H12, H13 (Emergency card only), H14 (Reminders placeholder at this sha), H15, H16, H18.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → code → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview with stats, House empty state with Start the plan | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c | qa-results:latest/field-log/screenshots/tour-landscape-today.png |
+| F5 | Pass | Catalog and unit tests (break, switch, out) | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved as version 2 with history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture from the job and from Today, photo in Recent photos | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Pass | Log with delays, weather, visitors; empty-log warning; Sent line; F09b failure is the flow (above) | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png |
+| F10 | Clunky | Behind the wall per room and wall, Rough-in and Finished, overlays and drain photo; 3D blank on the emulator; House tab loses the plan at 200% (new); installed items not built | qa-results:latest/field-log/screenshots/flow-F10b-behind-wall-F10b-behind-wall-finished.png |
+| F11 | Pass | Tasks, pin on plan and on a file page | qa-results:latest/field-log/screenshots/flow-F11c-file-pin-F11c-file-pin.png |
+| F15 | Clunky | Hours report; Delays below the fold (open) | qa-results:latest/field-log/screenshots/flow-F09-daily-log-F09-daily-log-reports-delays.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F18 | Clunky | More rows fit at 200% and on the rail; Schedule is the placeholder at this sha; Materials and Clients not in this build | qa-results:latest/field-log/screenshots/tour-font200-schedule.png |
+
+Not built yet: F12, F13, F14 (T056–T060 ticked after this sha, untested), F17 (T064); installed items (T062); handoff (T063).
+
+Focus check: nothing wrong. House Manual's root tabs are Home, House, Items, Reminders, More; Field Log's are Today, Jobs, Clock, Schedule, More; walls and overlays appear under the homeowner's rooms in one and under the job's House tab and Behind the wall in the other.
+
+Coverage note: the auto entry reports 343/343 claimed ACs covered across 192 ticked tasks and subtasks (0 gaps); handoff flows still not written (Q004).
+
+Judged: 449 screenshots opened (69 Field Log and 116 House Manual device shots, 134 Field Log and 114 House Manual crawler light shots, 15 dark, 200% and landscape crawler shots, 1 builder reference), 1177 PNGs present. 27 walkthrough steps. New issues: 2. Product gaps: 0.
