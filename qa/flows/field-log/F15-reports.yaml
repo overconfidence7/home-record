@@ -1,4 +1,4 @@
-# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours; a job's summary PDF goes to the share sheet (AC-F15, AC-F46, AC-F47).
+# Walkthrough F15: Owner opens Reports from More; an empty range says so, the range chips work, exports are shown but disabled until there are hours; Photo reports lists each job with its photos in the range (AC-F28); a job's summary PDF goes to the share sheet (AC-F15, AC-F46, AC-F47).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -50,11 +50,18 @@ appId: com.kurtz.homerecord.fieldlog
     visible:
       id: fl_reports_list
     timeout: 10000
+# AC-F28: Photo reports lists the job with its photo count for the range; with none it is not a link
 - scrollUntilVisible:
-    element: "Hale kitchen"
+    element: "No photos in these dates"
+- assertVisible: "Photo reports"
+- takeScreenshot: F15-photo-reports
+- scrollUntilVisible:
+    element:
+      id: "fl_reports_summary_.*"
 - assertVisible: "Job summaries"
 - takeScreenshot: F15-job-summaries
-- tapOn: "Hale kitchen"
+- tapOn:
+    id: "fl_reports_summary_.*"
 # the system share sheet is on top; leave it like a person who picked nothing
 - back
 - extendedWaitUntil:

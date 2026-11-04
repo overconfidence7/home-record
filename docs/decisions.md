@@ -894,3 +894,8 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 - The job summary (AC-F47) runs from the job's first punch to today, not the Reports week range: "hours vs budget" only means something against all the hours. Days on site are the days someone started work on the job (clock in, switch to it, back from a break). Change orders show signed (count and total) apart from drafts and declined, so the total is what the client agreed to. Delays come from the job's saved daily logs, counted by days and by reason.
 - Reports lists every job (Active first, then by name) under Job summaries; a tap makes the PDF with the daily log's layout and opens the share sheet. No new dependency.
+
+## 2026-11-04 — T061b: photo report PDF
+
+- Pure `PhotoReportPicker` and `PhotoReportLayout` in :core `log` (job's live photos in the range, oldest first; 2×2 per page with room · phase, date and time, note cut to three lines). It draws through the existing `AndroidLogPdfWriter`, so there is no new dependency.
+- The range is the Reports range chips; photos not downloaded to this phone are left out and counted on page one (see BLOCKERS "Decisions to confirm").

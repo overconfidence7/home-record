@@ -186,6 +186,13 @@ interface PhotoDao {
             "AND photo.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY photo.takenAt DESC LIMIT :limit",
     )
     fun observeRecentForCompany(companyId: String, limit: Int): Flow<List<PhotoEntity>>
+    /** Every live photo on the company's live jobs, oldest first, for the photo report counts (AC-F28). */
+    @Query(
+        "SELECT photo.* FROM photo JOIN job ON photo.jobId = job.id WHERE job.companyId = :companyId " +
+            "AND photo.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY photo.takenAt",
+    )
+    fun observeForCompanyJobs(companyId: String): Flow<List<PhotoEntity>>
+    @Query("SELECT * FROM photo WHERE jobId = :jobId AND deletedAt IS NULL ORDER BY takenAt") suspend fun listForJob(jobId: String): List<PhotoEntity>
     /** Sets a late GPS fix in one statement, so a tag or Before edited meanwhile is not overwritten; 0 when already set or deleted. */
     @Query("UPDATE photo SET lat = :lat, lng = :lng, updatedAt = :at WHERE id = :id AND lat IS NULL AND deletedAt IS NULL")
     suspend fun setFixIfMissing(id: String, lat: Double, lng: Double, at: Long): Int

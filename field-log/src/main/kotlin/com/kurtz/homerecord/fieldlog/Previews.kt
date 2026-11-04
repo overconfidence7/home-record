@@ -677,6 +677,11 @@ private val repState = com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
         com.kurtz.homerecord.fieldlog.reports.SummaryJob("j1", "Garage subpanel", "22 Birch Ct"),
         com.kurtz.homerecord.fieldlog.reports.SummaryJob("j3", "Hale bath rough-in", null),
     ),
+    photoJobs = listOf(
+        com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j2", "Ortiz kitchen remodel", 14),
+        com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j1", "Garage subpanel", 3),
+        com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j3", "Hale bath rough-in", 0),
+    ),
 )
 
 @ThemePreviews
@@ -740,6 +745,29 @@ fun ReportsSummariesPreview() = Frame {
             byJob = listOf(com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(8))),
             totalMillis = hrs(8), regularMillis = hrs(8),
             summaries = repState.summaries, summaryBusy = "j2", summaryFailed = true,
+            photoJobs = repState.photoJobs,
+        ),
+        {}, {},
+    )
+}
+
+/** Photo reports (AC-F28): a quiet week so the section shows; one job with photos, one with none, one PDF being made. */
+@ThemePreviews
+@Composable
+fun ReportsPhotosPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(
+        com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
+            loading = false, range = com.kurtz.homerecord.fieldlog.reports.ReportRange.LastFourWeeks, from = TS_MONDAY.minusWeeks(4), to = TS_MONDAY.minusDays(1),
+            byPerson = listOf(com.kurtz.homerecord.core.model.HoursLine("m1", "Dana Whitfield", hrs(31))),
+            byJob = listOf(com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(31))),
+            totalMillis = hrs(31), regularMillis = hrs(31),
+            photoJobs = listOf(
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j2", "Ortiz kitchen remodel", 38),
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j3", "Hale basement finish", 12),
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j1", "Garage subpanel", 0),
+            ),
+            photoBusy = "j3",
+            photoNotice = com.kurtz.homerecord.fieldlog.reports.PhotoReportOutcome.NoneHere,
         ),
         {}, {},
     )

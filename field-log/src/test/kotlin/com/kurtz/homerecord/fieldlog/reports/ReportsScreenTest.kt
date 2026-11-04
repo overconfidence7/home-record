@@ -78,4 +78,22 @@ class ReportsScreenTest {
         rule.onNodeWithTag("fl_reports_summary_j1").performClick()
         assertThat(events).containsExactly(ReportsEvent.ShareJobSummary("j1"))
     }
+
+    // AC-F28: a job with photos in the range shares its photo report; one with none is not tappable
+    @Test fun aPhotoReportRowSharesAndAJobWithNoPhotosDoesNot() {
+        val events = mutableListOf<ReportsEvent>()
+        val s = state.copy(
+            photoJobs = listOf(PhotoReportJob("j1", "Hale kitchen", 12), PhotoReportJob("j2", "Garage subpanel", 0)),
+            photoNotice = PhotoReportOutcome.NoneHere,
+        )
+        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(s, { events += it }, {}) } }
+        rule.onNodeWithTag("fl_reports_list").performScrollToNode(hasTestTag("fl_reports_photo_j2"))
+        rule.onNodeWithText("Photo reports").assertExists()
+        rule.onNodeWithText("12 photos in these dates").assertExists()
+        rule.onNodeWithText("No photos in these dates").assertExists()
+        rule.onNodeWithTag("fl_reports_photo_notice").assertExists()
+        rule.onNodeWithTag("fl_reports_photo_j2").performClick()
+        rule.onNodeWithTag("fl_reports_photo_j1").performClick()
+        assertThat(events).containsExactly(ReportsEvent.SharePhotoReport("j1"))
+    }
 }

@@ -150,6 +150,27 @@
     <string name="rep_summary_making">Making the PDF…</string>
     <string name="rep_summary_failed">Couldn\'t make the job summary. Try again.</string>
     <string name="rep_summary_share_title">Share job summary</string>
+    <string name="rep_photos">Photo reports</string>
+    <string name="rep_photos_hint">The job\'s photos from these dates, four to a page with room, phase, date and note, as a PDF.</string>
+    <plurals name="rep_photos_count">
+        <item quantity="one">%d photo in these dates</item>
+        <item quantity="other">%d photos in these dates</item>
+    </plurals>
+    <string name="rep_photos_zero">No photos in these dates</string>
+    <string name="rep_photo_make">Share photo report PDF</string>
+    <string name="rep_photo_failed">Couldn\'t make the photo report. Try again.</string>
+    <string name="rep_photo_none_here">The photos from these dates are still on another phone. Open the job\'s Photos to download them, then try again.</string>
+    <string name="rep_photo_share_title">Share photo report</string>
+    <string name="rep_photo_title">Photo report, %1$s – %2$s</string>
+    <string name="rep_photo_no_room">No room or phase</string>
+    <plurals name="rep_photo_pdf_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <plurals name="rep_photo_pdf_left_out">
+        <item quantity="one">%d photo still on another phone is not included.</item>
+        <item quantity="other">%d photos still on another phone are not included.</item>
+    </plurals>
     <string name="rep_summary_title">Job summary, %1$s</string>
     <string name="rep_summary_hours">Hours</string>
     <string name="rep_summary_worked">Worked: %1$s</string>

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.CircularProgressIndicator
@@ -87,6 +88,7 @@ fun ReportsScreen(
                 }
                 item { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
                 delayTimeline(state, onOpenLog)
+                photoReports(state, onEvent)
                 jobSummaries(state, onEvent)
             }
         }
@@ -251,6 +253,51 @@ private fun LazyListScope.jobSummaries(state: ReportsUiState, onEvent: (ReportsE
             onClick = { onEvent(ReportsEvent.ShareJobSummary(job.id)) },
             onClickLabel = stringResource(R.string.rep_summary_make),
             modifier = Modifier.fillMaxWidth().testTag("fl_reports_summary_${job.id}"),
+        )
+    }
+}
+
+/**
+ * Photo reports (AC-F28): every job with how many photos it has in the range above; tapping one with photos makes a
+ * PDF of them, four to a page with captions, and opens the share sheet. A job with none in the range is not tappable.
+ */
+private fun LazyListScope.photoReports(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit) {
+    item(key = "photos-h") { SectionHeading(stringResource(R.string.rep_photos)) }
+    item(key = "photos-hint") {
+        Text(
+            stringResource(if (state.photoJobs.isEmpty()) R.string.rep_summaries_none else R.string.rep_photos_hint),
+            Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    state.photoNotice?.takeIf { it != PhotoReportOutcome.Shared }?.let { notice ->
+        item(key = "photos-notice") {
+            Text(
+                stringResource(if (notice == PhotoReportOutcome.NoneHere) R.string.rep_photo_none_here else R.string.rep_photo_failed),
+                Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("fl_reports_photo_notice"),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    items(state.photoJobs, key = { "photo-${it.id}" }) { job ->
+        val busy = state.photoBusy == job.id
+        val has = job.photos > 0
+        RecordListItem(
+            headline = job.name,
+            supporting = when {
+                busy -> stringResource(R.string.rep_summary_making)
+                has -> pluralStringResource(R.plurals.rep_photos_count, job.photos, job.photos)
+                else -> stringResource(R.string.rep_photos_zero)
+            },
+            leading = { Icon(Icons.Rounded.PhotoLibrary, contentDescription = null) },
+            trailing = when {
+                busy -> { { CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 3.dp) } }
+                has -> { { Icon(Icons.Rounded.Share, contentDescription = null) } }
+                else -> null
+            },
+            onClick = if (has) { { onEvent(ReportsEvent.SharePhotoReport(job.id)) } } else null,
+            onClickLabel = stringResource(R.string.rep_photo_make),
+            modifier = Modifier.fillMaxWidth().testTag("fl_reports_photo_${job.id}"),
         )
     }
 }

@@ -36,6 +36,13 @@ class ReportsViewModelTest {
     private val delayRanges = mutableListOf<Pair<LocalDate, LocalDate>>()
     private val summariesAsked = mutableListOf<String>()
     private var summaryWorks = true
+    private val photoAsks = mutableListOf<Triple<String, LocalDate, LocalDate>>()
+    private var photoOutcome = PhotoReportOutcome.Shared
+    private val photos = listOf(
+        com.kurtz.homerecord.core.log.ReportPhoto("p1", "j3", monday.plusDays(1).atTime(9, 0).atZone(zone).toInstant().toEpochMilli(), "/m/p1.jpg"),
+        com.kurtz.homerecord.core.log.ReportPhoto("p2", "j3", monday.plusDays(2).atTime(9, 0).atZone(zone).toInstant().toEpochMilli(), "/m/p2.jpg"),
+        com.kurtz.homerecord.core.log.ReportPhoto("p3", "j1", monday.minusDays(3).atTime(9, 0).atZone(zone).toInstant().toEpochMilli(), "/m/p3.jpg"),
+    )
     private val jobs = listOf(
         JobEntity(id = "j1", companyId = "c1", name = "Garage subpanel", createdAt = 1, updatedAt = 1),
         JobEntity(id = "j2", companyId = "c1", name = "Bath fan", address = "22 Birch Ct", status = "DONE", createdAt = 1, updatedAt = 1),
@@ -66,6 +73,8 @@ class ReportsViewModelTest {
             share = { if (shareFails) throw IOException("disk") else shared += it },
             delays = { from, to -> delayRanges += from to to; flowOf(delayDays) },
             shareJobSummary = { summariesAsked += it; summaryWorks },
+            photos = flowOf(photos),
+            sharePhotoReport = { job, from, to -> photoAsks += Triple(job, from, to); photoOutcome },
             zone = zone, now = { now },
         )
         return ReportsViewModel(deps, saved)
@@ -140,5 +149,27 @@ class ReportsViewModelTest {
         summaryWorks = true
         vm.onEvent(ReportsEvent.ShareJobSummary("j3"))
         assertThat(vm.state.value.summaryFailed).isFalse()
+    }
+
+    // AC-F28: each job shows its photos in the range; a job with photos shares a photo report for those dates
+    @Test fun photoReportsCountTheRangeAndShareForThoseDates() {
+        val vm = vm()
+        assertThat(vm.state.value.photoJobs.map { it.name to it.photos })
+            .containsExactly("Attic run" to 2, "Garage subpanel" to 0, "Bath fan" to 0).inOrder()
+        vm.onEvent(ReportsEvent.SharePhotoReport("j1"))
+        assertThat(photoAsks).isEmpty()
+        vm.onEvent(ReportsEvent.SharePhotoReport("j3"))
+        assertThat(photoAsks.single()).isEqualTo(Triple("j3", monday, monday.plusDays(6)))
+        assertThat(vm.state.value.photoBusy).isNull()
+        assertThat(vm.state.value.photoNotice).isNull()
+
+        vm.onEvent(ReportsEvent.SelectRange(ReportRange.LastWeek))
+        assertThat(vm.state.value.photoJobs.first { it.id == "j1" }.photos).isEqualTo(1)
+        photoOutcome = PhotoReportOutcome.NoneHere
+        vm.onEvent(ReportsEvent.SharePhotoReport("j1"))
+        assertThat(photoAsks.last()).isEqualTo(Triple("j1", monday.minusWeeks(1), monday.minusDays(1)))
+        assertThat(vm.state.value.photoNotice).isEqualTo(PhotoReportOutcome.NoneHere)
+        vm.onEvent(ReportsEvent.SelectRange(ReportRange.ThisWeek))
+        assertThat(vm.state.value.photoNotice).isNull()
     }
 }
