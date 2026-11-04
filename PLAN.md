@@ -362,9 +362,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T060: Materials and clients: receipt capture with scanner and OCR total suggestion, list per job with totals, CSV; FL-Clients list (acceptance: AC-F44, AC-F45)
   - [x] T060a: FL-Clients from More (Owner/Office): `ClientListBuilder` `[unit]` (clients named on live jobs, by name, jobs Active first, blank phone/email is none), Call and Email, job rows open the job (AC-F45)
   - [x] T060b: FL-Materials: receipt capture (document scanner) → job, vendor, amount with OCR total suggestion, category, date, note; list per job with totals; CSV export; More entry (AC-F44)
-  - [ ] T060c: receipt images reach the office: upload the scanned receipt to R2 like job photos (needs a `material.r2Key` column, Room v14 and a backend migration) so another phone shows the receipt, not only the one that scanned it; Leads log receipts on the jobs they run (backend policy already allows it) (AC-F44)
+  - [x] T060c: receipt images reach the office: upload the scanned receipt to R2 like job photos (needs a `material.r2Key` column, Room v14 and a backend migration) so another phone shows the receipt, not only the one that scanned it; Leads log receipts on the jobs they run (backend policy already allows it) (AC-F44)
     - [x] T060c1: `material.r2Key` (Room v14); a scanned receipt is queued for R2 (`material` media entity, 25 MB, no backend migration: rows are JSON), the key syncs, another phone's receipt form downloads and shows it; editing keeps the key, a new scan or Remove drops it (AC-F44)
-    - [ ] T060c2: Leads log receipts on the jobs they run: Materials entry for a Lead, job picker and list limited to their jobs (backend policy already allows it) (AC-F44)
+    - [x] T060c2: Leads log receipts on the jobs they run: Materials entry for a Lead, job picker and list limited to their jobs (backend policy already allows it) (AC-F44)
 - [ ] R11: Review T056–T060
 - [ ] T061: Reports: photo report PDF (range, 4 per page), job summary PDF (hours vs budget, COs, tasks, delays) (acceptance: AC-F28 report, AC-F47)
 - [ ] T062: Installed items on the job: FL-House rooms with items (same editor as HM), warranty lookup, data plate OCR (acceptance: AC-F50)

@@ -72,6 +72,15 @@ class RoleGatesTest {
         more(CompanyRole.Lead)
         rule.onNodeWithText("Team").assertDoesNotExist()
         rule.onNodeWithText("Company").assertDoesNotExist()
+        rule.onNodeWithText("Clients").assertDoesNotExist()
+    }
+
+    // AC-F44 (T060c2): a Lead logs receipts on the jobs they run, so Materials is on their More tab.
+    @Test fun leadSeesMaterials() {
+        val events = mutableListOf<MoreEvent>()
+        more(CompanyRole.Lead) { events += it }
+        rule.onNodeWithText("Materials and receipts").performScrollTo().assertIsDisplayed().performClick()
+        assertThat(events).containsExactly(MoreEvent.OpenMaterials)
     }
 
     @Test fun signOutAsksFirst() {

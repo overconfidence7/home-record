@@ -191,13 +191,16 @@ class AppContainer(private val app: Application) {
         })
     }
 
-    private fun jobOptions(companyId: String) = db.jobDao().observeFor(companyId).map { jobs ->
-        jobs.sortedBy { it.name.lowercase() }.map { com.kurtz.homerecord.fieldlog.materials.JobOption(it.id, it.name) }
+    /** The jobs this member may log receipts on: every job for Owner and Office, the jobs a Lead runs (T060c2). */
+    private fun jobOptions(companyId: String) = kotlinx.coroutines.flow.combine(db.jobDao().observeFor(companyId), roleGates) { jobs, gates ->
+        com.kurtz.homerecord.fieldlog.materials.MaterialsScope.jobs(jobs, gates, { it.id }, { it.name })
     }
 
     /** FL-Materials (AC-F44). */
     fun materialsDeps(companyId: String) = com.kurtz.homerecord.fieldlog.materials.MaterialsDeps(
-        materials = jobMaterials.observeForCompany(companyId),
+        materials = kotlinx.coroutines.flow.combine(jobMaterials.observeForCompany(companyId), roleGates) { rows, gates ->
+            com.kurtz.homerecord.fieldlog.materials.MaterialsScope.materials(rows, gates)
+        },
         jobs = jobOptions(companyId),
         exporter = com.kurtz.homerecord.fieldlog.materials.AndroidMaterialsExporter(app),
         categoryLabel = { app.getString(com.kurtz.homerecord.fieldlog.materials.categoryLabelRes(it)) },
