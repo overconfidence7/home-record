@@ -296,6 +296,10 @@ fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", Compan
 @Composable
 fun MoreCrewPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew), {}) }
 
+@ThemePreviews
+@Composable
+fun MoreLeadPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Lead), {}) }
+
 /** Fixed times (Oct 28, 2026 in the afternoon, UTC) keep the screenshots stable. */
 private val sampleConflicts = listOf(
     com.kurtz.homerecord.core.sync.ConflictEntry(
