@@ -71,6 +71,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.kurtz.homerecord.housemodel.blueprint.drawOpening
 import com.kurtz.homerecord.housemodel.blueprint.drawStair
+import com.kurtz.homerecord.housemodel.blueprint.LabelBox
+import com.kurtz.homerecord.housemodel.blueprint.LabelPlacer
+import com.kurtz.homerecord.housemodel.blueprint.labelAnchor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -717,8 +720,15 @@ private fun DrawScope.drawPlan(
         drawPath(path, if (flagged) flaggedLine else if (selected) primary else textColor.copy(alpha = 0.6f), style = Stroke(width = (if (selected) 3f else 1.5f) * density))
         val name = room.name.ifBlank { "·" }
         val layout = measurer.measure(name, labelStyle.copy(color = if (selected) roomText else textColor, fontSize = (labelStyle.fontSize.value).sp))
-        val cx = (room.minX + room.maxX) / 2f * z + ox
-        val cy = (room.minY + room.maxY) / 2f * z + oy
+        // Placed like the blueprint's name (LabelPlacer), so stair treads never cross it ([judge:hm-plan-name-over-stairs]);
+        // with no clear spot the editor still shows the name at the room's anchor, since it is the room being edited.
+        val (ax, ay) = labelAnchor(room)
+        val stairBoxes = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
+            LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
+        }
+        val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
+        val (cx, cy) = LabelPlacer.place(ax * z + ox, ay * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairBoxes, emptyList(), 4f * density)
+            ?: (ax * z + ox to ay * z + oy)
         if (layout.size.width < (room.maxX - room.minX) * z) {
             drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
         }
