@@ -9,6 +9,8 @@ import com.kurtz.homerecord.core.model.ChangeOrderPhotos
 import com.kurtz.homerecord.core.model.ChangeOrderStatus
 import com.kurtz.homerecord.core.model.JobChangeOrder
 import com.kurtz.homerecord.core.model.MoneyMath
+import com.kurtz.homerecord.core.model.Signature
+import com.kurtz.homerecord.core.model.SignatureStroke
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -30,9 +32,13 @@ fun ChangeOrderEntity.toModel(): JobChangeOrder {
         totalCents = if (ChangeOrderStatus.of(status) == ChangeOrderStatus.DRAFT) MoneyMath.totalCents(lines) else totalCents,
         clientName = clientName, status = ChangeOrderStatus.of(status), signedAt = signedAt, signedBy = signedBy,
         createdAt = createdAt, updatedAt = updatedAt, photoIds = ChangeOrderPhotos.decode(photoIdsJson),
-        signaturePath = signaturePath,
+        signaturePath = signaturePath, signature = Signature.decode(signatureJson), signedOnWeb = signedVia == SIGNED_VIA_WEB,
     )
 }
+
+/** `change_order.signedVia` for a signature the client gave on the share page (AC-F40, backend AC-B36). */
+const val SIGNED_VIA_WEB = "web"
+
 
 /**
  * A job's change orders (AC-F37): add, edit while Draft, delete a Draft. Every write is one outbox change through
@@ -99,7 +105,7 @@ class JobChangeOrders(
      * Signs a Draft on the phone (AC-F38): stores the signature image, the signer's name and the time, freezes the
      * total and makes it Signed, after which it is read only. False when gone, not a Draft, or the name is blank.
      */
-    suspend fun sign(id: String, signerName: String, signaturePath: String): Boolean {
+    suspend fun sign(id: String, signerName: String, signaturePath: String, strokes: List<SignatureStroke> = emptyList()): Boolean {
         val name = signerName.trim()
         if (name.isEmpty() || signaturePath.isBlank()) return false
         val row = dao.get(id) ?: return false
@@ -108,11 +114,26 @@ class JobChangeOrders(
         dao.upsert(
             row.copy(
                 status = ChangeOrderStatus.SIGNED.name, signedBy = name, signedAt = stamp, signaturePath = signaturePath,
+                signatureJson = strokes.takeIf { it.isNotEmpty() }?.let(Signature::encode),
                 totalCents = MoneyMath.totalCents(ChangeOrderLineItem.decode(row.linesJson)), updatedAt = stamp,
             ),
         )
         onChange(ENTITY, id)
         return true
+    }
+
+    /**
+     * The signature image of a Signed order on this phone. One signed on another phone or on the share page (T058b)
+     * arrives as strokes only; [draw] makes the PNG once and its path is kept as this phone's local column (never
+     * pushed, so no outbox change). Null when the order has no signature or the image could not be drawn.
+     */
+    suspend fun signatureImage(id: String, draw: suspend (List<SignatureStroke>) -> String?): String? {
+        val row = dao.get(id) ?: return null
+        row.signaturePath?.takeIf { java.io.File(it).exists() }?.let { return it }
+        val strokes = Signature.decode(row.signatureJson).takeIf { it.isNotEmpty() } ?: return null
+        val path = draw(strokes) ?: return null
+        dao.get(id)?.let { dao.upsert(it.copy(signaturePath = path)) }
+        return path
     }
 
     /**

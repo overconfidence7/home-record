@@ -4,11 +4,14 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.data.ChangeOrderEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.model.ChangeOrderLineItem
 import com.kurtz.homerecord.core.model.ChangeOrderStatus
+import com.kurtz.homerecord.core.model.Signature
+import com.kurtz.homerecord.core.model.SignatureStroke
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -21,7 +24,7 @@ import org.robolectric.annotation.Config
 
 // AC-F37 (create from a job: title, description, line items, total in cents, client name), AC-F52 (each write queues a sync change),
 // AC-F38 (sign stores the image, signer and time, makes it Signed and read only; duplicate to change)
-@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F52")
+@AcceptanceCriterion("AC-F37", "AC-F38", "AC-F40", "AC-F52")
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class JobChangeOrdersTest {
@@ -160,5 +163,38 @@ class JobChangeOrdersTest {
         assertThat(copy.signaturePath).isNull()
         assertThat(checkNotNull(orders.get(id)).status).isEqualTo(ChangeOrderStatus.SIGNED)
         assertThat(orders.duplicate("nope")).isNull()
+    }
+
+    // T058b (AC-F40): the strokes are stored with the signature so every phone can draw it; an order signed on the
+    // share page arrives as strokes only and this phone draws its PNG once, as a local column with no sync change.
+    @Test fun signatureStrokesSyncAndAWebSignedOrderGetsItsImageDrawnOnce() = runBlocking<Unit> {
+        val strokes = listOf(SignatureStroke(listOf(0.1f, 0.5f, 0.6f, 0.4f)))
+        val id = checkNotNull(orders.add("j1", ChangeOrderDraft("Island outlet", lines = lines)))
+        assertThat(orders.sign(id, "Dana Hale", "/m/sig.png", strokes)).isTrue()
+        assertThat(checkNotNull(orders.get(id)).signature).isEqualTo(strokes)
+
+        val web = "web-co"
+        db.changeOrderDao().upsert(
+            ChangeOrderEntity(
+                id = web, jobId = "j1", title = "Fridge circuit", status = "SIGNED", signedBy = "Dana Hale", signedAt = 9_000,
+                signatureJson = Signature.encode(strokes), signedVia = SIGNED_VIA_WEB, createdAt = 1, updatedAt = 9_000,
+            ),
+        )
+        val pulled = checkNotNull(orders.get(web))
+        assertThat(pulled.signedOnWeb).isTrue()
+        assertThat(pulled.signaturePath).isNull()
+        changes.clear()
+        val file = java.io.File.createTempFile("sig", ".png")
+        var drawn = 0
+        val draw: suspend (List<SignatureStroke>) -> String? = { s -> drawn++; assertThat(s).isEqualTo(strokes); file.absolutePath }
+        assertThat(orders.signatureImage(web, draw)).isEqualTo(file.absolutePath)
+        assertThat(orders.signatureImage(web, draw)).isEqualTo(file.absolutePath)
+        assertThat(drawn).isEqualTo(1)
+        assertThat(checkNotNull(orders.get(web)).signaturePath).isEqualTo(file.absolutePath)
+        assertThat(changes).isEmpty()
+        // A Draft has nothing to draw.
+        val draft = checkNotNull(orders.add("j1", ChangeOrderDraft("Another")))
+        assertThat(orders.signatureImage(draft, draw)).isNull()
+        file.delete()
     }
 }

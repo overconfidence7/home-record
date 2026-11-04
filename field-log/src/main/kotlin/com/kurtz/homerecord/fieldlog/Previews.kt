@@ -1431,6 +1431,41 @@ fun ChangeOrderSignErrorPreview() = Frame {
     ).let { com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreen(it, {}) }
 }
 
+/** Signed by the client through the link (AC-F40): the signature, "Signed through the link", and the link still on. */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormSignedWebPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+        title = "Second outlet on the island", clientName = "Dana Hale",
+        lines = listOf(com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "Outlet, box and wire", "1", "185.00")),
+    )
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, locked = true, draft = draft, initial = draft, linkAllowed = true,
+            linkUrl = "https://api.homerecord.app/share/co/q3V8pZx1",
+            signature = com.kurtz.homerecord.fieldlog.changes.CoSignature("Dana Hale", 1_793_808_000_000L, null, onWeb = true),
+        ),
+        {},
+    )
+}
+
+/** Turn off link asks first (rule 16, AC-B35). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormLinkOffPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+        title = "Second outlet on the island", clientName = "Dana Hale",
+        lines = listOf(com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "Outlet, box and wire", "1", "185.00")),
+    )
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(
+            isNew = false, loading = false, draft = draft, initial = draft, linkAllowed = true,
+            linkUrl = "https://api.homerecord.app/share/co/q3V8pZx1", confirmLinkOff = true,
+        ),
+        {},
+    )
+}
+
 /** Delete asks first (rule 16). */
 @ThemePreviews
 @Composable

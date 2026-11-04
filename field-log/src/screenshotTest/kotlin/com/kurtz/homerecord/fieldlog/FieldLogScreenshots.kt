@@ -755,6 +755,16 @@ fun ChangeOrderFormShareFailedScreenshot() = ChangeOrderFormShareFailedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ChangeOrderFormSignedWebScreenshot() = ChangeOrderFormSignedWebPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormLinkOffScreenshot() = ChangeOrderFormLinkOffPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ChangeOrderSignDrawnScreenshot() = ChangeOrderSignDrawnPreview()
 
 @PreviewTest

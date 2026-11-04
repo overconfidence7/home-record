@@ -79,7 +79,7 @@ class ChangeOrderSignViewModel(private val d: ChangeOrderSignDeps, private val s
         _state.update { it.copy(working = true, saveFailed = false) }
         viewModelScope.launch {
             val path = d.writeImage(st.strokes)
-            val ok = path != null && d.orders.sign(d.changeOrderId, st.signerName, path)
+            val ok = path != null && d.orders.sign(d.changeOrderId, st.signerName, path, st.strokes)
             if (ok) {
                 saved.remove<String>(NAME)
                 saved.remove<String>(STROKES)

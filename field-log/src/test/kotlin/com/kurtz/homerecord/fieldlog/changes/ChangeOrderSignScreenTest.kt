@@ -1,6 +1,8 @@
 package com.kurtz.homerecord.fieldlog.changes
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -23,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /** Sign on phone (AC-F38): the pad sends strokes, Clear and Sign; a Signed order shows the signer and Duplicate. */
-@AcceptanceCriterion("AC-F38")
+@AcceptanceCriterion("AC-F38", "AC-F40")
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class ChangeOrderSignScreenTest {
@@ -84,5 +86,27 @@ class ChangeOrderSignScreenTest {
         }
         rule.onNodeWithTag("fl_co_form_sign").performScrollTo().assertIsEnabled().performClick()
         assertThat(events).containsExactly(ChangeOrderFormEvent.SignOnPhone)
+    }
+
+    // AC-F40: Owner/Office see Send link to sign; while a link is on it says so and Turn off link asks first (AC-B35).
+    @Test fun linkSectionSendsAndTurnsOffAndHidesWithoutTheRole() {
+        val events = mutableListOf<ChangeOrderFormEvent>()
+        val draft = ChangeOrderFormDraft("Island outlet", "Dana Hale", lines = listOf(FormLine("l1", "Outlet", "1", "185")))
+        var state by androidx.compose.runtime.mutableStateOf(ChangeOrderFormUiState(isNew = false, loading = false, draft = draft, initial = draft))
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ChangeOrderFormScreen(state, { events += it }) }
+        }
+        rule.onNodeWithTag("fl_co_form_share_link").assertDoesNotExist()
+        state = state.copy(linkAllowed = true)
+        rule.onNodeWithTag("fl_co_form_share_link").performScrollTo().assertIsEnabled().performClick()
+        rule.onNodeWithText("Send link to sign").assertExists()
+        rule.onNodeWithTag("fl_co_form_link_off").assertDoesNotExist()
+        state = state.copy(linkUrl = "https://api.example.test/share/co/tok")
+        rule.onNodeWithTag("fl_co_form_link_on").performScrollTo()
+        rule.onNodeWithText("Link is on. Anyone with it can read this order and sign it.").assertExists()
+        rule.onNodeWithTag("fl_co_form_link_off").performScrollTo().performClick()
+        state = state.copy(confirmLinkOff = true)
+        rule.onNodeWithTag("fl_co_form_link_off_confirm").performClick()
+        assertThat(events).containsExactly(ChangeOrderFormEvent.ShareLink, ChangeOrderFormEvent.AskLinkOff, ChangeOrderFormEvent.LinkOff).inOrder()
     }
 }

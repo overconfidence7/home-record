@@ -54,9 +54,12 @@ class ChangeOrderPdfMaker(
     private val db: HomeRecordDatabase,
     private val membership: () -> CompanyMembership? = { null },
     private val zone: () -> ZoneId = ZoneId::systemDefault,
+    /** The signature PNG, drawn from the synced strokes when it was signed elsewhere (T058b). */
+    private val signatureImage: suspend (changeOrderId: String) -> String? = { null },
 ) {
     suspend fun make(changeOrderId: String): File? = withContext(Dispatchers.IO) {
-        val order = db.changeOrderDao().get(changeOrderId)?.toModel() ?: return@withContext null
+        val stored = db.changeOrderDao().get(changeOrderId)?.toModel() ?: return@withContext null
+        val order = if (stored.status == ChangeOrderStatus.SIGNED) stored.copy(signaturePath = signatureImage(changeOrderId) ?: stored.signaturePath) else stored
         val job = db.jobDao().get(order.jobId) ?: return@withContext null
         val company = LogPdfCompany.of(job.companyId, db.companyDao().get(job.companyId), membership())
         // the full photo when it is on this phone, else its thumbnail; neither means it is still on another phone

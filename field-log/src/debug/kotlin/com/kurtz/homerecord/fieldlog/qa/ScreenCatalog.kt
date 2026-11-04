@@ -120,6 +120,8 @@ object ScreenCatalog {
         QaScreen("co-form-delete", nonRoot = true) { ChangeOrderFormDeletePreview() },
         QaScreen("co-form-signed-short", nonRoot = true) { ChangeOrderFormSignedShortPreview() },
         QaScreen("co-form-share-failed", nonRoot = true) { ChangeOrderFormShareFailedPreview() },
+        QaScreen("co-form-signed-web", nonRoot = true) { ChangeOrderFormSignedWebPreview() },
+        QaScreen("co-form-link-off", nonRoot = true) { ChangeOrderFormLinkOffPreview() },
         QaScreen("co-sign-blank", nonRoot = true) { ChangeOrderSignBlankPreview() },
         QaScreen("co-sign-drawn", nonRoot = true) { ChangeOrderSignDrawnPreview() },
         QaScreen("co-sign-error", nonRoot = true) { ChangeOrderSignErrorPreview() },

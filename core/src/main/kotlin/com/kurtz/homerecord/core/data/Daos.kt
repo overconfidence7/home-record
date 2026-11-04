@@ -395,6 +395,11 @@ interface ShareLinkDao {
     @Query("SELECT * FROM share_link WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<ShareLinkEntity>>
     @Query("SELECT * FROM share_link WHERE jobId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<ShareLinkEntity>
     @Query("UPDATE share_link SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+    /** The live, not revoked link of this kind for a job and target (T058b). */
+    @Query("SELECT * FROM share_link WHERE jobId = :jobId AND kind = :kind AND ((:targetId IS NULL AND targetId IS NULL) OR targetId = :targetId) AND revoked = 0 AND deletedAt IS NULL ORDER BY createdAt DESC LIMIT 1")
+    suspend fun activeFor(kind: String, jobId: String, targetId: String?): ShareLinkEntity?
+    @Query("SELECT * FROM share_link WHERE jobId = :jobId AND kind = :kind AND ((:targetId IS NULL AND targetId IS NULL) OR targetId = :targetId) AND revoked = 0 AND deletedAt IS NULL ORDER BY createdAt DESC LIMIT 1")
+    fun observeActive(kind: String, jobId: String, targetId: String?): Flow<ShareLinkEntity?>
 }
 @Dao
 interface OutboxDao {
