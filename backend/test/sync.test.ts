@@ -25,6 +25,15 @@ describe("AC-B20 merge rules (unit)", () => {
     const third = mergeRow({ ...second, authoritative: false }, { id: "t", done: true }, 15, false);
     expect(third.row).toMatchObject({ title: "B", done: true });
   });
+  it("R11: a signed change order takes no phone write, newer or authoritative (AC-F38 read only)", () => {
+    const signed = mergeRow(null, { id: "c", status: "SIGNED", signedBy: "Dana Hale", title: "Fridge circuit" }, 10, false, "change_order");
+    const edit = mergeRow({ ...signed, authoritative: false }, { id: "c", status: "DRAFT", signedBy: null, title: "New" }, 99, true, "change_order");
+    expect(edit.row).toMatchObject({ status: "SIGNED", signedBy: "Dana Hale", title: "Fridge circuit" });
+    expect(edit.conflicts.every((x) => x.reason === "signed")).toBe(true);
+    // A Draft still merges by field as before.
+    const draft = mergeRow(null, { id: "d", status: "DRAFT", title: "A" }, 10, false, "change_order");
+    expect(mergeRow({ ...draft, authoritative: false }, { id: "d", title: "B" }, 20, false, "change_order").row.title).toBe("B");
+  });
   it("an older write to a field is dropped and logged", () => {
     const first = mergeRow(null, { id: "t", title: "New" }, 20, false);
     const stale = mergeRow({ ...first, authoritative: false }, { id: "t", title: "Old" }, 10, false);

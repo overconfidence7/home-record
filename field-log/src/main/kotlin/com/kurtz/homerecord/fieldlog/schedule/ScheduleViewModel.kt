@@ -76,9 +76,12 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
                     .filter { it.effectiveStatus(day) in setOf(JobStatus.ACTIVE, JobStatus.UPCOMING) && gates.leads(it.id) }
                     .sortedBy { it.name.lowercase() }
                     .map { ScheduleJobOption(it.id, it.name) }
-                Triple(ScheduleWeek.build(weekStart, people, entries, names), ownOnly, options)
-            }.collect { (rows, ownOnly, options) ->
-                _state.update { it.copy(loading = false, rows = rows, ownOnly = ownOnly, jobs = options, sheet = it.sheet?.takeIf { s -> s.stillValid(rows) }) }
+                val changeable = if (ownOnly) emptySet() else shown.filter { gates.leads(it.id) }.map { it.id }.toSet()
+                Shown(ScheduleWeek.build(weekStart, people, entries, names), ownOnly, options, changeable)
+            }.collect { (rows, ownOnly, options, changeable) ->
+                _state.update {
+                    it.copy(loading = false, rows = rows, ownOnly = ownOnly, jobs = options, changeable = changeable, sheet = it.sheet?.takeIf { s -> s.stillValid(rows) })
+                }
             }
         }
     }
@@ -138,6 +141,13 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
         is ScheduleSheet.PickJob -> rows.any { it.memberId == memberId }
         is ScheduleSheet.Day -> rows.any { r -> r.memberId == memberId && r.cells.any { c -> c.jobs.any { it.assignmentId == job.assignmentId } } }
     }
+
+    private data class Shown(
+        val rows: List<com.kurtz.homerecord.core.model.ScheduleRow>,
+        val ownOnly: Boolean,
+        val options: List<ScheduleJobOption>,
+        val changeable: Set<String>,
+    )
 
     private companion object {
         const val KEY_WEEK = "schedule_week"

@@ -176,6 +176,24 @@ describe("AC-B36 change order share page and web signature", () => {
     expect(html).toContain("Signed by Dana Hale");
   });
 
+  it("R11: a phone edit made after the web signature (an offline phone's later clock) does not undo it either", async () => {
+    const { owner, co } = await seed("sh9");
+    expect((await post("/share/co/sh9-co-token-000000001", { name: "Dana Hale", strokes: SIGNATURE })).status).toBe(200);
+    const later = Date.now() + 60_000;
+    const res = await push(owner, co, [
+      op(31, "change_order", { id: "sh9-c", title: "Changed after signing", status: "DRAFT", signedBy: null, signatureJson: null, totalCents: 1 }, later),
+    ]);
+    const body = (await res.json()) as { conflicts: { field: string; reason: string }[] };
+    expect(body.conflicts.map((x) => x.reason)).toContain("signed");
+    // A second signature from a phone that signed offline does not replace the client's either.
+    await push(owner, co, [op(32, "change_order", { id: "sh9-c", status: "SIGNED", signedBy: "Owner on site", signedVia: null }, later + 1)]);
+    const html = await (await get("/share/co/sh9-co-token-000000001")).text();
+    expect(html).toContain("Signed by Dana Hale");
+    expect(html).toContain("Add a circuit for the fridge");
+    expect(html).toContain("$329.00");
+    expect(html).not.toContain("Changed after signing");
+  });
+
   it("a revoked change order link cannot sign", async () => {
     const { owner, co } = await seed("sh8");
     await push(owner, co, [op(40, "share_link", { id: "sh8-sc", revoked: true })]);

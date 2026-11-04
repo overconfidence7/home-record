@@ -11,11 +11,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /** What FL-Clients reads: the company's clients and jobs, live from Room. */
-class ClientsDeps(val clients: Flow<List<ClientEntity>>, val jobs: Flow<List<JobEntity>>)
+class ClientsDeps(
+    val clients: Flow<List<ClientEntity>>,
+    val jobs: Flow<List<JobEntity>>,
+    val today: () -> String = { java.time.LocalDate.now().toString() },
+)
 
 /** FL-Clients (AC-F45): clients from jobs, kept current as jobs and clients change. */
 class ClientsViewModel(deps: ClientsDeps) : ViewModel() {
     val state: StateFlow<ClientsUiState> = combine(deps.clients, deps.jobs) { clients, jobs ->
-        ClientsUiState(loading = false, clients = ClientListBuilder.build(clients, jobs))
+        ClientsUiState(loading = false, clients = ClientListBuilder.build(clients, jobs, deps.today()))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ClientsUiState())
 }

@@ -365,7 +365,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T060c: receipt images reach the office: upload the scanned receipt to R2 like job photos (needs a `material.r2Key` column, Room v14 and a backend migration) so another phone shows the receipt, not only the one that scanned it; Leads log receipts on the jobs they run (backend policy already allows it) (AC-F44)
     - [x] T060c1: `material.r2Key` (Room v14); a scanned receipt is queued for R2 (`material` media entity, 25 MB, no backend migration: rows are JSON), the key syncs, another phone's receipt form downloads and shows it; editing keeps the key, a new scan or Remove drops it (AC-F44)
     - [x] T060c2: Leads log receipts on the jobs they run: Materials entry for a Lead, job picker and list limited to their jobs (backend policy already allows it) (AC-F44)
-- [ ] R11: Review T056–T060
+- [x] R11: Review T056–T060
 - [ ] T061: Reports: photo report PDF (range, 4 per page), job summary PDF (hours vs budget, COs, tasks, delays) (acceptance: AC-F28 report, AC-F47)
 - [ ] T062: Installed items on the job: FL-House rooms with items (same editor as HM), warranty lookup, data plate OCR (acceptance: AC-F50)
 - [ ] T063: `.homerecord` v2 bundle writer/reader `[unit]`, `ImportPlanner` `[unit]`, handoff summary and export from FL-House; `/handoff` backend with claim email; HM import (file, share, claim link) with preview and conflicts (acceptance: AC-C46, AC-C47, AC-F51, AC-B40, AC-H17)

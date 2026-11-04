@@ -83,6 +83,17 @@ class ScheduleViewModelTest {
         assertThat(calls).containsExactly("move a1 2026-11-06", "remove a1").inOrder()
     }
 
+    @Test fun aDayOnAJobNowDoneCanStillComeOff() {
+        // R11: the job finished early; it is no longer offered for new days but its scheduled day can be taken off.
+        jobs.value = jobs.value.map { if (it.id == "j1") it.copy(status = "DONE") else it }
+        val vm = vm()
+        assertThat(vm.state.value.jobs.map { it.id }).containsExactly("j2")
+        assertThat(vm.state.value.canChange("j1")).isTrue()
+        vm.onEvent(ScheduleEvent.OpenDay("m2", "a1"))
+        vm.onEvent(ScheduleEvent.Remove)
+        assertThat(calls).containsExactly("remove a1")
+    }
+
     @Test fun twoJobsTheSameDayShowAConflict() {
         entries.value = entries.value + ScheduleEntry("a2", "j2", "m2", wed)
         val vm = vm()

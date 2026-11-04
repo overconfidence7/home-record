@@ -32,12 +32,17 @@ data class ScheduleUiState(
     /** Jobs this person may schedule: every Active or Upcoming job for Owner and Office, the jobs they run for a Lead. */
     val jobs: List<ScheduleJobOption> = emptyList(),
     val sheet: ScheduleSheet? = null,
+    /**
+     * Jobs on the week this person may move or take off besides [jobs]: a Done job someone is still scheduled on can come
+     * off the schedule even though it is no longer offered for new days (R11).
+     */
+    val changeable: Set<String> = emptySet(),
 ) {
     val days: List<LocalDate> get() = ScheduleWeek.days(weekStart)
     val isThisWeek: Boolean get() = weekStart == ScheduleWeek.weekStart(today)
     val canAssign: Boolean get() = !ownOnly && jobs.isNotEmpty()
 
-    fun canChange(jobId: String): Boolean = !ownOnly && jobs.any { it.id == jobId }
+    fun canChange(jobId: String): Boolean = !ownOnly && (jobId in changeable || jobs.any { it.id == jobId })
 
     /** Someone is on a job that day. */
     fun busy(day: LocalDate): Boolean = rows.any { row -> row.cells.any { it.date == day && it.jobs.isNotEmpty() } }

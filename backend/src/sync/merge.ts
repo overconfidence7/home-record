@@ -11,7 +11,7 @@ export interface Conflict {
   field: string;
   kept: unknown;
   dropped: unknown;
-  reason: "older" | "authoritative";
+  reason: "older" | "authoritative" | "signed";
 }
 
 export interface Merged {
@@ -61,9 +61,16 @@ export const UNION_FIELDS: Record<string, ReadonlySet<string>> = {
 export const isUnionField = (entity: string, field: string) => UNION_FIELDS[entity]?.has(field) ?? false;
 
 /**
+ * A signed change order is the record of what the client agreed to (AC-F38: read only, duplicate to change). Once the
+ * stored row is Signed, by a phone or on the share page (AC-B36), no phone write changes it: an offline phone's later
+ * Draft edit or a second signature would otherwise win by updatedAt and drop the signature (R11).
+ */
+export const isSealed = (entity: string, row: Row) => entity === "change_order" && row.status === "SIGNED";
+
+/**
  * Field-level merge (AC-F53). Fields are last-writer-wins by the op's updatedAt, with ties going to the later push;
  * the append-only lists in [UNION_FIELDS] are unioned. A row marked authoritative (a punch edited by Owner/Office)
- * rejects every non-authoritative write and logs it.
+ * rejects every non-authoritative write and logs it; a signed change order ([isSealed]) rejects every write.
  */
 export function mergeRow(
   existing: Stored | null,
@@ -80,11 +87,12 @@ export function mergeRow(
   const row: Row = { ...existing.row };
   const times: FieldTimes = { ...existing.times };
   const conflicts: Conflict[] = [];
-  const locked = existing.authoritative && !incomingAuthoritative;
+  const sealed = isSealed(entity, existing.row);
+  const locked = sealed || (existing.authoritative && !incomingAuthoritative);
   for (const [field, value] of Object.entries(incoming)) {
     if (field === "id") continue;
     if (locked) {
-      if (!sameValue(row[field], value)) conflicts.push({ field, kept: row[field], dropped: value, reason: "authoritative" });
+      if (!sameValue(row[field], value)) conflicts.push({ field, kept: row[field], dropped: value, reason: sealed ? "signed" : "authoritative" });
       continue;
     }
     const current = row[field];

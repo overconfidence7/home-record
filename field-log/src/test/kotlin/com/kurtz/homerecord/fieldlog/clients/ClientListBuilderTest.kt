@@ -11,8 +11,10 @@ class ClientListBuilderTest {
     private fun client(id: String, name: String, phone: String? = null, email: String? = null, deletedAt: Long? = null) =
         ClientEntity(id, "co", name, phone, email, createdAt = 1, updatedAt = 1, deletedAt = deletedAt)
 
-    private fun job(id: String, name: String, clientId: String?, status: String = "ACTIVE", deletedAt: Long? = null) =
-        JobEntity(id, "co", clientId = clientId, name = name, status = status, createdAt = 1, updatedAt = 1, deletedAt = deletedAt)
+    private fun job(id: String, name: String, clientId: String?, status: String = "ACTIVE", deletedAt: Long? = null, startDate: String? = null) =
+        JobEntity(id, "co", clientId = clientId, name = name, status = status, startDate = startDate, createdAt = 1, updatedAt = 1, deletedAt = deletedAt)
+
+    private val today = "2026-11-04"
 
     // AC-F45
     @Test fun clientsSortByNameWithTheirJobsActiveFirst() {
@@ -24,6 +26,7 @@ class ClientListBuilderTest {
                 job("j3", "Hale kitchen", "c2", "UPCOMING"),
                 job("j4", "Garage subpanel", null),
             ),
+            today,
         )
         assertThat(rows.map { it.name }).containsExactly("Dana Hale", "smith family").inOrder()
         assertThat(rows[1].jobs.map { it.jobId }).containsExactly("j2", "j1").inOrder()
@@ -37,15 +40,27 @@ class ClientListBuilderTest {
         val rows = ClientListBuilder.build(
             listOf(client("c1", "Old client"), client("c2", "Gone", deletedAt = 5), client("c3", "Kept")),
             listOf(job("j1", "Removed job", "c1", deletedAt = 9), job("j2", "Job", "c2"), job("j3", "Porch", "c3")),
+            today,
         )
         assertThat(rows.map { it.clientId }).containsExactly("c3")
     }
 
     // AC-F45: a blank phone or email is no phone or email, so no Call or Email button.
     @Test fun blankContactDetailsReadAsNone() {
-        val row = ClientListBuilder.build(listOf(client("c1", "Hale", "  ", "")), listOf(job("j1", "Kitchen", "c1"))).single()
+        val row = ClientListBuilder.build(listOf(client("c1", "Hale", "  ", "")), listOf(job("j1", "Kitchen", "c1")), today).single()
         assertThat(row.phone).isNull()
         assertThat(row.email).isNull()
+    }
+
+    // AC-F45 (R11): a job's status is read as of today, so an Upcoming job whose start date came is listed as Active, first.
+    @Test fun jobStatusIsReadAsOfToday() {
+        val row = ClientListBuilder.build(
+            listOf(client("c1", "Hale")),
+            listOf(job("j1", "Attic fan", "c1", "ACTIVE"), job("j2", "Bath fan", "c1", "UPCOMING", startDate = "2026-11-02")),
+            today,
+        ).single()
+        assertThat(row.jobs.map { it.status }).containsExactly(JobStatus.ACTIVE, JobStatus.ACTIVE)
+        assertThat(row.jobs.map { it.name }).containsExactly("Attic fan", "Bath fan").inOrder()
     }
 
     // AC-F45: tap-to-call dials digits only, keeping a leading plus.
