@@ -186,6 +186,20 @@ class AppContainer(private val app: Application) {
     /** A job's tasks and punch list (AC-F34), each change queued for sync (AC-F36). */
     val jobTasks by lazy { com.kurtz.homerecord.core.task.JobTasks(db, onChange = ::recordChange) }
 
+    /** A job's change orders (AC-F37), each change queued for sync (AC-F52). */
+    val jobChangeOrders by lazy { com.kurtz.homerecord.core.changeorder.JobChangeOrders(db, onChange = ::recordChange) }
+
+    /** The job's Changes tab: Owner, Office and the job's Lead write change orders (AC-F3). */
+    fun changesDeps(jobId: String) = com.kurtz.homerecord.fieldlog.changes.ChangesDeps(jobId, jobChangeOrders, roleGates.map { it.leads(jobId) })
+
+    /** The change order form (AC-F37): a new one starts with the job's client; Speak shows when the phone has speech to text. */
+    fun changeOrderFormDeps(jobId: String, changeOrderId: String?) = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDeps(
+        jobId, changeOrderId, jobChangeOrders,
+        canManage = roleGates.map { it.leads(jobId) },
+        clientName = { db.jobDao().get(jobId)?.clientId?.let { db.clientDao().get(it)?.name } },
+        canDictate = android.speech.SpeechRecognizer.isRecognitionAvailable(app),
+    )
+
     /** The job's daily log (AC-F30, AC-F31): drafts from the day's records, weather from the backend proxy. */
     val dailyLogs by lazy {
         com.kurtz.homerecord.core.log.DailyLogRepository(

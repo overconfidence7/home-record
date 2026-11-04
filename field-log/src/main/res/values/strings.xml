@@ -724,4 +724,49 @@
     <string name="push_change_order_body_bare">Open the job to see it.</string>
     <string name="push_timesheet_title">Timesheet approved</string>
     <string name="push_timesheet_body">Your hours for the week of %1$s are approved.</string>
+
+    <!-- Change orders (FL-ChangeOrder, AC-F37) -->
+    <string name="changes_add">New change order</string>
+    <string name="changes_empty_title">No change orders yet</string>
+    <string name="changes_empty">When the client asks for extra work, write it up here, price it and get it signed.</string>
+    <string name="changes_empty_crew_title">No change orders</string>
+    <string name="changes_empty_crew">Change orders on this job show up here once your lead writes one.</string>
+    <string name="changes_status_draft">Draft</string>
+    <string name="changes_status_signed">Signed</string>
+    <string name="changes_status_declined">Declined</string>
+    <string name="changes_row_supporting">%1$s · %2$s</string>
+    <string name="changes_row_client">%1$s · %2$s · %3$s</string>
+    <string name="changes_total_drafts">Drafts total %1$s</string>
+    <string name="co_form_new">New change order</string>
+    <string name="co_form_edit">Edit change order</string>
+    <string name="co_form_title">Title</string>
+    <string name="co_form_title_help">What changed, in a few words. Example: Second outlet on the island.</string>
+    <string name="co_form_title_error">Give the change order a title.</string>
+    <string name="co_form_client">Client name</string>
+    <string name="co_form_description">Description</string>
+    <string name="co_form_speak">Speak</string>
+    <string name="co_form_speak_description">Speak the description</string>
+    <string name="co_form_speak_prompt">Describe the change</string>
+    <string name="co_form_lines">Line items</string>
+    <string name="co_form_line_description">Item</string>
+    <string name="co_form_line_qty">Qty</string>
+    <string name="co_form_line_qty_error">Enter a number above 0.</string>
+    <string name="co_form_line_price">Price each</string>
+    <string name="co_form_line_amount">Line total %1$s</string>
+    <string name="co_form_line_remove">Remove line</string>
+    <string name="co_form_line_remove_description">Remove line %1$d</string>
+    <string name="co_form_line_add">Add line</string>
+    <string name="co_form_no_lines">No line items yet. Add one for each part of the work and its price.</string>
+    <string name="co_form_total">Total</string>
+    <string name="co_form_delete">Delete change order</string>
+    <string name="co_form_delete_title">Delete this change order?</string>
+    <string name="co_form_delete_body">%1$s is a draft. Deleting it removes it from the job for everyone.</string>
+    <string name="co_form_delete_confirm">Delete</string>
+    <string name="co_form_cancel">Cancel</string>
+    <string name="co_form_failed">This change order isn\'t on this phone, or you can\'t change it.</string>
+    <string name="co_form_signed">This change order is signed and can\'t be changed.</string>
+    <plurals name="changes_lines">
+        <item quantity="one">%1$d line</item>
+        <item quantity="other">%1$d lines</item>
+    </plurals>
 </resources>

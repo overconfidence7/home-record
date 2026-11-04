@@ -1,0 +1,129 @@
+# Walkthrough F12 (T056a): change order on a job's Changes tab: empty state, the full-screen form with title, client,
+# description, two line items with quantity and price, and the total MoneyMath works out; saved as a Draft with its
+# total on the list; reopened, a line removed, the new total saved (AC-F37). Photos (T056b), signing (T057) and the
+# share link (T058) extend this flow.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f12@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# The tab row scrolls; picking House brings Changes, the last tab, into view.
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_house
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_changes
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_changes
+- extendedWaitUntil:
+    visible:
+      id: fl_changes_empty
+    timeout: 10000
+# rule 10: the empty state's action is the FAB's action
+- assertVisible: "No change orders yet"
+- assertVisible:
+    id: fl_changes_add
+- tapOn:
+    id: fl_changes_empty_add
+# AC-F37: a full-screen form (rule 15) with no tab bar
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_title
+    timeout: 10000
+- assertNotVisible:
+    id: fl_tab_today
+- tapOn:
+    id: fl_co_form_title
+- inputText: "Second outlet on the island"
+- tapOn:
+    id: fl_co_form_client
+- inputText: "Dana Hale"
+- tapOn:
+    id: fl_co_form_description
+- inputText: "Outlet on the end facing the dining room"
+- hideKeyboard
+# Line 1: one outlet at 185
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_0_price
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_line_0_description
+- inputText: "Outlet box and wire"
+- tapOn:
+    id: fl_co_form_line_0_price
+- inputText: "185"
+- hideKeyboard
+# Line 2: 1.5 hours of labor at 96
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_add_line
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_add_line
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_1_price
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_line_1_description
+- inputText: "Labor"
+- tapOn:
+    id: fl_co_form_line_1_qty
+- eraseText: 3
+- inputText: "1.5"
+- tapOn:
+    id: fl_co_form_line_1_price
+- inputText: "96"
+- hideKeyboard
+# AC-F37: the total is the sum of the lines: 185.00 + 144.00
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_total
+    direction: DOWN
+- assertVisible: "Line total \\$144\\.00"
+- assertVisible: ".*\\$329\\.00.*"
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Second outlet on the island"
+    timeout: 10000
+- assertVisible: "Draft · Dana Hale · 2 lines"
+- assertVisible: "\\$329\\.00"
+# Reopen, take the labor line off, save the new total
+- tapOn: "Second outlet on the island"
+- extendedWaitUntil:
+    visible:
+      id: fl_co_form_title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_1_remove
+    direction: DOWN
+- tapOn:
+    id: fl_co_form_line_1_remove
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible: "Draft · Dana Hale · 1 line"
+    timeout: 10000
+- assertVisible: "\\$185\\.00"
+- takeScreenshot: F12-change-order-list

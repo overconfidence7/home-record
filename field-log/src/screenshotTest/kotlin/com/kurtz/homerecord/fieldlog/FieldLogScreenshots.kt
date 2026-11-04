@@ -696,3 +696,38 @@ fun BehindWallWallsScreenshot() = BehindWallWallsPreview()
 @ThemePreviews
 @Composable
 fun BehindWallEmptyScreenshot() = BehindWallEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangesListScreenshot() = ChangesListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangesEmptyScreenshot() = ChangesEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangesCrewScreenshot() = ChangesCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormEditScreenshot() = ChangeOrderFormEditPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormNewScreenshot() = ChangeOrderFormNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormSignedScreenshot() = ChangeOrderFormSignedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangeOrderFormDeleteScreenshot() = ChangeOrderFormDeletePreview()

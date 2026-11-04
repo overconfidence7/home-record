@@ -192,6 +192,8 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
                 ),
                 onOpenTask = { nav.push(TaskFormKey(key.jobId, it)) },
+                changes = container.changesDeps(key.jobId),
+                onOpenChange = { nav.push(ChangeOrderKey(key.jobId, it)) },
             )
         }
         entry<PhotoKey> { key ->
@@ -238,6 +240,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     startFilePin = key.fileId?.let { com.kurtz.homerecord.core.model.TaskFilePin.of(it, key.page, key.x, key.y) },
                     me = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of),
                 ), onClose = nav::pop)
+        }
+        entry<ChangeOrderKey> { key ->
+            com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormRoute(container.changeOrderFormDeps(key.jobId, key.changeOrderId), onClose = nav::pop)
         }
         entry<AnnotateKey> { key ->
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)

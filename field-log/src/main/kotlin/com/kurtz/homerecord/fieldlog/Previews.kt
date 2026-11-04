@@ -1712,3 +1712,86 @@ fun BehindWallSheetPreview() = Frame {
         {},
     )
 }
+
+// FL-ChangeOrder (AC-F37): a kitchen remodel where the client added an island outlet and a pantry light.
+private val coRows = listOf(
+    com.kurtz.homerecord.fieldlog.changes.ChangeRow("co3", "Pantry light on a motion switch", com.kurtz.homerecord.core.model.ChangeOrderStatus.DRAFT, 42_500, "Dana Hale", 2),
+    com.kurtz.homerecord.fieldlog.changes.ChangeRow("co2", "Second outlet on the island", com.kurtz.homerecord.core.model.ChangeOrderStatus.SIGNED, 33_500, "Dana Hale", 2),
+    com.kurtz.homerecord.fieldlog.changes.ChangeRow("co1", "Move the range circuit to 50A", com.kurtz.homerecord.core.model.ChangeOrderStatus.DECLINED, 61_000, null, 3),
+)
+
+@Composable
+private fun ChangesTab(state: com.kurtz.homerecord.fieldlog.changes.ChangesUiState) =
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        sampleOverview, com.kurtz.homerecord.fieldlog.jobs.JobTab.CHANGES, {}, {}, {},
+        changesContent = { com.kurtz.homerecord.fieldlog.changes.ChangesScreen(state, {}) },
+    )
+
+/** The office's Changes tab: a draft waiting on the client, a signed one and a declined one, newest first (AC-F37). */
+@ThemePreviews
+@Composable
+fun ChangesListPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.changes.ChangesUiState(loading = false, rows = coRows, canManage = true)) }
+
+/** No change orders yet: the one action matches the FAB (rule 10). */
+@ThemePreviews
+@Composable
+fun ChangesEmptyPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.changes.ChangesUiState(loading = false, canManage = true)) }
+
+/** Crew see the list and no New change order (AC-F3). */
+@ThemePreviews
+@Composable
+fun ChangesCrewPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.changes.ChangesUiState(loading = false, rows = coRows.take(2), canManage = false)) }
+
+private val coDraft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+    title = "Pantry light on a motion switch",
+    clientName = "Dana Hale",
+    description = "Client asked for a ceiling light in the pantry that turns on when the door opens. Run from the kitchen lighting circuit.",
+    lines = listOf(
+        com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "LED fixture and motion switch", "1", "185.00"),
+        com.kurtz.homerecord.fieldlog.changes.FormLine("l2", "Labor", "2.5", "96"),
+    ),
+)
+
+/** Editing a draft: two lines, the total from MoneyMath, Speak under the description, Delete at the end (AC-F37). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormEditPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, draft = coDraft, initial = coDraft, canDictate = true),
+        {},
+    )
+}
+
+/** A new change order with the client filled in from the job, one line typed and a quantity that is not a number yet (rule 21). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormNewPreview() = Frame {
+    val draft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
+        title = "Second outlet on the island", clientName = "Dana Hale",
+        lines = listOf(com.kurtz.homerecord.fieldlog.changes.FormLine("l1", "Outlet, box and wire", "0", "185")),
+    )
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(loading = false, draft = draft, initial = draft.copy(title = ""), canDictate = true),
+        {},
+    )
+}
+
+/** A signed change order opens locked (AC-F38). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormSignedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, locked = true, draft = coDraft, initial = coDraft),
+        {},
+    )
+}
+
+/** Delete asks first (rule 16). */
+@ThemePreviews
+@Composable
+fun ChangeOrderFormDeletePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormScreen(
+        com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormUiState(isNew = false, loading = false, draft = coDraft, initial = coDraft, confirmDelete = true),
+        {},
+    )
+}

@@ -346,6 +346,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 ## M5 Field Log complete
 
 - [ ] T056: Change orders: entity, `MoneyMath` `[unit]`, FL-ChangeOrder form with voice description, photos, line items, total (acceptance: AC-F37)
+  - [x] T056a: `MoneyMath` `[unit]` (line = qty in thousandths × unit cents rounded half up, total = sum of lines), `JobChangeOrders` (add/edit/delete Draft only, each write queued for sync), job Changes tab (newest first, status, client, total, drafts total; New for Owner/Office/Lead), full-screen FL-ChangeOrder form with title, client (from the job), description typed or by Speak (platform speech to text), line items with Qty and Price each, Total; Signed opens locked (AC-F37)
+  - [ ] T056b: photos on a change order (pick job photos or take one; `photoIdsJson` on change_order, Room v12) shown on the form and carried into the CO PDF in T057 (AC-F37)
 - [ ] T057: Signature pad and CO PDF: `SignaturePad` in `:core-ui`, Signed state read-only with Duplicate, PDF with signature, share (acceptance: AC-F38, AC-F39)
 - [ ] T058: Share links backend: `/share/gallery/:token`, `/share/log/:token`, `/share/co/:token` with web signature, revocation; app "Share link" actions and Signed on pull (acceptance: AC-B35, AC-B36, AC-F40, AC-F28 gallery link)
 - [ ] T059: Schedule: `Assignment` entity, FL-Schedule week view (crew rows, day cells, tap/drag assign), crew's own week and "Tomorrow" on Today, conflict badges, push on change for tomorrow (acceptance: AC-F41, AC-F42, AC-F43)
