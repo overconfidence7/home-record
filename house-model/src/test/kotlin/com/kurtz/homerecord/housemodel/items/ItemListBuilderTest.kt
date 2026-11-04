@@ -62,4 +62,19 @@ class ItemListBuilderTest {
         }
         assertThat(french.flatMap { it.items }.map { it.id }).containsExactly("2")
     }
+
+    // [judge:hm-items-shutoff-warranty]: a shutoff has no warranty to miss, so no warranty line and not under Unknown
+    @Test @AcceptanceCriterion("AC-H6")
+    fun shutoffsCarryNoUnknownWarranty() {
+        val gas = row("5", "Gas main shutoff", ItemCategory.SHUTOFFS, "Basement")
+        val sump = row("6", "Sump pump", ItemCategory.SHUTOFFS, "Basement", WarrantyStatus.Active("2029-05-01"))
+        assertThat(gas.showsWarranty).isFalse()
+        assertThat(sump.showsWarranty).isTrue()
+        assertThat(rows.all { it.showsWarranty }).isTrue()
+        val all = rows + gas + sump
+        fun ids(f: WarrantyFilter) = ItemListBuilder.build(all, ItemGrouping.CATEGORY, ItemFilter(warranty = f)) { names[it] ?: it.name }.flatMap { it.items }.map { it.id }
+        assertThat(ids(WarrantyFilter.UNKNOWN)).containsExactly("4")
+        assertThat(ids(WarrantyFilter.ACTIVE)).containsExactly("2", "6")
+        assertThat(ItemListBuilder.build(all, ItemGrouping.ROOM) { names[it] ?: it.name }.flatMap { it.items }.map { it.id }).contains("5")
+    }
 }

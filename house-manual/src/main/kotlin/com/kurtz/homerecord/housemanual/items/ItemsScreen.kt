@@ -132,7 +132,7 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                                 leading = { Icon(itemIcon(ItemCategory.subtype(r.subtypeId)?.iconName ?: "Category"), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                                 onClick = { onEvent(ItemsEvent.Open(r.id)) },
                             )
-                            WarrantyStatusLine(r.warranty, Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp))
+                            if (r.showsWarranty) WarrantyStatusLine(r.warranty, Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp))
                         }
                     }
                 }

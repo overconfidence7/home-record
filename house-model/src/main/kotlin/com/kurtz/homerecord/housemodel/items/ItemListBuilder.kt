@@ -15,7 +15,13 @@ data class ItemRow(
     val roomName: String,
     val warranty: WarrantyStatus,
     val createdAt: Long = 0,
-)
+) {
+    /**
+     * Whether the row carries a warranty line. A shutoff (gas main, water main) has no warranty to miss, so it shows
+     * none unless one was recorded, and the Unknown warranty filter leaves it out [judge:hm-items-shutoff-warranty].
+     */
+    val showsWarranty: Boolean get() = !(category == ItemCategory.SHUTOFFS && warranty is WarrantyStatus.Unknown)
+}
 
 enum class WarrantyFilter { ACTIVE, EXPIRING, EXPIRED, UNKNOWN;
     fun matches(s: WarrantyStatus) = when (this) {
@@ -50,7 +56,7 @@ object ItemListBuilder {
         val kept = rows.filter { r ->
             (filter.category == null || r.category == filter.category) &&
                 (filter.roomId == null || r.roomId == filter.roomId) &&
-                (filter.warranty == null || filter.warranty.matches(r.warranty)) &&
+                (filter.warranty == null || (r.showsWarranty && filter.warranty.matches(r.warranty))) &&
                 tokens.all { t -> listOfNotNull(r.name, r.make, r.model, r.roomName, categoryName(r.category)).any { it.lowercase().contains(t) } }
         }
         val byName = compareBy<ItemRow>({ it.name.lowercase() }, { it.id })
