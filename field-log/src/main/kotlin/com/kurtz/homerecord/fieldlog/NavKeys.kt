@@ -12,6 +12,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object ReportsKey : NavKey
 
+/** FL-Clients (AC-F45). */
+@Serializable data object ClientsKey : NavKey
+
 /** More > Sync: sync status and the conflict log (AC-F52, AC-F53). */
 @Serializable data object SyncLogKey : NavKey
 

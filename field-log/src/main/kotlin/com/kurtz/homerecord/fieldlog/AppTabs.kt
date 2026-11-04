@@ -139,6 +139,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenTimesheets = { nav.push(TimesheetsKey()) },
                     onOpenReports = { nav.push(ReportsKey) },
                     onOpenCompany = { nav.push(CompanyKey) },
+                    onOpenClients = { nav.push(ClientsKey) },
                     onOpenSync = { nav.push(SyncLogKey) },
                     onSignOut = container::signOut,
                 )
@@ -357,6 +358,13 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.reports.ReportsRoute(
                 { container.reportsDeps(membership) }, onBack = nav::pop,
                 onOpenLog = { jobId, day -> nav.push(JobKey(jobId, com.kurtz.homerecord.fieldlog.jobs.JobTab.LOG.name, day.toString())) },
+            )
+        }
+        entry<ClientsKey> {
+            com.kurtz.homerecord.fieldlog.clients.ClientsRoute(
+                { com.kurtz.homerecord.fieldlog.clients.ClientsDeps(container.db.clientDao().observeFor(membership.companyId), container.db.jobDao().observeFor(membership.companyId)) },
+                onBack = nav::pop,
+                onOpenJob = { nav.push(JobKey(it)) },
             )
         }
         entry<SyncLogKey> {

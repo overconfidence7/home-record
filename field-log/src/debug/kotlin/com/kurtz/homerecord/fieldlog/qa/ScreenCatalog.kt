@@ -162,6 +162,8 @@ object ScreenCatalog {
         QaScreen("annotate-measure", nonRoot = true) { AnnotateTextPreview() },
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
+        QaScreen("clients-list", nonRoot = true) { ClientsListPreview() },
+        QaScreen("clients-empty", nonRoot = true) { ClientsEmptyPreview() },
         QaScreen("sync-log", nonRoot = true) { SyncLogUpToDatePreview() },
         QaScreen("sync-log-conflicts", nonRoot = true) { SyncLogConflictsPreview() },
         QaScreen("sync-log-offline", nonRoot = true) { SyncLogOfflinePreview() },

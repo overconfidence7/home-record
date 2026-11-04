@@ -11,6 +11,7 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Business
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Handshake
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Storage
@@ -48,6 +49,7 @@ sealed interface MoreEvent {
     data object OpenTimesheets : MoreEvent
     data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
+    data object OpenClients : MoreEvent
     data object OpenSync : MoreEvent
     data object FreeUp : MoreEvent
     data object SignOut : MoreEvent
@@ -83,6 +85,12 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.BarChart, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenReports) },
                 modifier = Modifier.testTag("fl_more_reports"),
+            )
+            RecordListItem(
+                headline = stringResource(R.string.more_clients),
+                leading = { Icon(Icons.Rounded.Handshake, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenClients) },
+                modifier = Modifier.testTag("fl_more_clients"),
             )
             RecordListItem(
                 headline = stringResource(R.string.more_company),

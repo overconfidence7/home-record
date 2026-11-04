@@ -360,6 +360,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T059a: a schedule-changed notification opens FL-Schedule on the notified day (`PushDestination` sends the Schedule tab today; carry `PushMessage.ScheduleChanged.date` into the schedule screen) (AC-F42)
   - [x] T059b: `ScheduleWeek` `[unit]` (Monday weeks, crew rows with seven cells, conflict when two jobs share a day, next scheduled day) and `JobSchedule` in :core (assign once per person/job/day, move, remove, each write one outbox change); FL-Schedule (week bar, day strip with busy dot and conflict badge, a row per person with job chips and Add, picker sheet, chip sheet Move to another day / Take off this day; Owner/Office all Active and Upcoming jobs, a Lead the jobs they run, Crew and Sub their own week read only); Today "Tomorrow" line opening Schedule (AC-F41, AC-F42, AC-F43)
 - [ ] T060: Materials and clients: receipt capture with scanner and OCR total suggestion, list per job with totals, CSV; FL-Clients list (acceptance: AC-F44, AC-F45)
+  - [x] T060a: FL-Clients from More (Owner/Office): `ClientListBuilder` `[unit]` (clients named on live jobs, by name, jobs Active first, blank phone/email is none), Call and Email, job rows open the job (AC-F45)
+  - [ ] T060b: FL-Materials: receipt capture (document scanner) → job, vendor, amount with OCR total suggestion, category, date, note; list per job with totals; CSV export; More entry (AC-F44)
 - [ ] R11: Review T056–T060
 - [ ] T061: Reports: photo report PDF (range, 4 per page), job summary PDF (hours vs budget, COs, tasks, delays) (acceptance: AC-F28 report, AC-F47)
 - [ ] T062: Installed items on the job: FL-House rooms with items (same editor as HM), warranty lookup, data plate OCR (acceptance: AC-F50)

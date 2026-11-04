@@ -67,6 +67,16 @@
     <string name="more_team">Team</string>
     <string name="more_company">Company</string>
     <string name="more_reports">Reports</string>
+    <string name="more_clients">Clients</string>
+    <string name="clients_title">Clients</string>
+    <string name="clients_empty_title">No clients yet</string>
+    <string name="clients_empty_body">Name a client on a job and they show up here with their phone, email and jobs.</string>
+    <string name="clients_call">Call %1$s</string>
+    <string name="clients_email">Email %1$s</string>
+    <plurals name="clients_job_count">
+        <item quantity="one">%d job</item>
+        <item quantity="other">%d jobs</item>
+    </plurals>
     <string name="rep_title">Reports</string>
     <string name="rep_range_this">This week</string>
     <string name="rep_range_last">Last week</string>

@@ -868,3 +868,6 @@ Crew and Sub now pull only the tasks assigned to them; a Lead also every task of
 - Weeks start Monday, like timesheets. Schedule rows come from the synced `member` table in its order; Crew and Sub see only their own row. A Lead may schedule only the jobs `RoleGates.leads` gives them (same rule as backend policy.ts LEAD_JOB_ROWS). Assignable jobs are Active and Upcoming; Done jobs' past days still show, Archived ones do not.
 - The same job twice for one person on one day is stored once (assign returns the existing row; a move onto a twin removes the moved row). Two different jobs on one day are kept and badged (AC-F43).
 - A tapped schedule push sets `AppContainer.scheduleOpenDay`; FL-Schedule jumps to that week and day and clears it (T059a), so the tab stays a root with no extra back stack entry.
+
+## 2026-11-04 — FL-Clients is Owner/Office only and lists clients named on live jobs
+SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left out, and the screen sits with Team and Company in More's admin rows, so Crew and Leads do not see client phone numbers and emails outside the jobs they work. Phone and email are edited on the job form (the client row is shared), so Clients is read-and-act only.

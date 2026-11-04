@@ -816,3 +816,13 @@ fun ScheduleCrewScreenshot() = ScheduleCrewPreview()
 @ThemePreviews
 @Composable
 fun ScheduleCrewEmptyScreenshot() = ScheduleCrewEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClientsListScreenshot() = ClientsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClientsEmptyScreenshot() = ClientsEmptyPreview()

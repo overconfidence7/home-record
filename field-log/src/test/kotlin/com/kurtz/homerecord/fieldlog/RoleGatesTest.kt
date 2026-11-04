@@ -46,8 +46,9 @@ class RoleGatesTest {
         val events = mutableListOf<MoreEvent>()
         more(CompanyRole.Owner) { events += it }
         rule.onNodeWithText("Team").assertIsDisplayed().performClick()
+        rule.onNodeWithText("Clients").assertIsDisplayed().performClick()
         rule.onNodeWithText("Company").assertIsDisplayed().performClick()
-        assertThat(events).containsExactly(MoreEvent.OpenTeam, MoreEvent.OpenCompany).inOrder()
+        assertThat(events).containsExactly(MoreEvent.OpenTeam, MoreEvent.OpenClients, MoreEvent.OpenCompany).inOrder()
     }
 
     @Test fun officeSeesTeamAndCompany() {
@@ -60,6 +61,7 @@ class RoleGatesTest {
         more(CompanyRole.Crew)
         rule.onNodeWithText("Team").assertDoesNotExist()
         rule.onNodeWithText("Company").assertDoesNotExist()
+        rule.onNodeWithText("Clients").assertDoesNotExist()
         rule.onNodeWithText("Sign out").assertIsDisplayed()
     }
 

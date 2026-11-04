@@ -105,7 +105,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun statusLabel(status: JobStatus): String = stringResource(
+internal fun statusLabel(status: JobStatus): String = stringResource(
     when (status) {
         JobStatus.ACTIVE -> R.string.job_status_active
         JobStatus.UPCOMING -> R.string.job_status_upcoming

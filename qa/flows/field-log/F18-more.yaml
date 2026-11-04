@@ -1,0 +1,64 @@
+# Walkthrough F18 (T060a): the screens in More open and return. Clients (AC-F45): a job named with a client,
+# phone and email puts that client on More → Clients with Call, Email and the job under them; the job row opens
+# the job. Materials, Billing and Settings join this flow when T060b, T064 and T065 build them.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f18@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_client
+- inputText: "Dana Hale"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: fl_jobedit_client_phone
+    timeout: 5000
+- tapOn:
+    id: fl_jobedit_client_phone
+- inputText: "5550142290"
+- hideKeyboard
+- tapOn:
+    id: fl_jobedit_client_email
+- inputText: "dana@example.test"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn:
+    id: fl_tab_more
+- tapOn:
+    id: fl_more_clients
+- extendedWaitUntil:
+    visible:
+      id: fl_clients_list
+    timeout: 10000
+- assertVisible: "Dana Hale"
+- assertVisible:
+    id: "fl_clients_call_.*"
+- assertVisible:
+    id: "fl_clients_email_.*"
+- assertVisible: "Hale kitchen"
+- takeScreenshot: F18-clients
+- tapOn: "Hale kitchen"
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_clients_list
+    timeout: 5000
+- back
+- assertVisible:
+    id: fl_more_clients

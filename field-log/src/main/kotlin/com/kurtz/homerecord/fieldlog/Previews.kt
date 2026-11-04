@@ -2090,3 +2090,35 @@ fun TodayCrewTomorrowPreview() = Frame {
         onEvent = {},
     )
 }
+
+private val previewClients = listOf(
+    com.kurtz.homerecord.fieldlog.clients.ClientRow(
+        "c1", "Dana Hale", "(555) 014-2290", "dana.hale@gmail.com",
+        listOf(
+            com.kurtz.homerecord.fieldlog.clients.ClientJob("j1", "Hale kitchen remodel", JobStatus.ACTIVE),
+            com.kurtz.homerecord.fieldlog.clients.ClientJob("j4", "Hale basement panel swap", JobStatus.DONE),
+        ),
+    ),
+    com.kurtz.homerecord.fieldlog.clients.ClientRow(
+        "c2", "Pat and Lee Smith", "(555) 017-8834", null,
+        listOf(com.kurtz.homerecord.fieldlog.clients.ClientJob("j2", "Smith deck lighting", JobStatus.UPCOMING)),
+    ),
+    com.kurtz.homerecord.fieldlog.clients.ClientRow(
+        "c3", "Westbrook Property Mgmt", null, "maintenance@westbrookpm.com",
+        listOf(com.kurtz.homerecord.fieldlog.clients.ClientJob("j3", "Unit 4B service upgrade", JobStatus.ACTIVE)),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun ClientsListPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clients.ClientsScreen(
+        com.kurtz.homerecord.fieldlog.clients.ClientsUiState(loading = false, clients = previewClients), {}, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClientsEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clients.ClientsScreen(com.kurtz.homerecord.fieldlog.clients.ClientsUiState(loading = false), {}, {})
+}
