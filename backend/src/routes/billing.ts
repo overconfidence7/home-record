@@ -66,6 +66,19 @@ export function grantedEntitlement(table: Tenant["table"], ids: string[]): strin
   return null;
 }
 
+/**
+ * True when an event about Solo would replace a Crew still in force (an Owner who moved up to Crew gets the old
+ * Solo subscription's cancellation or renewal later); Crew is the larger plan and wins until it ends.
+ */
+export function outranked(
+  entitlement: string,
+  current: { entitlement: string | null; entitlement_expires_at: number | null } | null,
+  now: number,
+): boolean {
+  if (entitlement !== SOLO || current?.entitlement !== CREW) return false;
+  return current.entitlement_expires_at == null || current.entitlement_expires_at > now;
+}
+
 /** Constant-time compare so the secret cannot be guessed a byte at a time. */
 function sameSecret(a: string, b: string): boolean {
   const x = new TextEncoder().encode(a);
@@ -86,10 +99,17 @@ billing.post("/webhooks/revenuecat", async (c) => {
   const now = Date.now();
   const at = e.event_timestamp_ms ?? now;
 
-  const fresh = await c.env.DB.prepare("INSERT INTO billing_events (id, app_user_id, type, received_at) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING")
-    .bind(e.id, e.app_user_id ?? "", e.type, now)
-    .run();
-  if (!fresh.meta.changes) return c.json({ ok: true, duplicate: true });
+  const seen = await c.env.DB.prepare("SELECT 1 FROM billing_events WHERE id = ?").bind(e.id).first();
+  if (seen) return c.json({ ok: true, duplicate: true });
+  // The event id is recorded only once the event has been applied, so a retry after a failure applies it again.
+  const handled = () =>
+    c.env.DB.prepare("INSERT INTO billing_events (id, app_user_id, type, received_at) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO NOTHING")
+      .bind(e.id, e.app_user_id ?? "", e.type, now)
+      .run();
+  const done = async (body: Record<string, unknown>) => {
+    await handled();
+    return c.json(body);
+  };
 
   const apply = (t: Tenant, entitlement: string | null, expiresAt: number | null) =>
     c.env.DB.prepare(
@@ -102,18 +122,24 @@ billing.post("/webhooks/revenuecat", async (c) => {
       const t = tenantOf(id);
       if (t) await apply(t, null, null);
     }
-    return c.json({ ok: true });
+    return done({ ok: true });
   }
   const tenant = tenantFor(e);
-  if (!tenant) return c.json({ ok: true, ignored: "app_user_id" });
-  if (e.type === "EXPIRATION") {
-    await apply(tenant, null, null);
-    return c.json({ ok: true });
-  }
-  if (!GRANT.has(e.type)) return c.json({ ok: true, ignored: "type" });
+  if (!tenant) return done({ ok: true, ignored: "app_user_id" });
   const ids = e.entitlement_ids ?? (e.entitlement_id ? [e.entitlement_id] : []);
   const entitlement = grantedEntitlement(tenant.table, ids);
-  if (!entitlement) return c.json({ ok: true, ignored: "entitlement" });
+  const current = await c.env.DB.prepare(`SELECT entitlement, entitlement_expires_at FROM ${tenant.table} WHERE id = ?`)
+    .bind(tenant.id)
+    .first<{ entitlement: string | null; entitlement_expires_at: number | null }>();
+  if (e.type === "EXPIRATION") {
+    // A subscription that ends clears only its own entitlement: Solo running out leaves a Crew the company holds.
+    if (entitlement && current?.entitlement && current.entitlement !== entitlement) return done({ ok: true, ignored: "other_entitlement" });
+    await apply(tenant, null, null);
+    return done({ ok: true });
+  }
+  if (!GRANT.has(e.type)) return done({ ok: true, ignored: "type" });
+  if (!entitlement) return done({ ok: true, ignored: "entitlement" });
+  if (outranked(entitlement, current ?? null, now)) return done({ ok: true, ignored: "outranked" });
   await apply(tenant, entitlement, e.expiration_at_ms ?? null);
-  return c.json({ ok: true });
+  return done({ ok: true });
 });

@@ -29,10 +29,15 @@ sealed interface ImportRead {
  * on this phone when there is one ([com.kurtz.homerecord.core.bundle.HomeBundle.retargeted]) and plans it; [apply]
  * writes it with media into `filesDir/media` (AC-H17).
  */
-class ImportFiles(private val context: Context, private val db: HomeRecordDatabase) {
+class ImportFiles(
+    private val context: Context,
+    private val db: HomeRecordDatabase,
+    /** Queues each imported record for sync, like every other House Manual write. */
+    onWritten: suspend (type: String, id: String) -> Unit = { _, _ -> },
+) {
     private val rows = RoomRowStore(db)
     private val importer = HomeBundleImporter(
-        { table, column, values -> rows.readWhere(table, column, values) }, rows, db.importLedgerDao(), File(context.filesDir, "media"),
+        { table, column, values -> rows.readWhere(table, column, values) }, rows, db.importLedgerDao(), File(context.filesDir, "media"), onWritten,
     )
 
     suspend fun read(uri: Uri): ImportRead = withContext(Dispatchers.IO) {

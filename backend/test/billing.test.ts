@@ -83,6 +83,24 @@ describe("AC-B50 RevenueCat webhook", () => {
     expect(row?.entitlement).toBe("fieldlog_solo");
   });
 
+  // r12:billing-solo-undoes-crew
+  it("a Solo subscription's later events never undo a Crew the company moved up to", async () => {
+    await seedUser("bo9", "bo9@x.com");
+    await seedCompany("bco9", "Ridge Roofing", "bo9");
+    const later = Date.now() + 30 * 86400_000;
+    await hook({ type: "INITIAL_PURCHASE", app_user_id: "company:bco9", entitlement_ids: ["fieldlog_solo"], expiration_at_ms: later, event_timestamp_ms: 100 });
+    await hook({ type: "INITIAL_PURCHASE", app_user_id: "company:bco9", entitlement_ids: ["fieldlog_crew"], expiration_at_ms: later, event_timestamp_ms: 200 });
+    expect(await json(await hook({ type: "CANCELLATION", app_user_id: "company:bco9", entitlement_ids: ["fieldlog_solo"], expiration_at_ms: later, event_timestamp_ms: 300 })))
+      .toMatchObject({ ignored: "outranked" });
+    expect(await json(await hook({ type: "EXPIRATION", app_user_id: "company:bco9", entitlement_ids: ["fieldlog_solo"], event_timestamp_ms: 400 })))
+      .toMatchObject({ ignored: "other_entitlement" });
+    let row = await env.DB.prepare("SELECT entitlement FROM companies WHERE id = 'bco9'").first<{ entitlement: string | null }>();
+    expect(row?.entitlement).toBe("fieldlog_crew");
+    await hook({ type: "EXPIRATION", app_user_id: "company:bco9", entitlement_ids: ["fieldlog_crew"], event_timestamp_ms: 500 });
+    row = await env.DB.prepare("SELECT entitlement FROM companies WHERE id = 'bco9'").first<{ entitlement: string | null }>();
+    expect(row?.entitlement).toBeNull();
+  });
+
   it("finds the company through aliases, ignores anonymous buyers and clears on transfer", async () => {
     await seedUser("bo3", "bo3@x.com");
     await seedCompany("bco3", "Kurtz Builders", "bo3");

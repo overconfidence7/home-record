@@ -579,6 +579,9 @@ class AppContainer(private val app: Application) {
     /** Items installed on a job (water heater, panel, fixtures) with make, model and serial; they go to the homeowner in the handoff (AC-F50). */
     val items by lazy { com.kurtz.homerecord.housemodel.items.ItemRepository(
         db, app.resources::getString, onChange = ::recordChange, source = com.kurtz.homerecord.core.data.Sources.FIELD_LOG,
+        queuePhotoUpload = { id, path ->
+            company.current?.companyId?.let { uploadMedia(TenantRef(TenantKind.Company, it), "photo", id, path.substringAfterLast('/'), path, "image/jpeg") }
+        },
     ) }
 
     /** The job house's `.homerecord` for the handoff (AC-F51). */

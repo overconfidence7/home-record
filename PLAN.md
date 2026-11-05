@@ -392,7 +392,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T065: FL-More and Settings: Team, Timesheets, Reports, Company, Billing, Materials, Clients, Settings (units, offline storage, notifications), Account (sign out clears after confirm), About (acceptance: AC-F4, More shell)
   - [x] T065a: FL-Settings (units choice stored on the phone, notifications status opening phone settings, storage with Free up moved from More), FL-About (version), More names the signed-in account and gains Settings and About rows (AC-F4, AC-C4, AC-F20)
   - [x] T065b: apply the units choice to Field Log's house screens (plan, floors, room, walls, item place) through `UnitsStore` (AC-C4)
-- [ ] R12: Review T061–T065
+- [x] R12: Review T061–T065
 - [ ] V5: Visual review of M5 screenshots; walk PRODUCT.md Field Log steps 1–10
 
 ## M6 House Manual complete

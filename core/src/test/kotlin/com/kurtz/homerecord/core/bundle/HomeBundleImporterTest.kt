@@ -101,6 +101,22 @@ class HomeBundleImporterTest {
         assertThat(photo.source).isEqualTo(Sources.FIELD_LOG)
     }
 
+    // r12:import-not-synced: every imported record reaches the app's sync outbox hook, parents first.
+    @Test fun eachWrittenRecordIsReportedForSync() = runBlocking<Unit> {
+        seedCrew()
+        val (bundle, unpacked) = handoff()
+        val written = mutableListOf<Pair<String, String>>()
+        val store = RoomRowStore(owner)
+        val reporting = HomeBundleImporter({ t, c, v -> store.readWhere(t, c, v) }, store, owner.importLedgerDao(), mediaDir) { type, id ->
+            written += type to id
+        }
+        reporting.apply(reporting.preview(bundle), unpacked)
+        assertThat(written).containsAtLeast("home" to "h1", "floor" to "f1", "room" to "r1", "wall" to "w1", "wall_photo" to "wp1", "overlay" to "o1").inOrder()
+        written.clear()
+        reporting.apply(reporting.preview(bundle), unpacked)
+        assertThat(written).isEmpty()
+    }
+
     @Test fun importingTheSameBundleAgainChangesNothing() = runBlocking<Unit> {
         seedCrew()
         val (bundle, unpacked) = handoff()

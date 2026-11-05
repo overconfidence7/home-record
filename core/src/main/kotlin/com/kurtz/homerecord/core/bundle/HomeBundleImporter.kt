@@ -29,6 +29,8 @@ class HomeBundleImporter(
     private val store: RowStore,
     private val ledger: ImportLedgerDao,
     private val mediaDir: File,
+    /** Called for each record written, after the transaction commits, so the app can queue it for sync (r12:import-not-synced). */
+    private val onWritten: suspend (type: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun preview(bundle: HomeBundle): ImportPreview {
         val local = bundle.records.mapValues { (type, records) ->
@@ -77,6 +79,10 @@ class HomeBundleImporter(
         store.inTransaction {
             rows.forEach { (type, row) -> store.write(type, row) }
             ledger.setAll(preview.plan.ledgerRows(preview.bundle.homeId))
+        }
+        rows.forEach { (type, row) ->
+            val id = (row["id"] as? JsonPrimitive)?.takeIf { it.isString }?.content
+            if (!id.isNullOrEmpty()) onWritten(type, id)
         }
         return ImportOutcome(preview.bundle.homeId, rows.size, copied)
     }

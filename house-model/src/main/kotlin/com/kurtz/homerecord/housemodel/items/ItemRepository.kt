@@ -97,6 +97,8 @@ class ItemRepository(
     /** The app stamped on new rows: House Manual, or Field Log for items installed on a job (T062, AC-F50). */
     private val source: String = com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
+    /** Queues a new item photo's file for upload (Field Log sends it to the company's media, r12:fl-item-photo-upload). */
+    private val queuePhotoUpload: suspend (photoId: String, path: String) -> Unit = { _, _ -> },
 ) {
     suspend fun get(id: String): ItemEntity? = db.itemDao().get(id)
 
@@ -261,6 +263,7 @@ class ItemRepository(
                 ),
             )
             onChange("photo", pid)
+            if (it.path.isNotEmpty()) queuePhotoUpload(pid, it.path)
         }
     }
 

@@ -111,6 +111,19 @@ class ItemRepositoryTest {
         assertThat(db.photoDao().listForItem(id)).hasSize(1)
     }
 
+    // r12:fl-item-photo-upload: a new item photo is queued for upload once, kept photos are not sent again.
+    @AcceptanceCriterion("AC-F50")
+    @Test fun newItemPhotosAreQueuedForUpload() = runTest {
+        val uploads = mutableListOf<Pair<String, String>>()
+        val uploading = ItemRepository(db, ApplicationProvider.getApplicationContext<android.content.Context>().resources::getString, now = { 5_000L },
+            queuePhotoUpload = { id, path -> uploads += id to path })
+        val id = checkNotNull(uploading.save("h1", furnace().copy(photos = listOf(DraftPhoto(null, "/m/plate.jpg", PhotoKind.ITEM)))))
+        val photo = db.photoDao().listForItem(id).single()
+        assertThat(uploads).containsExactly(photo.id to "/m/plate.jpg")
+        uploading.save("h1", checkNotNull(uploading.draftFor(id)))
+        assertThat(uploads).hasSize(1)
+    }
+
     @AcceptanceCriterion("AC-C33")
     @Test fun registeredToggleUpdatesWarrantyAndQueuesSync() = runTest {
         val id = checkNotNull(repo.save("h1", furnace()))
