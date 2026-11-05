@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { normalizeEmail } from "../auth/emailCode";
+import { devHandoffKey } from "./handoff";
 
 /** QA helpers. Mounted only when ENVIRONMENT=dev; any other value leaves these paths as plain 404s. */
 export const dev = new Hono<AppEnv>();
@@ -19,6 +20,14 @@ dev.get("/last-code", async (c) => {
   if (!email) return c.json({ error: "bad_request" }, 400);
   const code = await c.env.CACHE.get(devCodeKey(email));
   return code ? c.json({ code }) : c.json({ error: "not_found" }, 404);
+});
+
+/** The token of the newest handoff sent to this email, for flows that claim it without reading the email. */
+dev.get("/last-handoff", async (c) => {
+  const email = normalizeEmail(c.req.query("email") ?? "");
+  if (!email) return c.json({ error: "bad_request" }, 400);
+  const token = await c.env.CACHE.get(devHandoffKey(email));
+  return token ? c.json({ token, path: `/handoff/${token}` }) : c.json({ error: "not_found" }, 404);
 });
 
 /** The newest notifications the Worker sent (or would have, without FCM), for flows that check a push went out. */
@@ -57,12 +66,12 @@ dev.post("/seed", async (c) => {
 
 async function resetAll(env: AppEnv["Bindings"]) {
   const tables = [
-    "push_tokens", "push_log", "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
+    "handoffs", "push_tokens", "push_log", "sync_conflicts", "sync_applied", "sync_rows", "sync_counters", "company_invites",
     "memberships", "email_codes", "auth_limits", "media_objects", "lookup_log", "lookup_quota", "companies", "homes", "users",
   ];
   await env.DB.batch(tables.map((t) => env.DB.prepare(`DELETE FROM ${t}`)));
   // Codes and lookup quotas; cached lookup answers stay (they belong to no account).
-  for (const prefix of ["devcode:", "quota:"]) {
+  for (const prefix of ["devcode:", "devhandoff:", "quota:"]) {
     let cursor: string | undefined;
     do {
       const page = await env.CACHE.list({ prefix, cursor });

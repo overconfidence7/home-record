@@ -64,6 +64,16 @@ A link is a synced `share_link` row (Owner and Office only): `kind` `gallery`, `
 - `GET /share/co/:token` the change order (lines, total, photos); while it is not signed, a name field and a signature pad. `POST /share/co/:token` `{name, aspect, strokes: [{points: [x, y, ...]}]}` (0..1 pad coordinates, as the app's `Signature`; at least 0.2 pad widths of ink) marks it `SIGNED` with `signedBy`, `signedAt`, `signatureJson`, `signedVia: "web"` as a server write (next seq, so phones pull it; Owner and Office get the `change_order_signed` push). 409 once signed or declined.
 - `GET /share/:kind/:token/photo/:photoId` streams a photo from the `MEDIA` binding: for a gallery any live photo of the job, for a log or change order only the photos on it.
 
+## Handoff (AC-B40)
+
+Field Log sends a job's `.homerecord` bundle to the homeowner; House Manual claims it and imports it (AC-H17).
+
+- `POST /handoff?companyId=&jobId=&email=&homeName=` (Owner, Office or Lead of the company; Crew/Sub 403, another company 404) with the raw bundle as the body and a `Content-Length` (411 without one, 413 above 100 MB, 400 `not_a_bundle` unless it starts like a zip). Stores it in R2 at `company/<co>/handoff/<id>.homerecord`, records it in `handoffs` (migration 0014, only a SHA-256 of the claim token is kept), emails the homeowner the link through Resend (502 `send_failed` removes both again), answers 201 `{id, email, expiresAt, size}`. Links work for 30 days.
+- `GET /handoff/:token` the page the email links to: who sent it, the home, "Open in House Manual" (`intent://handoff/<token>#Intent;scheme=homerecord;package=com.kurtz.homerecord.housemanual;end`, which goes to Google Play without the app). 404 for an unknown token, 410 once expired.
+- `POST /handoff/:token/claim` (any signed-in account): the first account to claim owns the handoff (claiming again from it is fine, any other account gets 409); answers `{homeName, companyName, size, claimedAt, expiresAt, bundlePath}`. 410 once expired.
+- `GET /handoff/:token/bundle` the claimer downloads the zip (404 for anyone else). House Manual imports it locally with the preview and conflicts, and its own sync then copies the home into the account's home tenant.
+- The daily cron (`pruneHandoffs`) deletes expired handoffs and their bundles. In dev, `GET /dev/last-handoff?email=` returns the newest token for that address.
+
 ## Push notifications (AC-B30)
 
 - `PUT /me/push-token` `{token, app: "field-log" | "house-manual"}` registers a phone's FCM token for the caller (204); a token already on another account moves to the caller. `DELETE /me/push-token` `{token}` removes the caller's own token. `POST /auth/revoke` drops all of the account's tokens.
