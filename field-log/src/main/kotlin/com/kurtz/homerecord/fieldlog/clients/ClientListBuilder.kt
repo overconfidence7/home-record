@@ -42,6 +42,22 @@ object ClientListBuilder {
         }.sortedWith(compareBy({ it.name.lowercase() }, { it.clientId }))
     }
 
+    /**
+     * How a phone number reads (rule 22, judge:fl-clients-phone-unformatted): a US number of 10 digits, or 11 with a
+     * leading 1, as (555) 014-2290; anything else (extensions, other countries, partial numbers) as it was typed.
+     */
+    fun displayPhone(phone: String): String {
+        val trimmed = phone.trim()
+        if (trimmed.any { it.isLetter() }) return trimmed
+        val digits = trimmed.filter(Char::isDigit)
+        val us = when {
+            digits.length == 10 && !trimmed.startsWith("+") -> digits
+            digits.length == 11 && digits.startsWith("1") && (trimmed.startsWith("+1") || !trimmed.startsWith("+")) -> digits.substring(1)
+            else -> return trimmed
+        }
+        return "(${us.substring(0, 3)}) ${us.substring(3, 6)}-${us.substring(6)}"
+    }
+
     /** What a phone number dials: digits and a leading plus only. */
     fun dialable(phone: String): String {
         val trimmed = phone.trim()

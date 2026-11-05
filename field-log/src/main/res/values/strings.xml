@@ -864,6 +864,7 @@
     <string name="changes_total_drafts">Drafts total %1$s</string>
     <string name="co_form_new">New change order</string>
     <string name="co_form_edit">Edit change order</string>
+    <string name="co_form_view">Change order</string>
     <string name="co_form_title">Title</string>
     <string name="co_form_title_help">What changed, in a few words. Example: Second outlet on the island.</string>
     <string name="co_form_title_error">Give the change order a title.</string>

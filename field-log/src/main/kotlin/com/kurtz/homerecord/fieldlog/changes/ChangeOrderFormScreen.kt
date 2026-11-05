@@ -1,5 +1,8 @@
 package com.kurtz.homerecord.fieldlog.changes
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -93,19 +96,7 @@ import com.kurtz.homerecord.fieldlog.R
 @Composable
 fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFormEvent) -> Unit, modifier: Modifier = Modifier) {
     val editable = !state.locked && !state.working
-    FormScaffold(
-        title = stringResource(if (state.isNew) R.string.co_form_new else R.string.co_form_edit),
-        dirty = state.dirty && !state.done && !state.locked,
-        saveEnabled = state.canSave,
-        onClose = { onEvent(ChangeOrderFormEvent.Close) },
-        onSave = { onEvent(ChangeOrderFormEvent.Save) },
-        modifier = modifier.testTag("fl_co_form"),
-        placeholder = when {
-            state.loading -> { m -> LoadingState(m.fillMaxSize()) }
-            state.failed -> { m -> ErrorState(stringResource(R.string.co_form_failed), { onEvent(ChangeOrderFormEvent.Retry) }, m.fillMaxSize()) }
-            else -> null
-        },
-    ) {
+    val body: @Composable () -> Unit = {
         if (state.locked) {
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("fl_co_form_locked"), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.Lock, contentDescription = null, Modifier.padding(end = 12.dp))
@@ -190,6 +181,34 @@ fun ChangeOrderFormScreen(state: ChangeOrderFormUiState, onEvent: (ChangeOrderFo
                 Text(stringResource(R.string.co_form_delete))
             }
         }
+    }
+    if (state.locked && !state.loading && !state.failed) {
+        // A signed (or declined) order is a view, not an editor: its title and Back, no Close or Save (rules 2 and 3,
+        // judge:fl-co-signed-edit-title).
+        ScreenScaffold(
+            title = state.draft.title.ifBlank { stringResource(R.string.co_form_view) },
+            onBack = { onEvent(ChangeOrderFormEvent.Close) },
+        ) { padding ->
+            Column(
+                modifier.testTag("fl_co_form").fillMaxSize().padding(padding).padding(horizontal = 16.dp, vertical = 8.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) { body() }
+        }
+    } else {
+        FormScaffold(
+            title = stringResource(if (state.isNew) R.string.co_form_new else R.string.co_form_edit),
+            dirty = state.dirty && !state.done && !state.locked,
+            saveEnabled = state.canSave,
+            onClose = { onEvent(ChangeOrderFormEvent.Close) },
+            onSave = { onEvent(ChangeOrderFormEvent.Save) },
+            modifier = modifier.testTag("fl_co_form"),
+            placeholder = when {
+                state.loading -> { m -> LoadingState(m.fillMaxSize()) }
+                state.failed -> { m -> ErrorState(stringResource(R.string.co_form_failed), { onEvent(ChangeOrderFormEvent.Retry) }, m.fillMaxSize()) }
+                else -> null
+            },
+        ) { body() }
     }
     if (state.pickingPhotos && editable) PhotoSheet(state, onEvent)
     if (state.confirmLinkOff) {

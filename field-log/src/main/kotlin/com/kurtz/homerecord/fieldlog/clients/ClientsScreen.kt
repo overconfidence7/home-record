@@ -64,7 +64,7 @@ fun ClientsScreen(state: ClientsUiState, onEvent: (ClientsEvent) -> Unit, onBack
 
 @Composable
 private fun ClientHeader(client: ClientRow, onEvent: (ClientsEvent) -> Unit) {
-    val contact = listOfNotNull(client.phone, client.email).joinToString("\n")
+    val contact = listOfNotNull(client.phone?.let(ClientListBuilder::displayPhone), client.email).joinToString("\n")
     val jobs = pluralStringResource(R.plurals.clients_job_count, client.jobs.size, client.jobs.size)
     RecordListItem(
         headline = client.name,

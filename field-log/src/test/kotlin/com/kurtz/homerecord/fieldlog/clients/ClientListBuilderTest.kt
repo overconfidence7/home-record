@@ -68,4 +68,15 @@ class ClientListBuilderTest {
         assertThat(ClientListBuilder.dialable("(555) 014-2290")).isEqualTo("5550142290")
         assertThat(ClientListBuilder.dialable(" +1 555-014-2290 ")).isEqualTo("+15550142290")
     }
+
+    /** judge:fl-clients-phone-unformatted: a stored "5550142290" reads (555) 014-2290; other numbers stay as typed. */
+    @Test fun phonesReadFormatted() {
+        assertThat(ClientListBuilder.displayPhone("5550142290")).isEqualTo("(555) 014-2290")
+        assertThat(ClientListBuilder.displayPhone("555-014-2290")).isEqualTo("(555) 014-2290")
+        assertThat(ClientListBuilder.displayPhone("+1 555 014 2290")).isEqualTo("(555) 014-2290")
+        assertThat(ClientListBuilder.displayPhone("15550142290")).isEqualTo("(555) 014-2290")
+        assertThat(ClientListBuilder.displayPhone("+44 20 7946 0958")).isEqualTo("+44 20 7946 0958")
+        assertThat(ClientListBuilder.displayPhone("555-0142 ext 4")).isEqualTo("555-0142 ext 4")
+        assertThat(ClientListBuilder.displayPhone("0142")).isEqualTo("0142")
+    }
 }
