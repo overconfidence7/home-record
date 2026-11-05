@@ -405,7 +405,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T066c1: HM-Breaker editor (tap a slot: label, amps, poles, type, rooms and items fed, delete with confirm; live slot check), touch and hold a single-pole breaker for a tandem; catalog, screenshots, flow (AC-C40)
     - [x] T066c2: panel facts editor (slot count, layout, main amps, brand) and panel photo from the camera or Files (AC-C40)
 - [ ] T067: Breaker links everywhere: item `poweredBy` chip, breaker "feeds" list, room "Breakers feeding this room" with confidence dots, search highlights slot (acceptance: AC-C41, AC-H7)
-  - [x] T067a: `PanelRepository.observeFeedingItem/observeFeedingRoom` (breakers feeding an item or room with the panel's name and link confidence, best link per breaker, panel then slot order) over new query-only `BreakerLinkDao` joins (AC-C41)
+  - [x] T067a: `PanelRepository.observeFeedingItem/observeFeedingRoom` (breakers feeding an item or room with the panel's name and link confidence, best link per breaker, panel then slot order) over new query-only `BreakerLinkDao` joins (groundwork; T067b claims the AC once the pages show it)
   - [ ] T067b: item page "Breaker 14" chip opening the panel, room page "Breakers feeding this room" with Confirmed/Likely/Unknown dots, breaker form "feeds" list, search hit on a breaker highlights its slot (AC-C41, AC-H7)
 - [ ] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
 - [ ] T069: Legend PDF per panel (acceptance: AC-C43)

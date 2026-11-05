@@ -1,18 +1,8 @@
 {
- "ticked_tasks": 243,
- "acs_claimed": 422,
- "acs_missing": 1,
+ "ticked_tasks": 242,
+ "acs_claimed": 421,
+ "acs_missing": 0,
  "unit_test_files": 355,
  "device_test_files": 75,
- "tasks": [
-  {
-   "task": "T067a",
-   "acs": [
-    "AC-C41"
-   ],
-   "missing": [
-    "AC-C41"
-   ]
-  }
- ]
+ "tasks": []
 }
