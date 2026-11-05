@@ -48,3 +48,17 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_item_detail_panel"
     timeout: 5000
+# T066b2: the seeded home has one panel, so More → Breaker panels opens it straight
+- tapOn:
+    id: "hm_tab_more"
+- extendedWaitUntil:
+    visible:
+      id: "hm_more_panels"
+    timeout: 5000
+- tapOn:
+    id: "hm_more_panels"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_grid"
+    timeout: 10000
+- assertVisible: "Main panel"

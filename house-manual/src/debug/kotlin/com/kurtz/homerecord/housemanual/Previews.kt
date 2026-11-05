@@ -1493,3 +1493,23 @@ fun PanelLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panel
 @ThemePreviews
 @Composable
 fun PanelMissingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(com.kurtz.homerecord.housemanual.panel.PanelUiState(loading = false, missing = true), {}) }
+
+// More → Breaker panels (AC-C40): a main panel in the basement and a garage sub-panel.
+private val samplePanelRows = listOf(
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-main", "Main panel", "Square D", "QO140M200", ItemCategory.ELECTRICAL, "breaker_panel", "r-u", "Utility room", WarrantyStatus.Unknown, createdAt = 1),
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-sub", "Garage sub-panel", "Siemens", "W0816ML1125CU", ItemCategory.ELECTRICAL, "sub_panel", "r-g", "Garage", WarrantyStatus.Unknown, createdAt = 2),
+)
+
+@ThemePreviews
+@Composable
+fun PanelsListPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false, panels = samplePanelRows), {})
+}
+
+@ThemePreviews
+@Composable
+fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false), {}) }
+
+@ThemePreviews
+@Composable
+fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }

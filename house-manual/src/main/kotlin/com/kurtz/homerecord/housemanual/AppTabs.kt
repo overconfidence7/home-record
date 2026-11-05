@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import com.kurtz.homerecord.housemanual.contacts.ContactsRoute
 import com.kurtz.homerecord.housemanual.paywall.PaywallRoute
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import com.kurtz.homerecord.housemodel.overlays.OverlayTarget
 import androidx.compose.runtime.rememberCoroutineScope
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerRoute
@@ -202,6 +203,12 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
         entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, key.itemId, onBack = nav::pop) }
+        entry<PanelsKey> {
+            com.kurtz.homerecord.housemanual.panel.PanelsRoute(
+                container.items, home.id, onBack = nav::pop, onOpen = { nav.push(PanelKey(it)) },
+                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "breaker_panel") },
+            )
+        }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
@@ -235,6 +242,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                         when (event) {
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
+                            MoreEvent.OpenPanels -> scope.launch {
+                                nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
+                            }
                             MoreEvent.OpenDocuments -> nav.push(DocumentsKey)
                             MoreEvent.OpenImport -> pickHandoff.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         }

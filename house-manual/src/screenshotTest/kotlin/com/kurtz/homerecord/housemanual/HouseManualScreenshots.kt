@@ -677,3 +677,18 @@ fun PanelLoadingScreenshot() = PanelLoadingPreview()
 @ThemePreviews
 @Composable
 fun PanelMissingScreenshot() = PanelMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelsListScreenshot() = PanelsListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelsEmptyScreenshot() = PanelsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelsLoadingScreenshot() = PanelsLoadingPreview()
