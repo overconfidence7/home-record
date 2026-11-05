@@ -57,7 +57,7 @@ fun RoomRoute(
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
             is RoomEvent.OpenPlanOverlay -> onOpenPlanOverlay(event.overlayId)
-            is RoomEvent.OpenItem, RoomEvent.AddItem -> Unit
+            is RoomEvent.OpenItem, RoomEvent.AddItem, is RoomEvent.OpenBreaker -> Unit
             else -> vm.onPhotoEvent(event)
         }
     }
@@ -86,6 +86,9 @@ fun RoomRoute(
     onOpenPlanOverlay: (String) -> Unit = {},
     /** The stage the walls open on: Finished in House Manual (AC-C17), Rough-in on a job (AC-F49). */
     defaultStage: WallStage = WallStage.HouseManualDefault,
+    /** The home's panels; with [onOpenBreaker], the room lists the breakers feeding it (AC-C41). */
+    panels: com.kurtz.homerecord.housemodel.panel.PanelRepository? = null,
+    onOpenBreaker: ((com.kurtz.homerecord.housemodel.panel.FeedingBreaker) -> Unit)? = null,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -97,6 +100,7 @@ fun RoomRoute(
                     overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
                     removedWallPhotos = wallPhotos.observeRemovedWallPhotos(roomId),
                     canAddItem = onAddItem != null,
+                    feeding = panels?.takeIf { onOpenBreaker != null }?.observeFeedingRoom(roomId),
                 )
             }
         },
@@ -107,6 +111,7 @@ fun RoomRoute(
         when (event) {
             RoomEvent.Back -> onBack()
             is RoomEvent.OpenItem -> onOpenItem(event.id)
+            is RoomEvent.OpenBreaker -> onOpenBreaker?.invoke(event.breaker)
             RoomEvent.AddItem -> onAddItem?.invoke(roomId)
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)

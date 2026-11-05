@@ -64,6 +64,7 @@ object ScreenCatalog {
         QaScreen("item-detail-links", nonRoot = true) { ItemDetailLinksPagePreview() },
         QaScreen("item-detail-power", nonRoot = true) { ItemDetailPowerPreview() },
         QaScreen("room-overlays", nonRoot = true) { RoomOverlaysPreview() },
+        QaScreen("room-breakers", nonRoot = true) { RoomBreakersPreview() },
         QaScreen("wall-outline-dragging", nonRoot = true) { WallOutlineDraggingPreview() },
         QaScreen("wall-outline-crossed", nonRoot = true) { WallOutlineCrossedPreview() },
         QaScreen("wall-outline-saving", nonRoot = true) { WallOutlineSavingPreview() },

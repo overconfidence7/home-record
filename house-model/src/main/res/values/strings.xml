@@ -157,6 +157,14 @@
     <string name="room_section_overlays">Overlays</string>
     <string name="room_section_overlays_empty">No outlets, pipes or wires drawn in this room yet.</string>
     <string name="room_section_breakers">Breakers</string>
+    <string name="room_section_breakers_feeding">Breakers feeding this room</string>
+    <string name="room_breaker_headline">Breaker %1$d</string>
+    <string name="room_breaker_unlabeled">No label</string>
+    <string name="room_breaker_amps">%1$d A</string>
+    <string name="room_breaker_confirmed">Confirmed</string>
+    <string name="room_breaker_likely">Likely</string>
+    <string name="room_breaker_unknown">Unknown</string>
+    <string name="room_breaker_open">Open the panel at this breaker</string>
     <string name="room_section_breakers_empty">No breakers linked to this room yet.</string>
     <string name="room_section_shutoffs">Shutoffs</string>
     <string name="room_section_shutoffs_empty">No shutoffs linked to this room yet.</string>

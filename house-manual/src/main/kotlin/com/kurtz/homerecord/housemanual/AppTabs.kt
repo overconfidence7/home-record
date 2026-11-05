@@ -222,6 +222,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             overlays = container.overlays,
             onOpenWall = { nav.push(RoomWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
             onOpenPlanOverlay = { nav.push(PlanKey(overlayId = it)) },
+            panels = container.panels,
+            onOpenBreaker = { nav.push(PanelKey(it.panelItemId, highlightSlot = it.breaker.number)) },
         ) }
         entry<RoomWallKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(

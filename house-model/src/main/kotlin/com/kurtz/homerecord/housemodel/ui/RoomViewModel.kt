@@ -39,6 +39,8 @@ class RoomViewModel(
     removedWallPhotos: Flow<List<RemovedWallPhoto>>? = null,
     /** Offers "Add an item here" when the room lists items; false for a member who may only read them. */
     canAddItem: Boolean = itemRows != null,
+    /** Breakers feeding the room (AC-C41); null hides the section's rows where the app keeps no panels. */
+    feeding: Flow<List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>>? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(
@@ -48,6 +50,7 @@ class RoomViewModel(
             wallStage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage,
             canOpenWalls = overlays != null && walls != null,
             overlays = if (overlays != null) emptyList() else null,
+            breakers = if (feeding != null) emptyList() else null,
         ),
     )
     val state: StateFlow<RoomUiState> = _state.asStateFlow()
@@ -71,6 +74,9 @@ class RoomViewModel(
         }
         if (overlays != null) {
             viewModelScope.launch { overlays.collect { list -> _state.update { it.copy(overlays = list) } } }
+        }
+        if (feeding != null) {
+            viewModelScope.launch { feeding.collect { list -> _state.update { it.copy(breakers = list) } } }
         }
     }
 

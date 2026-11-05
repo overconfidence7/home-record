@@ -44,6 +44,8 @@ data class RoomUiState(
     val overlays: List<Overlay>? = null,
     /** A wall row opens HM-Wall to draw and edit overlays on it (AC-C28). */
     val canOpenWalls: Boolean = false,
+    /** Breakers feeding the room with their link confidence (AC-C41); null where the app keeps no panels. */
+    val breakers: List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>? = null,
 ) {
     /** "View in 3D" shows once the room is drawn on its floor and the app has a 3D view. */
     val showView3D: Boolean get() = canView3D && floorId != null && (room?.points?.size ?: 0) >= 3
@@ -80,6 +82,8 @@ sealed interface RoomEvent {
     data object Back : RoomEvent
     data class OpenItem(val id: String) : RoomEvent
     data object AddItem : RoomEvent
+    /** A "Breakers feeding this room" row: open its panel at the slot (AC-H7). */
+    data class OpenBreaker(val breaker: com.kurtz.homerecord.housemodel.panel.FeedingBreaker) : RoomEvent
     data object View3D : RoomEvent
     data class SelectStage(val stage: WallStage) : RoomEvent
     data class PhotographWall(val wallId: String) : RoomEvent

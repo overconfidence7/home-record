@@ -120,6 +120,21 @@ class RoomViewModelTest {
         assertThat(gone.loading).isFalse()
     }
 
+    @AcceptanceCriterion("AC-C41")
+    @Test fun listsTheBreakersFeedingTheRoomOnlyWhereTheAppKeepsPanels() = test {
+        mainFloor()
+        assertThat(withTimeout(10_000) { vm("k").state.first { !it.loading } }.breakers).isNull()
+        val fed = com.kurtz.homerecord.housemodel.panel.FeedingBreaker(
+            com.kurtz.homerecord.core.model.Breaker("b12", "p1", listOf(12), 1, 20, com.kurtz.homerecord.core.model.BreakerType.STANDARD, "Refrigerator", com.kurtz.homerecord.core.model.LinkConfidence.LIKELY),
+            "panel-item", "Main panel", com.kurtz.homerecord.core.model.LinkConfidence.LIKELY,
+        )
+        val feeding = MutableStateFlow(emptyList<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>())
+        val model = RoomViewModel(repo, "k", feeding = feeding).also { created += it }
+        assertThat(withTimeout(10_000) { model.state.first { !it.loading } }.breakers).isEmpty()
+        feeding.value = listOf(fed)
+        assertThat(withTimeout(10_000) { model.state.first { it.breakers?.isNotEmpty() == true } }.breakers).containsExactly(fed)
+    }
+
     @Test fun unknownRoomIsNotFound() = test {
         mainFloor()
         val state = withTimeout(10_000) { vm("nope").state.first { !it.loading } }

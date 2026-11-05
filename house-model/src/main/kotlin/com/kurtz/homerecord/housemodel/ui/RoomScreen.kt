@@ -128,6 +128,7 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                         "items" -> RoomItemsCard(state.items, state.canAddItem, onEvent)
                         "walls" -> RoomWallsCard(state, onEvent)
                         "overlays" -> if (state.overlays != null) RoomOverlaysCard(state, state.overlays, onEvent) else RoomSectionCard(section)
+                        "breakers" -> if (state.breakers != null) RoomBreakersCard(state.breakers, onEvent) else RoomSectionCard(section)
                         else -> RoomSectionCard(section)
                     }
                 }
@@ -396,6 +397,70 @@ private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEven
                     modifier = Modifier.testTag("${prefix}_room_overlay_${o.id}"),
                 )
             }
+        }
+    }
+}
+
+/**
+ * Breakers feeding this room (AC-C41): one row per breaker, panel then slot order, with a confidence dot (filled for
+ * Confirmed, half for Likely, an empty ring for Unknown) and the word beside it, so the state never rests on color alone.
+ * A tap opens the panel at that breaker (AC-H7).
+ */
+@Composable
+private fun RoomBreakersCard(breakers: List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    Card(Modifier.fillMaxWidth().testTag("${prefix}_room_breakers")) {
+        Column(Modifier.padding(vertical = 8.dp)) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Rounded.ElectricalServices, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.room_section_breakers_feeding), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            }
+            if (breakers.isEmpty()) {
+                Text(
+                    stringResource(R.string.room_section_breakers_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
+            breakers.forEach { f ->
+                val b = f.breaker
+                val confidence = stringResource(
+                    when (f.confidence) {
+                        com.kurtz.homerecord.core.model.LinkConfidence.CONFIRMED -> R.string.room_breaker_confirmed
+                        com.kurtz.homerecord.core.model.LinkConfidence.LIKELY -> R.string.room_breaker_likely
+                        com.kurtz.homerecord.core.model.LinkConfidence.UNKNOWN -> R.string.room_breaker_unknown
+                    },
+                )
+                RecordListItem(
+                    headline = listOf(stringResource(R.string.room_breaker_headline, b.number), b.label.ifBlank { stringResource(R.string.room_breaker_unlabeled) }).joinToString(" · "),
+                    supporting = listOfNotNull(f.panelName, b.amps?.let { stringResource(R.string.room_breaker_amps, it) }, confidence).joinToString(" · "),
+                    leading = { ConfidenceDot(f.confidence) },
+                    onClick = { onEvent(RoomEvent.OpenBreaker(f)) },
+                    onClickLabel = stringResource(R.string.room_breaker_open),
+                    trailing = RecordListItemChevron,
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.testTag("${prefix}_room_breaker_${b.number}"),
+                )
+            }
+        }
+    }
+}
+
+/** 16 dp dot in the primary color: filled (Confirmed), left half filled (Likely), ring only (Unknown). */
+@Composable
+private fun ConfidenceDot(confidence: com.kurtz.homerecord.core.model.LinkConfidence) {
+    val color = MaterialTheme.colorScheme.primary
+    androidx.compose.foundation.Canvas(Modifier.size(24.dp).padding(4.dp)) {
+        val stroke = 2.dp.toPx()
+        val r = size.minDimension / 2f - stroke / 2f
+        when (confidence) {
+            com.kurtz.homerecord.core.model.LinkConfidence.CONFIRMED -> drawCircle(color, radius = size.minDimension / 2f)
+            com.kurtz.homerecord.core.model.LinkConfidence.LIKELY -> {
+                drawArc(color, startAngle = 90f, sweepAngle = 180f, useCenter = true, topLeft = androidx.compose.ui.geometry.Offset(stroke / 2f, stroke / 2f), size = androidx.compose.ui.geometry.Size(r * 2, r * 2))
+                drawCircle(color, radius = r, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+            }
+            com.kurtz.homerecord.core.model.LinkConfidence.UNKNOWN -> drawCircle(color, radius = r, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
         }
     }
 }

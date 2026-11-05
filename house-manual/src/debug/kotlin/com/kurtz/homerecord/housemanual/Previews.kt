@@ -1284,6 +1284,21 @@ fun RoomOverlaysPreview() = Frame {
         canOpenWalls = true, overlays = sinkWallOverlays.take(3) + sinkWallOverlays[4]), {})
 }
 
+/** The Kitchen's "Breakers feeding this room": one confirmed, one likely, one not yet checked (AC-C41). */
+@ThemePreviews
+@Composable
+fun RoomBreakersPreview() = Frame {
+    fun fed(slot: Int, amps: Int, label: String, c: com.kurtz.homerecord.core.model.LinkConfidence) = com.kurtz.homerecord.housemodel.panel.FeedingBreaker(
+        com.kurtz.homerecord.core.model.Breaker("b$slot", "p1", listOf(slot), 1, amps, com.kurtz.homerecord.core.model.BreakerType.STANDARD, label, c), "i-panel", "Main panel", c,
+    )
+    val breakers = listOf(
+        fed(2, 20, "Kitchen counter", com.kurtz.homerecord.core.model.LinkConfidence.CONFIRMED),
+        fed(4, 20, "Refrigerator", com.kurtz.homerecord.core.model.LinkConfidence.LIKELY),
+        fed(12, 20, "Dishwasher", com.kurtz.homerecord.core.model.LinkConfidence.UNKNOWN),
+    )
+    RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", breakers = breakers), {})
+}
+
 /** Place on plan (AC-C30 position): the refrigerator placed against the Kitchen's left wall on the Main floor, the floor's other items faint. */
 private fun itemPlaceState(spot: com.kurtz.homerecord.housemodel.items.ItemPlace?, rooms: List<PlanRoom> = houseRooms) =
     com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(

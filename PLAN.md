@@ -409,6 +409,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] T067b: item page "Breaker 14" chip opening the panel, room page "Breakers feeding this room" with Confirmed/Likely/Unknown dots, breaker form "feeds" list, search hit on a breaker highlights its slot (AC-C41, AC-H7)
     - [x] T067b1: item page Power section with a "Breaker 14" chip per feeding breaker (panel named when fed from two panels); the chip opens the panel scrolled to that slot, outlined for 2 s (AC-C41, AC-H7)
     - [ ] T067b2: room page "Breakers feeding this room" with Confirmed/Likely/Unknown dots, breaker form "feeds" list, search hit on a breaker highlights its slot (AC-C41)
+      - [x] T067b2a: House Manual room page "Breakers feeding this room": a row per breaker (number, label, panel, amps, confidence word) with a filled/half/ring dot; a row opens the panel at that slot (AC-C41, AC-H7)
+      - [ ] T067b2b: breaker form "feeds" list and Home search hit on a breaker opening its panel with the slot highlighted (AC-C41)
 - [ ] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
 - [ ] T069: Legend PDF per panel (acceptance: AC-C43)
 - [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)

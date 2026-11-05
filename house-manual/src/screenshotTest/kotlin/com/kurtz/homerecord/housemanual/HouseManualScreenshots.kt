@@ -576,6 +576,11 @@ fun RoomOverlaysScreenshot() = RoomOverlaysPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun RoomBreakersScreenshot() = RoomBreakersPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemPlaceScreenshot() = ItemPlacePreview()
 
 @PreviewTest
