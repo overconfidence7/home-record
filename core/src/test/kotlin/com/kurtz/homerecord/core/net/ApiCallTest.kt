@@ -29,6 +29,8 @@ class ApiCallTest {
         assertThat(failureOf({ throw http(403) })).isEqualTo(ApiFailure.Forbidden)
         assertThat(failureOf({ throw http(400) })).isEqualTo(ApiFailure.Invalid)
         assertThat(failureOf({ throw http(413) })).isEqualTo(ApiFailure.Invalid)
+        // AC-F56: an expired company's writes come back 402.
+        assertThat(failureOf({ throw http(402) })).isEqualTo(ApiFailure.SubscriptionRequired)
         assertThat(failureOf({ throw http(500) })).isEqualTo(ApiFailure.Failed)
         assertThat(failureOf({ throw http(404) }, ::invalidOrFailed)).isEqualTo(ApiFailure.Failed)
         assertThat(failureOf({ throw http(400) }, ::invalidOrFailed)).isEqualTo(ApiFailure.Invalid)

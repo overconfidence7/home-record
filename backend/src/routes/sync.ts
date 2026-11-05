@@ -6,6 +6,7 @@ import { membershipFor, requireSession, requireTenant } from "../tenancy";
 import { mergeRow, type FieldTimes, type Row } from "../sync/merge";
 import { companyDays, pushEventsFor, type CompanyDays, type PushEvent } from "../push/events";
 import { deliver } from "../push/notify";
+import { SUBSCRIPTION_REQUIRED, companyExpired } from "../billing/plan";
 import { ADMIN_ROLES, accessFor, canPush, visibleRow, visibleTimes, type Access } from "../sync/policy";
 
 export const sync = new Hono<AppEnv>();
@@ -157,6 +158,8 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const kind = kindOf(c.req.param("kind"));
   const tenantId = c.req.param("tenantId");
   const role = membershipFor(c.get("session"), kind, tenantId)?.role ?? "";
+  // AC-F56: an expired company is read only on the server too; the phone keeps its queued writes for the renewal.
+  if (kind === "company" && (await companyExpired(c.env.DB, tenantId, Date.now()))) return c.json(SUBSCRIPTION_REQUIRED, 402);
   const parsed = PushBody.safeParse(await c.req.json().catch(() => null));
   if (!parsed.success) return c.json({ error: "invalid" }, 400);
   const { deviceId, ops } = parsed.data;

@@ -11,6 +11,8 @@ fun failureForStatus(e: HttpException): ApiFailure = when (e.code()) {
     404 -> ApiFailure.NotFound
     403 -> ApiFailure.Forbidden
     400, 413 -> ApiFailure.Invalid
+    // AC-F56: the company's plan lapsed; the backend refuses writes until it renews.
+    402 -> ApiFailure.SubscriptionRequired
     else -> ApiFailure.Failed
 }
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv, Membership } from "../env";
 import { membershipFor, notFound, requireSession } from "../tenancy";
 import { MEDIA_BUCKET, presignUrl, type R2Credentials } from "../media/presign";
+import { SUBSCRIPTION_REQUIRED, companyExpired } from "../billing/plan";
 import { ADMIN_ROLES, accessFor, canUpload, seesFullRow } from "../sync/policy";
 import type { Row } from "../sync/merge";
 
@@ -73,6 +74,8 @@ media.post("/media/presign", async (c) => {
   const session = c.get("session");
   const m = membershipFor(session, b.tenantKind, b.tenantId);
   if (!m) return notFound(c);
+  // AC-F56: no new files for an expired company (reads through presign-get stay open).
+  if (m.tenantKind === "company" && (await companyExpired(c.env.DB, m.tenantId, Date.now()))) return c.json(SUBSCRIPTION_REQUIRED, 402);
   const maxBytes = MEDIA_MAX_BYTES[b.entity];
   if (maxBytes === undefined) return c.json({ error: "bad_request" }, 400);
   if (b.size > maxBytes) return c.json({ error: "too_large", maxBytes }, 413);

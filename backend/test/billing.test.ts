@@ -153,3 +153,50 @@ describe("AC-F56 member limit on join", () => {
     expect((await join("exp1", code)).status).toBe(402);
   });
 });
+
+// AC-F56 "verified on the backend" [r12:expired-writes-accepted]: an expired company is read only on the server too.
+describe("AC-F56 expired company is read only on the server", () => {
+  const r2 = { R2_ACCOUNT_ID: "acct", R2_ACCESS_KEY_ID: "AKID", R2_SECRET_ACCESS_KEY: "secret" };
+  const op = (outboxId: number) => ({
+    outboxId, entity: "task", entityId: `t-${outboxId}`, op: "upsert", payload: JSON.stringify({ id: `t-${outboxId}`, title: "Pull wire" }), updatedAt: 10 + outboxId,
+  });
+  const push = (token: string, id: string, outboxId: number) => call("POST", `/companies/${id}/sync/push`, token, { deviceId: "d1", ops: [op(outboxId)] });
+  const presign = (token: string, id: string) =>
+    app.request(
+      "/media/presign",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "content-type": "application/json" },
+        body: JSON.stringify({ tenantKind: "company", tenantId: id, entity: "photo", entityId: "p1", filename: "a.jpg", size: 2048, contentType: "image/jpeg" }),
+      },
+      { ...env, ...r2 },
+    );
+
+  it("refuses sync pushes and uploads with 402 while pulls stay open, and takes writes again once renewed", async () => {
+    const owner = await seedUser("ro-owner", "ro-owner@x.com");
+    await seedCompany("co-ro", "Read Only Co", "ro-owner");
+    expect((await push(owner, "co-ro", 1)).status).toBe(200);
+
+    await env.DB.prepare("UPDATE companies SET trial_ends_at = 1 WHERE id = ?").bind("co-ro").run();
+    const refused = await push(owner, "co-ro", 2);
+    expect(refused.status).toBe(402);
+    expect(await json(refused)).toEqual({ error: "subscription_required" });
+    expect((await presign(owner, "co-ro")).status).toBe(402);
+    const pulled = await call("GET", "/companies/co-ro/sync/pull?since=0", owner);
+    expect(pulled.status).toBe(200);
+    expect((await json(pulled)).rows.map((r: any) => r.entityId)).toEqual(["t-1"]);
+
+    await hook({ type: "INITIAL_PURCHASE", app_user_id: "company:co-ro", entitlement_ids: ["fieldlog_solo"], expiration_at_ms: Date.now() + 86400_000 });
+    expect((await push(owner, "co-ro", 2)).status).toBe(200);
+    expect((await presign(owner, "co-ro")).status).toBe(200);
+  });
+
+  it("homes are never gated by a company plan", async () => {
+    const owner = await seedUser("ro-home", "ro-home@x.com");
+    await seedCompany("co-ro2", "Lapsed Co", "ro-home");
+    await env.DB.prepare("UPDATE companies SET trial_ends_at = 1 WHERE id = ?").bind("co-ro2").run();
+    expect((await call("PUT", "/homes/0d6f1c1e-6a4e-4d5b-9b65-3f1f2c7a9e10", owner, { name: "Maple St" })).status).toBeLessThan(300);
+    const res = await call("POST", "/homes/0d6f1c1e-6a4e-4d5b-9b65-3f1f2c7a9e10/sync/push", owner, { deviceId: "d1", ops: [{ ...op(1), entity: "contact" }] });
+    expect(res.status).toBe(200);
+  });
+});

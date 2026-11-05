@@ -156,7 +156,9 @@ class SyncEngine(
                 val batch = pending.take(fits)
                 val ops = all.take(fits)
                 when (val res = api.push(tenant, deviceId, ops)) {
-                    is ApiResult.Err -> return fail(res.failure)
+                    // AC-F56: an expired company is read only on the server. The queue stays as it is for the
+                    // renewal and this pass still pulls, so crew keep seeing their own week.
+                    is ApiResult.Err -> if (res.failure == ApiFailure.SubscriptionRequired) break else return fail(res.failure)
                     is ApiResult.Ok -> {
                         res.value.accepted.forEach { outbox.markSent(it.outboxId, it.serverSeq) }
                         val bySeq = batch.associateBy { it.seq }

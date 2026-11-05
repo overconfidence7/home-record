@@ -68,6 +68,24 @@ class SyncEngineTest {
         assertThat(dbA.outboxDao().pending()).isEmpty()
     }
 
+    // AC-F56 [r12:expired-writes-accepted]: an expired company's server refuses the push; the phone keeps the queued
+    // write for the renewal and still pulls what others wrote, then sends it once the plan is back.
+    @Test fun expiredCompanyKeepsTheQueueAndStillPulls() = runTest {
+        save(dbB, b, task("Before it lapsed", 10))
+        b.sync(tenant)
+        server.expired = true
+        save(dbA, a, TaskEntity(id = "t2", jobId = "j1", title = "Written after", done = false, createdAt = 1, updatedAt = 20))
+        assertThat(a.sync(tenant)).isInstanceOf(ApiResult.Ok::class.java)
+        assertThat(dbA.taskDao().get("t1")?.title).isEqualTo("Before it lapsed")
+        assertThat(a.pendingCount.first()).isEqualTo(1)
+        assertThat(server.rows(tenant).map { it.entityId }).doesNotContain("t2")
+
+        server.expired = false
+        a.sync(tenant)
+        assertThat(a.pendingCount.first()).isEqualTo(0)
+        assertThat(server.rows(tenant).map { it.entityId }).contains("t2")
+    }
+
     @Test fun offlineChangesWaitThenSyncOnceWithoutDuplicates() = runTest {
         server.online = false
         save(dbA, a, task("Offline edit", 10))

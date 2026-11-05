@@ -193,6 +193,22 @@ class MediaUploaderTest {
         assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("failed")
     }
 
+    // AC-F56 [r12:expired-writes-accepted]: a lapsed company plan (402) keeps the file, never counts against it, and it
+    // uploads once the plan is back.
+    @Test fun lapsedPlanKeepsTheFileUntilTheCompanyRenews() = runBlocking<Unit> {
+        val id = enqueue()
+        net.presignResult = ApiResult.Err(ApiFailure.SubscriptionRequired)
+        repeat(MediaUploader.MAX_ATTEMPTS + 2) {
+            uploader.runPending()
+            clock += 2 * 60 * 60_000
+        }
+        assertThat(db.mediaUploadDao().get(id)?.state).isEqualTo("queued")
+        assertThat(db.mediaUploadDao().get(id)?.attempts).isEqualTo(0)
+        assertThat(net.puts).isEmpty()
+        net.presignResult = null
+        assertThat(uploader.runPending().uploaded).isEqualTo(1)
+    }
+
     @Test fun aFileTooLargeOrRefusedByTheServerGivesUp() = runBlocking<Unit> {
         // 413 (over the size cap) and 403 (someone else's object) come back as Invalid and Forbidden: retrying cannot help.
         for (failure in listOf(ApiFailure.Invalid, ApiFailure.Forbidden)) {

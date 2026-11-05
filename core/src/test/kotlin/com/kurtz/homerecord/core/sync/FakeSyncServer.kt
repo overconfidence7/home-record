@@ -24,12 +24,15 @@ internal class FakeSyncServer : SyncApi {
     var appliedOps = 0
     /** Applies the next push, then answers as if the connection dropped, so the phone retries the same rows. */
     var loseNextResponse = false
+    /** The company's plan lapsed: pushes answer 402 `subscription_required` and pulls still work (AC-F56). */
+    var expired = false
 
     /** Rows the server holds for [tenant], one per record. */
     fun rows(tenant: TenantRef): List<PulledRow> = tenants[tenant.key]?.values.orEmpty().toList()
 
     override suspend fun push(tenant: TenantRef, deviceId: String, ops: List<PushOp>): ApiResult<PushResponse> {
         if (!online) return ApiResult.Err(ApiFailure.Offline)
+        if (expired) return ApiResult.Err(ApiFailure.SubscriptionRequired)
         pushCalls++
         pushBytes += ops.sumOf { PushBatches.encodedSize(it) }
         val rows = tenants.getOrPut(tenant.key) { LinkedHashMap() }

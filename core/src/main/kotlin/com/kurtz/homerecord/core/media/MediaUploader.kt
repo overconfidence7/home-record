@@ -84,7 +84,8 @@ class MediaUploader(
                     current = current.copy(key = r.value.key, putUrl = r.value.putUrl, putExpiresAt = r.value.putExpiresAt)
                     dao.save(current)
                 }
-                is ApiResult.Err -> return back(current, offline = r.failure == ApiFailure.Offline, giveUp = r.failure == ApiFailure.Forbidden || r.failure == ApiFailure.NotFound || r.failure == ApiFailure.Invalid)
+                // A lapsed company plan (402) waits like no network: the file is kept, uncounted, for the renewal (AC-F56).
+                is ApiResult.Err -> return back(current, offline = r.failure == ApiFailure.Offline || r.failure == ApiFailure.SubscriptionRequired, giveUp = r.failure == ApiFailure.Forbidden || r.failure == ApiFailure.NotFound || r.failure == ApiFailure.Invalid)
             }
         }
         val url = current.putUrl ?: return back(current, offline = false)

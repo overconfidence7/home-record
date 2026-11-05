@@ -45,3 +45,19 @@ export function memberLimit(plan: CompanyPlan): number {
       return 0;
   }
 }
+
+/**
+ * True when the company's trial and paid plan have both lapsed (AC-F56 "verified on the backend"): an expired company
+ * is read only, so sync push and media uploads answer 402 `subscription_required` until it renews. Pulls and reads
+ * stay open so crew still see their own week. A company row that is missing is not expired here; the tenancy check
+ * answers that case.
+ */
+export async function companyExpired(db: D1Database, companyId: string, now: number): Promise<boolean> {
+  const row = await db
+    .prepare("SELECT entitlement, entitlement_expires_at, trial_ends_at FROM companies WHERE id = ?")
+    .bind(companyId)
+    .first<EntitlementRow>();
+  return row != null && companyPlan(row, now) === "expired";
+}
+
+export const SUBSCRIPTION_REQUIRED = { error: "subscription_required" } as const;
