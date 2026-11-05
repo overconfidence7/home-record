@@ -354,3 +354,15 @@ data class BreakerLinkEntity(
     val deletedAt: Long? = null,
     val source: String = Sources.HOUSE_MANUAL,
 )
+
+/**
+ * The import ledger (AC-C47, v15): each imported record's `updatedAt` as last imported into [homeId], so the next
+ * import of a newer bundle can tell "only the crew changed this" (Update) from "both changed" (Conflict).
+ */
+@Entity(tableName = "import_ledger", primaryKeys = ["type", "recordId"], indices = [Index("homeId")])
+data class ImportLedgerEntity(
+    val type: String,
+    val recordId: String,
+    val homeId: String,
+    val updatedAt: Long,
+)

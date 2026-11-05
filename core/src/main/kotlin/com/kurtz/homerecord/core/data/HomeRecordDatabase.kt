@@ -50,8 +50,9 @@ import androidx.sqlite.execSQL
         SyncBaseEntity::class,
         MediaUploadEntity::class,
         SyncConflictEntity::class,
+        ImportLedgerEntity::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -79,6 +80,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 12, to = 13),
         // v14 (T060c): material.r2Key, so a receipt scanned on one phone shows on the others; older rows null.
         AutoMigration(from = 13, to = 14),
+        // v15 (T063b1): import_ledger, the base for merging a newer `.homerecord` into a home; starts empty.
+        AutoMigration(from = 14, to = 15),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {
@@ -121,6 +124,7 @@ abstract class HomeRecordDatabase : RoomDatabase() {
     abstract fun syncBaseDao(): SyncBaseDao
     abstract fun mediaUploadDao(): MediaUploadDao
     abstract fun syncConflictDao(): SyncConflictDao
+    abstract fun importLedgerDao(): ImportLedgerDao
 
     /**
      * v2 (CR2b): the single pull cursor becomes one per tenant. The old cursor is dropped, so the next sync pulls each

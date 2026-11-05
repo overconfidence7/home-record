@@ -67,18 +67,35 @@ class RoomRowStore(private val db: RoomDatabase, private val io: CoroutineDispat
         require(entity in tables) { "Unknown entity $entity" }
         return db.openHelper.readableDatabase.query("SELECT * FROM $entity WHERE id = ?", arrayOf(id)).use { c ->
             if (!c.moveToFirst()) return@use null
-            JsonObject(
-                (0 until c.columnCount).associate { i ->
-                    c.getColumnName(i) to when (c.getType(i)) {
-                        android.database.Cursor.FIELD_TYPE_INTEGER -> JsonPrimitive(c.getLong(i))
-                        android.database.Cursor.FIELD_TYPE_FLOAT -> JsonPrimitive(c.getDouble(i))
-                        android.database.Cursor.FIELD_TYPE_STRING -> JsonPrimitive(c.getString(i))
-                        else -> JsonNull
-                    }
-                },
-            )
+            c.toJson()
         }
     }
+
+    /**
+     * Every row of [entity] whose [column] is one of [values], soft-deleted rows included (the `.homerecord` export
+     * walks a home's tables this way, T063b1). [column] is checked against the table's columns.
+     */
+    suspend fun readWhere(entity: String, column: String, values: Collection<String>): List<JsonObject> = onIo {
+        require(entity in tables) { "Unknown entity $entity" }
+        require(column in columnsOf(entity)) { "Unknown column $entity.$column" }
+        values.distinct().chunked(500).flatMap { chunk ->
+            val marks = chunk.joinToString(",") { "?" }
+            db.openHelper.readableDatabase.query("SELECT * FROM `$entity` WHERE `$column` IN ($marks)", chunk.toTypedArray()).use { c ->
+                buildList { while (c.moveToNext()) add(c.toJson()) }
+            }
+        }
+    }
+
+    private fun android.database.Cursor.toJson(): JsonObject = JsonObject(
+        (0 until columnCount).associate { i ->
+            getColumnName(i) to when (getType(i)) {
+                android.database.Cursor.FIELD_TYPE_INTEGER -> JsonPrimitive(getLong(i))
+                android.database.Cursor.FIELD_TYPE_FLOAT -> JsonPrimitive(getDouble(i))
+                android.database.Cursor.FIELD_TYPE_STRING -> JsonPrimitive(getString(i))
+                else -> JsonNull
+            }
+        },
+    )
 
     override suspend fun <T> inTransaction(block: suspend () -> T): T = db.withTransaction(block)
 

@@ -480,3 +480,9 @@ interface MediaUploadDao {
     @Upsert suspend fun save(row: MediaUploadEntity)
     @Query("UPDATE media_upload SET state = 'queued', attempts = 0, nextAttemptAt = 0 WHERE state = 'failed'") suspend fun retryFailed()
 }
+
+@Dao
+interface ImportLedgerDao {
+    @Upsert suspend fun setAll(rows: List<ImportLedgerEntity>)
+    @Query("SELECT * FROM import_ledger WHERE homeId = :homeId") suspend fun forHome(homeId: String): List<ImportLedgerEntity>
+}

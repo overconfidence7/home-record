@@ -64,6 +64,7 @@ class SchemaVersionGuardTest {
             12 to "284b7855562f575f49f4850ed6b5330d",
             13 to "122eb9f425d5841ba3a5832802ad8dc1",
             14 to "c40034463f519a532d0de8f9df134734",
+            15 to "b4ebc1b730606c50e58b01ec5fcf5c71",
         )
     }
 }

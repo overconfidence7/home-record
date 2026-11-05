@@ -184,6 +184,18 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T063b1: the import ledger starts empty and keeps one row per imported record.
+    @Test fun v14ToV15AddsAnEmptyImportLedger() {
+        helper.createDatabase(14).use { db ->
+            db.execSQL("INSERT INTO home (id, name, houseType, foundation, attachedGarage, units, createdAt, updatedAt, source) VALUES ('h1', 'Ortiz house', 'OTHER', 'BASEMENT', 0, 'IMPERIAL', 1, 1, 'house-manual')")
+        }
+        helper.runMigrationsAndValidate(15).use { db ->
+            assertThat(db.count("SELECT COUNT(*) FROM import_ledger")).isEqualTo(0L)
+            db.execSQL("INSERT INTO import_ledger (type, recordId, homeId, updatedAt) VALUES ('room', 'r1', 'h1', 5)")
+            assertThat(db.texts("SELECT name FROM home WHERE id = 'h1'")).containsExactly("Ortiz house")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -222,6 +234,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 14
+        const val LATEST = 15
     }
 }
