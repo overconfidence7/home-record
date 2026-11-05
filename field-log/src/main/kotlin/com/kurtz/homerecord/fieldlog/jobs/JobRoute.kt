@@ -41,8 +41,8 @@ class JobHouseDeps(
     val onBehindWall: ((homeId: String, title: String) -> Unit)? = null,
     /** A tapped overlay on the blueprint: its wall or the job plan with it picked (T055a). */
     val onOpenOverlay: ((homeId: String, title: String, com.kurtz.homerecord.housemodel.overlays.Overlay) -> Unit)? = null,
-    /** A tapped item on the blueprint; Field Log opens the room it stands in until the item page (T062). */
-    val onOpenItemRoom: (roomId: String) -> Unit = onOpenRoom,
+    /** A tapped item on the blueprint opens FL-Item (T062, AC-F50). */
+    val onOpenItem: (homeId: String, itemId: String) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -118,7 +118,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     overlays = house.overlays,
                     onBehindWall = house.onBehindWall?.let { open -> { open(homeId, state.name) } },
                     onOpenOverlay = house.onOpenOverlay?.let { open -> { o -> open(homeId, state.name, o) } },
-                    onOpenItem = { _, roomId -> house.onOpenItemRoom(roomId) },
+                    onOpenItem = { itemId, _ -> house.onOpenItem(homeId, itemId) },
                     pins = { floorId ->
                         TaskPins.onFloor(jobTasks, floorId, canManageTasks, tasks?.me).mapIndexed { i, t ->
                             val pin = t.planPin ?: return@mapIndexed null

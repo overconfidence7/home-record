@@ -20,8 +20,12 @@ const HOME_ENTITIES = [
 ];
 // A job's house model (AC-F48) syncs inside the company tenant; the handoff copies it to a home tenant (AC-B40).
 // The rows Field Log writes for a job today: FL-JobEdit (home, floor, room), FL-House's plan editor (wall, opening,
-// stair), job photos and behind-the-wall wall photos (T048d). Add overlays and items here when FL-House writes them.
-const JOB_HOME_ENTITIES = ["home", "floor", "room", "wall", "wall_photo", "opening", "stair", "photo"];
+// stair), job photos and behind-the-wall wall photos (T048d), the overlays drawn on walls and the plan, and the items
+// installed on the job with their looked-up warranties and the consumables and reminders a new item seeds (T062, AC-F50).
+const JOB_HOME_ENTITIES = [
+  "home", "floor", "room", "wall", "wall_photo", "opening", "stair", "photo", "overlay", "item", "warranty", "consumable",
+  "maintenance_task",
+];
 const ENTITIES: Record<TenantKind, Set<string>> = {
   company: new Set([...COMPANY_ENTITIES, ...JOB_HOME_ENTITIES]),
   home: new Set(HOME_ENTITIES),

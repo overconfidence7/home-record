@@ -34,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import androidx.compose.runtime.remember
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.kurtz.homerecord.coreui.shell.AppTab
@@ -179,6 +181,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     overlays = container.overlays,
                     onBehindWall = { homeId, title -> nav.push(JobBehindWallKey(homeId, title)) },
                     onOpenOverlay = { homeId, title, o -> openJobOverlay(scope, container, nav, homeId, title, null, o) },
+                    onOpenItem = { homeId, itemId -> nav.push(JobItemKey(homeId, itemId)) },
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
@@ -299,23 +302,34 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 layerStore = container.layers,
                 // A wall overlay opens its wall with it picked; a plan overlay the plan of its room's floor (AC-C23).
                 onOpenOverlay = { o -> openJobOverlay(sceneScope, container, nav, key.homeId, key.title, key.floorId, o) },
-                // Field Log has no item page yet (T062): an item marker opens the room it stands in.
-                onOpenItem = { _, roomId -> nav.push(JobRoomKey(roomId)) },
+                onOpenItem = { itemId, _ -> nav.push(JobItemKey(key.homeId, itemId)) },
             )
         }
-        entry<JobRoomKey> { key ->
-            val roomScope = androidx.compose.runtime.rememberCoroutineScope()
-            com.kurtz.homerecord.housemodel.ui.RoomRoute(
-                container.homes, container.wallPhotos, container.media, key.roomId, onBack = nav::pop,
-                onOutline = { nav.push(JobWallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
-                onView3D = { nav.push(JobHouse3DKey(it.homeId, it.homeName, it.floorId, it.roomId)) },
-                overlays = container.overlays,
-                onOpenWall = { nav.push(JobWallKey(key.roomId, it.wallId, it.stage.name, it.overlayId)) },
-                onOpenPlanOverlay = { overlayId ->
-                    roomScope.launch {
-                        container.homes.roomLocation(key.roomId)?.let { nav.push(JobPlanKey(it.homeId, it.homeName, it.floorId, overlayId = overlayId)) }
+        entry<JobRoomKey> { key -> JobRoomEntry(container, nav, key.roomId) }
+        entry<JobItemKey> { key ->
+            val canEdit = remember { container.roleGates.map { it.canEditHouse } }
+            com.kurtz.homerecord.fieldlog.house.JobItemRoute(
+                container.items, container.warrantyLookup, key.homeId, key.itemId, canEdit, onBack = nav::pop,
+                onEdit = { nav.push(JobItemEditKey(key.homeId, key.itemId)) },
+                onPlace = { nav.push(JobItemPlaceKey(key.homeId, key.itemId)) },
+            )
+        }
+        entry<JobItemEditKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.ItemEditRoute(
+                container.items, container.homes, container.media, container.textRecognizer, container.lookupApi,
+                key.homeId, key.itemId, key.roomId, scanPlate = key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty,
+            )
+        }
+        entry<JobItemPlaceKey> { key ->
+            com.kurtz.homerecord.housemodel.ui.ItemPlaceRoute(
+                container.homes, container.items, key.homeId, key.itemId, onBack = nav::pop,
+                onEditPlan = { floorId ->
+                    scope.launch {
+                        val title = withContext(Dispatchers.IO) { container.db.homeDao().get(key.homeId)?.name }.orEmpty()
+                        nav.push(JobPlanKey(key.homeId, title, floorId))
                     }
                 },
+                roomWalls = container.wallPhotos::observeRoomWalls, homeItems = container.overlays.observeItemSpots(key.homeId),
             )
         }
         entry<JobBehindWallKey> { key ->
@@ -417,6 +431,50 @@ private fun NotificationPermissionAsk(container: AppContainer) {
 }
 
 /** A tapped overlay (3D or blueprint): a wall overlay opens its wall with it picked, a plan overlay the job plan of its floor (AC-C23). */
+/**
+ * FL-Room with the items installed in it (AC-F50): Owner, Office and Lead add items; Crew and Sub read them. The home
+ * is looked up from the room first; a room that is gone shows the room page's own "not found".
+ */
+@Composable
+private fun JobRoomEntry(container: AppContainer, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String) {
+    val roomScope = rememberCoroutineScope()
+    val location by androidx.compose.runtime.produceState<RoomLookup>(RoomLookup.Loading, roomId) {
+        value = RoomLookup.Found(container.homes.roomLocation(roomId)?.homeId?.takeIf { it.isNotEmpty() })
+    }
+    // Wait for the role too: the room's view model reads "may add items" once, when it is made.
+    val canEdit by remember { container.roleGates.map<com.kurtz.homerecord.core.company.RoleGates, Boolean?> { it.canEditHouse } }.collectAsState(initial = null)
+    val found = location as? RoomLookup.Found ?: return LoadingState(Modifier.fillMaxSize())
+    val mayEdit = canEdit ?: return LoadingState(Modifier.fillMaxSize())
+    val onOutline: (com.kurtz.homerecord.housemodel.ui.WallOutlineRequest) -> Unit = { nav.push(JobWallOutlineKey(roomId, it.wallId, it.stage.name, it.photoPath)) }
+    val onView3D: (com.kurtz.homerecord.housemodel.ui.Room3DTarget) -> Unit = { nav.push(JobHouse3DKey(it.homeId, it.homeName, it.floorId, it.roomId)) }
+    val onOpenWall: (com.kurtz.homerecord.housemodel.ui.WallOpenRequest) -> Unit = { nav.push(JobWallKey(roomId, it.wallId, it.stage.name, it.overlayId)) }
+    val onOpenPlanOverlay: (String) -> Unit = { overlayId ->
+        roomScope.launch {
+            container.homes.roomLocation(roomId)?.let { nav.push(JobPlanKey(it.homeId, it.homeName, it.floorId, overlayId = overlayId)) }
+        }
+    }
+    val homeId = found.homeId
+    if (homeId == null) {
+        com.kurtz.homerecord.housemodel.ui.RoomRoute(
+            container.homes, container.wallPhotos, container.media, roomId, onBack = nav::pop, onOutline = onOutline, onView3D = onView3D,
+            overlays = container.overlays, onOpenWall = onOpenWall, onOpenPlanOverlay = onOpenPlanOverlay,
+        )
+        return
+    }
+    com.kurtz.homerecord.housemodel.ui.RoomRoute(
+        container.homes, container.items, container.wallPhotos, container.media, homeId, roomId, onBack = nav::pop,
+        onOpenItem = { nav.push(JobItemKey(homeId, it)) },
+        onAddItem = if (mayEdit) ({ nav.push(JobItemEditKey(homeId, roomId = it)) }) else null,
+        onOutline = onOutline, onView3D = onView3D, overlays = container.overlays, onOpenWall = onOpenWall,
+        onOpenPlanOverlay = onOpenPlanOverlay, defaultStage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
+    )
+}
+
+private sealed interface RoomLookup {
+    data object Loading : RoomLookup
+    data class Found(val homeId: String?) : RoomLookup
+}
+
 private fun openJobOverlay(
     scope: kotlinx.coroutines.CoroutineScope,
     container: AppContainer,

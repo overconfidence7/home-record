@@ -17,6 +17,12 @@ data class RoleGates(val role: CompanyRole, val leadJobs: Set<String> = emptySet
     /** New job, edit job and its client, crew and rooms: Owner and Office only. */
     val canEditJobs: Boolean get() = role.isAdmin
 
+    /**
+     * Edit a job's house: plan, overlays, installed items and their warranties (T062, AC-F50). Owner, Office and any
+     * Lead, as the backend's JOB_HOUSE rule allows (house rows carry no job id); Crew and Sub read it.
+     */
+    val canEditHouse: Boolean get() = role.isAdmin || role == CompanyRole.Lead
+
     /** True when this member runs [jobId]: Owner and Office on every job, a Lead on the jobs they are on. */
     fun leads(jobId: String?): Boolean = role.isAdmin || (role == CompanyRole.Lead && jobId != null && jobId in leadJobs)
 

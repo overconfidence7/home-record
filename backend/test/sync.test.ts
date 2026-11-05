@@ -116,7 +116,7 @@ describe("AC-B20 push and pull", () => {
     expect((await push(other, "s-c5", "d", [])).status).toBe(404);
     expect((await call("GET", "/companies/s-c5/sync/pull", other)).status).toBe(404);
     const res = await push(owner, "s-c5", "d", [
-      op(1, "x", {}, 1, "item"),
+      op(1, "x", {}, 1, "service_record"),
       { ...op(2, "x", {}, 1), entityId: "y" },
       { ...op(3, "z", {}, 1), payload: "not json" },
       op(4, "t1", { title: "Still syncs" }, 1),
@@ -325,6 +325,27 @@ describe("AC-B3 sync role gates (AC-F3)", () => {
     expect(lead.rejected.map((r: any) => r.outboxId)).toEqual([3, 4]);
     const crewRoom = await json(await push(t.crew, t.co, "phone", [op(6, "r2", { floorId: "fl1", name: "Bath" }, 5, "room")]));
     expect(crewRoom.rejected).toEqual([{ outboxId: 6, reason: "role" }]);
+  });
+
+  it("T062 AC-F50 installed items, their warranties and overlays on a job sync in the company tenant; a Lead writes them, Crew cannot", async () => {
+    // AC-F50: the water heater entered on the job reaches the office's phone with make, model, serial and warranty.
+    const t = await company("t062");
+    const office = await json(await push(t.owner, t.co, "office", [
+      op(1, "it1", { homeId: "h1", roomId: "r1", name: "Water heater", make: "Rheem", model: "XE50M06ST45U1", serial: "Q123", updatedAt: 10 }, 10, "item"),
+      op(2, "wa1", { itemId: "it1", partsMonths: 72, laborMonths: 12, source: "LOOKUP", updatedAt: 10 }, 10, "warranty"),
+      op(3, "ov1", { homeId: "h1", roomId: "r1", kind: "DRAIN", updatedAt: 10 }, 10, "overlay"),
+      op(4, "cn1", { itemId: "it1", kind: "ANODE", spec: "Anode rod", quantity: 1, updatedAt: 10 }, 10, "consumable"),
+      op(5, "mt1", { homeId: "h1", itemId: "it1", title: "Flush the tank", updatedAt: 10 }, 10, "maintenance_task"),
+    ]));
+    expect(office.rejected).toEqual([]);
+    const pulled = (await pull(t.lead, t.co)).rows;
+    expect(pulled.find((r: any) => r.entity === "item").row).toMatchObject({ make: "Rheem", model: "XE50M06ST45U1", serial: "Q123" });
+    expect(pulled.find((r: any) => r.entity === "warranty").row).toMatchObject({ itemId: "it1", partsMonths: 72 });
+    expect(pulled.some((r: any) => r.entity === "overlay")).toBe(true);
+    const lead = await json(await push(t.lead, t.co, "lead", [op(1, "it2", { homeId: "h1", roomId: "r1", name: "Main panel" }, 11, "item")]));
+    expect(lead.rejected).toEqual([]);
+    const crew = await json(await push(t.crew, t.co, "phone", [op(1, "it3", { homeId: "h1", roomId: "r1", name: "Faucet" }, 11, "item")]));
+    expect(crew.rejected).toEqual([{ outboxId: 1, reason: "role" }]);
   });
 
   it("N004 AC-F3 tasks are private on pull: Crew and Sub get their own, a Lead every task of their jobs", async () => {

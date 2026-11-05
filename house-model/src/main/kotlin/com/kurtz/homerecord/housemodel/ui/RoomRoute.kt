@@ -74,7 +74,8 @@ fun RoomRoute(
     roomId: String,
     onBack: () -> Unit,
     onOpenItem: (String) -> Unit,
-    onAddItem: (roomId: String) -> Unit,
+    /** "Add an item here"; null hides it (a Field Log member who cannot edit the job's house, T062). */
+    onAddItem: ((roomId: String) -> Unit)?,
     onOutline: (WallOutlineRequest) -> Unit,
     /** Opens the room's floor in 3D standing inside the room (AC-C22); null hides "View in 3D". */
     onView3D: ((Room3DTarget) -> Unit)? = null,
@@ -83,6 +84,8 @@ fun RoomRoute(
     onOpenWall: ((WallOpenRequest) -> Unit)? = null,
     /** Opens the plan editor with a plan overlay picked (AC-C28). */
     onOpenPlanOverlay: (String) -> Unit = {},
+    /** The stage the walls open on: Finished in House Manual (AC-C17), Rough-in on a job (AC-F49). */
+    defaultStage: WallStage = WallStage.HouseManualDefault,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -90,9 +93,10 @@ fun RoomRoute(
             initializer {
                 RoomViewModel(
                     repo, roomId, items.observeRows(homeId, emptyMap()), wallPhotos.observeRoomWalls(roomId),
-                    WallStage.HouseManualDefault, createSavedStateHandle(), media, canView3D = onView3D != null,
+                    defaultStage, createSavedStateHandle(), media, canView3D = onView3D != null,
                     overlays = overlays?.takeIf { onOpenWall != null }?.observeForRoom(roomId),
                     removedWallPhotos = wallPhotos.observeRemovedWallPhotos(roomId),
+                    canAddItem = onAddItem != null,
                 )
             }
         },
@@ -103,7 +107,7 @@ fun RoomRoute(
         when (event) {
             RoomEvent.Back -> onBack()
             is RoomEvent.OpenItem -> onOpenItem(event.id)
-            RoomEvent.AddItem -> onAddItem(roomId)
+            RoomEvent.AddItem -> onAddItem?.invoke(roomId)
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))

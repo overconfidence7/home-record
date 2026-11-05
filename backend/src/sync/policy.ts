@@ -5,7 +5,8 @@ import type { Row } from "./merge";
  * are limited per entity. Home tenants are not gated here: every home member edits the whole home.
  *
  * - Lead: own time, plus the crew's time, tasks, files, logs, change orders, materials and schedule on the jobs
- *   they are on (job_crew or assignment); captures on any job; the job's house model.
+ *   they are on (job_crew or assignment); captures on any job; the job's house model (plan, overlays, installed
+ *   items with their warranties, consumables and reminders).
  * - Crew and Sub: own time, captures (photo, note, behind-the-wall wall photo) on any job, and only the tasks
  *   assigned to them.
  * - Nobody but Owner and Office writes the company, members, clients, jobs, crew lists, approvals or share links.
@@ -21,7 +22,7 @@ const ADMIN_ONLY = new Set(["company", "member", "client", "job", "job_crew", "t
 const OWN_TIME = new Set(["punch", "shift"]);
 const LEAD_JOB_ROWS = new Set(["job_file", "daily_log", "change_order", "material", "assignment", "task"]);
 const CAPTURE = new Set(["photo", "note", "wall_photo"]);
-const JOB_HOUSE = new Set(["home", "floor", "room", "wall", "opening", "stair"]);
+const JOB_HOUSE = new Set(["home", "floor", "room", "wall", "opening", "stair", "overlay", "item", "warranty", "consumable", "maintenance_task"]);
 const PRIVATE_TO_MEMBER = new Set(["punch", "shift", "timesheet_approval"]);
 const ADMIN_FIELDS: Record<string, string[]> = { member: ["rateCents", "fcmToken"] };
 /** Marks a pulled row that only tells a former assignee where the task went; the phone never inserts one. */

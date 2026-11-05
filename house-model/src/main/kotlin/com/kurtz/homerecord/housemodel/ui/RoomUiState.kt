@@ -22,7 +22,7 @@ data class RoomUiState(
     val canView3D: Boolean = false,
     val homeName: String? = null,
     val items: List<RoomItem> = emptyList(),
-    /** House Manual keeps items and offers "Add an item here"; Field Log does not. */
+    /** "Add an item here": House Manual, and on a job for whoever may edit its house (T062). */
     val canAddItem: Boolean = false,
     /** The room's walls by side and length with a picture per photographed stage (AC-C17). */
     val walls: List<RoomWall> = emptyList(),

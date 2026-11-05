@@ -94,6 +94,8 @@ class ItemRepository(
     private val strings: (Int) -> String,
     private val now: () -> Long = System::currentTimeMillis,
     private val today: () -> LocalDate = LocalDate::now,
+    /** The app stamped on new rows: House Manual, or Field Log for items installed on a job (T062, AC-F50). */
+    private val source: String = com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun get(id: String): ItemEntity? = db.itemDao().get(id)
@@ -234,7 +236,7 @@ class ItemRepository(
                     wallX = existing?.wallX?.takeIf { existing.roomId == draft.roomId },
                     wallY = existing?.wallY?.takeIf { existing.roomId == draft.roomId },
                     poweredByBreakerId = existing?.poweredByBreakerId, shutoffItemId = existing?.shutoffItemId,
-                    createdAt = existing?.createdAt ?: at, updatedAt = at, source = existing?.source ?: com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
+                    createdAt = existing?.createdAt ?: at, updatedAt = at, source = existing?.source ?: source,
                 ),
             )
             onChange("item", id)
@@ -255,7 +257,7 @@ class ItemRepository(
             db.photoDao().upsert(
                 PhotoEntity(
                     id = pid, homeId = homeId, roomId = draft.roomId?.takeUnless(PseudoRooms::isPseudo), itemId = itemId,
-                    path = it.path, takenAt = at, tagsJson = "[\"${it.kind.tag}\"]", createdAt = at, updatedAt = at,
+                    path = it.path, takenAt = at, tagsJson = "[\"${it.kind.tag}\"]", createdAt = at, updatedAt = at, source = source,
                 ),
             )
             onChange("photo", pid)
@@ -265,7 +267,7 @@ class ItemRepository(
     private suspend fun seedDefaults(homeId: String, itemId: String, subtype: com.kurtz.homerecord.core.model.ItemSubtype, at: Long) {
         subtype.consumables.forEach {
             val cid = Ids.newId()
-            db.consumableDao().upsert(ConsumableEntity(id = cid, itemId = itemId, kind = it.kind.name, spec = strings(it.specRes), createdAt = at, updatedAt = at))
+            db.consumableDao().upsert(ConsumableEntity(id = cid, itemId = itemId, kind = it.kind.name, spec = strings(it.specRes), createdAt = at, updatedAt = at, source = source))
             onChange("consumable", cid)
         }
         subtype.reminders.forEach {
@@ -273,7 +275,7 @@ class ItemRepository(
             db.maintenanceTaskDao().upsert(
                 MaintenanceTaskEntity(
                     id = tid, homeId = homeId, itemId = itemId, title = strings(it.titleRes), intervalMonths = it.intervalMonths,
-                    dueOn = today().plusMonths(it.intervalMonths.toLong()).toString(), createdAt = at, updatedAt = at,
+                    dueOn = today().plusMonths(it.intervalMonths.toLong()).toString(), createdAt = at, updatedAt = at, source = source,
                 ),
             )
             onChange("maintenance_task", tid)

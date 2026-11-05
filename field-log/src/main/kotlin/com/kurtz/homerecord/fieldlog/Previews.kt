@@ -2287,3 +2287,120 @@ fun MaterialFormJobSheetPreview() = Frame {
         previewMaterialJobs.map { com.kurtz.homerecord.coreui.components.SheetOption(it.id, it.name, androidx.compose.material.icons.Icons.Rounded.Work) },
     ) {}
 }
+
+// FL-Item (T062, AC-F50): the water heater installed on the Hale kitchen job.
+private val waterHeaterEntity = com.kurtz.homerecord.core.data.ItemEntity(
+    id = "it1", homeId = "h1", roomId = "r-utility", category = "WATER", subtype = "water_heater", name = "Water heater",
+    make = "Rheem", model = "XE50M06ST45U1", serial = "Q051826153", inServiceOn = "2026-10-21",
+    notes = "50 gal electric. Expansion tank added on the cold side; drain pan piped to the floor drain.", createdAt = 1, updatedAt = 1,
+)
+
+private val waterHeaterWarranty = com.kurtz.homerecord.core.data.WarrantyEntity(
+    id = "w-it1", itemId = "it1", partsMonths = 72, laborMonths = 12, endsOn = "2032-10-21", registered = false,
+    sourceUrl = "https://example.com/rheem-warranty", lookedUpAt = 1_761_000_000_000, confidence = "HIGH",
+    summary = "6-year tank and parts, 1-year in-home labor.", createdAt = 1, updatedAt = 1,
+)
+
+private fun waterHeaterDetail(warranty: Boolean = true, item: com.kurtz.homerecord.core.data.ItemEntity = waterHeaterEntity) =
+    com.kurtz.homerecord.housemodel.items.ItemDetail(
+        item = item, category = com.kurtz.homerecord.core.model.ItemCategory.WATER, subtypeLabel = "Water heater", roomName = "Utility room",
+        warranty = waterHeaterWarranty.takeIf { warranty },
+        status = if (warranty) com.kurtz.homerecord.core.model.WarrantyStatus.Active("2032-10-21") else com.kurtz.homerecord.core.model.WarrantyStatus.Unknown,
+        photos = emptyList(),
+    )
+
+/** A Lead's view of the water heater with its looked-up warranty (AC-F50). */
+@ThemePreviews
+@Composable
+fun JobItemPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(com.kurtz.homerecord.fieldlog.house.JobItemUiState(loading = false, detail = waterHeaterDetail(), canEdit = true), {})
+}
+
+/** Just entered: no warranty yet, "Look up warranty" offered. */
+@ThemePreviews
+@Composable
+fun JobItemNoWarrantyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(com.kurtz.homerecord.fieldlog.house.JobItemUiState(loading = false, detail = waterHeaterDetail(false), canEdit = true), {})
+}
+
+/** A fixture with no make or model: the lookup asks for them. */
+@ThemePreviews
+@Composable
+fun JobItemNeedsModelPreview() = Frame {
+    val vanity = waterHeaterEntity.copy(id = "it2", category = "FIXTURES", subtype = "faucet", name = "Vanity faucet", make = null, model = null, serial = null, inServiceOn = null, notes = null)
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(
+        com.kurtz.homerecord.fieldlog.house.JobItemUiState(
+            loading = false, detail = waterHeaterDetail(false, vanity).copy(subtypeLabel = "Faucet", roomName = "Hall bath"), canEdit = true,
+            lookupNote = com.kurtz.homerecord.fieldlog.house.JobItemLookupNote.NeedsMakeModel,
+        ),
+        {},
+    )
+}
+
+/** Crew read the item; no Edit, Delete or lookup. */
+@ThemePreviews
+@Composable
+fun JobItemCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(com.kurtz.homerecord.fieldlog.house.JobItemUiState(loading = false, detail = waterHeaterDetail(), canEdit = false), {})
+}
+
+@ThemePreviews
+@Composable
+fun JobItemDeletePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(
+        com.kurtz.homerecord.fieldlog.house.JobItemUiState(loading = false, detail = waterHeaterDetail(), canEdit = true, confirmDelete = true), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun JobItemMissingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(com.kurtz.homerecord.fieldlog.house.JobItemUiState(loading = false), {})
+}
+
+/** The terms the lookup found, to save or discard (AC-C34). */
+@ThemePreviews
+@Composable
+fun JobItemReviewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemReviewContent(
+        com.kurtz.homerecord.core.warranty.WarrantyTerms(
+            partsMonths = 72, laborMonths = 12, specialTerms = listOf("Tank: 6 years to the original owner"),
+            sourceUrl = "https://example.com/rheem-warranty", confidence = "HIGH", summary = "6-year tank and parts, 1-year in-home labor.",
+        ),
+        {},
+    )
+}
+
+/** The item page with the review sheet open, as the app shows it; the catalog uses it (a sheet draws on a device, not in a preview). */
+@Composable
+fun JobItemReviewSheetOpen() = Frame {
+    com.kurtz.homerecord.fieldlog.house.JobItemScreen(
+        com.kurtz.homerecord.fieldlog.house.JobItemUiState(
+            loading = false, detail = waterHeaterDetail(false), canEdit = true,
+            review = com.kurtz.homerecord.core.warranty.WarrantyTerms(
+                partsMonths = 72, laborMonths = 12, specialTerms = listOf("Tank: 6 years to the original owner"),
+                sourceUrl = "https://example.com/rheem-warranty", confidence = "HIGH", summary = "6-year tank and parts, 1-year in-home labor.",
+            ),
+        ),
+        {},
+    )
+}
+
+/** FL-Room on a job with the items installed there and "Add an item here" for a Lead (AC-F50). */
+@ThemePreviews
+@Composable
+fun JobRoomItemsPreview() = Frame {
+    androidx.compose.runtime.CompositionLocalProvider(com.kurtz.homerecord.coreui.shell.LocalTagPrefix provides "fl") {
+        com.kurtz.homerecord.housemodel.ui.RoomScreen(
+            com.kurtz.homerecord.housemodel.ui.RoomUiState(
+                loading = false, floorName = "Main floor", homeName = "Hale kitchen", canAddItem = true,
+                room = com.kurtz.homerecord.housemodel.plan.PlanRoom.rectangle("r-utility", "Utility room", "UTILITY", 0, 0, 96, 120),
+                items = listOf(
+                    com.kurtz.homerecord.housemodel.ui.RoomItem("it1", "Water heater", "Rheem XE50M06ST45U1", "WaterDrop", com.kurtz.homerecord.core.model.WarrantyStatus.Active("2032-10-21")),
+                    com.kurtz.homerecord.housemodel.ui.RoomItem("it3", "Sump pump", "Zoeller M53", "Water"),
+                ),
+                wallStage = com.kurtz.homerecord.housemodel.walls.WallStage.BehindTheWall,
+            ),
+        ) {}
+    }
+}

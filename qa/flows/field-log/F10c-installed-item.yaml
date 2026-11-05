@@ -1,0 +1,161 @@
+# Walkthrough F10 (T062, AC-F50): the installed water heater on the job's house. Builds a one-room plan on a new job
+# like F10, then the Kitchen's room page → "Add an item here": the shared item form opens with the room filled in;
+# type, make, model and serial are typed (the data plate button offers camera and gallery; OCR itself is covered by
+# DataPlateParserTest and ItemEditViewModelTest). Save lands back on the room, which lists the water heater; the row
+# opens FL-Item with Details and a Warranty section (the local backend has no Claude key, so the lookup itself is
+# covered by JobItemViewModelTest). Delete asks first; Cancel keeps the item.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f10c@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; step along the row by id as F10 does
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-F50: the room page lists installed items and, for the Owner, offers "Add an item here"
+- tapOn: "Kitchen"
+- extendedWaitUntil:
+    visible:
+      id: "fl_room_items"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "fl_room_add_item"
+- takeScreenshot: F10c-room-no-items
+- tapOn:
+    id: "fl_room_add_item"
+- extendedWaitUntil:
+    visible: "Add item"
+    timeout: 10000
+- tapOn:
+    id: "fl_item_type"
+- tapOn:
+    id: "fl_item_type_search"
+- inputText: "water heater"
+- extendedWaitUntil:
+    visible:
+      id: "fl_item_type_water_heater"
+    timeout: 5000
+- tapOn:
+    id: "fl_item_type_water_heater"
+- assertVisible: "Kitchen.*"
+- tapOn:
+    id: "fl_item_make"
+- inputText: "Rheem"
+- tapOn:
+    id: "fl_item_model"
+- inputText: "XE50M06ST45U1"
+- tapOn:
+    id: "fl_item_serial"
+- inputText: "Q051826153"
+- hideKeyboard
+- takeScreenshot: F10c-item-form
+# AC-C31: the data plate button offers camera and gallery
+- scrollUntilVisible:
+    element:
+      id: "fl_item_photo_data_plate"
+- scroll
+- waitForAnimationToEnd
+- tapOn:
+    id: "fl_item_photo_data_plate"
+- extendedWaitUntil:
+    visible: "Take photo"
+    timeout: 10000
+- assertVisible: "Choose from gallery"
+- pressKey: back
+- tapOn:
+    id: "fl_save"
+# Save closes the form back to the Kitchen, which now lists the water heater
+- extendedWaitUntil:
+    visible:
+      id: "fl_room_items"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Water heater"
+- assertVisible: "Rheem XE50M06ST45U1"
+- takeScreenshot: F10c-room-with-item
+- tapOn: "Water heater"
+# FL-Item: details, where and the warranty lookup (AC-F50, AC-C34)
+- extendedWaitUntil:
+    visible:
+      id: "fl_jobitem_status"
+    timeout: 10000
+- assertVisible: "Q051826153"
+- assertVisible:
+    id: "fl_jobitem_edit"
+# The automatic lookup after save may have queued (no Claude key on the local backend), so assert the section, not its button
+- scrollUntilVisible:
+    element:
+      id: "fl_jobitem_warranty"
+- takeScreenshot: F10c-item-page
+# Rule 16: Delete asks first; Cancel keeps the item
+- tapOn:
+    id: "fl_jobitem_delete"
+- extendedWaitUntil:
+    visible: "Delete Water heater?"
+    timeout: 5000
+- tapOn:
+    id: "fl_jobitem_delete_cancel"
+- assertVisible:
+    id: "fl_jobitem_edit"
+- tapOn:
+    id: "fl_back"
+- extendedWaitUntil:
+    visible: "Water heater"
+    timeout: 10000
+- stopApp

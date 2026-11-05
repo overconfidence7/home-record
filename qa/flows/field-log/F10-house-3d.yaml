@@ -4,8 +4,8 @@
 # T051 (AC-C22): the Kitchen room page's "View in 3D" stands the camera inside the room; Back to floor leaves it.
 # T052b2 (AC-C18, AC-C25, AC-C26): behind-the-wall capture on the Kitchen's North wall from the gallery
 # (`qa/fixtures/wall-rough-in.jpg`; the picker is another app, so its steps run only when it shows the fixture), then a
-# wire run and a drain drawn on that wall at Rough-in, the drain with its own photo; the installed item arrives with the
-# F10 item work.
+# wire run and a drain drawn on that wall at Rough-in, the drain with its own photo. The installed water heater is
+# F10c-installed-item.yaml (T062, AC-F50).
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked` (not `selected`).
 appId: com.kurtz.homerecord.fieldlog
 ---

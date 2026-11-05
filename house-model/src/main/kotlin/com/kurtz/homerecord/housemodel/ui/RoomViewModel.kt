@@ -37,10 +37,12 @@ class RoomViewModel(
     overlays: Flow<List<Overlay>>? = null,
     /** Photos of the room's removed walls (N001). */
     removedWallPhotos: Flow<List<RemovedWallPhoto>>? = null,
+    /** Offers "Add an item here" when the room lists items; false for a member who may only read them. */
+    canAddItem: Boolean = itemRows != null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(
-            canAddItem = itemRows != null,
+            canAddItem = itemRows != null && canAddItem,
             canView3D = canView3D,
             canPhotograph = media != null && walls != null,
             wallStage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage,

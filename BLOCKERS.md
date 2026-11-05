@@ -18,6 +18,8 @@
 
 ## Decisions to confirm
 
+- 2026-11-05 (T062): installed items on a job are added, edited and deleted by Owner, Office and Lead only; Crew and Sub see them read-only (same rule as the plan). Crew who install a fixture tell their Lead. The item page on a job shows details, where, warranty and notes; consumables, service history and documents stay House Manual-only. Details in docs/decisions.md.
+
 - 2026-11-04 (T061b) The photo report (AC-F28) uses the Reports range chips (This week, Last week, Last 4 weeks) as its date range rather than a separate date picker, so one range drives everything on the screen. Photos still on another phone are left out and the PDF says how many; if none are on this phone the row says to open the job's Photos to download them.
 
 - 2026-11-04 (T060b): FL-Materials is Owner/Office only for now, and the receipt total read by OCR is offered as a "Use $x" chip rather than filled in. Leads logging receipts and receipt images on other phones are T060c. Details in docs/decisions.md.

@@ -871,3 +871,43 @@ fun MaterialFormEditScreenshot() = MaterialFormEditPreview()
 @ThemePreviews
 @Composable
 fun MaterialFormJobSheetScreenshot() = MaterialFormJobSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobRoomItemsScreenshot() = JobRoomItemsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemScreenshot() = JobItemPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemNoWarrantyScreenshot() = JobItemNoWarrantyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemNeedsModelScreenshot() = JobItemNeedsModelPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemCrewScreenshot() = JobItemCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemDeleteScreenshot() = JobItemDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemMissingScreenshot() = JobItemMissingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobItemReviewScreenshot() = JobItemReviewPreview()

@@ -570,6 +570,31 @@ class AppContainer(private val app: Application) {
 
     val layers by lazy { com.kurtz.homerecord.housemodel.blueprint.PrefsLayerStore(app) }
 
+    /** Items installed on a job (water heater, panel, fixtures) with make, model and serial; they go to the homeowner in the handoff (AC-F50). */
+    val items by lazy { com.kurtz.homerecord.housemodel.items.ItemRepository(
+        db, app.resources::getString, onChange = ::recordChange, source = com.kurtz.homerecord.core.data.Sources.FIELD_LOG,
+    ) }
+
+    /** Warranty lookup for installed items (AC-C34, AC-F50); queued offline and run when the network is back. */
+    val warrantyLookup by lazy {
+        com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository(
+            db, com.kurtz.homerecord.core.warranty.RetrofitWarrantyLookupApi.create(BuildConfig.API_BASE_URL, http), onChange = ::recordChange,
+            source = com.kurtz.homerecord.core.data.Sources.FIELD_LOG,
+        )
+    }
+
+    /** Data plate fallback when on-device OCR finds no model (AC-B11). */
+    val lookupApi by lazy {
+        com.kurtz.homerecord.core.lookup.RetrofitLookupApi.create(BuildConfig.API_BASE_URL, http, com.kurtz.homerecord.core.lookup.PlateImageEncoder::encode)
+    }
+
+    val textRecognizer: com.kurtz.homerecord.core.ocr.TextRecognizer by lazy { com.kurtz.homerecord.housemodel.ui.MlKitTextRecognizer(app) }
+
+    /** The automatic warranty attempt after an installed item is first saved (AC-C34); runs past the form closing. */
+    fun autoLookupWarranty(itemId: String) {
+        scope.launch { warrantyLookup.autoLookup(itemId) }
+    }
+
     val jobHomes by lazy { com.kurtz.homerecord.fieldlog.jobs.JobHomeProvisioner(db.jobDao(), db.homeDao(), db.floorDao(), ::recordChange, app.getString(com.kurtz.homerecord.housemodel.R.string.floor_default_main)) }
 
     val jobGeocoder by lazy { JobGeocoder(db.jobDao(), AndroidGeocoder(app), ::recordChange) }
@@ -604,7 +629,12 @@ class AppContainer(private val app: Application) {
         scope.launch(Dispatchers.IO) {
             val connectivity = AndroidConnectivityMonitor(app)
             combine(connectivity.online, company.state) { online, c -> (c as? CompanyState.Active)?.takeIf { online } }
-                .collect { active -> active?.let { jobGeocoder.resolvePending(it.membership.companyId) } }
+                .collect { active ->
+                    active ?: return@collect
+                    jobGeocoder.resolvePending(active.membership.companyId)
+                    // Warranty lookups queued offline run when connectivity returns (AC-C34, AC-F50).
+                    warrantyLookup.runPending()
+                }
         }
     }
 

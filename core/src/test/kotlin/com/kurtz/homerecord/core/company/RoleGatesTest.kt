@@ -45,6 +45,12 @@ class RoleGatesTest {
         assertThat(g.canClockCrew(null)).isFalse()
     }
 
+    // AC-F50: installed items on the job's house are entered by Owner, Office and Lead (backend policy.ts JOB_HOUSE); Crew and Sub read them.
+    @Test fun ownerOfficeAndLeadEditTheJobsHouseCrewAndSubReadIt() {
+        for (role in listOf(CompanyRole.Owner, CompanyRole.Office, CompanyRole.Lead)) assertThat(RoleGates(role).canEditHouse).isTrue()
+        for (role in listOf(CompanyRole.Crew, CompanyRole.Sub)) assertThat(RoleGates(role, setOf("j1")).canEditHouse).isFalse()
+    }
+
     @Test fun crewAndSubOnlyView() {
         for (role in listOf(CompanyRole.Crew, CompanyRole.Sub)) {
             // A job list never widens Crew or Sub, even if one were passed.

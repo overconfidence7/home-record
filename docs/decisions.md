@@ -899,3 +899,10 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 - Pure `PhotoReportPicker` and `PhotoReportLayout` in :core `log` (job's live photos in the range, oldest first; 2×2 per page with room · phase, date and time, note cut to three lines). It draws through the existing `AndroidLogPdfWriter`, so there is no new dependency.
 - The range is the Reports range chips; photos not downloaded to this phone are left out and counted on page one (see BLOCKERS "Decisions to confirm").
+
+## 2026-11-05 — T062: installed items on the job (AC-F50)
+
+- Field Log uses House Manual's item form (`ItemEditRoute`, with the data plate OCR and the vision fallback) and Place on plan unchanged; the room page is the shared one with its item list and "Add an item here", walls still opening on Rough-in. The item page is a Field Log screen (`fieldlog.house.JobItemScreen`): Details (make, model, serial, installed), Where, Warranty (lookup, review, Registered) and Notes. House Manual's item page was not moved to :house-model because its consumables, service history, documents and recalls belong to the homeowner after the handoff, not to the job.
+- Who edits: Owner, Office and any Lead add, edit, look up and delete items (new `RoleGates.canEditHouse`, the same rule as the backend's JOB_HOUSE set, since house rows carry no job id); Crew and Sub read the room's items and the item page.
+- Sync: the company tenant now accepts `item`, `warranty`, `consumable`, `maintenance_task` (the defaults a new item seeds) and `overlay`. `overlay` was missing although FL-House already drew overlays, so a job's overlays were refused with reason `entity` and never reached the crew's other phones; it joins the same JOB_HOUSE rule. Items and warranties made on a job are stamped `source = field-log` (new `source` parameter on `ItemRepository` and `WarrantyLookupRepository`), which T063's handoff can read.
+- Item photos stay on the phone that took them (as in House Manual today); only the row syncs. The warranty lookup uses the same `/lookup/warranty` endpoint and per-account daily quota as House Manual.

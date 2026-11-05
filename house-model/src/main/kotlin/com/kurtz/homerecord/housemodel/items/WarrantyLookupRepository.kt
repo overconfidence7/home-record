@@ -38,6 +38,8 @@ class WarrantyLookupRepository(
     private val db: HomeRecordDatabase,
     private val api: WarrantyLookupApi,
     private val now: () -> Long = System::currentTimeMillis,
+    /** The app stamped on new warranty rows (T062: Field Log for items installed on a job). */
+    private val source: String = com.kurtz.homerecord.core.data.Sources.HOUSE_MANUAL,
     private val onChange: suspend (entity: String, id: String) -> Unit = { _, _ -> },
 ) {
     suspend fun lookup(itemId: String, force: Boolean = false): LookupOutcome {
@@ -136,7 +138,7 @@ class WarrantyLookupRepository(
 
     private suspend fun current(itemId: String) = db.warrantyDao().listFor(itemId).firstOrNull()
 
-    private fun blank(itemId: String) = now().let { WarrantyEntity(id = Ids.newId(), itemId = itemId, createdAt = it, updatedAt = it) }
+    private fun blank(itemId: String) = now().let { WarrantyEntity(id = Ids.newId(), itemId = itemId, createdAt = it, updatedAt = it, source = source) }
 
     private fun WarrantyEntity.isConfirmed() = confidence != PENDING && !confidence.startsWith(REVIEW)
 

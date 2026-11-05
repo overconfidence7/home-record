@@ -37,6 +37,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class JobRoomKey(val roomId: String) : NavKey
 
+/** FL-Item: an item installed on the job (water heater, panel, fixture) with its warranty (AC-F50). */
+@Serializable data class JobItemKey(val homeId: String, val itemId: String) : NavKey
+
+/** The item form for the job's house (shared with House Manual); [itemId] null adds one in [roomId], [scanPlate] opens the data plate camera first. */
+@Serializable data class JobItemEditKey(val homeId: String, val itemId: String? = null, val roomId: String? = null, val scanPlate: Boolean = false) : NavKey
+
+/** Place on plan for an installed item (AC-C30 position). */
+@Serializable data class JobItemPlaceKey(val homeId: String, val itemId: String) : NavKey
+
 /** FL-BehindWall: the job's rooms, then a room's walls, then the camera; the photo is saved at Rough-in, then Finished (AC-F49). */
 @Serializable data class JobBehindWallKey(val homeId: String, val title: String) : NavKey
 
@@ -81,6 +90,6 @@ import kotlinx.serialization.Serializable
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is MaterialFormKey, is JobWallOutlineKey, is JobWallKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is MaterialFormKey, is JobWallOutlineKey, is JobWallKey, is JobItemEditKey, CompanyKey -> true
     else -> false
 }
