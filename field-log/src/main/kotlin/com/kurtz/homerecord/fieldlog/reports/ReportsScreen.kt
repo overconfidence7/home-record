@@ -68,6 +68,9 @@ fun ReportsScreen(
                 ReportTab.entries.forEach { tab ->
                     Tab(
                         selected = tab == state.tab,
+                        // Only the selected tab in the primary colour, so the open tab reads at a glance (v5:tabs-all-primary).
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         onClick = { onEvent(ReportsEvent.SelectTab(tab)) },
                         text = { Text(stringResource(tabLabel(tab))) },
                         modifier = Modifier.heightIn(min = 48.dp).testTag("fl_reports_tab_${tab.name}"),

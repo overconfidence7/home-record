@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -49,6 +50,9 @@ fun JobScreen(
                 JobTab.entries.forEach { tab ->
                     Tab(
                         selected = tab == selected,
+                        // Only the selected tab in the primary colour, so the open tab reads at a glance (v5:tabs-all-primary).
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         onClick = { onSelect(tab) },
                         text = { Text(stringResource(tab.label())) },
                         modifier = Modifier.testTag("fl_job_tab_${tab.name.lowercase()}"),
