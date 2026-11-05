@@ -12,6 +12,8 @@ fun failureText(failure: ApiFailure): String = stringResource(
         ApiFailure.Offline -> R.string.company_err_offline
         ApiFailure.InvalidCode -> R.string.company_err_invalid_code
         ApiFailure.AlreadyInCompany -> R.string.company_err_already_in_company
+        ApiFailure.MemberLimit -> R.string.company_err_member_limit
+        ApiFailure.SubscriptionRequired -> R.string.company_err_subscription_required
         ApiFailure.Invalid -> R.string.company_err_invalid
         ApiFailure.Forbidden -> R.string.company_err_forbidden
         ApiFailure.NotFound -> R.string.company_err_not_found

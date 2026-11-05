@@ -49,6 +49,8 @@ data class CompanyMembership(
     val phone: String? = null,
     /** The company's email, sent to Owner and Office only (AC-B3); heads the daily log PDF they send (AC-F33). */
     val email: String? = null,
+    /** When [entitlement] lapses; null when it has no end or there is none (AC-B50, AC-F56). */
+    val entitlementExpiresAt: Long? = null,
 )
 
 data class TeamMember(
@@ -114,7 +116,7 @@ data class CompanyProfileUpdate(
     val settings: CompanySettings? = null,
 )
 
-enum class ApiFailure { Offline, NotFound, Forbidden, Invalid, InvalidCode, AlreadyInCompany, Failed }
+enum class ApiFailure { Offline, NotFound, Forbidden, Invalid, InvalidCode, AlreadyInCompany, MemberLimit, SubscriptionRequired, Failed }
 
 sealed interface ApiResult<out T> {
     data class Ok<T>(val value: T) : ApiResult<T>
@@ -132,6 +134,7 @@ data class MeMembership(
     val name: String,
     val entitlement: String? = null,
     @SerialName("trialEndsAt") val trialEndsAt: Long? = null,
+    val entitlementExpiresAt: Long? = null,
     val settings: SettingsBody? = null,
     val phone: String? = null,
     val email: String? = null,

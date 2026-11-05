@@ -23,6 +23,7 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
             ),
             phone = prefs.getString(PHONE, null),
             email = prefs.getString(EMAIL, null),
+            entitlementExpiresAt = prefs.getLong(ENTITLEMENT_EXPIRES, -1L).takeIf { it >= 0 },
         )
     }
 
@@ -34,6 +35,7 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
             editor.putString(ROLE, it.role.wire)
             it.trialEndsAt?.let { t -> editor.putLong(TRIAL, t) }
             it.entitlement?.let { e -> editor.putString(ENTITLEMENT, e) }
+            it.entitlementExpiresAt?.let { t -> editor.putLong(ENTITLEMENT_EXPIRES, t) }
             editor.putString(OT_RULE, it.settings.overtimeRule.wire)
             editor.putBoolean(BREAK_RULE, it.settings.breakRule)
             editor.putBoolean(REQUIRE_GPS, it.settings.requireGps)
@@ -52,6 +54,7 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
         const val ROLE = "role"
         const val TRIAL = "trial"
         const val ENTITLEMENT = "entitlement"
+        const val ENTITLEMENT_EXPIRES = "entitlement_expires_at"
         const val OT_RULE = "ot_rule"
         const val BREAK_RULE = "break_rule"
         const val REQUIRE_GPS = "require_gps"

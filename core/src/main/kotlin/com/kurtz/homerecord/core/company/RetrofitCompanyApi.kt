@@ -40,7 +40,7 @@ interface CompanyService {
 class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
     override suspend fun me() = call {
         service.me().memberships.filter { it.kind == "company" }.map {
-            CompanyMembership(it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement, it.settings.toSettings(), it.phone, it.email)
+            CompanyMembership(it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement, it.settings.toSettings(), it.phone, it.email, it.entitlementExpiresAt)
         }
     }
 
@@ -96,6 +96,8 @@ class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
         return when {
             code == "invalid_code" -> ApiFailure.InvalidCode
             code == "already_in_company" -> ApiFailure.AlreadyInCompany
+            code == "member_limit" -> ApiFailure.MemberLimit
+            code == "subscription_required" -> ApiFailure.SubscriptionRequired
             else -> failureForStatus(e)
         }
     }

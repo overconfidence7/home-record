@@ -23,6 +23,13 @@ class PrefsCompanyCacheTest {
         assertThat(PrefsCompanyCache(context).read()).isNull()
     }
 
+    // AC-F56: the plan's expiry holds offline so a lapsed plan gates the same way with no network
+    @Test fun keepsTheEntitlementExpiry() {
+        val membership = CompanyMembership("c1", "Hale Electric", CompanyRole.Owner, 5, "fieldlog_solo", entitlementExpiresAt = 1_900_000_000_000L)
+        PrefsCompanyCache(context).write(membership)
+        assertThat(PrefsCompanyCache(context).read()).isEqualTo(membership)
+    }
+
     // AC-F33: the company's phone and email, which head the daily log PDF, survive a restart with no network
     @Test fun keepsTheCompanyContactLine() {
         val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Owner, null, null, phone = "(412) 555-0148", email = "office@qaelectric.com")

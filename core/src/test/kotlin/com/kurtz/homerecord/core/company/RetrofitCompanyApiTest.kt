@@ -64,6 +64,24 @@ class RetrofitCompanyApiTest {
         assertThat(r.api().join("ABCDEFGH")).isEqualTo(ApiResult.Err(ApiFailure.AlreadyInCompany))
     }
 
+    // AC-F56: the server refuses a join past the plan's limit or into a lapsed company, and the phone says which
+    @Test fun planRefusalsMapToTheirOwnFailures() = runTest {
+        assertThat(Recorder(409, """{"error":"member_limit","plan":"solo","limit":1}""").api().join("ABCDEFGH"))
+            .isEqualTo(ApiResult.Err(ApiFailure.MemberLimit))
+        assertThat(Recorder(402, """{"error":"subscription_required"}""").api().join("ABCDEFGH"))
+            .isEqualTo(ApiResult.Err(ApiFailure.SubscriptionRequired))
+    }
+
+    // AC-B50: /me carries the entitlement in force and when it lapses
+    @Test fun meReadsTheEntitlementExpiry() = runTest {
+        val r = Recorder(body = """{"user":{"id":"u","email":"a@b.com"},"memberships":[
+            {"kind":"company","id":"c1","role":"owner","name":"Hale Electric","entitlement":"fieldlog_crew",
+             "entitlementExpiresAt":1900000000000,"trialEndsAt":5,"plan":"crew","memberLimit":10}]}""")
+        val m = (r.api().me() as ApiResult.Ok).value.single()
+        assertThat(m.entitlement).isEqualTo("fieldlog_crew")
+        assertThat(m.entitlementExpiresAt).isEqualTo(1_900_000_000_000L)
+    }
+
     @Test fun statusCodesMap() = runTest {
         assertThat(Recorder(404, """{"error":"not_found"}""").api().members("c")).isEqualTo(ApiResult.Err(ApiFailure.NotFound))
         assertThat(Recorder(403, """{"error":"forbidden"}""").api().remove("c", "u")).isEqualTo(ApiResult.Err(ApiFailure.Forbidden))
