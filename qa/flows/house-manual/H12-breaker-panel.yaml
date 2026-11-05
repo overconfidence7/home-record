@@ -1,0 +1,50 @@
+# Walkthrough H12 (first part, T066b): open the seeded Main panel item and its slots (AC-C40). Starts from the
+# regression seed (_seed.yaml), which files a Square D breaker panel named "Main panel". Labeling breakers and the
+# fridge's "Breaker 12" link extend this flow with T066c and T067.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 15000
+- tapOn:
+    id: "hm_items_search"
+- inputText: "QO140M200"
+- extendedWaitUntil:
+    visible: "Main panel"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Main panel"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+# AC-C40: a Breaker panel item has a Panel section that opens its slots
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_panel"
+- tapOn:
+    id: "hm_item_detail_panel"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_grid"
+    timeout: 10000
+# The panel is made on first open with 40 slots in two columns
+- assertVisible: "40 slots, two columns"
+- assertVisible:
+    id: "hm_panel_slot_1"
+- assertVisible:
+    id: "hm_panel_slot_2"
+- takeScreenshot: H12-panel
+- scrollUntilVisible:
+    element:
+      id: "hm_panel_slot_40"
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_panel"
+    timeout: 5000

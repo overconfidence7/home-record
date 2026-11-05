@@ -29,6 +29,9 @@ import kotlinx.serialization.Serializable
 @Serializable data class ItemPlaceKey(val itemId: String) : NavKey
 @Serializable data class ItemEditKey(val itemId: String? = null, val roomId: String? = null, val subtypeId: String? = null, val scanPlate: Boolean = false) : NavKey
 
+/** HM-Panel for the Breaker panel or Sub-panel item [itemId] (AC-C40). */
+@Serializable data class PanelKey(val itemId: String) : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

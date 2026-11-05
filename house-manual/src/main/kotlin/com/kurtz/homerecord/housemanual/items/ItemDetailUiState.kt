@@ -114,6 +114,8 @@ sealed interface ItemDetailEvent {
     data class OpenOverlay(val link: OverlayLink) : ItemDetailEvent
     /** The Where row: open Place on plan (AC-C30 position). */
     data object Place : ItemDetailEvent
+    /** The Panel row of a Breaker panel or Sub-panel item: open HM-Panel (AC-C40). */
+    data object OpenPanel : ItemDetailEvent
     data object ShowAttach : ItemDetailEvent
     data object HideAttach : ItemDetailEvent
     data class AttachDocument(val id: String) : ItemDetailEvent

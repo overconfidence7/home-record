@@ -399,7 +399,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 
 - [ ] T066: Breaker panel item: `Panel`/`Breaker` entities, `SlotOccupancy` `[unit]`, HM-Panel grid (two-pole tall cell, tandem), panel photo, HM-Breaker editor with rooms and items fed (acceptance: AC-C40)
   - [x] T066a: `SlotOccupancy` `[unit]` (two-column / DIN numbering, two-pole spans, tandem, placement refusals, clashing rows unplaced) and `Panel`/`Breaker` domain models with mappers in :core; `PanelRepository` in :house-model (panel created on first open, panel facts that cannot shrink under a breaker, breaker save with slot checks, tandem, rooms and items fed as Likely links, delete) (AC-C40)
-  - [ ] T066b: HM-Panel screen: panel facts header with photo, slot grid (two-pole tall cell, tandem halves, open slots), opened from a Breaker panel / Sub-panel item page and More → Breaker panels; catalog, previews, screenshots, flow (AC-C40)
+  - [x] T066b: HM-Panel screen: panel facts header with photo, slot grid (two-pole tall cell, tandem halves, open slots), opened from a Breaker panel / Sub-panel item page and More → Breaker panels (the More entry split to T066b2); catalog, previews, screenshots, flow (AC-C40)
+    - [ ] T066b2: More → Breaker panels: the home's Breaker panel and Sub-panel items as rows (one panel opens straight), empty state with Add breaker panel; catalog, screenshots, flow (AC-C40)
   - [ ] T066c: HM-Breaker editor sheet (label, amps, poles, type, rooms, items fed, delete), long-press an occupied slot for a tandem, panel facts editor and panel photo (AC-C40)
 - [ ] T067: Breaker links everywhere: item `poweredBy` chip, breaker "feeds" list, room "Breakers feeding this room" with confidence dots, search highlights slot (acceptance: AC-C41, AC-H7)
 - [ ] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)

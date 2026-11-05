@@ -130,6 +130,9 @@ class AppContainer(app: Application) {
         db, overlayKindName = { app.resources.getString(it.nameRes) }, subtypeName = items::subtypeName,
     )
 
+    /** Breaker panels and their breakers (AC-C40). */
+    val panels = com.kurtz.homerecord.housemodel.panel.PanelRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
+
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
     /** Data plate vision fallback (AC-B11) and recalls (AC-B12). */

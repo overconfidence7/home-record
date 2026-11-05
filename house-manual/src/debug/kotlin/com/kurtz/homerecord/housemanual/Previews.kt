@@ -1432,3 +1432,64 @@ fun ClaimExpiredPreview() = Frame {
         {},
     )
 }
+
+// HM-Panel (AC-C40): a 200 A Square D panel with the breakers a homeowner labels first.
+private val samplePanel = com.kurtz.homerecord.core.model.Panel("p1", "i-panel", 40, com.kurtz.homerecord.core.model.PanelLayout.NORTH_AMERICAN, 200, "Square D QO", null)
+
+private fun sampleBreaker(id: String, slots: List<Int>, amps: Int, label: String, type: com.kurtz.homerecord.core.model.BreakerType = com.kurtz.homerecord.core.model.BreakerType.STANDARD, at: Long = 1) =
+    com.kurtz.homerecord.core.model.Breaker(id, "p1", slots, slots.size, amps, type, label, com.kurtz.homerecord.core.model.LinkConfidence.UNKNOWN, at)
+
+private val sampleBreakers = listOf(
+    sampleBreaker("b1", listOf(1, 3), 40, "Range"),
+    sampleBreaker("b2", listOf(2), 20, "Kitchen counter", com.kurtz.homerecord.core.model.BreakerType.GFCI),
+    sampleBreaker("b3", listOf(4), 20, "Refrigerator"),
+    sampleBreaker("b4", listOf(5), 15, "Living room lights", com.kurtz.homerecord.core.model.BreakerType.AFCI),
+    sampleBreaker("b5", listOf(6, 8), 30, "Water heater"),
+    sampleBreaker("b6", listOf(7), 15, "Porch lights", at = 1),
+    sampleBreaker("b7", listOf(7), 15, "Garage door opener", at = 2),
+    sampleBreaker("b8", listOf(9), 20, "Bathroom", com.kurtz.homerecord.core.model.BreakerType.DUAL_FUNCTION),
+    sampleBreaker("b9", listOf(12), 20, "Dishwasher"),
+)
+
+private fun panelState(panel: com.kurtz.homerecord.core.model.Panel, breakers: List<com.kurtz.homerecord.core.model.Breaker>) =
+    com.kurtz.homerecord.housemanual.panel.PanelUiState(
+        loading = false, name = "Main panel", panel = panel, breakers = breakers,
+        grid = com.kurtz.homerecord.core.model.SlotOccupancy.grid(panel.layout, panel.slotCount, breakers),
+    )
+
+@ThemePreviews
+@Composable
+fun PanelPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers), {}) }
+
+@ThemePreviews
+@Composable
+fun PanelEmptyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel.copy(slotCount = 20, mainAmps = null, brand = null), emptyList()), {})
+}
+
+@ThemePreviews
+@Composable
+fun PanelDinPreview() = Frame {
+    val din = samplePanel.copy(slotCount = 12, layout = com.kurtz.homerecord.core.model.PanelLayout.DIN, mainAmps = 100, brand = "Hager")
+    val breakers = listOf(
+        sampleBreaker("d1", listOf(1, 2), 30, "Dryer"),
+        sampleBreaker("d2", listOf(3), 16, "Kitchen sockets", com.kurtz.homerecord.core.model.BreakerType.GFCI),
+        sampleBreaker("d3", listOf(4), 10, "Lights"),
+    )
+    com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(din, breakers), {})
+}
+
+@ThemePreviews
+@Composable
+fun PanelClashPreview() = Frame {
+    // A second phone put a two-pole breaker over slots 2 and 4 while this one was offline: it lists under the grid.
+    com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers + sampleBreaker("b10", listOf(2, 4), 30, "Air conditioner", at = 9)), {})
+}
+
+@ThemePreviews
+@Composable
+fun PanelLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(com.kurtz.homerecord.housemanual.panel.PanelUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun PanelMissingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(com.kurtz.homerecord.housemanual.panel.PanelUiState(loading = false, missing = true), {}) }

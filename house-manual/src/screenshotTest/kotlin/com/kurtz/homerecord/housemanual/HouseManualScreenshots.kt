@@ -647,3 +647,33 @@ fun ClaimOfflineScreenshot() = ClaimOfflinePreview()
 @ThemePreviews
 @Composable
 fun ClaimExpiredScreenshot() = ClaimExpiredPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelScreenshot() = PanelPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelEmptyScreenshot() = PanelEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelDinScreenshot() = PanelDinPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelClashScreenshot() = PanelClashPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelLoadingScreenshot() = PanelLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelMissingScreenshot() = PanelMissingPreview()

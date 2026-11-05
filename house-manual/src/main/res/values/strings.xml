@@ -331,4 +331,42 @@
     <string name="import_one_other">Record</string>
     <string name="more_import">Import handoff</string>
     <string name="more_import_supporting">Open a .homerecord file from your contractor</string>
+    <!-- HM-Panel (AC-C40) -->
+    <string name="panel_title">Breaker panel</string>
+    <string name="panel_missing_title">This panel is gone</string>
+    <string name="panel_missing_body">Its item was deleted, so its slots are no longer shown.</string>
+    <string name="panel_slots">Slots</string>
+    <string name="panel_no_breakers">No breakers yet. Each breaker you label shows in its slot.</string>
+    <string name="panel_unplaced">Breakers that don\'t fit</string>
+    <string name="panel_unplaced_row">Says slots %1$s, which another breaker holds</string>
+    <string name="panel_breaker_unlabeled">No label</string>
+    <string name="panel_photo">Panel photo</string>
+    <string name="panel_main_amps">%1$d A main</string>
+    <string name="panel_main_unknown">Main size not set</string>
+    <string name="panel_slots_line">%1$s, %2$s</string>
+    <plurals name="panel_slot_count">
+        <item quantity="one">%1$d slot</item>
+        <item quantity="other">%1$d slots</item>
+    </plurals>
+    <plurals name="panel_breaker_count">
+        <item quantity="one">%1$d breaker labeled</item>
+        <item quantity="other">%1$d breakers labeled</item>
+    </plurals>
+    <string name="panel_layout_two_column">two columns</string>
+    <string name="panel_layout_din">one row (DIN)</string>
+    <string name="panel_slot_open">Open</string>
+    <string name="panel_tandem_a">%1$dA</string>
+    <string name="panel_tandem_b">%1$dB</string>
+    <string name="panel_two_pole_number">%1$d–%2$d</string>
+    <string name="panel_amps">%1$d A</string>
+    <string name="panel_type_gfci">GFCI</string>
+    <string name="panel_type_afci">AFCI</string>
+    <string name="panel_type_dual">Dual function</string>
+    <string name="panel_slot_open_description">Slot %1$d, open</string>
+    <string name="panel_slot_description">Slot %1$d, %2$s</string>
+    <string name="panel_two_pole_description">Slots %1$d and %2$d, two-pole, %3$s</string>
+    <string name="panel_tandem_description">Slot %1$d, tandem: %2$s; %3$s</string>
+    <string name="item_detail_panel">Panel</string>
+    <string name="item_detail_open_panel">Slots and breakers</string>
+    <string name="item_detail_panel_supporting_none">Label the breakers in each slot</string>
 </resources>

@@ -188,6 +188,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 overlays = container.overlays,
                 onOpenOverlay = { link -> openOverlay(nav, link.overlay) },
                 onPlace = { nav.push(ItemPlaceKey(key.itemId)) },
+                onOpenPanel = { nav.push(PanelKey(key.itemId)) },
             )
         }
         entry<ItemPlaceKey> { key ->
@@ -200,6 +201,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
+        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, key.itemId, onBack = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }

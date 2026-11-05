@@ -44,6 +44,7 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.PinDrop
 import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.SearchOff
@@ -129,6 +130,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
                 DetailsSection(detail, onEvent)
                 WhereSection(detail, onEvent)
+                if (com.kurtz.homerecord.housemodel.panel.isPanelSubtype(detail.item.subtype)) PanelSection(onEvent)
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
                 ConsumablesSection(state.consumables, onEvent)
@@ -296,6 +298,20 @@ internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit
             onClick = if (pseudo) null else ({ onEvent(ItemDetailEvent.Place) }),
             onClickLabel = stringResource(if (placed) R.string.item_detail_where_move else R.string.item_detail_where_place),
             modifier = Modifier.testTag("hm_item_detail_place"),
+        )
+    }
+}
+
+/** A Breaker panel or Sub-panel item opens its slots (AC-C40). */
+@Composable
+internal fun PanelSection(onEvent: (ItemDetailEvent) -> Unit) {
+    Section(stringResource(R.string.item_detail_panel)) {
+        RecordListItem(
+            headline = stringResource(R.string.item_detail_open_panel),
+            supporting = stringResource(R.string.item_detail_panel_supporting_none),
+            leading = { Icon(Icons.Rounded.ElectricalServices, contentDescription = null) },
+            onClick = { onEvent(ItemDetailEvent.OpenPanel) },
+            modifier = Modifier.testTag("hm_item_detail_panel"),
         )
     }
 }
