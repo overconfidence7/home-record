@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -31,6 +32,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class PhotoDetailViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private val changes = mutableListOf<String>()
 
@@ -48,14 +50,15 @@ class PhotoDetailViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
 
     private fun vm(id: String = "p1", gates: com.kurtz.homerecord.core.company.RoleGates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)) =
-        PhotoDetailViewModel(
+        scopes.track(PhotoDetailViewModel(
             PhotoDetailDeps(id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }, kotlinx.coroutines.flow.flowOf(gates)),
-        )
+        ))
 
     private suspend fun loaded(v: PhotoDetailViewModel) = v.state.filter { !it.loading }.first()
 
@@ -144,7 +147,7 @@ class PhotoDetailViewModelTest {
     @Test fun `photo from another phone downloads with offline and retry`() = runBlocking<Unit> {
         db.photoDao().upsert(PhotoEntity(id = "p2", homeId = "h1", jobId = "j1", path = "", r2Key = "c1/photo/p2/IMG.jpg", takenAt = 6, createdAt = 6, updatedAt = 6))
         val answers = ArrayDeque(listOf(com.kurtz.homerecord.core.photo.OnPhone.NoNetwork, com.kurtz.homerecord.core.photo.OnPhone.Ready))
-        val v = PhotoDetailViewModel(
+        val v = scopes.track(PhotoDetailViewModel(
             PhotoDetailDeps(
                 "p2", db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") },
                 kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)),
@@ -155,7 +158,7 @@ class PhotoDetailViewModelTest {
                     r
                 },
             ),
-        )
+        ))
         val offline = v.state.filter { !it.loading && it.image != PhotoImage.Downloading }.first()
         assertThat(offline.image).isEqualTo(PhotoImage.NoNetwork)
         assertThat(offline.imagePath).isEmpty()
@@ -167,13 +170,13 @@ class PhotoDetailViewModelTest {
 
     @Test fun `photo on this phone is shown without a download`() = runBlocking<Unit> {
         var asked = false
-        val v = PhotoDetailViewModel(
+        val v = scopes.track(PhotoDetailViewModel(
             PhotoDetailDeps(
                 "p1", db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") },
                 kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)),
                 isOnPhone = { true }, download = { asked = true; com.kurtz.homerecord.core.photo.OnPhone.Ready },
             ),
-        )
+        ))
         val s = loaded(v)
         assertThat(s.image).isEqualTo(PhotoImage.Ready)
         assertThat(s.imagePath).isEqualTo("/m/p1.jpg")
@@ -188,10 +191,10 @@ class PhotoDetailViewModelTest {
             id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }, kotlinx.coroutines.flow.flowOf(crew),
             memberName = { if (it == "u-crew") "Marco Diaz" else null },
         )
-        val mine = loaded(PhotoDetailViewModel(deps("p2")))
+        val mine = loaded(scopes.track(PhotoDetailViewModel(deps("p2"))))
         assertThat(mine.canDelete).isTrue()
         assertThat(mine.takenBy).isEqualTo("Marco Diaz")
-        val other = loaded(PhotoDetailViewModel(deps("p1")))
+        val other = loaded(scopes.track(PhotoDetailViewModel(deps("p1"))))
         assertThat(other.canDelete).isFalse()
         assertThat(other.takenBy).isNull()
     }

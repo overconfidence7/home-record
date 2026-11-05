@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.files
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -27,6 +28,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class FilesViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private val uploaded = java.util.concurrent.CopyOnWriteArrayList<JobFileEntity>()
     private lateinit var vm: FilesViewModel
@@ -36,10 +38,11 @@ class FilesViewModelTest {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
         val files = JobFiles(db)
-        vm = FilesViewModel(FilesDeps("j1", db.jobFileDao(), files, "m1", queueUpload = { uploaded += it }))
+        vm = scopes.track(FilesViewModel(FilesDeps("j1", db.jobFileDao(), files, "m1", queueUpload = { uploaded += it })))
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
@@ -118,7 +121,7 @@ class FilesViewModelTest {
         val toggled = mutableListOf<Pair<String, Boolean>>()
         var result = com.kurtz.homerecord.core.photo.OnPhone.Ready
         val files = JobFiles(db)
-        val vm2 = FilesViewModel(FilesDeps("j2", db.jobFileDao(), files, "m1", uploads = status, setOffline = { id, on -> toggled += id to on; result }))
+        val vm2 = scopes.track(FilesViewModel(FilesDeps("j2", db.jobFileDao(), files, "m1", uploads = status, setOffline = { id, on -> toggled += id to on; result })))
         runBlocking { files.add("j2", "", "plan.pdf", "/m/plan.pdf", "application/pdf", 10, "m1") }
         val row = runBlocking { withTimeout(5_000) { vm2.state.first { it.files.isNotEmpty() } } }.files.single()
         assertThat(row.upload).isEqualTo(com.kurtz.homerecord.core.photo.UploadStatus.None)
@@ -135,7 +138,7 @@ class FilesViewModelTest {
     @Test fun crewCannotAddRenameOrDelete() {
         val files = JobFiles(db)
         runBlocking { files.add("j3", "", "plan.pdf", "/m/plan.pdf", "application/pdf", 10, "m1") }
-        val crew = FilesViewModel(FilesDeps("j3", db.jobFileDao(), files, "m2", canManage = kotlinx.coroutines.flow.flowOf(false)))
+        val crew = scopes.track(FilesViewModel(FilesDeps("j3", db.jobFileDao(), files, "m2", canManage = kotlinx.coroutines.flow.flowOf(false))))
         val s = runBlocking { withTimeout(5_000) { crew.state.first { it.files.isNotEmpty() } } }
         assertThat(s.canManage).isFalse()
         val id = s.files.single().id

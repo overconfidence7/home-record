@@ -38,7 +38,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -84,7 +85,8 @@ class LogViewModelTest {
     private fun track(v: LogViewModel) = v.also { made += it }
 
     @After fun tearDown() {
-        made.forEach { it.viewModelScope.cancel() }
+        // Join, not just cancel: an assembly still reading Room would finish after close() and fail a later test.
+        runBlocking { made.forEach { it.viewModelScope.coroutineContext.job.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
     }

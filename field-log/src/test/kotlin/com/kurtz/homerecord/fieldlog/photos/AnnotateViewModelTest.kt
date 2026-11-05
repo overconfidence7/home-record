@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -30,6 +31,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class AnnotateViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private var renderOk = true
 
@@ -44,17 +46,18 @@ class AnnotateViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
 
-    private fun vm(id: String = "p1") = AnnotateViewModel(
+    private fun vm(id: String = "p1") = scopes.track(AnnotateViewModel(
         AnnotateDeps(
             id, db.photoDao(),
             PhotoAnnotator(db, { _, _, _ -> renderOk }, { _, _, _, _, _, _ -> }, { null }),
             aspectOf = { 2f },
         ),
-    )
+    ))
 
     private fun p(x: Float, y: Float) = NormPoint(x, y)
     private fun AnnotateViewModel.draw(tool: AnnotationTool, vararg pts: NormPoint) {

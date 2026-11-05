@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.jobs
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -26,6 +27,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class JobOverviewViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
 
     @Before fun setUp() {
@@ -36,14 +38,15 @@ class JobOverviewViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
 
-    private fun vm(provision: suspend (String) -> String?) = JobOverviewViewModel(
+    private fun vm(provision: suspend (String) -> String?) = scopes.track(JobOverviewViewModel(
         "c1", "j1", db.jobDao(), db.clientDao(), db.jobCrewDao(), db.memberDao(), db.assignmentDao(), db.taskDao(),
         db.punchDao(), db.photoDao(), flowOf(RoleGates(CompanyRole.Owner)), provision,
-    )
+    ))
 
     // AC-F48
     @Test fun startHouseProvisionsTheJobHomeOnceWhileItRuns() {

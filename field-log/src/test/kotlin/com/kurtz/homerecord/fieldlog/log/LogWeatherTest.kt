@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.log
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import com.kurtz.homerecord.core.data.sections
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
@@ -39,6 +40,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class LogWeatherTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private val day = LocalDate.of(2026, 10, 30)
     private val zone = ZoneOffset.UTC
@@ -60,11 +62,12 @@ class LogWeatherTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
 
-    private fun form(saved: SavedStateHandle = SavedStateHandle()) = LogWeatherViewModel(LogWeatherDeps("j1", day, repo, gates), saved)
+    private fun form(saved: SavedStateHandle = SavedStateHandle()) = scopes.track(LogWeatherViewModel(LogWeatherDeps("j1", day, repo, gates), saved))
 
     private suspend fun LogWeatherViewModel.settled(check: (LogWeatherUiState) -> Boolean = { true }) =
         withTimeout(5_000) { state.first { !it.loading && check(it) } }

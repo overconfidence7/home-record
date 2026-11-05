@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.files
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.room.Room
@@ -37,6 +38,7 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class FileViewerPinsTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private lateinit var files: JobFiles
     private lateinit var tasks: JobTasks
@@ -57,6 +59,7 @@ class FileViewerPinsTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
@@ -66,12 +69,12 @@ class FileViewerPinsTest {
         return runBlocking { files.add("j1", "", "Kitchen plan.pdf", f.absolutePath, "application/pdf", 10, "m1") }.id
     }
 
-    private fun viewer(fileId: String, me: String? = "m1") = FileViewerViewModel(
+    private fun viewer(fileId: String, me: String? = "m1") = scopes.track(FileViewerViewModel(
         FileViewerDeps(
             fileId, db.jobFileDao(), { _, _ -> pages },
             tasks = tasks::observeForJob, canManageTasks = { manage }, me = me, pinOnFile = tasks::pinOnFile,
         ),
-    )
+    ))
 
     private fun FileViewerViewModel.until(test: (FileViewerUiState) -> Boolean) = runBlocking { withTimeout(5_000) { state.first(test) } }
 
@@ -171,12 +174,12 @@ class FileViewerPinsTest {
         val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Patch the soffit")) })
         // The screen's own watch still says Lead; the role on the phone has just changed (the gate is asked again on Choose).
         var asks = 0
-        val vm = FileViewerViewModel(
+        val vm = scopes.track(FileViewerViewModel(
             FileViewerDeps(
                 file, db.jobFileDao(), { _, _ -> pages },
                 tasks = tasks::observeForJob, canManageTasks = { flowOf(asks++ == 0) }, me = "m1", pinOnFile = tasks::pinOnFile,
             ),
-        )
+        ))
         vm.until { !it.loading && it.choices.isNotEmpty() }
         vm.onPinEvent(FileViewerEvent.StartPinning)
         vm.onPinEvent(FileViewerEvent.TapPage(0, 0.5f, 0.5f))

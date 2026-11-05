@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.files
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.room.Room
@@ -34,6 +35,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class MarkupViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private lateinit var files: JobFiles
     private lateinit var markup: PdfMarkup
@@ -55,6 +57,7 @@ class MarkupViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
@@ -62,7 +65,7 @@ class MarkupViewModelTest {
     private fun plan(mime: String = PdfMarkup.PDF_MIME) = runBlocking { files.add("j1", "Plans", "Garage plan.pdf", "/m/plan.pdf", mime, 10, "owner") }.id
 
     private fun editor(id: String, onPhone: Boolean = true, open: (String, String) -> PageSource? = { _, _ -> pages }) =
-        MarkupViewModel(MarkupDeps(id, db.jobFileDao(), markup, "lead-1", open, isOnPhone = { onPhone }))
+        scopes.track(MarkupViewModel(MarkupDeps(id, db.jobFileDao(), markup, "lead-1", open, isOnPhone = { onPhone })))
 
     private fun MarkupViewModel.loaded() = runBlocking { withTimeout(5_000) { state.first { !it.loading } } }
     private fun MarkupViewModel.saved() = runBlocking { withTimeout(5_000) { state.first { !it.saving && (it.savedId != null || it.failed) } } }
@@ -151,9 +154,9 @@ class MarkupViewModelTest {
         clock = 2_000L
         val v2 = checkNotNull(runBlocking { markup.saveVersion(v1, listOf(PdfMark.Arrow(0, NormPoint(0f, 0f), NormPoint(1f, 1f))), "lead-1") })
         val names = mapOf("lead-1" to "Marcus Ortiz", "owner" to "Dana Reyes")
-        fun viewer(id: String, manage: Boolean) = FileViewerViewModel(
+        fun viewer(id: String, manage: Boolean) = scopes.track(FileViewerViewModel(
             FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, history = markup::history, memberName = { names[it] }, canManage = { flowOf(manage) }),
-        )
+        ))
         // v1's path exists; v2's path is under /files/media and is not on this test disk, so open v1 for the markable case
         val s = runBlocking { withTimeout(5_000) { viewer(v1, manage = true).state.first { !it.loading && it.canMarkUp } } }
         assertThat(s.versions.map { it.version }).containsExactly(2, 1).inOrder()

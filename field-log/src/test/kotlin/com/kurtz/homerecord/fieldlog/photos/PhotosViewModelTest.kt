@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -35,6 +36,7 @@ import java.time.ZoneId
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class PhotosViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private val zone = ZoneId.of("UTC")
     private fun at(day: Int, hour: Int) = LocalDate.of(2026, 10, day).atTime(hour, 0).atZone(zone).toInstant().toEpochMilli()
@@ -52,6 +54,7 @@ class PhotosViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
@@ -62,7 +65,7 @@ class PhotosViewModelTest {
             takenAt = takenAt, beforeOfPhotoId = before, annotationsJson = marks, createdAt = takenAt, updatedAt = takenAt,
         )
 
-    private fun vm() = PhotosViewModel(PhotosDeps("j1", db.photoDao(), db.jobDao(), db.roomDao(), zone))
+    private fun vm() = scopes.track(PhotosViewModel(PhotosDeps("j1", db.photoDao(), db.jobDao(), db.roomDao(), zone)))
 
     @Test fun `empty job shows no days once loaded`() = runBlocking {
         val s = vm().state.filter { !it.loading }.first()
@@ -103,7 +106,7 @@ class PhotosViewModelTest {
         db.photoDao().upsert(photo("theirs", at(21, 9)).copy(path = "", r2Key = "c1/photo/theirs/IMG.jpg"))
         val asked = mutableListOf<String>()
         val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
-        val model = PhotosViewModel(
+        val model = scopes.track(PhotosViewModel(
             PhotosDeps(
                 "j1", db.photoDao(), db.jobDao(), db.roomDao(), zone,
                 missing = { paths -> paths.filterTo(mutableSetOf()) { it.isNullOrEmpty() } },
@@ -114,7 +117,7 @@ class PhotosViewModelTest {
                     com.kurtz.homerecord.core.photo.OnPhone.Ready
                 },
             ),
-        )
+        ))
         val waiting = model.state.filter { !it.loading }.first()
         val tiles = waiting.days.single().cells.map { (it as PhotoCell.Single).tile }.associateBy { it.id }
         assertThat(tiles.getValue("theirs").imagePath).isEmpty()
@@ -132,7 +135,7 @@ class PhotosViewModelTest {
     @Test fun `owner gets a gallery link once there is a photo and crew never do`() = runBlocking<Unit> {
         val links = com.kurtz.homerecord.fieldlog.share.FakeJobLinks()
         val canLink = kotlinx.coroutines.flow.MutableStateFlow(true)
-        val model = PhotosViewModel(PhotosDeps("j1", db.photoDao(), db.jobDao(), db.roomDao(), zone, links = links, canLink = canLink))
+        val model = scopes.track(PhotosViewModel(PhotosDeps("j1", db.photoDao(), db.jobDao(), db.roomDao(), zone, links = links, canLink = canLink)))
         assertThat(model.state.filter { !it.loading }.first().link.allowed).isFalse()
         db.photoDao().upsert(photo("a", at(21, 9)))
         model.state.filter { it.link.allowed }.first()

@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.tasks
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.room.Room
@@ -40,6 +41,7 @@ import java.time.LocalDate
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class TaskFormViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private lateinit var tasks: JobTasks
 
@@ -55,6 +57,7 @@ class TaskFormViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
@@ -62,7 +65,7 @@ class TaskFormViewModelTest {
     private fun vm(
         taskId: String? = null, manage: Boolean = true, saved: SavedStateHandle = SavedStateHandle(), jobId: String = "j1",
         startFilePin: TaskFilePin? = null, me: String? = null,
-    ) = TaskFormViewModel(
+    ) = scopes.track(TaskFormViewModel(
         TaskFormDeps(
             jobId, taskId, tasks,
             people = { listOf(PersonOption("m1", "Nate Kurtz"), PersonOption("m3", "Marcus Bell", onJob = true), PersonOption("m2", "Dana Ortiz", onJob = true)) },
@@ -75,7 +78,7 @@ class TaskFormViewModelTest {
             me = me,
         ),
         saved,
-    )
+    ))
 
     // Kitchen (r1) on the main floor is 0..144 x 0..120 inches; the basement has no rooms and is not offered.
     private var plan = listOf(
@@ -188,7 +191,7 @@ class TaskFormViewModelTest {
     @Test fun theFormLoadsOnceTheRightToEditArrives() {
         val id = checkNotNull(runBlocking { tasks.add("j1", TaskDraft("Cover plate")) })
         val manage = MutableStateFlow(false)
-        val vm = TaskFormViewModel(TaskFormDeps("j1", id, tasks, canManage = manage))
+        val vm = scopes.track(TaskFormViewModel(TaskFormDeps("j1", id, tasks, canManage = manage)))
         assertThat(vm.current().failed).isTrue()
         manage.value = true
         assertThat(vm.current { !it.failed }.draft.title).isEqualTo("Cover plate")

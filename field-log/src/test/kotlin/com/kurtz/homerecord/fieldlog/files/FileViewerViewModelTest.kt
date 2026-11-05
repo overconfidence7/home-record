@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.files
 
+import com.kurtz.homerecord.fieldlog.ViewModelScopes
 import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.room.Room
@@ -29,6 +30,7 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class FileViewerViewModelTest {
+    private val scopes = ViewModelScopes()
     private lateinit var db: HomeRecordDatabase
     private lateinit var files: JobFiles
     private val opened = mutableListOf<Pair<String, String>>()
@@ -46,12 +48,13 @@ class FileViewerViewModelTest {
     }
 
     @After fun tearDown() {
+        scopes.cancelAll()
         db.close()
         Dispatchers.resetMain()
     }
 
     private fun viewer(id: String, open: (String, String) -> PageSource? = { p, m -> opened += p to m; pages }) =
-        FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), open))
+        scopes.track(FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), open)))
 
     private fun FileViewerViewModel.loaded() = runBlocking { withTimeout(5_000) { state.first { !it.loading } } }
 
@@ -104,10 +107,10 @@ class FileViewerViewModelTest {
     @Test fun fileNotOnPhoneDownloadsOnOpenThenShowsPages() {
         val id = stored("permit.pdf", "application/pdf", exists = false)
         val downloaded = File.createTempFile("download", ".pdf").apply { deleteOnExit() }
-        val vm = FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
+        val vm = scopes.track(FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
             files.setLocal(it, false, downloaded.absolutePath)
             com.kurtz.homerecord.core.photo.OnPhone.Ready
-        }))
+        })))
         val s = vm.loaded()
         assertThat(s.problem).isNull()
         assertThat(s.pages?.pageCount).isEqualTo(3)
@@ -116,10 +119,10 @@ class FileViewerViewModelTest {
     @Test fun downloadThatFailsShowsPromptAndRetryTriesAgain() {
         val id = stored("permit.pdf", "application/pdf", exists = false)
         var calls = 0
-        val vm = FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
+        val vm = scopes.track(FileViewerViewModel(FileViewerDeps(id, db.jobFileDao(), { _, _ -> pages }, ensureOnPhone = {
             calls++
             com.kurtz.homerecord.core.photo.OnPhone.NoNetwork
-        }))
+        })))
         assertThat(vm.loaded().problem).isEqualTo(FileViewerProblem.NotOnPhone)
         vm.onRetry()
         runBlocking { withTimeout(5_000) { while (calls < 2) kotlinx.coroutines.delay(10) } }
