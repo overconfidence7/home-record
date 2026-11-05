@@ -36,17 +36,33 @@ class MainActivity : ComponentActivity() {
         super.onPause()
     }
 
+    /** A `.homerecord` handed to House Manual by Open with or Share (AC-H17). */
+    private val incoming = androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null)
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        incoming.value = handoffUri(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) incoming.value = handoffUri(intent)
         enableEdgeToEdge()
         setContent {
             HomeRecordTheme(Brand.HouseManual) {
                 CompositionLocalProvider(LocalTagPrefix provides "hm") {
                     Box(Modifier.semantics { testTagsAsResourceId = true }) {
-                        HouseManualApp(container)
+                        HouseManualApp(container, incoming.value, onIncomingHandled = { incoming.value = null })
                     }
                 }
             }
         }
     }
+}
+
+/** The file of an Open with (VIEW) or Share (SEND) intent, or null for a normal launch. */
+internal fun handoffUri(intent: android.content.Intent?): android.net.Uri? = when (intent?.action) {
+    android.content.Intent.ACTION_VIEW -> intent.data
+    android.content.Intent.ACTION_SEND -> androidx.core.content.IntentCompat.getParcelableExtra(intent, android.content.Intent.EXTRA_STREAM, android.net.Uri::class.java)
+    else -> null
 }

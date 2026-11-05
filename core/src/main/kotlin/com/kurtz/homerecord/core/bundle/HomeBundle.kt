@@ -25,6 +25,23 @@ data class HomeBundle(
 ) {
     fun count(type: String): Int = records[type]?.count { !it.deleted } ?: 0
 
+    /**
+     * This bundle aimed at [target], the home already on this phone (T063d2): the bundle's own home record is left
+     * out (the homeowner's home keeps its name and details) and every `homeId` that named the bundle's home names
+     * [target], so the crew's floors, overlays, items and documents join the home this phone shows.
+     */
+    fun retargeted(target: String): HomeBundle {
+        if (target == homeId) return this
+        val from = JsonPrimitive(homeId)
+        val to = JsonPrimitive(target)
+        return copy(
+            homeId = target,
+            records = records.filterKeys { it != "home" }.mapValues { (_, list) ->
+                list.map { r -> if (r.fields["homeId"] == from) BundleRecord(JsonObject(r.fields + ("homeId" to to))) else r }
+            },
+        )
+    }
+
     companion object {
         const val FORMAT_VERSION = 2
         const val RECORD_JSON = "record.json"

@@ -64,8 +64,16 @@ private val tabDefs = listOf(
 
 /** No home yet shows onboarding; once one exists the tabs take over (AC-C1, AC-H1). */
 @Composable
-fun HouseManualApp(container: AppContainer) {
+fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, onIncomingHandled: () -> Unit = {}) {
     var home by remember { mutableStateOf<HomeEntity?>(null) }
+    // A `.homerecord` handoff opened from another app or picked from More (AC-H17); shown over onboarding or the tabs.
+    var importUri by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(incoming) {
+        if (incoming != null) {
+            importUri = incoming.toString()
+            onIncomingHandled()
+        }
+    }
     var loaded by remember { mutableStateOf(false) }
     LaunchedEffect(container) {
         container.homes.observeHome().collect { home = it; loaded = true }
@@ -73,15 +81,22 @@ fun HouseManualApp(container: AppContainer) {
     val current = home
     // Set by "Draw your floor plan" so the new home opens straight on the plan editor, House tab.
     var openEditor by rememberSaveable { mutableStateOf(false) }
+    val pendingImport = importUri
     when {
+        pendingImport != null -> com.kurtz.homerecord.housemanual.importing.ImportRoute(
+            container.importFiles, android.net.Uri.parse(pendingImport), onClose = { importUri = null },
+        )
         !loaded -> Scaffold { LoadingState(Modifier.padding(it)) }
         current == null -> OnboardingRoute(container.homes, onDrawPlan = { openEditor = true })
-        else -> HouseManualTabs(container, current, openEditor)
+        else -> HouseManualTabs(container, current, openEditor, onImport = { importUri = it.toString() })
     }
 }
 
 @Composable
-private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEditor: Boolean = false) {
+private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEditor: Boolean = false, onImport: (android.net.Uri) -> Unit = {}) {
+    val pickHandoff = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri -> if (uri != null) onImport(uri) }
     val tabs = tabDefs.map {
         AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; else -> PlaceholderKey(it.id) })
     }
@@ -201,6 +216,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
                             MoreEvent.OpenDocuments -> nav.push(DocumentsKey)
+                            MoreEvent.OpenImport -> pickHandoff.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         }
                     },
                 ) { accountModifier ->

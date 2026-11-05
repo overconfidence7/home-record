@@ -151,4 +151,21 @@ class HomeBundleImporterTest {
         assertThat(outcome.written).isEqualTo(preview.plan.writes().size - 1)
         assertThat(owner.roomDao().get("r1")).isNotNull()
     }
+
+    @Test fun retargetedBundleJoinsTheHomeAlreadyOnThisPhone() = runBlocking<Unit> {
+        seedCrew()
+        owner.homeDao().upsert(HomeEntity(id = "mine", name = "Our house", createdAt = 1, updatedAt = 1))
+        val (bundle, unpacked) = handoff()
+        val aimed = bundle.retargeted("mine")
+        assertThat(aimed.records).doesNotContainKey("home")
+        val preview = importer.preview(aimed)
+        importer.apply(preview, unpacked)
+        assertThat(owner.homeDao().get("h1")).isNull()
+        assertThat(owner.homeDao().get("mine")?.name).isEqualTo("Our house")
+        assertThat(owner.floorDao().get("f1")?.homeId).isEqualTo("mine")
+        assertThat(owner.overlayDao().get("o1")?.homeId).isEqualTo("mine")
+        assertThat(importer.preview(bundle.retargeted("mine")).plan.nothingToDo).isTrue()
+        assertThat(bundle.retargeted("h1")).isSameInstanceAs(bundle)
+    }
 }
+

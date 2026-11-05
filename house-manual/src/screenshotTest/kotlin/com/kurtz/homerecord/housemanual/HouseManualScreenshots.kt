@@ -592,3 +592,38 @@ fun ItemPlaceOnWallScreenshot() = ItemPlaceOnWallPreview()
 @ThemePreviews
 @Composable
 fun ItemPlaceEmptyFloorScreenshot() = ItemPlaceEmptyFloorPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportPreviewScreenshot() = ImportPreviewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportConflictsScreenshot() = ImportConflictsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportNothingNewScreenshot() = ImportNothingNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportImportingScreenshot() = ImportImportingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportDoneScreenshot() = ImportDonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportErrorScreenshot() = ImportErrorPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ImportLoadingScreenshot() = ImportLoadingPreview()

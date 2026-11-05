@@ -145,6 +145,7 @@ class AppContainer(app: Application) {
     val documents = DocumentRepository(db, AndroidDocumentFiles(app)) { entity, id -> recordHomeChange(entity, id) }
 
     val media: MediaFiles = AndroidMediaFiles(app)
+    val importFiles = com.kurtz.homerecord.housemanual.importing.ImportFiles(app, db)
     val textRecognizer: TextRecognizer = MlKitTextRecognizer(app)
 
     val layers = PrefsLayerStore(app)

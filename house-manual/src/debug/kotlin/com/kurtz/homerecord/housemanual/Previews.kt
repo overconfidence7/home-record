@@ -1329,3 +1329,59 @@ fun ItemPlaceUnplacedPreview() = Frame { com.kurtz.homerecord.housemodel.ui.Item
 @ThemePreviews
 @Composable
 fun ItemPlaceEmptyFloorPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(null, emptyList()), {}) }
+
+private val sampleImport = com.kurtz.homerecord.housemanual.importing.ImportUiState(
+    loading = false,
+    homeName = "Ortiz house",
+    counts = listOf(
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.Floors, 1),
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.Rooms, 4),
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.WallPhotos, 6),
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.Overlays, 3),
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.Items, 1),
+        com.kurtz.homerecord.housemanual.importing.ImportCount(com.kurtz.homerecord.housemanual.importing.ImportKind.ChangeOrders, 2),
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun ImportPreviewPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleImport, {}) }
+
+@ThemePreviews
+@Composable
+fun ImportConflictsPreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ImportScreen(
+        sampleImport.copy(
+            counts = sampleImport.counts.drop(2).take(2),
+            conflicts = listOf(
+                com.kurtz.homerecord.housemanual.importing.ImportConflict("room", "r1", com.kurtz.homerecord.housemanual.importing.ImportKind.Rooms, "Kitchen"),
+                com.kurtz.homerecord.housemanual.importing.ImportConflict("item", "i1", com.kurtz.homerecord.housemanual.importing.ImportKind.Items, "Water heater", useImported = true),
+            ),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ImportNothingNewPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleImport.copy(counts = emptyList()), {}) }
+
+@ThemePreviews
+@Composable
+fun ImportImportingPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleImport.copy(importing = true), {}) }
+
+@ThemePreviews
+@Composable
+fun ImportDonePreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleImport.copy(done = true), {}) }
+
+@ThemePreviews
+@Composable
+fun ImportErrorPreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ImportScreen(
+        com.kurtz.homerecord.housemanual.importing.ImportUiState(loading = false, error = com.kurtz.homerecord.housemanual.importing.ImportError.NotABundle), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ImportLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(com.kurtz.homerecord.housemanual.importing.ImportUiState(), {}) }

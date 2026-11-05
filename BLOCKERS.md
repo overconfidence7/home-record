@@ -18,6 +18,8 @@
 
 ## Decisions to confirm
 
+- 2026-11-05 (T063d2): a Field Log handoff imported on a phone that already has a home joins that home: the bundle's own home record is left out (your name, address and details stay) and the crew's floors, rooms, wall photos, overlays, items and documents attach to your home as new records (a crew "Main floor" shows beside yours, rename or delete it). On a phone with no home yet the handoff becomes the home and onboarding is skipped. House Manual opens `.homerecord` files from Open with and Share (registered for application/octet-stream and application/zip, the types Field Log shares with) and from More → Import handoff.
+
 - 2026-11-05 (T063c1): "Send to homeowner" claim links bind to the first House Manual account that claims them, and the home reaches that account by the app importing the bundle (preview and conflicts) and then syncing, rather than the server copying rows into a tenant. Handoffs by email are capped at 100 MB (larger homes use Export). Details in docs/decisions.md.
 - 2026-11-05 (T063b1): the `.homerecord` handoff carries only the change orders the client signed (drafts and declined ones stay in Field Log), and deleted house records travel as tombstones (`deletedAt` set) so an import can tell; a home that is itself deleted cannot be exported.
 - 2026-11-05 (T062): installed items on a job are added, edited and deleted by Owner, Office and Lead only; Crew and Sub see them read-only (same rule as the plan). Crew who install a fixture tell their Lead. The item page on a job shows details, where, warranty and notes; consumables, service history and documents stay House Manual-only. Details in docs/decisions.md.

@@ -155,7 +155,7 @@ record permissions pass "granted where declared"
 if ls qa/fixtures/*.jpg qa/fixtures/*.pdf >/dev/null 2>&1; then
   adb shell mkdir -p /sdcard/Download/qa-fixtures >/dev/null 2>&1
   fx_ok=1
-  for f in qa/fixtures/*.jpg qa/fixtures/*.pdf; do
+  for f in qa/fixtures/*.jpg qa/fixtures/*.pdf qa/fixtures/*.homerecord; do   # .homerecord: the handoff H18 imports
     adb push "$f" /sdcard/Download/qa-fixtures/ >/dev/null 2>&1 || { fx_ok=0; echo "fixture push failed: $f" >&2; }
   done
   [ "$fx_ok" = 1 ] && record fixtures pass "pushed to /sdcard/Download/qa-fixtures" || record fixtures warn "adb push failed"

@@ -1,0 +1,63 @@
+# Walkthrough H18: import the Field Log handoff (AC-H17). More → Import handoff opens the system file picker on
+# qa/fixtures/ortiz-handoff.homerecord (pushed to Download/qa-fixtures by the suite); the preview counts the rooms,
+# the rough-in wall photo and the two overlays, Import brings them into the onboarded home and the Kitchen shows them.
+# The picker is another app, so its steps run only while it shows; the import screen is checked whenever reached.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn: "More"
+# AC-H17: More offers Import handoff, which opens the file picker
+- assertVisible:
+    id: "hm_more_import"
+- tapOn:
+    id: "hm_more_import"
+- runFlow:
+    when:
+      notVisible: "ortiz-handoff.homerecord"
+    commands:
+      - tapOn:
+          label: "Open the drawer"
+          optional: true
+          point: "8%,7%"
+      - tapOn:
+          text: "Downloads"
+          optional: true
+      - tapOn:
+          text: "qa-fixtures"
+          optional: true
+- runFlow:
+    when:
+      visible: "ortiz-handoff.homerecord"
+    commands:
+      - tapOn: "ortiz-handoff.homerecord"
+      # AC-H17: the preview counts the rooms, the rough-in wall photo and the overlays before anything is written
+      - extendedWaitUntil:
+          visible:
+            id: "hm_import_confirm"
+          timeout: 20000
+      - assertVisible: "Import handoff"
+      - assertVisible:
+          id: "hm_import_count_room"
+      - assertVisible:
+          id: "hm_import_count_wall_photo"
+      - assertVisible:
+          id: "hm_import_count_overlay"
+      - takeScreenshot: H18-import-preview
+      # AC-H17: Import, then the Kitchen lists the crew's overlays
+      - tapOn:
+          id: "hm_import_confirm"
+      - extendedWaitUntil:
+          visible:
+            id: "hm_import_finish"
+          timeout: 20000
+      - takeScreenshot: H18-import-done
+      - tapOn:
+          id: "hm_import_finish"
+      - tapOn:
+          id: "hm_tab_house"
+      - tapOn: "Kitchen"
+      - scrollUntilVisible:
+          element: "Range circuit"
+          direction: DOWN
+          timeout: 15000
+      - takeScreenshot: H18-kitchen-after-import
