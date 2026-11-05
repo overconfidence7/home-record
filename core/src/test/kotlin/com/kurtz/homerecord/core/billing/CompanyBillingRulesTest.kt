@@ -11,6 +11,8 @@ class CompanyBillingRulesTest {
     @Test
     fun appUserIdIsTheCompanyIdTheWebhookExpects() {
         assertEquals("company:c-42", CompanyBillingRules.appUserId("c-42"))
+        // r12:hm-revenuecat-anonymous: House Manual Pro lands on the home (AC-B50).
+        assertEquals("home:h-7", HomeBillingRules.appUserId("h-7"))
     }
 
     @Test

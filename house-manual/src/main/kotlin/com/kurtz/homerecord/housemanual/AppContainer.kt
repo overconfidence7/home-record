@@ -156,7 +156,10 @@ class AppContainer(app: Application) {
     /** Pro state (AC-H18); without a RevenueCat key everyone stays on the free tier. */
     val billing: com.kurtz.homerecord.core.billing.ProBilling =
         if (BuildConfig.REVENUECAT_API_KEY.isEmpty()) com.kurtz.homerecord.core.billing.UnavailableBilling
-        else com.kurtz.homerecord.housemanual.billing.RevenueCatBilling(app, BuildConfig.REVENUECAT_API_KEY) { activityContext }
+        else com.kurtz.homerecord.housemanual.billing.RevenueCatBilling(
+            app, BuildConfig.REVENUECAT_API_KEY, { activityContext },
+            homeId = { db.homeDao().observeAll().first().firstOrNull()?.id },
+        )
 
     val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing)
 

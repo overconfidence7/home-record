@@ -46,6 +46,11 @@ data class ProPlan(val id: String, val kind: ProPlanKind, val price: String)
 enum class ProPlanKind { Annual, Lifetime }
 
 /** What the paywall needs from the store: the plans, buying one, and restoring. */
+/** House Manual Pro belongs to the home: RevenueCat's app user id is `home:<homeId>`, which the backend webhook keeps (AC-B50). */
+object HomeBillingRules {
+    fun appUserId(homeId: String): String = "home:$homeId"
+}
+
 interface ProBilling : Entitlements {
     suspend fun plans(): Result<List<ProPlan>>
     suspend fun purchase(planId: String): Result<Unit>

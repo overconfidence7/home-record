@@ -13,15 +13,29 @@ import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
 import com.revenuecat.purchases.interfaces.UpdatedCustomerInfoListener
 import com.revenuecat.purchases.awaitCustomerInfo
+import com.revenuecat.purchases.awaitLogIn
 import com.revenuecat.purchases.awaitOfferings
 import com.revenuecat.purchases.awaitPurchase
 import com.revenuecat.purchases.awaitRestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import com.kurtz.homerecord.core.billing.HomeBillingRules
 
-/** RevenueCat behind [ProBilling] (docs/billing.md): entitlement `pro`, offering `default`. */
-class RevenueCatBilling(app: Application, apiKey: String, private val activity: () -> Context?) : ProBilling {
+/**
+ * RevenueCat behind [ProBilling] (docs/billing.md): entitlement `pro`, offering `default`. Logs in as `home:<homeId>`
+ * for the home on this phone ([homeId]) before reading or buying, so the webhook puts Pro on the home and `/me` reports
+ * it (AC-B50); with no home yet it stays anonymous.
+ */
+class RevenueCatBilling(
+    app: Application,
+    apiKey: String,
+    private val activity: () -> Context?,
+    private val homeId: suspend () -> String? = { null },
+) : ProBilling {
+    private val login = Mutex()
     private val state = MutableStateFlow(false)
     override val isPro: StateFlow<Boolean> = state
     private var packages = emptyMap<String, Package>()
@@ -31,16 +45,22 @@ class RevenueCatBilling(app: Application, apiKey: String, private val activity: 
         Purchases.sharedInstance.updatedCustomerInfoListener = UpdatedCustomerInfoListener { apply(it) }
     }
 
+    private suspend fun logIn() = login.withLock {
+        val id = homeId()?.let(HomeBillingRules::appUserId) ?: return@withLock
+        if (Purchases.sharedInstance.appUserID != id) apply(Purchases.sharedInstance.awaitLogIn(id).customerInfo)
+    }
+
     private fun apply(info: CustomerInfo) {
         state.value = info.entitlements[ENTITLEMENT]?.isActive == true
     }
 
     /** Reads the current entitlement; called once at start so a returning buyer is Pro offline-first from RevenueCat's cache. */
     suspend fun refresh() {
-        try { apply(Purchases.sharedInstance.awaitCustomerInfo()) } catch (e: CancellationException) { throw e } catch (_: Exception) { /* stays as it was */ }
+        try { logIn(); apply(Purchases.sharedInstance.awaitCustomerInfo()) } catch (e: CancellationException) { throw e } catch (_: Exception) { /* stays as it was */ }
     }
 
     override suspend fun plans(): Result<List<ProPlan>> = runCatching {
+        logIn()
         val offering = Purchases.sharedInstance.awaitOfferings().current ?: error("No current offering")
         val found = offering.availablePackages.mapNotNull { pkg ->
             val kind = when (pkg.packageType) {
@@ -57,10 +77,12 @@ class RevenueCatBilling(app: Application, apiKey: String, private val activity: 
     override suspend fun purchase(planId: String): Result<Unit> = runCatching {
         val pkg = packages[planId] ?: error("Unknown plan")
         val host = activity() as? android.app.Activity ?: error("No activity")
+        logIn()
         apply(Purchases.sharedInstance.awaitPurchase(PurchaseParams.Builder(host, pkg).build()).customerInfo)
     }.rethrowCancellation()
 
     override suspend fun restore(): Result<Unit> = runCatching {
+        logIn()
         val info = Purchases.sharedInstance.awaitRestore()
         apply(info)
         check(state.value) { "Nothing to restore" }
