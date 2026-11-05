@@ -78,7 +78,7 @@ class HomeBundleImporter(
         }
         store.inTransaction {
             rows.forEach { (type, row) -> store.write(type, row) }
-            ledger.setAll(preview.plan.ledgerRows(preview.bundle.homeId))
+            ledger.setAll(preview.plan.ledgerRows(preview.bundle.homeId, choices))
         }
         rows.forEach { (type, row) ->
             val id = (row["id"] as? JsonPrimitive)?.takeIf { it.isString }?.content

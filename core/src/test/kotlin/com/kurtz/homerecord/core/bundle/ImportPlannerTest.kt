@@ -76,8 +76,27 @@ class ImportPlannerTest {
         // Apply: keep mine for the conflict, add the rest; then the ledger records what came in.
         val written = first.writes(mapOf(("room" to "r1") to ConflictChoice.KeepMine)).map { it.imported }
         val after = mapOf("room" to local.getValue("room") + written)
-        val second = ImportPlanner.plan(b, after, base = first.ledger())
+        val second = ImportPlanner.plan(b, after, base = first.ledger(mapOf(("room" to "r1") to ConflictChoice.KeepMine)))
         assertThat(second.nothingToDo).isTrue()
         assertThat(second.writes()).isEmpty()
+    }
+
+    // r12:import-keep-mine-lost: a record the homeowner kept stays theirs; the crew's next edit asks again.
+    @Test fun aKeptRecordIsAConflictAgainWhenTheCrewChangesItLater() {
+        val mine = mapOf("room" to listOf(room("r1", "Our kitchen", 100, source = "house-manual")))
+        val first = ImportPlanner.plan(bundle(room("r1", "Kitchen", 200)), mine)
+        assertThat(first.steps.single().action).isEqualTo(ImportAction.Conflict)
+        val keep = mapOf(("room" to "r1") to ConflictChoice.KeepMine)
+        val base = first.ledger(keep)
+        // The same bundle again: nothing to ask.
+        assertThat(ImportPlanner.plan(bundle(room("r1", "Kitchen", 200)), mine, base).nothingToDo).isTrue()
+        // The crew edits the room again and sends a new bundle: a conflict, not an overwrite.
+        val later = ImportPlanner.plan(bundle(room("r1", "Kitchen and pantry", 300)), mine, base)
+        assertThat(later.steps.single().action).isEqualTo(ImportAction.Conflict)
+        assertThat(later.writes()).isEmpty()
+        // Once the homeowner takes the imported one, the next crew-only edit updates as usual.
+        val took = later.ledger(mapOf(("room" to "r1") to ConflictChoice.UseImported))
+        val now = mapOf("room" to listOf(room("r1", "Kitchen and pantry", 300)))
+        assertThat(ImportPlanner.plan(bundle(room("r1", "Kitchen, pantry", 400)), now, took).steps.single().action).isEqualTo(ImportAction.Update)
     }
 }

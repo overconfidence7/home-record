@@ -7,5 +7,5 @@ fun List<ImportLedgerEntity>.toImportBase(): Map<String, Map<String, Long>> =
     groupBy { it.type }.mapValues { (_, rows) -> rows.associate { it.recordId to it.updatedAt } }
 
 /** What to store in the ledger once [this] plan is applied to [homeId], so importing the same bundle again is a no-op. */
-fun ImportPlan.ledgerRows(homeId: String): List<ImportLedgerEntity> =
-    ledger().flatMap { (type, ids) -> ids.map { (id, updatedAt) -> ImportLedgerEntity(type, id, homeId, updatedAt) } }
+fun ImportPlan.ledgerRows(homeId: String, choices: Map<Pair<String, String>, ConflictChoice> = emptyMap()): List<ImportLedgerEntity> =
+    ledger(choices).flatMap { (type, ids) -> ids.map { (id, updatedAt) -> ImportLedgerEntity(type, id, homeId, updatedAt) } }
