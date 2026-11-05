@@ -2,6 +2,8 @@ package com.kurtz.homerecord.housemanual.panel
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,7 +82,13 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("hm_panel_empty"),
                     )
                 }
-                SlotGrid(grid, state, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                Text(
+                    stringResource(R.string.panel_grid_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("hm_panel_hint"),
+                )
+                SlotGrid(grid, state, onEvent, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 val unplaced = state.unplaced
                 if (unplaced.isNotEmpty()) {
                     SectionHeader(stringResource(R.string.panel_unplaced))
@@ -98,6 +106,7 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
             }
         }
     }
+    BreakerEditorDialog(state, onEvent)
 }
 
 /** Photo (or the panel icon) beside the facts: main amps, brand, slot count and layout. */
@@ -151,7 +160,7 @@ private fun PanelHeader(panel: Panel, breakerCount: Int) {
  * left and right columns stay level. A tandem splits its cell into a top and a bottom half.
  */
 @Composable
-private fun SlotGrid(grid: PanelGrid, state: PanelUiState, modifier: Modifier = Modifier) {
+private fun SlotGrid(grid: PanelGrid, state: PanelUiState, onEvent: (PanelEvent) -> Unit, modifier: Modifier = Modifier) {
     val fontScale = LocalDensity.current.fontScale
     // Tall enough for a two-line label and the amps line at any text size (rule 32: the label wraps, it is not cut).
     val rowHeight = (64f * maxOf(1f, fontScale)).dp
@@ -160,7 +169,7 @@ private fun SlotGrid(grid: PanelGrid, state: PanelUiState, modifier: Modifier = 
         for (column in 0 until grid.columns) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
                 grid.cells.filter { it.column == column }.sortedBy { it.row }.forEach { cell ->
-                    SlotCell(cell, state, rowHeight * cell.rowSpan + gap * (cell.rowSpan - 1))
+                    SlotCell(cell, state, rowHeight * cell.rowSpan + gap * (cell.rowSpan - 1), onEvent)
                 }
             }
         }
@@ -168,12 +177,25 @@ private fun SlotGrid(grid: PanelGrid, state: PanelUiState, modifier: Modifier = 
 }
 
 @Composable
-private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp) {
+private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp, onEvent: (PanelEvent) -> Unit) {
     val shape = RoundedCornerShape(8.dp)
     val breakers = cell.breakerIds.mapNotNull(state::breaker)
     val large = LocalDensity.current.fontScale >= 1.5f
     val description = slotDescription(cell, breakers)
+    val single = breakers.singleOrNull()
+    // Tap opens HM-Breaker for the slot (a new breaker when open); touch and hold a single-pole breaker adds a tandem.
+    // A tandem's halves each open their own breaker, so the cell itself takes no tap.
+    val tap = when {
+        breakers.isEmpty() -> Modifier.combinedClickable(onClickLabel = stringResource(R.string.panel_slot_add_action)) { onEvent(PanelEvent.OpenSlot(cell.slot)) }
+        single != null -> Modifier.combinedClickable(
+            onClickLabel = stringResource(R.string.panel_slot_edit_action),
+            onLongClickLabel = if (single.poles == 1) stringResource(R.string.panel_slot_tandem_action) else null,
+            onLongClick = if (single.poles == 1) ({ onEvent(PanelEvent.AddTandem(cell.slot)) }) else null,
+        ) { onEvent(PanelEvent.OpenBreaker(single.id)) }
+        else -> Modifier
+    }
     val base = Modifier.fillMaxWidth().height(height).clip(shape)
+        .then(tap)
         .semantics(mergeDescendants = true) { contentDescription = description }
         .testTag("hm_panel_slot_${cell.slot}")
     if (breakers.isEmpty()) {
@@ -208,7 +230,11 @@ private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp) {
                 }
                 return@forEachIndexed
             }
-            Row(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            val half = if (cell.isTandem) {
+                Modifier.clickable(onClickLabel = stringResource(R.string.panel_slot_edit_action)) { onEvent(PanelEvent.OpenBreaker(b.id)) }
+                    .testTag("hm_panel_slot_${cell.slot}_${if (i == 0) "a" else "b"}")
+            } else Modifier
+            Row(Modifier.weight(1f).fillMaxWidth().then(half).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 SlotNumber(number)
                 if (cell.isTandem) {
                     // Half a cell holds one line: the label, then the amps.

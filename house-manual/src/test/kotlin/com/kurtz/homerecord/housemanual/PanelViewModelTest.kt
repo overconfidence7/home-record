@@ -6,7 +6,13 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
+import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.ItemEntity
+import com.kurtz.homerecord.core.data.RoomEntity
+import com.kurtz.homerecord.core.model.BreakerType
+import com.kurtz.homerecord.core.model.SlotPlacement
+import com.kurtz.homerecord.housemanual.panel.PanelEvent
+import androidx.lifecycle.SavedStateHandle
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.panel.PanelUiState
 import com.kurtz.homerecord.housemanual.panel.PanelViewModel
@@ -55,7 +61,8 @@ class PanelViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(itemId: String = "pi") = PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }).also {
+    private fun vm(itemId: String = "pi", saved: SavedStateHandle = SavedStateHandle()) =
+        PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }, repo.observeChoices("h1"), saved).also {
         vms += it
         it.state.launchIn(it.viewModelScope)
     }
@@ -98,5 +105,110 @@ class PanelViewModelTest {
         val s = vm("gone").await { !it.loading }
         assertThat(s.missing).isTrue()
         assertThat(runBlocking { db.panelDao().listFor("gone") }).isEmpty()
+    }
+
+    private fun seedFeeds() = runBlocking {
+        db.floorDao().upsert(FloorEntity(id = "f1", homeId = "h1", sortOrder = 0, name = "Main floor", createdAt = 1, updatedAt = 1))
+        db.roomDao().upsert(RoomEntity(id = "kitchen", floorId = "f1", name = "Kitchen", createdAt = 1, updatedAt = 1))
+        db.itemDao().upsert(ItemEntity(id = "dw", homeId = "h1", category = "APPLIANCES", subtype = "dishwasher", name = "Dishwasher", createdAt = 2, updatedAt = 2))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun tappingAnOpenSlotAddsALabeledBreakerThatFeedsARoomAndAnItem() {
+        seedFeeds()
+        val vm = vm()
+        vm.await { !it.loading }
+        vm.onEvent(PanelEvent.OpenSlot(5))
+        val open = vm.await { it.editor?.rooms?.isNotEmpty() == true }
+        // The panel item itself is not something a breaker feeds.
+        assertThat(open.editor?.items?.map { it.name }).containsExactly("Dishwasher")
+        assertThat(open.editor?.rooms?.map { it.name }).containsExactly("Kitchen")
+        assertThat(open.editor?.isNew).isTrue()
+        val draft = checkNotNull(open.editor).draft
+        vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(label = "Kitchen counter", amps = "20", type = BreakerType.GFCI, roomIds = setOf("kitchen"), itemIds = setOf("dw"))))
+        assertThat(vm.state.value.editor?.dirty).isTrue()
+        vm.onEvent(PanelEvent.SaveBreaker)
+        val saved = vm.await { it.editor == null && it.breakers.size == 1 }
+        val b = saved.breakers.single()
+        assertThat(b.slots).containsExactly(5)
+        assertThat(b.label).isEqualTo("Kitchen counter")
+        assertThat(b.type).isEqualTo(BreakerType.GFCI)
+        val links = runBlocking { db.breakerLinkDao().listFor(b.id) }
+        assertThat(links.mapNotNull { it.roomId }).containsExactly("kitchen")
+        assertThat(links.mapNotNull { it.itemId }).containsExactly("dw")
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun twoPolesIntoATakenSlotSaysWhichSlotAndDoesNotSave() {
+        val panelId = runBlocking { repo.ensurePanel("pi") }
+        runBlocking { repo.saveBreaker(panelId, BreakerDraft(startSlot = 3, label = "Bath")) }
+        val vm = vm()
+        vm.await { it.breakers.size == 1 }
+        vm.onEvent(PanelEvent.OpenSlot(1))
+        val draft = checkNotNull(vm.await { it.editor != null }.editor).draft
+        vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 2, label = "Range")))
+        val e = checkNotNull(vm.state.value.editor)
+        assertThat(e.slotProblem).isEqualTo(SlotPlacement.Taken(listOf(3)))
+        assertThat(e.canSave).isFalse()
+        vm.onEvent(PanelEvent.SaveBreaker)
+        assertThat(vm.state.value.editor).isNotNull()
+        assertThat(runBlocking { db.breakerDao().listFor(panelId) }).hasSize(1)
+        // Bad amps keep the form open with the error shown.
+        vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 1, amps = "999")))
+        vm.onEvent(PanelEvent.SaveBreaker)
+        assertThat(vm.state.value.editor?.ampsError).isTrue()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun touchAndHoldOnASinglePoleBreakerAddsATandemInTheSameSlot() {
+        val panelId = runBlocking { repo.ensurePanel("pi") }
+        runBlocking {
+            repo.saveBreaker(panelId, BreakerDraft(startSlot = 7, label = "Porch lights"))
+            repo.saveBreaker(panelId, BreakerDraft(startSlot = 1, poles = 2, label = "Range"))
+        }
+        val vm = vm()
+        vm.await { it.breakers.size == 2 }
+        // Not beside a two-pole breaker.
+        vm.onEvent(PanelEvent.AddTandem(1))
+        assertThat(vm.state.value.editor).isNull()
+        vm.onEvent(PanelEvent.AddTandem(7))
+        val draft = checkNotNull(vm.await { it.editor != null }.editor).draft
+        assertThat(draft.tandem).isTrue()
+        // A tandem stays single-pole.
+        vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 2, label = "Garage door opener")))
+        assertThat(vm.state.value.editor?.draft?.poles).isEqualTo(1)
+        vm.onEvent(PanelEvent.SaveBreaker)
+        val s = vm.await { it.editor == null && it.breakers.size == 3 }
+        assertThat(checkNotNull(s.grid).cells.single { it.slot == 7 }.isTandem).isTrue()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun editingABreakerSurvivesProcessDeathAndDeleteAsksThenFreesTheSlot() {
+        val panelId = runBlocking { repo.ensurePanel("pi") }
+        val id = (runBlocking { repo.saveBreaker(panelId, BreakerDraft(startSlot = 9, amps = "20", label = "Bathroom")) } as com.kurtz.homerecord.housemodel.panel.BreakerSave.Saved).id
+        val saved = SavedStateHandle()
+        val first = vm(saved = saved)
+        first.await { it.breakers.size == 1 }
+        first.onEvent(PanelEvent.OpenBreaker(id))
+        val draft = checkNotNull(first.await { it.editor != null }.editor).draft
+        assertThat(draft.label).isEqualTo("Bathroom")
+        first.onEvent(PanelEvent.ChangeBreaker(draft.copy(label = "Hall bath")))
+
+        val again = vm(saved = saved)
+        val restored = checkNotNull(again.await { it.editor != null }.editor)
+        assertThat(restored.draft.label).isEqualTo("Hall bath")
+        assertThat(restored.dirty).isTrue()
+        again.onEvent(PanelEvent.AskDeleteBreaker)
+        assertThat(again.state.value.editor?.confirmDelete).isTrue()
+        again.onEvent(PanelEvent.CancelDeleteBreaker)
+        assertThat(again.state.value.editor?.confirmDelete).isFalse()
+        again.onEvent(PanelEvent.AskDeleteBreaker)
+        again.onEvent(PanelEvent.ConfirmDeleteBreaker)
+        val s = again.await { it.editor == null && it.breakers.isEmpty() }
+        assertThat(checkNotNull(s.grid).cells).hasSize(40)
     }
 }

@@ -1494,6 +1494,64 @@ fun PanelLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panel
 @Composable
 fun PanelMissingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(com.kurtz.homerecord.housemanual.panel.PanelUiState(loading = false, missing = true), {}) }
 
+// HM-Breaker (AC-C40): the editor over the panel, as the QA catalog and screenshots draw it (without the dialog window).
+private val sampleFeedRooms = listOf("Bathroom", "Dining room", "Kitchen", "Living room", "Mudroom").mapIndexed { i, n -> com.kurtz.homerecord.housemodel.panel.FeedOption("r$i", n) }
+private val sampleFeedItems = listOf("Dishwasher", "Garbage disposal", "Microwave", "Range", "Refrigerator").mapIndexed { i, n -> com.kurtz.homerecord.housemodel.panel.FeedOption("i$i", n) }
+
+@Composable
+private fun BreakerFrame(editor: com.kurtz.homerecord.housemanual.panel.BreakerEditorState) =
+    FormScreenScaffold(com.kurtz.homerecord.housemanual.panel.breakerEditorTitle(editor), "hm_breaker_save", editor.canSave, {}, {}) {
+        com.kurtz.homerecord.housemanual.panel.BreakerEditorContent(editor, {})
+    }
+
+@ThemePreviews
+@Composable
+fun PanelBreakerEditPreview() = Frame {
+    BreakerFrame(
+        com.kurtz.homerecord.housemanual.panel.BreakerEditorState(
+            draft = com.kurtz.homerecord.housemodel.panel.BreakerDraft(
+                id = "b2", startSlot = 2, amps = "20", type = com.kurtz.homerecord.core.model.BreakerType.GFCI, label = "Kitchen counter",
+                roomIds = setOf("r2"), itemIds = setOf("i1", "i2"),
+            ),
+            dirty = true, placement = com.kurtz.homerecord.core.model.SlotPlacement.Ok(listOf(2)), rooms = sampleFeedRooms, items = sampleFeedItems,
+        ),
+    )
+}
+
+@ThemePreviews
+@Composable
+fun PanelBreakerNewPreview() = Frame {
+    // Two poles picked on slot 10, but slot 12 below it holds the dishwasher: the form says so and Save stays off.
+    BreakerFrame(
+        com.kurtz.homerecord.housemanual.panel.BreakerEditorState(
+            draft = com.kurtz.homerecord.housemodel.panel.BreakerDraft(startSlot = 10, poles = 2, amps = "30", label = "Dryer"),
+            dirty = true, placement = com.kurtz.homerecord.core.model.SlotPlacement.Taken(listOf(12)), rooms = emptyList(), items = sampleFeedItems,
+        ),
+    )
+}
+
+@ThemePreviews
+@Composable
+fun PanelBreakerTandemPreview() = Frame {
+    BreakerFrame(
+        com.kurtz.homerecord.housemanual.panel.BreakerEditorState(
+            draft = com.kurtz.homerecord.housemodel.panel.BreakerDraft(startSlot = 4, tandem = true, amps = "15", label = "Garage lights"),
+            placement = com.kurtz.homerecord.core.model.SlotPlacement.Ok(listOf(4)), rooms = sampleFeedRooms, items = sampleFeedItems,
+        ),
+    )
+}
+
+@ThemePreviews
+@Composable
+fun PanelBreakerDeletePreview() = Frame {
+    val editor = com.kurtz.homerecord.housemanual.panel.BreakerEditorState(
+        draft = com.kurtz.homerecord.housemodel.panel.BreakerDraft(id = "b1", startSlot = 1, poles = 2, amps = "40", label = "Range", itemIds = setOf("i3")),
+        placement = com.kurtz.homerecord.core.model.SlotPlacement.Ok(listOf(1, 3)), rooms = sampleFeedRooms, items = sampleFeedItems, confirmDelete = true,
+    )
+    BreakerFrame(editor)
+    com.kurtz.homerecord.housemanual.panel.BreakerDeleteDialog(editor, {})
+}
+
 // More → Breaker panels (AC-C40): a main panel in the basement and a garage sub-panel.
 private val samplePanelRows = listOf(
     com.kurtz.homerecord.housemodel.items.ItemRow("i-main", "Main panel", "Square D", "QO140M200", ItemCategory.ELECTRICAL, "breaker_panel", "r-u", "Utility room", WarrantyStatus.Unknown, createdAt = 1),

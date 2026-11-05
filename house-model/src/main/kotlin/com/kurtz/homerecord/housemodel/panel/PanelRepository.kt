@@ -80,6 +80,12 @@ data class PanelState(
     fun breaker(id: String): Breaker? = breakers.firstOrNull { it.id == id }
 }
 
+/** A room or item the breaker editor offers as something the breaker feeds. */
+data class FeedOption(val id: String, val name: String)
+
+/** What a breaker can feed: the home's rooms and its items other than the panels themselves, by name (AC-C40). */
+data class FeedChoices(val rooms: List<FeedOption> = emptyList(), val items: List<FeedOption> = emptyList())
+
 /** Panels, breakers and what they feed (AC-C40). [onChange] feeds the sync outbox after every write. */
 class PanelRepository(
     private val db: HomeRecordDatabase,
@@ -105,6 +111,16 @@ class PanelRepository(
             PanelState(panel, breakers, SlotOccupancy.grid(panel.layout, panel.slotCount, breakers), links.groupBy { it.breakerId })
         }
     }
+
+    /** Rooms and items a breaker of this home can feed, by name; panels and sub-panels are not offered (AC-C40). */
+    fun observeChoices(homeId: String): Flow<FeedChoices> =
+        combine(db.roomDao().observeForHome(homeId), db.itemDao().observeFor(homeId)) { rooms, items ->
+            val byName = compareBy<FeedOption, String>(String.CASE_INSENSITIVE_ORDER) { it.name }.thenBy { it.id }
+            FeedChoices(
+                rooms = rooms.map { FeedOption(it.id, it.name) }.sortedWith(byName),
+                items = items.filterNot { isPanelSubtype(it.subtype) }.map { FeedOption(it.id, it.name) }.sortedWith(byName),
+            )
+        }
 
     /** Saves panel facts; false when the draft has errors (a slot count below the breakers in use is one). */
     suspend fun savePanel(panelId: String, draft: PanelDraft): Boolean {

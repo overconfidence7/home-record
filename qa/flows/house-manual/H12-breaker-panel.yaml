@@ -62,3 +62,41 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_panel_grid"
     timeout: 10000
 - assertVisible: "Main panel"
+# T066c: tap an open slot to label its breaker (HM-Breaker), save, and the slot shows it
+- scrollUntilVisible:
+    element:
+      id: "hm_panel_slot_12"
+- tapOn:
+    id: "hm_panel_slot_12"
+- extendedWaitUntil:
+    visible:
+      id: "hm_breaker_form"
+    timeout: 5000
+- assertVisible: "Slot 12"
+- tapOn:
+    id: "hm_breaker_label"
+- inputText: "Refrigerator"
+- tapOn:
+    id: "hm_breaker_amps"
+- inputText: "20"
+- hideKeyboard
+- tapOn:
+    id: "hm_breaker_save"
+- extendedWaitUntil:
+    visible: "Refrigerator"
+    timeout: 5000
+- assertNotVisible:
+    id: "hm_breaker_form"
+- takeScreenshot: H12-breaker-labeled
+# Touch and hold the breaker to add a tandem in the same slot; close without saving
+- longPressOn:
+    id: "hm_panel_slot_12"
+- extendedWaitUntil:
+    visible: "Slot 12, tandem"
+    timeout: 5000
+- tapOn:
+    id: "hm_close"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_grid"
+    timeout: 5000

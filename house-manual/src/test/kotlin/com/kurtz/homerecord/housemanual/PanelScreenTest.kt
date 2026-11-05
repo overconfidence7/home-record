@@ -1,12 +1,20 @@
 package com.kurtz.homerecord.housemanual
 
 import androidx.compose.ui.test.assertHeightIsAtLeast
-import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onAllNodesWithTag
+import com.kurtz.homerecord.core.model.SlotPlacement
+import com.kurtz.homerecord.housemanual.panel.BreakerEditorContent
+import com.kurtz.homerecord.housemanual.panel.BreakerEditorState
+import com.kurtz.homerecord.housemodel.panel.BreakerDraft
+import com.kurtz.homerecord.housemodel.panel.FeedOption
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
@@ -50,8 +58,8 @@ class PanelScreenTest {
     @AcceptanceCriterion("AC-C40")
     fun aTwoPoleBreakerIsOneCellAsTallAsTwoSlots() {
         show(state(listOf(b("r", listOf(1, 3), "Range"), b("k", listOf(2), "Kitchen counter", BreakerType.GFCI))))
-        val tall = rule.onNodeWithTag("hm_panel_slot_1").getBoundsInRoot()
-        val single = rule.onNodeWithTag("hm_panel_slot_2").getBoundsInRoot()
+        val tall = rule.onNodeWithTag("hm_panel_slot_1").getUnclippedBoundsInRoot()
+        val single = rule.onNodeWithTag("hm_panel_slot_2").getUnclippedBoundsInRoot()
         assertThat((tall.bottom - tall.top).value).isGreaterThan((single.bottom - single.top).value * 1.9f)
         rule.onNodeWithTag("hm_panel_slot_3").assertDoesNotExist()
         rule.onNodeWithContentDescription("Slots 1 and 3, two-pole, Range, 20 A").assertExists()
@@ -75,8 +83,8 @@ class PanelScreenTest {
     fun aDinPanelIsOneColumnInSlotOrder() {
         val din = panel.copy(layout = PanelLayout.DIN, slotCount = 6)
         show(state(listOf(b("d", listOf(1, 2), "Dryer")), din))
-        val dryer = rule.onNodeWithTag("hm_panel_slot_1").getBoundsInRoot()
-        val next = rule.onNodeWithTag("hm_panel_slot_3").getBoundsInRoot()
+        val dryer = rule.onNodeWithTag("hm_panel_slot_1").getUnclippedBoundsInRoot()
+        val next = rule.onNodeWithTag("hm_panel_slot_3").getUnclippedBoundsInRoot()
         assertThat(next.top.value).isGreaterThan(dryer.bottom.value - 1f)
         assertThat(next.left).isEqualTo(dryer.left)
         rule.onNodeWithText("6 slots, one row (DIN)").assertExists()
@@ -113,5 +121,62 @@ class PanelScreenTest {
         rule.onNodeWithText("Slots and breakers").assertExists()
         rule.onNodeWithTag("hm_item_detail_panel").performClick()
         assertThat(events).containsExactly(ItemDetailEvent.OpenPanel)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun tapASlotToEditItsBreakerAndTouchAndHoldForATandem() {
+        val events = mutableListOf<PanelEvent>()
+        show(state(listOf(b("r", listOf(1, 3), "Range"), b("k", listOf(2), "Kitchen counter"), b("a", listOf(5), "Porch lights"), b("g", listOf(5), "Garage door opener", at = 2)))) { events += it }
+        rule.onNodeWithTag("hm_panel_hint").assertExists()
+        rule.onNodeWithTag("hm_panel_slot_4").performClick()
+        rule.onNodeWithTag("hm_panel_slot_1").performClick()
+        rule.onNodeWithTag("hm_panel_slot_2").performScrollTo().performTouchInput { longClick() }
+        rule.onNodeWithTag("hm_panel_slot_5_b").performScrollTo().performClick()
+        assertThat(events).containsExactly(
+            PanelEvent.OpenSlot(4), PanelEvent.OpenBreaker("r"), PanelEvent.AddTandem(2), PanelEvent.OpenBreaker("g"),
+        ).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun theBreakerFormTakesLabelAmpsPolesTypeRoomsAndItemsAndAsksBeforeDelete() {
+        val events = mutableListOf<PanelEvent>()
+        val draft = BreakerDraft(id = "k", startSlot = 2, amps = "20", label = "Kitchen counter")
+        val editor = BreakerEditorState(
+            draft, placement = SlotPlacement.Ok(listOf(2)),
+            rooms = listOf(FeedOption("kit", "Kitchen")), items = listOf(FeedOption("dw", "Dishwasher")),
+        )
+        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { BreakerEditorContent(editor, { events += it }) } }
+        rule.onNodeWithText("Slot 2").assertExists()
+        rule.onNodeWithTag("hm_breaker_type_gfci").performClick()
+        rule.onNodeWithTag("hm_breaker_poles_2").performClick()
+        rule.onNodeWithText("Kitchen").performScrollTo().performClick()
+        rule.onNodeWithText("Dishwasher").performScrollTo().performClick()
+        rule.onNodeWithTag("hm_breaker_delete").performScrollTo().performClick()
+        assertThat(events).containsExactly(
+            PanelEvent.ChangeBreaker(draft.copy(type = BreakerType.GFCI)),
+            PanelEvent.ChangeBreaker(draft.copy(poles = 2)),
+            PanelEvent.ChangeBreaker(draft.copy(roomIds = setOf("kit"))),
+            PanelEvent.ChangeBreaker(draft.copy(itemIds = setOf("dw"))),
+            PanelEvent.AskDeleteBreaker,
+        ).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun aTwoPoleIntoATakenSlotSaysWhichAndATandemHasNoPoleChoice() {
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                androidx.compose.foundation.layout.Column {
+                    BreakerEditorContent(BreakerEditorState(BreakerDraft(startSlot = 10, poles = 2), placement = SlotPlacement.Taken(listOf(12))), {})
+                    BreakerEditorContent(BreakerEditorState(BreakerDraft(startSlot = 4, tandem = true), placement = SlotPlacement.Ok(listOf(4))), {})
+                }
+            }
+        }
+        rule.onNodeWithText("Slot 12 already has a breaker. Pick 1 pole or another slot.").assertExists()
+        rule.onNodeWithText("Slot 4, tandem").assertExists()
+        assertThat(rule.onAllNodesWithTag("hm_breaker_poles_1").fetchSemanticsNodes()).hasSize(1)
+        assertThat(rule.onAllNodesWithTag("hm_breaker_delete").fetchSemanticsNodes()).isEmpty()
     }
 }
