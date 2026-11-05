@@ -18,7 +18,21 @@ android {
             buildConfigField("String", field, "\"${firebaseValue(key, field)}\"")
         }
     }
+    buildTypes {
+        // Field Log's own RevenueCat app (docs/billing.md, BLOCKERS); blank means no purchases (paywall Retry state).
+        debug {
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.fieldLogTestApiKey", "REVENUECAT_FL_TEST_API_KEY").ifEmpty { revenueCatKey("revenuecat.fieldLogApiKey", "REVENUECAT_FL_API_KEY") }}\"")
+        }
+        for (name in listOf("release", "benchmark")) {
+            getByName(name) {
+                buildConfigField("String", "REVENUECAT_API_KEY", "\"${revenueCatKey("revenuecat.fieldLogApiKey", "REVENUECAT_FL_API_KEY")}\"")
+            }
+        }
+    }
 }
+
+fun revenueCatKey(prop: String, env: String): String =
+    localProp(prop, "").ifEmpty { System.getenv(env).orEmpty() }
 
 /** `firebase.<key>` in local.properties, else the environment variable named like the field (FIREBASE_APP_ID...). */
 fun firebaseValue(key: String, env: String): String =
@@ -31,6 +45,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
     implementation(libs.coil.compose)
+    implementation(libs.purchases)
     implementation(libs.reorderable)
     implementation(libs.navigation3.runtime)
     implementation(libs.navigation3.ui)

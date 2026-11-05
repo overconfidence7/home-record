@@ -64,6 +64,12 @@ class AppContainer(private val app: Application) {
         auth.addSignOutListener(repo::clear)
     }
 
+    /** Owner purchases for the company (AC-F56); Unavailable until the Field Log RevenueCat key exists (BLOCKERS). */
+    val companyBilling: com.kurtz.homerecord.core.billing.CompanyBilling by lazy {
+        if (BuildConfig.REVENUECAT_API_KEY.isEmpty()) com.kurtz.homerecord.core.billing.UnavailableCompanyBilling
+        else com.kurtz.homerecord.fieldlog.billing.RevenueCatCompanyBilling(app, BuildConfig.REVENUECAT_API_KEY) { activityContext }
+    }
+
     val db = Room.databaseBuilder(app, HomeRecordDatabase::class.java, "homerecord.db").build()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
