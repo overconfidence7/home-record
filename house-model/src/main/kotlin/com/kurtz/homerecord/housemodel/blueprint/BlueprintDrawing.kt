@@ -139,52 +139,67 @@ fun DrawScope.drawBlueprint(
         room.openings.forEach { drawOpening(room, it, z, ox, oy, density, colors.wall, colors.fill) }
     }
     rooms.forEach { room ->
-        val layout = roomNameLayout(
+        val layouts = roomNameLayouts(
             measurer, room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text),
             maxWidth = room.widthIn * z * 0.9f, maxHeight = room.lengthIn * z * 0.8f,
         )
         val (clx, cly) = labelAnchor(room)
-        val half = layout.size.width / 2f
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
         // Keep the name off any stairs, and off the overlays and items the layers show where there is room for it.
         val stairs = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
             LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
-        val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
-            ?: return@forEach
-        val (cx, cy) = at
-        if (cx - half >= room.minX * z + ox) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+        // The first layout (one line, two lines, smaller) that finds a spot clear of the stairs is drawn.
+        for (layout in layouts) {
+            val half = layout.size.width / 2f
+            val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
+                ?: continue
+            val (cx, cy) = at
+            if (cx - half < room.minX * z + ox) continue
+            drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+            break
+        }
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
     drawNorthArrow(measurer, dimStyle, colors, density)
 }
 
-/** The smallest a room name shrinks to before it is ellipsized, as a share of the theme's size. */
+/** The steps a room name shrinks through before it is ellipsized, as a share of the theme's size. */
 private val NAME_SCALES = floatArrayOf(1f, 0.85f, 0.7f)
 
 /**
- * Lays a room name out to fit its room ([judge:hm-blueprint-names-font200], ui-standards rule 32): at the theme's size
- * on up to two lines first ("Living / room" at 200% text), then a step or two smaller if one word is still wider than
- * the room or the lines are taller than it, and only then ellipsized, so every room keeps a readable name.
+ * The ways a room name can be laid out to fit its room, best first ([judge:hm-blueprint-names-font200], ui-standards
+ * rule 32): at the theme's size on one line, then on two lines ("Living / room" at 200% text), then a step or two
+ * smaller, and as a last resort ellipsized. Each layout is only as wide as its longest line, so a wrapped name can sit
+ * beside stairs. The caller places the first one that finds a free spot, so every room keeps a readable name.
  */
-fun roomNameLayout(measurer: TextMeasurer, name: String, style: TextStyle, maxWidth: Float, maxHeight: Float): TextLayoutResult {
+fun roomNameLayouts(measurer: TextMeasurer, name: String, style: TextStyle, maxWidth: Float, maxHeight: Float): List<TextLayoutResult> {
     val width = maxWidth.toInt().coerceAtLeast(1)
-    var last: TextLayoutResult? = null
+    val out = ArrayList<TextLayoutResult>()
     for (scale in NAME_SCALES) {
         val centred = style.copy(textAlign = TextAlign.Center)
         val sized = if (style.fontSize.isSp) centred.copy(fontSize = style.fontSize * scale) else centred
         val widestWord = name.split(' ').filter { it.isNotEmpty() }.maxOfOrNull {
             measurer.measure(it, sized, maxLines = 1, softWrap = false).size.width
         } ?: 0
-        val layout = measurer.measure(
-            name, sized, overflow = TextOverflow.Ellipsis, softWrap = true, maxLines = 2,
-            constraints = Constraints(maxWidth = width),
-        )
-        last = layout
-        if (widestWord <= width && !layout.hasVisualOverflow && layout.size.height <= maxHeight) return layout
+        if (widestWord > width) continue
+        for (lines in 1..2) {
+            val wrapped = measurer.measure(name, sized, softWrap = lines > 1, maxLines = lines, constraints = Constraints(maxWidth = width))
+            if (wrapped.hasVisualOverflow || wrapped.size.height > maxHeight || wrapped.lineCount != lines) continue
+            val content = (0 until wrapped.lineCount).maxOf { wrapped.getLineRight(it) - wrapped.getLineLeft(it) }
+            out += measurer.measure(name, sized, softWrap = lines > 1, maxLines = lines, constraints = Constraints(maxWidth = kotlin.math.ceil(content).toInt().coerceIn(1, width)))
+        }
     }
-    return last ?: measurer.measure(name, style)
+    if (out.isEmpty()) {
+        val smallest = if (style.fontSize.isSp) style.copy(fontSize = style.fontSize * NAME_SCALES.last()) else style
+        out += measurer.measure(name, smallest, overflow = TextOverflow.Ellipsis, maxLines = 1, softWrap = false, constraints = Constraints(maxWidth = width))
+    }
+    return out
 }
+
+/** The best of [roomNameLayouts]. */
+fun roomNameLayout(measurer: TextMeasurer, name: String, style: TextStyle, maxWidth: Float, maxHeight: Float): TextLayoutResult =
+    roomNameLayouts(measurer, name, style, maxWidth, maxHeight).first()
 
 private fun DrawScope.drawDimensions(
     rooms: List<PlanRoom>,
