@@ -52,16 +52,48 @@ private val TargetHeight = 56.dp
 @Composable
 fun ClockScreen(
     state: ClockUiState, onEvent: (ClockEvent) -> Unit, modifier: Modifier = Modifier, listState: LazyListState = rememberLazyListState(),
+    readOnly: Boolean = false, onSignOut: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize().statusBarsPadding()) {
         Text(
-            stringResource(R.string.clock_title),
+            stringResource(if (readOnly) R.string.renew_title else R.string.clock_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 8.dp),
         )
-        if (state.loading) LoadingState(Modifier.weight(1f)) else ClockBody(state, onEvent, listState, Modifier.weight(1f))
+        when {
+            state.loading -> LoadingState(Modifier.weight(1f))
+            readOnly -> ReadOnlyBody(state, onSignOut, listState, Modifier.weight(1f))
+            else -> ClockBody(state, onEvent, listState, Modifier.weight(1f))
+        }
     }
-    ClockDialogs(state, onEvent)
+    if (!readOnly) ClockDialogs(state, onEvent)
+}
+
+/**
+ * The company's plan ended and this is not the Owner (AC-F56): why the clock is off, and my own week, read only. No
+ * job picker, no Clock in; Sign out stays reachable since More is gone.
+ */
+@Composable
+private fun ReadOnlyBody(state: ClockUiState, onSignOut: () -> Unit, listState: LazyListState, modifier: Modifier) {
+    LazyColumn(
+        modifier.testTag("fl_clock_list"),
+        state = listState,
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Card(Modifier.fillMaxWidth().testTag("fl_renew_notice")) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.renew_body), style = MaterialTheme.typography.bodyLarge)
+                    TextButton(onClick = onSignOut, modifier = Modifier.heightIn(min = TargetHeight).testTag("fl_renew_sign_out")) {
+                        Text(stringResource(R.string.more_sign_out))
+                    }
+                }
+            }
+        }
+        item { Timesheet(state) }
+        if (state.sheet != null && state.changes.isNotEmpty()) item { PunchChanges(state.changes) }
+    }
 }
 
 @Composable

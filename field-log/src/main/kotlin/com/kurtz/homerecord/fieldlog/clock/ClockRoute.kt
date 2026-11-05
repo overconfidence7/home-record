@@ -18,7 +18,7 @@ import com.kurtz.homerecord.core.location.LocationPermissions
 import com.kurtz.homerecord.coreui.platform.Intents
 
 @Composable
-fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier) {
+fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier, readOnly: Boolean = false, onSignOut: () -> Unit = {}) {
     val context = LocalContext.current
     val vm = viewModel<ClockViewModel>(
         factory = viewModelFactory { initializer { ClockViewModel(deps(context.applicationContext), createSavedStateHandle()) } },
@@ -40,5 +40,7 @@ fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier) {
             } else vm.onEvent(event)
         },
         modifier,
+        readOnly = readOnly,
+        onSignOut = onSignOut,
     )
 }

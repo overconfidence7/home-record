@@ -39,6 +39,29 @@ dev.get("/pushes", async (c) => {
   });
 });
 
+/**
+ * Moves a company's clock back [days] (default 15) so its 14-day trial has ended (walkthrough F17, AC-F56): the
+ * company the email owns gets created_at and trial_ends_at that much earlier. A paid entitlement is left alone.
+ */
+dev.post("/age-company", async (c) => {
+  const parsed = z
+    .object({ email: z.string().min(3), days: z.number().int().min(1).max(365).default(15) })
+    .safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json({ error: "bad_request" }, 400);
+  const email = normalizeEmail(parsed.data.email);
+  const row = await c.env.DB.prepare(
+    `SELECT m.tenant_id AS company_id FROM memberships m JOIN users u ON u.id = m.user_id
+     WHERE u.email = ? AND m.tenant_kind = 'company' AND m.role = 'owner' LIMIT 1`,
+  ).bind(email).first<{ company_id: string }>();
+  if (!row) return c.json({ error: "not_found" }, 404);
+  const shift = parsed.data.days * 86_400_000;
+  await c.env.DB.prepare("UPDATE companies SET created_at = created_at - ?, trial_ends_at = trial_ends_at - ? WHERE id = ?")
+    .bind(shift, shift, row.company_id)
+    .run();
+  const company = await c.env.DB.prepare("SELECT trial_ends_at FROM companies WHERE id = ?").bind(row.company_id).first<{ trial_ends_at: number }>();
+  return c.json({ ok: true, companyId: row.company_id, trialEndsAt: company?.trial_ends_at ?? null });
+});
+
 dev.post("/reset", async (c) => {
   await resetAll(c.env);
   return c.json({ ok: true });

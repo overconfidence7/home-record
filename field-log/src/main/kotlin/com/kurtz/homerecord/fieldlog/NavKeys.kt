@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object CompanyKey : NavKey
 
+/** FL-Paywall from More, Owner only (AC-F56). */
+@Serializable data object PlanKey : NavKey
+
 /** FL-Timesheets; [week] (ISO Monday) opens that week instead of this one, as a timesheet-approved notification does. */
 @Serializable data class TimesheetsKey(val week: String? = null) : NavKey
 
@@ -92,6 +95,6 @@ import kotlinx.serialization.Serializable
  * (and its discard prompt) or back is the only way out (ui-standards rule 3, rule 30).
  */
 fun isFullScreen(key: NavKey): Boolean = when (key) {
-    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is MaterialFormKey, is JobWallOutlineKey, is JobWallKey, is JobItemEditKey, CompanyKey -> true
+    is MarkupKey, is AnnotateKey, is CaptureKey, is LogWeatherKey, is JobEditKey, is TaskFormKey, is ChangeOrderKey, is ChangeOrderSignKey, is MaterialFormKey, is JobWallOutlineKey, is JobWallKey, is JobItemEditKey, CompanyKey, PlanKey -> true
     else -> false
 }

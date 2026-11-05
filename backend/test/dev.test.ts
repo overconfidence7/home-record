@@ -43,9 +43,21 @@ describe("AC-B2 dev routes", () => {
     expect(await env.CACHE.get("warranty:keep")).toBe("{}");
     expect(await env.MEDIA.get("co/photo/p/a.jpg")).toBeNull();
   });
+  it("AC-F56 age-company moves the owner's company trial back so it has ended", async () => {
+    await post("/dev/seed", { scenario: "regression" });
+    const before = await env.DB.prepare("SELECT trial_ends_at FROM companies WHERE id = 'qa-company'").first<{ trial_ends_at: number }>();
+    const res = await post("/dev/age-company", { email: "Owner@qa.test" });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { companyId: string; trialEndsAt: number };
+    expect(body.companyId).toBe("qa-company");
+    expect(body.trialEndsAt).toBe((before?.trial_ends_at ?? 0) - 15 * 86_400_000);
+    expect(body.trialEndsAt).toBeLessThan(Date.now());
+    expect((await post("/dev/age-company", { email: "crew@qa.test" })).status).toBe(404);
+    expect((await post("/dev/age-company", {})).status).toBe(400);
+  });
   it("is absent unless ENVIRONMENT=dev", async () => {
     const prod = { ...env, ENVIRONMENT: "production" };
-    for (const path of ["/dev/last-code?email=a@b.co", "/dev/reset", "/dev/seed"]) {
+    for (const path of ["/dev/last-code?email=a@b.co", "/dev/reset", "/dev/seed", "/dev/age-company"]) {
       expect((await call(path, { method: path.includes("last") ? "GET" : "POST" }, prod)).status).toBe(404);
     }
     await Promise.resolve(post("/auth/email/start", { email: "p@example.com" }, prod)).catch(() => null);

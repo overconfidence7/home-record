@@ -16,7 +16,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.kurtz.homerecord.core.auth.AuthState
+import com.kurtz.homerecord.core.billing.PlanAccess
+import com.kurtz.homerecord.core.billing.plan
 import com.kurtz.homerecord.core.company.CompanyMembership
+import com.kurtz.homerecord.fieldlog.billing.PlanRoute
 import com.kurtz.homerecord.core.company.CompanyState
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.coreui.components.ErrorState
@@ -74,7 +77,26 @@ fun FieldLogApp(container: AppContainer) {
         !signedIn -> Scaffold { AccountRoute(container.auth, Modifier.padding(it)) }
         state is CompanyState.Active -> {
             LaunchedEffect(Unit) { container.pendingJoinCode.value = null }
-            FieldLogTabs(container, state.membership)
+            val membership = state.membership
+            val plan = membership.plan(System.currentTimeMillis())
+            when (plan.access(membership.role)) {
+                PlanAccess.Full -> FieldLogTabs(container, membership)
+                // The plan ended (AC-F56): the Owner gets FL-Paywall as the whole app until a plan is in force again.
+                PlanAccess.OwnerPaywall -> PlanRoute(
+                    billing = { container.companyBilling }, companyId = membership.companyId, plan = plan, lapsed = true,
+                    refresh = { container.company.refresh() }, onBack = {}, onSignOut = container::signOut,
+                )
+                // Everyone else: "Ask your owner to renew" over their own week, read only.
+                PlanAccess.CrewReadOnly -> Scaffold { padding ->
+                    val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
+                    val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
+                    if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier.padding(padding))
+                    else com.kurtz.homerecord.fieldlog.clock.ClockRoute(
+                        { ctx -> container.clockDeps(ctx, membership, memberId) }, Modifier.padding(padding),
+                        readOnly = true, onSignOut = container::signOut,
+                    )
+                }
+            }
         }
         state is CompanyState.NoCompany -> Scaffold {
             val pending by container.pendingJoinCode.collectAsState()
@@ -141,6 +163,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenTimesheets = { nav.push(TimesheetsKey()) },
                     onOpenReports = { nav.push(ReportsKey) },
                     onOpenCompany = { nav.push(CompanyKey) },
+                    onOpenPlan = { nav.push(PlanKey) },
                     onOpenClients = { nav.push(ClientsKey) },
                     onOpenMaterials = { nav.push(MaterialsKey) },
                     onOpenSync = { nav.push(SyncLogKey) },
@@ -164,6 +187,13 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                 }
                 else -> PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }
+        }
+        entry<PlanKey> {
+            PlanRoute(
+                billing = { container.companyBilling }, companyId = membership.companyId,
+                plan = membership.plan(System.currentTimeMillis()), lapsed = false,
+                refresh = { container.company.refresh() }, onBack = nav::pop, onSignOut = container::signOut,
+            )
         }
         entry<TeamKey> {
             TeamRoute(container.companyApi, membership, container::inviteLink, onBack = nav::pop)

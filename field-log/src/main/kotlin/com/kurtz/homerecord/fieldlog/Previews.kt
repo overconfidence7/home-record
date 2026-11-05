@@ -317,7 +317,15 @@ fun TodayCrewNothingScheduledPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun MoreOwnerPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Owner, com.kurtz.homerecord.core.photo.FileStorage(24_500_000, 112_000_000)), {}) }
+fun MoreOwnerPreview() = Frame {
+    MoreScreen(
+        MoreUiState(
+            "Kurtz Electric", CompanyRole.Owner, com.kurtz.homerecord.core.photo.FileStorage(24_500_000, 112_000_000),
+            plan = com.kurtz.homerecord.core.billing.FieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Trial, 9, 10),
+        ),
+        {},
+    )
+}
 
 @ThemePreviews
 @Composable
@@ -2499,3 +2507,70 @@ fun HandoffFailedPreview() = Frame {
         com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff, failed = true), {},
     )
 }
+
+private val storeOffers = listOf(
+    com.kurtz.homerecord.core.billing.CompanyPlanOffer("fieldlog_solo_monthly", com.kurtz.homerecord.core.billing.FieldLogPlanKind.Solo, "$39.00"),
+    com.kurtz.homerecord.core.billing.CompanyPlanOffer("fieldlog_crew_monthly", com.kurtz.homerecord.core.billing.FieldLogPlanKind.Crew, "$79.00"),
+)
+private fun fieldLogPlan(kind: com.kurtz.homerecord.core.billing.FieldLogPlanKind, days: Int? = null, limit: Int = 10) =
+    com.kurtz.homerecord.core.billing.FieldLogPlan(kind, days, limit)
+
+/** FL-Paywall from More on day 5 of the trial: 9 days left, Solo and Crew at store prices (AC-F56). */
+@ThemePreviews
+@Composable
+fun PlanTrialPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.billing.PlanScreen(
+        com.kurtz.homerecord.fieldlog.billing.PlanUiState(fieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Trial, 9), loading = false, offers = storeOffers), {},
+    )
+}
+
+/** The trial ended: the Owner's whole app is this screen, with Sign out at the bottom (AC-F56). */
+@ThemePreviews
+@Composable
+fun PlanLapsedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.billing.PlanScreen(
+        com.kurtz.homerecord.fieldlog.billing.PlanUiState(
+            fieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Expired, limit = 0), lapsed = true, loading = false, offers = storeOffers,
+        ),
+        {},
+    )
+}
+
+/** On Crew: the Crew card says so; Solo can still be picked to move down. */
+@ThemePreviews
+@Composable
+fun PlanCrewPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.billing.PlanScreen(
+        com.kurtz.homerecord.fieldlog.billing.PlanUiState(
+            fieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Crew), loading = false, offers = storeOffers,
+            bought = com.kurtz.homerecord.core.billing.FieldLogPlanKind.Crew,
+        ),
+        {},
+    )
+}
+
+/** No prices (offline, or no billing key in this build): the reason and Retry. */
+@ThemePreviews
+@Composable
+fun PlanFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.billing.PlanScreen(
+        com.kurtz.homerecord.fieldlog.billing.PlanUiState(
+            fieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Expired, limit = 0), lapsed = true, loading = false, loadFailed = true,
+        ),
+        {},
+    )
+}
+
+/** Prices on their way from the store. */
+@ThemePreviews
+@Composable
+fun PlanLoadingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.billing.PlanScreen(
+        com.kurtz.homerecord.fieldlog.billing.PlanUiState(fieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Trial, 1)), {},
+    )
+}
+
+/** A crew phone after the plan ended: "Ask your owner to renew" over my own week, read only (AC-F56). */
+@ThemePreviews
+@Composable
+fun RenewCrewPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState(), {}, readOnly = true) }

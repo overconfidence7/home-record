@@ -630,6 +630,9 @@ class AppContainer(private val app: Application) {
 
     fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(
         membership.companyName, membership.role, syncEngine.pendingCount, jobFileTransfers::storage, { jobFileTransfers.freeUp() },
+        plan = com.kurtz.homerecord.core.billing.FieldLogPlan.of(
+            membership.entitlement, membership.entitlementExpiresAt, membership.trialEndsAt, System.currentTimeMillis(),
+        ),
     )
 
     init {

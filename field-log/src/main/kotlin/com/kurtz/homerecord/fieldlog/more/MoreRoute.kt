@@ -15,6 +15,7 @@ fun MoreRoute(
     onOpenTimesheets: () -> Unit,
     onOpenReports: () -> Unit,
     onOpenCompany: () -> Unit,
+    onOpenPlan: () -> Unit,
     onOpenClients: () -> Unit,
     onOpenMaterials: () -> Unit,
     onOpenSync: () -> Unit,
@@ -29,6 +30,7 @@ fun MoreRoute(
             MoreEvent.OpenTimesheets -> onOpenTimesheets()
             MoreEvent.OpenReports -> onOpenReports()
             MoreEvent.OpenCompany -> onOpenCompany()
+            MoreEvent.OpenPlan -> onOpenPlan()
             MoreEvent.OpenClients -> onOpenClients()
             MoreEvent.OpenMaterials -> onOpenMaterials()
             MoreEvent.OpenSync -> onOpenSync()

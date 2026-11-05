@@ -1070,4 +1070,38 @@
     <string name="handoff_missing_title">This house is gone</string>
     <string name="handoff_missing_body">It was deleted on another phone.</string>
     <string name="handoff_back">Back to the job</string>
+    <!-- FL-Paywall (AC-F56) -->
+    <string name="plan_title">Field Log plan</string>
+    <string name="plan_lapsed_title">Pick a plan to keep going</string>
+    <plurals name="plan_status_trial">
+        <item quantity="one">Trial: 1 day left. Everything is on for up to 10 people.</item>
+        <item quantity="other">Trial: %d days left. Everything is on for up to 10 people.</item>
+    </plurals>
+    <string name="plan_status_solo">Your plan: Solo, for you alone.</string>
+    <string name="plan_status_crew">Your plan: Crew, up to 10 people.</string>
+    <string name="plan_status_expired">The trial or plan has ended. Your jobs, photos and hours are all still here; pick a plan and your crew can clock in again.</string>
+    <string name="plan_explain">Both plans have every feature: time clock, photos, daily logs, files, tasks, schedule and handoff to the homeowner. They differ only in how many people can sign in.</string>
+    <string name="plan_solo">Solo</string>
+    <string name="plan_solo_detail">Just you</string>
+    <string name="plan_crew">Crew</string>
+    <string name="plan_crew_detail">You and up to 9 more</string>
+    <string name="plan_price_month">%1$s a month</string>
+    <string name="plan_choose_solo">Choose Solo</string>
+    <string name="plan_choose_crew">Choose Crew</string>
+    <string name="plan_current">Your current plan</string>
+    <string name="plan_restore">Restore purchases</string>
+    <string name="plan_retry">Retry</string>
+    <string name="plan_load_failed">Can\'t load prices right now. Check your connection and tap Retry.</string>
+    <string name="plan_purchase_failed">The purchase didn\'t go through. Nothing was charged. Try again.</string>
+    <string name="plan_nothing_to_restore">No earlier purchase found for this company.</string>
+    <string name="plan_bought_solo">Solo is on. It can take a minute to reach every phone.</string>
+    <string name="plan_bought_crew">Crew is on. It can take a minute to reach every phone.</string>
+    <string name="more_plan">Plan</string>
+    <plurals name="more_plan_trial">
+        <item quantity="one">Trial, 1 day left</item>
+        <item quantity="other">Trial, %d days left</item>
+    </plurals>
+    <string name="more_plan_ended">Ended</string>
+    <string name="renew_title">Ask your owner to renew</string>
+    <string name="renew_body">Your company\'s Field Log plan has ended. Your own hours are below; clocking in comes back once it\'s renewed.</string>
 </resources>

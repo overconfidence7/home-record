@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Handshake
 import androidx.compose.material.icons.rounded.Logout
+import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.AlertDialog
@@ -32,6 +33,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.core.billing.FieldLogPlan
+import com.kurtz.homerecord.core.billing.FieldLogPlanKind
 import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.media.ByteSize
 import com.kurtz.homerecord.core.photo.FileStorage
@@ -44,13 +47,21 @@ import com.kurtz.homerecord.fieldlog.company.roleLabel
  * [storage] is what job files hold on this phone (AC-F20); null while it is being counted. [unsynced] is the count of
  * changes not yet sent, which sign-out would delete (AC-F4).
  */
-data class MoreUiState(val companyName: String, val role: CompanyRole, val storage: FileStorage? = null, val unsynced: Int = 0)
+data class MoreUiState(
+    val companyName: String,
+    val role: CompanyRole,
+    val storage: FileStorage? = null,
+    val unsynced: Int = 0,
+    /** The company's plan; the Plan row (FL-Paywall, AC-F56) is the Owner's only. */
+    val plan: FieldLogPlan? = null,
+)
 
 sealed interface MoreEvent {
     data object OpenTeam : MoreEvent
     data object OpenTimesheets : MoreEvent
     data object OpenReports : MoreEvent
     data object OpenCompany : MoreEvent
+    data object OpenPlan : MoreEvent
     data object OpenClients : MoreEvent
     data object OpenMaterials : MoreEvent
     data object OpenSync : MoreEvent
@@ -106,6 +117,15 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
                 leading = { Icon(Icons.Rounded.Business, contentDescription = null) },
                 onClick = { onEvent(MoreEvent.OpenCompany) },
                 modifier = Modifier.testTag("fl_more_company"),
+            )
+        }
+        if (state.role == CompanyRole.Owner && state.plan != null) {
+            RecordListItem(
+                headline = stringResource(R.string.more_plan),
+                supporting = planLine(state.plan),
+                leading = { Icon(Icons.Rounded.Payments, contentDescription = null) },
+                onClick = { onEvent(MoreEvent.OpenPlan) },
+                modifier = Modifier.testTag("fl_more_plan"),
             )
         }
         if (state.role == CompanyRole.Lead) {
@@ -168,4 +188,12 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             },
         )
     }
+}
+
+@Composable
+private fun planLine(plan: FieldLogPlan): String = when (plan.kind) {
+    FieldLogPlanKind.Trial -> pluralStringResource(R.plurals.more_plan_trial, plan.trialDaysLeft ?: 0, plan.trialDaysLeft ?: 0)
+    FieldLogPlanKind.Solo -> stringResource(R.string.plan_solo)
+    FieldLogPlanKind.Crew -> stringResource(R.string.plan_crew)
+    FieldLogPlanKind.Expired -> stringResource(R.string.more_plan_ended)
 }

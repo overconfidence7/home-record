@@ -23,6 +23,7 @@ class MoreDeps(
     val storage: suspend () -> FileStorage,
     val freeUp: suspend () -> Unit,
     val io: CoroutineDispatcher = Dispatchers.IO,
+    val plan: com.kurtz.homerecord.core.billing.FieldLogPlan? = null,
 )
 
 /** FL-More: counts what job files hold on this phone and frees the cached copies; navigation stays in the route. */
@@ -31,8 +32,8 @@ class MoreViewModel(private val deps: MoreDeps) : ViewModel() {
     private var freeing = false
 
     val state: StateFlow<MoreUiState> = combine(deps.unsynced, storage) { unsynced, s ->
-        MoreUiState(deps.companyName, deps.role, s, unsynced)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, MoreUiState(deps.companyName, deps.role))
+        MoreUiState(deps.companyName, deps.role, s, unsynced, deps.plan)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, MoreUiState(deps.companyName, deps.role, plan = deps.plan))
 
     fun freeUp() {
         if (freeing) return

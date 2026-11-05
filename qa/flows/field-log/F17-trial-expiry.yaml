@@ -1,0 +1,55 @@
+# Walkthrough F17 (T064c, AC-F56): during the trial the Owner's More → Plan shows the days left with Solo and Crew
+# (or Retry when this build has no billing key); after the company is moved back 15 days on the dev backend,
+# Field Log reopens on FL-Paywall "Pick a plan to keep going" with no tabs and Sign out. The crew side ("Ask your
+# owner to renew" over their own week, read only) is PlanScreenTest and the renew-crew catalog entry.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f17@example.test"
+- tapOn:
+    id: fl_tab_more
+- scrollUntilVisible:
+    element:
+      id: fl_more_plan
+    timeout: 5000
+# AC-F56: a new company is on the 14-day trial; the Owner's More shows it on the Plan row
+- assertVisible: "Trial, 14 days left"
+- tapOn:
+    id: fl_more_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_status
+    timeout: 10000
+- assertVisible: "Trial: 14 days left.*"
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_restore
+    timeout: 15000
+- takeScreenshot: F17-plan-trial
+- tapOn:
+    id: fl_back
+- runScript:
+    file: ../_scripts/age-dev-company.js
+    env:
+      EMAIL: "qa-owner-f17@example.test"
+- assertTrue: ${output.companyAged}
+- stopApp
+- launchApp
+# AC-F56: after the trial the Owner's whole app is FL-Paywall, no tabs, Sign out still there
+- extendedWaitUntil:
+    visible: "Pick a plan to keep going"
+    timeout: 15000
+- assertVisible:
+    id: fl_plan_status
+- assertVisible: ".*has ended.*"
+- assertNotVisible:
+    id: fl_tab_today
+- scrollUntilVisible:
+    element:
+      id: fl_plan_sign_out
+    timeout: 5000
+- takeScreenshot: F17-plan-lapsed
