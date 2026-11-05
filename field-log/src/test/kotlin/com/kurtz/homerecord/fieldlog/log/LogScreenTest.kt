@@ -202,4 +202,18 @@ class LogScreenTest {
         rule.waitForIdle()
         rule.onNodeWithTag("fl_log_sent").assertIsDisplayed()
     }
+
+    /** Suite F09b on 323d8128: for the owner the share-link row lands with the Sent line, two rows above the log. */
+    @Test fun sendAtTheTopShowsTheSentLineWithTheLinkRow() {
+        var state by mutableStateOf(ready)
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                Box(Modifier.height(420.dp)) { LogScreen(state, {}) }
+            }
+        }
+        rule.waitForIdle()
+        state = state.copy(sentAt = 1_000L, link = com.kurtz.homerecord.fieldlog.share.ShareLinkUi(allowed = true))
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_log_sent").assertIsDisplayed()
+    }
 }

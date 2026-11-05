@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -77,7 +78,7 @@ private val monthDay = DateTimeFormatter.ofPattern("MMM d")
 @Composable
 fun ScheduleScreen(state: ScheduleUiState, onEvent: (ScheduleEvent) -> Unit, modifier: Modifier = Modifier) {
     if (state.loading) { LoadingState(modifier.fillMaxSize()); return }
-    Column(modifier.fillMaxSize().testTag("fl_schedule_week")) {
+    Column(modifier.fillMaxSize().statusBarsPadding().testTag("fl_schedule_week")) {
         WeekBar(state, onEvent)
         if (state.ownOnly) OwnWeek(state) else TeamDay(state, onEvent)
     }

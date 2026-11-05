@@ -86,7 +86,11 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_material_form_amount
 - inputText: "123.71"
-- hideKeyboard
+- runFlow: _hide-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      id: fl_material_form_cat_tools
+    direction: DOWN
 - tapOn:
     id: fl_material_form_cat_tools
 - tapOn:

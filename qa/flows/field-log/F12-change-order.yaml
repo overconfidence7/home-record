@@ -97,10 +97,16 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_co_form_line_0_description
 - inputText: "Outlet box and wire"
+# [judge: flow error] on 323d8128: Price each sits under the keyboard; put it away and scroll to the field first
+- runFlow: _hide-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_0_price
+    direction: DOWN
 - tapOn:
     id: fl_co_form_line_0_price
 - inputText: "185"
-- hideKeyboard
+- runFlow: _hide-keyboard.yaml
 # Line 2: 1.5 hours of labor at 96
 - scrollUntilVisible:
     element:
@@ -115,14 +121,24 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_co_form_line_1_description
 - inputText: "Labor"
+- runFlow: _hide-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_1_price
+    direction: DOWN
 - tapOn:
     id: fl_co_form_line_1_qty
 - eraseText: 3
 - inputText: "1.5"
+- runFlow: _hide-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_line_1_price
+    direction: DOWN
 - tapOn:
     id: fl_co_form_line_1_price
 - inputText: "96"
-- hideKeyboard
+- runFlow: _hide-keyboard.yaml
 # AC-F37: the total is the sum of the lines: 185.00 + 144.00
 - scrollUntilVisible:
     element:

@@ -190,13 +190,16 @@ private fun Sections(state: LogUiState, onEvent: (LogEvent) -> Unit, zone: ZoneI
     // The effect can run before the list has measured the new row (or while the share sheet covers the app and no
     // frame is drawn), so it waits for real layouts: while the top of the list is the row under Sent, scroll to Sent;
     // stop once Sent is first or the person has scrolled away.
+    // The Sent line can arrive with the share-link row under it (Owner and Office), so two rows land above the first
+    // section, not one (suite F09b on 323d8128): count them from the latest state.
+    val headerRows by rememberUpdatedState(if (state.link.allowed) 2 else 1)
     LaunchedEffect(state.sentAt) {
-        if (state.sentAt == null || list.firstVisibleItemIndex > 1) return@LaunchedEffect
+        if (state.sentAt == null || list.firstVisibleItemIndex > headerRows) return@LaunchedEffect
         snapshotFlow { list.layoutInfo }.first { info ->
             val first = info.visibleItemsInfo.firstOrNull() ?: return@first false
             when {
                 first.key == SENT_KEY -> true
-                first.index > 1 -> true
+                first.index > headerRows -> true
                 else -> {
                     if (!list.isScrollInProgress) list.scrollToItem(0)
                     false

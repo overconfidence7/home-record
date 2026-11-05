@@ -419,7 +419,7 @@ private fun LineCard(index: Int, line: FormLine, editable: Boolean, onEvent: (Ch
                     val remove = stringResource(R.string.co_form_line_remove_description, index + 1)
                     IconButton(
                         onClick = { onEvent(ChangeOrderFormEvent.RemoveLine(line.id)) },
-                        modifier = Modifier.semantics { contentDescription = remove }.testTag("fl_co_form_line_${index}_remove"),
+                        modifier = Modifier.size(48.dp).semantics { contentDescription = remove }.testTag("fl_co_form_line_${index}_remove"),
                     ) { Icon(Icons.Rounded.RemoveCircleOutline, contentDescription = null) }
                 }
             }
