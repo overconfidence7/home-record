@@ -79,6 +79,7 @@ fun TaskPinPicker(state: TaskFormUiState, onEvent: (TaskFormEvent) -> Unit, modi
                     modifier = Modifier.weight(1f).fillMaxWidth().testTag("fl_task_pin_plan"),
                     pins = listOfNotNull(pin?.let { BlueprintPin("pin", title, it.xIn, it.yIn, 1) }),
                     onPlanTap = { x, y -> onEvent(TaskFormEvent.PlacePin(x, y)) },
+                    system = com.kurtz.homerecord.housemodel.ui.LocalUnitSystem.current,
                 )
                 if (state.draft.planPin != null) {
                     Row(

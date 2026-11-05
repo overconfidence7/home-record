@@ -43,7 +43,7 @@ fun WallOverlaysRoute(
             initializer { WallOverlaysViewModel(repo, wallPhotos, overlays, maker, roomId, wallId, stage, selectId, createSavedStateHandle(), media) }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     OverlayPhotoLaunchers(state.photoLaunch, vm::onEvent)
     fun back(fromArrow: Boolean) {
         when (WallBack.step(state.form != null, state.drawing != null, state.selectedId, selectId, fromArrow)) {

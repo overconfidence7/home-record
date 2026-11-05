@@ -48,7 +48,7 @@ fun RoomRoute(
             }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     WallPhotoLaunchers(state, vm, onOutline)
     RoomScreen(state) { event ->
         when (event) {
@@ -101,7 +101,7 @@ fun RoomRoute(
             }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     WallPhotoLaunchers(state, vm, onOutline)
     RoomScreen(state) { event ->
         when (event) {

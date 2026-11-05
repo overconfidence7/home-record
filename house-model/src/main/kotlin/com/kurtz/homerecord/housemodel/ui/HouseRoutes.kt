@@ -22,7 +22,7 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 @Composable
 fun FloorsRoute(repo: HomeRepository, homeId: String, homeName: String, onBack: () -> Unit) {
     val vm = viewModel<FloorsViewModel>(factory = viewModelFactory { initializer { FloorsViewModel(repo, homeId) } })
-    FloorsScreen(vm.state.collectAsState().value, vm::onEvent, onBack, homeName)
+    FloorsScreen(vm.state.collectAsState().value, vm::onEvent, onBack, homeName, system = LocalUnitSystem.current)
 }
 
 @Composable
@@ -68,7 +68,7 @@ fun HouseRoute(
             }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     val activity = LocalContext.current
     val shareTitle = stringResource(R.string.house_export_share_title)
     LaunchedEffect(state.shareUri, state.exportFailed) {

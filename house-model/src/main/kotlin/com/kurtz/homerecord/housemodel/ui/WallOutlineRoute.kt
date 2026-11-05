@@ -31,7 +31,7 @@ fun WallOutlineRoute(
             initializer { WallOutlineViewModel(wallPhotos, maker, media, roomId, wallId, stage, photoPath, createSavedStateHandle()) }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     LaunchedEffect(state.done) { if (state.done) onClose() }
     val back = {
         vm.onEvent(WallOutlineEvent.Back)

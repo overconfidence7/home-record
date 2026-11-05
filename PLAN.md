@@ -389,9 +389,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T064b1: :core `FieldLogPlan` `[unit]` (trial days left, Solo/Crew/expired, member limit, Owner paywall vs crew read-only, over-limit count) mirroring backend plan.ts; `CompanyMembership.entitlementExpiresAt` from `/me` and the offline cache; join failures `MemberLimit` / `SubscriptionRequired` with their own Field Log messages
     - [x] T064b2: RevenueCat for Field Log behind a :core billing interface, logged in as `company:<id>`, Solo/Crew monthly plans with store prices, key per docs/billing.md (Unavailable until the Field Log RevenueCat app exists, BLOCKERS)
   - [x] T064c: FL-Paywall (Owner: trial days, Solo and Crew with store prices, Restore, Retry), crew "Ask your owner to renew" with read-only own timesheet, join errors for member limit and expired company (AC-F56)
-- [ ] T065: FL-More and Settings: Team, Timesheets, Reports, Company, Billing, Materials, Clients, Settings (units, offline storage, notifications), Account (sign out clears after confirm), About (acceptance: AC-F4, More shell)
+- [x] T065: FL-More and Settings: Team, Timesheets, Reports, Company, Billing, Materials, Clients, Settings (units, offline storage, notifications), Account (sign out clears after confirm), About (acceptance: AC-F4, More shell)
   - [x] T065a: FL-Settings (units choice stored on the phone, notifications status opening phone settings, storage with Free up moved from More), FL-About (version), More names the signed-in account and gains Settings and About rows (AC-F4, AC-C4, AC-F20)
-  - [ ] T065b: apply the units choice to Field Log's house screens (plan, floors, room, walls, item place) through `UnitsStore` (AC-C4)
+  - [x] T065b: apply the units choice to Field Log's house screens (plan, floors, room, walls, item place) through `UnitsStore` (AC-C4)
 - [ ] R12: Review T061–T065
 - [ ] V5: Visual review of M5 screenshots; walk PRODUCT.md Field Log steps 1–10
 

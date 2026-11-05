@@ -43,7 +43,7 @@ fun BehindWallRoute(
             }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
     BackHandler(enabled = state.roomId != null && state.roomId != roomId) { vm.back() }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> vm.onEvent(BehindWallEvent.CameraResult(ok)) }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->

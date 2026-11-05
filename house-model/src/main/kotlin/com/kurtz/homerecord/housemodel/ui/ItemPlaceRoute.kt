@@ -23,7 +23,7 @@ fun ItemPlaceRoute(
     itemId: String,
     onBack: () -> Unit,
     onEditPlan: (floorId: String?) -> Unit,
-    system: UnitSystem = UnitSystem.IMPERIAL,
+    system: UnitSystem = LocalUnitSystem.current,
     roomWalls: (roomId: String) -> Flow<List<RoomWall>> = { flowOf(emptyList()) },
     homeItems: Flow<List<ItemSpot>> = flowOf(emptyList()),
 ) {
@@ -31,7 +31,7 @@ fun ItemPlaceRoute(
         key = "item-place:$itemId",
         factory = viewModelFactory { initializer { ItemPlaceViewModel(homes, items, homeId, itemId, createSavedStateHandle(), system, roomWalls, homeItems) } },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = system)
     ItemPlaceScreen(state, onEvent = {
         when (it) {
             ItemPlaceEvent.Done -> onBack()

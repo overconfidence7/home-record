@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.kurtz.homerecord.housemodel.ui.LocalUnitSystem
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.CompositionLocalProvider
@@ -74,7 +77,8 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             HomeRecordTheme(Brand.FieldLog) {
-                CompositionLocalProvider(LocalTagPrefix provides "fl") {
+                val units by container.unitsStore.units.collectAsState()
+                CompositionLocalProvider(LocalTagPrefix provides "fl", LocalUnitSystem provides units) {
                     Box(Modifier.semantics { testTagsAsResourceId = true }) {
                         FieldLogApp(container)
                     }

@@ -33,19 +33,20 @@ fun PlanEditorRoute(
     overlayStage: WallStage = WallStage.HouseManualDefault,
     overlayId: String? = null,
 ) {
+    val system = LocalUnitSystem.current
     val vm = viewModel<PlanEditorViewModel>(
         factory = viewModelFactory {
             initializer {
                 PlanEditorViewModel(
                     repo, homeId, createSavedStateHandle(), initialFloorId = floorId, initialRoomId = roomId, initialEditShape = editShape,
-                    overlays = overlays, media = media, overlayStage = overlayStage, initialOverlayId = overlayId,
+                    overlays = overlays, media = media, overlayStage = overlayStage, initialOverlayId = overlayId, system = system,
                 )
             }
         },
     )
     // Leaving the editor (back arrow, system back, Floors) keeps a name or size still being typed.
     DisposableEffect(vm) { onDispose { vm.onEvent(PlanEditorEvent.CommitFields) } }
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(system = system)
     val onOverlay: (WallOverlaysEvent) -> Unit = { vm.onEvent(PlanEditorEvent.OverlayEvent(it)) }
     OverlayPhotoLaunchers(state.photoLaunch, onOverlay)
     // The overlay form's own handler, composed later, asks before discarding changes.
