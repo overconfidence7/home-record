@@ -712,3 +712,18 @@ fun PanelBreakerTandemScreenshot() = PanelBreakerTandemPreview()
 @ThemePreviews
 @Composable
 fun PanelBreakerDeleteScreenshot() = PanelBreakerDeletePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelFactsScreenshot() = PanelFactsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelFactsLockedScreenshot() = PanelFactsLockedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelPhotoSheetScreenshot() = PanelPhotoSheetPreview()

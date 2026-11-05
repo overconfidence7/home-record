@@ -6,6 +6,9 @@ import com.kurtz.homerecord.core.model.PanelGrid
 import com.kurtz.homerecord.core.model.SlotPlacement
 import com.kurtz.homerecord.housemodel.panel.BreakerDraft
 import com.kurtz.homerecord.housemodel.panel.FeedOption
+import com.kurtz.homerecord.housemodel.panel.PanelDraft
+import com.kurtz.homerecord.housemodel.panel.PanelField
+import com.kurtz.homerecord.core.media.CaptureTarget
 
 /** HM-Panel (AC-C40): the panel facts, the slot grid and any breaker whose slots clash with another. */
 data class PanelUiState(
@@ -19,6 +22,14 @@ data class PanelUiState(
     val missing: Boolean = false,
     /** HM-Breaker, open over the grid; null when closed. */
     val editor: BreakerEditorState? = null,
+    /** The panel facts form (slot count, layout, main amps, brand); null when closed. */
+    val facts: PanelFactsState? = null,
+    /** "Panel photo" sheet: take one, choose one, or remove it. */
+    val photoSheet: Boolean = false,
+    /** Set while the route should open the camera ([PanelPhotoLaunch.target]) or the photo picker (null target). */
+    val photoLaunch: PanelPhotoLaunch? = null,
+    /** The picked photo could not be read. */
+    val photoFailed: Boolean = false,
 ) {
     fun breaker(id: String): Breaker? = breakers.firstOrNull { it.id == id }
 
@@ -45,6 +56,22 @@ data class BreakerEditorState(
     val canSave: Boolean get() = slotProblem == null && (dirty || isNew)
 }
 
+/**
+ * Panel facts as typed (AC-C40). [highestUsed] is the highest slot a breaker fills (the slot count cannot go below it);
+ * [layoutLocked] when breakers are labeled, since switching between two-column and DIN would move every one of them.
+ */
+data class PanelFactsState(
+    val draft: PanelDraft,
+    val dirty: Boolean = false,
+    val showErrors: Boolean = false,
+    val highestUsed: Int = 0,
+    val layoutLocked: Boolean = false,
+) {
+    val errors: Set<PanelField> get() = if (showErrors) draft.errors(highestUsed) else emptySet()
+}
+
+data class PanelPhotoLaunch(val target: CaptureTarget?)
+
 sealed interface PanelEvent {
     data object Back : PanelEvent
 
@@ -62,4 +89,16 @@ sealed interface PanelEvent {
     data object AskDeleteBreaker : PanelEvent
     data object ConfirmDeleteBreaker : PanelEvent
     data object CancelDeleteBreaker : PanelEvent
+    data object EditFacts : PanelEvent
+    data class ChangeFacts(val draft: PanelDraft) : PanelEvent
+    data object SaveFacts : PanelEvent
+    data object CloseFacts : PanelEvent
+    data object OpenPhotoSheet : PanelEvent
+    data object ClosePhotoSheet : PanelEvent
+    data object TakePhoto : PanelEvent
+    data object ChoosePhoto : PanelEvent
+    data object RemovePhoto : PanelEvent
+    data object PhotoLaunchHandled : PanelEvent
+    data class CameraResult(val ok: Boolean) : PanelEvent
+    data class GalleryResult(val uri: String?) : PanelEvent
 }

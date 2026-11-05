@@ -18,7 +18,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AddAPhoto
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.ElectricalServices
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.IconButton
+import com.kurtz.homerecord.coreui.components.OptionsSheet
+import com.kurtz.homerecord.coreui.components.SheetOption
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -61,6 +69,13 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
     ScreenScaffold(
         title = state.name.ifBlank { stringResource(R.string.panel_title) },
         onBack = { onEvent(PanelEvent.Back) },
+        actions = {
+            if (panel != null && !state.loading) {
+                IconButton(onClick = { onEvent(PanelEvent.EditFacts) }, modifier = Modifier.testTag("hm_panel_edit")) {
+                    Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.panel_edit))
+                }
+            }
+        },
     ) { padding ->
         when {
             state.missing -> EmptyState(
@@ -72,7 +87,15 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
             )
             state.loading || panel == null || grid == null -> LoadingState(Modifier.padding(padding).testTag("hm_panel_loading"))
             else -> Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("hm_panel_scroll")) {
-                PanelHeader(panel, state.breakers.size)
+                PanelHeader(panel, state.breakers.size, onPhoto = { onEvent(PanelEvent.OpenPhotoSheet) })
+                if (state.photoFailed) {
+                    Text(
+                        stringResource(R.string.panel_photo_failed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 16.dp).testTag("hm_panel_photo_failed"),
+                    )
+                }
                 SectionHeader(stringResource(R.string.panel_slots))
                 if (state.breakers.isEmpty()) {
                     Text(
@@ -107,11 +130,32 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
         }
     }
     BreakerEditorDialog(state, onEvent)
+    PanelFactsDialog(state, onEvent)
+    if (state.photoSheet && panel != null) {
+        OptionsSheet(
+            title = stringResource(R.string.panel_photo_sheet_title),
+            options = listOfNotNull(
+                SheetOption("take", stringResource(R.string.panel_photo_take), Icons.Rounded.PhotoCamera),
+                SheetOption("choose", stringResource(R.string.panel_photo_choose), Icons.Rounded.PhotoLibrary),
+                panel.photoPath?.let { SheetOption("remove", stringResource(R.string.panel_photo_remove), Icons.Rounded.Delete) },
+            ),
+            onDismiss = { onEvent(PanelEvent.ClosePhotoSheet) },
+            onPick = {
+                onEvent(
+                    when (it.id) {
+                        "take" -> PanelEvent.TakePhoto
+                        "choose" -> PanelEvent.ChoosePhoto
+                        else -> PanelEvent.RemovePhoto
+                    },
+                )
+            },
+        )
+    }
 }
 
 /** Photo (or the panel icon) beside the facts: main amps, brand, slot count and layout. */
 @Composable
-private fun PanelHeader(panel: Panel, breakerCount: Int) {
+private fun PanelHeader(panel: Panel, breakerCount: Int, onPhoto: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().padding(16.dp).testTag("hm_panel_header"),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -119,14 +163,16 @@ private fun PanelHeader(panel: Panel, breakerCount: Int) {
     ) {
         val shape = RoundedCornerShape(12.dp)
         Box(
-            Modifier.size(88.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh).testTag("hm_panel_photo"),
+            Modifier.size(88.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .clickable(onClickLabel = stringResource(if (panel.photoPath == null) R.string.panel_photo_add else R.string.panel_photo_change), onClick = onPhoto)
+                .testTag("hm_panel_photo"),
             contentAlignment = Alignment.Center,
         ) {
             val photo = panel.photoPath
             if (photo != null) {
                 AsyncImage(File(photo), contentDescription = stringResource(R.string.panel_photo), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             } else {
-                Icon(Icons.Rounded.ElectricalServices, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Rounded.AddAPhoto, contentDescription = stringResource(R.string.panel_photo_add), modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
             }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {

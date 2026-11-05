@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual
 
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import com.kurtz.homerecord.coreui.pages.PageSource
 import android.content.res.Configuration
 import androidx.compose.material3.Surface
@@ -1550,6 +1552,45 @@ fun PanelBreakerDeletePreview() = Frame {
     )
     BreakerFrame(editor)
     com.kurtz.homerecord.housemanual.panel.BreakerDeleteDialog(editor, {})
+}
+
+@ThemePreviews
+@Composable
+fun PanelFactsPreview() = Frame {
+    FormScreenScaffold(stringResource(R.string.panel_facts_title), "hm_panel_facts_save", true, {}, {}) {
+        com.kurtz.homerecord.housemanual.panel.PanelFactsContent(
+            com.kurtz.homerecord.housemanual.panel.PanelFactsState(com.kurtz.homerecord.housemodel.panel.PanelDraft("40", mainAmps = "200", brand = "Square D QO"), dirty = true),
+            {},
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+fun PanelFactsLockedPreview() = Frame {
+    // Breakers run to slot 23, so 20 slots is refused and the layout stays two columns.
+    FormScreenScaffold(stringResource(R.string.panel_facts_title), "hm_panel_facts_save", true, {}, {}) {
+        com.kurtz.homerecord.housemanual.panel.PanelFactsContent(
+            com.kurtz.homerecord.housemanual.panel.PanelFactsState(
+                com.kurtz.homerecord.housemodel.panel.PanelDraft("20", mainAmps = "200", brand = "Square D QO"),
+                dirty = true, showErrors = true, highestUsed = 23, layoutLocked = true,
+            ),
+            {},
+        )
+    }
+}
+
+@ThemePreviews
+@Composable
+fun PanelPhotoSheetPreview() = Frame {
+    com.kurtz.homerecord.coreui.components.OptionsSheetContent(
+        stringResource(R.string.panel_photo_sheet_title),
+        listOf(
+            com.kurtz.homerecord.coreui.components.SheetOption("take", stringResource(R.string.panel_photo_take), androidx.compose.material.icons.Icons.Rounded.PhotoCamera),
+            com.kurtz.homerecord.coreui.components.SheetOption("choose", stringResource(R.string.panel_photo_choose), androidx.compose.material.icons.Icons.Rounded.PhotoLibrary),
+        ),
+        {},
+    )
 }
 
 // More → Breaker panels (AC-C40): a main panel in the basement and a garage sub-panel.

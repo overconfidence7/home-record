@@ -61,8 +61,10 @@ class PanelViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val media = PanelFakeMedia()
+
     private fun vm(itemId: String = "pi", saved: SavedStateHandle = SavedStateHandle()) =
-        PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }, repo.observeChoices("h1"), saved).also {
+        PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }, repo.observeChoices("h1"), saved, media).also {
         vms += it
         it.state.launchIn(it.viewModelScope)
     }
@@ -127,7 +129,7 @@ class PanelViewModelTest {
         assertThat(open.editor?.isNew).isTrue()
         val draft = checkNotNull(open.editor).draft
         vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(label = "Kitchen counter", amps = "20", type = BreakerType.GFCI, roomIds = setOf("kitchen"), itemIds = setOf("dw"))))
-        assertThat(vm.state.value.editor?.dirty).isTrue()
+        vm.await { it.editor?.dirty == true }
         vm.onEvent(PanelEvent.SaveBreaker)
         val saved = vm.await { it.editor == null && it.breakers.size == 1 }
         val b = saved.breakers.single()
@@ -149,7 +151,7 @@ class PanelViewModelTest {
         vm.onEvent(PanelEvent.OpenSlot(1))
         val draft = checkNotNull(vm.await { it.editor != null }.editor).draft
         vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 2, label = "Range")))
-        val e = checkNotNull(vm.state.value.editor)
+        val e = checkNotNull(vm.await { it.editor?.slotProblem != null }.editor)
         assertThat(e.slotProblem).isEqualTo(SlotPlacement.Taken(listOf(3)))
         assertThat(e.canSave).isFalse()
         vm.onEvent(PanelEvent.SaveBreaker)
@@ -158,7 +160,7 @@ class PanelViewModelTest {
         // Bad amps keep the form open with the error shown.
         vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 1, amps = "999")))
         vm.onEvent(PanelEvent.SaveBreaker)
-        assertThat(vm.state.value.editor?.ampsError).isTrue()
+        vm.await { it.editor?.ampsError == true }
     }
 
     @Test
@@ -179,7 +181,7 @@ class PanelViewModelTest {
         assertThat(draft.tandem).isTrue()
         // A tandem stays single-pole.
         vm.onEvent(PanelEvent.ChangeBreaker(draft.copy(poles = 2, label = "Garage door opener")))
-        assertThat(vm.state.value.editor?.draft?.poles).isEqualTo(1)
+        assertThat(vm.await { it.editor?.draft?.label == "Garage door opener" }.editor?.draft?.poles).isEqualTo(1)
         vm.onEvent(PanelEvent.SaveBreaker)
         val s = vm.await { it.editor == null && it.breakers.size == 3 }
         assertThat(checkNotNull(s.grid).cells.single { it.slot == 7 }.isTandem).isTrue()
@@ -203,12 +205,70 @@ class PanelViewModelTest {
         assertThat(restored.draft.label).isEqualTo("Hall bath")
         assertThat(restored.dirty).isTrue()
         again.onEvent(PanelEvent.AskDeleteBreaker)
-        assertThat(again.state.value.editor?.confirmDelete).isTrue()
+        again.await { it.editor?.confirmDelete == true }
         again.onEvent(PanelEvent.CancelDeleteBreaker)
-        assertThat(again.state.value.editor?.confirmDelete).isFalse()
+        again.await { it.editor?.confirmDelete == false }
         again.onEvent(PanelEvent.AskDeleteBreaker)
         again.onEvent(PanelEvent.ConfirmDeleteBreaker)
         val s = again.await { it.editor == null && it.breakers.isEmpty() }
         assertThat(checkNotNull(s.grid).cells).hasSize(40)
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun panelDetailsSaveSlotCountMainAmpsAndBrandButNotBelowTheBreakersInUse() {
+        val panelId = runBlocking { repo.ensurePanel("pi") }
+        runBlocking { repo.saveBreaker(panelId, BreakerDraft(startSlot = 23, label = "Garage")) }
+        val vm = vm()
+        vm.await { it.breakers.size == 1 }
+        vm.onEvent(PanelEvent.EditFacts)
+        val facts = checkNotNull(vm.await { it.facts != null }.facts)
+        assertThat(facts.draft.slotCount).isEqualTo("40")
+        assertThat(facts.layoutLocked).isTrue()
+        assertThat(facts.highestUsed).isEqualTo(23)
+        vm.onEvent(PanelEvent.ChangeFacts(facts.draft.copy(slotCount = "20")))
+        vm.onEvent(PanelEvent.SaveFacts)
+        val refused = checkNotNull(vm.await { it.facts?.showErrors == true }.facts)
+        assertThat(refused.errors).containsExactly(com.kurtz.homerecord.housemodel.panel.PanelField.SLOT_COUNT)
+        vm.onEvent(PanelEvent.ChangeFacts(facts.draft.copy(slotCount = "30", mainAmps = "200", brand = "Square D QO")))
+        vm.onEvent(PanelEvent.SaveFacts)
+        val s = vm.await { it.facts == null && it.panel?.slotCount == 30 }
+        assertThat(s.panel?.mainAmps).isEqualTo(200)
+        assertThat(s.panel?.brand).isEqualTo("Square D QO")
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun aPanelPhotoComesFromTheCameraOrThePickerAndCanBeRemoved() {
+        val saved = SavedStateHandle()
+        val vm = vm(saved = saved)
+        vm.await { !it.loading }
+        vm.onEvent(PanelEvent.OpenPhotoSheet)
+        vm.await { it.photoSheet }
+        vm.onEvent(PanelEvent.TakePhoto)
+        val target = checkNotNull(vm.await { it.photoLaunch != null }.photoLaunch?.target)
+        vm.onEvent(PanelEvent.PhotoLaunchHandled)
+        // The app was killed while the camera was open: a fresh view model still takes the photo.
+        media.files += target.path
+        val revived = vm(saved = saved)
+        revived.await { !it.loading }
+        revived.onEvent(PanelEvent.CameraResult(true))
+        assertThat(revived.await { it.panel?.photoPath != null }.panel?.photoPath).isEqualTo(target.path)
+
+        revived.onEvent(PanelEvent.GalleryResult("content://broken"))
+        assertThat(revived.await { it.photoFailed }.panel?.photoPath).isEqualTo(target.path)
+        revived.onEvent(PanelEvent.GalleryResult("content://picked"))
+        assertThat(revived.await { it.panel?.photoPath?.contains("imported") == true }).isNotNull()
+        revived.onEvent(PanelEvent.RemovePhoto)
+        revived.await { it.panel?.photoPath == null }
+    }
+}
+
+private class PanelFakeMedia : com.kurtz.homerecord.core.media.MediaFiles {
+    val files = mutableSetOf<String>()
+    private var n = 0
+    override fun newCaptureTarget() = com.kurtz.homerecord.core.media.CaptureTarget("content://capture/${++n}", "/media/panel-$n.jpg")
+    override suspend fun import(uri: String): String? = if (uri.contains("broken")) null else "/media/imported-${++n}.jpg".also { files += it }
+    override fun exists(path: String) = path in files
+    override fun discard(path: String) { files -= path }
 }

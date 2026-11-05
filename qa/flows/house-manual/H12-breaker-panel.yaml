@@ -100,3 +100,31 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_panel_grid"
     timeout: 5000
+# T066c2: panel details (main amps and brand) and the panel photo sheet
+- tapOn:
+    id: "hm_panel_edit"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_facts_form"
+    timeout: 5000
+- tapOn:
+    id: "hm_panel_facts_main"
+- eraseText
+- inputText: "200"
+- hideKeyboard
+- tapOn:
+    id: "hm_panel_facts_save"
+- extendedWaitUntil:
+    visible: "200 A main"
+    timeout: 5000
+- tapOn:
+    id: "hm_panel_photo"
+- extendedWaitUntil:
+    visible: "Take photo"
+    timeout: 5000
+- assertVisible: "Choose photo"
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_grid"
+    timeout: 5000

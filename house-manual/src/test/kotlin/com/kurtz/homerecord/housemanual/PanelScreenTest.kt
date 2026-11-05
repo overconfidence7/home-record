@@ -179,4 +179,32 @@ class PanelScreenTest {
         assertThat(rule.onAllNodesWithTag("hm_breaker_poles_1").fetchSemanticsNodes()).hasSize(1)
         assertThat(rule.onAllNodesWithTag("hm_breaker_delete").fetchSemanticsNodes()).isEmpty()
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun thePanelPhotoAndEditOpenTheirFormsAndTheDetailsFormShowsWhyItRefuses() {
+        val events = mutableListOf<PanelEvent>()
+        show(state(emptyList())) { events += it }
+        rule.onNodeWithTag("hm_panel_photo").performClick()
+        rule.onNodeWithTag("hm_panel_edit").performClick()
+        assertThat(events).containsExactly(PanelEvent.OpenPhotoSheet, PanelEvent.EditFacts).inOrder()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun panelDetailsSayTheBreakersNeedTheSlotsAndKeepTheLayout() {
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                com.kurtz.homerecord.housemanual.panel.PanelFactsContent(
+                    com.kurtz.homerecord.housemanual.panel.PanelFactsState(
+                        com.kurtz.homerecord.housemodel.panel.PanelDraft("20"), showErrors = true, highestUsed = 23, layoutLocked = true,
+                    ),
+                    {},
+                )
+            }
+        }
+        rule.onNodeWithText("Breakers fill slots up to 23, so the panel needs at least 23").assertExists()
+        rule.onNodeWithText("The layout can't change once breakers are labeled, since each one would move.").assertExists()
+        assertThat(rule.onAllNodesWithTag("hm_panel_facts_layout_din").fetchSemanticsNodes()).isEmpty()
+    }
 }
