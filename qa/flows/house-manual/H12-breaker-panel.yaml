@@ -1,6 +1,6 @@
 # Walkthrough H12 (first part, T066b): open the seeded Main panel item and its slots (AC-C40). Starts from the
 # regression seed (_seed.yaml), which files a Square D breaker panel named "Main panel". Labeling breakers and the
-# fridge's "Breaker 12" link extend this flow with T066c and T067.
+# fridge's "Breaker 12" link (T067b1, AC-C41, AC-H7) extend this flow.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
@@ -128,3 +128,60 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_panel_grid"
     timeout: 5000
+# T067b1: link the fridge to breaker 12, then the fridge page shows "Breaker 12" (AC-C41) and the chip opens the
+# panel scrolled to slot 12 with it outlined for 2 s (AC-H7)
+- scrollUntilVisible:
+    element:
+      id: "hm_panel_slot_12"
+- tapOn:
+    id: "hm_panel_slot_12"
+- extendedWaitUntil:
+    visible:
+      id: "hm_breaker_form"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "hm_breaker_items_chip"
+      text: "Refrigerator"
+- tapOn:
+    id: "hm_breaker_items_chip"
+    text: "Refrigerator"
+- tapOn:
+    id: "hm_breaker_save"
+- extendedWaitUntil:
+    notVisible:
+      id: "hm_breaker_form"
+    timeout: 5000
+- tapOn:
+    id: "hm_back"
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_search"
+    timeout: 5000
+- tapOn:
+    id: "hm_items_search"
+- eraseText
+- inputText: "LRMVS3006S"
+- extendedWaitUntil:
+    visible: "Refrigerator"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Refrigerator"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_power"
+- assertVisible: "Breaker 12"
+- takeScreenshot: H12-fridge-breaker
+- tapOn: "Breaker 12"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_slot_12"
+    timeout: 10000
+- assertVisible: "Main panel"
+- takeScreenshot: H12-panel-highlight

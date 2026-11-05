@@ -42,12 +42,13 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
 class PanelViewModelTest {
+    private val main = UnconfinedTestDispatcher()
     private lateinit var db: HomeRecordDatabase
     private lateinit var repo: PanelRepository
     private val vms = mutableListOf<PanelViewModel>()
 
     @Before fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+        Dispatchers.setMain(main)
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java).allowMainThreadQueries().build()
         repo = PanelRepository(db)
         runBlocking {
@@ -63,8 +64,8 @@ class PanelViewModelTest {
 
     private val media = PanelFakeMedia()
 
-    private fun vm(itemId: String = "pi", saved: SavedStateHandle = SavedStateHandle()) =
-        PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }, repo.observeChoices("h1"), saved, media).also {
+    private fun vm(itemId: String = "pi", saved: SavedStateHandle = SavedStateHandle(), highlightSlot: Int? = null) =
+        PanelViewModel(repo, itemId, db.itemDao().observeOne(itemId).map { it?.name }, repo.observeChoices("h1"), saved, media, highlightSlot).also {
         vms += it
         it.state.launchIn(it.viewModelScope)
     }
@@ -261,6 +262,27 @@ class PanelViewModelTest {
         assertThat(revived.await { it.panel?.photoPath?.contains("imported") == true }).isNotNull()
         revived.onEvent(PanelEvent.RemovePhoto)
         revived.await { it.panel?.photoPath == null }
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-H7")
+    fun openedFromABreakerChipTheSlotIsMarkedForTwoSecondsAndNotAgainAfterRotation() {
+        val saved = SavedStateHandle()
+        val opened = vm(saved = saved, highlightSlot = 12)
+        assertThat(opened.await { !it.loading }.highlightSlot).isEqualTo(12)
+        main.scheduler.advanceTimeBy(1_999)
+        main.scheduler.runCurrent()
+        assertThat(opened.state.value.highlightSlot).isEqualTo(12)
+        main.scheduler.advanceTimeBy(2)
+        main.scheduler.runCurrent()
+        assertThat(opened.await { it.highlightSlot == null }.highlightSlot).isNull()
+        // The same back stack entry after rotation or process death keeps the saved state: no second highlight.
+        assertThat(vm(saved = saved, highlightSlot = 12).await { !it.loading }.highlightSlot).isNull()
+    }
+
+    @Test
+    fun openedFromMoreThePanelMarksNoSlot() {
+        assertThat(vm().await { !it.loading }.highlightSlot).isNull()
     }
 }
 

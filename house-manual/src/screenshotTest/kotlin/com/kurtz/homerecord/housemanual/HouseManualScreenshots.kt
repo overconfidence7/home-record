@@ -671,6 +671,16 @@ fun PanelClashScreenshot() = PanelClashPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun PanelHighlightScreenshot() = PanelHighlightPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailPowerScreenshot() = ItemDetailPowerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PanelLoadingScreenshot() = PanelLoadingPreview()
 
 @PreviewTest

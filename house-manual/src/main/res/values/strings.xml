@@ -421,6 +421,9 @@
     <string name="breaker_delete_confirm">Delete</string>
     <string name="breaker_cancel">Cancel</string>
     <string name="item_detail_panel">Panel</string>
+    <string name="item_detail_power">Power</string>
+    <string name="item_detail_breaker_chip">Breaker %1$d</string>
+    <string name="item_detail_breaker_chip_panel">%1$s, breaker %2$d</string>
     <string name="item_detail_open_panel">Slots and breakers</string>
     <string name="item_detail_panel_supporting_none">Label the breakers in each slot</string>
     <string name="more_panels">Breaker panels</string>

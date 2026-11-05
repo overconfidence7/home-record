@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -45,7 +46,13 @@ class PanelViewModel(
     choices: Flow<FeedChoices> = flowOf(FeedChoices()),
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val media: MediaFiles? = null,
+    /** Opened from an item's breaker chip (AC-H7): the slot to scroll to and mark for [highlightMillis]. */
+    highlightSlot: Int? = null,
+    private val highlightMillis: Long = HIGHLIGHT_MILLIS,
 ) : ViewModel() {
+    // Shown once: after rotation or process death the panel opens without marking the slot again.
+    private val highlight = MutableStateFlow(highlightSlot?.takeUnless { saved[HIGHLIGHT_SHOWN] ?: false })
+
     // A panel row is only made for an item that still exists.
     private val panel: Flow<PanelState?> = itemName.map { it != null }.distinctUntilChanged().flatMapLatest { exists ->
         if (!exists) flowOf(null) else flow { emit(repo.ensurePanel(itemId)) }.flatMapLatest { repo.observe(itemId) }
@@ -61,9 +68,19 @@ class PanelViewModel(
     /** The latest panel, for the editor's slot checks and saves. */
     private var current: PanelState? = null
 
-    private val extras = combine(facts, photo) { fa, ph -> fa to ph }
+    private val extras = combine(facts, photo, highlight) { fa, ph, h -> Triple(fa, ph, h) }
 
-    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph) ->
+    init {
+        if (highlight.value != null) {
+            viewModelScope.launch {
+                delay(highlightMillis)
+                highlight.value = null
+                saved[HIGHLIGHT_SHOWN] = true
+            }
+        }
+    }
+
+    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph, h) ->
         current = p
         when {
             name == null -> PanelUiState(loading = false, missing = true)
@@ -78,6 +95,7 @@ class PanelViewModel(
                     )
                 },
                 photoSheet = ph.sheet, photoLaunch = ph.launch, photoFailed = ph.failed,
+                highlightSlot = h,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
@@ -267,6 +285,8 @@ class PanelViewModel(
 
     private companion object {
         const val FORM = "breakerForm"
+        const val HIGHLIGHT_SHOWN = "highlightShown"
+        const val HIGHLIGHT_MILLIS = 2_000L
         const val FACTS = "panelFacts"
         const val PENDING_PHOTO = "pendingPanelPhoto"
         val json = Json { ignoreUnknownKeys = true }

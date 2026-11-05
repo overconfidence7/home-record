@@ -21,6 +21,8 @@ import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.overlays.OverlayLink
 import com.kurtz.homerecord.housemodel.overlays.OverlayRepository
+import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
+import com.kurtz.homerecord.housemodel.panel.PanelRepository
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 
 @Composable
@@ -43,6 +45,9 @@ fun ItemDetailRoute(
     onPlace: () -> Unit = {},
     /** Opens HM-Panel for a Breaker panel or Sub-panel item (AC-C40). */
     onOpenPanel: () -> Unit = {},
+    panels: PanelRepository? = null,
+    /** Opens the panel of a breaker that feeds this item, scrolled to its slot (AC-H7). */
+    onOpenBreaker: (FeedingBreaker) -> Unit = {},
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -55,7 +60,8 @@ fun ItemDetailRoute(
         factory = viewModelFactory {
             initializer {
                 ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), recalls,
-                    overlays?.observeLinks(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()))
+                    overlays?.observeLinks(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
+                    panels?.observeFeedingItem(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()))
             }
         },
     )
@@ -82,6 +88,7 @@ fun ItemDetailRoute(
             is ItemDetailEvent.OpenOverlay -> onOpenOverlay(it.link)
             ItemDetailEvent.Place -> onPlace()
             ItemDetailEvent.OpenPanel -> onOpenPanel()
+            is ItemDetailEvent.OpenBreaker -> onOpenBreaker(it.breaker)
             ItemDetailEvent.UploadDocument -> picker.launch(arrayOf("application/pdf", "image/*"))
             ItemDetailEvent.ScanDocument -> scan()
             is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }

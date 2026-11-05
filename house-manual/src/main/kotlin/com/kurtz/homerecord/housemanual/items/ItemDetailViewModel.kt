@@ -15,6 +15,7 @@ import com.kurtz.homerecord.housemodel.items.LookupOutcome
 import com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository
 import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.overlays.OverlayLink
+import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
 import com.kurtz.homerecord.housemodel.upkeep.ConsumableDraft
 import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
@@ -46,6 +47,8 @@ class ItemDetailViewModel(
     private val recallApi: RecallApi? = null,
     /** The overlays linked to this item (AC-C26). */
     overlayLinks: Flow<List<OverlayLink>> = flowOf(emptyList()),
+    /** The breakers that feed this item (AC-C41). */
+    feeding: Flow<List<FeedingBreaker>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val confirmDelete = MutableStateFlow(saved[CONFIRM] ?: false)
 
@@ -109,8 +112,8 @@ class ItemDetailViewModel(
         )
     }
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, overlayLinks) { s, n, p, links ->
-        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = links)
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, overlayLinks, feeding) { s, n, p, links, f ->
+        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = links, feeding = f)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
