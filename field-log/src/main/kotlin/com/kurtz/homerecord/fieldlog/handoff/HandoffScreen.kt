@@ -19,7 +19,17 @@ import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.Polyline
 import androidx.compose.material.icons.rounded.Draw
 import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.rounded.MarkEmailRead
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import com.kurtz.homerecord.core.bundle.HandoffSendFailure
+import com.kurtz.homerecord.coreui.components.LabeledField
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +55,7 @@ import com.kurtz.homerecord.fieldlog.R
 
 /**
  * FL-Handoff: the summary of what the homeowner gets (rooms, walls with photos, overlays, items, documents, signed
- * change orders) and Export `.homerecord` through the share sheet (AC-F51).
+ * change orders), Send to homeowner by email (AC-B40) and Export `.homerecord` through the share sheet (AC-F51).
  */
 @Composable
 fun HandoffScreen(state: HandoffUiState, onEvent: (HandoffEvent) -> Unit) {
@@ -101,10 +111,13 @@ private fun HandoffContent(summary: HandoffSummary, state: HandoffUiState, onEve
                 supporting = stringResource(R.string.handoff_change_orders_note),
             )
         }
-        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
+        SectionHeader(stringResource(R.string.handoff_send_title))
+        SendSection(state, enabled = !summary.isEmpty, onEvent = onEvent)
+        SectionHeader(stringResource(R.string.handoff_export_title))
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
                 onClick = { onEvent(HandoffEvent.Export) },
-                enabled = !summary.isEmpty && !state.exporting,
+                enabled = !summary.isEmpty && !state.busy,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_handoff_export"),
             ) {
                 Text(stringResource(R.string.handoff_export))
@@ -115,14 +128,7 @@ private fun HandoffContent(summary: HandoffSummary, state: HandoffUiState, onEve
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (state.exporting) {
-                Row(
-                    Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("fl_handoff_making"),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
-                    Text(stringResource(R.string.handoff_making), style = MaterialTheme.typography.bodyMedium)
-                }
+                Progress(R.string.handoff_making, "fl_handoff_making")
             } else if (state.failed) {
                 Text(
                     stringResource(R.string.handoff_failed),
@@ -132,6 +138,93 @@ private fun HandoffContent(summary: HandoffSummary, state: HandoffUiState, onEve
                 )
             }
         }
+    }
+}
+
+/** Send to homeowner (AC-B40): the address, Send, then where it went and until when. */
+@Composable
+private fun SendSection(state: HandoffUiState, enabled: Boolean, onEvent: (HandoffEvent) -> Unit) {
+    val sentTo = state.sentTo
+    if (sentTo != null) {
+        val until = state.sentUntil?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)).orEmpty()
+        RecordListItem(
+            headline = stringResource(R.string.handoff_sent_title, sentTo),
+            supporting = stringResource(R.string.handoff_sent_body, until),
+            leading = { Icon(Icons.Rounded.MarkEmailRead, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            trailing = null,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("fl_handoff_sent"),
+        )
+        TextButton(
+            onClick = { onEvent(HandoffEvent.SendAnother) },
+            modifier = Modifier.padding(horizontal = 4.dp).heightIn(min = 48.dp).testTag("fl_handoff_send_again"),
+        ) {
+            Text(stringResource(R.string.handoff_send_again))
+        }
+        return
+    }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LabeledField(
+            label = stringResource(R.string.handoff_email_label),
+            value = state.email,
+            onValueChange = { onEvent(HandoffEvent.EmailChanged(it)) },
+            modifier = Modifier.testTag("fl_handoff_email"),
+            helper = stringResource(R.string.handoff_email_help),
+            error = if (state.emailInvalid) stringResource(R.string.handoff_email_invalid) else null,
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Send,
+            keyboardActions = KeyboardActions(onSend = { onEvent(HandoffEvent.Send) }),
+        )
+        Button(
+            onClick = { onEvent(HandoffEvent.Send) },
+            enabled = enabled && !state.busy,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("fl_handoff_send"),
+        ) {
+            Text(stringResource(R.string.handoff_send))
+        }
+        if (state.sending) {
+            Progress(R.string.handoff_sending, "fl_handoff_sending")
+        } else {
+            state.sendFailure?.let { failure ->
+                Row(
+                    Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite }.testTag("fl_handoff_send_error"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        stringResource(
+                            when (failure) {
+                                HandoffSendFailure.Offline -> R.string.handoff_send_offline
+                                HandoffSendFailure.TooLarge -> R.string.handoff_send_too_large
+                                HandoffSendFailure.Failed -> R.string.handoff_send_failed
+                            },
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (failure != HandoffSendFailure.TooLarge) {
+                        TextButton(
+                            onClick = { onEvent(HandoffEvent.Send) },
+                            modifier = Modifier.heightIn(min = 48.dp).testTag("fl_handoff_send_retry"),
+                        ) {
+                            Text(stringResource(R.string.handoff_retry))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Progress(label: Int, tag: String) {
+    Row(
+        Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        CircularProgressIndicator(Modifier.size(24.dp))
+        Text(stringResource(label), style = MaterialTheme.typography.bodyMedium)
     }
 }
 

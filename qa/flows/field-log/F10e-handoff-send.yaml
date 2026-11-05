@@ -1,0 +1,111 @@
+# Walkthrough F10 (T063c2, AC-F51, AC-B40): "Send to homeowner". Same one-room house as F10d, then House → Hand off →
+# Send to homeowner: a mistyped address is caught on the field, a real one goes to `POST /handoff` on the local backend
+# (dev: no Resend key, the link is logged and kept for `/dev/last-handoff`), and the screen says where the link went and
+# until when, with Send again. The server side is covered by backend/test/handoff.test.ts; the upload by
+# RetrofitHandoffApiTest and the screen by HandoffViewModelTest and HandoffScreenTest.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f10e@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; step along the row by id as F10 does
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-F51: the Owner hands off the job's house
+- scrollUntilVisible:
+    element:
+      id: fl_house_handoff
+- tapOn:
+    id: fl_house_handoff
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_count_rooms
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_handoff_send
+- tapOn:
+    id: fl_handoff_email
+- eraseText: 60
+- inputText: "dana.hale@example"
+- hideKeyboard
+- tapOn:
+    id: fl_handoff_send
+- assertVisible: "Enter an email address like name@example.com."
+- tapOn:
+    id: fl_handoff_email
+- eraseText: 60
+- inputText: "dana.hale@example.test"
+- hideKeyboard
+- takeScreenshot: F10e-handoff-send
+- tapOn:
+    id: fl_handoff_send
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_sent
+    timeout: 30000
+- assertVisible: "Sent to dana.hale@example.test"
+- assertNotVisible:
+    id: fl_handoff_send_error
+- takeScreenshot: F10e-handoff-sent
+- tapOn:
+    id: fl_handoff_send_again
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_send
+    timeout: 5000

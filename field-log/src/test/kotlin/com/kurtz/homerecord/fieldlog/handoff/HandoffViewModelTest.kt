@@ -3,7 +3,13 @@ package com.kurtz.homerecord.fieldlog.handoff
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.bundle.BundleRecord
 import com.kurtz.homerecord.core.bundle.ExportedHome
+import com.kurtz.homerecord.core.bundle.HandoffSendFailure
+import com.kurtz.homerecord.core.bundle.HandoffSendResult
 import com.kurtz.homerecord.core.bundle.HomeBundle
+import com.kurtz.homerecord.core.bundle.SentHandoff
+import androidx.lifecycle.SavedStateHandle
+import java.time.LocalDate
+import java.time.ZoneId
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,5 +78,83 @@ class HandoffViewModelTest {
         gone.onEvent(HandoffEvent.Export)
         assertThat(writes).isEqualTo(0)
         assertThat(gone.state.value.missing).isTrue()
+    }
+
+    private val utc = { ZoneId.of("UTC") }
+    private val dec5 = LocalDate.of(2026, 12, 5).atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli() + 3_600_000
+
+    private fun sender(
+        saved: SavedStateHandle = SavedStateHandle(),
+        prefill: String? = "dana@example.com",
+        rooms: () -> Int = { 2 },
+        send: suspend (String, File) -> HandoffSendResult = { email, _ -> HandoffSendResult.Sent(SentHandoff(email, dec5)) },
+    ) = HandoffViewModel(
+        "Hale kitchen", load = { home(rooms()) }, write = { File.createTempFile("handoff", ".homerecord") },
+        send = send, saved = saved, prefillEmail = { prefill }, zone = utc,
+    )
+
+    @Test fun sendToHomeownerPrefillsTheClientsEmailAndSaysWhereItWentAndUntilWhen() { // AC-F51
+        val to = mutableListOf<String>()
+        val vm = sender(send = { email, file -> to += email; assertThat(file.exists()).isTrue(); HandoffSendResult.Sent(SentHandoff(email, dec5)) })
+        assertThat(vm.state.value.email).isEqualTo("dana@example.com")
+        vm.onEvent(HandoffEvent.EmailChanged(" Dana.Hale@Example.com "))
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(to).containsExactly("dana.hale@example.com")
+        val s = vm.state.value
+        assertThat(s.sending).isFalse()
+        assertThat(s.sentTo).isEqualTo("dana.hale@example.com")
+        assertThat(s.sentUntil).isEqualTo(LocalDate.of(2026, 12, 5))
+        // A second tap does not send twice; Send another clears the sent state.
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(to).hasSize(1)
+        vm.onEvent(HandoffEvent.SendAnother)
+        assertThat(vm.state.value.sentTo).isNull()
+        assertThat(vm.state.value.email).isEqualTo(" Dana.Hale@Example.com ")
+    }
+
+    @Test fun aBadAddressIsCaughtBeforeAnythingIsSent() { // AC-F51
+        var sends = 0
+        val vm = sender(prefill = null, send = { e, _ -> sends++; HandoffSendResult.Sent(SentHandoff(e, dec5)) })
+        assertThat(vm.state.value.email).isEmpty()
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(vm.state.value.emailInvalid).isTrue()
+        vm.onEvent(HandoffEvent.EmailChanged("dana@example"))
+        assertThat(vm.state.value.emailInvalid).isFalse()
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(vm.state.value.emailInvalid).isTrue()
+        assertThat(sends).isEqualTo(0)
+    }
+
+    @Test fun offlineAndTooLargeAreToldAndSendCanBeTriedAgain() { // AC-F51
+        var result: HandoffSendResult = HandoffSendResult.Failed(HandoffSendFailure.Offline)
+        val vm = sender(send = { _, _ -> result })
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(vm.state.value.sendFailure).isEqualTo(HandoffSendFailure.Offline)
+        assertThat(vm.state.value.sending).isFalse()
+        result = HandoffSendResult.Failed(HandoffSendFailure.TooLarge)
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(vm.state.value.sendFailure).isEqualTo(HandoffSendFailure.TooLarge)
+        result = HandoffSendResult.Sent(SentHandoff("dana@example.com", dec5))
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(vm.state.value.sendFailure).isNull()
+        assertThat(vm.state.value.sentTo).isEqualTo("dana@example.com")
+    }
+
+    @Test fun theTypedAddressAndAFinishedSendSurviveProcessDeath() { // AC-F51
+        val saved = SavedStateHandle()
+        val first = sender(saved = saved, prefill = "dana@example.com")
+        first.onEvent(HandoffEvent.EmailChanged("owner@halehome.com"))
+        first.onEvent(HandoffEvent.Send)
+        val restored = sender(saved = saved, prefill = "dana@example.com")
+        assertThat(restored.state.value.email).isEqualTo("owner@halehome.com")
+        assertThat(restored.state.value.sentTo).isEqualTo("owner@halehome.com")
+        assertThat(restored.state.value.sentUntil).isEqualTo(LocalDate.of(2026, 12, 5))
+    }
+
+    @Test fun anEmptyHouseIsNotSent() { // AC-F51
+        var sends = 0
+        val vm = sender(rooms = { 0 }, send = { e, _ -> sends++; HandoffSendResult.Sent(SentHandoff(e, dec5)) })
+        vm.onEvent(HandoffEvent.Send)
+        assertThat(sends).isEqualTo(0)
     }
 }

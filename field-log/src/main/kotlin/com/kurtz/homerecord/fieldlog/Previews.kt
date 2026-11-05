@@ -2415,7 +2415,57 @@ private val haleHandoff = com.kurtz.homerecord.core.bundle.HandoffSummary(
 @Composable
 fun HandoffPreview() = Frame {
     com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
-        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff), {},
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff, email = "dana.hale@gmail.com"), {},
+    )
+}
+
+/** Send to homeowner going out: "Sending…" under the button (AC-B40). */
+@ThemePreviews
+@Composable
+fun HandoffSendingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(
+            loading = false, jobName = "Hale kitchen", summary = haleHandoff, email = "dana.hale@gmail.com", sending = true,
+        ),
+        {},
+    )
+}
+
+/** Sent: where the link went and until when, with Send again (AC-B40). */
+@ThemePreviews
+@Composable
+fun HandoffSentPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(
+            loading = false, jobName = "Hale kitchen", summary = haleHandoff, email = "dana.hale@gmail.com",
+            sentTo = "dana.hale@gmail.com", sentUntil = java.time.LocalDate.of(2026, 12, 5),
+        ),
+        {},
+    )
+}
+
+/** No signal on the jobsite: the reason under Send with Retry; Export still works. */
+@ThemePreviews
+@Composable
+fun HandoffSendOfflinePreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(
+            loading = false, jobName = "Hale kitchen", summary = haleHandoff, email = "dana.hale@gmail.com",
+            sendFailure = com.kurtz.homerecord.core.bundle.HandoffSendFailure.Offline,
+        ),
+        {},
+    )
+}
+
+/** A mistyped address is caught before anything is sent. */
+@ThemePreviews
+@Composable
+fun HandoffEmailInvalidPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(
+            loading = false, jobName = "Hale kitchen", summary = haleHandoff, email = "dana.hale@gmail", emailInvalid = true,
+        ),
+        {},
     )
 }
 

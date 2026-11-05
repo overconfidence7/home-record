@@ -931,3 +931,23 @@ fun HandoffMakingScreenshot() = HandoffMakingPreview()
 @ThemePreviews
 @Composable
 fun HandoffFailedScreenshot() = HandoffFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffSendingScreenshot() = HandoffSendingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffSentScreenshot() = HandoffSentPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffSendOfflineScreenshot() = HandoffSendOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffEmailInvalidScreenshot() = HandoffEmailInvalidPreview()

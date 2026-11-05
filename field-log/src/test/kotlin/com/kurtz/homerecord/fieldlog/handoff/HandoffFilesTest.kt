@@ -6,7 +6,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.bundle.BundleReadResult
 import com.kurtz.homerecord.core.bundle.BundleReader
+import com.kurtz.homerecord.core.bundle.HandoffApi
+import com.kurtz.homerecord.core.bundle.HandoffSendFailure
+import com.kurtz.homerecord.core.bundle.HandoffSendResult
 import com.kurtz.homerecord.core.bundle.HandoffSummary
+import com.kurtz.homerecord.core.bundle.SentHandoff
+import com.kurtz.homerecord.core.data.ClientEntity
+import com.kurtz.homerecord.core.data.JobEntity
 import com.kurtz.homerecord.core.data.FloorEntity
 import com.kurtz.homerecord.core.data.HomeEntity
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
@@ -36,11 +42,45 @@ class HandoffFilesTest {
 
     @After fun tearDown() = db.close()
 
+    private val sent = mutableListOf<List<String?>>()
+    private val api = HandoffApi { companyId, jobId, email, homeName, bundle ->
+        sent += listOf(companyId, jobId, email, homeName, bundle.name)
+        HandoffSendResult.Sent(SentHandoff(email, 1L))
+    }
+    private fun files(company: String? = "co1", zone: () -> ZoneId = ZoneId::systemDefault) = HandoffFiles(context, db, api, { company }, zone)
+
+    private suspend fun job(id: String, homeId: String, status: String = "ACTIVE", address: String? = null, clientId: String? = null) =
+        db.jobDao().upsert(JobEntity(id = id, companyId = "co1", homeId = homeId, clientId = clientId, name = "Hale kitchen", address = address, status = status, createdAt = 1, updatedAt = 1))
+
+    @Test fun theRecipientIsTheActiveJobOnTheHouseWithItsClientsEmail() = runBlocking { // AC-F51
+        db.clientDao().upsert(ClientEntity(id = "c1", companyId = "co1", name = "Dana Hale", email = " dana@example.com ", createdAt = 1, updatedAt = 1))
+        job("j-old", "h1", status = "DONE")
+        job("j1", "h1", address = "12 Hale St", clientId = "c1")
+        job("j2", "h2")
+        assertThat(files().recipient("h1")).isEqualTo(HandoffFiles.Recipient("j1", "12 Hale St", "dana@example.com"))
+        assertThat(files().recipient("h9")).isNull()
+        assertThat(files(company = null).recipient("h1")).isNull()
+    }
+
+    @Test fun sendNamesTheHomeByTheJobsAddressOrElseTheJobName() = runBlocking { // AC-F51
+        job("j1", "h1", address = "12 Hale St")
+        job("j2", "h2")
+        val file = File(context.cacheDir, "x.homerecord")
+        files().send("h1", "Hale kitchen", "dana@example.com", file)
+        files().send("h2", "Garage subpanel", "dana@example.com", file)
+        assertThat(sent).containsExactly(
+            listOf("co1", "j1", "dana@example.com", "12 Hale St", "x.homerecord"),
+            listOf("co1", "j2", "dana@example.com", "Garage subpanel", "x.homerecord"),
+        ).inOrder()
+        assertThat(files(company = null).send("h1", "Hale kitchen", "a@b.co", file))
+            .isEqualTo(HandoffSendResult.Failed(HandoffSendFailure.Failed))
+    }
+
     @Test fun writesTheHouseAsAHomerecordThatReadsBack() = runBlocking { // AC-F51
         db.homeDao().upsert(HomeEntity(id = "h1", name = "12 Hale St", createdAt = 1, updatedAt = 1))
         db.floorDao().upsert(FloorEntity(id = "f1", homeId = "h1", sortOrder = 0, name = "Main floor", createdAt = 1, updatedAt = 1))
         db.roomDao().upsert(RoomEntity(id = "r1", floorId = "f1", name = "Kitchen", createdAt = 1, updatedAt = 1))
-        val files = HandoffFiles(context, db, zone = { ZoneId.of("America/New_York") })
+        val files = files(zone = { ZoneId.of("America/New_York") })
         val home = files.load("h1")
         assertThat(home).isNotNull()
         val file = files.write(checkNotNull(home), "Hale kitchen")
@@ -53,6 +93,6 @@ class HandoffFilesTest {
     }
 
     @Test fun aHouseThatIsGoneLoadsAsNull() = runBlocking { // AC-F51
-        assertThat(HandoffFiles(context, db).load("nope")).isNull()
+        assertThat(files().load("nope")).isNull()
     }
 }

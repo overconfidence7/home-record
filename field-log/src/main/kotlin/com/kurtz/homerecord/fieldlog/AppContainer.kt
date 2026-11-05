@@ -576,7 +576,12 @@ class AppContainer(private val app: Application) {
     ) }
 
     /** The job house's `.homerecord` for the handoff (AC-F51). */
-    val handoffFiles by lazy { com.kurtz.homerecord.fieldlog.handoff.HandoffFiles(app, db) }
+    val handoffFiles by lazy {
+        com.kurtz.homerecord.fieldlog.handoff.HandoffFiles(
+            app, db, com.kurtz.homerecord.core.bundle.RetrofitHandoffApi.create(BuildConfig.API_BASE_URL, http),
+            companyId = { company.current?.companyId },
+        )
+    }
 
     /** Warranty lookup for installed items (AC-C34, AC-F50); queued offline and run when the network is back. */
     val warrantyLookup by lazy {
