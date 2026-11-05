@@ -106,12 +106,20 @@ adb logcat -v time > "$OUT/logs/logcat.txt" 2>/dev/null &
 LOGCAT_PID=$!
 
 # ---------------------------------------------------------------- install
+# [judge:qa-stages-after-failed-install]: every later stage of an app whose debug APK did not install is skipped
+# ("skipped: install failed"); otherwise it runs against whatever was left on the device and reports on that build.
+INSTALLED=""
+installed() { case " $INSTALLED " in *" $1 "*) return 0 ;; esac; return 1; }
+skip_uninstalled() { # stage app -> 0 (and records the skip) when the app's install failed
+  if installed "$2"; then return 1; fi
+  record "$1:$2" skip "skipped: install failed"; return 0
+}
 for a in $APPS; do
   # a leftover build signed with another key (release stage, cached AVD) would fail the install
   adb uninstall "$(pkg_of "$a")" >/dev/null 2>&1 || true
   adb uninstall "$(pkg_of "$a").test" >/dev/null 2>&1 || true
   if [ -f "$APK/$a-debug.apk" ]; then
-    if adb install -r -g "$APK/$a-debug.apk" > "$OUT/logs/install-$a.txt" 2>&1; then record "install:$a" pass "debug apk"; else record "install:$a" fail "$(tail -n 2 "$OUT/logs/install-$a.txt" | tr '\n' ' ')"; fi
+    if adb install -r -g "$APK/$a-debug.apk" > "$OUT/logs/install-$a.txt" 2>&1; then record "install:$a" pass "debug apk"; INSTALLED="$INSTALLED $a"; else record "install:$a" fail "$(tail -n 2 "$OUT/logs/install-$a.txt" | tr '\n' ' ')"; fi
   else
     record "install:$a" fail "no debug apk in $APK"
   fi
@@ -121,6 +129,19 @@ for a in $APPS; do
     record "install-test:$a" skip "no androidTest apk yet (PLAN Q002/Q003)"
   fi
 done
+
+# ---------------------------------------------------------------- backend
+# [judge:qa-wrangler-log]: whether the local backend (qa.yml "Start the backend locally") answers, so a sign-in flow
+# failure can be told from a backend that never started; its log is copied into logs/ at the end.
+if ls "$ROOT"/wrangler-*.log >/dev/null 2>&1; then
+  if curl -fs --max-time 10 http://127.0.0.1:8787/health > "$OUT/logs/backend-health.txt" 2>&1; then
+    record "backend:$APP" pass "GET /health answered"
+  else
+    record "backend:$APP" fail "local backend did not answer GET /health (logs/wrangler-*.log)"
+  fi
+else
+  record "backend:$APP" skip "no local backend started for this job"
+fi
 
 # ------------------------------------------------------------ permissions
 for p in $PKGS; do
@@ -145,6 +166,7 @@ fi
 
 # -------------------------------------------------------------- coldstart
 for a in $PER_APP; do
+  skip_uninstalled coldstart "$a" && continue
   p=$(pkg_of "$a"); times=""
   for i in 1 2 3; do
     adb shell am force-stop "$p" >/dev/null 2>&1
@@ -168,6 +190,7 @@ done
 
 # ------------------------------------------------------------------- seed
 for a in $APPS; do
+  skip_uninstalled seed "$a" && continue
   p=$(pkg_of "$a")
   r=$(adb shell am broadcast --include-stopped-packages -a "$p.qa.SEED" -p "$p" --es scenario regression 2>/dev/null | tr -d '\r')
   if echo "$r" | grep -q "result=1"; then record "seed:$a" pass "regression scenario seeded"; else record "seed:$a" skip "no debug seed receiver yet (PLAN Q005)"; fi
@@ -175,6 +198,7 @@ done
 
 # ------------------------------------------------------------ instrumented
 for a in $PER_APP; do
+  skip_uninstalled instrumented "$a" && continue
   p=$(pkg_of "$a")
   if adb shell pm list packages 2>/dev/null | grep -q "^package:$p.test$"; then
     adb shell "rm -rf /sdcard/Download/qa/$a; mkdir -p /sdcard/Download/qa/$a" >/dev/null 2>&1 || true
@@ -210,7 +234,10 @@ run_flow() { # file label [variant]
   return $rc
 }
 FLOWDIR="qa/flows/$APP"
-if ls "$FLOWDIR"/*.yaml >/dev/null 2>&1; then
+MISSING=""; for a in $APPS; do installed "$a" || MISSING="$MISSING $a"; done
+if [ -n "$MISSING" ]; then
+  record flows skip "skipped: install failed ($MISSING )"
+elif ls "$FLOWDIR"/*.yaml >/dev/null 2>&1; then
   for f in "$FLOWDIR"/*.yaml; do
     label=$(basename "$f" .yaml)
     case "$label" in _*) continue ;; esac   # underscore flows are helpers run by the variants stage
@@ -221,7 +248,7 @@ else
 fi
 
 # --------------------------------------------------------------- variants
-if [ -n "$PER_APP" ] && [ -f "$FLOWDIR/_tour.yaml" ]; then
+if [ -n "$PER_APP" ] && [ -z "$MISSING" ] && [ -f "$FLOWDIR/_tour.yaml" ]; then
   for v in dark font200 landscape; do
     case $v in
       dark) adb shell cmd uimode night yes ;;
@@ -233,13 +260,14 @@ if [ -n "$PER_APP" ] && [ -f "$FLOWDIR/_tour.yaml" ]; then
   done
   adb shell settings put system user_rotation 0; adb shell settings put system font_scale 1.0; adb shell cmd uimode night no
 else
-  record variants skip "no _tour.yaml for $APP"
+  if [ -n "$MISSING" ]; then record variants skip "skipped: install failed ($MISSING )"; else record variants skip "no _tour.yaml for $APP"; fi
 fi
 # collect any screenshots flows left in the maestro dir
 for s in "$OUT"/maestro/*.png; do [ -f "$s" ] && mv "$s" "$OUT/screenshots/"; done
 
 # ----------------------------------------------------------------- monkey
 for a in $PER_APP; do
+  skip_uninstalled monkey "$a" && continue
   p=$(pkg_of "$a")
   adb shell monkey -p "$p" --throttle 40 --pct-syskeys 0 --pct-anyevent 0 -s 42 -v 1500 > "$OUT/logs/monkey-$a.txt" 2>&1
   if grep -q "// CRASH\|// NOT RESPONDING" "$OUT/logs/monkey-$a.txt"; then record "monkey:$a" fail "crash or ANR during monkey (logs/monkey-$a.txt)"; else record "monkey:$a" pass "1500 events, no crash"; fi
@@ -253,6 +281,7 @@ done
 # Under 100 rendered frames the percentage says nothing about scrolling ([judge:qa-jank-no-list]), so the stage
 # reports "not measurable" instead of a number.
 for a in $PER_APP; do
+  skip_uninstalled jank "$a" && continue
   p=$(pkg_of "$a"); bench="$APK/$a-benchmark.apk"; flow="qa/flows/$a/_jank.yaml"
   if [ ! -f "$bench" ]; then record "jank:$a" skip "not measurable: no benchmark apk"; continue; fi
   if [ ! -f "$flow" ]; then record "jank:$a" skip "not measurable: no $flow"; continue; fi
@@ -317,6 +346,7 @@ done
 
 # ---------------------------------------------------------------- release
 for a in $PER_APP; do
+  skip_uninstalled release "$a" && continue
   p=$(pkg_of "$a"); rel="$APK/$a-release.apk"
   if [ ! -f "$rel" ]; then record "release:$a" skip "no release apk"; continue; fi
   signer=$(ls -d "${ANDROID_HOME:-$HOME/.android-sdk}"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -n 1)
@@ -366,7 +396,9 @@ sleep 1; kill $LOGCAT_PID >/dev/null 2>&1 || true
 : > "$OUT/logs/crashes.txt"; : > "$OUT/logs/strictmode.txt"
 # pid of a `-v time` line: "10-30 12:00:00.000 E/Tag( 1234): msg" (the pid is padded, so not a fixed awk field)
 PID_AWK='function pidof_line(l) { if (match(l, /\( *[0-9]+\):/)) { v = substr(l, RSTART + 1, RLENGTH - 3); gsub(/ /, "", v); return v } return "" }'
-for p in $PKGS; do
+for a in $APPS; do
+  p=$(pkg_of "$a")
+  if ! installed "$a"; then record "logcat:$p" skip "skipped: install failed"; continue; fi
   # Lines from other processes (system UI, Google app, the other app in handoff) are not ours: keep only this
   # package's pids. A crash is ours when the line after FATAL EXCEPTION names the package ("Process: <pkg>, PID: n").
   pids=$(sed -n "s/.*Start proc \([0-9][0-9]*\):$p[\/:].*/\1/p" "$OUT/logs/logcat.txt" | sort -u | tr '\n' ' ')
@@ -382,6 +414,8 @@ for p in $PKGS; do
   details="$crashes crashes, $anrs ANRs, $strict StrictMode violations"
   if [ "$crashes" != "0" ] || [ "$anrs" != "0" ]; then record "logcat:$p" fail "$details"; elif [ "$strict" != "0" ]; then record "logcat:$p" warn "$details"; else record "logcat:$p" pass "$details"; fi
 done
+
+for w in "$ROOT"/wrangler-*.log; do [ -f "$w" ] && cp "$w" "$OUT/logs/"; done
 
 echo "device suite for $APP finished"; cat "$STAGES"
 exit 0

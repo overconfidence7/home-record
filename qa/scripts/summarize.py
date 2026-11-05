@@ -166,6 +166,10 @@ def main():
         for s in stages:
             stage_rows.append((app, s["stage"], s["status"], s["details"]))
             st, name, det = s["status"], s["stage"], s["details"]
+            if name.startswith("install:") and st == "fail":
+                # [judge:qa-stages-after-failed-install]: no later stage of that app saw this commit, so the run
+                # does not count as a test of it (qa/last-tested.txt is not advanced)
+                device_ok = False
             shots = sorted(glob.glob(os.path.join(appdir, "screenshots", "*.png")))
             if st == "skip":
                 skipped.append((app, name, det)); continue
