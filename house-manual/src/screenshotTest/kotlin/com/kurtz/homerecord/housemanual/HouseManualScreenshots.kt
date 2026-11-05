@@ -692,3 +692,33 @@ fun PanelsEmptyScreenshot() = PanelsEmptyPreview()
 @ThemePreviews
 @Composable
 fun PanelsLoadingScreenshot() = PanelsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerEditScreenshot() = BreakerEditPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerNewScreenshot() = BreakerNewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerClashScreenshot() = BreakerClashPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerItemPickerScreenshot() = BreakerItemPickerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerLoadingScreenshot() = BreakerLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BreakerMissingScreenshot() = BreakerMissingPreview()

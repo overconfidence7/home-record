@@ -41,7 +41,7 @@ class PanelViewModel(
 
     fun onEvent(e: PanelEvent) {
         when (e) {
-            PanelEvent.Back -> Unit // the route's job
+            PanelEvent.Back, is PanelEvent.OpenSlot -> Unit // the route's job
         }
     }
 }

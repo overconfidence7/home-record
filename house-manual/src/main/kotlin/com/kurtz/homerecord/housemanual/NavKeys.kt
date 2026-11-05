@@ -32,6 +32,9 @@ import kotlinx.serialization.Serializable
 /** HM-Panel for the Breaker panel or Sub-panel item [itemId] (AC-C40). */
 @Serializable data class PanelKey(val itemId: String) : NavKey
 
+/** HM-Breaker: edit [breakerId] on the panel of item [itemId], or add one at [slot] (AC-C40). */
+@Serializable data class BreakerKey(val itemId: String, val slot: Int, val breakerId: String? = null) : NavKey
+
 /** More → Breaker panels when the home has none or several (AC-C40). */
 @Serializable data object PanelsKey : NavKey
 
@@ -41,4 +44,4 @@ import kotlinx.serialization.Serializable
 @Serializable data class PaywallKey(val feature: LimitedFeature? = null) : NavKey
 
 /** Full-screen editors hide the tab bar so only Close/Save or back leaves them (ui-standards rule 3). */
-fun isFullScreen(key: NavKey): Boolean = key is ItemEditKey || key is PaywallKey || key is WallOutlineKey || key is RoomWallKey
+fun isFullScreen(key: NavKey): Boolean = key is ItemEditKey || key is BreakerKey || key is PaywallKey || key is WallOutlineKey || key is RoomWallKey

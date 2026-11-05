@@ -1513,3 +1513,67 @@ fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panels
 @ThemePreviews
 @Composable
 fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }
+
+// HM-Breaker (AC-C40): the Kitchen counter breaker, a GFCI feeding the kitchen and the dishwasher.
+private val breakerRooms = listOf(
+    com.kurtz.homerecord.housemodel.panel.RoomChoice("r-k", "Kitchen"),
+    com.kurtz.homerecord.housemodel.panel.RoomChoice("r-l", "Living room"),
+    com.kurtz.homerecord.housemodel.panel.RoomChoice("r-d", "Dining room"),
+    com.kurtz.homerecord.housemodel.panel.RoomChoice("r-m", "Mudroom"),
+    com.kurtz.homerecord.housemodel.panel.RoomChoice("r-b", "Half bath"),
+)
+
+private val breakerItems = listOf(
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-dw", "Dishwasher", "Bosch", "SHPM88Z75N", ItemCategory.APPLIANCES, "dishwasher", "r-k", "Kitchen", WarrantyStatus.Unknown, createdAt = 1),
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-fr", "Refrigerator", "LG", "LRMVS3006S", ItemCategory.APPLIANCES, "refrigerator", "r-k", "Kitchen", WarrantyStatus.Unknown, createdAt = 2),
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-mw", "Microwave", "GE", "JVM7195SKSS", ItemCategory.APPLIANCES, "microwave", "r-k", "Kitchen", WarrantyStatus.Unknown, createdAt = 3),
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-gd", "Garbage disposal", "InSinkErator", "Evolution Excel", ItemCategory.FIXTURES, "garbage_disposal", "r-k", "Kitchen", WarrantyStatus.Unknown, createdAt = 4),
+    com.kurtz.homerecord.housemodel.items.ItemRow("i-wh", "Water heater", "Rheem", "XE50T10H45U0", ItemCategory.WATER, "water_heater", "r-u", "Utility room", WarrantyStatus.Unknown, createdAt = 5),
+)
+
+private val kitchenCounter = com.kurtz.homerecord.housemodel.panel.BreakerDraft(
+    id = "b2", startSlot = 2, poles = 1, amps = "20", type = com.kurtz.homerecord.core.model.BreakerType.GFCI, label = "Kitchen counter",
+    roomIds = setOf("r-k"), itemIds = setOf("i-dw", "i-gd"),
+)
+
+private fun breakerState(draft: com.kurtz.homerecord.housemodel.panel.BreakerDraft, initial: com.kurtz.homerecord.housemodel.panel.BreakerDraft = draft) =
+    com.kurtz.homerecord.housemanual.panel.BreakerUiState(loading = false, draft = draft, initial = initial, rooms = breakerRooms, items = breakerItems)
+
+@ThemePreviews
+@Composable
+fun BreakerEditPreview() = Frame { com.kurtz.homerecord.housemanual.panel.BreakerScreen(breakerState(kitchenCounter), {}, {}) }
+
+@ThemePreviews
+@Composable
+fun BreakerNewPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.BreakerScreen(breakerState(com.kurtz.homerecord.housemodel.panel.BreakerDraft(startSlot = 14)), {}, {})
+}
+
+@ThemePreviews
+@Composable
+fun BreakerClashPreview() = Frame {
+    // Made two-pole at slot 4, where the Refrigerator breaker sits in slot 6 below it.
+    val draft = com.kurtz.homerecord.housemodel.panel.BreakerDraft(startSlot = 4, poles = 2, amps = "30", label = "Dryer")
+    com.kurtz.homerecord.housemanual.panel.BreakerScreen(
+        breakerState(draft, com.kurtz.homerecord.housemodel.panel.BreakerDraft(startSlot = 4)).copy(
+            placement = com.kurtz.homerecord.core.model.SlotPlacement.Taken(listOf(6)), ampsError = false,
+        ),
+        {}, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun BreakerItemPickerPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.ItemPickerContent(breakerItems, setOf("i-dw", "i-gd"), {})
+}
+
+@ThemePreviews
+@Composable
+fun BreakerLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.BreakerScreen(com.kurtz.homerecord.housemanual.panel.BreakerUiState(), {}, {}) }
+
+@ThemePreviews
+@Composable
+fun BreakerMissingPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.BreakerScreen(com.kurtz.homerecord.housemanual.panel.BreakerUiState(loading = false, missing = true), {}, {})
+}

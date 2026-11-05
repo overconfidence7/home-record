@@ -23,4 +23,7 @@ data class PanelUiState(
 
 sealed interface PanelEvent {
     data object Back : PanelEvent
+
+    /** Tap on a slot: edit [breakerId] there, or add a breaker at [slot] when it is open (AC-C40). */
+    data class OpenSlot(val slot: Int, val breakerId: String?) : PanelEvent
 }

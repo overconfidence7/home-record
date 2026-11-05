@@ -114,4 +114,15 @@ class PanelScreenTest {
         rule.onNodeWithTag("hm_item_detail_panel").performClick()
         assertThat(events).containsExactly(ItemDetailEvent.OpenPanel)
     }
+
+    @Test
+    @AcceptanceCriterion("AC-C40")
+    fun tappingASlotOpensItsBreakerOrAddsOneWhenOpenAndEachTandemHalfOpensItsOwn() {
+        val events = mutableListOf<PanelEvent>()
+        show(state(listOf(b("k", listOf(2), "Kitchen counter"), b("p", listOf(7), "Porch lights", at = 1), b("g", listOf(7), "Garage door", at = 2))), events::add)
+        rule.onNodeWithTag("hm_panel_slot_2").performScrollTo().performClick()
+        rule.onNodeWithTag("hm_panel_slot_5").performScrollTo().performClick()
+        rule.onNodeWithTag("hm_panel_slot_7b").performScrollTo().performClick()
+        assertThat(events).containsExactly(PanelEvent.OpenSlot(2, "k"), PanelEvent.OpenSlot(5, null), PanelEvent.OpenSlot(7, "g")).inOrder()
+    }
 }

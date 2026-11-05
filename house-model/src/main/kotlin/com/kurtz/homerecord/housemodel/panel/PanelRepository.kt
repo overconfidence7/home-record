@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** Item subtypes that open the panel editor (AC-C40). */
 val PANEL_SUBTYPES = setOf("breaker_panel", "sub_panel")
@@ -70,6 +71,9 @@ sealed interface BreakerSave {
     data class Invalid(val fields: Set<BreakerField>, val placement: SlotPlacement?) : BreakerSave
 }
 
+/** A room offered in the breaker editor's "Rooms it feeds". */
+data class RoomChoice(val id: String, val name: String)
+
 /** One panel with its breakers, the grid they make and what each breaker feeds. */
 data class PanelState(
     val panel: Panel,
@@ -105,6 +109,13 @@ class PanelRepository(
             PanelState(panel, breakers, SlotOccupancy.grid(panel.layout, panel.slotCount, breakers), links.groupBy { it.breakerId })
         }
     }
+
+    /** The panel's facts, or null once it is gone. */
+    suspend fun panel(panelId: String): Panel? = db.panelDao().get(panelId)?.toPanel()
+
+    /** The home's rooms a breaker can feed (HM-Breaker, AC-C40), in the order they were drawn. */
+    fun observeRooms(homeId: String): Flow<List<RoomChoice>> =
+        db.roomDao().observeForHome(homeId).map { rooms -> rooms.map { RoomChoice(it.id, it.name) } }
 
     /** Saves panel facts; false when the draft has errors (a slot count below the breakers in use is one). */
     suspend fun savePanel(panelId: String, draft: PanelDraft): Boolean {

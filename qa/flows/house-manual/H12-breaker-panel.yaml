@@ -1,6 +1,6 @@
 # Walkthrough H12 (first part, T066b): open the seeded Main panel item and its slots (AC-C40). Starts from the
-# regression seed (_seed.yaml), which files a Square D breaker panel named "Main panel". Labeling breakers and the
-# fridge's "Breaker 12" link extend this flow with T066c and T067.
+# regression seed (_seed.yaml), which files a Square D breaker panel named "Main panel". T066c labels slot 2 on
+# HM-Breaker; the tandem, panel facts and the fridge's "Breaker 12" link extend this flow with T066c2 and T067.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
@@ -39,6 +39,49 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_panel_slot_2"
 - takeScreenshot: H12-panel
+# AC-C40: tap an open slot to label its breaker (label, amps, type, the room it feeds)
+- tapOn:
+    id: "hm_panel_slot_2"
+- extendedWaitUntil:
+    visible:
+      id: "hm_breaker_label"
+    timeout: 5000
+- assertVisible: "Slot 2"
+- tapOn:
+    id: "hm_breaker_label"
+- inputText: "Kitchen counter"
+- tapOn:
+    id: "hm_breaker_amps"
+- inputText: "20"
+- hideKeyboard
+- tapOn:
+    id: "hm_breaker_type_gfci"
+- scrollUntilVisible:
+    element:
+      id: "hm_breaker_room_qa-kitchen"
+- tapOn:
+    id: "hm_breaker_room_qa-kitchen"
+- takeScreenshot: H12-breaker
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    visible: ".*Kitchen counter.*"
+    timeout: 10000
+- assertVisible: ".*20 A · GFCI.*"
+# Reopen it: the values come back and Delete is offered
+- tapOn:
+    id: "hm_panel_slot_2"
+- extendedWaitUntil:
+    visible:
+      id: "hm_breaker_delete"
+    timeout: 5000
+- assertVisible: "Edit breaker"
+- tapOn:
+    id: "hm_close"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_grid"
+    timeout: 5000
 - scrollUntilVisible:
     element:
       id: "hm_panel_slot_40"
