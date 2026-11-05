@@ -3080,3 +3080,75 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff flows (no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run)
 
 Tested: 67 device stages, 1767 unit tests, 177 backend tests, coverage 379/379 ACs. Passed: 60. New issues: 6. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-05 (commit 323d8128)
+
+Judged the suite results for 323d8128 (run of 2026-11-05 00:21 UTC, 67 stages, 60 passed), which is `build` HEAD's app code (the two later commits are PROGRESS and the QA auto entry). First device run of change orders, Schedule, Clients, Materials and the job summary and photo report PDFs (T056–T061). The 83c76a2b auto entry got no judge entry; its fixes (c4ebb726) are in this sha.
+
+Verdict: House Manual: unchanged in substance and solid on its flows; Kitchen now reads "Kitchen" on the room page and in the editor, so the room-kind fix holds. Nate would still say first that the 3D view is a black box on every run and that Reminders, panel, shutoffs and the home report do not exist yet. / Field Log: the owner features are finally there (change orders with signature, Schedule, Clients, Materials, job summary and photo report), but tapping the job summary's share crashes the app, and the Schedule tab draws its week bar under the status bar clock. Nate would hit the crash in his first minute in Reports.
+
+- [ ] [UI] Major: the Schedule tab has no top inset: the "‹ Week of Nov 2 ›" bar is drawn under the status bar, so the previous-week arrow sits on the clock and the next-week arrow on the battery icon, in light, dark, 200% and landscape, owner and crew. This is likely why F13 fails on `fl_schedule_title`. The builder's reference PNGs are drawn with no status bar, which hides it [judge:fl-schedule-under-statusbar] - steps: Schedule tab on any device - expected: rule 28 (insets from Scaffold, nothing interactive under the status bar) - actual: week arrows overlap 12:10 and the status icons - screenshot: qa-results:latest/field-log/screenshots/flow-F13-schedule-step-048-assertCondition-fl_schedule_title.png (also tour-font200-schedule.png, crawler schedule-team-light.png)
+- [ ] [UI] Minor: a signed change order still opens as "Edit change order" with Close (X) and a greyed-out Save, although the screen is read-only ("This change order is signed and can't be changed."). At 200% the title is cut to "Edit change" [judge:fl-co-signed-edit-title] - steps: Job → Changes → a Signed row - expected: rule 2 (title names the record: the change order's title, with Back), rule 3 (Close/Save only on editors) - actual: editor chrome on a view - screenshot: qa-results:latest/field-log/crawler/field-log/co-form-signed-dark.png
+- [ ] [Minor] Clients shows the phone number as stored ("5550142290") on the device. The catalog shows "(555) 014-2290", so the preview hides it [judge:fl-clients-phone-unformatted] - steps: F18: More → Clients after creating a job with a client phone - expected: rule 22 (formatted values), voice.md - actual: ten bare digits - screenshot: qa-results:latest/field-log/screenshots/flow-F18-more-F18-clients.png
+- [ ] [Product gap] Minor: Reports is one long scroll: range chips, hours card, by person, by job, two export buttons, Delays, Photo reports, then Job summaries. The two new PDFs, which an owner opens on purpose, sit below the fold. With an empty range, the screen scrolls to grey, disabled export buttons and a cut-off "range to see earlier weeks." line [judge:fl-reports-one-long-page] - steps: More → Reports, scroll - expected: PRODUCT.md FL step 8 / F15 (hours, photo report and job summary each easy to reach); rule 12 (hub sections one tap from their content) - actual: three report types stacked on one page - screenshot: qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png
+
+Auto entry review:
+- [auto:flow:field-log:F15-reports] and [auto:logcat:field-log:com.kurtz.homerecord.fieldlog] are the same app crash, not a flow error: `IllegalArgumentException: Failed to find configured root that contains .../cache/reports/Job summary Hale kitchen.pdf` from `JobSummaryPdfMaker.share` → `Intents.shareFile` (FileProvider paths have no `cache/reports/`). The step-060 shot is the launcher. The photo report shares from the same folder, so check it as well.
+- [auto:instrumented:field-log:field-log] is real: `co-form-edit` Remove line buttons are 40×40 dp with no touch padding (rule 30).
+- [auto:flow:field-log:F12-change-order] looks like a flow error [judge: flow error]: the focused Item field sits just above the keyboard (rule 23 holds), and Price each is below the keyboard, where `tapOn` cannot reach it. Scroll to it (or hide the keyboard) first.
+- [auto:flow:field-log:F18-more] looks like a flow error [judge: flow error]: the shot shows the app's correct "Discard changes?" prompt over New receipt. A Back (most likely `hideKeyboard` with no keyboard up) reached the form's Close handler before the Tools chip tap.
+- [auto:flow:field-log:F09b-log-send] is not a flow error this time: the step-066 shot shows the log from its top ("Crew on site" right under the date bar) with "Send again" in the bar, and no Sent line anywhere. The send ran at 23:53 local, close to midnight, so check whether the Sent line is lost when the day rolls over.
+
+Seen this run and fine: change order list with Draft/Signed/Declined icons and Drafts total; change order form with labelled fields, inline "Enter a number above 0."; sign screen with name, pad, approval sentence; signed view with Duplicate; Materials grouped by job with totals and category icons; receipt form with "Use $123.71 from the receipt"; Clients with call/email and job rows; Schedule conflict "Two jobs this day" and the pick-job sheet; crew's own week; Today "Nothing scheduled for you today"; empty states for change orders, receipts and clients (icon, headline, sentence, action); House Manual Kitchen kind, editor names off the stairs, Items by category with warranty lines.
+
+Still open and seen again: [judge:qa-3d-blank-emulator] (H03-3d-room, H09-wall-in-3d black), [v4:editor-marks-over-names] (H11 plan "Ki●n"), [judge:hm-more-signed-in-no-account] (H17 "You are signed in."), [judge:nav-label-200-uneven] (Reminders and Schedule labels smaller at 200% in both apps), [judge:fl-reports-delays-below-empty]. Fixed and confirmed: [judge:hm-room-kind-not-inferred] (H03 "14' by 12' 6" · Kitchen").
+
+House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding to Home | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass; Kind follows the name | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Pass | Blueprint, room page names Kitchen as Kitchen | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-kitchen.png |
+| H4 | Pass | Item form | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Clunky | No flow adds more than one item | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-by-category.png |
+| H6 | Pass | By category, by room, Expired | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Clunky | Place on plan and On a wall work; hero icon still too tall (open) | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-placed.png |
+| H8 | Pass | Stored warranty (catalog, unit tests) | qa-results:latest/house-manual/crawler/house-manual/item-detail-light.png |
+| H9 | Pass | Outline and thumbnail | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Clunky | 3D black on the emulator (open) | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png |
+| H11 | Clunky | Flow passes; plan dot over the room name, 3D blank | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-plan-overlay-picked.png |
+| H17 | Clunky | Signed in; More does not name the account | qa-results:latest/house-manual/screenshots/flow-H17-sign-in-H17-signed-in.png |
+| H19 | Clunky | Paywall with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: H12, H13 (Emergency card only), H14 (Reminders is an empty state with no action until T072), H15, H16, H18.
+
+Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → company → Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview and House empty state | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c | qa-results:latest/field-log/screenshots/tour-landscape-today.png |
+| F5 | Pass | Catalog and unit tests | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup and version history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture from job and Today | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-today-recent-photos.png |
+| F9 | Clunky | Log, weather, delays, PDF preview; after Send the Sent line is missing (auto F09b) | qa-results:latest/field-log/screenshots/flow-F09b-log-send-step-066-assertCondition-fl_log_sent.png |
+| F10 | Clunky | Behind the wall and overlays pass; 3D blank; installed items not built | qa-results:latest/field-log/screenshots/flow-F10b-behind-wall-F10b-behind-wall-finished.png |
+| F11 | Pass | Tasks, pins | qa-results:latest/field-log/screenshots/flow-F11c-file-pin-F11c-file-pin.png |
+| F12 | Clunky | List, form, sign and signed view look right in the catalog; flow stops at the line price (flow error); signed view keeps editor chrome; Remove line under 48 dp | qa-results:latest/field-log/crawler/field-log/co-form-signed-dark.png |
+| F13 | Clunky | Assign, conflicts, crew week work; week bar under the status bar | qa-results:latest/field-log/screenshots/flow-F13-schedule-step-048-assertCondition-fl_schedule_title.png |
+| F14 | Pass | Materials by job with totals, receipt amount suggested (catalog; F18 flow reaches the form) | qa-results:latest/field-log/crawler/field-log/material-form-scanned-font200.png |
+| F15 | Blocked | Job summary share crashes the app (FileProvider root) | qa-results:latest/field-log/screenshots/flow-F15-reports-step-060-assertCondition-Job_summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F18 | Clunky | Clients and Materials open; client phone unformatted; flow stopped on the discard prompt (flow error) | qa-results:latest/field-log/screenshots/flow-F18-more-F18-clients.png |
+
+Not built yet: F17 (T064); installed items (T062); handoff (T063).
+
+Focus check: nothing wrong. Change orders, Schedule, Clients and Materials live only in Field Log, under the job or More. House Manual's tabs are unchanged.
+
+Coverage note: the auto entry reports 379/379 claimed ACs covered across 215 ticked tasks (0 gaps); handoff flows still not written (Q004).
+
+Judged: 51 screenshots opened (13 Field Log and 12 House Manual device shots, 20 Field Log crawler shots, 5 Field Log tour shots, 1 builder reference), 1268 PNGs present. 30 walkthrough steps. New issues: 4. Product gaps: 1.
