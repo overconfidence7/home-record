@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.FilterChip
@@ -158,12 +159,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
     items(rows, key = { it.summary.id }, contentType = { "job" }) { row ->
         RecordListItem(
             headline = row.summary.name,
-            supporting = row.supporting,
+            // A job with no client or address still gets a second line, so it does not read as a bare heading.
+            supporting = row.supporting ?: stringResource(R.string.jobs_row_no_details),
+            leading = { Icon(Icons.Rounded.Work, contentDescription = null) },
             // The job name and address are how the crew tells jobs apart; at 200% beside the date
             // they wrap rather than end in "…" (rule 32).
             headlineMaxLines = 4,
             supportingMaxLines = 4,
-            trailing = row.nextDay?.let { day -> { Text(shortDate(day), style = MaterialTheme.typography.labelLarge) } },
+            // Next day on site as trailing meta; with none, the chevron says the row opens (rule 7).
+            trailing = row.nextDay?.let { day -> { Text(shortDate(day), style = MaterialTheme.typography.labelLarge) } }
+                ?: { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
             onClick = { onEvent(JobsEvent.Open(row.summary.id)) },
             modifier = Modifier.testTag("fl_jobs_row_${row.summary.id}"),
         )
