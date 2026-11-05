@@ -638,10 +638,12 @@ class AppContainer(private val app: Application) {
         { company.current?.let { TenantRef(TenantKind.Company, it.companyId) }?.let { conflictLog.clear(it); syncEngine.clearRefused(it) } },
     )
 
-    /** The units lengths show in on this phone (AC-C4); kept across sign out. */
-    val unitsStore: com.kurtz.homerecord.core.units.UnitsStore by lazy {
-        com.kurtz.homerecord.core.units.PrefsUnitsStore(app.getSharedPreferences("display", Context.MODE_PRIVATE))
-    }
+    /**
+     * The units lengths show in on this phone (AC-C4); kept across sign out. Built with the container so the stored
+     * choice is read on the IO pool during Application.onCreate, before the first frame needs it.
+     */
+    val unitsStore: com.kurtz.homerecord.core.units.UnitsStore =
+        com.kurtz.homerecord.core.units.PrefsUnitsStore({ app.getSharedPreferences("display", Context.MODE_PRIVATE) }, scope)
 
     fun settingsDeps() = com.kurtz.homerecord.fieldlog.settings.SettingsDeps(
         unitsStore,
