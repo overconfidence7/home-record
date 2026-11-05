@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PowerOff
 import androidx.compose.material.icons.rounded.Warning
@@ -187,9 +188,9 @@ private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
         state.results.forEach { r ->
             RecordListItem(
                 headline = r.title,
-                supporting = listOfNotNull(stringResource(kindLabel(r.kind)), r.subtitle).joinToString(" · "),
+                supporting = listOfNotNull(kindLabel(r.kind)?.let { stringResource(it) }, r.subtitle).joinToString(" · ").ifEmpty { null },
                 leading = { ResultIcon(r) },
-                onClick = { onEvent(HomeEvent.OpenResult(r.kind, r.id)) },
+                onClick = { onEvent(HomeEvent.OpenResult(r.kind, r.openId ?: r.id, r.slot)) },
                 modifier = Modifier.testTag("hm_home_result_${r.id}"),
             )
         }
@@ -214,13 +215,15 @@ private fun NoResults(query: String, onEvent: (HomeEvent) -> Unit) {
     }
 }
 
-private fun kindLabel(kind: SearchKind): Int = when (kind) {
+/** A breaker's title or subtitle already reads "Breaker 14", so its row carries no kind word. */
+private fun kindLabel(kind: SearchKind): Int? = when (kind) {
     SearchKind.ITEM -> R.string.search_kind_item
     SearchKind.ROOM -> R.string.search_kind_room
     SearchKind.DOCUMENT -> R.string.search_kind_document
     SearchKind.CONTACT -> R.string.search_kind_contact
     SearchKind.OVERLAY -> R.string.search_kind_overlay
-    SearchKind.SHUTOFF, SearchKind.BREAKER -> R.string.search_kind_item
+    SearchKind.BREAKER -> null
+    SearchKind.SHUTOFF -> R.string.search_kind_item
 }
 
 /** An overlay shows its own kind's icon in its layer color (rule 26, AC-C25); other results the kind's icon in primary. */
@@ -238,5 +241,6 @@ private fun kindIcon(kind: SearchKind): ImageVector = when (kind) {
     SearchKind.ROOM -> Icons.Rounded.MeetingRoom
     SearchKind.DOCUMENT -> Icons.Rounded.Description
     SearchKind.CONTACT -> Icons.Rounded.Person
+    SearchKind.BREAKER -> Icons.Rounded.ElectricalServices
     else -> Icons.Rounded.Inventory2
 }

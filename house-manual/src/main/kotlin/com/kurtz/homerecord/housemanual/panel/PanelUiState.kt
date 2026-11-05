@@ -56,6 +56,9 @@ data class BreakerEditorState(
     val slotProblem: SlotPlacement? get() = placement?.takeIf { it !is SlotPlacement.Ok }
     val ampsError: Boolean get() = showErrors && draft.ampsError()
     val canSave: Boolean get() = slotProblem == null && (dirty || isNew)
+
+    /** What the breaker feeds as picked so far, rooms then items, in the pickers' order (AC-C41). */
+    val feeds: List<String> get() = rooms.filter { it.id in draft.roomIds }.map { it.name } + items.filter { it.id in draft.itemIds }.map { it.name }
 }
 
 /**

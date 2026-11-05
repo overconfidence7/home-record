@@ -185,3 +185,25 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 10000
 - assertVisible: "Main panel"
 - takeScreenshot: H12-panel-highlight
+# T067b2b: Home search finds the breaker by "breaker 12" and opens the panel at that slot (AC-H3, AC-C41)
+- tapOn:
+    id: "hm_tab_home"
+- extendedWaitUntil:
+    visible:
+      id: "hm_home_search"
+    timeout: 5000
+- tapOn:
+    id: "hm_home_search"
+- inputText: "breaker 12"
+- extendedWaitUntil:
+    visible: "Breaker 12 · Main panel · 20 A"
+    timeout: 10000
+- hideKeyboard
+- takeScreenshot: H12-search-breaker
+- tapOn: "Breaker 12 · Main panel · 20 A"
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_slot_12"
+    timeout: 10000
+- assertVisible: "Main panel"
+- takeScreenshot: H12-search-panel-highlight

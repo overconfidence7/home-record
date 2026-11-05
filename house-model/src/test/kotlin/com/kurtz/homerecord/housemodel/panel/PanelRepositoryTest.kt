@@ -154,4 +154,22 @@ class PanelRepositoryTest {
         assertThat(choices.items.map { it.name }).containsExactly("Air conditioner", "dishwasher").inOrder()
         assertThat(choices.rooms).isEmpty()
     }
+
+    // AC-H3: Home search indexes every live breaker of the home with its panel item, so a hit opens that panel.
+    @AcceptanceCriterion("AC-H3")
+    @Test fun homeSearchSeesEveryLiveBreakerWithItsPanelItem() = runTest {
+        db.itemDao().upsert(ItemEntity(id = "other-home-panel", homeId = "h2", category = "ELECTRICAL", subtype = "breaker_panel", name = "Neighbor", createdAt = 2, updatedAt = 2))
+        val main = repo.ensurePanel("panel-item")
+        val other = repo.ensurePanel("other-home-panel")
+        val dryer = (repo.saveBreaker(main, BreakerDraft(startSlot = 27, poles = 2, amps = "30", label = "Dryer")) as BreakerSave.Saved).id
+        val gone = (repo.saveBreaker(main, BreakerDraft(startSlot = 3, label = "Old porch light")) as BreakerSave.Saved).id
+        repo.saveBreaker(other, BreakerDraft(startSlot = 1, label = "Not ours"))
+        repo.deleteBreaker(gone)
+
+        val rows = db.breakerDao().observeForHome("h1").first()
+        assertThat(rows.map { Triple(it.label, it.panelItemId, it.number) }).containsExactly(Triple("Dryer", "panel-item", 27))
+        assertThat(rows.single().breakerId).isEqualTo(dryer)
+        assertThat(rows.single().panelName).isEqualTo("Main panel")
+        assertThat(rows.single().amps).isEqualTo(30)
+    }
 }

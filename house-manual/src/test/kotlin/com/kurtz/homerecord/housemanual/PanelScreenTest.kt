@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -149,8 +150,8 @@ class PanelScreenTest {
         )
         rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { BreakerEditorContent(editor, { events += it }) } }
         rule.onNodeWithText("Slot 2").assertExists()
-        rule.onNodeWithTag("hm_breaker_type_gfci").performClick()
-        rule.onNodeWithTag("hm_breaker_poles_2").performClick()
+        rule.onNodeWithTag("hm_breaker_type_gfci").performScrollTo().performClick()
+        rule.onNodeWithTag("hm_breaker_poles_2").performScrollTo().performClick()
         rule.onNodeWithText("Kitchen").performScrollTo().performClick()
         rule.onNodeWithText("Dishwasher").performScrollTo().performClick()
         rule.onNodeWithTag("hm_breaker_delete").performScrollTo().performClick()
@@ -161,6 +162,26 @@ class PanelScreenTest {
             PanelEvent.ChangeBreaker(draft.copy(itemIds = setOf("dw"))),
             PanelEvent.AskDeleteBreaker,
         ).inOrder()
+    }
+
+    // AC-C41: the breaker shows what it feeds, rooms then items, above the pickers; nothing picked says so.
+    @Test
+    @AcceptanceCriterion("AC-C41")
+    fun theBreakerFormSaysWhatItFeeds() {
+        val rooms = listOf(FeedOption("kit", "Kitchen"), FeedOption("din", "Dining room"))
+        val items = listOf(FeedOption("dw", "Dishwasher"), FeedOption("fr", "Refrigerator"))
+        val feeding = BreakerEditorState(BreakerDraft(id = "k", startSlot = 2, roomIds = setOf("kit"), itemIds = setOf("fr", "dw")), rooms = rooms, items = items)
+        assertThat(feeding.feeds).containsExactly("Kitchen", "Dishwasher", "Refrigerator").inOrder()
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                androidx.compose.foundation.layout.Column {
+                    BreakerEditorContent(feeding, {}, Modifier.weight(1f))
+                    BreakerEditorContent(BreakerEditorState(BreakerDraft(startSlot = 4), rooms = rooms, items = items), {}, Modifier.weight(1f))
+                }
+            }
+        }
+        rule.onNodeWithText("Feeds Kitchen, Dishwasher, Refrigerator").assertExists()
+        rule.onNodeWithText("Feeds nothing yet. Pick the rooms and items below.").assertExists()
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.search
 
 import com.google.common.truth.Truth.assertThat
+import com.kurtz.homerecord.core.data.BreakerSearchRow
 import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.DocumentEntity
@@ -83,5 +84,30 @@ class SearchIndexBuilderTest {
     fun findsOverlaysByTheirRoom() {
         assertThat(ids("garage")).containsAtLeast(SearchKind.ROOM to "r1", SearchKind.OVERLAY to "o1", SearchKind.OVERLAY to "o2")
         assertThat(ids("garage")).doesNotContain(SearchKind.OVERLAY to "o3")
+    }
+
+    // AC-H3: a breaker is found by its label, by "breaker 14" and by its panel; the hit opens the panel item at its slot.
+    @Test @AcceptanceCriterion("AC-H3")
+    fun findsABreakerByLabelNumberAndPanelAndOpensItsPanelAtTheSlot() {
+        val breakers = listOf(
+            BreakerSearchRow("b14", "[14,16]", 20, "Kitchen counters", "panel-item", "Main panel"),
+            BreakerSearchRow("b3", "[3]", null, "", "sub-item", "Garage sub-panel"),
+        )
+        val withBreakers = SearchIndexBuilder.build(
+            items, rooms, consumables, contacts, documents, emptyMap(), breakers = breakers, breakerName = { "Breaker $it" },
+        ) { null }
+        fun hits(q: String) = SearchEngine.search(withBreakers, q).map { it.document }.filter { it.kind == SearchKind.BREAKER }
+
+        val counters = hits("counters").single()
+        assertThat(counters.title).isEqualTo("Kitchen counters")
+        assertThat(counters.subtitle).isEqualTo("Breaker 14 · Main panel · 20 A")
+        assertThat(counters.openId).isEqualTo("panel-item")
+        assertThat(counters.slot).isEqualTo(14)
+        assertThat(hits("breaker 14").map { it.id }).containsExactly("b14")
+        // An unlabeled breaker is titled by its number and found by its panel's name.
+        val unlabeled = hits("garage").single()
+        assertThat(unlabeled.title).isEqualTo("Breaker 3")
+        assertThat(unlabeled.subtitle).isEqualTo("Garage sub-panel")
+        assertThat(unlabeled.slot).isEqualTo(3)
     }
 }

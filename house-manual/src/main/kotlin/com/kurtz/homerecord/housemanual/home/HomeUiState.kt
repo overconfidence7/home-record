@@ -17,8 +17,19 @@ data class HomeUiState(
     val searching: Boolean get() = query.isNotBlank()
 }
 
-/** [subkind] is [com.kurtz.homerecord.core.model.SearchDocument.subkind]: an overlay row draws its kind's icon and color. */
-data class SearchResultRow(val kind: SearchKind, val id: String, val title: String, val subtitle: String?, val subkind: String? = null)
+/**
+ * [subkind] is [com.kurtz.homerecord.core.model.SearchDocument.subkind]: an overlay row draws its kind's icon and color.
+ * A breaker row opens its panel item [openId] at [slot].
+ */
+data class SearchResultRow(
+    val kind: SearchKind,
+    val id: String,
+    val title: String,
+    val subtitle: String?,
+    val subkind: String? = null,
+    val openId: String? = null,
+    val slot: Int? = null,
+)
 
 sealed interface HomeEvent {
     data class OpenItem(val itemId: String) : HomeEvent
@@ -26,5 +37,6 @@ sealed interface HomeEvent {
     data object ScanDataPlate : HomeEvent
     data object AddShutoff : HomeEvent
     data class QueryChanged(val query: String) : HomeEvent
-    data class OpenResult(val kind: SearchKind, val id: String) : HomeEvent
+    /** [id] is what opens: the record itself, or for a breaker its panel item, with the breaker's [slot]. */
+    data class OpenResult(val kind: SearchKind, val id: String, val slot: Int? = null) : HomeEvent
 }

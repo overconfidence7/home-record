@@ -42,3 +42,16 @@ data class BreakerFeedRow(
         type = BreakerType.of(type), label = label, confidence = LinkConfidence.of(breakerConfidence), createdAt = createdAt,
     )
 }
+
+/** A breaker with the panel item it sits in, as Home search indexes it (AC-H3). */
+data class BreakerSearchRow(
+    val breakerId: String,
+    val slotsJson: String,
+    val amps: Int?,
+    val label: String,
+    val panelItemId: String,
+    val panelName: String,
+) {
+    /** The number on the panel door: the first slot (0 when unplaced). */
+    val number: Int get() = decodeSlots(slotsJson).minOrNull() ?: 0
+}

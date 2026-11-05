@@ -63,6 +63,14 @@ fun BreakerEditorContent(editor: BreakerEditorState, onEvent: (PanelEvent) -> Un
         editor.slotProblem?.let {
             Text(slotProblemText(it), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("hm_breaker_slot_error"))
         }
+        // AC-C41: the breaker says what it feeds up top, so a long list of chips below is not the only place to read it.
+        Text(
+            editor.feeds.takeIf { it.isNotEmpty() }?.let { stringResource(R.string.breaker_feeds, it.joinToString(", ")) }
+                ?: stringResource(R.string.breaker_feeds_none),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag("hm_breaker_feeds"),
+        )
         LabeledField(
             label = stringResource(R.string.breaker_label), value = d.label,
             onValueChange = { change(d.copy(label = it.take(60))) },

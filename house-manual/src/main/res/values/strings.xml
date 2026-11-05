@@ -405,6 +405,8 @@
     <string name="breaker_poles_two">2 poles</string>
     <string name="breaker_type">Type</string>
     <string name="breaker_type_standard">Standard</string>
+    <string name="breaker_feeds">Feeds %1$s</string>
+    <string name="breaker_feeds_none">Feeds nothing yet. Pick the rooms and items below.</string>
     <string name="breaker_rooms">Rooms it feeds</string>
     <string name="breaker_rooms_none">No rooms yet. Rooms you draw on the plan show here.</string>
     <string name="breaker_items">Items it feeds</string>

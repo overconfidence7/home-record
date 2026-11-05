@@ -128,6 +128,7 @@ class AppContainer(app: Application) {
 
     val search = com.kurtz.homerecord.housemodel.search.SearchRepository(
         db, overlayKindName = { app.resources.getString(it.nameRes) }, subtypeName = items::subtypeName,
+        breakerName = { app.resources.getString(R.string.item_detail_breaker_chip, it) },
     )
 
     /** Breaker panels and their breakers (AC-C40). */

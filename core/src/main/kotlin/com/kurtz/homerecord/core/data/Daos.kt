@@ -236,6 +236,10 @@ interface BreakerDao {
     @Query("SELECT * FROM breaker WHERE panelId = :parentId AND deletedAt IS NULL ORDER BY createdAt") fun observeFor(parentId: String): Flow<List<BreakerEntity>>
     @Query("SELECT * FROM breaker WHERE panelId = :parentId AND deletedAt IS NULL ORDER BY createdAt") suspend fun listFor(parentId: String): List<BreakerEntity>
     @Query("UPDATE breaker SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
+
+    /** Every live breaker in [homeId]'s live panels with its panel item, for Home search (AC-H3). */
+    @Query("SELECT b.id AS breakerId, b.slotsJson AS slotsJson, b.amps AS amps, b.label AS label, p.itemId AS panelItemId, i.name AS panelName FROM breaker b JOIN panel p ON b.panelId = p.id JOIN item i ON p.itemId = i.id WHERE i.homeId = :homeId AND b.deletedAt IS NULL AND p.deletedAt IS NULL AND i.deletedAt IS NULL ORDER BY i.createdAt, b.createdAt")
+    fun observeForHome(homeId: String): Flow<List<BreakerSearchRow>>
 }
 
 @Dao

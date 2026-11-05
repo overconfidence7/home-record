@@ -137,6 +137,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenOverlay = { id ->
                     scope.launch { container.overlays.get(id)?.let { openOverlay(nav, it) } }
                 },
+                onOpenPanel = { panelItemId, slot -> nav.push(PanelKey(panelItemId, highlightSlot = slot)) },
             )
         }
         entry<HouseKey> {

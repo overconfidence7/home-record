@@ -13,6 +13,9 @@ data class SearchDocument(
     val subtitle: String? = null,
     val fields: List<String> = listOf(title),
     val subkind: String? = null,
+    /** What a hit opens when it is not [id] itself: a breaker opens its panel item ([openId]) at [slot]. */
+    val openId: String? = null,
+    val slot: Int? = null,
 )
 
 data class SearchHit(val document: SearchDocument, val score: Int)

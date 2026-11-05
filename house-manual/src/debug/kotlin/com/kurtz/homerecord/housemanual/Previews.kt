@@ -971,6 +971,7 @@ fun HomeSearchPreview() = Frame {
                 SearchResultRow(SearchKind.ITEM, "i1", "Garage freezer", "Frigidaire FFFH17F4QW"),
                 SearchResultRow(SearchKind.OVERLAY, "o1", "Freezer outlet circuit", "Electrical wire · Garage", "electrical_wire"),
                 SearchResultRow(SearchKind.DOCUMENT, "d1", "Garage door opener manual", "Manuals"),
+                SearchResultRow(SearchKind.BREAKER, "b9", "Garage outlets", "Breaker 9 · Main panel · 20 A", openId = "panel-item", slot = 9),
             ),
         ),
         {},

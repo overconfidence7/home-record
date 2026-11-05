@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.search
 
+import com.kurtz.homerecord.core.data.BreakerSearchRow
 import com.kurtz.homerecord.core.data.ConsumableEntity
 import com.kurtz.homerecord.core.data.ContactEntity
 import com.kurtz.homerecord.core.data.DocumentEntity
@@ -14,6 +15,8 @@ import com.kurtz.homerecord.housemodel.overlays.OverlayKind
  * Turns the home's rows into [SearchDocument]s for [com.kurtz.homerecord.core.model.SearchEngine] (AC-C38, AC-H3).
  * Overlays (AC-C28) are found by label, by their kind's shown name ([overlayKindName]) and by the kind's search words
  * ("pipe" finds supply, drain, vent and gas lines), then by their room; an unlabeled overlay is titled by its kind.
+ * Breakers (AC-H3) are found by label, by "breaker 14" ([breakerName]) and by their panel's name; a hit opens the panel
+ * item at the breaker's slot. A labeled breaker is titled by its label, an unlabeled one by its number.
  */
 object SearchIndexBuilder {
     fun build(
@@ -25,6 +28,8 @@ object SearchIndexBuilder {
         pseudoNames: Map<String, String>,
         overlays: List<OverlayEntity> = emptyList(),
         overlayKindName: (OverlayKind) -> String = { it.wire },
+        breakers: List<BreakerSearchRow> = emptyList(),
+        breakerName: (Int) -> String = { "Breaker $it" },
         subtypeName: (String) -> String?,
     ): List<SearchDocument> {
         val roomNames = rooms.associate { it.id to it.name }
@@ -56,6 +61,18 @@ object SearchIndexBuilder {
                 subkind = kind.wire,
             )
         }
-        return itemDocs + roomDocs + overlayDocs + contactDocs + docDocs
+        val breakerDocs = breakers.map { b ->
+            val label = b.label.trim()
+            val number = b.number.takeIf { it > 0 }?.let(breakerName)
+            val amps = b.amps?.let { "$it A" }
+            SearchDocument(
+                SearchKind.BREAKER, b.breakerId, label.ifEmpty { number ?: b.panelName },
+                subtitle = listOfNotNull(number.takeIf { label.isNotEmpty() }, b.panelName, amps).joinToString(" · "),
+                fields = listOfNotNull(label.ifEmpty { null }, number, b.panelName),
+                openId = b.panelItemId,
+                slot = b.number.takeIf { it > 0 },
+            )
+        }
+        return itemDocs + roomDocs + overlayDocs + breakerDocs + contactDocs + docDocs
     }
 }
