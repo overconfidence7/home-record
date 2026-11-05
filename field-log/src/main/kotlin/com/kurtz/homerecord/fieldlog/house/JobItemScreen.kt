@@ -331,7 +331,7 @@ fun JobItemReviewContent(terms: WarrantyTerms, onEvent: (JobItemEvent) -> Unit, 
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth().testTag("fl_jobitem_review_labor"),
         )
-        terms.specialTerms.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+        terms.specialTerms.forEach { Text(stringResource(com.kurtz.homerecord.housemodel.R.string.warranty_term_bullet, it), style = MaterialTheme.typography.bodyMedium) }
         terms.sourceUrl?.let {
             AssistChip(
                 onClick = { onEvent(JobItemEvent.OpenLink(it)) },

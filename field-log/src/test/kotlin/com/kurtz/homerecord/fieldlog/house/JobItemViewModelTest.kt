@@ -147,4 +147,19 @@ class JobItemViewModelTest {
         assertThat(s.canEdit).isFalse()
         assertThat(s.confirmDelete).isFalse()
     }
+
+    @Test fun crewCannotDeleteLookUpOrRegisterEvenIfAnEventArrives() = runTest {
+        val id = heater()
+        canEdit.value = false
+        val vm = vm(id)
+        vm.await { it.detail != null }
+        vm.onEvent(JobItemEvent.SetRegistered(true))
+        vm.onEvent(JobItemEvent.LookUp(again = false))
+        vm.onEvent(JobItemEvent.ConfirmDelete)
+        val s = vm.await { it.detail != null && !it.lookupBusy }
+        assertThat(s.closed).isFalse()
+        assertThat(s.review).isNull()
+        assertThat(s.detail?.warranty).isNull()
+        assertThat(items.observeRows("h1", emptyMap()).first()).isNotEmpty()
+    }
 }

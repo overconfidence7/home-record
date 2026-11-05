@@ -402,7 +402,7 @@ fun WarrantyReviewContent(terms: WarrantyTerms, onEvent: (ItemDetailEvent) -> Un
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth().testTag("hm_item_detail_review_labor"),
         )
-        terms.specialTerms.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+        terms.specialTerms.forEach { Text(stringResource(com.kurtz.homerecord.housemodel.R.string.warranty_term_bullet, it), style = MaterialTheme.typography.bodyMedium) }
         Text(
             stringResource(R.string.item_detail_warranty_confidence, terms.confidence.lowercase()),
             style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,

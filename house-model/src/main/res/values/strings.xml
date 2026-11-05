@@ -500,4 +500,6 @@
     <string name="item_place_wall_hint">%1$s: tap the wall where this item hangs.</string>
     <string name="item_place_wall_hint_set">Hangs on %1$s. Tap the wall to move it.</string>
     <string name="item_place_wall_canvas">%1$s. Tap where the item hangs.</string>
+    <!-- One special warranty term in the item page's Warranty section, shared by both apps. -->
+    <string name="warranty_term_bullet">• %1$s</string>
 </resources>

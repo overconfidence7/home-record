@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,7 +27,7 @@ class JobItemViewModel(
     private val lookup: WarrantyLookupRepository,
     private val itemId: String,
     detail: Flow<ItemDetail?>,
-    canEdit: Flow<Boolean>,
+    private val canEdit: Flow<Boolean>,
     private val saved: SavedStateHandle,
 ) : ViewModel() {
     private data class Local(
@@ -48,31 +49,39 @@ class JobItemViewModel(
 
     fun onEvent(e: JobItemEvent) {
         when (e) {
-            JobItemEvent.AskDelete -> setConfirm(true)
+            JobItemEvent.AskDelete -> whenEditable { setConfirm(true) }
             JobItemEvent.CancelDelete -> setConfirm(false)
-            JobItemEvent.ConfirmDelete -> viewModelScope.launch {
+            JobItemEvent.ConfirmDelete -> whenEditable {
                 items.delete(itemId)
                 setConfirm(false)
                 setClosed(true)
             }
             JobItemEvent.ClosedHandled -> setClosed(false)
-            is JobItemEvent.LookUp -> lookUp(e.again)
-            JobItemEvent.OpenReview -> viewModelScope.launch {
+            is JobItemEvent.LookUp -> whenEditable { lookUp(e.again) }
+            JobItemEvent.OpenReview -> whenEditable {
                 lookup.reviewTerms(itemId)?.let { t -> local.update { it.copy(review = t) } }
             }
-            is JobItemEvent.ConfirmTerms -> viewModelScope.launch {
-                val terms = local.value.review ?: return@launch
+            is JobItemEvent.ConfirmTerms -> whenEditable {
+                val terms = local.value.review ?: return@whenEditable
                 val edited = e.partsMonths != terms.partsMonths || e.laborMonths != terms.laborMonths
                 lookup.confirm(itemId, terms.copy(partsMonths = e.partsMonths, laborMonths = e.laborMonths), edited)
                 local.update { it.copy(busy = false, note = null, review = null) }
             }
-            JobItemEvent.DiscardTerms -> viewModelScope.launch {
+            JobItemEvent.DiscardTerms -> whenEditable {
                 lookup.discard(itemId)
                 local.update { it.copy(busy = false, note = null, review = null) }
             }
-            is JobItemEvent.SetRegistered -> viewModelScope.launch { items.setRegistered(itemId, e.registered) }
+            is JobItemEvent.SetRegistered -> whenEditable { items.setRegistered(itemId, e.registered) }
             JobItemEvent.Back, JobItemEvent.Edit, JobItemEvent.Place, is JobItemEvent.OpenLink -> Unit // the route navigates
         }
+    }
+
+    /**
+     * Runs a write only for someone allowed to edit the job's house ([r12:jobitem-canedit]): the screen hides the
+     * buttons from read-only crew, and this keeps a stray event (or a stale screen) from writing anyway.
+     */
+    private fun whenEditable(block: suspend () -> Unit) {
+        viewModelScope.launch { if (canEdit.first()) block() }
     }
 
     private fun lookUp(again: Boolean) {
