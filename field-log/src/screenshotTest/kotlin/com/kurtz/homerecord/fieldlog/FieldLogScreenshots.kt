@@ -911,3 +911,23 @@ fun JobItemMissingScreenshot() = JobItemMissingPreview()
 @ThemePreviews
 @Composable
 fun JobItemReviewScreenshot() = JobItemReviewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffScreenshot() = HandoffPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffEmptyScreenshot() = HandoffEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffMakingScreenshot() = HandoffMakingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HandoffFailedScreenshot() = HandoffFailedPreview()

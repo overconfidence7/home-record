@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Outbox
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Polyline
@@ -88,6 +89,8 @@ fun HouseScreen(
     onOpenMark: ((PlanMark) -> Unit)? = null,
     /** The home's name and address over the plan; off in Field Log, whose job top bar already names the job (rule 2). */
     showHeader: Boolean = true,
+    /** Field Log's handoff summary and `.homerecord` export (AC-F51); no button when null. */
+    onHandoff: (() -> Unit)? = null,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -166,6 +169,7 @@ fun HouseScreen(
                     enabled = state.rooms.isNotEmpty() && !state.exporting, onClick = { onEvent(HouseEvent.ExportPdf) },
                 ),
             )
+            if (onHandoff != null) add(HouseAction("${prefix}_house_handoff", Icons.Rounded.Outbox, R.string.house_handoff, onClick = onHandoff))
         }
         val button: @Composable (HouseAction, Modifier) -> Unit = { a, m ->
             OutlinedButton(onClick = a.onClick, enabled = a.enabled, modifier = m.testTag(a.tag)) {

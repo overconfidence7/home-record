@@ -1619,7 +1619,7 @@ private fun JobHousePinsContent() {
             ),
             floorId = "f1", rooms = pinRooms,
         ),
-        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {}, on3D = {}, onBehindWall = {}, onOpenMark = {},
+        onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = {}, on3D = {}, onBehindWall = {}, onOpenMark = {}, onHandoff = {},
         pins = listOf(
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t1", "Task 1: Move the outlet behind the range", 60, 30, 1),
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t2", "Task 2: Replace cracked cover plate by the back door", 216, 110, 2),
@@ -2404,4 +2404,48 @@ fun JobRoomItemsPreview() = Frame {
             ),
         ) {}
     }
+}
+
+private val haleHandoff = com.kurtz.homerecord.core.bundle.HandoffSummary(
+    rooms = 4, wallsWithPhotos = 3, wallPhotos = 7, overlays = 5, items = 2, documents = 1, changeOrders = 2,
+)
+
+/** FL-Handoff for the Hale kitchen: what the homeowner gets and Export .homerecord (AC-F51). */
+@ThemePreviews
+@Composable
+fun HandoffPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff), {},
+    )
+}
+
+/** A job whose house has nothing on it yet: one row says so and Export waits. */
+@ThemePreviews
+@Composable
+fun HandoffEmptyPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(
+            loading = false, jobName = "Garage subpanel",
+            summary = com.kurtz.homerecord.core.bundle.HandoffSummary(0, 0, 0, 0, 0, 0, 0),
+        ),
+        {},
+    )
+}
+
+/** Writing the file: "Making the file…" under a disabled Export. */
+@ThemePreviews
+@Composable
+fun HandoffMakingPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff, exporting = true), {},
+    )
+}
+
+/** The file could not be written (disk full): the reason under Export, which stays on for another try. */
+@ThemePreviews
+@Composable
+fun HandoffFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.handoff.HandoffScreen(
+        com.kurtz.homerecord.fieldlog.handoff.HandoffUiState(loading = false, jobName = "Hale kitchen", summary = haleHandoff, failed = true), {},
+    )
 }

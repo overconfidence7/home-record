@@ -6,6 +6,7 @@
     <cache-path name="change_orders" path="change-orders/" />
     <cache-path name="reports" path="reports/" />
     <cache-path name="downloads" path="downloads/" />
+    <cache-path name="handoff" path="handoff/" />
     <files-path name="media" path="media/" />
     <files-path name="offline_files" path="offline-files/" />
 </paths>

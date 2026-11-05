@@ -575,6 +575,9 @@ class AppContainer(private val app: Application) {
         db, app.resources::getString, onChange = ::recordChange, source = com.kurtz.homerecord.core.data.Sources.FIELD_LOG,
     ) }
 
+    /** The job house's `.homerecord` for the handoff (AC-F51). */
+    val handoffFiles by lazy { com.kurtz.homerecord.fieldlog.handoff.HandoffFiles(app, db) }
+
     /** Warranty lookup for installed items (AC-C34, AC-F50); queued offline and run when the network is back. */
     val warrantyLookup by lazy {
         com.kurtz.homerecord.housemodel.items.WarrantyLookupRepository(

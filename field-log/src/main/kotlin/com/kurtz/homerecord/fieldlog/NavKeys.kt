@@ -39,6 +39,8 @@ import kotlinx.serialization.Serializable
 
 /** FL-Item: an item installed on the job (water heater, panel, fixture) with its warranty (AC-F50). */
 @Serializable data class JobItemKey(val homeId: String, val itemId: String) : NavKey
+/** FL-Handoff: the summary and `.homerecord` export of a job's house (AC-F51). */
+@Serializable data class JobHandoffKey(val homeId: String, val title: String) : NavKey
 
 /** The item form for the job's house (shared with House Manual); [itemId] null adds one in [roomId], [scanPlate] opens the data plate camera first. */
 @Serializable data class JobItemEditKey(val homeId: String, val itemId: String? = null, val roomId: String? = null, val scanPlate: Boolean = false) : NavKey

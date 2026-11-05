@@ -1028,4 +1028,29 @@
     <string name="jobitem_warranty_save">Save terms</string>
     <string name="jobitem_warranty_discard">Discard</string>
     <string name="jobitem_warranty_registered">Registered with the maker</string>
+    <!-- FL-Handoff (AC-F51) -->
+    <string name="handoff_title">Handoff</string>
+    <string name="handoff_intro">The homeowner opens this file in House Manual and keeps the plan, the photos behind the walls and the items you installed.</string>
+    <string name="handoff_included">In the handoff</string>
+    <string name="handoff_rooms">Rooms</string>
+    <string name="handoff_walls">Walls with photos</string>
+    <plurals name="handoff_wall_photos">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <string name="handoff_overlays">Overlays</string>
+    <string name="handoff_items">Items</string>
+    <string name="handoff_documents">Documents</string>
+    <string name="handoff_change_orders">Change orders</string>
+    <string name="handoff_change_orders_note">Signed ones only</string>
+    <string name="handoff_empty_title">Nothing on this house yet</string>
+    <string name="handoff_empty_body">Draw the plan, take photos behind the walls or add items first.</string>
+    <string name="handoff_export">Export .homerecord</string>
+    <string name="handoff_export_help">Send the file by email, text or a shared drive.</string>
+    <string name="handoff_making">Making the file…</string>
+    <string name="handoff_failed">Couldn\'t make the file. Try again.</string>
+    <string name="handoff_share_title">Share the handoff</string>
+    <string name="handoff_missing_title">This house is gone</string>
+    <string name="handoff_missing_body">It was deleted on another phone.</string>
+    <string name="handoff_back">Back to the job</string>
 </resources>

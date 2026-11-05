@@ -42,14 +42,14 @@ class JobHouseLargeTextTest {
         ),
     )
 
-    private fun show(fontScale: Float, onFloors: () -> Unit = {}) {
+    private fun show(fontScale: Float, onFloors: () -> Unit = {}, onHandoff: (() -> Unit)? = null) {
         rule.setContent {
             val d = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(d.density, fontScale)) {
                 HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
                     HouseScreen(
                         state = state, onEvent = {}, onOpenRoom = {}, onEditPlan = {}, onEditShape = {}, onOpenFloors = onFloors,
-                        on3D = {}, onBehindWall = {}, showHeader = false,
+                        on3D = {}, onBehindWall = {}, showHeader = false, onHandoff = onHandoff,
                     )
                 }
             }
@@ -75,5 +75,17 @@ class JobHouseLargeTextTest {
         rule.onNodeWithText("Hale kitchen").assertDoesNotExist()
         listOf("behind_wall", "edit_plan", "3d", "floors", "export").forEach { rule.onNodeWithTag("fl_house_$it").assertExists() }
         rule.onNodeWithTag("fl_house_more").assertDoesNotExist()
+    }
+
+    @Test fun handOffIsAnActionOnlyWhenTheJobOffersIt() { // AC-F51
+        var opened = false
+        show(1f, onHandoff = { opened = true })
+        rule.onNodeWithTag("fl_house_handoff").performClick()
+        assertThat(opened).isTrue()
+    }
+
+    @Test fun withoutTheHandoffThereIsNoHandOffButton() { // AC-F51
+        show(1f)
+        rule.onNodeWithTag("fl_house_handoff").assertDoesNotExist()
     }
 }

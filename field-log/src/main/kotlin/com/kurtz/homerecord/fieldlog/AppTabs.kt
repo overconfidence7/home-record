@@ -182,6 +182,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onBehindWall = { homeId, title -> nav.push(JobBehindWallKey(homeId, title)) },
                     onOpenOverlay = { homeId, title, o -> openJobOverlay(scope, container, nav, homeId, title, null, o) },
                     onOpenItem = { homeId, itemId -> nav.push(JobItemKey(homeId, itemId)) },
+                    onHandoff = { homeId, title -> nav.push(JobHandoffKey(homeId, title)) },
                 ),
                 onEdit = { nav.push(JobEditKey(key.jobId)) }, onBack = nav::pop,
                 onCapture = { nav.push(CaptureKey(key.jobId)) },
@@ -306,6 +307,9 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             )
         }
         entry<JobRoomKey> { key -> JobRoomEntry(container, nav, key.roomId) }
+        entry<JobHandoffKey> { key ->
+            com.kurtz.homerecord.fieldlog.handoff.HandoffRoute(container.handoffFiles, key.homeId, key.title, onBack = nav::pop)
+        }
         entry<JobItemKey> { key ->
             val canEdit = remember { container.roleGates.map { it.canEditHouse } }
             com.kurtz.homerecord.fieldlog.house.JobItemRoute(

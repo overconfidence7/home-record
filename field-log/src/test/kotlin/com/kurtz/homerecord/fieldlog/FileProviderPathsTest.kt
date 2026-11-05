@@ -25,6 +25,7 @@ class FileProviderPathsTest {
             File(context.cacheDir, "change-orders/Change order.pdf"),
             File(context.cacheDir, "exports/Hours.csv"),
             File(context.cacheDir, "downloads/photo.jpg"),
+            File(context.cacheDir, "handoff/Hale kitchen 2026-11-05.homerecord"), // AC-F51
             File(context.filesDir, "media/photo.jpg"),
             File(context.filesDir, "offline-files/plan.pdf"),
         )

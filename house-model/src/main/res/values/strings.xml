@@ -43,6 +43,7 @@
     <string name="cancel">Cancel</string>
     <string name="save_floor">Save</string>
     <string name="house_export_pdf">Export PDF</string>
+    <string name="house_handoff">Hand off</string>
     <string name="house_edit_plan">Edit plan</string>
     <string name="house_more_actions">More actions</string>
     <string name="house_blueprint_hint">Tap a room to open it. Press and hold for more.</string>

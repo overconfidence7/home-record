@@ -43,6 +43,8 @@ class JobHouseDeps(
     val onOpenOverlay: ((homeId: String, title: String, com.kurtz.homerecord.housemodel.overlays.Overlay) -> Unit)? = null,
     /** A tapped item on the blueprint opens FL-Item (T062, AC-F50). */
     val onOpenItem: (homeId: String, itemId: String) -> Unit = { _, _ -> },
+    /** FL-Handoff for the job's house (AC-F51); Owner, Office and Lead only. */
+    val onHandoff: ((homeId: String, title: String) -> Unit)? = null,
 )
 
 @Composable
@@ -100,6 +102,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             val jobTasks by remember(tasks) { tasks?.tasks?.observeForJob(jobId) ?: flowOf(emptyList()) }.collectAsState(emptyList())
             val canManageTasks by remember(tasks) { tasks?.canManage ?: flowOf(false) }.collectAsState(false)
             val pinLabel = stringResource(R.string.task_pin_label)
+            val canHandOff by remember(gates) { gates.map { it.canEditHouse } }.collectAsState(false)
             if (homeId == null) {
                 JobHouseEmpty(onStart = vm::startHouse, modifier = Modifier.fillMaxSize())
             } else {
@@ -127,6 +130,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                     },
                     onOpenPin = { id -> onOpenTask(id) },
                     showHeader = false,
+                    onHandoff = house.onHandoff?.takeIf { canHandOff }?.let { open -> { open(homeId, state.name) } },
                 )
             }
         },

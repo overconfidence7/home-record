@@ -1,0 +1,105 @@
+# Walkthrough F10 (T063b2, AC-F51): "Handoff export produces a .homerecord". Builds a one-room plan on a new job like
+# F10, then House → Hand off: FL-Handoff lists rooms, walls with photos, overlays, items, documents and signed change
+# orders with their counts (Rooms 1), and Export .homerecord opens the share sheet with "<job> <date>.homerecord" (cache/handoff, FileProvider).
+# The file's contents are covered by HandoffFilesTest, HandoffSummaryTest and HomeBundleExporterTest.
+appId: com.kurtz.homerecord.fieldlog
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f10d@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; step along the row by id as F10 does
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-F51: the Owner hands off the job's house
+- scrollUntilVisible:
+    element:
+      id: fl_house_handoff
+- tapOn:
+    id: fl_house_handoff
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_count_rooms
+    timeout: 10000
+- assertVisible: "Rooms"
+- assertVisible: "Walls with photos"
+- assertVisible: "Overlays"
+- assertVisible: "Items"
+- scrollUntilVisible:
+    element:
+      id: fl_handoff_count_change_orders
+- assertVisible: "Documents"
+- assertVisible: "Change orders"
+- scrollUntilVisible:
+    element:
+      id: fl_handoff_export
+- takeScreenshot: F10d-handoff-summary
+- tapOn:
+    id: fl_handoff_export
+- extendedWaitUntil:
+    notVisible:
+      id: fl_handoff_making
+    timeout: 15000
+- takeScreenshot: F10d-handoff-share
+# the system share sheet is on top; leave it like a person who picked nothing (a Back with no sheet would leave FL-Handoff)
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_export
+    timeout: 10000
+- assertNotVisible:
+    id: fl_handoff_failed

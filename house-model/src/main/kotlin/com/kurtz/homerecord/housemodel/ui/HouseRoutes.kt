@@ -52,6 +52,8 @@ fun HouseRoute(
     onOpenItem: (itemId: String, roomId: String) -> Unit = { _, _ -> },
     /** The home's name and address over the plan; Field Log turns it off (its job top bar names the job). */
     showHeader: Boolean = true,
+    /** Field Log's handoff (AC-F51); no button when null. */
+    onHandoff: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -92,6 +94,7 @@ fun HouseRoute(
         on3D = on3D?.let { open -> { open(state.floorId) } },
         onBehindWall = onBehindWall,
         showHeader = showHeader,
+        onHandoff = onHandoff,
         onOpenMark = onOpenOverlay?.let { openOverlay ->
             { mark ->
                 when (val target = mark.target) {
