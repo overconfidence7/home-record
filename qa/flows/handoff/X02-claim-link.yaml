@@ -1,0 +1,162 @@
+# Walkthrough F10 → H18 across both apps (T063d4; AC-F51, AC-B40, AC-H17): the claim link end to end.
+# Field Log: the Owner draws a Kitchen on a job's house, House → Hand off → Send to homeowner (POST /handoff on the
+# local backend; dev keeps the token for /dev/last-handoff instead of mailing it). House Manual: a fresh install is
+# onboarded, opens homerecord://handoff/<token> (what the email page's "Open in House Manual" button does), signs
+# in as the homeowner with the dev email code, claims the link, downloads the bundle and shows the import preview;
+# Import brings the crew's Kitchen into the home. Needs the dev backend (ENVIRONMENT=dev) for /dev/reset,
+# /dev/last-code and /dev/last-handoff. The parts are covered one app at a time by F10e-handoff-send and
+# H18b-claim-link; this flow is the only one that checks a real token issued by Field Log claims in House Manual.
+appId: com.kurtz.homerecord.fieldlog
+env:
+  OWNER: qa-owner-x02@example.test
+  HOMEOWNER: qa-homeowner-x02@example.test
+---
+# ---- Field Log: the Owner sends the handoff
+- launchApp:
+    appId: com.kurtz.homerecord.fieldlog
+    clearState: true
+- runFlow:
+    file: ../field-log/_owner-company.yaml
+    env:
+      EMAIL: ${OWNER}
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Hale kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn: "Hale kitchen"
+# House is the seventh of eight sub-tabs and starts off screen on a phone; step along the row by id as F10 does
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_files
+    timeout: 10000
+- tapOn:
+    id: fl_job_tab_files
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_time
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_time
+- extendedWaitUntil:
+    visible:
+      id: fl_job_tab_house
+    timeout: 5000
+- tapOn:
+    id: fl_job_tab_house
+- tapOn:
+    id: fl_jobhouse_start
+- extendedWaitUntil:
+    visible:
+      id: fl_house_edit_plan
+    timeout: 10000
+- tapOn:
+    id: fl_house_edit_plan
+- extendedWaitUntil:
+    visible:
+      id: fl_plan_add_room
+    timeout: 15000
+- tapOn:
+    id: fl_plan_add_room
+- tapOn:
+    id: fl_plan_room_name
+- eraseText: 20
+- inputText: "Kitchen"
+- hideKeyboard
+- tapOn:
+    id: fl_plan_done
+- tapOn:
+    id: fl_back
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 10000
+# AC-F51: the Owner hands the house off to the homeowner by email
+- scrollUntilVisible:
+    element:
+      id: fl_house_handoff
+- tapOn:
+    id: fl_house_handoff
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_count_rooms
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: fl_handoff_send
+- tapOn:
+    id: fl_handoff_email
+- eraseText: 60
+- inputText: ${HOMEOWNER}
+- hideKeyboard
+- tapOn:
+    id: fl_handoff_send
+- extendedWaitUntil:
+    visible:
+      id: fl_handoff_sent
+    timeout: 30000
+- takeScreenshot: X02-handoff-sent
+# AC-B40: the backend issued a claim token for that address
+- runScript:
+    file: ../_scripts/fetch-dev-handoff.js
+    env:
+      EMAIL: ${HOMEOWNER}
+- assertTrue: ${output.handoffToken != null && output.handoffToken != ''}
+# ---- House Manual: the homeowner opens the link
+- runFlow: ../house-manual/_onboard.yaml
+- openLink: homerecord://handoff/${output.handoffToken}
+# AC-H17: a claim link needs a House Manual account; sign in with the address the link was sent to
+- extendedWaitUntil:
+    visible:
+      id: "hm_claim_sign_in"
+    timeout: 15000
+- tapOn:
+    id: "hm_sign_in_email"
+- inputText: ${HOMEOWNER}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_send"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_code"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: ${HOMEOWNER}
+- assertTrue: ${output.devCode != null && output.devCode != ''}
+- tapOn:
+    id: "hm_sign_in_code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_verify"
+# AC-B40: signed in, the claim succeeds and the bundle downloads; AC-H17: the preview counts the crew's room
+- extendedWaitUntil:
+    visible:
+      id: "hm_import_confirm"
+    timeout: 30000
+- assertNotVisible:
+    id: "hm_claim_error"
+- assertVisible:
+    id: "hm_import_count_room"
+- takeScreenshot: X02-import-preview
+- tapOn:
+    id: "hm_import_confirm"
+- extendedWaitUntil:
+    visible:
+      id: "hm_import_finish"
+    timeout: 20000
+- takeScreenshot: X02-import-done
+- tapOn:
+    id: "hm_import_finish"
+# AC-H17: the crew's Kitchen is now a room of the homeowner's house
+- tapOn:
+    id: "hm_tab_house"
+- extendedWaitUntil:
+    visible: "Kitchen"
+    timeout: 15000
+- takeScreenshot: X02-house-after-claim
