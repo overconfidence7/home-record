@@ -12,12 +12,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.kurtz.homerecord.core.auth.AuthState
 import com.kurtz.homerecord.core.billing.PlanAccess
 import com.kurtz.homerecord.core.billing.plan
+import com.kurtz.homerecord.core.billing.planChangesAt
 import com.kurtz.homerecord.core.company.CompanyMembership
 import com.kurtz.homerecord.fieldlog.billing.PlanRoute
 import com.kurtz.homerecord.core.company.CompanyState
@@ -78,7 +81,18 @@ fun FieldLogApp(container: AppContainer) {
         state is CompanyState.Active -> {
             LaunchedEffect(Unit) { container.pendingJoinCode.value = null }
             val membership = state.membership
-            val plan = membership.plan(System.currentTimeMillis())
+            // Re-worked out when the trial or a paid plan runs out while the app is open ([r12:fl-plan-clock-frozen]).
+            // Short naps: the main thread's delay stops counting while the phone sleeps, the wall clock does not.
+            var clock by remember { mutableLongStateOf(System.currentTimeMillis()) }
+            LaunchedEffect(membership) {
+                clock = System.currentTimeMillis()
+                while (true) {
+                    val next = membership.planChangesAt(System.currentTimeMillis()) ?: break
+                    kotlinx.coroutines.delay((next - System.currentTimeMillis()).coerceIn(1L, 60_000L))
+                    if (System.currentTimeMillis() >= next) clock = System.currentTimeMillis()
+                }
+            }
+            val plan = membership.plan(clock)
             when (plan.access(membership.role)) {
                 PlanAccess.Full -> FieldLogTabs(container, membership)
                 // The plan ended (AC-F56): the Owner gets FL-Paywall as the whole app until a plan is in force again.

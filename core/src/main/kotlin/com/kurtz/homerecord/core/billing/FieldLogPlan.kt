@@ -56,8 +56,19 @@ data class FieldLogPlan(val kind: FieldLogPlanKind, val trialDaysLeft: Int?, val
                 else -> FieldLogPlan(FieldLogPlanKind.Expired, null, 0)
             }
         }
+
+        /**
+         * The next moment the plan worked out by [of] changes on its own (a paid plan or the trial running out), or
+         * null when nothing is due; the app re-works out the plan then, so a plan ending while the app is open shows
+         * the paywall without a restart ([r12:fl-plan-clock-frozen]).
+         */
+        fun nextChangeAt(entitlement: String?, entitlementExpiresAt: Long?, trialEndsAt: Long?, now: Long): Long? =
+            listOfNotNull(entitlementExpiresAt?.takeIf { entitlement != null }, trialEndsAt).filter { it > now }.minOrNull()
     }
 }
 
 /** The plan of this membership at [now]. */
 fun CompanyMembership.plan(now: Long): FieldLogPlan = FieldLogPlan.of(entitlement, entitlementExpiresAt, trialEndsAt, now)
+
+/** When this membership's plan next changes on its own; see [FieldLogPlan.nextChangeAt]. */
+fun CompanyMembership.planChangesAt(now: Long): Long? = FieldLogPlan.nextChangeAt(entitlement, entitlementExpiresAt, trialEndsAt, now)

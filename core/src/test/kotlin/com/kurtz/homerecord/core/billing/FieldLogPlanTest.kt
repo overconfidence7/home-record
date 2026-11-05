@@ -49,4 +49,17 @@ class FieldLogPlanTest {
         assertThat(m.plan(now).kind).isEqualTo(FieldLogPlanKind.Solo)
         assertThat(m.plan(now + 2 * day).access(CompanyRole.Owner)).isEqualTo(PlanAccess.OwnerPaywall)
     }
+
+    // [r12:fl-plan-clock-frozen]: the app wakes at the next moment the plan changes by itself
+    @Test fun theNextChangeIsTheEarliestFutureEndOfAPaidPlanOrTheTrial() {
+        assertThat(FieldLogPlan.nextChangeAt(null, null, trialEndsAt = now + day, now = now)).isEqualTo(now + day)
+        assertThat(FieldLogPlan.nextChangeAt("fieldlog_solo", now + 3 * day, trialEndsAt = now + day, now = now)).isEqualTo(now + day)
+        assertThat(FieldLogPlan.nextChangeAt("fieldlog_crew", now + 3 * day, trialEndsAt = now - day, now = now)).isEqualTo(now + 3 * day)
+        assertThat(FieldLogPlan.nextChangeAt("fieldlog_crew", null, trialEndsAt = now - day, now = now)).isNull()
+        assertThat(FieldLogPlan.nextChangeAt(null, now + day, trialEndsAt = null, now = now)).isNull()
+        assertThat(FieldLogPlan.nextChangeAt("fieldlog_solo", now - 1, trialEndsAt = now - 1, now = now)).isNull()
+        // Just past the moment, the plan it gives is the new one.
+        val ends = checkNotNull(FieldLogPlan.nextChangeAt(null, null, now + day, now))
+        assertThat(FieldLogPlan.of(null, null, now + day, ends).kind).isEqualTo(FieldLogPlanKind.Expired)
+    }
 }
