@@ -30,6 +30,13 @@ class PrefsCompanyCacheTest {
         assertThat(PrefsCompanyCache(context).read()).isEqualTo(membership)
     }
 
+    // AC-F4: More > Account names the signed-in person offline too
+    @Test fun keepsTheSignedInPerson() {
+        val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Crew, null, null, userEmail = "sam@qaelectric.com", userName = "Sam Ortiz")
+        PrefsCompanyCache(context).write(membership)
+        assertThat(PrefsCompanyCache(context).read()).isEqualTo(membership)
+    }
+
     // AC-F33: the company's phone and email, which head the daily log PDF, survive a restart with no network
     @Test fun keepsTheCompanyContactLine() {
         val membership = CompanyMembership("c1", "QA Electric", CompanyRole.Owner, null, null, phone = "(412) 555-0148", email = "office@qaelectric.com")

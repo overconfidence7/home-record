@@ -1,4 +1,4 @@
-# Walkthrough F7: Storage on this phone is listed in More with a Free up action (AC-F20).
+# Walkthrough F7: Storage on this phone is listed in More > Settings with a Free up action (AC-F20; moved to Settings in T065a).
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -7,8 +7,10 @@ appId: com.kurtz.homerecord.fieldlog
     file: _owner-company.yaml
     env:
       EMAIL: "qa-owner-f07b@example.test"
-# AC-F20 (storage part): More lists storage on this phone with Free up
+# AC-F20 (storage part): More > Settings lists storage on this phone with Free up
 - tapOn: "More"
+- tapOn:
+    id: fl_more_settings
 - extendedWaitUntil:
     visible:
       id: fl_more_storage

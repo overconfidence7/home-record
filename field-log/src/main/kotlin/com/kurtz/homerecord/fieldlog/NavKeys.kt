@@ -26,6 +26,12 @@ import kotlinx.serialization.Serializable
 /** More > Sync: sync status and the conflict log (AC-F52, AC-F53). */
 @Serializable data object SyncLogKey : NavKey
 
+/** More > Settings: units, notifications, storage on this phone (T065a). */
+@Serializable data object SettingsKey : NavKey
+
+/** More > About (T065a). */
+@Serializable data object AboutKey : NavKey
+
 @Serializable data class JobEditKey(val jobId: String? = null) : NavKey
 
 /** A job; [tab] (a `JobTab` name) and [day] (ISO yyyy-MM-dd, for the Log tab) open it somewhere other than Overview. */

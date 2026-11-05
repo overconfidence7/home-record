@@ -51,6 +51,9 @@ data class CompanyMembership(
     val email: String? = null,
     /** When [entitlement] lapses; null when it has no end or there is none (AC-B50, AC-F56). */
     val entitlementExpiresAt: Long? = null,
+    /** The signed-in person's own email and name from `/me`, for More > Account (AC-F4). */
+    val userEmail: String? = null,
+    val userName: String? = null,
 )
 
 data class TeamMember(

@@ -675,6 +675,26 @@ fun TaskPinPickerEmptyScreenshot() = TaskPinPickerEmptyPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun SettingsScreenshot() = SettingsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SettingsMetricOffScreenshot() = SettingsMetricOffPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SettingsLoadingScreenshot() = SettingsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AboutScreenshot() = AboutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun SyncLogUpToDateScreenshot() = SyncLogUpToDatePreview()
 
 @PreviewTest

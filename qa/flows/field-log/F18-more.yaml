@@ -1,6 +1,6 @@
 # Walkthrough F18 (T060a): the screens in More open and return. Clients (AC-F45): a job named with a client,
 # phone and email puts that client on More → Clients with Call, Email and the job under them; the job row opens
-# the job. Materials, Billing and Settings join this flow when T060b, T064 and T065 build them.
+# the job. Materials (T060b) is below; Settings, About and the signed-in account (T065a, AC-F4, AC-C4) close the flow.
 appId: com.kurtz.homerecord.fieldlog
 ---
 - launchApp:
@@ -134,3 +134,49 @@ appId: com.kurtz.homerecord.fieldlog
 - back
 - assertVisible:
     id: fl_more_materials
+# T065a (AC-F4): More names the signed-in account
+- assertVisible:
+    id: fl_more_account
+- assertVisible: "Signed in as qa-owner-f18@example.test"
+# T065a (AC-C4, AC-F20): Settings picks units, shows notifications and storage, and returns
+- scrollUntilVisible:
+    element:
+      id: fl_more_settings
+    direction: DOWN
+- assertVisible: "Feet and inches"
+- tapOn:
+    id: fl_more_settings
+- extendedWaitUntil:
+    visible:
+      id: fl_settings_list
+    timeout: 10000
+- assertVisible:
+    id: fl_settings_notifications
+- tapOn:
+    id: fl_settings_units_metric
+- extendedWaitUntil:
+    visible:
+      id: fl_more_storage
+    timeout: 10000
+- takeScreenshot: F18-settings
+- back
+- scrollUntilVisible:
+    element:
+      id: fl_more_settings
+    direction: DOWN
+- assertVisible: "Metric"
+# T065a: About shows the version and returns
+- scrollUntilVisible:
+    element:
+      id: fl_more_about
+    direction: DOWN
+- tapOn:
+    id: fl_more_about
+- extendedWaitUntil:
+    visible:
+      id: fl_about_version
+    timeout: 10000
+- takeScreenshot: F18-about
+- back
+- assertVisible:
+    id: fl_more_about

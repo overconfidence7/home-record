@@ -628,8 +628,21 @@ class AppContainer(private val app: Application) {
         { company.current?.let { TenantRef(TenantKind.Company, it.companyId) }?.let { conflictLog.clear(it); syncEngine.clearRefused(it) } },
     )
 
+    /** The units lengths show in on this phone (AC-C4); kept across sign out. */
+    val unitsStore: com.kurtz.homerecord.core.units.UnitsStore by lazy {
+        com.kurtz.homerecord.core.units.PrefsUnitsStore(app.getSharedPreferences("display", Context.MODE_PRIVATE))
+    }
+
+    fun settingsDeps() = com.kurtz.homerecord.fieldlog.settings.SettingsDeps(
+        unitsStore,
+        notificationsEnabled = { androidx.core.app.NotificationManagerCompat.from(app).areNotificationsEnabled() },
+        storage = jobFileTransfers::storage,
+        freeUp = { jobFileTransfers.freeUp() },
+    )
+
     fun moreDeps(membership: com.kurtz.homerecord.core.company.CompanyMembership) = com.kurtz.homerecord.fieldlog.more.MoreDeps(
-        membership.companyName, membership.role, syncEngine.pendingCount, jobFileTransfers::storage, { jobFileTransfers.freeUp() },
+        membership.companyName, membership.role, syncEngine.pendingCount, unitsStore.units,
+        userEmail = membership.userEmail, versionName = BuildConfig.VERSION_NAME,
         plan = com.kurtz.homerecord.core.billing.FieldLogPlan.of(
             membership.entitlement, membership.entitlementExpiresAt, membership.trialEndsAt, System.currentTimeMillis(),
         ),

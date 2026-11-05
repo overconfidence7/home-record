@@ -24,6 +24,8 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
             phone = prefs.getString(PHONE, null),
             email = prefs.getString(EMAIL, null),
             entitlementExpiresAt = prefs.getLong(ENTITLEMENT_EXPIRES, -1L).takeIf { it >= 0 },
+            userEmail = prefs.getString(USER_EMAIL, null),
+            userName = prefs.getString(USER_NAME, null),
         )
     }
 
@@ -44,6 +46,8 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
             it.settings.timeZone?.let { z -> editor.putString(TIME_ZONE, z) }
             it.phone?.let { p -> editor.putString(PHONE, p) }
             it.email?.let { e -> editor.putString(EMAIL, e) }
+            it.userEmail?.let { e -> editor.putString(USER_EMAIL, e) }
+            it.userName?.let { n -> editor.putString(USER_NAME, n) }
         }
         editor.apply()
     }
@@ -63,5 +67,7 @@ class PrefsCompanyCache(context: Context) : CompanyCache {
         const val TIME_ZONE = "time_zone"
         const val PHONE = "phone"
         const val EMAIL = "email"
+        const val USER_EMAIL = "user_email"
+        const val USER_NAME = "user_name"
     }
 }

@@ -320,8 +320,9 @@ fun TodayCrewNothingScheduledPreview() = Frame {
 fun MoreOwnerPreview() = Frame {
     MoreScreen(
         MoreUiState(
-            "Kurtz Electric", CompanyRole.Owner, com.kurtz.homerecord.core.photo.FileStorage(24_500_000, 112_000_000),
+            "Kurtz Electric", CompanyRole.Owner,
             plan = com.kurtz.homerecord.core.billing.FieldLogPlan(com.kurtz.homerecord.core.billing.FieldLogPlanKind.Trial, 9, 10),
+            userEmail = "nate@kurtzelectric.com", versionName = "0.1.0",
         ),
         {},
     )
@@ -329,11 +330,44 @@ fun MoreOwnerPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun MoreCrewPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew), {}) }
+fun MoreCrewPreview() = Frame {
+    MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew, userEmail = "sam.ortiz@gmail.com", versionName = "0.1.0"), {})
+}
 
 @ThemePreviews
 @Composable
 fun MoreLeadPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Lead), {}) }
+
+@ThemePreviews
+@Composable
+fun SettingsPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.settings.SettingsScreen(
+        com.kurtz.homerecord.fieldlog.settings.SettingsUiState(
+            storage = com.kurtz.homerecord.core.photo.FileStorage(24_500_000, 112_000_000),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun SettingsMetricOffPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.settings.SettingsScreen(
+        com.kurtz.homerecord.fieldlog.settings.SettingsUiState(
+            com.kurtz.homerecord.core.units.UnitSystem.METRIC, notificationsOn = false,
+            storage = com.kurtz.homerecord.core.photo.FileStorage(2_400_000, 0),
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun SettingsLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.settings.SettingsScreen(com.kurtz.homerecord.fieldlog.settings.SettingsUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun AboutPreview() = Frame { com.kurtz.homerecord.fieldlog.settings.AboutScreen(com.kurtz.homerecord.fieldlog.settings.AboutUiState("0.1.0", 1), {}) }
 
 /** Fixed times (Oct 28, 2026 in the afternoon, UTC) keep the screenshots stable. */
 private val sampleConflicts = listOf(

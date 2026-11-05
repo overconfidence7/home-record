@@ -935,3 +935,11 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - During the trial or a paid plan the Owner reaches the same screen from More → Plan (row supporting text "Trial, N days left" / Solo / Crew); other roles have no Plan row.
 - After the store reports a purchase or restore the screen says "<plan> is on. It can take a minute to reach every phone." and re-reads `/me`; the plan in force always comes from the backend (webhook, AC-B50), never from the store answer alone.
 - QA: dev-only `POST /dev/age-company {email, days=15}` moves the company the email owns back that many days (created_at and trial_ends_at), standing in for the walkthrough's "set the company creation date back 15 days in the debug menu". Flow F17-trial-expiry uses it.
+
+## 2026-11-05 — T065a FL-Settings, About and the account line
+
+- T065 split into T065a (Settings, About, account) and T065b (units applied to the house screens).
+- Units are a per-phone display choice (`:core` `UnitsStore`, plain SharedPreferences `display`), kept across sign out because it is not company data. The `Home.units` column stays as the home's own record; T065b decides how the two combine (phone choice wins for display).
+- Storage on this phone with Free up moved from the More root into Settings, as SPEC FL-More lists offline storage under Settings. Test tags `fl_more_storage` / `fl_more_free_up` kept so F07b only gained one tap.
+- Account: More's header names "Signed in as <email>" (from `/me` `user`, now cached with the membership) and Sign out stays on the More root with its confirm. No separate Account screen: it would hold only those two things.
+- Units are two radio rows, not a segmented row: "Feet and inches" wraps at 200% and a segment cannot (rule 32).

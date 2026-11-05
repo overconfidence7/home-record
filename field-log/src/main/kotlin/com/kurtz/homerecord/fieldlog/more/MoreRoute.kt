@@ -1,7 +1,6 @@
 package com.kurtz.homerecord.fieldlog.more
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,11 +18,12 @@ fun MoreRoute(
     onOpenClients: () -> Unit,
     onOpenMaterials: () -> Unit,
     onOpenSync: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenAbout: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val vm = viewModel<MoreViewModel>(factory = viewModelFactory { initializer { MoreViewModel(deps()) } })
     val state by vm.state.collectAsState()
-    LaunchedEffect(vm) { vm.refresh() }
     MoreScreen(state, onEvent = { event ->
         when (event) {
             MoreEvent.OpenTeam -> onOpenTeam()
@@ -34,7 +34,8 @@ fun MoreRoute(
             MoreEvent.OpenClients -> onOpenClients()
             MoreEvent.OpenMaterials -> onOpenMaterials()
             MoreEvent.OpenSync -> onOpenSync()
-            MoreEvent.FreeUp -> vm.freeUp()
+            MoreEvent.OpenSettings -> onOpenSettings()
+            MoreEvent.OpenAbout -> onOpenAbout()
             MoreEvent.SignOut -> onSignOut()
         }
     })

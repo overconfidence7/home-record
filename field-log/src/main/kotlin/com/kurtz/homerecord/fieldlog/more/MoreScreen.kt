@@ -2,7 +2,6 @@ package com.kurtz.homerecord.fieldlog.more
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -17,7 +16,8 @@ import androidx.compose.material.icons.rounded.Handshake
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,24 +36,26 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.billing.FieldLogPlan
 import com.kurtz.homerecord.core.billing.FieldLogPlanKind
 import com.kurtz.homerecord.core.company.CompanyRole
-import com.kurtz.homerecord.core.media.ByteSize
-import com.kurtz.homerecord.core.photo.FileStorage
+import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.company.roleLabel
+import com.kurtz.homerecord.fieldlog.settings.unitsLabel
 
 /**
- * [storage] is what job files hold on this phone (AC-F20); null while it is being counted. [unsynced] is the count of
- * changes not yet sent, which sign-out would delete (AC-F4).
+ * [unsynced] is the count of changes not yet sent, which sign-out would delete (AC-F4). [userEmail] names the account
+ * signed in on this phone under the company; [units] and [versionName] are the Settings and About rows' supporting lines.
  */
 data class MoreUiState(
     val companyName: String,
     val role: CompanyRole,
-    val storage: FileStorage? = null,
     val unsynced: Int = 0,
     /** The company's plan; the Plan row (FL-Paywall, AC-F56) is the Owner's only. */
     val plan: FieldLogPlan? = null,
+    val userEmail: String? = null,
+    val units: UnitSystem = UnitSystem.IMPERIAL,
+    val versionName: String? = null,
 )
 
 sealed interface MoreEvent {
@@ -65,7 +67,8 @@ sealed interface MoreEvent {
     data object OpenClients : MoreEvent
     data object OpenMaterials : MoreEvent
     data object OpenSync : MoreEvent
-    data object FreeUp : MoreEvent
+    data object OpenSettings : MoreEvent
+    data object OpenAbout : MoreEvent
     data object SignOut : MoreEvent
 }
 
@@ -79,8 +82,16 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             roleLabel(state.role),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = if (state.userEmail == null) 12.dp else 0.dp),
         )
+        state.userEmail?.let { email ->
+            Text(
+                stringResource(R.string.more_signed_in_as, email),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp).testTag("fl_more_account"),
+            )
+        }
         if (state.role.isAdmin) {
             RecordListItem(
                 headline = stringResource(R.string.more_team),
@@ -145,21 +156,20 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             onClick = { onEvent(MoreEvent.OpenSync) },
             modifier = Modifier.testTag("fl_more_sync"),
         )
-        state.storage?.let { s ->
-            RecordListItem(
-                headline = stringResource(R.string.more_storage),
-                supporting = stringResource(R.string.more_storage_detail, ByteSize.label(s.totalBytes), ByteSize.label(s.offlineBytes)),
-                // The numbers are the point of the row; at 200% they wrap instead of ending in "…" (rule 32).
-                supportingMaxLines = Int.MAX_VALUE,
-                leading = { Icon(Icons.Rounded.Storage, contentDescription = null) },
-                trailing = {
-                    TextButton({ onEvent(MoreEvent.FreeUp) }, Modifier.heightIn(min = 48.dp).testTag("fl_more_free_up"), enabled = s.cachedBytes > 0) {
-                        Text(stringResource(R.string.more_free_up))
-                    }
-                },
-                modifier = Modifier.testTag("fl_more_storage"),
-            )
-        }
+        RecordListItem(
+            headline = stringResource(R.string.more_settings),
+            supporting = unitsLabel(state.units),
+            leading = { Icon(Icons.Rounded.Settings, contentDescription = null) },
+            onClick = { onEvent(MoreEvent.OpenSettings) },
+            modifier = Modifier.testTag("fl_more_settings"),
+        )
+        RecordListItem(
+            headline = stringResource(R.string.more_about),
+            supporting = state.versionName?.let { stringResource(R.string.about_version_short, it) },
+            leading = { Icon(Icons.Rounded.Info, contentDescription = null) },
+            onClick = { onEvent(MoreEvent.OpenAbout) },
+            modifier = Modifier.testTag("fl_more_about"),
+        )
         RecordListItem(
             headline = stringResource(R.string.more_sign_out),
             leading = { Icon(Icons.Rounded.Logout, contentDescription = null) },

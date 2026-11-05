@@ -2,54 +2,31 @@ package com.kurtz.homerecord.fieldlog.more
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.billing.FieldLogPlan
 import com.kurtz.homerecord.core.company.CompanyRole
-import com.kurtz.homerecord.core.photo.FileStorage
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import com.kurtz.homerecord.core.units.UnitSystem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/** What FL-More needs from the app: who is signed in, the unsent change count and the job file storage (AC-F4, AC-F20). */
+/** What FL-More needs from the app: who is signed in, the unsent change count, the units choice and the version (AC-F4). */
 class MoreDeps(
     val companyName: String,
     val role: CompanyRole,
     val unsynced: Flow<Int>,
-    val storage: suspend () -> FileStorage,
-    val freeUp: suspend () -> Unit,
-    val io: CoroutineDispatcher = Dispatchers.IO,
-    val plan: com.kurtz.homerecord.core.billing.FieldLogPlan? = null,
+    val units: StateFlow<UnitSystem>,
+    val userEmail: String? = null,
+    val versionName: String? = null,
+    val plan: FieldLogPlan? = null,
 )
 
-/** FL-More: counts what job files hold on this phone and frees the cached copies; navigation stays in the route. */
+/** FL-More: the rows and their supporting lines; navigation stays in the route. Storage moved to Settings (T065a). */
 class MoreViewModel(private val deps: MoreDeps) : ViewModel() {
-    private val storage = MutableStateFlow<FileStorage?>(null)
-    private var freeing = false
+    private fun state(unsynced: Int, units: UnitSystem) =
+        MoreUiState(deps.companyName, deps.role, unsynced, deps.plan, deps.userEmail, units, deps.versionName)
 
-    val state: StateFlow<MoreUiState> = combine(deps.unsynced, storage) { unsynced, s ->
-        MoreUiState(deps.companyName, deps.role, s, unsynced, deps.plan)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, MoreUiState(deps.companyName, deps.role, plan = deps.plan))
-
-    fun freeUp() {
-        if (freeing) return
-        freeing = true
-        viewModelScope.launch {
-            try {
-                withContext(deps.io) { deps.freeUp() }
-                storage.value = withContext(deps.io) { deps.storage() }
-            } finally {
-                freeing = false
-            }
-        }
-    }
-
-    /** Counts again; the route calls it each time More is shown, since downloads elsewhere change the total. */
-    fun refresh() {
-        viewModelScope.launch { storage.value = withContext(deps.io) { deps.storage() } }
-    }
+    val state: StateFlow<MoreUiState> = combine(deps.unsynced, deps.units) { unsynced, units -> state(unsynced, units) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, state(0, deps.units.value))
 }

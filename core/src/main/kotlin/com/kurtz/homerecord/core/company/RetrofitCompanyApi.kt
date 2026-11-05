@@ -39,8 +39,12 @@ interface CompanyService {
 
 class RetrofitCompanyApi(private val service: CompanyService) : CompanyApi {
     override suspend fun me() = call {
-        service.me().memberships.filter { it.kind == "company" }.map {
-            CompanyMembership(it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement, it.settings.toSettings(), it.phone, it.email, it.entitlementExpiresAt)
+        val me = service.me()
+        me.memberships.filter { it.kind == "company" }.map {
+            CompanyMembership(
+                it.id, it.name, CompanyRole.fromWire(it.role), it.trialEndsAt, it.entitlement, it.settings.toSettings(), it.phone, it.email,
+                it.entitlementExpiresAt, userEmail = me.user.email, userName = me.user.name,
+            )
         }
     }
 

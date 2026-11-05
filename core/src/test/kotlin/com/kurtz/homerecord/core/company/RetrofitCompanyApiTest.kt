@@ -30,11 +30,14 @@ private class Recorder(val code: Int = 200, val body: String = "{}") {
 
 class RetrofitCompanyApiTest {
     @Test fun meKeepsOnlyCompanyMemberships() = runTest {
-        val r = Recorder(body = """{"user":{"id":"u","email":"a@b.com"},"memberships":[
+        val r = Recorder(body = """{"user":{"id":"u","email":"a@b.com","name":"Ana Ruiz"},"memberships":[
             {"kind":"home","id":"h1","role":"owner","name":"Home"},
             {"kind":"company","id":"c1","role":"lead","name":"Kurtz Builders","trialEndsAt":5}]}""")
         val result = r.api().me() as ApiResult.Ok
-        assertThat(result.value).containsExactly(CompanyMembership("c1", "Kurtz Builders", CompanyRole.Lead, 5, null))
+        // AC-F4: the signed-in person's own email and name ride along for More > Account
+        assertThat(result.value).containsExactly(
+            CompanyMembership("c1", "Kurtz Builders", CompanyRole.Lead, 5, null, userEmail = "a@b.com", userName = "Ana Ruiz"),
+        )
     }
 
     // AC-F9, AC-F12, AC-F13, AC-F18 (cr:fl-settings-source): the clock rules arrive with the membership for every role
