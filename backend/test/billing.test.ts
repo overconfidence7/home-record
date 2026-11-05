@@ -147,6 +147,13 @@ describe("AC-F56 member limit on join", () => {
     expect(await json(res)).toMatchObject({ error: "member_limit", plan: "trial", limit: 10 });
   });
 
+  it("two crew joining at the last open seat do not both get in", async () => {
+    const { code } = await companyWithCode("race");
+    for (let i = 0; i < 8; i++) expect((await join(`race${i}`, code)).status).toBe(201);
+    const [a, b] = await Promise.all([join("race-a", code), join("race-b", code)]);
+    expect([a.status, b.status].sort()).toEqual([201, 409]);
+  });
+
   it("an expired company takes nobody new", async () => {
     const { id, code } = await companyWithCode("exp");
     await env.DB.prepare("UPDATE companies SET trial_ends_at = 1 WHERE id = ?").bind(id).run();

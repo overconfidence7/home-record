@@ -84,15 +84,21 @@ company.post("/companies/join", requireSession, async (c) => {
        (SELECT COUNT(*) FROM memberships m WHERE m.tenant_kind = 'company' AND m.tenant_id = c.id) AS members
      FROM companies c WHERE c.id = ?`,
   ).bind(row.company_id).first<{ entitlement: string | null; entitlement_expires_at: number | null; trial_ends_at: number | null; members: number }>();
-  if (plan) {
-    const current = companyPlan(plan, Date.now());
-    if (current === "expired") return c.json({ error: "subscription_required" }, 402);
-    const limit = memberLimit(current);
-    if (plan.members >= limit) return c.json({ error: "member_limit", plan: current, limit }, 409);
-  }
-  await c.env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at) VALUES (?, ?, 'company', ?, 'crew', ?)")
-    .bind(crypto.randomUUID(), session.userId, row.company_id, Date.now())
+  if (!plan) return c.json({ error: "invalid_code" }, 404);
+  const current = companyPlan(plan, Date.now());
+  if (current === "expired") return c.json({ error: "subscription_required" }, 402);
+  const limit = memberLimit(current);
+  if (plan.members >= limit) return c.json({ error: "member_limit", plan: current, limit }, 409);
+  // [r12:join-limit-race]: the count and the insert are one statement, so two crew joining at the last open seat
+  // cannot both get in; the one that finds the company full gets the same 409 as above.
+  const inserted = await c.env.DB.prepare(
+    `INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at)
+     SELECT ?, ?, 'company', ?, 'crew', ?
+     WHERE (SELECT COUNT(*) FROM memberships m WHERE m.tenant_kind = 'company' AND m.tenant_id = ?) < ?`,
+  )
+    .bind(crypto.randomUUID(), session.userId, row.company_id, Date.now(), row.company_id, limit)
     .run();
+  if (!inserted.meta.changes) return c.json({ error: "member_limit", plan: current, limit }, 409);
   return c.json({ id: row.company_id, role: "crew" }, 201);
 });
 
