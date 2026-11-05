@@ -126,6 +126,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
                         }.filterNotNull()
                     },
                     onOpenPin = { id -> onOpenTask(id) },
+                    showHeader = false,
                 )
             }
         },

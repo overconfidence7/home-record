@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Polyline
@@ -30,7 +31,10 @@ import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.ViewInAr
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -82,10 +86,12 @@ fun HouseScreen(
     onBehindWall: (() -> Unit)? = null,
     /** A tapped wall overlay, plan overlay or item on the blueprint (T055a); marks are not tappable when null. */
     onOpenMark: ((PlanMark) -> Unit)? = null,
+    /** The home's name and address over the plan; off in Field Log, whose job top bar already names the job (rule 2). */
+    showHeader: Boolean = true,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        if (showHeader) Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(state.homeName, style = MaterialTheme.typography.headlineMedium)
             Text(state.summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -103,7 +109,7 @@ fun HouseScreen(
         }
     }
     val canvas: @Composable (Modifier) -> Unit = { canvasModifier ->
-        Box(canvasModifier.fillMaxWidth()) {
+        Box(canvasModifier.fillMaxWidth().testTag("${LocalTagPrefix.current}_house_plan")) {
             if (state.rooms.isEmpty()) {
                 EmptyState(
                     icon = Icons.Rounded.GridView,
@@ -145,53 +151,69 @@ fun HouseScreen(
     }
     val layerRow: @Composable () -> Unit = { LayerToggleRow(state.layers, { onEvent(HouseEvent.ToggleLayer(it)) }) }
     val actions: @Composable () -> Unit = {
-        val buttons: @Composable (Modifier) -> Unit = { m ->
+        val prefix = LocalTagPrefix.current
+        val list = buildList {
             if (onBehindWall != null && state.rooms.isNotEmpty()) {
-                OutlinedButton(onClick = onBehindWall, modifier = m.testTag("${LocalTagPrefix.current}_house_behind_wall")) {
-                    Icon(Icons.Rounded.PhotoCamera, contentDescription = null)
-                    Text(stringResource(R.string.house_behind_wall), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
-                }
+                add(HouseAction("${prefix}_house_behind_wall", Icons.Rounded.PhotoCamera, R.string.house_behind_wall, onClick = onBehindWall))
             }
             // An empty floor already offers Edit plan in its empty state; one primary action only.
-            if (state.rooms.isNotEmpty()) {
-                OutlinedButton(onClick = onEditPlan, modifier = m.testTag("${LocalTagPrefix.current}_house_edit_plan")) {
-                    Icon(Icons.Rounded.Edit, contentDescription = null)
-                    Text(stringResource(R.string.house_edit_plan), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
-                }
-            }
-            if (on3D != null && state.rooms.isNotEmpty()) {
-                OutlinedButton(onClick = on3D, modifier = m.testTag("${LocalTagPrefix.current}_house_3d")) {
-                    Icon(Icons.Rounded.ViewInAr, contentDescription = null)
-                    Text(stringResource(R.string.house_3d), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
-                }
-            }
-            OutlinedButton(onClick = onOpenFloors, modifier = m.testTag("${LocalTagPrefix.current}_house_floors")) {
-                Icon(Icons.Rounded.Layers, contentDescription = null)
-                Text(stringResource(R.string.floors_row), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
-            }
-            OutlinedButton(
-                onClick = { onEvent(HouseEvent.ExportPdf) },
-                enabled = state.rooms.isNotEmpty() && !state.exporting,
-                modifier = m.testTag("${LocalTagPrefix.current}_house_export"),
-            ) {
-                Icon(Icons.Rounded.PictureAsPdf, contentDescription = null)
-                Text(stringResource(R.string.house_export_pdf), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
+            if (state.rooms.isNotEmpty()) add(HouseAction("${prefix}_house_edit_plan", Icons.Rounded.Edit, R.string.house_edit_plan, onClick = onEditPlan))
+            if (on3D != null && state.rooms.isNotEmpty()) add(HouseAction("${prefix}_house_3d", Icons.Rounded.ViewInAr, R.string.house_3d, onClick = on3D))
+            add(HouseAction("${prefix}_house_floors", Icons.Rounded.Layers, R.string.floors_row, onClick = onOpenFloors))
+            add(
+                HouseAction(
+                    "${prefix}_house_export", Icons.Rounded.PictureAsPdf, R.string.house_export_pdf,
+                    enabled = state.rooms.isNotEmpty() && !state.exporting, onClick = { onEvent(HouseEvent.ExportPdf) },
+                ),
+            )
+        }
+        val button: @Composable (HouseAction, Modifier) -> Unit = { a, m ->
+            OutlinedButton(onClick = a.onClick, enabled = a.enabled, modifier = m.testTag(a.tag)) {
+                Icon(a.icon, contentDescription = null)
+                Text(stringResource(a.label), modifier = Modifier.padding(start = 8.dp), maxLines = 1, softWrap = false)
             }
         }
-        // Three buttons side by side break words at large text, so they stack then.
-        if (landscape || LocalDensity.current.fontScale > 1.3f) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                buttons(Modifier.fillMaxWidth())
+        when {
+            landscape -> Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                list.forEach { button(it, Modifier.fillMaxWidth()) }
             }
-        } else {
+            // At large text five stacked full-width buttons leave no room for the plan in portrait:
+            // the first action keeps its button and the rest go in a More actions menu beside it.
+            LocalDensity.current.fontScale > 1.3f -> Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                list.firstOrNull()?.let { button(it, Modifier.weight(1f)) }
+                val rest = list.drop(1)
+                if (rest.isNotEmpty()) {
+                    var open by rememberSaveable { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { open = true }, modifier = Modifier.testTag("${prefix}_house_more")) {
+                            Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.house_more_actions))
+                        }
+                        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                            rest.forEach { a ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(a.label)) },
+                                    leadingIcon = { Icon(a.icon, contentDescription = null) },
+                                    enabled = a.enabled,
+                                    onClick = { open = false; a.onClick() },
+                                    modifier = Modifier.testTag(a.tag),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
             // Three labelled buttons in a third of a 360 dp phone each cut "Edit plan" and "Export
             // PDF" in two, so at most two share a row: Export PDF takes the full row under them.
-            FlowRow(
+            else -> FlowRow(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 maxItemsInEachRow = 2,
-            ) { buttons(Modifier.weight(1f)) }
+            ) { list.forEach { button(it, Modifier.weight(1f)) } }
         }
     }
     val statusPane: @Composable (Modifier) -> Unit = { m ->
@@ -236,6 +258,15 @@ fun HouseScreen(
     }
     HouseDialogs(state.dialog, onEvent, onEditShape)
 }
+
+/** One of the House tab's actions under the plan. */
+private class HouseAction(
+    val tag: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    @androidx.annotation.StringRes val label: Int,
+    val enabled: Boolean = true,
+    val onClick: () -> Unit,
+)
 
 @Composable
 private fun HouseDialogs(dialog: HouseDialog?, onEvent: (HouseEvent) -> Unit, onEditShape: (PlanRoom) -> Unit) {
