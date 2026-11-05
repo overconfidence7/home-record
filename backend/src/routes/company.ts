@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
+import { companyPlan, memberLimit } from "../billing/plan";
 import { notFound, requireSession, requireTenant, membershipFor } from "../tenancy";
 
 export const company = new Hono<AppEnv>();
@@ -77,6 +78,18 @@ company.post("/companies/join", requireSession, async (c) => {
   const existing = membershipFor(session, "company", row.company_id);
   if (existing) return c.json({ id: row.company_id, role: existing.role });
   if (session.memberships.some((m) => m.tenantKind === "company")) return c.json({ error: "already_in_company" }, 409);
+  // AC-F56: Solo is the Owner alone, Crew and the trial up to 10; an expired company takes nobody new until renewed
+  const plan = await c.env.DB.prepare(
+    `SELECT c.entitlement, c.entitlement_expires_at, c.trial_ends_at,
+       (SELECT COUNT(*) FROM memberships m WHERE m.tenant_kind = 'company' AND m.tenant_id = c.id) AS members
+     FROM companies c WHERE c.id = ?`,
+  ).bind(row.company_id).first<{ entitlement: string | null; entitlement_expires_at: number | null; trial_ends_at: number | null; members: number }>();
+  if (plan) {
+    const current = companyPlan(plan, Date.now());
+    if (current === "expired") return c.json({ error: "subscription_required" }, 402);
+    const limit = memberLimit(current);
+    if (plan.members >= limit) return c.json({ error: "member_limit", plan: current, limit }, 409);
+  }
   await c.env.DB.prepare("INSERT INTO memberships (id, user_id, tenant_kind, tenant_id, role, created_at) VALUES (?, ?, 'company', ?, 'crew', ?)")
     .bind(crypto.randomUUID(), session.userId, row.company_id, Date.now())
     .run();

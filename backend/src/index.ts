@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { AppEnv } from "./env";
 import { auth } from "./routes/auth";
+import { billing } from "./routes/billing";
 import { dev } from "./routes/dev";
 import { company } from "./routes/company";
 import { handoff, pruneHandoffs } from "./routes/handoff";
@@ -27,6 +28,7 @@ app.route("/", lookup);
 app.route("/", media);
 app.route("/", share);
 app.route("/", handoff);
+app.route("/", billing);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 app.onError((err, c) => {

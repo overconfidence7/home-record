@@ -28,7 +28,7 @@ npm run dev   # wrangler dev with ENVIRONMENT=dev (/dev/* helpers on, sign-in li
 | `R2_SECRET_ACCESS_KEY` | presigned media URLs: that token's secret |
 | `CLAUDE_API_KEY` | warranty and data-plate lookup (T025) |
 | `FCM_SERVICE_ACCOUNT` | push delivery (T047): the whole service-account JSON key of the Firebase project (role Firebase Cloud Messaging API Admin); without it nothing is sent and pushes are only logged |
-| `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064) |
+| `REVENUECAT_WEBHOOK_SECRET` | entitlement webhook (T064a): in RevenueCat → Integrations → Webhooks, URL `https://<api domain>/webhooks/revenuecat` and the same value as the Authorization header (sent bare or as `Bearer <secret>`); without it the webhook answers 503 |
 
 For local runs, create `backend/.dev.vars` (gitignored) containing at least `JWT_SECRET=<a random string of at least 32 bytes>` and `ENVIRONMENT=dev`; without the secret (or with a shorter one) sign-in answers 500, and without `ENVIRONMENT=dev` a plain `npx wrangler dev` runs as production (no `/dev/last-code` for the QA flows). The QA workflow writes both itself.
 

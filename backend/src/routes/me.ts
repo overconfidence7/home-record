@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { requireSession } from "../tenancy";
 import { DEFAULT_SETTINGS } from "./company";
+import { activeEntitlement, companyPlan, memberLimit } from "../billing/plan";
 
 export const me = new Hono<AppEnv>();
 me.use("*", requireSession);
@@ -20,25 +21,30 @@ me.get("/", async (c) => {
     .bind(session.userId)
     .first<{ id: string; email: string; name: string | null }>();
 
+  const now = Date.now();
   const memberships = [];
   for (const m of session.memberships) {
     const table = m.tenantKind === "company" ? "companies" : "homes";
     const cols = m.tenantKind === "company"
-      ? "name, entitlement, trial_ends_at, settings, phone, email"
-      : "name, entitlement, NULL AS trial_ends_at, NULL AS settings, NULL AS phone, NULL AS email";
+      ? "name, entitlement, entitlement_expires_at, trial_ends_at, settings, phone, email"
+      : "name, entitlement, entitlement_expires_at, NULL AS trial_ends_at, NULL AS settings, NULL AS phone, NULL AS email";
     const row = await c.env.DB.prepare(`SELECT ${cols} FROM ${table} WHERE id = ?`)
       .bind(m.tenantId)
-      .first<{ name: string; entitlement: string | null; trial_ends_at: number | null; settings: string | null; phone: string | null; email: string | null }>();
+      .first<{ name: string; entitlement: string | null; entitlement_expires_at: number | null; trial_ends_at: number | null; settings: string | null; phone: string | null; email: string | null }>();
     if (!row) continue;
     memberships.push({
       kind: m.tenantKind,
       id: m.tenantId,
       role: m.role,
       name: row.name,
-      entitlement: row.entitlement,
+      // AC-B50: only an entitlement still in force; a lapsed one reads as none so every phone gates alike
+      entitlement: activeEntitlement(row, now),
+      entitlementExpiresAt: activeEntitlement(row, now) ? row.entitlement_expires_at : null,
       trialEndsAt: row.trial_ends_at,
       ...(m.tenantKind === "company"
         ? {
+            plan: companyPlan(row, now),
+            memberLimit: memberLimit(companyPlan(row, now)),
             settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings ?? "{}") },
             phone: row.phone,
             email: m.role === "owner" || m.role === "office" ? row.email : null,

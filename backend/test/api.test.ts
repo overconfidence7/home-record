@@ -56,7 +56,8 @@ describe("/me", () => {
     expect(body.user.email).toBe("me@example.com");
     expect(body.memberships).toEqual([
       {
-        kind: "company", id: "c-me", role: "owner", name: "Kurtz Builders", entitlement: null, trialEndsAt: 1_900_000_000_000,
+        kind: "company", id: "c-me", role: "owner", name: "Kurtz Builders", entitlement: null, entitlementExpiresAt: null, trialEndsAt: 1_900_000_000_000,
+        plan: "trial", memberLimit: 10,
         settings: { otRule: "none", breakRule: false, requireGps: false, punchDistanceFt: 500, photoOnPunch: false },
         phone: null, email: null,
       },
