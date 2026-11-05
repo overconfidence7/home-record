@@ -121,4 +121,37 @@ class PanelRepositoryTest {
         assertThat(p.photoPath).isEqualTo("media/panel.jpg")
         assertThat(p.slotCount).isEqualTo(30)
     }
+
+    // AC-C41: an item or room page lists the breakers feeding it, with the panel's name and the link's confidence.
+    @AcceptanceCriterion("AC-C41")
+    @Test fun itemsAndRoomsListTheBreakersFeedingThemWithThePanelNameAndConfidence() = runTest {
+        db.itemDao().upsert(ItemEntity(id = "sub-item", homeId = "h1", category = "ELECTRICAL", subtype = "sub_panel", name = "Garage sub-panel", createdAt = 2, updatedAt = 2))
+        val main = repo.ensurePanel("panel-item")
+        val sub = repo.ensurePanel("sub-item")
+        val fridge = (repo.saveBreaker(main, BreakerDraft(startSlot = 12, amps = "20", label = "Refrigerator", itemIds = setOf("fridge"), roomIds = setOf("kitchen"))) as BreakerSave.Saved).id
+        repo.saveBreaker(main, BreakerDraft(startSlot = 2, label = "Kitchen counter", roomIds = setOf("kitchen")))
+        repo.saveBreaker(sub, BreakerDraft(startSlot = 1, label = "Freezer outlet", itemIds = setOf("fridge")))
+
+        val forFridge = repo.observeFeedingItem("fridge").first()
+        assertThat(forFridge.map { it.panelName to it.breaker.number }).containsExactly("Garage sub-panel" to 1, "Main panel" to 12).inOrder()
+        assertThat(forFridge.map { it.confidence }.toSet()).containsExactly(com.kurtz.homerecord.core.model.LinkConfidence.LIKELY)
+        assertThat(forFridge.last().breaker.amps).isEqualTo(20)
+
+        val forKitchen = repo.observeFeedingRoom("kitchen").first()
+        assertThat(forKitchen.map { it.breaker.label }).containsExactly("Kitchen counter", "Refrigerator").inOrder()
+
+        // A deleted breaker, or a deleted panel item, no longer feeds anything.
+        repo.deleteBreaker(fridge)
+        assertThat(repo.observeFeedingRoom("kitchen").first().map { it.breaker.label }).containsExactly("Kitchen counter")
+        db.itemDao().softDelete("sub-item", 99)
+        assertThat(repo.observeFeedingItem("fridge").first()).isEmpty()
+    }
+
+    @Test fun aBreakerFeedsRoomsAndItemsButNotThePanels() = runTest {
+        db.itemDao().upsert(ItemEntity(id = "dw", homeId = "h1", category = "APPLIANCES", subtype = "dishwasher", name = "dishwasher", createdAt = 3, updatedAt = 3))
+        db.itemDao().upsert(ItemEntity(id = "ac", homeId = "h1", category = "HVAC", subtype = "ac", name = "Air conditioner", createdAt = 4, updatedAt = 4))
+        val choices = repo.observeChoices("h1").first()
+        assertThat(choices.items.map { it.name }).containsExactly("Air conditioner", "dishwasher").inOrder()
+        assertThat(choices.rooms).isEmpty()
+    }
 }

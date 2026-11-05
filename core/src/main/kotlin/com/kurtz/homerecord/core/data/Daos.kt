@@ -249,6 +249,13 @@ interface BreakerLinkDao {
     @Query("SELECT * FROM breaker_link WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<BreakerLinkEntity>
     @Query("SELECT breaker_link.* FROM breaker_link JOIN breaker ON breaker_link.breakerId = breaker.id WHERE breaker.panelId = :panelId AND breaker_link.deletedAt IS NULL AND breaker.deletedAt IS NULL ORDER BY breaker_link.createdAt")
     fun observeForPanel(panelId: String): Flow<List<BreakerLinkEntity>>
+    /** Breakers feeding an item, with their panel's name (AC-C41). */
+    @Query("SELECT l.id AS linkId, l.confidence AS linkConfidence, p.itemId AS panelItemId, i.name AS panelName, b.id AS breakerId, b.panelId AS panelId, b.slotsJson AS slotsJson, b.poles AS poles, b.amps AS amps, b.type AS type, b.label AS label, b.confidence AS breakerConfidence, b.createdAt AS createdAt FROM breaker_link l JOIN breaker b ON l.breakerId = b.id JOIN panel p ON b.panelId = p.id JOIN item i ON p.itemId = i.id WHERE l.itemId = :itemId AND l.deletedAt IS NULL AND b.deletedAt IS NULL AND p.deletedAt IS NULL AND i.deletedAt IS NULL ORDER BY i.createdAt, b.createdAt")
+    fun observeFeedingItem(itemId: String): Flow<List<BreakerFeedRow>>
+
+    /** Breakers feeding a room, with their panel's name (AC-C41). */
+    @Query("SELECT l.id AS linkId, l.confidence AS linkConfidence, p.itemId AS panelItemId, i.name AS panelName, b.id AS breakerId, b.panelId AS panelId, b.slotsJson AS slotsJson, b.poles AS poles, b.amps AS amps, b.type AS type, b.label AS label, b.confidence AS breakerConfidence, b.createdAt AS createdAt FROM breaker_link l JOIN breaker b ON l.breakerId = b.id JOIN panel p ON b.panelId = p.id JOIN item i ON p.itemId = i.id WHERE l.roomId = :roomId AND l.deletedAt IS NULL AND b.deletedAt IS NULL AND p.deletedAt IS NULL AND i.deletedAt IS NULL ORDER BY i.createdAt, b.createdAt")
+    fun observeFeedingRoom(roomId: String): Flow<List<BreakerFeedRow>>
 }
 
 @Dao

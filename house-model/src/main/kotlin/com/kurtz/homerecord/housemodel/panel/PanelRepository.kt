@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** Item subtypes that open the panel editor (AC-C40). */
 val PANEL_SUBTYPES = setOf("breaker_panel", "sub_panel")
@@ -86,6 +87,9 @@ data class FeedOption(val id: String, val name: String)
 /** What a breaker can feed: the home's rooms and its items other than the panels themselves, by name (AC-C40). */
 data class FeedChoices(val rooms: List<FeedOption> = emptyList(), val items: List<FeedOption> = emptyList())
 
+/** A breaker that feeds an item or room, as the item and room pages show it: "Main panel · Breaker 14" with a confidence dot (AC-C41). */
+data class FeedingBreaker(val breaker: Breaker, val panelItemId: String, val panelName: String, val confidence: LinkConfidence)
+
 /** Panels, breakers and what they feed (AC-C40). [onChange] feeds the sync outbox after every write. */
 class PanelRepository(
     private val db: HomeRecordDatabase,
@@ -121,6 +125,19 @@ class PanelRepository(
                 items = items.filterNot { isPanelSubtype(it.subtype) }.map { FeedOption(it.id, it.name) }.sortedWith(byName),
             )
         }
+
+    /** Breakers that feed [itemId], panel by panel, slot order (AC-C41). */
+    fun observeFeedingItem(itemId: String): Flow<List<FeedingBreaker>> = db.breakerLinkDao().observeFeedingItem(itemId).map(::feeding)
+
+    /** Breakers that feed [roomId], panel by panel, slot order (AC-C41). */
+    fun observeFeedingRoom(roomId: String): Flow<List<FeedingBreaker>> = db.breakerLinkDao().observeFeedingRoom(roomId).map(::feeding)
+
+    private fun feeding(rows: List<com.kurtz.homerecord.core.data.BreakerFeedRow>): List<FeedingBreaker> =
+        rows.groupBy { it.breakerId }.values.map { links ->
+            // One breaker linked twice (a second phone added the same link) shows once, at its best confidence.
+            val best = links.minBy { LinkConfidence.of(it.linkConfidence).ordinal }
+            FeedingBreaker(best.toBreaker(), best.panelItemId, best.panelName, LinkConfidence.of(best.linkConfidence))
+        }.sortedWith(compareBy<FeedingBreaker> { it.panelName.lowercase() }.thenBy { it.panelItemId }.thenBy { it.breaker.number })
 
     /** Saves panel facts; false when the draft has errors (a slot count below the breakers in use is one). */
     suspend fun savePanel(panelId: String, draft: PanelDraft): Boolean {
