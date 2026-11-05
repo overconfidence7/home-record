@@ -30,6 +30,8 @@ data class PanelUiState(
     val photoLaunch: PanelPhotoLaunch? = null,
     /** The picked photo could not be read. */
     val photoFailed: Boolean = false,
+    /** The slot an item's breaker chip opened the panel at (AC-H7): scrolled into view and marked for 2 s; null after. */
+    val highlightSlot: Int? = null,
 ) {
     fun breaker(id: String): Breaker? = breakers.firstOrNull { it.id == id }
 

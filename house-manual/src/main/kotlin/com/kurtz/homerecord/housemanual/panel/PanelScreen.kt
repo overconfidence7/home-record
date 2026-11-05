@@ -33,6 +33,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -240,7 +244,13 @@ private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp, onEvent: 
         ) { onEvent(PanelEvent.OpenBreaker(single.id)) }
         else -> Modifier
     }
-    val base = Modifier.fillMaxWidth().height(height).clip(shape)
+    // Opened from an item's breaker chip (AC-H7): the slot scrolls into view with a primary outline for 2 s.
+    val highlighted = state.highlightSlot?.let { h -> cell.slot == h || breakers.any { h in it.slots } } == true
+    val bring = remember { BringIntoViewRequester() }
+    if (highlighted) LaunchedEffect(Unit) { bring.bringIntoView() }
+    val base = Modifier.fillMaxWidth().height(height).bringIntoViewRequester(bring)
+        .then(if (highlighted) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+        .clip(shape)
         .then(tap)
         .semantics(mergeDescendants = true) { contentDescription = description }
         .testTag("hm_panel_slot_${cell.slot}")

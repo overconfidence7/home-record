@@ -17,11 +17,11 @@ import com.kurtz.homerecord.housemodel.panel.PanelRepository
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit) {
+fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null) {
     val vm = viewModel<PanelViewModel>(
-        key = "panel:$itemId",
+        key = "panel:$itemId:${highlightSlot ?: ""}",
         factory = viewModelFactory {
-            initializer { PanelViewModel(repo, itemId, items.observeItem(itemId).map { it?.name }, repo.observeChoices(homeId), createSavedStateHandle(), media) }
+            initializer { PanelViewModel(repo, itemId, items.observeItem(itemId).map { it?.name }, repo.observeChoices(homeId), createSavedStateHandle(), media, highlightSlot) }
         },
     )
     val state = vm.state.collectAsState().value

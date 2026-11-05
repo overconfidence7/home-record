@@ -3,6 +3,9 @@ package com.kurtz.homerecord.housemanual.items
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.ui.graphics.luminance
 import com.kurtz.homerecord.housemodel.overlays.OverlayLink
+import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
+import com.kurtz.homerecord.coreui.components.LinkChip
+import com.kurtz.homerecord.coreui.components.LinkChipRow
 import com.kurtz.homerecord.housemodel.overlays.color
 import com.kurtz.homerecord.housemodel.overlays.icon
 import com.kurtz.homerecord.housemodel.overlays.nameRes
@@ -130,6 +133,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
                 DetailsSection(detail, onEvent)
                 WhereSection(detail, onEvent)
+                PowerSection(state.feeding, onEvent)
                 if (com.kurtz.homerecord.housemodel.panel.isPanelSubtype(detail.item.subtype)) PanelSection(onEvent)
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
@@ -298,6 +302,31 @@ internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit
             onClick = if (pseudo) null else ({ onEvent(ItemDetailEvent.Place) }),
             onClickLabel = stringResource(if (placed) R.string.item_detail_where_move else R.string.item_detail_where_place),
             modifier = Modifier.testTag("hm_item_detail_place"),
+        )
+    }
+}
+
+/**
+ * Power (AC-C41, AC-H7): a "Breaker 14" chip for each breaker that feeds this item; the panel's name joins the label when
+ * the item is fed from more than one panel. A tap opens that panel scrolled to the slot. Hidden while no breaker feeds it.
+ */
+@Composable
+internal fun PowerSection(feeding: List<FeedingBreaker>, onEvent: (ItemDetailEvent) -> Unit) {
+    if (feeding.isEmpty()) return
+    val namePanel = feeding.map { it.panelItemId }.distinct().size > 1
+    val chips = feeding.map { f ->
+        LinkChip(
+            id = f.breaker.id,
+            label = if (namePanel) stringResource(R.string.item_detail_breaker_chip_panel, f.panelName, f.breaker.number)
+            else stringResource(R.string.item_detail_breaker_chip, f.breaker.number),
+            icon = Icons.Rounded.ElectricalServices,
+        )
+    }
+    Section(stringResource(R.string.item_detail_power), Modifier.testTag("hm_item_detail_power")) {
+        LinkChipRow(
+            chips,
+            onOpen = { chip -> feeding.firstOrNull { it.breaker.id == chip.id }?.let { onEvent(ItemDetailEvent.OpenBreaker(it)) } },
+            modifier = Modifier.padding(horizontal = 16.dp).testTag("hm_item_detail_breakers"),
         )
     }
 }

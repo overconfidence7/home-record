@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class ItemEditKey(val itemId: String? = null, val roomId: String? = null, val subtypeId: String? = null, val scanPlate: Boolean = false) : NavKey
 
 /** HM-Panel for the Breaker panel or Sub-panel item [itemId] (AC-C40). */
-@Serializable data class PanelKey(val itemId: String) : NavKey
+@Serializable data class PanelKey(val itemId: String, val highlightSlot: Int? = null) : NavKey
 
 /** More → Breaker panels when the home has none or several (AC-C40). */
 @Serializable data object PanelsKey : NavKey

@@ -190,6 +190,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenOverlay = { link -> openOverlay(nav, link.overlay) },
                 onPlace = { nav.push(ItemPlaceKey(key.itemId)) },
                 onOpenPanel = { nav.push(PanelKey(key.itemId)) },
+                panels = container.panels,
+                onOpenBreaker = { nav.push(PanelKey(it.panelItemId, highlightSlot = it.breaker.number)) },
             )
         }
         entry<ItemPlaceKey> { key ->
@@ -202,7 +204,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
-        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop) }
+        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot) }
         entry<PanelsKey> {
             com.kurtz.homerecord.housemanual.panel.PanelsRoute(
                 container.items, home.id, onBack = nav::pop, onOpen = { nav.push(PanelKey(it)) },

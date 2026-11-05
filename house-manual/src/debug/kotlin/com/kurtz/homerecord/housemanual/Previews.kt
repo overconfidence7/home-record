@@ -1463,6 +1463,25 @@ private fun panelState(panel: com.kurtz.homerecord.core.model.Panel, breakers: L
 @Composable
 fun PanelPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers), {}) }
 
+/** Opened from the refrigerator's "Breaker 4" chip (AC-H7): slot 4 is outlined for 2 s after the panel scrolls to it. */
+@ThemePreviews
+@Composable
+fun PanelHighlightPreview() = Frame {
+    com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers).copy(highlightSlot = 4), {})
+}
+
+/** The furnace's Power chip: the breaker that feeds it (AC-C41). */
+@ThemePreviews
+@Composable
+fun ItemDetailPowerPreview() = Frame {
+    val feeding = listOf(
+        com.kurtz.homerecord.housemodel.panel.FeedingBreaker(
+            sampleBreaker("b14", listOf(14), 15, "Furnace"), "i-panel", "Main panel", com.kurtz.homerecord.core.model.LinkConfidence.CONFIRMED,
+        ),
+    )
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), feeding = feeding), {})
+}
+
 @ThemePreviews
 @Composable
 fun PanelEmptyPreview() = Frame {
