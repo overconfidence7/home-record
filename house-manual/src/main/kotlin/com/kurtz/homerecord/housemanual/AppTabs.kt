@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.kurtz.homerecord.core.data.HomeEntity
@@ -68,9 +69,17 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     var home by remember { mutableStateOf<HomeEntity?>(null) }
     // A `.homerecord` handoff opened from another app or picked from More (AC-H17); shown over onboarding or the tabs.
     var importUri by rememberSaveable { mutableStateOf<String?>(null) }
+    // A claim link (`homerecord://handoff/<token>`) from the handoff email page; downloads, then opens the preview.
+    var claimToken by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(incoming) {
         if (incoming != null) {
-            importUri = incoming.toString()
+            val token = com.kurtz.homerecord.core.bundle.HandoffLink.token(incoming.toString())
+            if (token != null) {
+                claimToken = token
+                importUri = null
+            } else if (incoming.scheme != "homerecord") {
+                importUri = incoming.toString()
+            }
             onIncomingHandled()
         }
     }
@@ -82,7 +91,16 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     // Set by "Draw your floor plan" so the new home opens straight on the plan editor, House tab.
     var openEditor by rememberSaveable { mutableStateOf(false) }
     val pendingImport = importUri
+    val pendingClaim = claimToken
     when {
+        pendingClaim != null -> com.kurtz.homerecord.housemanual.importing.ClaimRoute(
+            container.auth, container.handoffClaims, LocalContext.current.cacheDir, pendingClaim,
+            onReady = { file ->
+                claimToken = null
+                importUri = file.toString()
+            },
+            onClose = { claimToken = null },
+        )
         pendingImport != null -> com.kurtz.homerecord.housemanual.importing.ImportRoute(
             container.importFiles, android.net.Uri.parse(pendingImport), onClose = { importUri = null },
         )

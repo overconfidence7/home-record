@@ -1385,3 +1385,50 @@ fun ImportErrorPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ImportLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(com.kurtz.homerecord.housemanual.importing.ImportUiState(), {}) }
+
+// HM-Claim: the contractor's handoff link (AC-H17, AC-B40). The sign-in slot shows the real form's fields.
+@Composable
+private fun ClaimSignInForm(modifier: androidx.compose.ui.Modifier) = com.kurtz.homerecord.coreui.auth.SignInScreen(
+    com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.ortiz@example.com"), {}, modifier,
+)
+
+@ThemePreviews
+@Composable
+fun ClaimSignInPreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ClaimScreen(
+        com.kurtz.homerecord.housemanual.importing.ClaimUiState(phase = com.kurtz.homerecord.housemanual.importing.ClaimPhase.SignIn), {},
+    ) { ClaimSignInForm(it) }
+}
+
+@ThemePreviews
+@Composable
+fun ClaimDownloadingPreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ClaimScreen(
+        com.kurtz.homerecord.housemanual.importing.ClaimUiState(
+            phase = com.kurtz.homerecord.housemanual.importing.ClaimPhase.Downloading, companyName = "Hale Electric", homeName = "Ortiz house",
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClaimOfflinePreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ClaimScreen(
+        com.kurtz.homerecord.housemanual.importing.ClaimUiState(
+            phase = com.kurtz.homerecord.housemanual.importing.ClaimPhase.Failed, failure = com.kurtz.homerecord.core.bundle.HandoffClaimFailure.Offline,
+        ),
+        {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ClaimExpiredPreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.ClaimScreen(
+        com.kurtz.homerecord.housemanual.importing.ClaimUiState(
+            phase = com.kurtz.homerecord.housemanual.importing.ClaimPhase.Failed, failure = com.kurtz.homerecord.core.bundle.HandoffClaimFailure.Expired,
+        ),
+        {},
+    )
+}

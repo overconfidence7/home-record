@@ -27,6 +27,13 @@
                 <data android:mimeType="application/octet-stream" />
                 <data android:mimeType="application/zip" />
             </intent-filter>
+            <!-- Claim link from the handoff email page (AC-H17, AC-B40): homerecord://handoff/<token>. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="homerecord" android:host="handoff" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

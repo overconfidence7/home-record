@@ -146,6 +146,9 @@ class AppContainer(app: Application) {
 
     val media: MediaFiles = AndroidMediaFiles(app)
     val importFiles = com.kurtz.homerecord.housemanual.importing.ImportFiles(app, db)
+    /** Claim links from the contractor's handoff email (AC-H17, AC-B40). */
+    val handoffClaims: com.kurtz.homerecord.core.bundle.HandoffClaimApi =
+        com.kurtz.homerecord.core.bundle.RetrofitHandoffClaimApi.create(BuildConfig.API_BASE_URL, http)
     val textRecognizer: TextRecognizer = MlKitTextRecognizer(app)
 
     val layers = PrefsLayerStore(app)

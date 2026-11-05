@@ -627,3 +627,23 @@ fun ImportErrorScreenshot() = ImportErrorPreview()
 @ThemePreviews
 @Composable
 fun ImportLoadingScreenshot() = ImportLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClaimSignInScreenshot() = ClaimSignInPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClaimDownloadingScreenshot() = ClaimDownloadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClaimOfflineScreenshot() = ClaimOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClaimExpiredScreenshot() = ClaimExpiredPreview()

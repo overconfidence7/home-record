@@ -272,6 +272,22 @@
     <string name="reminders_empty_title">No reminders yet</string>
     <string name="reminders_empty_body">Filter changes, service visits and warranty dates for your items will show here.</string>
     <!-- HM-Import (T063d2, AC-H17) -->
+    <string name="claim_title">Home record</string>
+    <string name="claim_sign_in_intro">Sign in to add this home record to House Manual. The link works for one account, so use the one you\'ll keep.</string>
+    <string name="claim_claiming">Checking the link…</string>
+    <string name="claim_downloading">Downloading the home record…</string>
+    <string name="claim_from">From %1$s</string>
+    <string name="claim_retry">Retry</string>
+    <string name="claim_offline_title">No connection</string>
+    <string name="claim_offline_body">Can\'t reach HomeRecord right now. Check your connection and tap Retry.</string>
+    <string name="claim_not_found_title">This link doesn\'t work</string>
+    <string name="claim_not_found_body">Check that the whole link was copied, or ask your contractor to send it again.</string>
+    <string name="claim_expired_title">This link has expired</string>
+    <string name="claim_expired_body">Handoff links work for 30 days. Ask your contractor to send the home record again.</string>
+    <string name="claim_taken_title">Already added to another account</string>
+    <string name="claim_taken_body">Someone signed in with a different account added this home record first. Sign in with that account, or ask your contractor to send it again.</string>
+    <string name="claim_failed_title">Couldn\'t get the home record</string>
+    <string name="claim_failed_body">HomeRecord didn\'t answer as expected. Tap Retry in a minute.</string>
     <string name="import_title">Import handoff</string>
     <string name="import_intro">Your contractor sent this from Field Log. It adds their rooms, rough-in wall photos, overlays and installed items to your home.</string>
     <string name="import_new_header">What\'s new</string>

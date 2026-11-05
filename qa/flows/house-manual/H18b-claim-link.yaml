@@ -1,0 +1,57 @@
+# Walkthrough H18 (claim link part, AC-H17, AC-B40): the handoff email page opens House Manual with
+# homerecord://handoff/<token>. Signed out, HM-Claim asks for an account first; after the dev email code it claims the
+# link. This token was never issued, so the dev backend answers 404 and the screen says the link doesn't work, with
+# Close only (no Retry). The full send-then-claim path across both apps belongs in qa/flows/handoff/X02-claim-link.yaml.
+# Needs the dev backend (ENVIRONMENT=dev) for /dev/last-code.
+appId: com.kurtz.homerecord.housemanual
+env:
+  EMAIL: qa-hm-claim@example.com
+  TOKEN: QaNeverIssuedHandoffToken0000000000000000000
+---
+- launchApp:
+    clearState: true
+- runFlow: _onboard.yaml
+- openLink: homerecord://handoff/${TOKEN}
+# AC-H17: a claim link needs a House Manual account; the sign-in form shows under the explanation
+- extendedWaitUntil:
+    visible:
+      id: "hm_claim_sign_in"
+    timeout: 15000
+- assertVisible: "Home record"
+- takeScreenshot: H18b-claim-sign-in
+- tapOn:
+    id: "hm_sign_in_email"
+- inputText: ${EMAIL}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_send"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_code"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: ${EMAIL}
+- assertTrue: ${output.devCode != null && output.devCode != ''}
+- tapOn:
+    id: "hm_sign_in_code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_verify"
+# AC-B40: signed in, the claim runs; an unknown token is refused and the screen says so with Close only
+- extendedWaitUntil:
+    visible:
+      id: "hm_claim_error"
+    timeout: 20000
+- assertVisible: "This link doesn't work"
+- assertNotVisible:
+    id: "hm_claim_retry"
+- takeScreenshot: H18b-claim-not-found
+- tapOn:
+    id: "hm_claim_close"
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_more"
+    timeout: 10000
