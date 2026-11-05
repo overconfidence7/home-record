@@ -247,6 +247,8 @@ interface BreakerLinkDao {
     @Query("UPDATE breaker_link SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
     @Query("SELECT * FROM breaker_link WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<BreakerLinkEntity>
     @Query("SELECT * FROM breaker_link WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<BreakerLinkEntity>
+    @Query("SELECT breaker_link.* FROM breaker_link JOIN breaker ON breaker_link.breakerId = breaker.id WHERE breaker.panelId = :panelId AND breaker_link.deletedAt IS NULL AND breaker.deletedAt IS NULL ORDER BY breaker_link.createdAt")
+    fun observeForPanel(panelId: String): Flow<List<BreakerLinkEntity>>
 }
 
 @Dao
