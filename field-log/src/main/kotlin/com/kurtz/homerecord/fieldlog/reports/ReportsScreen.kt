@@ -2,6 +2,7 @@ package com.kurtz.homerecord.fieldlog.reports
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,7 +37,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.HoursLine
-import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
@@ -47,8 +49,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 /**
- * FL-Reports (Owner and Office): hours by person and by job for a week range, shift and QuickBooks CSV (AC-F15, AC-F46),
- * and the job timeline of delays from the daily logs; a delay opens that job's log on its day (AC-F32).
+ * FL-Reports (Owner and Office), three tabs: Hours (by person and by job for a week range, shift and QuickBooks CSV,
+ * AC-F15, AC-F46, and the job timeline of delays from the daily logs; a delay opens that job's log on its day, AC-F32),
+ * Photos (photo report PDF per job for the range, AC-F28) and Summaries (job summary PDF per job, AC-F47).
  */
 @Composable
 fun ReportsScreen(
@@ -58,41 +61,76 @@ fun ReportsScreen(
     onOpenLog: (jobId: String, day: LocalDate) -> Unit = { _, _ -> },
 ) {
     ScreenScaffold(title = stringResource(R.string.rep_title), onBack = onBack) { padding ->
-        if (state.loading) {
-            LoadingState(Modifier.padding(padding))
-        } else {
-            LazyColumn(
-                Modifier.padding(padding).fillMaxWidth().testTag("fl_reports_list"),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                item { RangePicker(state, onEvent, Modifier.padding(horizontal = 16.dp)) }
-                if (state.isEmpty) {
-                    item {
-                        // Rule 10: icon, headline and a sentence; the exports below are disabled because there is nothing to send.
-                        EmptyState(
-                            icon = Icons.Rounded.Schedule,
-                            headline = stringResource(R.string.rep_empty_title),
-                            body = stringResource(R.string.rep_empty),
-                            actionLabel = null,
-                            onAction = {},
-                            modifier = Modifier.fillParentMaxHeight(0.5f).testTag("fl_reports_empty"),
-                        )
-                    }
-                } else {
-                    item { TotalsCard(state, Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)) }
-                    item { SectionHeading(stringResource(R.string.rep_by_person)) }
-                    items(state.byPerson, key = { "p-${it.id}" }) { LineRow(it, Icons.Rounded.Person, "fl_reports_person_${it.id}") }
-                    item { SectionHeading(stringResource(R.string.rep_by_job)) }
-                    items(state.byJob, key = { "j-${it.id}" }) { LineRow(it, Icons.Rounded.Work, "fl_reports_job_${it.id}") }
+        Column(Modifier.padding(padding).fillMaxSize()) {
+            // Hours, photo reports and job summaries are separate tabs, so each report is one tap from Reports (rule 12).
+            // Scrollable like the job tabs, so a label is never cut at 200% text.
+            PrimaryScrollableTabRow(selectedTabIndex = state.tab.ordinal, edgePadding = 8.dp) {
+                ReportTab.entries.forEach { tab ->
+                    Tab(
+                        selected = tab == state.tab,
+                        onClick = { onEvent(ReportsEvent.SelectTab(tab)) },
+                        text = { Text(stringResource(tabLabel(tab))) },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("fl_reports_tab_${tab.name}"),
+                    )
                 }
-                item { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)) }
-                delayTimeline(state, onOpenLog)
-                photoReports(state, onEvent)
-                jobSummaries(state, onEvent)
+            }
+            if (state.loading) {
+                LoadingState(Modifier.fillMaxSize())
+            } else {
+                LazyColumn(
+                    Modifier.fillMaxSize().testTag("fl_reports_list"),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    when (state.tab) {
+                        ReportTab.Hours -> {
+                            item(key = "range") { RangePicker(state, onEvent, Modifier.padding(horizontal = 16.dp)) }
+                            hours(state, onEvent)
+                            delayTimeline(state, onOpenLog)
+                        }
+                        ReportTab.Photos -> {
+                            item(key = "range") { RangePicker(state, onEvent, Modifier.padding(horizontal = 16.dp)) }
+                            photoReports(state, onEvent)
+                        }
+                        ReportTab.Summaries -> jobSummaries(state, onEvent)
+                    }
+                }
             }
         }
     }
+}
+
+private fun tabLabel(tab: ReportTab) = when (tab) {
+    ReportTab.Hours -> R.string.rep_tab_hours
+    ReportTab.Photos -> R.string.rep_tab_photos
+    ReportTab.Summaries -> R.string.rep_tab_summaries
+}
+
+/**
+ * Hours for the range: the totals card, by person and by job, then the two exports. With no hours a one-line row says
+ * so (the screen still has the delays below it, so it is not a full-screen empty state, rule 10) and the exports stay
+ * shown but disabled.
+ */
+private fun LazyListScope.hours(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit) {
+    if (state.isEmpty) {
+        item(key = "hours-empty") {
+            RecordListItem(
+                headline = stringResource(R.string.rep_empty_title),
+                supporting = stringResource(R.string.rep_empty),
+                supportingMaxLines = 4,
+                leading = { Icon(Icons.Rounded.Schedule, contentDescription = null) },
+                trailing = null,
+                modifier = Modifier.fillMaxWidth().testTag("fl_reports_empty"),
+            )
+        }
+    } else {
+        item(key = "totals") { TotalsCard(state, Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)) }
+        item(key = "by-person-h") { SectionHeading(stringResource(R.string.rep_by_person)) }
+        items(state.byPerson, key = { "p-${it.id}" }) { LineRow(it, Icons.Rounded.Person, "fl_reports_person_${it.id}") }
+        item(key = "by-job-h") { SectionHeading(stringResource(R.string.rep_by_job)) }
+        items(state.byJob, key = { "j-${it.id}" }) { LineRow(it, Icons.Rounded.Work, "fl_reports_job_${it.id}") }
+    }
+    item(key = "exports") { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = if (state.isEmpty) 8.dp else 16.dp)) }
 }
 
 @Composable

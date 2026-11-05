@@ -7,11 +7,15 @@ import java.time.LocalDate
 /** Which whole Monday weeks a report covers (AC-F46). */
 enum class ReportRange(val weeks: Int) { ThisWeek(1), LastWeek(1), LastFourWeeks(4) }
 
+/** The three report types, one tab each, so each is one tap from Reports (rule 12). */
+enum class ReportTab { Hours, Photos, Summaries }
+
 enum class ExportNotice { Shared, Failed, Empty }
 
 data class ReportsUiState(
     val loading: Boolean = true,
     val range: ReportRange = ReportRange.ThisWeek,
+    val tab: ReportTab = ReportTab.Hours,
     val from: LocalDate = LocalDate.of(2026, 1, 5),
     val to: LocalDate = LocalDate.of(2026, 1, 11),
     val byPerson: List<HoursLine> = emptyList(),
@@ -47,6 +51,7 @@ data class PhotoReportJob(val id: String, val name: String, val photos: Int)
 sealed interface ReportsEvent {
     data class SharePhotoReport(val jobId: String) : ReportsEvent
     data class ShareJobSummary(val jobId: String) : ReportsEvent
+    data class SelectTab(val tab: ReportTab) : ReportsEvent
     data class SelectRange(val range: ReportRange) : ReportsEvent
     data object ExportShifts : ReportsEvent
     data object ExportQuickBooks : ReportsEvent

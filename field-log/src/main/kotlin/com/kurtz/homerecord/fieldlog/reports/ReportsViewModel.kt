@@ -56,7 +56,7 @@ class ReportsDeps(
 /** FL-Reports: hours by person and by job over a week range, the two CSV exports (AC-F15, AC-F46), and the job timeline of delays (AC-F32). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedStateHandle) : ViewModel() {
-    private val _state = MutableStateFlow(ReportsUiState(range = rangeOf(saved[RANGE])))
+    private val _state = MutableStateFlow(ReportsUiState(range = rangeOf(saved[RANGE]), tab = tabOf(saved[TAB])))
     val state: StateFlow<ReportsUiState> = _state.asStateFlow()
 
     private var settings = CompanySettings()
@@ -134,6 +134,10 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
                 range.value = event.range
                 _state.update { it.copy(photoNotice = null) }
             }
+            is ReportsEvent.SelectTab -> {
+                saved[TAB] = event.tab.name
+                _state.update { it.copy(tab = event.tab) }
+            }
             ReportsEvent.ExportShifts -> export(TimeExportKind.ShiftCsv)
             ReportsEvent.ExportQuickBooks -> export(TimeExportKind.QuickBooksCsv)
             ReportsEvent.DismissNotice -> _state.update { it.copy(notice = null) }
@@ -206,6 +210,9 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
 
     private companion object {
         const val RANGE = "range"
+        const val TAB = "tab"
+
+        fun tabOf(name: String?): ReportTab = ReportTab.entries.firstOrNull { it.name == name } ?: ReportTab.Hours
         const val ACTIVE = "ACTIVE"
     }
 }

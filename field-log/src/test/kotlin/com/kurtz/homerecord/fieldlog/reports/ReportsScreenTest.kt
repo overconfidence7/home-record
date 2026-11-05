@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.fieldlog.reports
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -70,7 +72,7 @@ class ReportsScreenTest {
     @AcceptanceCriterion("AC-F47")
     @Test fun aJobSummaryRowAsksForItsPdfAndAFailureSaysSo() {
         val events = mutableListOf<ReportsEvent>()
-        val s = state.copy(summaries = listOf(SummaryJob("j1", "Hale kitchen", "14 Maple Ave")), summaryFailed = true)
+        val s = state.copy(tab = ReportTab.Summaries, summaries = listOf(SummaryJob("j1", "Hale kitchen", "14 Maple Ave")), summaryFailed = true)
         rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(s, { events += it }, {}) } }
         rule.onNodeWithTag("fl_reports_list").performScrollToNode(hasTestTag("fl_reports_summary_j1"))
         rule.onNodeWithText("Job summaries").assertExists()
@@ -83,6 +85,7 @@ class ReportsScreenTest {
     @Test fun aPhotoReportRowSharesAndAJobWithNoPhotosDoesNot() {
         val events = mutableListOf<ReportsEvent>()
         val s = state.copy(
+            tab = ReportTab.Photos,
             photoJobs = listOf(PhotoReportJob("j1", "Hale kitchen", 12), PhotoReportJob("j2", "Garage subpanel", 0)),
             photoNotice = PhotoReportOutcome.NoneHere,
         )
@@ -95,5 +98,27 @@ class ReportsScreenTest {
         rule.onNodeWithTag("fl_reports_photo_j2").performClick()
         rule.onNodeWithTag("fl_reports_photo_j1").performClick()
         assertThat(events).containsExactly(ReportsEvent.SharePhotoReport("j1"))
+    }
+
+    // judge:fl-reports-one-long-page: Hours, Photos and Summaries are tabs; a tab asks to switch, and each shows only its report
+    @Test fun eachReportIsOneTabAway() {
+        val events = mutableListOf<ReportsEvent>()
+        val s = state.copy(summaries = listOf(SummaryJob("j1", "Hale kitchen", null)), photoJobs = listOf(PhotoReportJob("j1", "Hale kitchen", 3)))
+        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(s, { events += it }, {}) } }
+        rule.onNodeWithTag("fl_reports_totals").assertExists()
+        rule.onNodeWithTag("fl_reports_summary_j1").assertDoesNotExist()
+        rule.onNodeWithTag("fl_reports_photo_j1").assertDoesNotExist()
+        rule.onNodeWithTag("fl_reports_tab_Photos").performClick()
+        rule.onNodeWithTag("fl_reports_tab_Summaries").performClick()
+        assertThat(events).containsExactly(ReportsEvent.SelectTab(ReportTab.Photos), ReportsEvent.SelectTab(ReportTab.Summaries)).inOrder()
+    }
+
+    // judge:fl-reports-delays-below-empty: no hours is a one-line row, so the range's delays show on the first screen
+    @Config(qualifiers = "w411dp-h891dp")
+    @Test fun noHoursIsOneRowAndTheDelaysStayInView() {
+        show(state.copy(byPerson = emptyList(), byJob = emptyList(), totalMillis = 0, regularMillis = 0))
+        rule.onNodeWithTag("fl_reports_empty").assertIsDisplayed()
+        rule.onNodeWithTag("fl_reports_export_shifts").assertIsNotEnabled()
+        rule.onNodeWithTag("fl_reports_delays_j1").assertIsDisplayed()
     }
 }

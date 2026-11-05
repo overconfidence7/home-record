@@ -734,7 +734,7 @@ fun ReportsDelaysPreview() = Frame {
     )
 }
 
-/** Job summaries (AC-F47): a quiet week so the section shows; one PDF being made, and the last one failed. */
+/** Job summaries tab (AC-F47): one PDF being made, and the last one failed. */
 @ThemePreviews
 @Composable
 fun ReportsSummariesPreview() = Frame {
@@ -744,6 +744,7 @@ fun ReportsSummariesPreview() = Frame {
             byPerson = listOf(com.kurtz.homerecord.core.model.HoursLine("m1", "Dana Whitfield", hrs(8))),
             byJob = listOf(com.kurtz.homerecord.core.model.HoursLine("j2", "Ortiz kitchen remodel", hrs(8))),
             totalMillis = hrs(8), regularMillis = hrs(8),
+            tab = com.kurtz.homerecord.fieldlog.reports.ReportTab.Summaries,
             summaries = repState.summaries, summaryBusy = "j2", summaryFailed = true,
             photoJobs = repState.photoJobs,
         ),
@@ -751,7 +752,7 @@ fun ReportsSummariesPreview() = Frame {
     )
 }
 
-/** Photo reports (AC-F28): a quiet week so the section shows; one job with photos, one with none, one PDF being made. */
+/** Photo reports tab (AC-F28): one job with photos, one with none, one PDF being made. */
 @ThemePreviews
 @Composable
 fun ReportsPhotosPreview() = Frame {
@@ -766,6 +767,7 @@ fun ReportsPhotosPreview() = Frame {
                 com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j3", "Hale basement finish", 12),
                 com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j1", "Garage subpanel", 0),
             ),
+            tab = com.kurtz.homerecord.fieldlog.reports.ReportTab.Photos,
             photoBusy = "j3",
             photoNotice = com.kurtz.homerecord.fieldlog.reports.PhotoReportOutcome.NoneHere,
         ),

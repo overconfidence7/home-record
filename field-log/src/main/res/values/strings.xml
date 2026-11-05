@@ -117,6 +117,9 @@
         <item quantity="other">%d jobs</item>
     </plurals>
     <string name="rep_title">Reports</string>
+    <string name="rep_tab_hours">Hours</string>
+    <string name="rep_tab_photos">Photos</string>
+    <string name="rep_tab_summaries">Summaries</string>
     <string name="rep_range_this">This week</string>
     <string name="rep_range_last">Last week</string>
     <string name="rep_range_four">Last 4 weeks</string>
