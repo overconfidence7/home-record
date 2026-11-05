@@ -11,6 +11,9 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import com.kurtz.homerecord.core.units.LengthParser
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.plan.OpeningKind
@@ -136,7 +139,10 @@ fun DrawScope.drawBlueprint(
         room.openings.forEach { drawOpening(room, it, z, ox, oy, density, colors.wall, colors.fill) }
     }
     rooms.forEach { room ->
-        val layout = measurer.measure(room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text))
+        val layout = roomNameLayout(
+            measurer, room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text),
+            maxWidth = room.widthIn * z * 0.9f, maxHeight = room.lengthIn * z * 0.8f,
+        )
         val (clx, cly) = labelAnchor(room)
         val half = layout.size.width / 2f
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
@@ -147,11 +153,37 @@ fun DrawScope.drawBlueprint(
         val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
             ?: return@forEach
         val (cx, cy) = at
-        val fits = layout.size.width < room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
-        if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+        if (cx - half >= room.minX * z + ox) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
     drawNorthArrow(measurer, dimStyle, colors, density)
+}
+
+/** The smallest a room name shrinks to before it is ellipsized, as a share of the theme's size. */
+private val NAME_SCALES = floatArrayOf(1f, 0.85f, 0.7f)
+
+/**
+ * Lays a room name out to fit its room ([judge:hm-blueprint-names-font200], ui-standards rule 32): at the theme's size
+ * on up to two lines first ("Living / room" at 200% text), then a step or two smaller if one word is still wider than
+ * the room or the lines are taller than it, and only then ellipsized, so every room keeps a readable name.
+ */
+fun roomNameLayout(measurer: TextMeasurer, name: String, style: TextStyle, maxWidth: Float, maxHeight: Float): TextLayoutResult {
+    val width = maxWidth.toInt().coerceAtLeast(1)
+    var last: TextLayoutResult? = null
+    for (scale in NAME_SCALES) {
+        val centred = style.copy(textAlign = TextAlign.Center)
+        val sized = if (style.fontSize.isSp) centred.copy(fontSize = style.fontSize * scale) else centred
+        val widestWord = name.split(' ').filter { it.isNotEmpty() }.maxOfOrNull {
+            measurer.measure(it, sized, maxLines = 1, softWrap = false).size.width
+        } ?: 0
+        val layout = measurer.measure(
+            name, sized, overflow = TextOverflow.Ellipsis, softWrap = true, maxLines = 2,
+            constraints = Constraints(maxWidth = width),
+        )
+        last = layout
+        if (widestWord <= width && !layout.hasVisualOverflow && layout.size.height <= maxHeight) return layout
+    }
+    return last ?: measurer.measure(name, style)
 }
 
 private fun DrawScope.drawDimensions(
