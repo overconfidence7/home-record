@@ -3172,8 +3172,8 @@ Open, found in the review:
 - [ ] [Minor] `POST /handoff` has no rate limit (each send emails any address and stores up to 100 MB for 30 days); and the R2 bundle is orphaned when the D1 insert fails [r12:handoff-rate-limit]
 - [ ] [Minor] Import leaves `cache/import/<uuid>` behind on Back or a thrown error, `cache/handoff/claimed.homerecord` is never removed, and `record.json` is buffered up to the 2 GB bundle cap [r12:import-cache-left]
 - [ ] [Minor] The photo report offers only This week / Last week / Last 4 weeks; a long job cannot get a whole-job or custom-range report (AC-F28 "date range") [r12:photo-report-range]
-- [ ] [Minor] `JobItemViewModel` deletes, registers and looks up without checking `canEdit` (only the screen hides the buttons) [r12:jobitem-canedit]
-- [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count]
+- [x] [Minor] `JobItemViewModel` deletes, registers and looks up without checking `canEdit` (only the screen hides the buttons) [r12:jobitem-canedit] - fixed in df90bf1a
+- [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count] (the "• term" half fixed in df90bf1a; the Reports recount is still open)
 - [ ] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread]
 
 ## Builder visual review V5 (commit b269f671)
