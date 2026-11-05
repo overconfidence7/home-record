@@ -183,9 +183,6 @@ private fun planState(vararg changes: PlanEditorUiState.() -> PlanEditorUiState)
             floors = floors,
             floorId = "f2",
             rooms = planRooms,
-            zoom = 0.8f,
-            panX = 24f,
-            panY = 24f,
             canUndo = true,
             canEditOverlays = true,
         ),
@@ -258,7 +255,7 @@ fun PlanEditorUnplacedPreview() = Frame {
 @ThemePreviews
 @Composable
 fun PlanEditorEmptyPreview() = Frame {
-    PlanEditorScreen(planState({ copy(rooms = emptyList(), canUndo = false, zoom = 1f, panX = 0f, panY = 0f) }), {}, {}, "Maple St")
+    PlanEditorScreen(planState({ copy(rooms = emptyList(), canUndo = false) }), {}, {}, "Maple St")
 }
 
 @ThemePreviews
@@ -285,6 +282,16 @@ private val planOverlays = listOf(
 @ThemePreviews
 @Composable
 fun PlanEditorOverlaysPreview() = Frame { PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays) }), {}, {}, "Maple St") }
+
+/** Landscape: the room panel sits beside the plan and the L-shaped room shows whole (judge:hm-plan-editor-fit). */
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun PlanEditorShapeLandscapePreview() = PlanEditorShapePreview()
+
+/** Landscape Overlays: the hint panel sits beside the plan, which keeps the full height (judge:hm-plan-editor-landscape-panel). */
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun PlanEditorOverlaysLandscapePreview() = PlanEditorOverlaysPreview()
 
 /** The range gas line picked: handles on its points to drag, Edit, Delete and Done (AC-C28). */
 @ThemePreviews

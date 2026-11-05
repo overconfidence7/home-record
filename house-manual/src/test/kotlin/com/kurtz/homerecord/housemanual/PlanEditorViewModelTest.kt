@@ -320,6 +320,21 @@ class PlanEditorViewModelTest {
         assertThat(cx).isWithin(1f).of(200f)
     }
 
+    @Test fun revealPansTheSelectedRoomOutFromUnderThePanel() = test {
+        val vm = vm()
+        vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))
+        vm.onEvent(PlanEditorEvent.Fit(400f, 700f))
+        assertThat(vm.state.value.viewSet).isTrue()
+        // The room panel came up: the canvas is now 400 × 250 dp and the fitted room ran under it.
+        vm.onEvent(PlanEditorEvent.Reveal(400f, 250f))
+        val s = vm.state.value
+        val room = checkNotNull(s.selected)
+        assertThat(room.minY * s.zoom + s.panY).isAtLeast(0f)
+        assertThat(room.maxY * s.zoom + s.panY).isAtMost(250f)
+        assertThat(room.minX * s.zoom + s.panX).isAtLeast(0f)
+        assertThat(room.maxX * s.zoom + s.panX).isAtMost(400f)
+    }
+
     @Test fun editShapeAddsDragsAndDeletesCornersAndSavesTheLShape() = test {
         val vm = vm()
         vm.onEvent(PlanEditorEvent.AddRoom(Pt(600, 400)))

@@ -12,6 +12,8 @@ import com.kurtz.homerecord.housemodel.plan.GridSnapper
 import com.kurtz.homerecord.housemodel.plan.PlanEditor
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanValidator
+import com.kurtz.homerecord.housemodel.plan.PlanView
+import com.kurtz.homerecord.housemodel.plan.PlanViewport
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 import com.kurtz.homerecord.core.media.MediaFiles
 import com.kurtz.homerecord.housemodel.overlays.Overlay
@@ -30,8 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -72,6 +72,7 @@ class PlanEditorViewModel(
             zoom = saved[ZOOM] ?: 1f,
             panX = saved[PAN_X] ?: 0f,
             panY = saved[PAN_Y] ?: 0f,
+            viewSet = saved.contains(ZOOM),
             system = system,
             canEditOverlays = overlays != null,
             canAddPhoto = overlays != null && media != null,
@@ -123,7 +124,7 @@ class PlanEditorViewModel(
     fun onEvent(event: PlanEditorEvent) {
         // Typing stays pending; any other edit, selection, undo or floor change first commits it.
         if (event !is PlanEditorEvent.Rename && event !is PlanEditorEvent.SetSize &&
-            event !is PlanEditorEvent.Transform && event !is PlanEditorEvent.Fit && event !is PlanEditorEvent.OverlayEvent
+            event !is PlanEditorEvent.Transform && event !is PlanEditorEvent.Fit && event !is PlanEditorEvent.Reveal && event !is PlanEditorEvent.OverlayEvent
         ) {
             commitFields()
         }
@@ -216,6 +217,7 @@ class PlanEditorViewModel(
             PlanEditorEvent.Redo -> { editor.redo(); keepSelectionIfPresent(); commit(_state.value.selectedId) }
             is PlanEditorEvent.Transform -> setView(event.zoom.coerceIn(MIN_ZOOM, MAX_ZOOM), event.panX, event.panY)
             is PlanEditorEvent.Fit -> fit(event.widthDp, event.heightDp)
+            is PlanEditorEvent.Reveal -> reveal(event.widthDp, event.heightDp)
             is PlanEditorEvent.SetOverlayMode -> setOverlayMode(event.on)
             is PlanEditorEvent.OverlayEvent -> onOverlayEvent(event.event)
         }
@@ -346,6 +348,8 @@ class PlanEditorViewModel(
                 unplaced = plan.unplaced,
                 selectedId = keep,
                 editShape = shape,
+                // Another floor draws fitted until the screen sends its Fit.
+                viewSet = it.viewSet && previous == floor.id,
                 focusName = false,
                 selectedWall = null,
                 selectedOpeningId = null,
@@ -441,20 +445,18 @@ class PlanEditorViewModel(
         saved[ZOOM] = zoom
         saved[PAN_X] = panX
         saved[PAN_Y] = panY
-        _state.update { it.copy(zoom = zoom, panX = panX, panY = panY) }
+        _state.update { it.copy(zoom = zoom, panX = panX, panY = panY, viewSet = true) }
     }
 
     private fun fit(widthDp: Float, heightDp: Float) {
-        val rooms = editor.rooms
-        if (rooms.isEmpty() || widthDp <= 0f || heightDp <= 0f) return
-        val minX = rooms.minOf { it.minX }
-        val maxX = rooms.maxOf { it.maxX }
-        val minY = rooms.minOf { it.minY }
-        val maxY = rooms.maxOf { it.maxY }
-        val w = max(maxX - minX, 1)
-        val h = max(maxY - minY, 1)
-        val zoom = min((widthDp - 2 * FIT_MARGIN_DP) / w, (heightDp - 2 * FIT_MARGIN_DP) / h).coerceIn(MIN_ZOOM, MAX_ZOOM)
-        setView(zoom, (widthDp - w * zoom) / 2f - minX * zoom, (heightDp - h * zoom) / 2f - minY * zoom)
+        PlanViewport.fit(editor.rooms, widthDp, heightDp)?.let { setView(it.zoom, it.panX, it.panY) }
+    }
+
+    /** Moves the view just enough that the whole selected room shows on the canvas (above the panel). */
+    private fun reveal(widthDp: Float, heightDp: Float) {
+        val s = _state.value
+        val room = s.selected ?: return
+        PlanViewport.reveal(PlanView(s.zoom, s.panX, s.panY), room, widthDp, heightDp)?.let { setView(it.zoom, it.panX, it.panY) }
     }
 
     private fun launch(block: suspend () -> Unit) {
@@ -475,9 +477,8 @@ class PlanEditorViewModel(
         private const val OVERLAY_MODE = "overlayMode"
         private const val OVERLAY_SELECTED = "overlaySelected"
         private const val DRAWING = "drawing"
-        const val MIN_ZOOM = 0.15f
-        const val MAX_ZOOM = 6f
-        private const val FIT_MARGIN_DP = 24f
+        const val MIN_ZOOM = PlanViewport.MIN_ZOOM
+        const val MAX_ZOOM = PlanViewport.MAX_ZOOM
 
         /** Keeps the point under [focusDp] fixed while the scale changes (pinch). */
         fun zoomAround(state: PlanEditorUiState, factor: Float, focusX: Float, focusY: Float): PlanEditorEvent.Transform {

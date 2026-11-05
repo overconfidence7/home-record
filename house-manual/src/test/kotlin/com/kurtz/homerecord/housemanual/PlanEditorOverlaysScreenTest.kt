@@ -51,7 +51,7 @@ class PlanEditorOverlaysScreenTest {
         floors = listOf(FloorSummary("f1", "Main", ceilingHeightIn = 96, halfLevel = false, roomCount = 1)),
         floorId = "f1",
         rooms = listOf(PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 168, 144)),
-        zoom = 1f, panX = 16f, panY = 16f,
+        zoom = 1f, panX = 16f, panY = 16f, viewSet = true,
         canEditOverlays = true,
     )
 

@@ -46,7 +46,7 @@ class PlanEditorInspectorTest {
         floorId = "f1",
         rooms = listOf(kitchen),
         selectedId = "k",
-        zoom = 1f, panX = 16f, panY = 16f,
+        zoom = 1f, panX = 16f, panY = 16f, viewSet = true,
     )
 
     private fun show(s: PlanEditorUiState, events: MutableList<PlanEditorEvent> = mutableListOf()) =

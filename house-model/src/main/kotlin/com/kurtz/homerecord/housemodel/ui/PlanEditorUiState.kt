@@ -31,6 +31,11 @@ data class PlanEditorUiState(
     /** Screen dp offset of the plan origin. */
     val panX: Float = 0f,
     val panY: Float = 0f,
+    /**
+     * False until the view model has a view for this canvas (fitted, restored, panned). Until then the screen draws the
+     * plan fitted to the canvas, so the plan never shows up pinned to a corner for a frame (or in previews).
+     */
+    val viewSet: Boolean = false,
     /** Rooms that overlap another or are under 2 x 2 ft. A warning only. */
     val flaggedIds: Set<String> = emptySet(),
     /** Bumps when the size fields must reload from the rooms (selection, drag end, undo), not while typing. */
@@ -109,6 +114,8 @@ sealed interface PlanEditorEvent {
     data class Transform(val zoom: Float, val panX: Float, val panY: Float) : PlanEditorEvent
     /** Fits all rooms into a viewport of the given size in dp. */
     data class Fit(val widthDp: Float, val heightDp: Float) : PlanEditorEvent
+    /** Pans (zooming out only if it must) so the selected room shows whole in a viewport of the given size in dp. */
+    data class Reveal(val widthDp: Float, val heightDp: Float) : PlanEditorEvent
     /** Switches between editing rooms and drawing overlays (AC-C25). */
     data class SetOverlayMode(val on: Boolean) : PlanEditorEvent
     /**

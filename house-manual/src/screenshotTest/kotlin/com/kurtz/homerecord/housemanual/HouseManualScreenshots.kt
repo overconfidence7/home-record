@@ -72,6 +72,16 @@ fun PlanEditorWallScreenshot() = PlanEditorWallPreview()
 fun PlanEditorOverlaysScreenshot() = PlanEditorOverlaysPreview()
 
 @PreviewTest
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun PlanEditorShapeLandscapeScreenshot() = PlanEditorShapeLandscapePreview()
+
+@PreviewTest
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun PlanEditorOverlaysLandscapeScreenshot() = PlanEditorOverlaysLandscapePreview()
+
+@PreviewTest
 @ThemePreviews
 @Composable
 fun PlanEditorOverlayPickedScreenshot() = PlanEditorOverlayPickedPreview()

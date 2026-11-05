@@ -33,7 +33,7 @@ class SharedHouseTagsTest {
         floorId = "f1",
         rooms = listOf(PlanRoom("k", "Kitchen", "KITCHEN", listOf(Pt(0, 0), Pt(168, 0), Pt(168, 150), Pt(0, 150)))),
         selectedId = "k",
-        zoom = 1f, panX = 16f, panY = 16f,
+        zoom = 1f, panX = 16f, panY = 16f, viewSet = true,
     )
 
     private fun tags(node: SemanticsNode): List<String> =

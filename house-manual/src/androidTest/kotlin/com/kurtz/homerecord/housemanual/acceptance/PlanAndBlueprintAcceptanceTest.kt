@@ -57,6 +57,7 @@ class PlanAndBlueprintAcceptanceTest {
         floorId = main.id,
         rooms = listOf(kitchen, living),
         zoom = 0.5f,
+        viewSet = true,
     )
 
     @AcceptanceCriterion("AC-C5")

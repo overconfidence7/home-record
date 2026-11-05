@@ -111,6 +111,7 @@ import com.kurtz.homerecord.housemodel.plan.OpeningKind
 import com.kurtz.homerecord.housemodel.plan.PlanOpening
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.plan.PlanStair
+import com.kurtz.homerecord.housemodel.plan.PlanViewport
 import com.kurtz.homerecord.housemodel.plan.Pt
 import com.kurtz.homerecord.housemodel.plan.RoomKind
 import com.kurtz.homerecord.housemodel.blueprint.drawPendingRun
@@ -225,12 +226,21 @@ fun PlanEditorScreen(
                 val plan: @Composable (Modifier) -> Unit = { modifier ->
                     PlanArea(state, onEvent, canvasWidthDp, canvasHeightDp, { w, h -> canvasWidthDp = w; canvasHeightDp = h }, showFloors, modifier)
                 }
+                // Landscape (and any wide window): the panel sits beside the plan so the plan keeps the full height.
+                val beside = maxWidth > maxHeight && maxWidth >= 600.dp
                 if (state.overlayMode) {
-                    Column(Modifier.fillMaxSize()) {
-                        plan(Modifier.weight(1f).fillMaxWidth())
-                        OverlayPanel(state, onOverlay, Modifier.fillMaxWidth().heightIn(max = panelMaxHeight))
+                    if (beside) {
+                        Row(Modifier.fillMaxSize()) {
+                            plan(Modifier.weight(1f).fillMaxHeight())
+                            OverlayPanel(state, onOverlay, Modifier.width(panelWidth).fillMaxHeight(), beside = true)
+                        }
+                    } else {
+                        Column(Modifier.fillMaxSize()) {
+                            plan(Modifier.weight(1f).fillMaxWidth())
+                            OverlayPanel(state, onOverlay, Modifier.fillMaxWidth().heightIn(max = panelMaxHeight), beside = false)
+                        }
                     }
-                } else if (room != null && maxWidth > maxHeight && maxWidth >= 600.dp) {
+                } else if (room != null && beside) {
                     Row(Modifier.fillMaxSize()) {
                         plan(Modifier.weight(1f).fillMaxHeight())
                         RoomPanel(state, room, onEvent, Modifier.width(panelWidth).fillMaxHeight())
@@ -262,7 +272,13 @@ private fun PlanArea(
             if (state.canEditOverlays) ModeSwitch(state.overlayMode, onEvent)
             if (state.unplaced.isNotEmpty() && !state.overlayMode) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
         }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            // Until the view model has a view, draw the plan fitted to this canvas (first frame, previews, catalog).
+            val state = if (state.viewSet) {
+                state
+            } else {
+                PlanViewport.fit(state.rooms, maxWidth.value, maxHeight.value)?.let { state.copy(zoom = it.zoom, panX = it.panX, panY = it.panY) } ?: state
+            }
             PlanCanvas(
                 state = state,
                 onEvent = onEvent,
@@ -327,7 +343,7 @@ private fun ModeSwitch(overlayMode: Boolean, onEvent: (PlanEditorEvent) -> Unit)
  * Done, or a line saying what to do.
  */
 @Composable
-private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent) -> Unit, modifier: Modifier) {
+private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent) -> Unit, modifier: Modifier, beside: Boolean) {
     val prefix = LocalTagPrefix.current
     val drawing = state.drawing
     val selected = state.selectedOverlay
@@ -354,7 +370,8 @@ private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 88.dp).testTag("${prefix}_plan_overlays_hint"),
+                    // Under the plan the hint leaves room for the Add overlay button; beside it the button sits lower.
+                    modifier = Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (beside) 12.dp else 88.dp).testTag("${prefix}_plan_overlays_hint"),
                 )
             }
         }
@@ -433,11 +450,14 @@ private fun PlanCanvas(
     // A point of the picked overlay being dragged: shown moved at once, saved when the finger lifts.
     var dragged by remember { mutableStateOf<Triple<String, Int, OverlayPoint>?>(null) }
     var sized by remember { mutableStateOf(false) }
-    LaunchedEffect(state.floorId, sized) {
-        // First open of a floor with no saved view: fit the rooms once the canvas size is known.
-        if (sized && state.rooms.isNotEmpty() && state.zoom == 1f && state.panX == 0f && state.panY == 0f) {
-            onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp))
-        }
+    val landscape = canvasWidthDp > canvasHeightDp
+    LaunchedEffect(state.floorId, sized, landscape) {
+        // Open, floor change and rotation: fit the rooms once the canvas size is known.
+        if (sized && state.rooms.isNotEmpty()) onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp))
+    }
+    LaunchedEffect(state.selectedId, state.editShape, sized, canvasWidthDp, canvasHeightDp) {
+        // Selecting a room brings up the panel and shrinks the canvas; keep the whole room (all its corners) in view.
+        if (sized && state.selectedId != null) onEvent(PlanEditorEvent.Reveal(canvasWidthDp, canvasHeightDp))
     }
     Canvas(
         modifier

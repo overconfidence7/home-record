@@ -40,7 +40,7 @@ class PlanEditorRoomNodesTest {
         floors = listOf(FloorSummary("f1", "Main", ceilingHeightIn = 96, halfLevel = false, roomCount = 2)),
         floorId = "f1",
         rooms = listOf(rect("k", "Kitchen", 0, 168, 150), rect("l", "Living room", 180, 192, 168)),
-        zoom = 1f, panX = 16f, panY = 16f,
+        zoom = 1f, panX = 16f, panY = 16f, viewSet = true,
     )
 
     @AcceptanceCriterion("AC-U10", "AC-C7")
