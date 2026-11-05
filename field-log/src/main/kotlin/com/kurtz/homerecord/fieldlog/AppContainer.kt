@@ -8,6 +8,7 @@ import com.kurtz.homerecord.core.auth.CredentialManagerGoogleSource
 import com.kurtz.homerecord.core.auth.EncryptedTokenStore
 import com.kurtz.homerecord.core.auth.RetrofitAuthApi
 import com.kurtz.homerecord.core.auth.SessionInterceptor
+import com.kurtz.homerecord.core.billing.plan
 import com.kurtz.homerecord.core.company.CompanyRepository
 import com.kurtz.homerecord.core.company.PrefsCompanyCache
 import com.kurtz.homerecord.core.company.RetrofitCompanyApi
@@ -146,6 +147,12 @@ class AppContainer(private val app: Application) {
         auth.signOut()
         localWipe.run()
         runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
+    }
+
+    /** Re-reads `/me` and returns the company's plan now (null when there is no company), for FL-Paywall (AC-F56). */
+    suspend fun refreshPlan(): com.kurtz.homerecord.core.billing.FieldLogPlan? {
+        company.refresh()
+        return (company.state.value as? CompanyState.Active)?.membership?.plan(System.currentTimeMillis())
     }
 
     fun signOut() {

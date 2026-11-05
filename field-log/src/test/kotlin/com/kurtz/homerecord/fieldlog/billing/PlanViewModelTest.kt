@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.billing.FieldLogPlan
 import com.kurtz.homerecord.core.billing.FieldLogPlanKind
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -17,7 +18,8 @@ import org.junit.Test
 /** AC-F56: FL-Paywall buys Solo or Crew for the company and re-reads `/me` once the store says yes. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlanViewModelTest {
-    @Before fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
+    private val scheduler = TestCoroutineScheduler()
+    @Before fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher(scheduler))
     @After fun tearDown() = Dispatchers.resetMain()
 
     private class FakeCompanyBilling(
@@ -38,8 +40,10 @@ class PlanViewModelTest {
 
     private val expired = FieldLogPlan(FieldLogPlanKind.Expired, null, 0)
     private var refreshes = 0
+    /** What `/me` answers on each read; the last answer repeats. */
+    private var meAnswers: List<FieldLogPlan?> = listOf(FieldLogPlan(FieldLogPlanKind.Crew, null, 10))
     private fun vm(billing: CompanyBilling, plan: FieldLogPlan = expired, lapsed: Boolean = true) =
-        PlanViewModel(billing, "co-1", plan, lapsed) { refreshes++ }
+        PlanViewModel(billing, "co-1", plan, lapsed, { meAnswers[minOf(refreshes++, meAnswers.lastIndex)] })
 
     // AC-F56
     @Test fun loadsSoloThenCrewWithStorePrices() {
@@ -71,8 +75,47 @@ class PlanViewModelTest {
         assertThat(vm.state.value.bought).isEqualTo(FieldLogPlanKind.Crew)
         assertThat(vm.state.value.busy).isFalse()
         assertThat(refreshes).isEqualTo(1)
-        vm.onPlan(FieldLogPlan(FieldLogPlanKind.Crew, null, 10), lapsed = false)
         assertThat(vm.state.value.plan.kind).isEqualTo(FieldLogPlanKind.Crew)
+        assertThat(vm.state.value.lapsed).isFalse()
+    }
+
+    // AC-F56 [r12:fl-paywall-stale-after-buy]: the webhook lands after the store, so /me is read again with backoff
+    // until it reports the plan just bought; the lapsed Owner is then out of the paywall without a restart.
+    @Test fun purchaseKeepsReadingMeUntilTheWebhookLands() {
+        meAnswers = listOf(expired, null, expired, FieldLogPlan(FieldLogPlanKind.Crew, null, 10))
+        val vm = vm(FakeCompanyBilling())
+        vm.onEvent(PlanEvent.Buy("fieldlog_crew_monthly"))
+        assertThat(refreshes).isEqualTo(1)
+        assertThat(vm.state.value.lapsed).isTrue()
+        scheduler.advanceTimeBy(2_001)
+        assertThat(refreshes).isEqualTo(2)
+        scheduler.advanceUntilIdle()
+        assertThat(refreshes).isEqualTo(4)
+        assertThat(vm.state.value.plan.kind).isEqualTo(FieldLogPlanKind.Crew)
+        assertThat(vm.state.value.lapsed).isFalse()
+    }
+
+    // AC-F56: a webhook that never lands stops the polling after the backoff list; the paywall stays lapsed.
+    @Test fun purchaseStopsReadingMeAfterTheBackoff() {
+        meAnswers = listOf(expired)
+        val vm = vm(FakeCompanyBilling())
+        vm.onEvent(PlanEvent.Buy("fieldlog_crew_monthly"))
+        scheduler.advanceUntilIdle()
+        assertThat(refreshes).isEqualTo(PlanViewModel.PLAN_REFRESH_BACKOFF.size)
+        assertThat(vm.state.value.lapsed).isTrue()
+        assertThat(vm.state.value.bought).isEqualTo(FieldLogPlanKind.Crew)
+    }
+
+    // AC-F56: a trial Owner upgrading to Crew waits for Crew, not just any active plan.
+    @Test fun upgradeFromTrialWaitsForTheBoughtPlan() {
+        val trial = FieldLogPlan(FieldLogPlanKind.Trial, 9, 10)
+        meAnswers = listOf(trial, FieldLogPlan(FieldLogPlanKind.Solo, null, 1))
+        val vm = vm(FakeCompanyBilling(restoreResult = Result.success(FieldLogPlanKind.Solo)), trial, lapsed = false)
+        vm.onEvent(PlanEvent.Restore)
+        assertThat(vm.state.value.plan.kind).isEqualTo(FieldLogPlanKind.Trial)
+        scheduler.advanceUntilIdle()
+        assertThat(refreshes).isEqualTo(2)
+        assertThat(vm.state.value.plan.kind).isEqualTo(FieldLogPlanKind.Solo)
         assertThat(vm.state.value.lapsed).isFalse()
     }
 

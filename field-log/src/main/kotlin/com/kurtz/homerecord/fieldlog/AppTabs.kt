@@ -84,7 +84,7 @@ fun FieldLogApp(container: AppContainer) {
                 // The plan ended (AC-F56): the Owner gets FL-Paywall as the whole app until a plan is in force again.
                 PlanAccess.OwnerPaywall -> PlanRoute(
                     billing = { container.companyBilling }, companyId = membership.companyId, plan = plan, lapsed = true,
-                    refresh = { container.company.refresh() }, onBack = {}, onSignOut = container::signOut,
+                    refresh = { container.refreshPlan() }, onBack = {}, onSignOut = container::signOut,
                 )
                 // Everyone else: "Ask your owner to renew" over their own week, read only.
                 PlanAccess.CrewReadOnly -> Scaffold { padding ->
@@ -194,7 +194,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             PlanRoute(
                 billing = { container.companyBilling }, companyId = membership.companyId,
                 plan = membership.plan(System.currentTimeMillis()), lapsed = false,
-                refresh = { container.company.refresh() }, onBack = nav::pop, onSignOut = container::signOut,
+                refresh = { container.refreshPlan() }, onBack = nav::pop, onSignOut = container::signOut,
             )
         }
         entry<TeamKey> {

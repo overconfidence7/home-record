@@ -15,7 +15,7 @@ fun PlanRoute(
     companyId: String,
     plan: FieldLogPlan,
     lapsed: Boolean,
-    refresh: suspend () -> Unit,
+    refresh: suspend () -> FieldLogPlan?,
     onBack: () -> Unit,
     onSignOut: () -> Unit,
 ) {
