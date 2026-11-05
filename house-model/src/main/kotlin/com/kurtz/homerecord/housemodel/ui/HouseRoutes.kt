@@ -50,6 +50,8 @@ fun HouseRoute(
     onOpenOverlay: ((com.kurtz.homerecord.housemodel.overlays.Overlay) -> Unit)? = null,
     /** A tapped item on the blueprint: the item, and the room it stands in. */
     onOpenItem: (itemId: String, roomId: String) -> Unit = { _, _ -> },
+    /** The home's name and address over the plan; Field Log turns it off (its job top bar names the job). */
+    showHeader: Boolean = true,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -89,6 +91,7 @@ fun HouseRoute(
         onOpenPin = onOpenPin,
         on3D = on3D?.let { open -> { open(state.floorId) } },
         onBehindWall = onBehindWall,
+        showHeader = showHeader,
         onOpenMark = onOpenOverlay?.let { openOverlay ->
             { mark ->
                 when (val target = mark.target) {

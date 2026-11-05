@@ -1624,6 +1624,7 @@ private fun JobHousePinsContent() {
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t1", "Task 1: Move the outlet behind the range", 60, 30, 1),
             com.kurtz.homerecord.housemodel.blueprint.BlueprintPin("t2", "Task 2: Replace cracked cover plate by the back door", 216, 110, 2),
         ),
+        showHeader = false,
     )
 }
 
