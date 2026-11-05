@@ -3174,7 +3174,7 @@ Open, found in the review:
 - [ ] [Minor] The photo report offers only This week / Last week / Last 4 weeks; a long job cannot get a whole-job or custom-range report (AC-F28 "date range") [r12:photo-report-range]
 - [x] [Minor] `JobItemViewModel` deletes, registers and looks up without checking `canEdit` (only the screen hides the buttons) [r12:jobitem-canedit] - fixed in df90bf1a
 - [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count] (the "• term" half fixed in df90bf1a; the Reports recount is still open)
-- [ ] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread]
+- [x] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread] - fixed in cefc32c8
 
 ## Builder visual review V5 (commit b269f671)
 
