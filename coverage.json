@@ -1,8 +1,8 @@
 {
- "ticked_tasks": 225,
- "acs_claimed": 394,
+ "ticked_tasks": 230,
+ "acs_claimed": 406,
  "acs_missing": 0,
- "unit_test_files": 341,
- "device_test_files": 71,
+ "unit_test_files": 342,
+ "device_test_files": 72,
  "tasks": []
 }
