@@ -3175,3 +3175,10 @@ Open, found in the review:
 - [ ] [Minor] `JobItemViewModel` deletes, registers and looks up without checking `canEdit` (only the screen hides the buttons) [r12:jobitem-canedit]
 - [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count]
 - [ ] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread]
+
+## Builder visual review V5 (commit b269f671)
+
+Opened M5 PNGs: Changes list (light), Edit change (200%), Sign change order (drawn, light), Reports Photos (light, before and after the fix), Handoff (200%), Job item (200%), Materials and receipts (200%), FL-Paywall lapsed (200%), Settings (200%), Job overview (dark, after the fix). Rules checked: 2, 7-10, 13, 15, 16, 21, 24-26, 30-32, 34. The PRODUCT.md Field Log steps 1-10 walk was not run on a device here (no emulator in the builder container); the last QA judge walkthrough (323d8128) is the device record, and its Field Log findings are all fixed.
+- Pass: change order form and sign pad (Close + Save, labelled required fields, full-width Clear/Sign, the approval sentence names signer and total); handoff contents as icon rows with counts; item page sections with primary headers; materials grouped by job with totals and an 88 dp-padded list under the FAB; paywall and settings wrap whole at 200%.
+- [x] [UI] Minor: the job tabs and the Reports tabs drew every label in the primary colour, so the open tab was marked only by the underline (Overview/Photos/Log/Files all orange on Changes) [v5:tabs-all-primary] - fixed in b269f671 (unselected tabs onSurfaceVariant; 63 job and report PNGs regenerated and checked)
+- Noted, not changed: in the Changes catalog shot the selected "Changes" tab sits off the right edge of the scrollable tab row; on the device the row scrolls to it, the static render does not. Change order photo tiles show the placeholder icon (same gap as [judge:fl-photo-catalog-no-image]).
