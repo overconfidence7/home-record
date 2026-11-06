@@ -79,6 +79,8 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     var claimToken by rememberSaveable { mutableStateOf<String?>(null) }
     // A `.hrbackup` picked on onboarding or HM-Backup (AC-C48); its passphrase prompt and preview go over everything.
     var restoreUri by rememberSaveable { mutableStateOf<String?>(null) }
+    // Onboarding → "Sign in to get your home" (AC-H15 second phone); closes on its own once the home arrives.
+    var signingIn by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(incoming) {
         if (incoming != null) {
             val token = com.kurtz.homerecord.core.bundle.HandoffLink.token(incoming.toString())
@@ -96,6 +98,7 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
         container.homes.observeHome().collect { home = it; loaded = true }
     }
     val current = home
+    LaunchedEffect(current != null) { if (current != null) signingIn = false }
     // Set by "Draw your floor plan" so the new home opens straight on the plan editor, House tab.
     var openEditor by rememberSaveable { mutableStateOf(false) }
     val pendingImport = importUri
@@ -117,7 +120,10 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
             container.importFiles, android.net.Uri.parse(pendingImport), onClose = { importUri = null },
         )
         !loaded -> Scaffold { LoadingState(Modifier.padding(it)) }
-        current == null -> OnboardingRoute(container.homes, onDrawPlan = { openEditor = true }, onRestore = { restoreUri = it.toString() })
+        current == null && signingIn -> com.kurtz.homerecord.housemanual.account.CloudRestoreRoute(container, onClose = { signingIn = false })
+        current == null -> OnboardingRoute(
+            container.homes, onDrawPlan = { openEditor = true }, onRestore = { restoreUri = it.toString() }, onSignIn = { signingIn = true },
+        )
         else -> HouseManualTabs(container, current, openEditor, onImport = { importUri = it.toString() }, onRestore = { restoreUri = it.toString() })
     }
 }

@@ -38,7 +38,7 @@ class OnboardingViewModel(
             is OnboardingEvent.GarageChanged -> update { copy(attachedGarage = event.value) }.also { saved[GARAGE] = event.value }
             OnboardingEvent.DrawPlan -> submit(seedFromTemplate = true)
             OnboardingEvent.Skip -> submit(seedFromTemplate = false)
-            OnboardingEvent.Restore -> Unit
+            OnboardingEvent.Restore, OnboardingEvent.SignIn -> Unit
         }
     }
 

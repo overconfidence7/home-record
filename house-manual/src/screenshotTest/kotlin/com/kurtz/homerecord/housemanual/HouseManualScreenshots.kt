@@ -456,6 +456,26 @@ fun AccountCloudDeletedScreenshot() = AccountCloudDeletedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CloudRestoreSignedOutScreenshot() = CloudRestoreSignedOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CloudRestoreWorkingScreenshot() = CloudRestoreWorkingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CloudRestoreNoHomeScreenshot() = CloudRestoreNoHomePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CloudRestoreOfflineScreenshot() = CloudRestoreOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun WallOutlineScreenshot() = WallOutlinePreview()
 
 @PreviewTest

@@ -28,4 +28,6 @@ sealed interface OnboardingEvent {
     data object Skip : OnboardingEvent
     /** Restore from a backup instead (AC-C48): the route opens the file picker. */
     data object Restore : OnboardingEvent
+    /** Sign in to bring the account's home to this phone instead (AC-H15): the app opens the sign-in screen. */
+    data object SignIn : OnboardingEvent
 }

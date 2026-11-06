@@ -1,0 +1,26 @@
+# Helper, not a walkthrough step: from the shared sign-in form (hm_sign_in_email visible), sign in with
+# ${EMAIL} using the dev backend's last code (/dev/last-code, PLAN Q005). Ends right after Verify.
+appId: com.kurtz.homerecord.housemanual
+---
+- tapOn:
+    id: "hm_sign_in_email"
+- eraseText
+- inputText: ${EMAIL}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_send"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_code"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: ${EMAIL}
+- assertTrue: ${output.devCode != null && output.devCode != ''}
+- tapOn:
+    id: "hm_sign_in_code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_verify"

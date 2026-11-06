@@ -21,7 +21,7 @@ import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
 @Composable
-fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawPlan: () -> Unit = {}, onRestore: (Uri) -> Unit = {}) {
+fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawPlan: () -> Unit = {}, onRestore: (Uri) -> Unit = {}, onSignIn: () -> Unit = {}) {
     val vm = viewModel<OnboardingViewModel>(
         factory = viewModelFactory { initializer { OnboardingViewModel(repo, createSavedStateHandle()) } },
     )
@@ -33,7 +33,13 @@ fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawP
     ) { uri -> if (uri != null) onRestore(uri) }
     OnboardingScreen(
         state,
-        { if (it == com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent.Restore) pickBackup.launch(com.kurtz.homerecord.housemanual.backup.PICK_TYPES) else vm.onEvent(it) },
+        {
+            when (it) {
+                com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent.Restore -> pickBackup.launch(com.kurtz.homerecord.housemanual.backup.PICK_TYPES)
+                com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent.SignIn -> onSignIn()
+                else -> vm.onEvent(it)
+            }
+        },
         modifier,
     )
 }

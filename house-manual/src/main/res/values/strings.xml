@@ -638,6 +638,17 @@
     <string name="backup_restore_body">Bring back a home from a .hrbackup file. Anything already on this phone stays unless you choose the backup\'s copy.</string>
     <string name="backup_restore">Restore from a backup</string>
     <string name="onboarding_restore">Restore from a backup</string>
+    <string name="onboarding_sign_in">Sign in to get your home</string>
+    <string name="cloud_restore_title">Sign in</string>
+    <string name="cloud_restore_intro">Sign in with the account you use on your other phone. Your home, its photos and its documents come back to this phone.</string>
+    <string name="cloud_restore_working">Getting your home from your account…</string>
+    <string name="cloud_restore_none_title">No home on this account yet</string>
+    <string name="cloud_restore_none_body">Set up your home on this phone. While you\'re signed in it\'s kept in the cloud.</string>
+    <string name="cloud_restore_set_up">Set up a home</string>
+    <string name="cloud_restore_set_up_instead">Set up a home instead</string>
+    <string name="cloud_restore_failed_title">Couldn\'t get your home</string>
+    <string name="cloud_restore_offline">Couldn\'t reach your account. Check your connection and tap Retry.</string>
+    <string name="cloud_restore_failed">The server didn\'t answer. Tap Retry, or set up the home here and sign in again later.</string>
     <string name="restore_title">Restore from a backup</string>
     <string name="restore_passphrase_intro">Type the passphrase you chose when you made this backup.</string>
     <string name="restore_confirm">Restore</string>

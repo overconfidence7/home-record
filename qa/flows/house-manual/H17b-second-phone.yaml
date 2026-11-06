@@ -1,0 +1,138 @@
+# Walkthrough H17, second half: "clear data and sign in again: the home appears with photos; edit on one side
+# shows on the other" (AC-H15). One emulator plays both phones: the seeded QA House is signed in and uploaded,
+# app data is cleared (the second phone), onboarding's "Sign in to get your home" brings it back, an edit made
+# there syncs, and a third clean install sees that edit. Photo rows coming down with their R2 keys and the
+# photo pass fetching them are proven in CloudHomeRestoreTest and HomeMediaTest (the seed has no photos).
+# Ends by deleting the cloud copy so the next run starts the account empty. Needs the dev backend (Q005).
+appId: com.kurtz.homerecord.housemanual
+env:
+  EMAIL: qa-hm-second@example.com
+---
+# Phone one: the seeded home, signed in and uploaded
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_email"
+    timeout: 5000
+- runFlow: _sign-in.yaml
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+# Phone two: no home, sign in from onboarding
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "hm_onboarding_sign_in"
+    direction: DOWN
+- tapOn:
+    id: "hm_onboarding_sign_in"
+- extendedWaitUntil:
+    visible:
+      id: "hm_cloud_restore_intro"
+    timeout: 5000
+- takeScreenshot: H17b-sign-in-to-get-home
+- runFlow: _sign-in.yaml
+# AC-H15: the same home shows on the second phone, its items with them
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 60000
+- assertVisible:
+    id: "hm_home_title"
+    text: "QA House"
+- takeScreenshot: H17b-home-back
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible: "Furnace"
+    timeout: 10000
+# AC-H15: an edit on the second phone syncs
+- tapOn:
+    id: "hm_tab_more"
+- tapOn:
+    id: "hm_more_contacts"
+- tapOn:
+    id: "hm_contacts_fab"
+- tapOn:
+    id: "hm_contacts_name"
+- inputText: "Rosa Diaz"
+- hideKeyboard
+- tapOn:
+    id: "hm_contacts_save"
+- assertVisible: "Rosa Diaz"
+- tapOn:
+    id: "hm_back"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+# A third clean install sees the second phone's edit
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "hm_onboarding_sign_in"
+    direction: DOWN
+- tapOn:
+    id: "hm_onboarding_sign_in"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_email"
+    timeout: 5000
+- runFlow: _sign-in.yaml
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 60000
+- tapOn:
+    id: "hm_tab_more"
+- tapOn:
+    id: "hm_more_contacts"
+- extendedWaitUntil:
+    visible: "Rosa Diaz"
+    timeout: 10000
+- takeScreenshot: H17b-edit-arrived
+# Clean up: delete the cloud copy so the account is empty for the next run
+- tapOn:
+    id: "hm_back"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "hm_account_delete_cloud"
+    direction: DOWN
+- tapOn:
+    id: "hm_account_delete_cloud"
+- tapOn:
+    id: "hm_account_delete_cloud_confirm"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_cloud_deleted"
+    timeout: 15000

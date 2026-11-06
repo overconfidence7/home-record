@@ -92,19 +92,28 @@ class AppContainer(private val app: Application) {
         auth::signOut,
     )
 
+    /** Onboarding sign-in on a phone with no home: the account's home comes down with one sync pass (AC-H15). */
+    val cloudRestore = com.kurtz.homerecord.core.sync.CloudHomeRestore(
+        homesOnAccount = account::homes,
+        localHomeIds = { db.homeDao().observeAll().first().map { it.id } },
+        sync = { tenant -> syncCoordinatorSync(tenant) },
+    )
+
     private val connectivity = AndroidConnectivityMonitor(app)
 
     private val homeTenant = db.homeDao().observeAll().map { it.firstOrNull()?.let { h -> TenantRef(TenantKind.Home, h.id) } }
 
+    /** One sync pass of [tenant], then the home's photo pass (T075a); the coordinator and the onboarding restore share it. */
+    private suspend fun syncCoordinatorSync(tenant: TenantRef) =
+        syncEngine.sync(tenant).also { result ->
+            if (result is ApiResult.Err) Log.w(SYNC_LOG_TAG, "Sync of ${tenant.key} failed: ${result.failure}")
+            // The home is on the server now: its photo files follow, and photos from its other phones come down (T075a).
+            if (result is ApiResult.Ok && tenant.kind == TenantKind.Home) scope.launch { afterHomeSync(tenant.id) }
+        }
+
     val syncCoordinator = SyncCoordinator(
         scope,
-        { tenant ->
-            syncEngine.sync(tenant).also { result ->
-                if (result is ApiResult.Err) Log.w(SYNC_LOG_TAG, "Sync of ${tenant.key} failed: ${result.failure}")
-                // The home is on the server now: its photo files follow, and photos from its other phones come down (T075a).
-                if (result is ApiResult.Ok && tenant.kind == TenantKind.Home) scope.launch { afterHomeSync(tenant.id) }
-            }
-        },
+        { tenant -> syncCoordinatorSync(tenant) },
         auth.state.map { it is AuthState.SignedIn },
         homeTenant,
         connectivity,

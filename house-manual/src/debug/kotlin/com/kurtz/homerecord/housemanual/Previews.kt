@@ -1077,6 +1077,30 @@ fun AccountSignedOutPreview() = Frame {
     }
 }
 
+/** Onboarding → Sign in to get your home, signed out: the line on what signing in does over the sign-in form. */
+@ThemePreviews
+@Composable
+fun CloudRestoreSignedOutPreview() = CloudRestoreFrame(com.kurtz.homerecord.housemanual.account.CloudRestorePhase.SignedOut)
+
+@ThemePreviews
+@Composable
+fun CloudRestoreWorkingPreview() = CloudRestoreFrame(com.kurtz.homerecord.housemanual.account.CloudRestorePhase.Working)
+
+@ThemePreviews
+@Composable
+fun CloudRestoreNoHomePreview() = CloudRestoreFrame(com.kurtz.homerecord.housemanual.account.CloudRestorePhase.NoHome)
+
+@ThemePreviews
+@Composable
+fun CloudRestoreOfflinePreview() = CloudRestoreFrame(com.kurtz.homerecord.housemanual.account.CloudRestorePhase.Failed, offline = true)
+
+@Composable
+private fun CloudRestoreFrame(phase: com.kurtz.homerecord.housemanual.account.CloudRestorePhase, offline: Boolean = false) = Frame {
+    com.kurtz.homerecord.housemanual.account.CloudRestoreScreen(com.kurtz.homerecord.housemanual.account.CloudRestoreUiState(phase, offline), {}) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.whitfield@gmail.com"), {}, modifier)
+    }
+}
+
 @ThemePreviews
 @Composable
 fun AccountSignOutConfirmPreview() = Frame {
