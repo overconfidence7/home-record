@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.PowerOff
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
@@ -98,6 +100,23 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
             state.loading || panel == null || grid == null -> LoadingState(Modifier.padding(padding).testTag("hm_panel_loading"))
             else -> Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("hm_panel_scroll")) {
                 PanelHeader(panel, state.breakers.size, onPhoto = { onEvent(PanelEvent.OpenPhotoSheet) })
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { onEvent(PanelEvent.ShareLegend) },
+                    enabled = !state.legendBusy,
+                    modifier = Modifier.padding(horizontal = 16.dp).heightIn(min = 48.dp).testTag("hm_panel_legend"),
+                ) {
+                    Icon(Icons.Rounded.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                    androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.panel_legend_share))
+                }
+                if (state.legendFailed) {
+                    Text(
+                        stringResource(R.string.panel_legend_failed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("hm_panel_legend_failed"),
+                    )
+                }
                 if (state.photoFailed) {
                     Text(
                         stringResource(R.string.panel_photo_failed),

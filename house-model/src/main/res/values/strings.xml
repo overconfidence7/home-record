@@ -226,6 +226,13 @@
     <string name="item_category_other">Other</string>
     <string name="item_type_value">%1$s, %2$s</string>
     <string name="blueprint_pdf_scale_feet">%1$d ft</string>
+    <!-- Panel legend PDF (AC-C43) -->
+    <string name="legend_open">Open</string>
+    <string name="legend_amps">%1$d A</string>
+    <string name="legend_with_slot">with %1$d</string>
+    <string name="legend_feeds">feeds %1$s</string>
+    <string name="legend_service">%1$d A service</string>
+    <string name="legend_slots">%1$d slots</string>
     <!-- Item types, their seeded consumables and reminders (cr:seed-strings); ids match ItemCategory -->
     <string name="item_subtype_refrigerator">Refrigerator</string>
     <string name="item_subtype_freezer">Freezer</string>

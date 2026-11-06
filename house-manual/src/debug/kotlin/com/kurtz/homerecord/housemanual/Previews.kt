@@ -1676,3 +1676,7 @@ fun MappingPickPreview() = Frame {
 @ThemePreviews
 @Composable
 fun MappingStoppedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.STOPPED, confirmed = 3), {}) }
+
+@ThemePreviews
+@Composable
+fun PanelLegendFailedPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers).copy(legendFailed = true), {}) }

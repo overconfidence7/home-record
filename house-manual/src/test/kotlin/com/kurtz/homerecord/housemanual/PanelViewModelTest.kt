@@ -280,6 +280,37 @@ class PanelViewModelTest {
         assertThat(vm(saved = saved, highlightSlot = 12).await { !it.loading }.highlightSlot).isNull()
     }
 
+    // AC-C43: Share legend makes the PDF from the panel, its breakers and what each feeds, then hands the URI to the route
+    @Test
+    @AcceptanceCriterion("AC-C43")
+    fun shareLegendExportsThePanelWithFeedsAndClearsAfterHandled() {
+        val got = mutableListOf<Pair<String, Map<String, List<String>>>>()
+        val sizes = mutableListOf<Int>()
+        var answer: String? = "content://legend.pdf"
+        runBlocking {
+            db.floorDao().upsert(FloorEntity(id = "f1", homeId = "h1", name = "Main", sortOrder = 0, createdAt = 1, updatedAt = 1))
+            db.roomDao().upsert(RoomEntity(id = "kitchen", floorId = "f1", name = "Kitchen", createdAt = 1, updatedAt = 1))
+        }
+        val vm = PanelViewModel(
+            repo, "pi", db.itemDao().observeOne("pi").map { it?.name }, repo.observeChoices("h1"), SavedStateHandle(), media, null,
+            legendExporter = { name, _, breakers, feeds -> got += name to feeds; sizes += breakers.size; answer },
+        ).also { vms += it; it.state.launchIn(it.viewModelScope) }
+        val panel = runBlocking { repo.ensurePanel("pi") }
+        val id = runBlocking { (repo.saveBreaker(panel, BreakerDraft(startSlot = 4, label = "Fridge", roomIds = setOf("kitchen"))) as com.kurtz.homerecord.housemodel.panel.BreakerSave.Saved).id }
+        vm.await { it.breakers.size == 1 }
+        // The export reads the breaker's links from the repository, so one tap is enough even before the screen has them.
+        vm.onEvent(PanelEvent.ShareLegend)
+        assertThat(vm.await { it.legendUri != null }.legendUri).isEqualTo("content://legend.pdf")
+        assertThat(got.last().first).isEqualTo("Main panel")
+        assertThat(sizes.last()).isEqualTo(1)
+        assertThat(got.last().second[id]).containsExactly("Kitchen")
+        vm.onEvent(PanelEvent.LegendHandled)
+        assertThat(vm.await { it.legendUri == null }.legendFailed).isFalse()
+        answer = null
+        vm.onEvent(PanelEvent.ShareLegend)
+        assertThat(vm.await { it.legendFailed }.legendUri).isNull()
+    }
+
     @Test
     fun openedFromMoreThePanelMarksNoSlot() {
         assertThat(vm().await { !it.loading }.highlightSlot).isNull()
