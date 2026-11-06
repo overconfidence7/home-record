@@ -282,6 +282,14 @@ private fun Timesheet(state: ClockUiState) {
             stringResource(R.string.clock_week_approved), style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary, modifier = Modifier.testTag("fl_clock_week_approved"),
         )
+        // A week with no hours and nothing flagged is one line, not seven "0h" rows (rule 10)
+        if (sheet.totalMillis == 0L && sheet.days.all { it.flags.isEmpty() }) {
+            Text(
+                stringResource(R.string.clock_week_empty), style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp).testTag("fl_clock_week_empty"),
+            )
+            return@Column
+        }
         sheet.days.forEach { day ->
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {

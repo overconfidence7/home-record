@@ -36,10 +36,18 @@ class ClockSoloOwnerScreenTest {
         assertThat(events).contains(ClockEvent.InviteCrew)
     }
 
-    @Test fun previewShowsTheRow() {
+    @Test fun aWeekWithNoHoursIsOneLine() {
         rule.setContent { ClockSoloOwnerPreview() }
-        rule.onNodeWithTag("fl_clock_list").performScrollToNode(hasTestTag("fl_clock_crew"))
+        rule.onNodeWithTag("fl_clock_list").performScrollToNode(hasTestTag("fl_clock_week_empty"))
+        rule.onNodeWithText("No hours this week yet.").assertExists()
+        rule.onNodeWithText("0h").assertDoesNotExist()
         rule.onNodeWithTag("fl_clock_crew_in").assertDoesNotExist()
+    }
+
+    @Test fun aWeekWithHoursKeepsItsRows() {
+        rule.setContent { com.kurtz.homerecord.fieldlog.ClockOutPreview() }
+        rule.onNodeWithTag("fl_clock_week_empty").assertDoesNotExist()
+        rule.onNodeWithTag("fl_clock_list").performScrollToNode(hasTestTag("fl_clock_timesheet"))
     }
 
     @Test fun withACrewTheCardAndButtonStay() {

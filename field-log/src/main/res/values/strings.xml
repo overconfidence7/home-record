@@ -589,6 +589,7 @@
     </plurals>
     <string name="clock_crew_done_skipped">%1$s Already on the clock: %2$s.</string>
     <string name="clock_timesheet">My timesheet</string>
+    <string name="clock_week_empty">No hours this week yet.</string>
     <string name="clock_total_regular">Regular</string>
     <string name="clock_total_overtime">Overtime</string>
     <string name="clock_total_double">Double time</string>

@@ -617,11 +617,14 @@ fun ClockCrewPreview() = Frame {
     )
 }
 
-/** A one-person company: the crew slot is one "Invite crew" row, no empty card (judge:fl-clock-solo-owner-noise). */
+/** A one-person company with no punches yet: one "Invite crew" row and one "No hours" line (judge:fl-clock-solo-owner-noise). */
 @ThemePreviews
 @Composable
 fun ClockSoloOwnerPreview() = Frame {
-    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(jobs = clockJobs.take(1), canLeadCrew = true, crew = emptyList()), {})
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(
+            jobs = clockJobs.take(1), canLeadCrew = true, crew = emptyList(),
+            sheet = com.kurtz.homerecord.fieldlog.clock.WeekSheet(tsDays(), 0, 0, 0),
+        ), {})
 }
 
 private val TS_MONDAY = java.time.LocalDate.of(2026, 10, 19)
