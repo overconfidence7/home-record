@@ -19,6 +19,7 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HomeRepository
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemodel.NewHome
+import com.kurtz.homerecord.housemodel.overlays.OverlayKind
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -57,6 +58,9 @@ class HandoffFixtureTest {
             val outcome = importer.apply(preview, tmp.root.resolve("unpacked"))
             assertThat(outcome.mediaCopied).isEqualTo(1)
             assertThat(db.wallPhotoDao().get("ortiz-wp1")?.originalPath).endsWith("ortiz-wp1.jpg")
+            // The crew's marks keep their kinds, so they land on the Electrical and Drain/vent layers
+            assertThat(OverlayKind.fromWire(db.overlayDao().get("ortiz-o1")?.kind)).isEqualTo(OverlayKind.ELECTRICAL_WIRE)
+            assertThat(OverlayKind.fromWire(db.overlayDao().get("ortiz-o2")?.kind)).isEqualTo(OverlayKind.DRAIN)
         } finally {
             db.close()
         }
@@ -88,13 +92,13 @@ class HandoffFixtureTest {
             )
             db.overlayDao().upsert(
                 OverlayEntity(
-                    id = "ortiz-o1", homeId = homeId, roomId = "ortiz-kitchen", wallId = wall.id, kind = "ELECTRICAL_WIRE", label = "Range circuit",
+                    id = "ortiz-o1", homeId = homeId, roomId = "ortiz-kitchen", wallId = wall.id, kind = OverlayKind.ELECTRICAL_WIRE.wire, label = "Range circuit",
                     stage = "ROUGH_IN", pointsJson = """[{"x":0.1,"y":0.3},{"x":0.8,"y":0.3}]""", createdAt = 1_762_300_000_000, updatedAt = 1_762_300_000_000, source = Sources.FIELD_LOG,
                 ),
             )
             db.overlayDao().upsert(
                 OverlayEntity(
-                    id = "ortiz-o2", homeId = homeId, roomId = "ortiz-kitchen", wallId = wall.id, kind = "DRAIN", label = "Sink drain",
+                    id = "ortiz-o2", homeId = homeId, roomId = "ortiz-kitchen", wallId = wall.id, kind = OverlayKind.DRAIN.wire, label = "Sink drain",
                     stage = "ROUGH_IN", pointsJson = """[{"x":0.5,"y":0.9},{"x":0.5,"y":0.6}]""", createdAt = 1_762_300_000_000, updatedAt = 1_762_300_000_000, source = Sources.FIELD_LOG,
                 ),
             )
