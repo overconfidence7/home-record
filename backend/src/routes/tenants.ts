@@ -104,6 +104,7 @@ export async function deleteHomeTenant(env: AppEnv["Bindings"], homeId: string):
     db.prepare("DELETE FROM sync_counters WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM media_objects WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM push_log WHERE tenant_id = ?").bind(homeId),
+    db.prepare("DELETE FROM home_invites WHERE home_id = ?").bind(homeId),
     db.prepare("DELETE FROM memberships WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM homes WHERE id = ?").bind(homeId),
   ]);

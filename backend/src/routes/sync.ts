@@ -1,3 +1,4 @@
+import { readOnlyHomeRole } from "./homeShare";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { z } from "zod";
@@ -175,6 +176,11 @@ sync.post("/:kind{companies|homes}/:tenantId/sync/push", requireSession, require
   const events: PushEvent[] = [];
   let days: CompanyDays | undefined;
   for (const op of ops) {
+    // AC-H16: a viewer of a shared home reads it and never changes it.
+    if (kind === "home" && readOnlyHomeRole(role)) {
+      rejected.push({ outboxId: op.outboxId, reason: "role" });
+      continue;
+    }
     if (!ENTITIES[kind].has(op.entity)) {
       rejected.push({ outboxId: op.outboxId, reason: "entity" });
       continue;

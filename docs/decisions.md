@@ -975,3 +975,11 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - Which home: the one the account owns, then any shared one, ties by name then id (stable). One home per phone stays the model (SPEC free tier is one home); a phone that already has a home is never pulled over.
 - No home on the account: "No home on this account yet" and Set up a home (back to onboarding, still signed in, so the home made next is uploaded). Failure: Retry, or Set up a home instead.
 - The sign-in entry is on onboarding only. Signing in from More on a phone that already has its own home keeps uploading that home (unchanged); merging two homes is out of scope.
+
+## 2026-11-06 — T076a Home sharing on the backend (AC-H16)
+
+- Home roles are `owner` (made the home; invites, removes people, deletes the cloud copy, billing), `editor` (family; edits the whole home) and `viewer` (buyer or house-sitter; reads only). The old home role name `member` reads as editor. `memberships` is rebuilt in migration 0016 because SQLite cannot widen a CHECK constraint; columns and index are unchanged.
+- Invites are one link per person: random token (SHA-256 stored), single use, 14 days, revocable while unused; the daily cron drops expired unused links. A link a member of the home opens again answers their current role and uses nothing up, so the owner tapping their own link does no harm. A link another account took answers 409, expired 410, revoked or unknown 404.
+- Only the owner makes, lists and revokes links and removes people; anyone else may leave (remove themselves). Every member sees the people list. The owner cannot be removed.
+- A viewer is read only on the server too: every sync push op is refused with `role` and `/media/presign` answers 403; pulls and signed downloads stay open. The app hiding edit controls (T076c) is the user-facing half.
+- The link page is `/invite/<token>` on the API host and opens `homerecord://invite/<token>` in House Manual through an `intent://` link, which sends a phone without the app to Google Play, like the handoff link.

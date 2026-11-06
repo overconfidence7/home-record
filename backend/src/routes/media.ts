@@ -1,3 +1,4 @@
+import { readOnlyHomeRole } from "./homeShare";
 import { Hono, type Context } from "hono";
 import { z } from "zod";
 import type { AppEnv, Membership } from "../env";
@@ -74,6 +75,8 @@ media.post("/media/presign", async (c) => {
   const session = c.get("session");
   const m = membershipFor(session, b.tenantKind, b.tenantId);
   if (!m) return notFound(c);
+  // AC-H16: a viewer of a shared home uploads nothing.
+  if (m.tenantKind === "home" && readOnlyHomeRole(m.role)) return forbidden(c);
   // AC-F56: no new files for an expired company (reads through presign-get stay open).
   if (m.tenantKind === "company" && (await companyExpired(c.env.DB, m.tenantId, Date.now()))) return c.json(SUBSCRIPTION_REQUIRED, 402);
   const maxBytes = MEDIA_MAX_BYTES[b.entity];

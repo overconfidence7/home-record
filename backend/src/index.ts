@@ -5,6 +5,7 @@ import { billing } from "./routes/billing";
 import { dev } from "./routes/dev";
 import { company } from "./routes/company";
 import { handoff, pruneHandoffs } from "./routes/handoff";
+import { homeShare, pruneHomeInvites } from "./routes/homeShare";
 import { lookup, pruneLookupQuota } from "./routes/lookup";
 import { media, removeOrphanedMedia } from "./routes/media";
 import { pruneLimits } from "./auth/rateLimit";
@@ -28,6 +29,7 @@ app.route("/", lookup);
 app.route("/", media);
 app.route("/", share);
 app.route("/", handoff);
+app.route("/", homeShare);
 app.route("/", billing);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
@@ -45,5 +47,6 @@ export default Object.assign(app, {
     ctx.waitUntil(pruneLookupQuota(env.DB));
     ctx.waitUntil(prunePushLog(env.DB));
     ctx.waitUntil(pruneHandoffs(env));
+    ctx.waitUntil(pruneHomeInvites(env.DB));
   },
 });

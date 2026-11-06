@@ -450,6 +450,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T075d: H17 second-device half: clear data, sign in to the same account, the home and its photos come back; an edit after that syncs (AC-H15)
 - [x] R14: Review T071–T075
 - [ ] T076: Sharing: editor/viewer invites by link, HM-Share people list, viewer mode hides edit controls; backend membership on homes (acceptance: AC-H16)
+  - [x] T076a: backend home sharing: home roles editor/viewer (memberships rebuilt, migration 0016), `home_invites` single-use 14-day links (`POST/DELETE /homes/:id/invites`), `GET /homes/:id/people`, `DELETE /homes/:id/people/:userId` (owner removes, others leave), `/invite/:token` page opening House Manual, `POST /invite/:token/accept`; viewers' sync pushes and uploads refused (backend half of T076; the sharing criterion is claimed by T076b and T076c, which add its flow; vitest home-share.test.ts)
+  - [ ] T076b: House Manual: HM-Share (More → Share this house): people list with roles, Invite family (editor) / Invite a viewer → share sheet with the link, open links with revoke, remove person; `homerecord://invite/<token>` deep link → sign in → accept → the shared home syncs down (AC-H16)
+  - [ ] T076c: viewer mode: a viewer's House Manual hides every edit control (FABs, Edit, overflow edits, plan editor, Add actions) and says "View only" (AC-H16)
 - [ ] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
 - [ ] T078: House Manual walkthrough pass: run `qa/product-walkthrough.md` House Manual section on the emulator if available, otherwise against screenshots; fix every blocked step (acceptance: AC-H19)
 - [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
