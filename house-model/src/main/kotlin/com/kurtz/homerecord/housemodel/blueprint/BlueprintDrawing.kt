@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import com.kurtz.homerecord.core.units.LengthParser
@@ -109,8 +110,9 @@ class BlueprintColors(
 
 /**
  * The room's name at the largest size that fits inside 90% of its width and height: [nameStyle] on one line, then
- * [smallStyle] on one line, then [smallStyle] wrapped onto two lines ("Half / bath"); null when none fits
- * [judge:hm-blueprint-small-room-name].
+ * [smallStyle] on one line, then [smallStyle] wrapped onto two lines ("Half / bath"), then [smallStyle] stepped down
+ * (one line, then two) to half its size, so at 200% font a name shrinks before it is dropped; null when none fits
+ * [judge:hm-blueprint-small-room-name, judge:hm-blueprint-names-font200].
  */
 internal fun roomNameLayout(
     room: com.kurtz.homerecord.housemodel.plan.PlanRoom,
@@ -118,20 +120,42 @@ internal fun roomNameLayout(
     measurer: androidx.compose.ui.text.TextMeasurer,
     nameStyle: TextStyle,
     smallStyle: TextStyle,
-): androidx.compose.ui.text.TextLayoutResult? {
+): androidx.compose.ui.text.TextLayoutResult? = roomNameLayouts(room, z, measurer, nameStyle, smallStyle).firstOrNull()
+
+/** Every layout of the room's name that fits the room, largest first, so the drawing can step down when stairs or marks leave less space. */
+internal fun roomNameLayouts(
+    room: com.kurtz.homerecord.housemodel.plan.PlanRoom,
+    z: Float,
+    measurer: androidx.compose.ui.text.TextMeasurer,
+    nameStyle: TextStyle,
+    smallStyle: TextStyle,
+): Sequence<androidx.compose.ui.text.TextLayoutResult> = sequence {
     val text = room.name.ifBlank { "·" }
     val maxW = room.widthIn * z * 0.9f
     val maxH = room.lengthIn * z * 0.9f
-    if (maxW < 1f || maxH < 1f) return null
+    if (maxW < 1f || maxH < 1f) return@sequence
     fun ok(l: androidx.compose.ui.text.TextLayoutResult) = !l.didOverflowWidth && !l.hasVisualOverflow && l.size.width <= maxW && l.size.height <= maxH
-    measurer.measure(text, nameStyle).takeIf(::ok)?.let { return it }
-    measurer.measure(text, smallStyle).takeIf(::ok)?.let { return it }
-    val wrapped = measurer.measure(
-        text, smallStyle, maxLines = 2, softWrap = true,
-        constraints = androidx.compose.ui.unit.Constraints(maxWidth = maxW.toInt()),
-    )
-    return wrapped.takeIf { ok(it) && !it.didOverflowHeight }
+    measurer.measure(text, nameStyle).takeIf(::ok)?.let { yield(it) }
+    for (style in nameShrinkSteps(smallStyle)) {
+        measurer.measure(text, style).takeIf(::ok)?.let { yield(it) }
+        val wrapped = measurer.measure(
+            text, style, maxLines = 2, softWrap = true,
+            constraints = androidx.compose.ui.unit.Constraints(maxWidth = maxW.toInt()),
+        )
+        if (ok(wrapped) && !wrapped.didOverflowHeight && wrapped.lineCount > 1) yield(wrapped)
+    }
 }
+
+/** [small] itself, then 85%, 70% and 50% of its size: at 200% font the smallest step is the label's size at 100%. */
+internal fun nameShrinkSteps(small: TextStyle): List<TextStyle> {
+    val size = small.fontSize
+    if (!size.isSp) return listOf(small)
+    return NAME_SHRINK.map { f ->
+        if (f == 1f) small else small.copy(fontSize = (size.value * f).sp, lineHeight = if (small.lineHeight.isSp) (small.lineHeight.value * f).sp else small.lineHeight)
+    }
+}
+
+private val NAME_SHRINK = listOf(1f, 0.85f, 0.7f, 0.5f)
 
 /** The clean plan (AC-C13): filled rooms, wall outlines, names, outer dimensions, openings, stairs, north arrow. Layers draw on top. */
 fun DrawScope.drawBlueprint(
@@ -162,19 +186,22 @@ fun DrawScope.drawBlueprint(
         room.openings.forEach { drawOpening(room, it, z, ox, oy, density, colors.wall, colors.fill) }
     }
     rooms.forEach { room ->
-        val layout = roomNameLayout(room, z, measurer, nameStyle.copy(color = colors.text), dimStyle.copy(color = colors.text)) ?: return@forEach
         val (clx, cly) = labelAnchor(room)
-        val half = layout.size.width / 2f
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
-        // Keep the name off any stairs, and off the overlays and items the layers show where there is room for it.
+        // Keep the name off any stairs, and off the overlays and items the layers show where there is room for it;
+        // when the largest size has no spot beside the stairs, a smaller one may (judge:hm-blueprint-names-font200).
         val stairs = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
             LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
-        val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
-            ?: return@forEach
-        val (cx, cy) = at
-        val fits = layout.size.width <= room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
-        if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+        for (layout in roomNameLayouts(room, z, measurer, nameStyle.copy(color = colors.text), dimStyle.copy(color = colors.text))) {
+            val half = layout.size.width / 2f
+            val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
+                ?: continue
+            val (cx, cy) = at
+            if (cx - half < room.minX * z + ox) continue
+            drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+            break
+        }
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
     drawNorthArrow(measurer, dimStyle, colors, density)
