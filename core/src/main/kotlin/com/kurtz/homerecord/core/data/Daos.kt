@@ -186,12 +186,15 @@ interface PhotoDao {
             "AND photo.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY photo.takenAt DESC LIMIT :limit",
     )
     fun observeRecentForCompany(companyId: String, limit: Int): Flow<List<PhotoEntity>>
-    /** Every live photo on the company's live jobs, oldest first, for the photo report counts (AC-F28). */
+    /**
+     * When each live photo on the company's live jobs was taken, oldest first, for the photo report counts (AC-F28).
+     * Only the three columns the count needs, so a caption or GPS edit does not reload whole rows.
+     */
     @Query(
-        "SELECT photo.* FROM photo JOIN job ON photo.jobId = job.id WHERE job.companyId = :companyId " +
-            "AND photo.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY photo.takenAt",
+        "SELECT photo.id AS id, photo.jobId AS jobId, photo.takenAt AS takenAt FROM photo JOIN job ON photo.jobId = job.id " +
+            "WHERE job.companyId = :companyId AND photo.deletedAt IS NULL AND job.deletedAt IS NULL ORDER BY photo.takenAt",
     )
-    fun observeForCompanyJobs(companyId: String): Flow<List<PhotoEntity>>
+    fun observeTakenForCompanyJobs(companyId: String): Flow<List<PhotoTaken>>
     @Query("SELECT * FROM photo WHERE jobId = :jobId AND deletedAt IS NULL ORDER BY takenAt") suspend fun listForJob(jobId: String): List<PhotoEntity>
     /** Sets a late GPS fix in one statement, so a tag or Before edited meanwhile is not overwritten; 0 when already set or deleted. */
     @Query("UPDATE photo SET lat = :lat, lng = :lng, updatedAt = :at WHERE id = :id AND lat IS NULL AND deletedAt IS NULL")
@@ -499,3 +502,6 @@ interface ImportLedgerDao {
     @Upsert suspend fun setAll(rows: List<ImportLedgerEntity>)
     @Query("SELECT * FROM import_ledger WHERE homeId = :homeId") suspend fun forHome(homeId: String): List<ImportLedgerEntity>
 }
+
+/** A photo's job and capture time: what the photo report counts read (AC-F28). */
+data class PhotoTaken(val id: String, val jobId: String, val takenAt: Long)

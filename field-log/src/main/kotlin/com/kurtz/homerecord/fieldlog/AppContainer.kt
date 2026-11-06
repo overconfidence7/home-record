@@ -1,6 +1,5 @@
 package com.kurtz.homerecord.fieldlog
 
-import com.kurtz.homerecord.fieldlog.reports.toReportPhoto
 import android.app.Application
 import android.content.Context
 import com.kurtz.homerecord.core.auth.AuthRepository
@@ -490,8 +489,9 @@ class AppContainer(private val app: Application) {
             settings = company.settings,
             share = { sharer.share(sharer.write(it)) },
             shareJobSummary = { jobId -> summaries.make(jobId)?.let(summaries::share) ?: false },
-            photos = db.photoDao().observeForCompanyJobs(membership.companyId).map { rows ->
-                rows.map { it.toReportPhoto() }
+            // Room re-emits on any photo write; only a new, removed or re-dated photo changes the counts.
+            photos = db.photoDao().observeTakenForCompanyJobs(membership.companyId).distinctUntilChanged().map { rows ->
+                rows.map { com.kurtz.homerecord.core.log.ReportPhoto(it.id, it.jobId, it.takenAt, path = null) }
             },
             sharePhotoReport = photoReports::share,
             delays = { from, to ->
