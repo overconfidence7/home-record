@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Contacts
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.PowerOff
 import androidx.compose.material.icons.outlined.WorkspacePremium
@@ -44,11 +45,13 @@ sealed interface MoreEvent {
     data object OpenBackup : MoreEvent
     /** HM-Account: sign in, sync, sign out (AC-H15). */
     data object OpenAccount : MoreEvent
+    /** HM-Share (AC-H16). */
+    data object OpenShare : MoreEvent
 }
 
 /**
- * HM-More root: Pro, Emergency, Breaker panels, Contacts, Documents, Home report, Backup and restore, Import handoff and
- * Account and sync, one scrolling list so every row is reachable at 200% text.
+ * HM-More root: Pro, Emergency, Breaker panels, Contacts, Documents, Home report, Backup and restore, Import handoff,
+ * Share this house and Account and sync, one scrolling list so every row is reachable at 200% text.
  */
 @Composable
 fun MoreScreen(onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier) {
@@ -62,6 +65,7 @@ fun MoreScreen(onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier) {
             MoreRow(R.string.more_report, R.string.more_report_supporting, Icons.Outlined.PictureAsPdf, "hm_more_report") { onEvent(MoreEvent.OpenReport) }
             MoreRow(R.string.more_backup, R.string.more_backup_supporting, Icons.Outlined.Backup, "hm_more_backup") { onEvent(MoreEvent.OpenBackup) }
             MoreRow(R.string.more_import, R.string.more_import_supporting, Icons.Outlined.FileOpen, "hm_more_import") { onEvent(MoreEvent.OpenImport) }
+            MoreRow(R.string.more_share, R.string.more_share_supporting, Icons.Outlined.GroupAdd, "hm_more_share") { onEvent(MoreEvent.OpenShare) }
             MoreRow(R.string.more_account, R.string.more_account_supporting, Icons.Outlined.CloudSync, "hm_more_account") { onEvent(MoreEvent.OpenAccount) }
         }
     }

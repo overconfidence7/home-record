@@ -1,3 +1,4 @@
+import { devInviteKey } from "./homeShare";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
@@ -28,6 +29,14 @@ dev.get("/last-handoff", async (c) => {
   if (!email) return c.json({ error: "bad_request" }, 400);
   const token = await c.env.CACHE.get(devHandoffKey(email));
   return token ? c.json({ token, path: `/handoff/${token}` }) : c.json({ error: "not_found" }, 404);
+});
+
+/** The token of the newest home invite link this owner made (AC-H16), for flows that join without a share sheet. */
+dev.get("/last-invite", async (c) => {
+  const email = normalizeEmail(c.req.query("email") ?? "");
+  if (!email) return c.json({ error: "bad_request" }, 400);
+  const token = await c.env.CACHE.get(devInviteKey(email));
+  return token ? c.json({ token, path: `/invite/${token}` }) : c.json({ error: "not_found" }, 404);
 });
 
 /** The newest notifications the Worker sent (or would have, without FCM), for flows that check a push went out. */
@@ -94,7 +103,7 @@ async function resetAll(env: AppEnv["Bindings"]) {
   ];
   await env.DB.batch(tables.map((t) => env.DB.prepare(`DELETE FROM ${t}`)));
   // Codes and lookup quotas; cached lookup answers stay (they belong to no account).
-  for (const prefix of ["devcode:", "devhandoff:", "quota:"]) {
+  for (const prefix of ["devcode:", "devhandoff:", "devinvite:", "quota:"]) {
     let cursor: string | undefined;
     do {
       const page = await env.CACHE.list({ prefix, cursor });

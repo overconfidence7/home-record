@@ -942,3 +942,49 @@ fun RestorePreviewScreenshot() = RestorePreviewPreview()
 @ThemePreviews
 @Composable
 fun RestoreDoneScreenshot() = RestoreDonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun SharePeopleScreenshot() = SharePeoplePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShareEditorViewScreenshot() = ShareEditorViewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShareRemoveConfirmScreenshot() = ShareRemoveConfirmPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShareSignedOutScreenshot() = ShareSignedOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShareOfflineScreenshot() = ShareOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JoinSignInScreenshot() = JoinSignInPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JoinRestoringScreenshot() = JoinRestoringPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JoinOtherHomeScreenshot() = JoinOtherHomePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JoinUsedScreenshot() = JoinUsedPreview()
+

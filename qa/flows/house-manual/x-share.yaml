@@ -1,0 +1,109 @@
+# HM-Share and invite links (AC-H16, T076b). Not a walkthrough step: More → Share this house. One emulator plays both
+# phones: the seeded QA House is signed in and uploaded by its owner, who invites family (the share sheet opens with
+# the link); app data is cleared (the family member's phone), the link opens House Manual, sign-in as another account
+# joins the home and pulls it down, and Share this house there lists the owner with no invite controls.
+# The link comes from the dev backend (/dev/last-invite) instead of the share sheet. Needs the dev backend (Q005).
+appId: com.kurtz.homerecord.housemanual
+env:
+  EMAIL: qa-hm-share-owner@example.com
+  FAMILY: qa-hm-share-family@example.com
+---
+# The owner's phone: the seeded home, signed in and uploaded
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_email"
+    timeout: 5000
+- runFlow: _sign-in.yaml
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+- tapOn:
+    id: "hm_back"
+# AC-H16: More → Share this house: the owner can invite family or a viewer and sees themselves as Owner
+- scrollUntilVisible:
+    element:
+      id: "hm_more_share"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_share"
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_invite_editor"
+    timeout: 15000
+- assertVisible:
+    id: "hm_share_invite_viewer"
+- assertVisible: "Owner"
+- takeScreenshot: x-share-owner
+- tapOn:
+    id: "hm_share_invite_editor"
+# The share sheet opens with the link; close it and the link is listed as not used yet
+- extendedWaitUntil:
+    visible: "Send the invite"
+    timeout: 15000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_link_0"
+    timeout: 15000
+- assertVisible: "Family link"
+- runScript:
+    file: ../_scripts/fetch-dev-invite.js
+    env:
+      OWNER_EMAIL: ${EMAIL}
+- assertTrue: ${output.inviteToken != null && output.inviteToken != ''}
+# The family member's phone: no home; the link opens House Manual and asks for an account
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
+- openLink: homerecord://invite/${output.inviteToken}
+- extendedWaitUntil:
+    visible:
+      id: "hm_join_intro"
+    timeout: 15000
+- takeScreenshot: x-share-join-sign-in
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: ${FAMILY}
+# AC-H16: after sign-in the shared home shows on this phone
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 60000
+- assertVisible:
+    id: "hm_home_title"
+    text: "QA House"
+- takeScreenshot: x-share-joined-home
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible: "Furnace"
+    timeout: 10000
+# Share this house as family: the people list, no invite or remove controls
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_share"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_share"
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_not_owner"
+    timeout: 15000
+- assertVisible: "Can edit"
+- assertNotVisible:
+    id: "hm_share_invite_editor"
+- takeScreenshot: x-share-family-view

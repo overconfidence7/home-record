@@ -93,6 +93,13 @@ class AppContainer(private val app: Application) {
     )
 
     /** Onboarding sign-in on a phone with no home: the account's home comes down with one sync pass (AC-H15). */
+    /** HM-Share and invite links (AC-H16). */
+    val homeShare: com.kurtz.homerecord.core.share.HomeShareApi =
+        com.kurtz.homerecord.core.share.RetrofitHomeShareApi.create(BuildConfig.API_BASE_URL, http)
+
+    /** This phone's home, if it has one yet (one home per phone). */
+    suspend fun localHomeId(): String? = db.homeDao().observeAll().first().firstOrNull()?.id
+
     val cloudRestore = com.kurtz.homerecord.core.sync.CloudHomeRestore(
         homesOnAccount = account::homes,
         localHomeIds = { db.homeDao().observeAll().first().map { it.id } },

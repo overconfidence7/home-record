@@ -21,6 +21,8 @@ const ID = /^[A-Za-z0-9._-]{1,64}$/;
 /** A viewer may read a home but never change it (AC-H16). */
 export const readOnlyHomeRole = (role: string | undefined): boolean => role === "viewer";
 
+export const devInviteKey = (ownerEmail: string) => `devinvite:${ownerEmail}`;
+
 const InviteBody = z.object({ role: z.enum(HOME_ROLES) });
 
 async function inviteHash(token: string): Promise<string> {
@@ -60,6 +62,11 @@ homeShare.post("/:kind{homes}/:tenantId/invites", requireSession, requireTenant(
   )
     .bind(id, await inviteHash(token), homeId, parsed.data.role, c.get("session").userId, now, expiresAt)
     .run();
+  if (c.env.ENVIRONMENT === "dev") {
+    // Flows join with the link the owner just made without reading a share sheet (/dev/last-invite, Q005).
+    const owner = await c.env.DB.prepare("SELECT email FROM users WHERE id = ?").bind(c.get("session").userId).first<{ email: string }>();
+    if (owner) await c.env.CACHE.put(devInviteKey(owner.email), token, { expirationTtl: INVITE_DAYS * 86_400 });
+  }
   return c.json({ id, role: parsed.data.role, link: `${new URL(c.req.url).origin}/invite/${token}`, token, expiresAt }, 201);
 });
 
