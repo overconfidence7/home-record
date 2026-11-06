@@ -177,7 +177,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T027c1: room chip under the hero opens the room; overflow Move to room (sheet of the home's rooms by floor, then Exterior and Whole house; clears the old plan and wall spot) (AC-H7)
     - [x] T027c2: item page Reminders section (the item's Due now and Upcoming reminders with Done and Snooze) (AC-H7, AC-C49)
     - [ ] T027c4: item page "Add reminder" for this item (the Reminders form with the item preset) (AC-C49)
-    - [ ] T027c3: item page Share action (item summary as text: name, make/model/serial, room, warranty status) (AC-H7)
+    - [x] T027c3: item page Share action (item summary as text: name, make/model/serial, room, warranty status) (AC-H7)
 - [x] T028: Consumables, service history, contacts: consumables editor and search, service record form, HM-Contacts with tap-to-call/email and links to items (acceptance: AC-C35, AC-C36, AC-C39)
   - [x] T028a: `UpkeepRepository` in :house-model (consumable, service record and contact drafts with validation, save/edit/delete, service newest first, contacts with serviced items, delete unlinks records) (AC-C35, AC-C36, AC-C39)
   - [x] T028b: consumables editor on the item page (kind, spec, quantity, reorder link) and service history section with the service record form (AC-C35, AC-C36)

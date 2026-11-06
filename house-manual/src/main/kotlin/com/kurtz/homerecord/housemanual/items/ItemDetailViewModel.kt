@@ -264,7 +264,7 @@ class ItemDetailViewModel(
                 documents.attach(e.id, DocumentScope.Item(itemId))
                 setAttach(false)
             }
-            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker, is ItemDetailEvent.OpenShutoff, is ItemDetailEvent.OpenRoom -> Unit // navigation is the route's job
+            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker, is ItemDetailEvent.OpenShutoff, is ItemDetailEvent.OpenRoom, ItemDetailEvent.Share -> Unit // navigation is the route's job
         }
     }
 

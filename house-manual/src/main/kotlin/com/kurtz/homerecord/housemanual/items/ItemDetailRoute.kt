@@ -64,6 +64,7 @@ fun ItemDetailRoute(
     )
     val suffix = stringResource(R.string.item_copy_suffix)
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val vm = viewModel<ItemDetailViewModel>(
         key = itemId,
         factory = viewModelFactory {
@@ -106,6 +107,11 @@ fun ItemDetailRoute(
             is ItemDetailEvent.OpenBreaker -> onOpenBreaker(it.breaker)
             is ItemDetailEvent.OpenShutoff -> onOpenItem(it.id)
             is ItemDetailEvent.OpenRoom -> onOpenRoom(it.roomId)
+            ItemDetailEvent.Share -> state.detail?.let { d ->
+                val text = ItemShareText.build(d, { id, args -> resources.getString(id, *args) })
+                val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_SUBJECT, d.item.name).putExtra(Intent.EXTRA_TEXT, text)
+                runCatching { context.startActivity(Intent.createChooser(send, resources.getString(R.string.item_share_chooser))) }
+            }
             ItemDetailEvent.UploadDocument -> picker.launch(arrayOf("application/pdf", "image/*"))
             ItemDetailEvent.ScanDocument -> scan()
             is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }

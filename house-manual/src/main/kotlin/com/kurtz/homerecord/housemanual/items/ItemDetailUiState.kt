@@ -148,6 +148,8 @@ sealed interface ItemDetailEvent {
     data class OpenShutoff(val id: String) : ItemDetailEvent
     data object ShowShutoffPicker : ItemDetailEvent
     data object ShowMove : ItemDetailEvent
+    /** Top bar Share: the route sends [ItemShareText] (SPEC HM-Item). */
+    data object Share : ItemDetailEvent
     data class ReminderDone(val id: String) : ItemDetailEvent
     data class ReminderOpenSnooze(val id: String) : ItemDetailEvent
     data object ReminderCloseSnooze : ItemDetailEvent

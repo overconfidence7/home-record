@@ -58,6 +58,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material.icons.rounded.MeetingRoom
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.ui.semantics.heading
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -118,6 +119,9 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
             if (detail != null) {
                 IconButton(onClick = { onEvent(ItemDetailEvent.Edit) }, modifier = Modifier.testTag("hm_item_detail_edit")) {
                     Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.item_detail_edit))
+                }
+                IconButton(onClick = { onEvent(ItemDetailEvent.Share) }, modifier = Modifier.testTag("hm_item_detail_share")) {
+                    Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.item_detail_share))
                 }
                 OverflowMenu(onEvent)
             }

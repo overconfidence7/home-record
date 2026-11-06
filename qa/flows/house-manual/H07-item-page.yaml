@@ -176,3 +176,6 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_item_detail_reminder_done_0"
 - assertVisible: "Overdue since.*"
 - takeScreenshot: H07-item-reminders
+# SPEC HM-Item: Share sits in the top bar beside Edit
+- assertVisible:
+    id: "hm_item_detail_share"
