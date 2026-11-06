@@ -60,6 +60,10 @@ data class ItemDetailUiState(
     /** The reminder whose Snooze menu is open. */
     val reminderSnoozeFor: String? = null,
     val today: java.time.LocalDate = java.time.LocalDate.now(),
+    /** The open Add reminder form, preset to this item. */
+    val reminderForm: com.kurtz.homerecord.housemodel.reminders.ReminderDraft? = null,
+    val reminderFormDirty: Boolean = false,
+    val showReminderErrors: Boolean = false,
     /** Overflow "Move to room": the sheet is open (SPEC HM-Item). */
     val showMove: Boolean = false,
     /** The rooms the item can move to, bottom floor first, then Exterior and Whole house. */
@@ -153,6 +157,10 @@ sealed interface ItemDetailEvent {
     data class ReminderDone(val id: String) : ItemDetailEvent
     data class ReminderOpenSnooze(val id: String) : ItemDetailEvent
     data object ReminderCloseSnooze : ItemDetailEvent
+    data object OpenReminderForm : ItemDetailEvent
+    data class ChangeReminderForm(val draft: com.kurtz.homerecord.housemodel.reminders.ReminderDraft) : ItemDetailEvent
+    data object SaveReminderForm : ItemDetailEvent
+    data object CloseReminderForm : ItemDetailEvent
     data class ReminderSnooze(val id: String, val length: com.kurtz.homerecord.housemodel.reminders.SnoozeLength) : ItemDetailEvent
     data object HideMove : ItemDetailEvent
     data class MoveTo(val roomId: String) : ItemDetailEvent

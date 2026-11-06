@@ -117,16 +117,17 @@ fun ServiceSection(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity
 }
 
 @Composable
-private fun UpkeepSection(
+internal fun UpkeepSection(
     title: String,
     addLabel: String,
     addTag: String,
     onAdd: () -> Unit,
     emptyText: String,
     isEmpty: Boolean,
+    modifier: Modifier = Modifier,
     rows: @Composable () -> Unit,
 ) {
-    Section(title) {
+    Section(title, modifier) {
         if (!isEmpty) rows()
         Inset {
             if (isEmpty) Text(emptyText, style = MaterialTheme.typography.bodyLarge)

@@ -54,8 +54,12 @@ class ItemDetailRemindersTest {
     }
 
     @Test
-    fun noRemindersHidesTheSection() {
-        rule.setContent { ItemDetailScreen(state(emptyList()), onEvent = {}) }
-        rule.onNodeWithTag("hm_item_detail_reminders").assertDoesNotExist()
+    @AcceptanceCriterion("AC-C49")
+    fun withNoRemindersTheSectionSaysSoAndOffersAddReminder() {
+        val events = mutableListOf<ItemDetailEvent>()
+        rule.setContent { ItemDetailScreen(state(emptyList()), onEvent = { events += it }) }
+        rule.onNodeWithText("Nothing to do for this item yet.").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("hm_item_detail_reminder_add").performScrollTo().performClick()
+        assertThat(events).containsExactly(ItemDetailEvent.OpenReminderForm)
     }
 }

@@ -122,6 +122,29 @@ class ItemDetailWarrantyTest {
         after.reminders.firstOrNull { it.id == first.id }?.let { assertThat(it.dueOn).isGreaterThan(first.dueOn) }
     }
 
+    @AcceptanceCriterion("AC-C49")
+    @Test fun addReminderFromTheItemPageSavesItForThisItem() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, context.resources::getString, today = { LocalDate.of(2026, 10, 24) })
+        val id = heater()
+        val vm = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", SavedStateHandle(), reminderRepo = reminders).also {
+            vms += it
+            it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        }
+        vm.onEvent(ItemDetailEvent.OpenReminderForm)
+        val open = vm.await { it.reminderForm != null }
+        assertThat(open.reminderForm?.itemId).isEqualTo(id)
+        assertThat(open.reminderFormDirty).isFalse()
+        // An empty form shows its errors instead of saving.
+        vm.onEvent(ItemDetailEvent.SaveReminderForm)
+        assertThat(vm.await { it.showReminderErrors }.reminderForm).isNotNull()
+        vm.onEvent(ItemDetailEvent.ChangeReminderForm(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(title = "Check anode rod", dueOn = LocalDate.of(2027, 1, 15), intervalMonths = 12)))
+        assertThat(vm.await { it.reminderFormDirty }.reminderForm?.itemId).isEqualTo(id)
+        vm.onEvent(ItemDetailEvent.SaveReminderForm)
+        val saved = vm.await { s -> s.reminderForm == null && s.reminders.any { it.title == "Check anode rod" } }
+        assertThat(saved.reminders.first { it.title == "Check anode rod" }.itemId).isEqualTo(id)
+    }
+
     @AcceptanceCriterion("AC-H7")
     @Test fun moveToRoomListsRoomsMovesTheItemAndSurvivesProcessDeath() = runTest {
         val id = heater()

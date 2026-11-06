@@ -571,6 +571,11 @@ fun ItemDetailRemindersScreenshot() = ItemDetailRemindersPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemDetailRemindersEmptyScreenshot() = ItemDetailRemindersEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun OverlayKindListScreenshot() = OverlayKindListPreview()
 
 @PreviewTest

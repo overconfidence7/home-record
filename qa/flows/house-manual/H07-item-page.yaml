@@ -179,3 +179,14 @@ appId: com.kurtz.homerecord.housemanual
 # SPEC HM-Item: Share sits in the top bar beside Edit
 - assertVisible:
     id: "hm_item_detail_share"
+# AC-C49: Add reminder on the item page opens the Reminders form for this item
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_reminder_add"
+- tapOn:
+    id: "hm_item_detail_reminder_add"
+- extendedWaitUntil:
+    visible:
+      id: "hm_reminders_form_title"
+    timeout: 5000
+- takeScreenshot: H07-item-add-reminder

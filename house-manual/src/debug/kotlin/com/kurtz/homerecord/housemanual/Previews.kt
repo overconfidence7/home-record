@@ -1855,3 +1855,12 @@ fun ItemDetailRemindersPreview() = Frame {
         com.kurtz.homerecord.housemanual.items.ItemRemindersSection(ItemDetailUiState(loading = false, detail = furnaceDetail(false), reminders = furnaceReminders, today = reminderToday)) {}
     }
 }
+
+/** The Reminders section for an item with nothing to do yet: one line and Add reminder (AC-C49). */
+@ThemePreviews
+@Composable
+fun ItemDetailRemindersEmptyPreview() = Frame {
+    androidx.compose.foundation.layout.Column(Modifier.padding(vertical = 16.dp)) {
+        com.kurtz.homerecord.housemanual.items.ItemRemindersSection(ItemDetailUiState(loading = false, detail = furnaceDetail(false), today = reminderToday)) {}
+    }
+}

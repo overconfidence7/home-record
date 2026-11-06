@@ -169,6 +169,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
     AttachDocumentSheet(state, onEvent)
     ShutoffPickerSheet(state, onEvent)
     MoveRoomSheet(state, onEvent)
+    ItemReminderForm(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),
@@ -259,13 +260,20 @@ private fun RoomChip(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
 }
 
 /**
- * Reminders (SPEC HM-Item, AC-C49): this item's Due now and Upcoming reminders with Done and Snooze, as on HM-Reminders.
- * Hidden when the item has none still to do.
+ * Reminders (SPEC HM-Item, AC-C49): this item's Due now and Upcoming reminders with Done and Snooze, as on HM-Reminders,
+ * and Add reminder (the Reminders form with this item preset).
  */
 @Composable
 internal fun ItemRemindersSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
-    if (state.reminders.isEmpty()) return
-    Section(stringResource(R.string.item_detail_reminders), Modifier.testTag("hm_item_detail_reminders")) {
+    UpkeepSection(
+        title = stringResource(R.string.item_detail_reminders),
+        addLabel = stringResource(R.string.reminders_add),
+        addTag = "hm_item_detail_reminder_add",
+        onAdd = { onEvent(ItemDetailEvent.OpenReminderForm) },
+        emptyText = stringResource(R.string.item_detail_reminders_empty),
+        isEmpty = state.reminders.isEmpty(),
+        modifier = Modifier.testTag("hm_item_detail_reminders"),
+    ) {
         state.reminders.forEachIndexed { i, r ->
             com.kurtz.homerecord.housemanual.reminders.ReminderRowItem(
                 r, "hm_item_detail_reminder", "$i", state.today, state.reminderSnoozeFor == r.id,
@@ -281,6 +289,24 @@ internal fun ItemRemindersSection(state: ItemDetailUiState, onEvent: (ItemDetail
                 openable = false, showItemName = false,
             )
         }
+    }
+}
+
+/** The Add reminder form for this item, full screen with Close and Save as on HM-Reminders (rule 15). */
+@Composable
+private fun ItemReminderForm(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    val form = state.reminderForm ?: return
+    com.kurtz.homerecord.housemanual.FormScreenDialog(
+        title = stringResource(R.string.reminders_form_title),
+        saveTag = "hm_item_detail_reminder_save",
+        dirty = state.reminderFormDirty,
+        saveEnabled = true,
+        onClose = { onEvent(ItemDetailEvent.CloseReminderForm) },
+        onSave = { onEvent(ItemDetailEvent.SaveReminderForm) },
+    ) {
+        com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(form, state.showReminderErrors, { e ->
+            if (e is com.kurtz.homerecord.housemanual.reminders.RemindersEvent.ChangeForm) onEvent(ItemDetailEvent.ChangeReminderForm(e.draft))
+        })
     }
 }
 

@@ -144,9 +144,17 @@ class ItemDetailViewModel(
         ?.map { rows -> rows.filter { it.itemId == itemId && it.bucket != com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DONE } }
         ?: flowOf(emptyList())
 
-    private data class Notices(val refused: Boolean, val move: MoveUi, val reminders: List<com.kurtz.homerecord.housemodel.reminders.ReminderRow>, val snoozeFor: String?)
+    private data class ReminderFormUi(val draft: com.kurtz.homerecord.housemodel.reminders.ReminderDraft? = null, val errors: Boolean = false)
 
-    private val notices = combine(shutoffRefused, moveUi, itemReminders, reminderSnooze) { r, m, rem, sn -> Notices(r, m, rem, sn) }
+    private val reminderForm = MutableStateFlow(ReminderFormUi())
+    private var savingReminder = false
+
+    private data class Notices(
+        val refused: Boolean, val move: MoveUi, val reminders: List<com.kurtz.homerecord.housemodel.reminders.ReminderRow>, val snoozeFor: String?,
+        val form: ReminderFormUi,
+    )
+
+    private val notices = combine(shutoffRefused, moveUi, itemReminders, reminderSnooze, reminderForm) { r, m, rem, sn, f -> Notices(r, m, rem, sn, f) }
 
     init {
         if (saved[MOVE] ?: false) showMove()
@@ -157,6 +165,8 @@ class ItemDetailViewModel(
         val (refused, move) = notice
         s.copy(
             showMove = move.show && s.detail != null, moveChoices = move.choices,
+            reminderForm = notice.form.draft, showReminderErrors = notice.form.errors,
+            reminderFormDirty = notice.form.draft?.let { it != com.kurtz.homerecord.housemodel.reminders.ReminderDraft(itemId = itemId) } ?: false,
             reminders = notice.reminders, reminderSnoozeFor = notice.snoozeFor?.takeIf { id -> notice.reminders.any { it.id == id } }, today = today(),
             nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = overlays, feeding = f,
             shutoff = sh.linked, shutoffChoices = sh.choices, showShutoffPicker = sh.picker && s.detail != null,
@@ -244,6 +254,21 @@ class ItemDetailViewModel(
             is ItemDetailEvent.ReminderDone -> viewModelScope.launch { reminderRepo?.done(e.id) }
             is ItemDetailEvent.ReminderOpenSnooze -> reminderSnooze.value = e.id
             ItemDetailEvent.ReminderCloseSnooze -> reminderSnooze.value = null
+            ItemDetailEvent.OpenReminderForm -> reminderForm.value = ReminderFormUi(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(itemId = itemId))
+            is ItemDetailEvent.ChangeReminderForm -> reminderForm.update { f -> if (f.draft == null) f else f.copy(draft = e.draft.copy(itemId = itemId)) }
+            ItemDetailEvent.CloseReminderForm -> reminderForm.value = ReminderFormUi()
+            ItemDetailEvent.SaveReminderForm -> {
+                val draft = reminderForm.value.draft ?: return
+                val repo = reminderRepo ?: return
+                if (!draft.valid) { reminderForm.value = ReminderFormUi(draft, true); return }
+                if (savingReminder) return
+                savingReminder = true
+                viewModelScope.launch {
+                    try {
+                        reminderForm.value = if (repo.add(homeId, draft) == null) ReminderFormUi(draft, true) else ReminderFormUi()
+                    } finally { savingReminder = false }
+                }
+            }
             is ItemDetailEvent.ReminderSnooze -> viewModelScope.launch {
                 reminderSnooze.value = null
                 reminderRepo?.snooze(e.id, e.length)
