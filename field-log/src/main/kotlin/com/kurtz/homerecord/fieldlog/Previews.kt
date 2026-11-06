@@ -617,6 +617,13 @@ fun ClockCrewPreview() = Frame {
     )
 }
 
+/** A one-person company: the crew slot is one "Invite crew" row, no empty card (judge:fl-clock-solo-owner-noise). */
+@ThemePreviews
+@Composable
+fun ClockSoloOwnerPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState().copy(jobs = clockJobs.take(1), canLeadCrew = true, crew = emptyList()), {})
+}
+
 private val TS_MONDAY = java.time.LocalDate.of(2026, 10, 19)
 private val TS_ZONE = java.time.ZoneId.of("America/Los_Angeles")
 private fun tsAt(day: Int, h: Int, m: Int = 0) = TS_MONDAY.plusDays(day.toLong()).atTime(h, m).atZone(TS_ZONE).toInstant().toEpochMilli()

@@ -193,7 +193,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token
                     val memberId = token?.let(com.kurtz.homerecord.core.auth.JwtSubject::of)
                     if (memberId == null) ErrorState(stringResource(R.string.clock_no_account), { container.signOut() }, Modifier)
-                    else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) })
+                    else com.kurtz.homerecord.fieldlog.clock.ClockRoute({ ctx -> container.clockDeps(ctx, membership, memberId) }, onInviteCrew = { nav.push(TeamKey) })
                 }
                 key.depth == 0 && key.title == "schedule" -> {
                     val token = (container.auth.state.collectAsState().value as? AuthState.SignedIn)?.token

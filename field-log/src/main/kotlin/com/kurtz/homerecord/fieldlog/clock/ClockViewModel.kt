@@ -194,6 +194,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
             ClockEvent.ClockInCrew -> run("crew")
             ClockEvent.DismissCrewNotice -> _state.update { it.copy(crewNotice = null) }
             ClockEvent.DismissNotice -> _state.update { it.copy(savedWithoutLocation = false) }
+            ClockEvent.InviteCrew -> Unit // navigation is the route's job
         }
     }
 

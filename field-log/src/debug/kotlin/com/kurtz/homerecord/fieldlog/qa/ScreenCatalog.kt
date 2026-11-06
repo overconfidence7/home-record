@@ -67,6 +67,7 @@ object ScreenCatalog {
         QaScreen("clock-approved", nonRoot = false) { ClockApprovedPreview() },
         QaScreen("clock-changes", nonRoot = false) { ClockChangesPreview() },
         QaScreen("clock-crew", nonRoot = false) { ClockCrewPreview() },
+        QaScreen("clock-solo-owner", nonRoot = false) { ClockSoloOwnerPreview() },
         QaScreen("clock-break", nonRoot = false) { ClockBreakPreview() },
         QaScreen("clock-far-reason", nonRoot = false) { ClockFarReasonPreview() },
         QaScreen("clock-explain", nonRoot = false) { ClockExplainPreview() },

@@ -174,6 +174,11 @@ fun ClockCrewScreenshot() = ClockCrewPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ClockSoloOwnerScreenshot() = ClockSoloOwnerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ClockBreakScreenshot() = ClockBreakPreview()
 
 

@@ -79,10 +79,14 @@ appId: com.kurtz.homerecord.fieldlog
 - extendedWaitUntil:
     visible: "Not clocked in"
     timeout: 10000
-# Owner and leads see the crew clock-in card on the Clock tab (punching crew needs a crew member; not driven here).
+# Owner and leads see the crew slot on the Clock tab; F04's one-person company gets one "Invite crew" row, not an
+# empty card with a dead "Clock in 0 people" button (judge:fl-clock-solo-owner-noise; punching crew is ClockCrewAcceptanceTest).
 - scrollUntilVisible:
     element:
       id: fl_clock_crew
+- assertVisible: "Invite crew"
+- assertNotVisible:
+    id: fl_clock_crew_in
 # AC-F8, AC-F9: location allowed and the phone two miles from Garage subpanel: Clock in gets a fix and asks why
 - stopApp
 - setLocation:

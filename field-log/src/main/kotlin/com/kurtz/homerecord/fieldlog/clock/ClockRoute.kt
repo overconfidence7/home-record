@@ -18,7 +18,7 @@ import com.kurtz.homerecord.core.location.LocationPermissions
 import com.kurtz.homerecord.coreui.platform.Intents
 
 @Composable
-fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier, readOnly: Boolean = false, onSignOut: () -> Unit = {}) {
+fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier, readOnly: Boolean = false, onSignOut: () -> Unit = {}, onInviteCrew: () -> Unit = {}) {
     val context = LocalContext.current
     val vm = viewModel<ClockViewModel>(
         factory = viewModelFactory { initializer { ClockViewModel(deps(context.applicationContext), createSavedStateHandle()) } },
@@ -34,7 +34,8 @@ fun ClockRoute(deps: (Context) -> ClockDeps, modifier: Modifier = Modifier, read
     ClockScreen(
         state,
         { event ->
-            if (event == ClockEvent.OpenSettings) {
+            if (event == ClockEvent.InviteCrew) onInviteCrew()
+            else if (event == ClockEvent.OpenSettings) {
                 vm.onEvent(ClockEvent.OpenSettings)
                 Intents.openAppSettings(context)
             } else vm.onEvent(event)

@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.fieldlog.clock
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.GroupAdd
 import androidx.annotation.StringRes
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
@@ -120,7 +122,10 @@ private fun ClockBody(state: ClockUiState, onEvent: (ClockEvent) -> Unit, listSt
             )
         }
         item { Actions(state, onEvent) }
-        if (state.canLeadCrew && state.status !is ClockStatus.OnBreak) item { CrewCard(state, onEvent) }
+        if (state.canLeadCrew && state.status !is ClockStatus.OnBreak) item {
+            // No one else on the team: one row to invite them instead of an empty card with a dead button (rule 8)
+            if (state.crew.isEmpty() && state.crewNotice == null) InviteCrewRow(onEvent) else CrewCard(state, onEvent)
+        }
         item { Timesheet(state) }
         if (state.sheet != null && state.changes.isNotEmpty()) item { PunchChanges(state.changes) }
     }
@@ -214,6 +219,18 @@ private fun Actions(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
             }
         }
     }
+}
+
+/** A solo owner's crew slot: "Invite crew" opens Team, where the invite code is. */
+@Composable
+private fun InviteCrewRow(onEvent: (ClockEvent) -> Unit) {
+    com.kurtz.homerecord.coreui.components.RecordListItem(
+        headline = stringResource(R.string.today_invite_crew),
+        supporting = stringResource(R.string.clock_crew_empty),
+        leading = { androidx.compose.material3.Icon(Icons.Rounded.GroupAdd, contentDescription = null) },
+        onClick = { onEvent(ClockEvent.InviteCrew) },
+        modifier = Modifier.heightIn(min = ButtonHeight).testTag("fl_clock_crew"),
+    )
 }
 
 /** Lead crew clock-in: tick the people, one tap punches them all with this phone's location (AC-F11). */

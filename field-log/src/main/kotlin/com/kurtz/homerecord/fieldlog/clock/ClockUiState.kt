@@ -77,6 +77,8 @@ data class ClockUiState(
 }
 
 sealed interface ClockEvent {
+    /** A solo owner's "Invite crew" row: navigation, handled by the route. */
+    data object InviteCrew : ClockEvent
     data class SelectJob(val id: String) : ClockEvent
     data class Note(val text: String) : ClockEvent
     data object ClockIn : ClockEvent
