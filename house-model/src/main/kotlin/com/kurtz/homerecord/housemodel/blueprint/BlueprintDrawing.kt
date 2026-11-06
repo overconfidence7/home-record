@@ -107,6 +107,32 @@ class BlueprintColors(
     val dark: Boolean,
 )
 
+/**
+ * The room's name at the largest size that fits inside 90% of its width and height: [nameStyle] on one line, then
+ * [smallStyle] on one line, then [smallStyle] wrapped onto two lines ("Half / bath"); null when none fits
+ * [judge:hm-blueprint-small-room-name].
+ */
+internal fun roomNameLayout(
+    room: com.kurtz.homerecord.housemodel.plan.PlanRoom,
+    z: Float,
+    measurer: androidx.compose.ui.text.TextMeasurer,
+    nameStyle: TextStyle,
+    smallStyle: TextStyle,
+): androidx.compose.ui.text.TextLayoutResult? {
+    val text = room.name.ifBlank { "·" }
+    val maxW = room.widthIn * z * 0.9f
+    val maxH = room.lengthIn * z * 0.9f
+    if (maxW < 1f || maxH < 1f) return null
+    fun ok(l: androidx.compose.ui.text.TextLayoutResult) = !l.didOverflowWidth && !l.hasVisualOverflow && l.size.width <= maxW && l.size.height <= maxH
+    measurer.measure(text, nameStyle).takeIf(::ok)?.let { return it }
+    measurer.measure(text, smallStyle).takeIf(::ok)?.let { return it }
+    val wrapped = measurer.measure(
+        text, smallStyle, maxLines = 2, softWrap = true,
+        constraints = androidx.compose.ui.unit.Constraints(maxWidth = maxW.toInt()),
+    )
+    return wrapped.takeIf { ok(it) && !it.didOverflowHeight }
+}
+
 /** The clean plan (AC-C13): filled rooms, wall outlines, names, outer dimensions, openings, stairs, north arrow. Layers draw on top. */
 fun DrawScope.drawBlueprint(
     rooms: List<PlanRoom>,
@@ -136,7 +162,7 @@ fun DrawScope.drawBlueprint(
         room.openings.forEach { drawOpening(room, it, z, ox, oy, density, colors.wall, colors.fill) }
     }
     rooms.forEach { room ->
-        val layout = measurer.measure(room.name.ifBlank { "·" }, nameStyle.copy(color = colors.text))
+        val layout = roomNameLayout(room, z, measurer, nameStyle.copy(color = colors.text), dimStyle.copy(color = colors.text)) ?: return@forEach
         val (clx, cly) = labelAnchor(room)
         val half = layout.size.width / 2f
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
@@ -147,7 +173,7 @@ fun DrawScope.drawBlueprint(
         val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
             ?: return@forEach
         val (cx, cy) = at
-        val fits = layout.size.width < room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
+        val fits = layout.size.width <= room.widthIn * z * 0.9f && cx - half >= room.minX * z + ox
         if (fits) drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
