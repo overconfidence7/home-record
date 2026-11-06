@@ -16,6 +16,7 @@
 #   instrumented androidTest run: acceptance tests + screen crawler (Q002/Q003 in PLAN.md)
 #   flows        every Maestro flow in qa/flows/<app>/, each in its own process, JUnit output
 #   variants     the _tour flow under dark mode, 200% font and landscape (screenshots)
+#   3d           House Manual only: the _3d-perf orbit under screenrecord (3d/orbit.mp4) with the HomeRecord3D fps line
 #   monkey       1,500 random events, must not crash
 #   jank         benchmark build (R8, profile compiled) with the long-list seed: fling the 200-row list and read
 #                dumpsys gfxinfo janky-frame percentage; under 100 frames it reports not measurable; on a software
@@ -266,6 +267,26 @@ elif ls "$FLOWDIR"/*.yaml >/dev/null 2>&1; then
   done
 else
   record flows skip "no flows in $FLOWDIR yet (PLAN Q004)"
+fi
+
+# -------------------------------------------------------------------- 3d
+# [v4:no-3d-recording]: V4 and S7 need a recorded 3D orbit. Runs the _3d-perf helper flow (3D reference home, All
+# floors, orbit) under `screenrecord` (20 s, 2 Mbps), publishes 3d/orbit.mp4 and the HomeRecord3D fps lines.
+# A software-rendered emulator measures the CPU path only, so the stage reports and never fails on the fps itself.
+if [ "$APP" = house-manual ] && [ -z "$MISSING" ] && [ -f "$FLOWDIR/_3d-perf.yaml" ]; then
+  mkdir -p "$OUT/3d"
+  adb shell rm -f /sdcard/qa-3d.mp4 >/dev/null 2>&1 || true
+  adb shell screenrecord --time-limit 20 --bit-rate 2000000 /sdcard/qa-3d.mp4 >/dev/null 2>&1 &
+  REC_PID=$!
+  if run_flow "$FLOWDIR/_3d-perf.yaml" "3d-perf"; then FLOW3D=ok; else FLOW3D="flow failed (maestro/3d-perf.log)"; fi
+  wait "$REC_PID" 2>/dev/null || true
+  adb pull /sdcard/qa-3d.mp4 "$OUT/3d/orbit.mp4" >/dev/null 2>&1 || true
+  adb logcat -d -s HomeRecord3D > "$OUT/3d/homerecord3d.txt" 2>/dev/null || true
+  FPS=$(grep -oE 'first frame [^;]+ ms; [^;]+ fps' "$OUT/3d/homerecord3d.txt" | tail -n 1)
+  REND=$(adb shell dumpsys SurfaceFlinger 2>/dev/null | grep -m1 -oE 'GLES: [^,]*, [^,]*' || true)
+  if [ ! -s "$OUT/3d/orbit.mp4" ]; then record "3d:$APP" skip "$FLOW3D; screenrecord gave no video; ${FPS:-no fps line}"
+  elif [ "$FLOW3D" = ok ]; then record "3d:$APP" pass "3d/orbit.mp4; ${FPS:-no fps line}; ${REND:-renderer unknown}"
+  else record "3d:$APP" fail "$FLOW3D; 3d/orbit.mp4 recorded; ${FPS:-no fps line}"; fi
 fi
 
 # --------------------------------------------------------------- variants
