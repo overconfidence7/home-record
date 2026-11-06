@@ -1023,3 +1023,13 @@ fun EmergencyEmptyViewOnlyScreenshot() = EmergencyEmptyViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun PanelsEmptyViewOnlyScreenshot() = PanelsEmptyViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ContactsViewOnlyScreenshot() = ContactsViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsViewOnlyScreenshot() = DocumentsViewOnlyPreview()

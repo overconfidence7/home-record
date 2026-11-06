@@ -15,6 +15,8 @@ data class DocumentsUiState(
     val unsupportedNotice: Boolean = false,
     /** True while the FAB menu (Add a file, Scan a document) is open. */
     val addMenuOpen: Boolean = false,
+    /** A viewer on a shared home: documents open; no Add, rename or move (AC-H16). */
+    val viewOnly: Boolean = false,
 )
 
 sealed interface DocumentsEvent {

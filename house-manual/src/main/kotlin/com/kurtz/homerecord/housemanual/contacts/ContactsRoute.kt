@@ -14,12 +14,12 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 
 @Composable
-fun ContactsRoute(repo: UpkeepRepository, homeId: String, onBack: () -> Unit) {
+fun ContactsRoute(repo: UpkeepRepository, homeId: String, onBack: () -> Unit, viewOnly: Boolean = false) {
     val vm = viewModel<ContactsViewModel>(
         factory = viewModelFactory { initializer { ContactsViewModel(repo, homeId, createSavedStateHandle()) } },
     )
     val context = LocalContext.current
-    ContactsScreen(vm.state.collectAsState().value, onEvent = {
+    ContactsScreen(vm.state.collectAsState().value.copy(viewOnly = viewOnly), onEvent = {
         when (it) {
             ContactsEvent.Back -> onBack()
             is ContactsEvent.Call -> context.launch(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + it.phone.filter { c -> c.isDigit() || c == '+' })))

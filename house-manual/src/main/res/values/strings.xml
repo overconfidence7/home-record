@@ -209,6 +209,7 @@
     <string name="documents_scan">Scan a document</string>
     <string name="documents_add_file">Add a file</string>
     <string name="documents_empty_title">No documents yet</string>
+    <string name="documents_empty_body_view_only">The owner hasn\'t added any manuals, receipts or permits yet.</string>
     <string name="documents_empty_body">Add the manuals, receipts and permits you would hate to lose. PDFs and photos both work.</string>
     <string name="documents_unfiled">Not in a folder</string>
     <string name="documents_unsupported">That file could not be added. Only PDFs and photos work.</string>
@@ -224,6 +225,7 @@
     <string name="contacts_title">Contacts</string>
     <string name="contacts_add">Add contact</string>
     <string name="contacts_empty_title">No contacts yet</string>
+    <string name="contacts_empty_body_view_only">The owner hasn\'t saved any contacts yet.</string>
     <string name="contacts_empty_body">Save the plumber, the electrician and the HVAC company so the number is there when something breaks.</string>
     <string name="contacts_serviced">Serviced %1$s (%2$s)</string>
     <plurals name="contacts_visits">

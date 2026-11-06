@@ -81,4 +81,20 @@ class ViewOnlyTest {
         rule.setContent { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false, viewOnly = true), {}) }
         rule.onNodeWithTag("hm_panels_add").assertDoesNotExist()
     }
+
+    @Test fun contactsAndDocumentsOfferNoAddOrEdit() {
+        rule.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.kurtz.homerecord.housemanual.contacts.ContactsScreen(com.kurtz.homerecord.housemanual.contacts.ContactsUiState(loading = false, viewOnly = true), {})
+            }
+        }
+        rule.onNodeWithTag("hm_contacts_fab").assertDoesNotExist()
+        rule.onNodeWithTag("hm_contacts_add").assertDoesNotExist()
+    }
+
+    @Test fun documentsOfferNoAdd() {
+        rule.setContent { com.kurtz.homerecord.housemanual.documents.DocumentsScreen(com.kurtz.homerecord.housemanual.documents.DocumentsUiState(loading = false, viewOnly = true), {}) }
+        rule.onNodeWithTag("hm_documents_fab").assertDoesNotExist()
+        rule.onNodeWithTag("hm_documents_add").assertDoesNotExist()
+    }
 }

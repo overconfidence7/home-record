@@ -860,6 +860,11 @@ fun ContactsListPreview() = Frame { ContactsScreen(ContactsUiState(loading = fal
 @Composable
 fun ContactsEmptyPreview() = Frame { ContactsScreen(ContactsUiState(loading = false), {}) }
 
+/** A viewer on a shared home (AC-H16): call and email, no Add. */
+@ThemePreviews
+@Composable
+fun ContactsViewOnlyPreview() = Frame { ContactsScreen(ContactsUiState(loading = false, rows = sampleContacts, viewOnly = true), {}) }
+
 @ThemePreviews
 @Composable
 fun ContactsLoadingPreview() = Frame { ContactsScreen(ContactsUiState(), {}) }
@@ -893,6 +898,11 @@ fun DocumentsListPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = 
 @ThemePreviews
 @Composable
 fun DocumentsEmptyPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false), {}) }
+
+/** A viewer on a shared home (AC-H16): documents open; no Add, rename or move. */
+@ThemePreviews
+@Composable
+fun DocumentsViewOnlyPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false, folders = sampleDocuments, viewOnly = true), {}) }
 
 /** Catalog only: the menu animates open, so a static screenshot shows its first frame (the X, no items). */
 @ThemePreviews

@@ -13,6 +13,8 @@ data class ContactsUiState(
     val formCanSave: Boolean = false,
     val showFormErrors: Boolean = false,
     val confirmDeleteId: String? = null,
+    /** A viewer on a shared home: rows call and email only; no Add or edit (AC-H16). */
+    val viewOnly: Boolean = false,
 )
 
 sealed interface ContactsEvent {

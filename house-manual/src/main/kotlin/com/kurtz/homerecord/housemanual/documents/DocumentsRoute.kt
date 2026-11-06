@@ -12,7 +12,7 @@ import com.kurtz.homerecord.coreui.pages.rememberDocumentScanner
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 
 @Composable
-fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit, onOpen: (String) -> Unit) {
+fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit, onOpen: (String) -> Unit, viewOnly: Boolean = false) {
     val vm = viewModel<DocumentsViewModel>(
         factory = viewModelFactory { initializer { DocumentsViewModel(repo, homeId, createSavedStateHandle()) } },
     )
@@ -23,7 +23,7 @@ fun DocumentsRoute(repo: DocumentRepository, homeId: String, onBack: () -> Unit,
         onPdf = { vm.onEvent(DocumentsEvent.Picked(it)) },
         onFailed = { vm.onEvent(DocumentsEvent.ScanFailed) },
     )
-    DocumentsScreen(vm.state.collectAsState().value, onEvent = {
+    DocumentsScreen(vm.state.collectAsState().value.copy(viewOnly = viewOnly), onEvent = {
         when (it) {
             DocumentsEvent.Back -> onBack()
             is DocumentsEvent.Open -> onOpen(it.id)

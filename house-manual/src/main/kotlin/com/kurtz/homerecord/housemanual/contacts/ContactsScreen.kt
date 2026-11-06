@@ -53,7 +53,7 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
         title = stringResource(R.string.contacts_title),
         onBack = { onEvent(ContactsEvent.Back) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onEvent(ContactsEvent.OpenForm(null)) }, modifier = Modifier.testTag("hm_contacts_fab")) {
+            if (!state.viewOnly) FloatingActionButton(onClick = { onEvent(ContactsEvent.OpenForm(null)) }, modifier = Modifier.testTag("hm_contacts_fab")) {
                 Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.contacts_add))
             }
         },
@@ -63,8 +63,8 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
             state.rows.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.Contacts,
                 headline = stringResource(R.string.contacts_empty_title),
-                body = stringResource(R.string.contacts_empty_body),
-                actionLabel = stringResource(R.string.contacts_add),
+                body = stringResource(if (state.viewOnly) R.string.contacts_empty_body_view_only else R.string.contacts_empty_body),
+                actionLabel = if (state.viewOnly) null else stringResource(R.string.contacts_add),
                 onAction = { onEvent(ContactsEvent.OpenForm(null)) },
                 modifier = Modifier.padding(padding),
                 actionModifier = Modifier.testTag("hm_contacts_add"),
@@ -73,7 +73,7 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
                 Modifier.padding(padding).fillMaxWidth(),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 88.dp),
             ) {
-                items(state.rows, key = { it.contact.id }) { ContactRowItem(it, onEvent, Modifier.animateItem()) }
+                items(state.rows, key = { it.contact.id }) { ContactRowItem(it, onEvent, Modifier.animateItem(), viewOnly = state.viewOnly) }
             }
         }
     }
@@ -111,7 +111,7 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
 
 /** One contact as a list row (rule 7): tap edits, the trailing buttons call or email. */
 @Composable
-private fun ContactRowItem(row: ContactRow, onEvent: (ContactsEvent) -> Unit, modifier: Modifier = Modifier) {
+private fun ContactRowItem(row: ContactRow, onEvent: (ContactsEvent) -> Unit, modifier: Modifier = Modifier, viewOnly: Boolean = false) {
     val c = row.contact
     val sub = listOfNotNull(c.trade, c.company).joinToString(", ").ifEmpty { null }
     val serviced = if (row.itemNames.isEmpty()) null else stringResource(
@@ -142,7 +142,7 @@ private fun ContactRowItem(row: ContactRow, onEvent: (ContactsEvent) -> Unit, mo
                 }
             }
         },
-        onClick = { onEvent(ContactsEvent.OpenForm(c.id)) },
+        onClick = if (viewOnly) null else ({ onEvent(ContactsEvent.OpenForm(c.id)) }),
         modifier = modifier.testTag("hm_contacts_row"),
     )
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Description
@@ -61,7 +62,7 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
     ScreenScaffold(
         title = stringResource(R.string.documents_title),
         onBack = { onEvent(DocumentsEvent.Back) },
-        floatingActionButton = { DocumentsAddMenu(state.addMenuOpen, onEvent) },
+        floatingActionButton = { if (!state.viewOnly) DocumentsAddMenu(state.addMenuOpen, onEvent) },
     ) { padding ->
         Column(Modifier.padding(padding)) {
             if (state.unsupportedNotice) {
@@ -82,8 +83,8 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
                 state.folders.isEmpty() -> EmptyState(
                     icon = Icons.Rounded.Description,
                     headline = stringResource(R.string.documents_empty_title),
-                    body = stringResource(R.string.documents_empty_body),
-                    actionLabel = stringResource(R.string.documents_add),
+                    body = stringResource(if (state.viewOnly) R.string.documents_empty_body_view_only else R.string.documents_empty_body),
+                    actionLabel = if (state.viewOnly) null else stringResource(R.string.documents_add),
                     onAction = { onEvent(DocumentsEvent.SetAddMenu(true)) },
                     actionModifier = Modifier.testTag("hm_documents_add"),
                 )
@@ -100,7 +101,7 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
                                 modifier = Modifier.animateItem().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
                             )
                         }
-                        items(folder.documents, key = { it.id }) { DocumentRow(it, onEvent, Modifier.animateItem()) }
+                        items(folder.documents, key = { it.id }) { DocumentRow(it, onEvent, Modifier.animateItem(), canEdit = !state.viewOnly) }
                     }
                 }
             }
@@ -169,14 +170,17 @@ private fun DocumentsAddMenu(open: Boolean, onEvent: (DocumentsEvent) -> Unit) {
 
 /** One document as a list row (rule 7): tap opens the viewer, the trailing button renames or moves it. */
 @Composable
-private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit, modifier: Modifier = Modifier) {
+private fun DocumentRow(doc: DocumentEntity, onEvent: (DocumentsEvent) -> Unit, modifier: Modifier = Modifier, canEdit: Boolean = true) {
     RecordListItem(
         headline = doc.name,
         supporting = ByteSize.label(doc.size),
         leading = { Icon(if (doc.mime == "application/pdf") Icons.Rounded.PictureAsPdf else Icons.Rounded.Image, contentDescription = null) },
-        trailing = {
+        // A viewer's row only opens the document: the usual chevron instead of rename/move (AC-H16).
+        trailing = if (!canEdit) ({ Icon(androidx.compose.material.icons.Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }) else {
+            {
             IconButton(onClick = { onEvent(DocumentsEvent.OpenForm(doc.id)) }, modifier = Modifier.testTag("hm_documents_edit")) {
                 Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.documents_edit, doc.name))
+            }
             }
         },
         onClick = { onEvent(DocumentsEvent.Open(doc.id)) },
