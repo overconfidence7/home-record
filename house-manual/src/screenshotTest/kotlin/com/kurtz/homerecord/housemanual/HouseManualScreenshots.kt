@@ -371,6 +371,11 @@ fun DocumentViewerMissingScreenshot() = DocumentViewerMissingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun DocumentViewerOfflineScreenshot() = DocumentViewerOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun HomeEmptyScreenshot() = HomeEmptyPreview()
 
 @PreviewTest

@@ -249,7 +249,7 @@ private fun HouseManualTabs(
         entry<ReportKey> { com.kurtz.homerecord.housemanual.report.ReportRoute(container.reportSource, container.reportFile, home.id, onBack = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
-        entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
+        entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop, fetch = container::fetchDocument) }
         entry<RoomKey> { key -> RoomRoute(
             container.homes, container.items, container.wallPhotos, container.media, home.id, key.roomId, onBack = nav::pop,
             onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },

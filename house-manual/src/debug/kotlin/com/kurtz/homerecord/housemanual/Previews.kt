@@ -936,6 +936,15 @@ fun DocumentViewerMissingPreview() = Frame {
     )
 }
 
+@ThemePreviews
+@Composable
+fun DocumentViewerOfflinePreview() = Frame {
+    com.kurtz.homerecord.housemanual.documents.DocumentViewerScreen(
+        com.kurtz.homerecord.housemanual.documents.DocumentViewerUiState(loading = false, name = "Roof warranty 2019.pdf", missing = true, offline = true),
+        {},
+    )
+}
+
 private val homeRecent = sampleItems.take(3)
 
 private val homeAttention = listOf(

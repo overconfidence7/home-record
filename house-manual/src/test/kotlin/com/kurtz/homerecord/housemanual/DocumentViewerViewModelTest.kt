@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.media.DocumentFiles
 import com.kurtz.homerecord.core.media.StoredDocument
+import com.kurtz.homerecord.core.photo.OnPhone
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerUiState
 import com.kurtz.homerecord.housemanual.documents.DocumentViewerViewModel
@@ -65,7 +66,8 @@ class DocumentViewerViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(id: String, open: (String, String) -> PageSource?) = DocumentViewerViewModel(repo, id, open).also {
+    private fun vm(id: String, fetch: suspend (String) -> OnPhone = { OnPhone.NotUploaded }, open: (String, String) -> PageSource?) =
+        DocumentViewerViewModel(repo, id, open, fetch).also {
         vms += it
         it.state.launchIn(it.viewModelScope)
     }
@@ -87,5 +89,48 @@ class DocumentViewerViewModelTest {
         val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") })
         assertThat(vm(id) { _, _ -> null }.await { !it.loading }.missing).isTrue()
         assertThat(vm("nope") { _, _ -> TwoPages() }.await { !it.loading }.missing).isTrue()
+    }
+
+    // T075a2: a document added on another phone has path "" here; the viewer fetches it from the cloud, then opens it.
+    @AcceptanceCriterion("AC-H15")
+    @Test fun documentOnlyInTheCloudIsFetchedThenOpened() {
+        val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/permit.pdf") })
+        runBlocking { db.documentDao().upsert(checkNotNull(db.documentDao().get(id)).copy(path = "", r2Key = "h1/document/$id/a.pdf")) }
+        val asked = mutableListOf<String>()
+        val opened = mutableListOf<String>()
+        val s = vm(id, fetch = { asked += it; db.documentDao().setLocalPath(it, "/cache/downloads/a.pdf"); OnPhone.Ready }) { path, _ -> opened += path; TwoPages() }
+            .await { !it.loading }
+        assertThat(asked).containsExactly(id)
+        assertThat(opened).containsExactly("/cache/downloads/a.pdf")
+        assertThat(s.missing).isFalse()
+        assertThat(s.path).isEqualTo("/cache/downloads/a.pdf")
+    }
+
+    // T075a2: with no connection the viewer says so, and Retry fetches again once the phone is back online.
+    @AcceptanceCriterion("AC-H15")
+    @Test fun offlineShowsNoConnectionAndRetryFetchesAgain() {
+        val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/permit.pdf") })
+        runBlocking { db.documentDao().upsert(checkNotNull(db.documentDao().get(id)).copy(path = "", r2Key = "h1/document/$id/a.pdf")) }
+        var online = false
+        val viewer = vm(id, fetch = {
+            if (online) { db.documentDao().setLocalPath(it, "/cache/downloads/a.pdf"); OnPhone.Ready } else OnPhone.NoNetwork
+        }) { _, _ -> TwoPages() }
+        val first = viewer.await { !it.loading }
+        assertThat(first.missing).isTrue()
+        assertThat(first.offline).isTrue()
+        online = true
+        viewer.onEvent(com.kurtz.homerecord.housemanual.documents.DocumentViewerEvent.Retry)
+        val second = viewer.await { !it.loading && !it.missing }
+        assertThat(second.offline).isFalse()
+        assertThat(second.pages?.pageCount).isEqualTo(2)
+    }
+
+    // A file that is gone with no cloud copy is still "can't be opened", not "no connection".
+    @AcceptanceCriterion("AC-C37")
+    @Test fun goneFileWithNoCloudCopyIsMissingNotOffline() {
+        val id = checkNotNull(runBlocking { repo.add("h1", DocumentScope.Home, "u/manual.pdf") })
+        val s = vm(id) { _, _ -> null }.await { !it.loading }
+        assertThat(s.missing).isTrue()
+        assertThat(s.offline).isFalse()
     }
 }

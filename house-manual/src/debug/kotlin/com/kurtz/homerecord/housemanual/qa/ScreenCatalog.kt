@@ -145,6 +145,7 @@ object ScreenCatalog {
         QaScreen("document-form", nonRoot = false) { DocumentFormPreview() },
         QaScreen("document-viewer", nonRoot = true) { DocumentViewerPreview() },
         QaScreen("document-viewer-missing", nonRoot = true) { DocumentViewerMissingPreview() },
+        QaScreen("document-viewer-offline", nonRoot = true) { DocumentViewerOfflinePreview() },
         QaScreen("home-empty", nonRoot = false) { HomeEmptyPreview() },
         QaScreen("home-full", nonRoot = false) { HomeFullPreview() },
         QaScreen("home-search", nonRoot = false) { HomeSearchPreview() },

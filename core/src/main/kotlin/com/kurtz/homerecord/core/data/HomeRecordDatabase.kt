@@ -52,7 +52,7 @@ import androidx.sqlite.execSQL
         SyncConflictEntity::class,
         ImportLedgerEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2, spec = HomeRecordDatabase.V1ToV2::class),
@@ -82,6 +82,8 @@ import androidx.sqlite.execSQL
         AutoMigration(from = 13, to = 14),
         // v15 (T063b1): import_ledger, the base for merging a newer `.homerecord` into a home; starts empty.
         AutoMigration(from = 14, to = 15),
+        // v16 (T075a2): document.r2Key, so a document added on one phone opens on the home's others; older rows null.
+        AutoMigration(from = 15, to = 16),
     ],
 )
 abstract class HomeRecordDatabase : RoomDatabase() {

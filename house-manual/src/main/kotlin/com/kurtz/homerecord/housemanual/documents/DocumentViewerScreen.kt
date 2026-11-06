@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Icon
@@ -36,6 +37,14 @@ fun DocumentViewerScreen(state: DocumentViewerUiState, onEvent: (DocumentViewerE
             val pages = state.pages
             when {
                 state.loading -> LoadingState()
+                pages == null && state.offline -> EmptyState(
+                    icon = Icons.Rounded.CloudOff,
+                    headline = stringResource(R.string.document_viewer_offline_title),
+                    body = stringResource(R.string.document_viewer_offline_body),
+                    actionLabel = stringResource(R.string.document_viewer_retry),
+                    onAction = { onEvent(DocumentViewerEvent.Retry) },
+                    actionModifier = Modifier.testTag("hm_document_retry"),
+                )
                 pages == null -> EmptyState(
                     icon = Icons.Rounded.ErrorOutline,
                     headline = stringResource(R.string.document_viewer_missing_title),

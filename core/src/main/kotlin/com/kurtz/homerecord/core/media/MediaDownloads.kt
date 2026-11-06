@@ -47,6 +47,13 @@ class MediaDownloads(
         fetch(row.r2Key) { db.noteDao().setVoicePath(id, it) }
     }
 
+    /** A House Manual document added on another phone (T075a2, AC-H15): fetched by its R2 key into this phone's cache. */
+    suspend fun document(id: String): OnPhone = lock.withLock {
+        val row = db.documentDao().get(id) ?: return OnPhone.Failed
+        if (isOnPhone(row.path)) return OnPhone.Ready
+        fetch(row.r2Key) { db.documentDao().setLocalPath(id, it) }
+    }
+
     /** A receipt scanned on another phone (T060c, AC-F44): fetched by its R2 key into this phone's cache. */
     suspend fun receipt(id: String): OnPhone = lock.withLock {
         val row = db.materialDao().get(id) ?: return OnPhone.Failed

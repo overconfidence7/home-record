@@ -237,6 +237,7 @@ data class DocumentEntity(
     val itemId: String? = null,
     val folder: String = "",
     val name: String,
+    /** Where the bytes sit on this phone; "" when the document came from another phone and is not downloaded. Local only. */
     val path: String,
     val mime: String,
     val size: Long = 0,
@@ -244,6 +245,8 @@ data class DocumentEntity(
     val updatedAt: Long,
     val deletedAt: Long? = null,
     val source: String = Sources.HOUSE_MANUAL,
+    /** The file's key in R2 once uploaded, so the home's other phones can fetch it (T075a2, AC-H15); synced. */
+    val r2Key: String? = null,
 )
 
 @Entity(tableName = "photo", indices = [Index("homeId"), Index("itemId"), Index("jobId")])

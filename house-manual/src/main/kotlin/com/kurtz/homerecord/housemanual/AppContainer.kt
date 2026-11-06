@@ -121,7 +121,7 @@ class AppContainer(private val app: Application) {
         }
     }
 
-    /** Photo files to and from R2 in the home tenant (T075a, AC-H15): queued after each sync, uploaded by WorkManager. */
+    /** Photo and document files to and from R2 in the home tenant (T075a, AC-H15): queued after each sync, uploaded by WorkManager. */
     private val mediaApi = com.kurtz.homerecord.core.media.RetrofitMediaTransferApi.create(BuildConfig.API_BASE_URL, http)
     private val uploadedKeys = com.kurtz.homerecord.core.media.UploadedKeys(db, onChange = { entity, id -> recordHomeChange(entity, id) })
     private val mediaUploader by lazy {
@@ -151,6 +151,10 @@ class AppContainer(private val app: Application) {
             fetchPhoto = { mediaDownloads.photo(it) },
         )
     }
+
+    /** A document added on the home's other phone, brought down when the viewer opens it (T075a2); signed out, nothing to fetch. */
+    suspend fun fetchDocument(id: String): com.kurtz.homerecord.core.photo.OnPhone =
+        if (auth.state.value is AuthState.SignedIn) mediaDownloads.document(id) else com.kurtz.homerecord.core.photo.OnPhone.NotUploaded
 
     private suspend fun afterHomeSync(homeId: String) {
         val pass = homeMedia.afterSync(homeId)

@@ -49,6 +49,15 @@ class UploadedKeysTest {
         assertThat(changes).containsExactly("photo" to "p1", "note" to "n1", "job_file" to "f1").inOrder()
     }
 
+    // T075a2 (AC-H15): a House Manual document's upload leaves its key on the row and syncs it.
+    @Test fun documentGetsItsKey() = runBlocking<Unit> {
+        db.documentDao().upsert(com.kurtz.homerecord.core.data.DocumentEntity(id = "d1", homeId = "h1", name = "Deck permit.pdf", path = "/f/d1.pdf", mime = "application/pdf", createdAt = 1, updatedAt = 1))
+        assertThat(keys.record("document", "d1", "h1/document/d1/d1.pdf")).isTrue()
+        assertThat(db.documentDao().get("d1")?.r2Key).isEqualTo("h1/document/d1/d1.pdf")
+        assertThat(keys.record("document", "d1", "h1/document/d1/d1.pdf")).isFalse()
+        assertThat(changes).containsExactly("document" to "d1")
+    }
+
     // T060c (AC-F44): a receipt's upload leaves its key on the material row and syncs it.
     @Test fun receiptGetsItsKey() = runBlocking<Unit> {
         db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m1", jobId = "j1", amountCents = 100, date = "2026-11-04", receiptPath = "/m/r.jpg", createdAt = 1, updatedAt = 1))

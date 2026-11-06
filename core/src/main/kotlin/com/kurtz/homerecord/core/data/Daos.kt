@@ -174,6 +174,8 @@ interface DocumentDao {
     @Query("UPDATE document SET deletedAt = :at, updatedAt = :at WHERE id = :id") suspend fun softDelete(id: String, at: Long)
     @Query("SELECT * FROM document WHERE roomId = :roomId AND deletedAt IS NULL") suspend fun listForRoom(roomId: String): List<DocumentEntity>
     @Query("SELECT * FROM document WHERE itemId = :itemId AND deletedAt IS NULL") suspend fun listForItem(itemId: String): List<DocumentEntity>
+    /** Where a downloaded document landed on this phone; device-local, so no updatedAt bump and no sync (T075a2). */
+    @Query("UPDATE document SET path = :path WHERE id = :id") suspend fun setLocalPath(id: String, path: String)
 }
 
 @Dao

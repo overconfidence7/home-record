@@ -196,6 +196,16 @@ class HomeRecordMigrationTest {
         }
     }
 
+    // T075a2 (AC-H15): older documents have no R2 key until the next sync of a signed-in home queues them.
+    @Test fun v15ToV16AddsDocumentKey() {
+        helper.createDatabase(15).use { db ->
+            db.execSQL("INSERT INTO document (id, homeId, folder, name, path, mime, size, createdAt, updatedAt, source) VALUES ('d1', 'h1', '', 'Deck permit.pdf', '/f/d1.pdf', 'application/pdf', 10, 1, 1, 'house-manual')")
+        }
+        helper.runMigrationsAndValidate(16).use { db ->
+            assertThat(db.texts("SELECT COALESCE(r2Key, 'none') || '/' || path FROM document WHERE id = 'd1'")).containsExactly("none//f/d1.pdf")
+        }
+    }
+
     // cr:room-schema-v1: a phone on any earlier testing APK upgrades straight to this one.
     @Test fun everyReleasedVersionMigratesToTheLatest() {
         for (from in 1 until LATEST) {
@@ -234,6 +244,6 @@ class HomeRecordMigrationTest {
         const val DB = "migration-test.db"
 
         /** HomeRecordDatabase.version; raise it with each new schema. */
-        const val LATEST = 15
+        const val LATEST = 16
     }
 }

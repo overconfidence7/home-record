@@ -8,13 +8,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * House Manual's photo files in the cloud (T075a, AC-H15, AC-C17). After each sync of a signed-in home, [afterSync]
+ * House Manual's photo and document files in the cloud (T075a, AC-H15, AC-C17). After each sync of a signed-in home, [afterSync]
  * queues every file of that home that has no R2 key yet (item and room photos, wall photos as taken and their
- * straightened copies) and fetches the item photos taken on another phone. Running it after a sync, not when a photo
+ * straightened copies, documents) and fetches the item photos taken on another phone. Running it after a sync, not when a photo
  * is saved, means photos taken while signed out go up after the first sign-in, and nothing is queued for a home the
  * server does not know yet (the sync registers it first). The upload queue skips a file it already holds, so a pass
  * that finds nothing new costs a query and one file check per photo. Wall photos taken elsewhere come down when
- * their room page opens ([MediaDownloads.wallPhotos]).
+ * their room page opens ([MediaDownloads.wallPhotos]), documents when the viewer opens one ([MediaDownloads.document]).
  */
 class HomeMedia(
     private val db: HomeRecordDatabase,
@@ -48,6 +48,11 @@ class HomeMedia(
                 queued++
             }
         }
+        for (doc in db.documentDao().listFor(homeId)) {
+            if (doc.r2Key != null || !isOnPhone(doc.path)) continue
+            enqueue(tenant, DOCUMENT, doc.id, doc.path.substringAfterLast('/'), doc.path, doc.mime)
+            queued++
+        }
         return queued
     }
 
@@ -70,5 +75,6 @@ class HomeMedia(
 
     private companion object {
         const val PHOTO = "photo"
+        const val DOCUMENT = "document"
     }
 }

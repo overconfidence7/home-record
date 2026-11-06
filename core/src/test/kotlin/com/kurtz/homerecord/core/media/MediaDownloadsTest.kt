@@ -130,6 +130,21 @@ class MediaDownloadsTest {
         assertThat(net.downloads).hasSize(1)
     }
 
+    // T075a2 (AC-H15): a document added on another phone arrives with path "" and its key; opening it downloads it once
+    // and records where it landed without touching updatedAt (the path is this phone's only).
+    @Test fun documentFromAnotherPhoneDownloadsOnce() = runBlocking<Unit> {
+        db.documentDao().upsert(com.kurtz.homerecord.core.data.DocumentEntity(id = "d1", homeId = "h1", name = "Deck permit.pdf", path = "", mime = "application/pdf", createdAt = 1, updatedAt = 4, r2Key = "c1/document/d1/d1.pdf"))
+        db.documentDao().upsert(com.kurtz.homerecord.core.data.DocumentEntity(id = "d2", homeId = "h1", name = "Old.pdf", path = "", mime = "application/pdf", createdAt = 1, updatedAt = 4))
+        assertThat(downloads.document("d1")).isEqualTo(OnPhone.Ready)
+        val row = checkNotNull(db.documentDao().get("d1"))
+        assertThat(File(row.path).isFile).isTrue()
+        assertThat(row.updatedAt).isEqualTo(4)
+        assertThat(downloads.document("d1")).isEqualTo(OnPhone.Ready)
+        assertThat(net.downloads).containsExactly("https://r2/get/c1/document/d1/d1.pdf")
+        assertThat(downloads.document("d2")).isEqualTo(OnPhone.NotUploaded)
+        assertThat(downloads.document("gone")).isEqualTo(OnPhone.Failed)
+    }
+
     // T060c (AC-F44): a receipt scanned on another phone arrives as a row with its key and downloads once.
     @Test fun pulledReceiptDownloadsByKey() = runBlocking<Unit> {
         db.materialDao().upsert(com.kurtz.homerecord.core.data.MaterialEntity(id = "m1", jobId = "j1", amountCents = 100, date = "2026-11-04", r2Key = "c1/material/m1/receipt.jpg", createdAt = 1, updatedAt = 4))

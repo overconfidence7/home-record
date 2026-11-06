@@ -117,4 +117,20 @@ class HomeMediaTest {
         assertThat(fetched).containsExactly("p1")
         assertThat(queued).isEmpty()
     }
+
+    // T075a2 (AC-H15): a document on this phone with no key goes up with its own type; one in R2, deleted, of another
+    // home or not on this phone stays out.
+    @Test fun queuesDocumentsOnThisPhoneWithNoKeyYet() = runBlocking<Unit> {
+        fun doc(id: String, path: String, r2Key: String? = null, homeId: String = "h1", deletedAt: Long? = null) =
+            com.kurtz.homerecord.core.data.DocumentEntity(id = id, homeId = homeId, name = "Furnace manual.pdf", path = path, mime = "application/pdf", createdAt = 1, updatedAt = 1, deletedAt = deletedAt, r2Key = r2Key)
+        db.documentDao().upsert(doc("d1", "/files/documents/d1.pdf"))
+        db.documentDao().upsert(doc("d2", "/files/documents/d2.pdf", r2Key = "h1/document/d2/d2.pdf"))
+        db.documentDao().upsert(doc("d3", ""))
+        db.documentDao().upsert(doc("d4", "/files/documents/d4.pdf", homeId = "h2"))
+        db.documentDao().upsert(doc("d5", "/files/documents/d5.pdf", deletedAt = 3))
+        onPhone += listOf("/files/documents/d1.pdf", "/files/documents/d2.pdf", "/files/documents/d4.pdf", "/files/documents/d5.pdf")
+
+        assertThat(media.afterSync("h1").queued).isEqualTo(1)
+        assertThat(queued).containsExactly(listOf("document", "d1", "d1.pdf", "/files/documents/d1.pdf", "application/pdf"))
+    }
 }

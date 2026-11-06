@@ -5,7 +5,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 /**
  * Saves the R2 key of a finished upload on its row and queues the row for sync (cr:sync-local-columns), so other
  * phones, and this one after Free up, can fetch the bytes: a job file (AC-F20), a photo or its marked-up copy (AC-F55)
- * a voice memo, a receipt (T060c), and a wall photo or its straightened copy (T048d; [filename] tells which). A row that is gone or an
+ * a voice memo, a receipt (T060c), a House Manual document (T075a2), and a wall photo or its straightened copy (T048d; [filename] tells which). A row that is gone or an
  * entity without a key column is left alone.
  */
 class UploadedKeys(
@@ -19,6 +19,7 @@ class UploadedKeys(
             "job_file" -> db.jobFileDao().get(entityId)?.takeIf { it.r2Key != key }?.let { db.jobFileDao().upsert(it.copy(r2Key = key, updatedAt = now())) }
             "photo" -> db.photoDao().get(entityId)?.takeIf { it.r2Key != key }?.let { db.photoDao().upsert(it.copy(r2Key = key, updatedAt = now())) }
             "material" -> db.materialDao().get(entityId)?.takeIf { it.r2Key != key }?.let { db.materialDao().upsert(it.copy(r2Key = key, updatedAt = now())) }
+            "document" -> db.documentDao().get(entityId)?.takeIf { it.r2Key != key }?.let { db.documentDao().upsert(it.copy(r2Key = key, updatedAt = now())) }
             "note" -> db.noteDao().get(entityId)?.takeIf { it.r2Key != key }?.let { db.noteDao().upsert(it.copy(r2Key = key, updatedAt = now())) }
             "wall_photo" -> db.wallPhotoDao().get(entityId)?.let { row ->
                 if (WallPhotoFiles.isTexture(filename)) {
