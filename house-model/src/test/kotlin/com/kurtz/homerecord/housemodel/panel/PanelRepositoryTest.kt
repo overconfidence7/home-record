@@ -10,6 +10,7 @@ import com.kurtz.homerecord.core.model.BreakerType
 import com.kurtz.homerecord.core.model.PanelLayout
 import com.kurtz.homerecord.core.model.SlotPlacement
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -35,6 +36,17 @@ class PanelRepositoryTest {
     }
 
     @After fun tearDown() = db.close()
+
+    @AcceptanceCriterion("AC-C40")
+    @Test fun panelOpenedFromTwoPlacesAtOnceIsStillMadeOnce(): Unit = kotlinx.coroutines.runBlocking {
+        val made = java.util.Collections.synchronizedList(mutableListOf<String>())
+        val racing = PanelRepository(db, onChange = { e, id -> made += "$e/$id" })
+        val scope = this
+        val ids = (1..8).map { scope.async(kotlinx.coroutines.Dispatchers.IO) { racing.ensurePanel("panel-item") } }.map { it.await() }
+        assertThat(ids.toSet()).hasSize(1)
+        assertThat(db.panelDao().listFor("panel-item")).hasSize(1)
+        assertThat(made).containsExactly("panel/${ids.first()}")
+    }
 
     @AcceptanceCriterion("AC-C40")
     @Test fun panelIsCreatedOnceWithFortySlotsAndTwoColumns() = runTest {

@@ -519,4 +519,24 @@
     <string name="item_place_wall_canvas">%1$s. Tap where the item hangs.</string>
     <!-- One special warranty term in the item page's Warranty section, shared by both apps. -->
     <string name="warranty_term_bullet">• %1$s</string>
+    <!-- Seasonal reminders a climate zone seeds (AC-C49); shared by both apps. -->
+    <string name="seasonal_test_ac">Test the air conditioning before summer</string>
+    <string name="seasonal_check_heating">Check the heating before winter</string>
+    <string name="seasonal_drain_outdoor_faucets">Shut off and drain outdoor faucets</string>
+    <string name="seasonal_check_weatherstripping">Check weatherstripping on doors and windows</string>
+    <string name="seasonal_check_ice_dams">Check the roof edge for ice dams</string>
+    <string name="seasonal_storm_prep">Get ready for storm season</string>
+    <string name="seasonal_check_moisture">Look for damp spots and mold</string>
+    <string name="seasonal_clear_ac_drain">Flush the AC condensate drain</string>
+    <string name="seasonal_service_evap_cooler">Service the evaporative cooler</string>
+    <string name="seasonal_clear_brush">Clear dry brush away from the house</string>
+    <string name="seasonal_check_roof_sun">Check the roof for sun damage</string>
+    <string name="seasonal_clear_moss">Clear moss from the roof and gutters</string>
+    <!-- Warranty-expiry reminder title (AC-C49); %1$s is the item name. -->
+    <string name="reminder_warranty_ends">Warranty ends soon: %1$s</string>
+    <string name="climate_zone_cold">Cold</string>
+    <string name="climate_zone_mixed">Mixed</string>
+    <string name="climate_zone_hot_humid">Hot-humid</string>
+    <string name="climate_zone_hot_dry">Hot-dry</string>
+    <string name="climate_zone_marine">Marine</string>
 </resources>

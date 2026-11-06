@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -70,7 +70,22 @@ class PanelViewModelTest {
         it.state.launchIn(it.viewModelScope)
     }
 
-    private fun PanelViewModel.await(what: (PanelUiState) -> Boolean) = runBlocking { withTimeout(5_000) { state.first(what) } }
+    /**
+     * Waits for a state that passes [what]. Work resumed on the unconfined test dispatcher from inside its own event loop is
+     * queued on the test scheduler, which nothing else runs here, so each poll runs what is due now (virtual time stays put).
+     */
+    private fun PanelViewModel.await(what: (PanelUiState) -> Boolean): PanelUiState = runBlocking {
+        withTimeout(5_000) {
+            var s: PanelUiState
+            while (true) {
+                main.scheduler.runCurrent()
+                s = state.value
+                if (what(s)) break
+                delay(5)
+            }
+            s
+        }
+    }
 
     @Test
     @AcceptanceCriterion("AC-C40")

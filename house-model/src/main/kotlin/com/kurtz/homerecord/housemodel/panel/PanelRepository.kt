@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.panel
 
+import androidx.room.withTransaction
 import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.BreakerEntity
 import com.kurtz.homerecord.core.data.BreakerLinkEntity
@@ -98,11 +99,16 @@ class PanelRepository(
 ) {
     /** The panel of a Breaker panel or Sub-panel item, created with the defaults the first time it is opened. */
     suspend fun ensurePanel(itemId: String): String {
-        db.panelDao().listFor(itemId).firstOrNull()?.let { return it.id }
-        val at = now()
-        val id = Ids.newId()
-        db.panelDao().upsert(PanelEntity(id = id, itemId = itemId, createdAt = at, updatedAt = at))
-        onChange("panel", id)
+        // Look and make in one transaction: HM-Panel and a breaker save opening at once used to make two panels.
+        var made = false
+        val id = db.withTransaction {
+            db.panelDao().listFor(itemId).firstOrNull()?.id ?: Ids.newId().also { id ->
+                val at = now()
+                db.panelDao().upsert(PanelEntity(id = id, itemId = itemId, createdAt = at, updatedAt = at))
+                made = true
+            }
+        }
+        if (made) onChange("panel", id)
         return id
     }
 
