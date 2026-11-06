@@ -138,14 +138,16 @@ private fun StatusCard(state: ClockUiState) {
             Text(headline, style = MaterialTheme.typography.titleLarge)
             state.currentJob?.let { Text(it.name, style = MaterialTheme.typography.bodyLarge) }
             if (state.status !is ClockStatus.Out) {
-                Text(elapsed(state.elapsedMillis), style = MaterialTheme.typography.displaySmall, modifier = Modifier.testTag("fl_clock_elapsed"))
+                // Tabular digits: the running time ticks every second and must not shift sideways as digits change.
+                Text(elapsed(state.elapsedMillis), style = MaterialTheme.typography.displaySmall.copy(fontFeatureSettings = "tnum"), modifier = Modifier.testTag("fl_clock_elapsed"))
             }
         }
     }
 }
 
+/** Stopwatch form H:MM:SS ("0:05:09", "10:42:00"), as the system clock app shows a running timer. */
 private fun elapsed(ms: Long): String {
-    val s = ms / 1000
+    val s = (ms / 1000).coerceAtLeast(0)
     return "%d:%02d:%02d".format(s / 3600, s / 60 % 60, s % 60)
 }
 
