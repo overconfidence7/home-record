@@ -1219,11 +1219,11 @@ private val overlayForm = com.kurtz.homerecord.housemodel.ui.OverlayForm(
 fun OverlayFormPreview() = Frame { com.kurtz.homerecord.housemodel.ui.OverlayFormScreen(overlayForm, {}, canAddPhoto = true) }
 
 private val overlayItems = listOf(
-    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i2", "Dishwasher", "r1", "Kitchen"),
-    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i3", "Kitchen sink faucet", "r1", "Kitchen"),
-    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i1", "Basement furnace", "r2", "Utility room"),
-    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i4", "Water heater", "r2", "Utility room"),
-    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i5", "Main panel", null, null),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i2", "Dishwasher", "r1", "Kitchen", "dishwasher"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i3", "Kitchen sink faucet", "r1", "Kitchen", "faucet"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i1", "Basement furnace", "r2", "Utility room", "furnace"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i4", "Water heater", "r2", "Utility room", "water_heater"),
+    com.kurtz.homerecord.housemodel.overlays.OverlayItemChoice("i5", "Main panel", null, null, "breaker_panel"),
 )
 
 /** The drain filled in with the dishwasher it serves and a close-up photo, Replace and Remove (AC-C26). */

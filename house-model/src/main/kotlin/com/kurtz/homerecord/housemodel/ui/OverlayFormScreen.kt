@@ -310,6 +310,10 @@ fun ItemPickList(query: String, selectedId: String?, items: List<OverlayItemChoi
                 colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                 headlineContent = { Text(item.name) },
                 supportingContent = item.roomName?.let { { Text(it) } },
+                leadingContent = {
+                    val icon = item.subtype?.let { com.kurtz.homerecord.core.model.ItemCategory.subtype(it)?.iconName }.orEmpty()
+                    Icon(itemIcon(icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                },
                 trailingContent = if (item.id == selectedId) chosen else null,
                 modifier = Modifier.fillMaxWidth().clickable { onEvent(WallOverlaysEvent.SetItem(item.id)) }.testTag("${prefix}_overlay_item_${item.id}"),
             )

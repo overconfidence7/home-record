@@ -3,7 +3,8 @@ package com.kurtz.homerecord.housemodel.overlays
 import java.util.Locale
 
 /** An item an overlay can be linked to (AC-C26: "the equipment it serves"), with the room it is in. */
-data class OverlayItemChoice(val id: String, val name: String, val roomId: String?, val roomName: String?)
+/** [subtype] picks the row's category icon in the picker (rule 26). */
+data class OverlayItemChoice(val id: String, val name: String, val roomId: String?, val roomName: String?, val subtype: String? = null)
 
 /** An overlay linked to an item, with its room's name, for the item page's Links (AC-C26). */
 data class OverlayLink(val overlay: Overlay, val roomName: String?)

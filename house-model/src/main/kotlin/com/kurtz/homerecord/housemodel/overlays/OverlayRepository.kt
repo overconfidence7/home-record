@@ -64,7 +64,7 @@ class OverlayRepository(
     fun observeItemChoices(homeId: String): Flow<List<OverlayItemChoice>> =
         combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId)) { items, rooms ->
             val roomNames = rooms.associate { it.id to it.name }
-            items.map { OverlayItemChoice(it.id, it.name, it.roomId, it.roomId?.let(roomNames::get)) }
+            items.map { OverlayItemChoice(it.id, it.name, it.roomId, it.roomId?.let(roomNames::get), it.subtype) }
         }
 
     /** The home's items placed on the plan (AC-C30 position), as markers for the 3D view (AC-C23) and the blueprint (AC-C15). */
