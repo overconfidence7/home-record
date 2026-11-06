@@ -182,6 +182,33 @@ class ItemRepositoryTest {
         assertThat(listOf(removed.roomId, removed.planX, removed.planY)).containsExactly("l", null, null).inOrder()
     }
 
+    @AcceptanceCriterion("AC-H7")
+    @Test fun moveToRoomClearsTheSpotsAndRefusesRoomsOfAnotherHome() = runTest {
+        db.floorDao().upsert(com.kurtz.homerecord.core.data.FloorEntity(id = "f1", homeId = "h1", name = "Main", sortOrder = 0, createdAt = 1, updatedAt = 1))
+        db.floorDao().upsert(com.kurtz.homerecord.core.data.FloorEntity(id = "f9", homeId = "h9", name = "Other", sortOrder = 0, createdAt = 1, updatedAt = 1))
+        db.roomDao().upsert(RoomEntity(id = "k", floorId = "f1", name = "Kitchen", polygonJson = "[]", createdAt = 1, updatedAt = 1))
+        db.roomDao().upsert(RoomEntity(id = "m", floorId = "f1", name = "Mudroom", polygonJson = "[]", createdAt = 1, updatedAt = 1))
+        db.roomDao().upsert(RoomEntity(id = "x", floorId = "f9", name = "Elsewhere", polygonJson = "[]", createdAt = 1, updatedAt = 1))
+        val id = checkNotNull(repo.save("h1", furnace().copy(roomId = "k")))
+        repo.setPlanSpot(id, ItemPlace("k", 40, 50))
+        changes.clear()
+        assertThat(repo.moveToRoom(id, "m")).isTrue()
+        val moved = checkNotNull(repo.get(id))
+        assertThat(listOf(moved.roomId, moved.planX, moved.planY, moved.wallId)).containsExactly("m", null, null, null).inOrder()
+        assertThat(changes).containsExactly("item/$id")
+        // Same room: nothing written.
+        changes.clear()
+        assertThat(repo.moveToRoom(id, "m")).isTrue()
+        assertThat(changes).isEmpty()
+        // Another home's room and a missing room are refused; Exterior is allowed.
+        assertThat(repo.moveToRoom(id, "x")).isFalse()
+        assertThat(repo.moveToRoom(id, "gone")).isFalse()
+        assertThat(repo.get(id)?.roomId).isEqualTo("m")
+        assertThat(repo.moveToRoom(id, PseudoRooms.EXTERIOR)).isTrue()
+        assertThat(repo.get(id)?.roomId).isEqualTo(PseudoRooms.EXTERIOR)
+        assertThat(repo.moveToRoom("nope", "m")).isFalse()
+    }
+
     @AcceptanceCriterion("AC-C30")
     @Test fun editingKeepsTheSpotUnlessTheRoomChanges() = runTest {
         val id = checkNotNull(repo.save("h1", furnace().copy(roomId = "k")))

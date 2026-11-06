@@ -98,6 +98,31 @@ class ItemDetailWarrantyTest {
     private suspend fun ItemDetailViewModel.await(until: (com.kurtz.homerecord.housemanual.items.ItemDetailUiState) -> Boolean) =
         kotlinx.coroutines.withContext(Dispatchers.Default) { kotlinx.coroutines.withTimeout(10_000) { state.first(until) } }
 
+    @AcceptanceCriterion("AC-H7")
+    @Test fun moveToRoomListsRoomsMovesTheItemAndSurvivesProcessDeath() = runTest {
+        val id = heater()
+        val choices = listOf(
+            com.kurtz.homerecord.housemanual.items.MoveChoice("k", "Kitchen", "Main"),
+            com.kurtz.homerecord.housemanual.items.MoveChoice(PseudoRooms.EXTERIOR, "Exterior"),
+        )
+        val saved = SavedStateHandle()
+        val vm = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", saved, moveChoices = { choices }).also {
+            vms += it
+            it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        }
+        vm.onEvent(ItemDetailEvent.ShowMove)
+        assertThat(vm.await { it.showMove }.moveChoices.map { it.name }).containsExactly("Kitchen", "Exterior").inOrder()
+        // A new ViewModel on the same saved state reopens the sheet.
+        val again = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", saved, moveChoices = { choices }).also {
+            vms += it
+            it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        }
+        assertThat(again.await { it.showMove }.moveChoices).hasSize(2)
+        vm.onEvent(ItemDetailEvent.MoveTo(PseudoRooms.EXTERIOR))
+        assertThat(vm.await { !it.showMove && it.detail?.item?.roomId == PseudoRooms.EXTERIOR }.detail).isNotNull()
+        assertThat(saved.get<Boolean>("showMove")).isFalse()
+    }
+
     @AcceptanceCriterion("AC-C34")
     @Test fun lookUpShowsTermsThenEditedConfirmStoresThemAsManual() = runTest {
         val id = heater()

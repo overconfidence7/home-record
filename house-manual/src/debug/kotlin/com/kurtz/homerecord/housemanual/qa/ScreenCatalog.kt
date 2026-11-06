@@ -65,6 +65,7 @@ object ScreenCatalog {
         QaScreen("item-detail-power", nonRoot = true) { ItemDetailPowerPreview() },
         QaScreen("item-detail-shutoff", nonRoot = true) { ItemDetailShutoffPreview() },
         QaScreen("item-shutoff-picker", nonRoot = false) { ItemShutoffPickerPreview() },
+        QaScreen("item-move-room", nonRoot = false) { ItemMoveRoomPreview() },
         QaScreen("room-overlays", nonRoot = true) { RoomOverlaysPreview() },
         QaScreen("room-breakers", nonRoot = true) { RoomBreakersPreview() },
         QaScreen("room-shutoffs", nonRoot = true) { RoomShutoffsPreview() },

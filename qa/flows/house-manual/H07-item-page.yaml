@@ -116,3 +116,39 @@ appId: com.kurtz.homerecord.housemanual
 - extendedWaitUntil:
     visible: "On the plan, hangs on North wall.*"
     timeout: 5000
+# AC-H7: the room chip under the hero opens the item's room; overflow Move to room moves it (the thermostat leaves the
+# Living room for the Dining room, losing its wall spot)
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_room"
+    direction: UP
+- tapOn:
+    id: "hm_item_detail_room"
+- extendedWaitUntil:
+    visible:
+      id: "hm_room_items"
+    timeout: 5000
+- assertVisible: "Living room"
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_room"
+    timeout: 5000
+- tapOn:
+    id: "hm_item_detail_more"
+- tapOn:
+    id: "hm_item_detail_move"
+- extendedWaitUntil:
+    visible: "Move to which room?"
+    timeout: 5000
+- takeScreenshot: H07-move-to-room
+- tapOn: "Dining room"
+- extendedWaitUntil:
+    notVisible: "Move to which room?"
+    timeout: 5000
+- assertVisible: "Dining room"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_place"
+- assertVisible: "Not on the plan yet.*"

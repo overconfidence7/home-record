@@ -53,6 +53,8 @@ class ItemDetailViewModel(
     shutoff: Flow<com.kurtz.homerecord.core.data.ItemEntity?> = flowOf(null),
     /** The home's shutoffs, in Emergency order, for the picker. */
     shutoffs: Flow<List<com.kurtz.homerecord.core.model.Shutoff>> = flowOf(emptyList()),
+    /** The rooms for "Move to room", read when the sheet opens. */
+    private val moveChoices: suspend () -> List<MoveChoice> = { emptyList() },
 ) : ViewModel() {
     private val shutoffPicker = MutableStateFlow(saved[SHUTOFF_PICKER] ?: false)
 
@@ -129,9 +131,21 @@ class ItemDetailViewModel(
 
     private val shutoffRefused = MutableStateFlow(false)
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, links, shutoffRefused) { s, n, p, l, refused ->
+    private data class MoveUi(val show: Boolean = false, val choices: List<MoveChoice> = emptyList())
+
+    private val moveUi = MutableStateFlow(MoveUi())
+
+    private val notices = combine(shutoffRefused, moveUi) { r, m -> r to m }
+
+    init {
+        if (saved[MOVE] ?: false) showMove()
+    }
+
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, links, notices) { s, n, p, l, notice ->
         val (overlays, f, sh) = l
+        val (refused, move) = notice
         s.copy(
+            showMove = move.show && s.detail != null, moveChoices = move.choices,
             nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = overlays, feeding = f,
             shutoff = sh.linked, shutoffChoices = sh.choices, showShutoffPicker = sh.picker && s.detail != null,
             shutoffRefused = refused,
@@ -214,6 +228,12 @@ class ItemDetailViewModel(
                 setShutoffPicker(true)
             }
             ItemDetailEvent.DismissShutoffNotice -> shutoffRefused.value = false
+            ItemDetailEvent.ShowMove -> showMove()
+            ItemDetailEvent.HideMove -> hideMove()
+            is ItemDetailEvent.MoveTo -> viewModelScope.launch {
+                repo.moveToRoom(itemId, e.roomId)
+                hideMove()
+            }
             ItemDetailEvent.HideShutoffPicker -> setShutoffPicker(false)
             is ItemDetailEvent.PickShutoff -> viewModelScope.launch {
                 shutoffRefused.value = !repo.setShutoff(itemId, e.id)
@@ -225,7 +245,7 @@ class ItemDetailViewModel(
                 documents.attach(e.id, DocumentScope.Item(itemId))
                 setAttach(false)
             }
-            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker, is ItemDetailEvent.OpenShutoff -> Unit // navigation is the route's job
+            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker, is ItemDetailEvent.OpenShutoff, is ItemDetailEvent.OpenRoom -> Unit // navigation is the route's job
         }
     }
 
@@ -302,6 +322,19 @@ class ItemDetailViewModel(
         return FormsUi(consumable, service, saved[FORM_ERRORS] ?: false, original)
     }
 
+    private fun showMove() {
+        saved[MOVE] = true
+        viewModelScope.launch {
+            val choices = moveChoices()
+            if (saved[MOVE] ?: false) moveUi.value = MoveUi(show = true, choices = choices)
+        }
+    }
+
+    private fun hideMove() {
+        saved[MOVE] = false
+        moveUi.value = MoveUi()
+    }
+
     private fun setShutoffPicker(v: Boolean) {
         shutoffPicker.value = v
         saved[SHUTOFF_PICKER] = v
@@ -316,6 +349,7 @@ class ItemDetailViewModel(
         const val CONFIRM = "confirmDelete"
         const val ATTACH = "showAttach"
         const val SHUTOFF_PICKER = "showShutoffPicker"
+        const val MOVE = "showMove"
         const val NAV_CLOSED = "navClosed"
         const val NAV_COPY = "navCopy"
         const val FORM_CONSUMABLE = "consumableForm"

@@ -1529,6 +1529,24 @@ fun ItemShutoffPickerPreview() = Frame {
     com.kurtz.homerecord.housemanual.items.ShutoffPickerContent(ItemDetailUiState(loading = false, detail = furnaceDetail(false), shutoff = furnaceShutoffs[1], shutoffChoices = furnaceShutoffs), {})
 }
 
+private val furnaceMoveChoices = listOf(
+    com.kurtz.homerecord.housemanual.items.MoveChoice("r-util", "Utility room", "Basement"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice("r-rec", "Rec room", "Basement"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice("r-kitchen", "Kitchen", "Main floor"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice("r-mud", "Mudroom", "Main floor"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice("r-hall", "Upstairs hall", "Second floor"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice(com.kurtz.homerecord.housemodel.items.PseudoRooms.EXTERIOR, "Exterior"),
+    com.kurtz.homerecord.housemanual.items.MoveChoice(com.kurtz.homerecord.housemodel.items.PseudoRooms.WHOLE_HOUSE, "Whole house"),
+)
+
+/** Overflow "Move to room": the home's rooms by floor, the furnace's room checked, then Exterior and Whole house. */
+@ThemePreviews
+@Composable
+fun ItemMoveRoomPreview() = Frame {
+    val detail = furnaceDetail(false).let { it.copy(item = it.item.copy(roomId = "r-util")) }
+    com.kurtz.homerecord.housemanual.items.MoveRoomContent(ItemDetailUiState(loading = false, detail = detail, showMove = true, moveChoices = furnaceMoveChoices), {})
+}
+
 @ThemePreviews
 @Composable
 fun PanelEmptyPreview() = Frame {

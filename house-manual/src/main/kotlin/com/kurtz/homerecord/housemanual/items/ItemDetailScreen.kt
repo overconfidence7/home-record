@@ -55,6 +55,10 @@ import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material.icons.rounded.MeetingRoom
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.ui.semantics.heading
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -131,6 +135,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
             )
             else -> Column(modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 16.dp, bottom = 24.dp)) {
                 Hero(detail)
+                RoomChip(detail, onEvent)
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
                 DetailsSection(detail, onEvent)
                 WhereSection(detail, onEvent)
@@ -158,6 +163,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
     UpkeepFormSheet(state, onEvent)
     AttachDocumentSheet(state, onEvent)
     ShutoffPickerSheet(state, onEvent)
+    MoveRoomSheet(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),
@@ -183,6 +189,11 @@ private fun OverflowMenu(onEvent: (ItemDetailEvent) -> Unit) {
         Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.item_detail_more))
     }
     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.item_detail_move)) },
+            onClick = { open = false; onEvent(ItemDetailEvent.ShowMove) },
+            modifier = Modifier.testTag("hm_item_detail_move"),
+        )
         DropdownMenuItem(
             text = { Text(stringResource(R.string.item_detail_duplicate)) },
             onClick = { open = false; onEvent(ItemDetailEvent.Duplicate) },
@@ -218,6 +229,63 @@ private fun Hero(detail: ItemDetail) {
                 val icon = ItemCategory.subtype(detail.item.subtype)?.iconName.orEmpty()
                 Icon(itemIcon(icon), contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
             }
+        }
+    }
+}
+
+/**
+ * The room chip under the hero (SPEC HM-Item, AC-H7): names the room and opens it. Exterior and Whole house are not rooms
+ * with a page, so they show as a plain label chip.
+ */
+@Composable
+private fun RoomChip(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
+    val roomId = detail.item.roomId
+    val name = detail.roomName.ifBlank { return }
+    val opens = roomId != null && !com.kurtz.homerecord.housemodel.items.PseudoRooms.isPseudo(roomId)
+    AssistChip(
+        onClick = { if (opens && roomId != null) onEvent(ItemDetailEvent.OpenRoom(roomId)) },
+        enabled = opens,
+        label = { Text(name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+        leadingIcon = { Icon(Icons.Rounded.MeetingRoom, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
+        colors = AssistChipDefaults.assistChipColors(disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, disabledLeadingIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).heightIn(min = 48.dp)
+            .testTag("hm_item_detail_room"),
+    )
+}
+
+/** Overflow "Move to room": every room of the home, bottom floor first, then Exterior and Whole house (SPEC HM-Item). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MoveRoomSheet(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    if (!state.showMove) return
+    ModalBottomSheet(modifier = Modifier.windowTestTags(), onDismissRequest = { onEvent(ItemDetailEvent.HideMove) }) {
+        MoveRoomContent(state, onEvent)
+    }
+}
+
+/** The Move to room list, scrolling so every room stays reachable at 200% text; tests and previews draw it. */
+@Composable
+fun MoveRoomContent(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    val current = state.detail?.item?.roomId
+    androidx.compose.foundation.lazy.LazyColumn(Modifier.testTag("hm_item_detail_move_list"), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {
+        item(key = "title") {
+            Text(
+                stringResource(R.string.item_detail_move_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { heading() },
+            )
+        }
+        items(state.moveChoices.size, key = { state.moveChoices[it].id }) { i ->
+            val c = state.moveChoices[i]
+            val here = c.id == current
+            RecordListItem(
+                headline = c.name,
+                supporting = c.floorName.ifBlank { null },
+                leading = { Icon(Icons.Rounded.MeetingRoom, contentDescription = null) },
+                trailing = if (here) ({ Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.item_detail_move_here)) }) else null,
+                onClick = { onEvent(if (here) ItemDetailEvent.HideMove else ItemDetailEvent.MoveTo(c.id)) },
+                modifier = Modifier.testTag("hm_item_detail_move_$i"),
+            )
         }
     }
 }

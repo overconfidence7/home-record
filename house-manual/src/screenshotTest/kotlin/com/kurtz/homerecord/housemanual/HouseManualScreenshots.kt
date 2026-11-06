@@ -801,6 +801,11 @@ fun ItemShutoffPickerScreenshot() = ItemShutoffPickerPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemMoveRoomScreenshot() = ItemMoveRoomPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun RoomShutoffsScreenshot() = RoomShutoffsPreview()
 
 @PreviewTest

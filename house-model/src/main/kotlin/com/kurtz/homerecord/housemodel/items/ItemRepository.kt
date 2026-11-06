@@ -233,6 +233,24 @@ class ItemRepository(
         return true
     }
 
+    /**
+     * Moves item [itemId] to room [roomId] (item page overflow "Move to room", SPEC HM-Item): a room of the item's own home,
+     * or Exterior / Whole house. The plan and wall spots belonged to the old room, so they are cleared. Returns false when
+     * the item or the room is gone or the room is in another home; moving to the room it is already in changes nothing.
+     */
+    suspend fun moveToRoom(itemId: String, roomId: String): Boolean {
+        val item = get(itemId) ?: return false
+        if (!PseudoRooms.isPseudo(roomId)) {
+            val room = db.roomDao().get(roomId) ?: return false
+            val floor = db.floorDao().get(room.floorId) ?: return false
+            if (floor.homeId != item.homeId) return false
+        }
+        if (item.roomId == roomId) return true
+        db.itemDao().upsert(item.copy(roomId = roomId, planX = null, planY = null, wallId = null, wallX = null, wallY = null, updatedAt = now()))
+        onChange("item", itemId)
+        return true
+    }
+
     /** The shutoff that isolates item [itemId] (AC-C45); null when none is linked or that shutoff was deleted. */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observeShutoffFor(itemId: String): Flow<ItemEntity?> =

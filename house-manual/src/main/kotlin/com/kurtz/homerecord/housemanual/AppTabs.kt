@@ -199,6 +199,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 panels = container.panels,
                 onOpenBreaker = { nav.push(PanelKey(it.panelItemId, highlightSlot = it.breaker.number)) },
                 onOpenItem = { nav.push(ItemDetailKey(it)) },
+                roomChoices = { container.homes.roomChoices(home.id) },
+                onOpenRoom = { nav.push(RoomKey(it)) },
             )
         }
         entry<ItemPlaceKey> { key ->

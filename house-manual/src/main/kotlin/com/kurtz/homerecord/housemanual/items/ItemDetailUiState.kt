@@ -55,11 +55,18 @@ data class ItemDetailUiState(
     val showShutoffPicker: Boolean = false,
     /** The picked shutoff could not be linked (deleted on another phone meanwhile); the section says so (r13). */
     val shutoffRefused: Boolean = false,
+    /** Overflow "Move to room": the sheet is open (SPEC HM-Item). */
+    val showMove: Boolean = false,
+    /** The rooms the item can move to, bottom floor first, then Exterior and Whole house. */
+    val moveChoices: List<MoveChoice> = emptyList(),
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
     val nav: ItemDetailNav? = null,
 )
 
 /** A shutoff item as the item page's Shutoff link and picker show it (AC-C45). */
+/** A room in the Move to room sheet; [floorName] is blank for Exterior and Whole house. */
+data class MoveChoice(val id: String, val name: String, val floorName: String = "")
+
 data class ShutoffChoice(val id: String, val name: String, val roomName: String = "")
 
 /** The upkeep record a Delete confirm names: [label] is its size or part number, or what was done. */
@@ -135,6 +142,11 @@ sealed interface ItemDetailEvent {
     /** The Shutoff chip: open the shutoff item's page (AC-H7). */
     data class OpenShutoff(val id: String) : ItemDetailEvent
     data object ShowShutoffPicker : ItemDetailEvent
+    data object ShowMove : ItemDetailEvent
+    data object HideMove : ItemDetailEvent
+    data class MoveTo(val roomId: String) : ItemDetailEvent
+    /** The room chip under the hero: opens the item's room (AC-H7); routed, never reaches the ViewModel. */
+    data class OpenRoom(val roomId: String) : ItemDetailEvent
     data object DismissShutoffNotice : ItemDetailEvent
     data object HideShutoffPicker : ItemDetailEvent
     /** Links [id] as the shutoff that isolates this item, or clears the link when null (AC-C45). */
