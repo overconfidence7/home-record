@@ -57,6 +57,8 @@ EOF
   echo "== $1: $2 ($3)"
 }
 shot() { adb exec-out screencap -p > "$OUT/screenshots/$1.png" 2>/dev/null || true; }
+# The package whose window has focus, so a stage can say whose screen its screenshot shows ([judge:qa-anr-dialog]).
+foreground() { adb shell dumpsys window 2>/dev/null | grep -m1 -E 'mCurrentFocus|mFocusedApp' | grep -oE '[a-z][a-z0-9_]*(\.[a-z0-9_]+)+/' | tr -d '/' | head -n1; }
 
 # The emulator can drop off adb for a moment (26da2dea: "device offline" after the uninstall before the House Manual
 # jank stage, then "device 'emulator-5554' not found" for release and cold start, filed as app Majors). Before each
@@ -98,6 +100,22 @@ adb shell settings put global animator_duration_scale 0 >/dev/null 2>&1 || true
 adb shell settings put system font_scale 1.0 >/dev/null 2>&1 || true
 adb shell settings put global hide_error_dialogs 1 >/dev/null 2>&1 || true  # emulator "System UI isn't responding" ANR dialogs covered the app and failed flows
 adb shell cmd uimode night no >/dev/null 2>&1 || true
+# [judge:qa-anr-dialog]: a cold, overloaded emulator showed "System UI isn't responding" before the first install and
+# the dialog covered every Field Log flow. hide_error_dialogs only stops new ones, so first wait for boot and for the
+# 1-minute load to settle (up to 3 min each; go on with a note if it never does), then close any dialog already up.
+settle_device() {
+  local i load
+  for i in $(seq 1 90); do [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] && break; sleep 2; done
+  for i in $(seq 1 36); do
+    load=$(adb shell cat /proc/loadavg 2>/dev/null | cut -d' ' -f1)
+    awk -v l="${load:-99}" 'BEGIN { exit !(l < 2.0) }' && break
+    sleep 5
+  done
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
+  adb shell input keyevent KEYCODE_HOME >/dev/null 2>&1 || true
+  echo "== device settled (load ${load:-unknown})"
+}
+settle_device
 adb shell settings put system accelerometer_rotation 0 >/dev/null 2>&1 || true
 adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
 adb shell "mkdir -p /sdcard/Download/qa && rm -rf /sdcard/Download/qa/*" >/dev/null 2>&1 || true
@@ -270,8 +288,9 @@ for a in $PER_APP; do
   skip_uninstalled monkey "$a" && continue
   p=$(pkg_of "$a")
   adb shell monkey -p "$p" --throttle 40 --pct-syskeys 0 --pct-anyevent 0 -s 42 -v 1500 > "$OUT/logs/monkey-$a.txt" 2>&1
-  if grep -q "// CRASH\|// NOT RESPONDING" "$OUT/logs/monkey-$a.txt"; then record "monkey:$a" fail "crash or ANR during monkey (logs/monkey-$a.txt)"; else record "monkey:$a" pass "1500 events, no crash"; fi
   shot "$a-after-monkey"
+  FG="foreground after: $(foreground || true)"
+  if grep -q "// CRASH\|// NOT RESPONDING" "$OUT/logs/monkey-$a.txt"; then record "monkey:$a" fail "crash or ANR during monkey (logs/monkey-$a.txt); $FG"; else record "monkey:$a" pass "1500 events, no crash; $FG"; fi
 done
 
 # ------------------------------------------------------------------- jank
