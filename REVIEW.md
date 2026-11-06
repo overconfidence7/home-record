@@ -3173,7 +3173,7 @@ Open, found in the review:
 - [x] [Minor] Import leaves `cache/import/<uuid>` behind on Back or a thrown error, `cache/handoff/claimed.homerecord` is never removed, and `record.json` is buffered up to the 2 GB bundle cap [r12:import-cache-left] - fixed in 04124c10 (Back or a closed screen deletes the unpacked read via the app scope; a failed read deletes its folder; reads a day old are swept on the next import; the downloaded claim copy in cache/handoff is deleted once read; record.json has its own 64 MB cap)
 - [ ] [Minor] The photo report offers only This week / Last week / Last 4 weeks; a long job cannot get a whole-job or custom-range report (AC-F28 "date range") [r12:photo-report-range]
 - [x] [Minor] `JobItemViewModel` deletes, registers and looks up without checking `canEdit` (only the screen hides the buttons) [r12:jobitem-canedit] - fixed in df90bf1a
-- [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count] (the "• term" half fixed in df90bf1a; the Reports recount is still open)
+- [x] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count] (the "• term" half fixed in df90bf1a; the Reports recount) - fixed in 97e68bb7
 - [x] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread] - fixed in cefc32c8
 
 ## Builder review R13 (T066–T070)
