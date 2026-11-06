@@ -38,6 +38,8 @@ git worktree add -q --detach "$work" HEAD
     app=$(basename "$appdir"); app=${app#qa-device-}
     mkdir -p "latest/$app"; cp -r "$appdir/." "latest/$app/"
     rm -f "latest/$app"/*.apk "latest/$app"/*.jks
+    # Per-flow device logcats from Maestro (the suite's logs/logcat.txt covers the run) are not published
+    find "latest/$app" -path '*/maestro/*' -name 'device-logcat.txt' -type f -delete 2>/dev/null || true
   done
   ls -1d history/* 2>/dev/null | sort | head -n -60 | xargs -r rm -rf
   cat > README.md <<EOF

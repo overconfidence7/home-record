@@ -245,6 +245,9 @@ run_flow() { # file label [variant]
   local prefix="flow-$label-"; case "$label" in tour-*) prefix="" ;; esac
   { find "$OUT/maestro" -maxdepth 1 -name '*.png' -type f; [ -d "$OUT/maestro/out-$label" ] && find "$OUT/maestro/out-$label" -name '*.png' -type f; } 2>/dev/null |
     while IFS= read -r s; do mv "$s" "$OUT/screenshots/$prefix$(basename "$s")"; done
+  # Maestro also saves a full device logcat per flow (1-7 MB each); logs/logcat.txt already holds the whole run, so
+  # these are not published ([judge:qa-flow-shots-path]). The flow's own maestro.log and commands JSON stay.
+  [ -d "$OUT/maestro/out-$label" ] && find "$OUT/maestro/out-$label" -name 'device-logcat.txt' -type f -delete 2>/dev/null
   # A flow that fails after setOrientation leaves the device rotated; put it back so the next flow starts portrait
   # (the landscape variant sets its rotation again before each tour run)
   adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
