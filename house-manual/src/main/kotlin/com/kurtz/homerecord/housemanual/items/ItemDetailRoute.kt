@@ -12,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.flow.map
 import com.kurtz.homerecord.core.lookup.RecallApi
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.coreui.pages.rememberDocumentScanner
@@ -48,6 +49,8 @@ fun ItemDetailRoute(
     panels: PanelRepository? = null,
     /** Opens the panel of a breaker that feeds this item, scrolled to its slot (AC-H7). */
     onOpenBreaker: (FeedingBreaker) -> Unit = {},
+    /** Opens another item's page: the shutoff that isolates this one (AC-H7). */
+    onOpenItem: (String) -> Unit = {},
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -61,7 +64,8 @@ fun ItemDetailRoute(
             initializer {
                 ItemDetailViewModel(repo, lookup, upkeep, documents, itemId, homeId, repo.observeDetail(itemId, homeId, pseudo), suffix, createSavedStateHandle(), recalls,
                     overlays?.observeLinks(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
-                    panels?.observeFeedingItem(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()))
+                    panels?.observeFeedingItem(itemId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
+                    repo.observeShutoffFor(itemId), repo.observeShutoffs(homeId, pseudo).map { sections -> sections.flatMap { it.shutoffs } })
             }
         },
     )
@@ -89,6 +93,7 @@ fun ItemDetailRoute(
             ItemDetailEvent.Place -> onPlace()
             ItemDetailEvent.OpenPanel -> onOpenPanel()
             is ItemDetailEvent.OpenBreaker -> onOpenBreaker(it.breaker)
+            is ItemDetailEvent.OpenShutoff -> onOpenItem(it.id)
             ItemDetailEvent.UploadDocument -> picker.launch(arrayOf("application/pdf", "image/*"))
             ItemDetailEvent.ScanDocument -> scan()
             is ItemDetailEvent.OpenLink -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))) }

@@ -134,6 +134,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 DetailsSection(detail, onEvent)
                 WhereSection(detail, onEvent)
                 PowerSection(state.feeding, onEvent)
+                ShutoffSection(state, onEvent)
                 if (com.kurtz.homerecord.housemodel.panel.isPanelSubtype(detail.item.subtype)) PanelSection(onEvent)
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
@@ -155,6 +156,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
     }
     UpkeepFormSheet(state, onEvent)
     AttachDocumentSheet(state, onEvent)
+    ShutoffPickerSheet(state, onEvent)
     if (state.confirmDelete && detail != null) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),

@@ -237,4 +237,33 @@ class ItemRepositoryTest {
         assertThat(main.roomName).isEqualTo("Basement")
         assertThat(sections.single().shutoffs.map { it.itemId }).containsExactly("wm", "sink").inOrder()
     }
+
+    // AC-C45: an item links to the shutoff that isolates it; only a live shutoff of the same home, never itself
+    @Test
+    @AcceptanceCriterion("AC-C45")
+    fun anItemLinksToTheShutoffThatIsolatesIt() = runTest {
+        fun item(id: String, sub: String, name: String, cat: String = "SHUTOFFS", home: String = "h1") =
+            com.kurtz.homerecord.core.data.ItemEntity(id = id, homeId = home, category = cat, subtype = sub, name = name, createdAt = 1, updatedAt = 1)
+        db.itemDao().upsert(item("valve", "fixture_shutoff", "Kitchen sink cold valve"))
+        db.itemDao().upsert(item("dw", "dishwasher", "Dishwasher", cat = "APPLIANCES"))
+        db.itemDao().upsert(item("fridge", "refrigerator", "Refrigerator", cat = "APPLIANCES"))
+        db.itemDao().upsert(item("elsewhere", "water_main", "Cabin water main", home = "h2"))
+        changes.clear()
+
+        assertThat(repo.observeShutoffFor("dw").first()).isNull()
+        assertThat(repo.setShutoff("dw", "valve")).isTrue()
+        assertThat(checkNotNull(repo.observeShutoffFor("dw").first()).name).isEqualTo("Kitchen sink cold valve")
+        assertThat(changes).containsExactly("item/dw")
+
+        assertThat(repo.setShutoff("dw", "fridge")).isFalse() // not a shutoff
+        assertThat(repo.setShutoff("dw", "elsewhere")).isFalse() // another home
+        assertThat(repo.setShutoff("valve", "valve")).isFalse() // itself
+        assertThat(checkNotNull(repo.get("dw")).shutoffItemId).isEqualTo("valve")
+
+        // a deleted shutoff drops off the chip; clearing removes the link
+        repo.delete("valve")
+        assertThat(repo.observeShutoffFor("dw").first()).isNull()
+        assertThat(repo.setShutoff("dw", null)).isTrue()
+        assertThat(checkNotNull(repo.get("dw")).shutoffItemId).isNull()
+    }
 }

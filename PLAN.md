@@ -417,10 +417,10 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T068a: `MappingStateMachine` `[unit]` and `MappingController` in :core mapping, `PowerMonitor` (sticky battery broadcast) and `MappingAlarm` (looping alarm sound + vibration) behind interfaces, `PanelRepository.confirmLink` marks the picked room/item link Confirmed (the AC claim waits for T068b, which shows it on screen)
   - [x] T068b: HM-Mapping screen from HM-Panel (Start, waiting/armed/alarm states, keep-screen-on, Silence, pick breaker + room/item sheet that calls confirmLink, leave stops it), previews, screenshots, H12 flow step (AC-C42)
 - [x] T069: Legend PDF per panel (acceptance: AC-C43)
-- [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
+- [x] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
   - [x] T070a: `ShutoffGroups` `[unit]` in :core model (Water / Gas / Electrical / HVAC / Other by subtype, mains first, then by name) and `ItemRepository.observeShutoffs` (instructions = the shutoff item's notes, photo = its first photo, room name); the AC claim waits for T070b, which shows it on screen
   - [x] T070b: HM-Emergency screen (24 sp instructions, full-width photos with pinch-zoom, offline, "Manage shutoffs" at the bottom), reached from More and the Home shutoff count; previews, screenshots, catalog, flow (AC-C44)
-  - [ ] T070c: item "Shutoff" link: pick the shutoff that isolates an item in the item form, "Shutoff: Kitchen sink cold valve" chip on HM-Item opening the shutoff; HM-Room "Shutoffs here" (AC-C45)
+  - [x] T070c: item "Shutoff" link: pick the shutoff that isolates an item in the item form, "Shutoff: Kitchen sink cold valve" chip on HM-Item opening the shutoff; HM-Room "Shutoffs here" (AC-C45)
 - [ ] R13: Review T066–T070
 - [ ] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)
 - [ ] T072: Reminders: `MaintenanceRule` `[unit]`, seeds per subtype and climate zone, warranty-expiry reminders, HM-Reminders (Due/Upcoming/Done, Done/Snooze, zone chips, Add), WorkManager 08:00 notification with deep link, permission after first reminder (acceptance: AC-C49, AC-C50, AC-H12)

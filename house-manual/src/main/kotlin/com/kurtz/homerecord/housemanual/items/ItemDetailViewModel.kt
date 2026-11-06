@@ -49,7 +49,22 @@ class ItemDetailViewModel(
     overlayLinks: Flow<List<OverlayLink>> = flowOf(emptyList()),
     /** The breakers that feed this item (AC-C41). */
     feeding: Flow<List<FeedingBreaker>> = flowOf(emptyList()),
+    /** The shutoff that isolates this item (AC-C45). */
+    shutoff: Flow<com.kurtz.homerecord.core.data.ItemEntity?> = flowOf(null),
+    /** The home's shutoffs, in Emergency order, for the picker. */
+    shutoffs: Flow<List<com.kurtz.homerecord.core.model.Shutoff>> = flowOf(emptyList()),
 ) : ViewModel() {
+    private val shutoffPicker = MutableStateFlow(saved[SHUTOFF_PICKER] ?: false)
+
+    private data class ShutoffUi(val linked: ShutoffChoice?, val choices: List<ShutoffChoice>, val picker: Boolean)
+
+    private val shutoffUi = combine(shutoff, shutoffs, shutoffPicker) { linked, all, picker ->
+        val choices = all.filter { it.itemId != itemId }.map { ShutoffChoice(it.itemId, it.name, it.roomName) }
+        ShutoffUi(linked?.let { l -> choices.firstOrNull { it.id == l.id } ?: ShutoffChoice(l.id, l.name) }, choices, picker)
+    }
+
+    private val links = combine(overlayLinks, feeding, shutoffUi) { o, f, s -> Triple(o, f, s) }
+
     private val confirmDelete = MutableStateFlow(saved[CONFIRM] ?: false)
 
     private val nav = MutableStateFlow(
@@ -112,8 +127,12 @@ class ItemDetailViewModel(
         )
     }
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, overlayLinks, feeding) { s, n, p, links, f ->
-        s.copy(nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = links, feeding = f)
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, links) { s, n, p, l ->
+        val (overlays, f, sh) = l
+        s.copy(
+            nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = overlays, feeding = f,
+            shutoff = sh.linked, shutoffChoices = sh.choices, showShutoffPicker = sh.picker && s.detail != null,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
     fun onEvent(e: ItemDetailEvent) {
@@ -187,13 +206,19 @@ class ItemDetailViewModel(
             }
             ItemDetailEvent.DocumentScanFailed -> documentUi.update { it.copy(notice = true) }
             ItemDetailEvent.DismissDocumentNotice -> documentUi.update { it.copy(notice = false) }
+            ItemDetailEvent.ShowShutoffPicker -> setShutoffPicker(true)
+            ItemDetailEvent.HideShutoffPicker -> setShutoffPicker(false)
+            is ItemDetailEvent.PickShutoff -> viewModelScope.launch {
+                repo.setShutoff(itemId, e.id)
+                setShutoffPicker(false)
+            }
             ItemDetailEvent.ShowAttach -> setAttach(true)
             ItemDetailEvent.HideAttach -> setAttach(false)
             is ItemDetailEvent.AttachDocument -> viewModelScope.launch {
                 documents.attach(e.id, DocumentScope.Item(itemId))
                 setAttach(false)
             }
-            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker -> Unit // navigation is the route's job
+            ItemDetailEvent.Back, ItemDetailEvent.Edit, is ItemDetailEvent.OpenLink, ItemDetailEvent.UploadDocument, ItemDetailEvent.ScanDocument, is ItemDetailEvent.OpenDocument, is ItemDetailEvent.OpenOverlay, ItemDetailEvent.Place, ItemDetailEvent.OpenPanel, is ItemDetailEvent.OpenBreaker, is ItemDetailEvent.OpenShutoff -> Unit // navigation is the route's job
         }
     }
 
@@ -270,6 +295,11 @@ class ItemDetailViewModel(
         return FormsUi(consumable, service, saved[FORM_ERRORS] ?: false, original)
     }
 
+    private fun setShutoffPicker(v: Boolean) {
+        shutoffPicker.value = v
+        saved[SHUTOFF_PICKER] = v
+    }
+
     private fun setAttach(v: Boolean) {
         documentUi.update { it.copy(showAttach = v) }
         saved[ATTACH] = v
@@ -278,6 +308,7 @@ class ItemDetailViewModel(
     private companion object {
         const val CONFIRM = "confirmDelete"
         const val ATTACH = "showAttach"
+        const val SHUTOFF_PICKER = "showShutoffPicker"
         const val NAV_CLOSED = "navClosed"
         const val NAV_COPY = "navCopy"
         const val FORM_CONSUMABLE = "consumableForm"

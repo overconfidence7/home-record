@@ -787,3 +787,18 @@ fun MappingStoppedScreenshot() = MappingStoppedPreview()
 @ThemePreviews
 @Composable
 fun PanelLegendFailedScreenshot() = PanelLegendFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailShutoffScreenshot() = ItemDetailShutoffPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemShutoffPickerScreenshot() = ItemShutoffPickerPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RoomShutoffsScreenshot() = RoomShutoffsPreview()

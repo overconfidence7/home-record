@@ -441,6 +441,17 @@
     <string name="breaker_cancel">Cancel</string>
     <string name="item_detail_panel">Panel</string>
     <string name="item_detail_power">Power</string>
+    <string name="item_detail_shutoff">Shutoff</string>
+    <string name="item_detail_shutoff_chip">Shutoff: %1$s</string>
+    <string name="item_detail_shutoff_change">Change</string>
+    <string name="item_detail_shutoff_pick">Pick the shutoff that turns this off</string>
+    <plurals name="item_detail_shutoff_pick_supporting">
+        <item quantity="one">%1$d shutoff in this home</item>
+        <item quantity="other">%1$d shutoffs in this home</item>
+    </plurals>
+    <string name="item_detail_shutoff_picker_title">Which shutoff turns this off?</string>
+    <string name="item_detail_shutoff_picked">Linked</string>
+    <string name="item_detail_shutoff_none">No shutoff</string>
     <string name="item_detail_breaker_chip">Breaker %1$d</string>
     <string name="item_detail_breaker_chip_panel">%1$s, breaker %2$d</string>
     <string name="item_detail_open_panel">Slots and breakers</string>

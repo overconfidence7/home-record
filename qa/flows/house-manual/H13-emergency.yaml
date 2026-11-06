@@ -51,3 +51,36 @@ appId: com.kurtz.homerecord.housemanual
       id: "hm_emergency_list"
     timeout: 10000
 - assertVisible: "Water main shutoff"
+- back
+# AC-C45: the water heater links to the water main as the shutoff that isolates it; the chip opens the shutoff
+- tapOn:
+    id: "hm_tab_items"
+- tapOn:
+    id: "hm_items_search"
+- inputText: "XE50T10"
+- extendedWaitUntil:
+    visible: "Water heater"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Water heater"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_shutoff_pick"
+- tapOn:
+    id: "hm_item_detail_shutoff_pick"
+- extendedWaitUntil:
+    visible: "Which shutoff turns this off?"
+    timeout: 5000
+- tapOn: "Water main shutoff"
+- extendedWaitUntil:
+    visible: "Shutoff: Water main shutoff"
+    timeout: 5000
+- takeScreenshot: H13-item-shutoff
+- tapOn: "Shutoff: Water main shutoff"
+- extendedWaitUntil:
+    visible: ".*red handle on the meter side.*"
+    timeout: 5000

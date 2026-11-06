@@ -1300,6 +1300,17 @@ fun RoomBreakersPreview() = Frame {
     RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", breakers = breakers), {})
 }
 
+/** The Kitchen's "Shutoffs here": the sink's cold and hot valves (AC-C45). */
+@ThemePreviews
+@Composable
+fun RoomShutoffsPreview() = Frame {
+    val shutoffs = listOf(
+        com.kurtz.homerecord.housemodel.ui.RoomItem("v-cold", "Kitchen sink cold valve", "BrassCraft quarter-turn", "PowerOff", category = ItemCategory.SHUTOFFS, subtypeId = "fixture_shutoff"),
+        com.kurtz.homerecord.housemodel.ui.RoomItem("v-hot", "Kitchen sink hot valve", "", "PowerOff", category = ItemCategory.SHUTOFFS, subtypeId = "fixture_shutoff"),
+    )
+    RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", shutoffs = shutoffs), {})
+}
+
 /** Place on plan (AC-C30 position): the refrigerator placed against the Kitchen's left wall on the Main floor, the floor's other items faint. */
 private fun itemPlaceState(spot: com.kurtz.homerecord.housemodel.items.ItemPlace?, rooms: List<PlanRoom> = houseRooms) =
     com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(
@@ -1496,6 +1507,26 @@ fun ItemDetailPowerPreview() = Frame {
         ),
     )
     ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), feeding = feeding), {})
+}
+
+private val furnaceShutoffs = listOf(
+    com.kurtz.homerecord.housemanual.items.ShutoffChoice("s-gas", "Gas main", "Utility room"),
+    com.kurtz.homerecord.housemanual.items.ShutoffChoice("s-furnace", "Furnace gas valve", "Basement"),
+    com.kurtz.homerecord.housemanual.items.ShutoffChoice("s-disc", "Furnace service switch", "Basement"),
+)
+
+/** The furnace's Shutoff link: "Shutoff: Furnace gas valve" with Change (AC-C45). */
+@ThemePreviews
+@Composable
+fun ItemDetailShutoffPreview() = Frame {
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), shutoff = furnaceShutoffs[1], shutoffChoices = furnaceShutoffs), {})
+}
+
+/** The "Which shutoff turns this off?" sheet: the home's shutoffs, the linked one checked, and No shutoff (AC-C45). */
+@ThemePreviews
+@Composable
+fun ItemShutoffPickerPreview() = Frame {
+    com.kurtz.homerecord.housemanual.items.ShutoffPickerContent(ItemDetailUiState(loading = false, detail = furnaceDetail(false), shutoff = furnaceShutoffs[1], shutoffChoices = furnaceShutoffs), {})
 }
 
 @ThemePreviews

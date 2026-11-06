@@ -158,6 +158,8 @@
     <string name="room_section_overlays_empty">No outlets, pipes or wires drawn in this room yet.</string>
     <string name="room_section_breakers">Breakers</string>
     <string name="room_section_breakers_feeding">Breakers feeding this room</string>
+    <string name="room_section_shutoffs_here">Shutoffs here</string>
+    <string name="room_section_shutoffs_here_empty">No shutoffs in this room. Add the valve under the sink or the water main as an item here.</string>
     <string name="room_breaker_headline">Breaker %1$d</string>
     <string name="room_breaker_unlabeled">No label</string>
     <string name="room_breaker_amps">%1$d A</string>

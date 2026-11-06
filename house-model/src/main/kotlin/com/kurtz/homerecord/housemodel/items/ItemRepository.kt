@@ -16,6 +16,10 @@ import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 /** "Exterior" and "Whole house" stand in for a room (AC-C30); their ids are reserved and never collide with UUIDs. */
@@ -216,6 +220,28 @@ class ItemRepository(
                 roomId = room.id, planX = spot.xIn, planY = spot.yIn, wallId = wallId, wallX = wx, wallY = wy, updatedAt = now(),
             ),
         )
+        onChange("item", itemId)
+        return true
+    }
+
+    /** The shutoff that isolates item [itemId] (AC-C45); null when none is linked or that shutoff was deleted. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    fun observeShutoffFor(itemId: String): Flow<ItemEntity?> =
+        db.itemDao().observeOne(itemId).map { it?.shutoffItemId }.distinctUntilChanged()
+            .flatMapLatest { sid -> sid?.let { db.itemDao().observeOne(it) } ?: flowOf(null) }
+
+    /**
+     * Links item [itemId] to the shutoff that isolates it (AC-C45), or clears the link when [shutoffId] is null. Only a
+     * live Shutoffs item of the same home counts, and a shutoff never isolates itself; returns false when refused.
+     */
+    suspend fun setShutoff(itemId: String, shutoffId: String?): Boolean {
+        val item = get(itemId) ?: return false
+        if (shutoffId != null) {
+            val shutoff = get(shutoffId) ?: return false
+            if (shutoffId == itemId || shutoff.homeId != item.homeId || ItemCategory.orOther(shutoff.category) != ItemCategory.SHUTOFFS) return false
+        }
+        if (item.shutoffItemId == shutoffId) return true
+        db.itemDao().upsert(item.copy(shutoffItemId = shutoffId, updatedAt = now()))
         onChange("item", itemId)
         return true
     }

@@ -46,6 +46,8 @@ data class RoomUiState(
     val canOpenWalls: Boolean = false,
     /** Breakers feeding the room with their link confidence (AC-C41); null where the app keeps no panels. */
     val breakers: List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>? = null,
+    /** Shutoff items in this room, mains first (AC-C45 "Shutoffs here"); null where the app keeps no items. */
+    val shutoffs: List<RoomItem>? = null,
 ) {
     /** "View in 3D" shows once the room is drawn on its floor and the app has a 3D view. */
     val showView3D: Boolean get() = canView3D && floorId != null && (room?.points?.size ?: 0) >= 3
@@ -76,6 +78,7 @@ data class RoomItem(
     val iconName: String = "Category",
     val warranty: WarrantyStatus = WarrantyStatus.Unknown,
     val category: ItemCategory = ItemCategory.OTHER,
+    val subtypeId: String = "",
 )
 
 sealed interface RoomEvent {
@@ -110,5 +113,10 @@ fun roomItemsFor(rows: List<ItemRow>, roomId: String): List<RoomItem> =
             category = it.category,
             iconName = ItemCategory.subtype(it.subtypeId)?.iconName ?: "Category",
             warranty = it.warranty,
+            subtypeId = it.subtypeId,
         )
     }
+
+/** "Shutoffs here" (AC-C45): the room's shutoff items, mains first, then by name. */
+fun roomShutoffsFor(items: List<RoomItem>): List<RoomItem> =
+    items.filter { it.category == ItemCategory.SHUTOFFS }.sortedBy { !it.subtypeId.endsWith("_main") }

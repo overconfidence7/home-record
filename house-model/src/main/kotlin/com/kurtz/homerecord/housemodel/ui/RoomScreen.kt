@@ -129,6 +129,7 @@ fun RoomScreen(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                         "walls" -> RoomWallsCard(state, onEvent)
                         "overlays" -> if (state.overlays != null) RoomOverlaysCard(state, state.overlays, onEvent) else RoomSectionCard(section)
                         "breakers" -> if (state.breakers != null) RoomBreakersCard(state.breakers, onEvent) else RoomSectionCard(section)
+                        "shutoffs" -> if (state.shutoffs != null) RoomShutoffsCard(state.shutoffs, onEvent) else RoomSectionCard(section)
                         else -> RoomSectionCard(section)
                     }
                 }
@@ -441,6 +442,40 @@ private fun RoomBreakersCard(breakers: List<com.kurtz.homerecord.housemodel.pane
                     trailing = RecordListItemChevron,
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.testTag("${prefix}_room_breaker_${b.number}"),
+                )
+            }
+        }
+    }
+}
+
+/** Shutoffs here (AC-C45): the room's shutoff items, mains first; a row opens the shutoff's page. */
+@Composable
+private fun RoomShutoffsCard(shutoffs: List<RoomItem>, onEvent: (RoomEvent) -> Unit) {
+    val prefix = LocalTagPrefix.current
+    Card(Modifier.fillMaxWidth().testTag("${prefix}_room_shutoffs")) {
+        Column(Modifier.padding(vertical = 8.dp)) {
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Rounded.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.room_section_shutoffs_here), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            }
+            if (shutoffs.isEmpty()) {
+                Text(
+                    stringResource(R.string.room_section_shutoffs_here_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
+            shutoffs.forEachIndexed { i, s ->
+                val subtype = com.kurtz.homerecord.core.model.ItemCategory.subtype(s.subtypeId)
+                RecordListItem(
+                    headline = s.name,
+                    supporting = s.detail.ifBlank { subtype?.let { stringResource(it.labelRes) } ?: stringResource(s.category.labelRes) },
+                    leading = { Icon(itemIcon(s.iconName), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                    onClick = { onEvent(RoomEvent.OpenItem(s.id)) },
+                    trailing = RecordListItemChevron,
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.testTag("${prefix}_room_shutoff_$i"),
                 )
             }
         }

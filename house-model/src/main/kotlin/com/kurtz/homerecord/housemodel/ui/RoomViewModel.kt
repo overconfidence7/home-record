@@ -51,6 +51,7 @@ class RoomViewModel(
             canOpenWalls = overlays != null && walls != null,
             overlays = if (overlays != null) emptyList() else null,
             breakers = if (feeding != null) emptyList() else null,
+            shutoffs = if (itemRows != null) emptyList() else null,
         ),
     )
     val state: StateFlow<RoomUiState> = _state.asStateFlow()
@@ -63,7 +64,10 @@ class RoomViewModel(
         }
         if (itemRows != null) {
             viewModelScope.launch {
-                itemRows.collect { rows -> _state.update { it.copy(items = roomItemsFor(rows, roomId)) } }
+                itemRows.collect { rows ->
+                    val items = roomItemsFor(rows, roomId)
+                    _state.update { it.copy(items = items, shutoffs = roomShutoffsFor(items)) }
+                }
             }
         }
         if (walls != null) {

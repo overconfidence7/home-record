@@ -47,9 +47,18 @@ data class ItemDetailUiState(
     val overlayLinks: List<OverlayLink> = emptyList(),
     /** The breakers that feed this item (AC-C41), panel by panel in slot order, for the Power chips. */
     val feeding: List<FeedingBreaker> = emptyList(),
+    /** The shutoff that isolates this item (AC-C45): "Shutoff: Kitchen sink cold valve"; null while none is linked. */
+    val shutoff: ShutoffChoice? = null,
+    /** The home's shutoffs this item can link to (never itself), mains first, for the picker. */
+    val shutoffChoices: List<ShutoffChoice> = emptyList(),
+    /** The "Which shutoff turns this off?" sheet is open. */
+    val showShutoffPicker: Boolean = false,
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
     val nav: ItemDetailNav? = null,
 )
+
+/** A shutoff item as the item page's Shutoff link and picker show it (AC-C45). */
+data class ShutoffChoice(val id: String, val name: String, val roomName: String = "")
 
 /** The upkeep record a Delete confirm names: [label] is its size or part number, or what was done. */
 sealed interface UpkeepDelete {
@@ -121,6 +130,12 @@ sealed interface ItemDetailEvent {
     data object OpenPanel : ItemDetailEvent
     /** A Power chip: open [breaker]'s panel scrolled to its slot (AC-H7). */
     data class OpenBreaker(val breaker: FeedingBreaker) : ItemDetailEvent
+    /** The Shutoff chip: open the shutoff item's page (AC-H7). */
+    data class OpenShutoff(val id: String) : ItemDetailEvent
+    data object ShowShutoffPicker : ItemDetailEvent
+    data object HideShutoffPicker : ItemDetailEvent
+    /** Links [id] as the shutoff that isolates this item, or clears the link when null (AC-C45). */
+    data class PickShutoff(val id: String?) : ItemDetailEvent
     data object ShowAttach : ItemDetailEvent
     data object HideAttach : ItemDetailEvent
     data class AttachDocument(val id: String) : ItemDetailEvent

@@ -329,4 +329,29 @@ class ItemDetailWarrantyTest {
         vm.onEvent(ItemDetailEvent.NavHandled)
         assertThat(vm.await { it.nav == null }.detail?.item?.id).isEqualTo(id)
     }
+
+    // AC-C45: the item page picks the shutoff that isolates it; the picker lists the home's other shutoffs and survives process death
+    @AcceptanceCriterion("AC-C45")
+    @Test fun pickingAShutoffLinksItAndNoShutoffClearsIt() = runTest {
+        val valve = items.save("h1", ItemDraft(subtypeId = "fixture_shutoff", roomId = PseudoRooms.WHOLE_HOUSE, name = "Kitchen sink cold valve")).orEmpty()
+        val main = items.save("h1", ItemDraft(subtypeId = "water_main", roomId = PseudoRooms.WHOLE_HOUSE, name = "Water main")).orEmpty()
+        val id = heater()
+        val saved = SavedStateHandle()
+        fun vmFor(h: SavedStateHandle) = ItemDetailViewModel(
+            items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", h,
+            shutoff = items.observeShutoffFor(id), shutoffs = items.observeShutoffs("h1", emptyMap()).let { f -> kotlinx.coroutines.flow.flow { f.collect { s -> emit(s.flatMap { it.shutoffs }) } } },
+        ).also { vms += it; it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
+        val vm = vmFor(saved)
+        assertThat(vm.await { it.shutoffChoices.size == 2 }.shutoffChoices.map { it.id }).containsExactly(main, valve).inOrder()
+        vm.onEvent(ItemDetailEvent.ShowShutoffPicker)
+        vm.await { it.showShutoffPicker }
+        // process death keeps the sheet open
+        assertThat(vmFor(saved).await { it.detail != null }.showShutoffPicker).isTrue()
+        vm.onEvent(ItemDetailEvent.PickShutoff(valve))
+        val linked = vm.await { it.shutoff != null && !it.showShutoffPicker }
+        assertThat(linked.shutoff?.name).isEqualTo("Kitchen sink cold valve")
+        vm.onEvent(ItemDetailEvent.PickShutoff(null))
+        vm.await { it.shutoff == null }
+        assertThat(checkNotNull(items.get(id)).shutoffItemId).isNull()
+    }
 }
