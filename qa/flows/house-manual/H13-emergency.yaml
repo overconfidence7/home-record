@@ -1,0 +1,53 @@
+# Walkthrough H13 (T070b): open Emergency from the Home card and from More (AC-C44). Starts from the regression
+# seed, which files a water main (Utility room) and a gas main (Exterior) with instructions. The quick settings
+# tile and the widget (AC-H11) extend this flow with T071.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_home"
+- scrollUntilVisible:
+    element:
+      id: "hm_home_emergency_open"
+- tapOn:
+    id: "hm_home_emergency_open"
+- extendedWaitUntil:
+    visible:
+      id: "hm_emergency_list"
+    timeout: 10000
+# AC-C44: grouped Water then Gas, each main with its instructions in large type
+- assertVisible:
+    id: "hm_emergency_group_water"
+- assertVisible: "Water main shutoff"
+- assertVisible: ".*red handle on the meter side.*"
+- takeScreenshot: H13-emergency
+- scrollUntilVisible:
+    element:
+      id: "hm_emergency_group_gas"
+- scrollUntilVisible:
+    element: "Gas main shutoff"
+- scrollUntilVisible:
+    element:
+      id: "hm_emergency_manage"
+- assertVisible: "Manage shutoffs"
+# A shutoff opens its item page, where its notes are the instructions
+- scrollUntilVisible:
+    element: "Gas main shutoff"
+    direction: UP
+- tapOn: "Gas main shutoff"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+- back
+- back
+# More → Emergency
+- tapOn:
+    id: "hm_tab_more"
+- tapOn:
+    id: "hm_more_emergency"
+- extendedWaitUntil:
+    visible:
+      id: "hm_emergency_list"
+    timeout: 10000
+- assertVisible: "Water main shutoff"

@@ -71,7 +71,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
                 return@Column
             }
             QuickActions(state, onEvent)
-            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddShutoff) })
+            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddShutoff) }, onOpen = { onEvent(HomeEvent.OpenEmergency) })
             Section(stringResource(R.string.home_attention)) {
                 if (state.attention.isEmpty()) {
                     Text(stringResource(R.string.home_attention_none), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_home_attention_none"))
@@ -126,8 +126,10 @@ private fun ActionButton(icon: ImageVector, label: Int, tag: String, filled: Boo
 }
 
 @Composable
-private fun EmergencyCard(count: Int, onAdd: () -> Unit) {
-    Card(Modifier.fillMaxWidth().testTag("hm_home_emergency")) {
+private fun EmergencyCard(count: Int, onAdd: () -> Unit, onOpen: () -> Unit) {
+    // With shutoffs recorded the button opens HM-Emergency (AC-H11); without, it adds the first one.
+    val modifier = Modifier.fillMaxWidth().testTag("hm_home_emergency")
+    val body: @Composable () -> Unit = {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.home_emergency), style = MaterialTheme.typography.titleMedium)
             Text(
@@ -140,9 +142,15 @@ private fun EmergencyCard(count: Int, onAdd: () -> Unit) {
                     Icon(Icons.Rounded.PowerOff, contentDescription = null)
                     Text(stringResource(R.string.home_emergency_add), modifier = Modifier.padding(start = 8.dp))
                 }
+            } else {
+                Button(onClick = onOpen, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_emergency_open")) {
+                    Icon(Icons.Rounded.PowerOff, contentDescription = null)
+                    Text(stringResource(R.string.home_emergency_open), modifier = Modifier.padding(start = 8.dp))
+                }
             }
         }
     }
+    Card(modifier) { body() }
 }
 
 @Composable

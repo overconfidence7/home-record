@@ -25,6 +25,7 @@ fun HomeRoute(
     onOpenRoom: (String) -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenContacts: () -> Unit,
+    onOpenEmergency: () -> Unit = {},
     onOpenOverlay: (String) -> Unit = {},
     onOpenPanel: (panelItemId: String, slot: Int?) -> Unit = { _, _ -> },
 ) {
@@ -40,6 +41,7 @@ fun HomeRoute(
             HomeEvent.AddItem -> onAddItem()
             HomeEvent.ScanDataPlate -> onScanDataPlate()
             HomeEvent.AddShutoff -> onAddShutoff()
+            HomeEvent.OpenEmergency -> onOpenEmergency()
             is HomeEvent.OpenItem -> onOpenItem(it.itemId)
             is HomeEvent.QueryChanged -> vm.onEvent(it)
             is HomeEvent.OpenResult -> when (it.kind) {
@@ -49,7 +51,7 @@ fun HomeRoute(
                 SearchKind.CONTACT -> onOpenContacts()
                 SearchKind.OVERLAY -> onOpenOverlay(it.id)
                 SearchKind.BREAKER -> onOpenPanel(it.id, it.slot)
-                SearchKind.SHUTOFF -> Unit
+                SearchKind.SHUTOFF -> onOpenEmergency()
             }
         }
     })

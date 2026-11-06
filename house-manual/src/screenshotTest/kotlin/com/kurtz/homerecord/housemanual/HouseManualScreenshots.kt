@@ -696,6 +696,21 @@ fun PanelMissingScreenshot() = PanelMissingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun EmergencyListScreenshot() = EmergencyListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun EmergencyEmptyScreenshot() = EmergencyEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun EmergencyLoadingScreenshot() = EmergencyLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PanelsListScreenshot() = PanelsListPreview()
 
 @PreviewTest

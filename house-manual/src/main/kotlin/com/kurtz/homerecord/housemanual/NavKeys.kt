@@ -38,6 +38,9 @@ import kotlinx.serialization.Serializable
 /** More → Breaker panels when the home has none or several (AC-C40). */
 @Serializable data object PanelsKey : NavKey
 
+/** HM-Emergency: shutoffs in large type (AC-C44). */
+@Serializable data object EmergencyKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

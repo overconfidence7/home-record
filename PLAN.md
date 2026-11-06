@@ -419,7 +419,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T069: Legend PDF per panel (acceptance: AC-C43)
 - [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
   - [x] T070a: `ShutoffGroups` `[unit]` in :core model (Water / Gas / Electrical / HVAC / Other by subtype, mains first, then by name) and `ItemRepository.observeShutoffs` (instructions = the shutoff item's notes, photo = its first photo, room name); the AC claim waits for T070b, which shows it on screen
-  - [ ] T070b: HM-Emergency screen (24 sp instructions, full-width photos with pinch-zoom, offline, "Manage shutoffs" at the bottom), reached from More and the Home shutoff count; previews, screenshots, catalog, flow (AC-C44)
+  - [x] T070b: HM-Emergency screen (24 sp instructions, full-width photos with pinch-zoom, offline, "Manage shutoffs" at the bottom), reached from More and the Home shutoff count; previews, screenshots, catalog, flow (AC-C44)
   - [ ] T070c: item "Shutoff" link: pick the shutoff that isolates an item in the item form, "Shutoff: Kitchen sink cold valve" chip on HM-Item opening the shutoff; HM-Room "Shutoffs here" (AC-C45)
 - [ ] R13: Review T066–T070
 - [ ] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)

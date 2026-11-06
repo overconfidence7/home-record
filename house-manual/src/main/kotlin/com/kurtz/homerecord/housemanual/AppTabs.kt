@@ -135,6 +135,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onScanDataPlate = { addItem(scope, container, home.id, nav, scanPlate = true) },
                 onAddShutoff = { addItem(scope, container, home.id, nav, subtypeId = "water_main") }, onOpenItem = { nav.push(ItemDetailKey(it)) },
                 onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
+                onOpenEmergency = { nav.push(EmergencyKey) },
                 onOpenOverlay = { id ->
                     scope.launch { container.overlays.get(id)?.let { openOverlay(nav, it) } }
                 },
@@ -216,6 +217,12 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onAdd = { addItem(scope, container, home.id, nav, subtypeId = "breaker_panel") },
             )
         }
+        entry<EmergencyKey> {
+            com.kurtz.homerecord.housemanual.emergency.EmergencyRoute(
+                container.items, home.id, onBack = nav::pop, onOpen = { nav.push(ItemDetailKey(it)) },
+                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "water_main") },
+            )
+        }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
@@ -251,6 +258,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                         when (event) {
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
+                            MoreEvent.OpenEmergency -> nav.push(EmergencyKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }

@@ -163,4 +163,15 @@ class RegressionSeedTest {
         assertThat(batches.size).isLessThan(scene.mesh.parts.size)
         assertThat(com.kurtz.homerecord.housemodel.scene.TextureBudget.maxSidePx(20)).isEqualTo(512)
     }
+
+    // AC-C44: what qa/flows/house-manual/H13-emergency.yaml asserts: Water before Gas, each main with instructions
+    @Test fun regressionSeedHasWaterAndGasMainsWithInstructions() = runTest {
+        val homeId = RegressionSeed.seed(db, repo, strings)
+        val sections = com.kurtz.homerecord.housemodel.items.ItemRepository(db, strings).observeShutoffs(homeId, emptyMap()).first()
+        assertThat(sections.map { it.group }).containsAtLeast(com.kurtz.homerecord.core.model.ShutoffGroup.WATER, com.kurtz.homerecord.core.model.ShutoffGroup.GAS).inOrder()
+        val water = sections.first().shutoffs.first()
+        assertThat(water.name).isEqualTo("Water main shutoff")
+        assertThat(water.instructions).contains("red handle on the meter side")
+        assertThat(sections.flatMap { it.shutoffs }.first { it.subtypeId == "gas_main" }.instructions).isNotEmpty()
+    }
 }

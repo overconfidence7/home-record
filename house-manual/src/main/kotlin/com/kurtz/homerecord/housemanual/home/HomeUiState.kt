@@ -36,6 +36,8 @@ sealed interface HomeEvent {
     data object AddItem : HomeEvent
     data object ScanDataPlate : HomeEvent
     data object AddShutoff : HomeEvent
+    /** HM-Emergency from the Emergency card (AC-H11). */
+    data object OpenEmergency : HomeEvent
     data class QueryChanged(val query: String) : HomeEvent
     /** [id] is what opens: the record itself, or for a breaker its panel item, with the breaker's [slot]. */
     data class OpenResult(val kind: SearchKind, val id: String, val slot: Int? = null) : HomeEvent

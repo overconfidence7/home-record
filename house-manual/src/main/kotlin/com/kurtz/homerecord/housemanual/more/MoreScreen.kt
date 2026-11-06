@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Contacts
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.PowerOff
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -24,6 +25,8 @@ import com.kurtz.homerecord.housemanual.R
 
 sealed interface MoreEvent {
     data object OpenPro : MoreEvent
+    /** HM-Emergency (AC-C44). */
+    data object OpenEmergency : MoreEvent
     data object OpenContacts : MoreEvent
     /** Breaker panels (AC-C40). */
     data object OpenPanels : MoreEvent
@@ -32,12 +35,13 @@ sealed interface MoreEvent {
     data object OpenImport : MoreEvent
 }
 
-/** HM-More root: Pro, Breaker panels, Contacts, Documents, Import handoff, then the account panel ([account], sign-in or the signed-in summary) filling the rest. */
+/** HM-More root: Pro, Emergency, Breaker panels, Contacts, Documents, Import handoff, then the account panel ([account], sign-in or the signed-in summary) filling the rest. */
 @Composable
 fun MoreScreen(onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier, account: @Composable (Modifier) -> Unit) {
     Scaffold(modifier) { padding ->
         Column(Modifier.padding(padding)) {
             MoreRow(R.string.more_pro, R.string.more_pro_supporting, Icons.Outlined.WorkspacePremium, "hm_more_pro") { onEvent(MoreEvent.OpenPro) }
+            MoreRow(R.string.more_emergency, R.string.more_emergency_supporting, Icons.Outlined.PowerOff, "hm_more_emergency") { onEvent(MoreEvent.OpenEmergency) }
             MoreRow(R.string.more_panels, R.string.more_panels_supporting, Icons.Outlined.ElectricalServices, "hm_more_panels") { onEvent(MoreEvent.OpenPanels) }
             MoreRow(R.string.more_contacts, R.string.more_contacts_supporting, Icons.Outlined.Contacts, "hm_more_contacts") { onEvent(MoreEvent.OpenContacts) }
             MoreRow(R.string.more_documents, R.string.more_documents_supporting, Icons.Outlined.Description, "hm_more_documents") { onEvent(MoreEvent.OpenDocuments) }

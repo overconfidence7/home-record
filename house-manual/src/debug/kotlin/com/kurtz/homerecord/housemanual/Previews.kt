@@ -1648,6 +1648,56 @@ fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panels
 @Composable
 fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }
 
+private val sampleShutoffSections = com.kurtz.homerecord.core.model.ShutoffGroups.sections(
+    listOf(
+        com.kurtz.homerecord.core.model.Shutoff(
+            "s1", "Water main shutoff", "water_main", "Utility room",
+            "Turn the red handle on the meter side a quarter turn so it crosses the pipe. The whole house loses water.", "valve.jpg", 1L,
+        ),
+        com.kurtz.homerecord.core.model.Shutoff("s2", "Kitchen sink cold", "fixture_shutoff", "Kitchen", "Under the sink, left valve. Turn clockwise until it stops.", null, 2L),
+        com.kurtz.homerecord.core.model.Shutoff(
+            "s3", "Gas main shutoff", "gas_main", "Exterior",
+            "Use the wrench on the meter bracket. Turn the tab a quarter turn until it crosses the pipe. Call the gas company to turn it back on.", "gas.jpg", 3L,
+        ),
+        com.kurtz.homerecord.core.model.Shutoff("s4", "Main breaker", "electrical_main", "Utility room", "", null, 4L),
+        com.kurtz.homerecord.core.model.Shutoff("s5", "Furnace switch", "hvac_disconnect", "Utility room", "Red switch plate on the stairway wall. Flip down.", null, 5L),
+    ),
+)
+
+/** A quarter-turn ball valve on a copper line against a basement wall, for the Emergency previews. */
+private val sampleValvePhoto: androidx.compose.ui.graphics.painter.Painter by lazy {
+    val bmp = android.graphics.Bitmap.createBitmap(800, 600, android.graphics.Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(bmp)
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    c.drawColor(android.graphics.Color.rgb(196, 190, 178))
+    paint.color = android.graphics.Color.rgb(184, 115, 51)
+    c.drawRect(0f, 270f, 800f, 330f, paint)
+    paint.color = android.graphics.Color.rgb(170, 160, 120)
+    c.drawRoundRect(330f, 240f, 470f, 360f, 18f, 18f, paint)
+    paint.color = android.graphics.Color.rgb(200, 30, 30)
+    c.drawRoundRect(380f, 120f, 420f, 270f, 14f, 14f, paint)
+    c.drawRoundRect(380f, 120f, 640f, 160f, 14f, 14f, paint)
+    androidx.compose.ui.graphics.painter.BitmapPainter(bmp.asImageBitmap())
+}
+
+@ThemePreviews
+@Composable
+fun EmergencyListPreview() = Frame {
+    com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(
+        com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false, sections = sampleShutoffSections), {}, previewPhoto = sampleValvePhoto,
+    )
+}
+
+@ThemePreviews
+@Composable
+fun EmergencyEmptyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false), {})
+}
+
+@ThemePreviews
+@Composable
+fun EmergencyLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(), {}) }
+
 private fun mappingState(phase: com.kurtz.homerecord.core.mapping.MappingPhase, plugged: Boolean = true, confirmed: Int = 0) =
     com.kurtz.homerecord.housemanual.mapping.MappingUiState(
         loading = false, panelName = "Main panel", phase = phase, plugged = plugged,

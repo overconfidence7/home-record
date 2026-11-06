@@ -64,7 +64,7 @@ object RegressionSeed {
     /** One seeded item: [warrantyDays] from today to the warranty end (negative is expired), null for none. */
     private data class SeedItem(
         val subtype: String, val name: String, val roomId: String, val make: String = "", val model: String = "",
-        val warrantyDays: Long? = null, val registrationRequired: Boolean = false,
+        val warrantyDays: Long? = null, val registrationRequired: Boolean = false, val notes: String = "",
     )
 
     private val items = listOf(
@@ -73,8 +73,8 @@ object RegressionSeed {
         SeedItem("water_softener", "Water softener", "qa-utility"),
         SeedItem("sump_pump", "Sump pump", "qa-utility", "Zoeller", "M53"),
         SeedItem("breaker_panel", "Main panel", "qa-utility", "Square D", "QO140M200"),
-        SeedItem("water_main", "Water main shutoff", "qa-utility"),
-        SeedItem("gas_main", "Gas main shutoff", PseudoRooms.EXTERIOR),
+        SeedItem("water_main", "Water main shutoff", "qa-utility", notes = "Turn the red handle on the meter side a quarter turn so it crosses the pipe."),
+        SeedItem("gas_main", "Gas main shutoff", PseudoRooms.EXTERIOR, notes = "Use the wrench on the meter bracket. Turn the tab a quarter turn until it crosses the pipe."),
         SeedItem("ac_condenser", "AC condenser", PseudoRooms.EXTERIOR, "Trane", "4TTR4036L1000A", warrantyDays = -200),
         SeedItem("roof", "Roof", PseudoRooms.EXTERIOR, "GAF", "Timberline HDZ", warrantyDays = 9000),
         SeedItem("refrigerator", "Refrigerator", "qa-kitchen", "LG", "LRMVS3006S", warrantyDays = 45),
@@ -122,7 +122,7 @@ object RegressionSeed {
         var clock = now
         val itemRepo = ItemRepository(db, strings, now = { clock++ }, today = { today })
         val ids = items.associate { seed ->
-            val draft = ItemDraft(subtypeId = seed.subtype, roomId = seed.roomId, name = seed.name, make = seed.make, model = seed.model)
+            val draft = ItemDraft(subtypeId = seed.subtype, roomId = seed.roomId, name = seed.name, make = seed.make, model = seed.model, notes = seed.notes)
             seed.name to checkNotNull(itemRepo.save(homeId, draft)) { "seed item ${seed.name} did not save" }
         }
         // The thermostat hangs on the living room's north wall at eye height, so Place on plan's On a wall and the 3D view have one
