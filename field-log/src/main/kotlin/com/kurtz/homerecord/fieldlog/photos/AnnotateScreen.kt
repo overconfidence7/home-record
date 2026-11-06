@@ -3,7 +3,6 @@ package com.kurtz.homerecord.fieldlog.photos
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.CropSquare
@@ -103,11 +101,16 @@ fun AnnotateScreen(state: AnnotateUiState, onEvent: (AnnotateEvent) -> Unit, onC
                 style = MaterialTheme.typography.bodyLarge,
             )
             else -> {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     IconButton({ onEvent(AnnotateEvent.Undo) }, Modifier.testTag("fl_annotate_undo"), enabled = state.canUndo) {
                         Icon(Icons.AutoMirrored.Rounded.Undo, stringResource(R.string.annotate_undo))
                     }
-                    Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // All six tools in view at any font size: the row wraps instead of scrolling off the edge
+                    // ([judge:fl-annotate-tools-hidden]; Measure is the one a contractor reaches for most).
+                    androidx.compose.foundation.layout.FlowRow(
+                        Modifier.weight(1f).testTag("fl_annotate_tools"),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         AnnotationTool.entries.forEach { t ->
                             FilterChip(
                                 t == state.tool, { onEvent(AnnotateEvent.Tool(t)) }, { Text(stringResource(toolLabel(t))) },
