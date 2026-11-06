@@ -108,6 +108,24 @@ class ReminderRepositoryTest {
         assertThat(repo.observe("h1").first()).isEmpty()
     }
 
+    @Test @AcceptanceCriterion("AC-C49")
+    fun aWarrantyReminderThatFellDueStaysUntilTheWarrantyEnds() = runTest {
+        repo.syncWarrantyReminders("h1", "i1", "Water heater", LocalDate.parse("2027-03-01"))
+        // Two days after the 60-day reminder fell due, the Reminders tab syncs again: it is still listed as due.
+        day = LocalDate.parse("2027-01-02")
+        repo.syncWarrantyReminders("h1", "i1", "Water heater", LocalDate.parse("2027-03-01"))
+        val rows = repo.observe("h1").first()
+        val sixty = rows.single { it.id == ReminderRepository.warrantyReminderId("i1", 60) }
+        assertThat(sixty.bucket).isEqualTo(ReminderBucket.DUE)
+        assertThat(sixty.dueOn).isEqualTo(LocalDate.parse("2026-12-31"))
+        assertThat(repo.dueNow("h1").map { it.id }).contains(sixty.id)
+
+        // Once the warranty has ended, both go.
+        day = LocalDate.parse("2027-03-02")
+        repo.syncWarrantyReminders("h1", "i1", "Water heater", LocalDate.parse("2027-03-01"))
+        assertThat(repo.observe("h1").first()).isEmpty()
+    }
+
     @Test fun everySeasonalKeyHasItsOwnText() {
         val keys = ClimateZone.entries.flatMap { MaintenanceRule.seasonalTasks(it) }.map { it.key }.toSet()
         assertThat(seasonalTitles.keys).containsAtLeastElementsIn(keys)

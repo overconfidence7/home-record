@@ -448,7 +448,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T075b: HM-Account (More → Account and sync, `hm_more_account`): its own screen with sign-in when signed out, and when signed in the account, the sync chip, what sync does and Sign out; More becomes one scrolling list (AC-H15)
   - [x] T075c: Delete cloud copy on HM-Account: backend removes the home tenant's rows and R2 media for the owner (vitest), the app asks first, then signs out and keeps the local copy (AC-H15)
   - [x] T075d: H17 second-device half: clear data, sign in to the same account, the home and its photos come back; an edit after that syncs (AC-H15)
-- [ ] R14: Review T071–T075
+- [x] R14: Review T071–T075
 - [ ] T076: Sharing: editor/viewer invites by link, HM-Share people list, viewer mode hides edit controls; backend membership on homes (acceptance: AC-H16)
 - [ ] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
 - [ ] T078: House Manual walkthrough pass: run `qa/product-walkthrough.md` House Manual section on the emulator if available, otherwise against screenshots; fix every blocked step (acceptance: AC-H19)

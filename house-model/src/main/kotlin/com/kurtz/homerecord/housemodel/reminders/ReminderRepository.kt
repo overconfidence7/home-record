@@ -139,20 +139,20 @@ class ReminderRepository(
 
     /**
      * Keeps an item's warranty-expiry reminders (60 and 7 days before [endsOn]) in step with its warranty: rows with
-     * stable ids per item and lead time, rewritten when the end date moves and removed when it goes away or is past.
+     * stable ids per item and lead time, rewritten when the end date moves and removed when it goes away or the warranty
+     * has ended. A reminder date already past is not created, but a row already on that date stays (it is due now and
+     * waits for Done; R14: it used to vanish the day after it fell due).
      */
     suspend fun syncWarrantyReminders(homeId: String, itemId: String, itemName: String, endsOn: LocalDate?) {
         val at = now()
-        val wanted = endsOn?.let { end ->
-            MaintenanceRule.WARRANTY_LEAD_DAYS.zip(MaintenanceRule.WARRANTY_LEAD_DAYS.map { end.minusDays(it.toLong()) })
-                .filter { (_, date) -> !date.isBefore(today()) }
-                .toMap()
-        }.orEmpty()
+        val day = today()
+        val title = strings(R.string.reminder_warranty_ends).format(itemName)
         MaintenanceRule.WARRANTY_LEAD_DAYS.forEach { lead ->
             val id = warrantyReminderId(itemId, lead)
             val row = dao.get(id)
-            val date = wanted[lead]
-            val title = strings(R.string.reminder_warranty_ends).format(itemName)
+            val target = endsOn?.takeIf { !it.isBefore(day) }?.minusDays(lead.toLong())
+            val keepsDate = row != null && target != null && row.dueOn == target.toString()
+            val date = target?.takeIf { keepsDate || !it.isBefore(day) }
             when {
                 date == null && row != null -> { dao.softDelete(id, at); onChange("maintenance_task", id) }
                 date != null && (row == null || row.dueOn != date.toString() || row.title != title) -> {
