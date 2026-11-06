@@ -164,7 +164,8 @@ private fun AttentionItem(row: AttentionRow, onEvent: (HomeEvent) -> Unit) {
         headline = row.title,
         supporting = supporting,
         leading = { Icon(if (row.kind == AttentionKind.MISSING_MAKE_MODEL) Icons.Rounded.Inventory2 else Icons.Rounded.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-        onClick = row.itemId?.let { id -> { onEvent(HomeEvent.OpenItem(id)) } },
+        onClick = if (row.kind == AttentionKind.REMINDER_OVERDUE) ({ onEvent(HomeEvent.OpenReminders) })
+            else row.itemId?.let { id -> { onEvent(HomeEvent.OpenItem(id)) } },
         modifier = Modifier.testTag("hm_home_attention_${row.id}"),
     )
 }

@@ -33,6 +33,8 @@ data class SearchResultRow(
 
 sealed interface HomeEvent {
     data class OpenItem(val itemId: String) : HomeEvent
+    /** An overdue reminder row on Needs attention opens the Reminders tab (AC-H2, AC-H12). */
+    data object OpenReminders : HomeEvent
     data object AddItem : HomeEvent
     data object ScanDataPlate : HomeEvent
     data object AddShutoff : HomeEvent

@@ -5,8 +5,12 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
+# AC-H2: Home's Needs attention lists the overdue furnace service; tapping it opens the Reminders tab
 - tapOn:
-    id: "hm_tab_reminders"
+    id: "hm_tab_home"
+- scrollUntilVisible:
+    element: "Reminder overdue since.*"
+- tapOn: "Reminder overdue since.*"
 - extendedWaitUntil:
     visible:
       id: "hm_reminders_section_due"

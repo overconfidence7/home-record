@@ -138,6 +138,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onAddShutoff = { addItem(scope, container, home.id, nav, subtypeId = "water_main") }, onOpenItem = { nav.push(ItemDetailKey(it)) },
                 onOpenRoom = { nav.push(RoomKey(it)) }, onOpenDocument = { nav.push(DocumentViewerKey(it)) }, onOpenContacts = { nav.push(ContactsKey) },
                 onOpenEmergency = { nav.push(EmergencyKey) },
+                onOpenReminders = { container.tabRequests.request("reminders") },
                 onOpenOverlay = { id ->
                     scope.launch { container.overlays.get(id)?.let { openOverlay(nav, it) } }
                 },

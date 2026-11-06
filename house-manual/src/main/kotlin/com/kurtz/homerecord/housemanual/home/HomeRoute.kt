@@ -22,6 +22,8 @@ fun HomeRoute(
     onScanDataPlate: () -> Unit,
     onAddShutoff: () -> Unit,
     onOpenItem: (String) -> Unit,
+    /** Switches to the Reminders tab (an overdue row on Needs attention). */
+    onOpenReminders: () -> Unit = {},
     onOpenRoom: (String) -> Unit,
     onOpenDocument: (String) -> Unit,
     onOpenContacts: () -> Unit,
@@ -43,6 +45,7 @@ fun HomeRoute(
             HomeEvent.AddShutoff -> onAddShutoff()
             HomeEvent.OpenEmergency -> onOpenEmergency()
             is HomeEvent.OpenItem -> onOpenItem(it.itemId)
+            HomeEvent.OpenReminders -> onOpenReminders()
             is HomeEvent.QueryChanged -> vm.onEvent(it)
             is HomeEvent.OpenResult -> when (it.kind) {
                 SearchKind.ITEM -> onOpenItem(it.id)
