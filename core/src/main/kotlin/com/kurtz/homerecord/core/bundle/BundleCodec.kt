@@ -56,11 +56,14 @@ object BundleReader {
     /** Unpacked size cap: a large home with every wall photographed at three stages stays well under it. */
     const val MAX_BYTES = 2L * 1024 * 1024 * 1024
 
+    /** `record.json` is read into memory, so it gets its own cap far below [MAX_BYTES]; a real home's is a few MB. */
+    const val RECORD_MAX_BYTES = 64L * 1024 * 1024
+
     private val SAFE_MEDIA = Regex("[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
     fun isSafeMediaName(name: String): Boolean = SAFE_MEDIA.matches(name) && ".." !in name
 
-    fun read(input: InputStream, mediaDir: File, maxBytes: Long = MAX_BYTES): BundleReadResult {
+    fun read(input: InputStream, mediaDir: File, maxBytes: Long = MAX_BYTES, recordMaxBytes: Long = RECORD_MAX_BYTES): BundleReadResult {
         val root = mediaDir.canonicalFile
         val unpacked = mutableListOf<File>()
         var bundle: HomeBundle? = null
@@ -77,7 +80,7 @@ object BundleReader {
                     when {
                         entry.isDirectory -> if (name != HomeBundle.MEDIA_DIR) return fail(BundleError.UnsafeEntry(name))
                         name == HomeBundle.RECORD_JSON -> {
-                            val bytes = zip.readCapped(maxBytes - total) ?: return fail(BundleError.TooLarge)
+                            val bytes = zip.readCapped(minOf(recordMaxBytes, maxBytes - total)) ?: return fail(BundleError.TooLarge)
                             total += bytes.size
                             when (val parsed = parse(bytes.decodeToString())) {
                                 is BundleReadResult.Ok -> bundle = parsed.bundle

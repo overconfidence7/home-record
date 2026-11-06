@@ -98,4 +98,40 @@ class ImportViewModelTest {
         val vm = ImportViewModel(read = { ImportRead.Ok(read(local = bundle.records)) }, apply = { _, _ -> true })
         assertThat(vm.state.value.nothingNew).isTrue()
     }
+
+    private fun owned(make: () -> ImportViewModel): Pair<androidx.lifecycle.ViewModelStore, ImportViewModel> {
+        val store = androidx.lifecycle.ViewModelStore()
+        val factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T = make() as T
+        }
+        return store to androidx.lifecycle.ViewModelProvider(store, factory)[ImportViewModel::class.java]
+    }
+
+    // r12:import-cache-left: leaving the preview without importing deletes the unpacked read; an import already did.
+    @Test fun leavingWithoutImportingDiscardsTheReadButAnImportDoesNot() {
+        val discarded = mutableListOf<ReadImport>()
+        val r = read()
+        val (store, _) = owned { ImportViewModel(read = { ImportRead.Ok(r) }, apply = { _, _ -> true }, discard = { discarded += it }) }
+        store.clear()
+        assertThat(discarded).containsExactly(r)
+
+        discarded.clear()
+        val (store2, vm2) = owned { ImportViewModel(read = { ImportRead.Ok(r) }, apply = { _, _ -> true }, discard = { discarded += it }) }
+        vm2.onEvent(ImportEvent.Import)
+        assertThat(vm2.state.value.done).isTrue()
+        store2.clear()
+        assertThat(discarded).isEmpty()
+    }
+
+    @Test fun theSweepDeletesReadsADayOldAndKeepsNewerOnes() {
+        val imports = kotlin.io.path.createTempDirectory("imports").toFile()
+        val now = 10L * 24 * 60 * 60 * 1000
+        val old = File(imports, "old").apply { mkdirs(); File(this, "a.jpg").writeText("x"); setLastModified(now - com.kurtz.homerecord.housemanual.importing.ImportFiles.STALE_MILLIS - 1) }
+        val fresh = File(imports, "fresh").apply { mkdirs(); setLastModified(now - 1_000) }
+        com.kurtz.homerecord.housemanual.importing.ImportFiles.sweepStale(imports, now)
+        assertThat(old.exists()).isFalse()
+        assertThat(fresh.exists()).isTrue()
+        imports.deleteRecursively()
+    }
 }

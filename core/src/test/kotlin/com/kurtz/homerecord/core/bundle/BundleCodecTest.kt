@@ -105,6 +105,12 @@ class BundleCodecTest {
         assertThat(dir.listFiles().orEmpty()).isEmpty()
     }
 
+    @Test fun anOversizedRecordStopsAtItsOwnCapBeforeTheBundleCap() {
+        val dir = tmp.newFolder()
+        val result = BundleReader.read(ByteArrayInputStream(zip("record.json" to json(bundle))), dir, recordMaxBytes = 16)
+        assertThat(result).isEqualTo(BundleReadResult.Failed(BundleError.TooLarge))
+    }
+
     @Test fun theWriterRefusesAMediaNameThatClimbsOut() {
         val bad = bundle.copy(media = listOf("../x.jpg"))
         val thrown = runCatching { BundleWriter.write(bad, ByteArrayOutputStream()) { null } }.exceptionOrNull()

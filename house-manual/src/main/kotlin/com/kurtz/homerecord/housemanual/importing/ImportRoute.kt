@@ -15,7 +15,7 @@ fun ImportRoute(files: ImportFiles, uri: Uri, onClose: () -> Unit) {
     val vm = viewModel<ImportViewModel>(
         key = "import:$uri",
         factory = viewModelFactory {
-            initializer { ImportViewModel(read = { files.read(uri) }, apply = files::apply, saved = createSavedStateHandle()) }
+            initializer { ImportViewModel(read = { files.read(uri) }, apply = files::apply, saved = createSavedStateHandle(), discard = files::discard) }
         },
     )
     BackHandler(onBack = onClose)

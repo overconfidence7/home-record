@@ -152,7 +152,7 @@ class AppContainer(app: Application) {
     val documents = DocumentRepository(db, AndroidDocumentFiles(app)) { entity, id -> recordHomeChange(entity, id) }
 
     val media: MediaFiles = AndroidMediaFiles(app)
-    val importFiles = com.kurtz.homerecord.housemanual.importing.ImportFiles(app, db) { entity, id -> recordHomeChange(entity, id) }
+    val importFiles = com.kurtz.homerecord.housemanual.importing.ImportFiles(app, db, { entity, id -> recordHomeChange(entity, id) }, scope)
     /** Claim links from the contractor's handoff email (AC-H17, AC-B40). */
     val handoffClaims: com.kurtz.homerecord.core.bundle.HandoffClaimApi =
         com.kurtz.homerecord.core.bundle.RetrofitHandoffClaimApi.create(BuildConfig.API_BASE_URL, http)

@@ -20,6 +20,8 @@ class ImportViewModel(
     private val read: suspend () -> ImportRead,
     private val apply: suspend (ReadImport, Map<Pair<String, String>, ConflictChoice>) -> Boolean,
     private val saved: SavedStateHandle = SavedStateHandle(),
+    /** Throws away a read that was never imported, when the screen goes. */
+    private val discard: (ReadImport) -> Unit = {},
 ) : ViewModel() {
     private val _state = MutableStateFlow(ImportUiState())
     val state: StateFlow<ImportUiState> = _state.asStateFlow()
@@ -70,6 +72,12 @@ class ImportViewModel(
             val ok = apply(r, choices)
             _state.update { if (ok) it.copy(importing = false, done = true) else it.copy(importing = false, error = ImportError.Failed) }
         }
+    }
+
+    override fun onCleared() {
+        val r = current ?: return
+        if (_state.value.done || _state.value.importing) return
+        discard(r)
     }
 
     companion object {

@@ -12,6 +12,7 @@ import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.sync.RoomRowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
@@ -34,6 +35,8 @@ class ImportFiles(
     private val db: HomeRecordDatabase,
     /** Queues each imported record for sync, like every other House Manual write. */
     onWritten: suspend (type: String, id: String) -> Unit = { _, _ -> },
+    /** The app's scope: a discard runs after the import screen's ViewModel is gone. */
+    private val appScope: kotlinx.coroutines.CoroutineScope? = null,
 ) {
     private val rows = RoomRowStore(db)
     private val importer = HomeBundleImporter(
@@ -41,10 +44,18 @@ class ImportFiles(
     )
 
     suspend fun read(uri: Uri): ImportRead = withContext(Dispatchers.IO) {
-        val dir = File(context.cacheDir, "import/${UUID.randomUUID()}")
+        val imports = File(context.cacheDir, "import")
+        sweepStale(imports, System.currentTimeMillis())
+        val dir = File(imports, UUID.randomUUID().toString())
         val result = runCatching {
             context.contentResolver.openInputStream(uri)?.buffered()?.use { BundleReader.read(it, dir) }
-        }.getOrNull() ?: return@withContext ImportRead.Failed(ImportError.Unreadable)
+        }.getOrNull()
+        // A downloaded claim is unpacked into `dir` now (or unreadable), so its copy in the cache is done with.
+        dropClaimedCopy(uri)
+        if (result == null) {
+            dir.deleteRecursively()
+            return@withContext ImportRead.Failed(ImportError.Unreadable)
+        }
         when (result) {
             is BundleReadResult.Failed -> {
                 dir.deleteRecursively()
@@ -64,9 +75,31 @@ class ImportFiles(
         }
     }
 
+    /** Deletes a read that will not be imported (Back, or the screen gone), so its unpacked media leave the cache. */
+    fun discard(read: ReadImport) {
+        appScope?.launch(Dispatchers.IO) { read.unpacked.deleteRecursively() }
+    }
+
+    private fun dropClaimedCopy(uri: Uri) {
+        if (uri.scheme != "file") return
+        val path = uri.path ?: return
+        val file = File(path).canonicalFile
+        if (file.parentFile == File(context.cacheDir, "handoff").canonicalFile) file.delete()
+    }
+
     suspend fun apply(read: ReadImport, choices: Map<Pair<String, String>, ConflictChoice>): Boolean = withContext(Dispatchers.IO) {
         val ok = runCatching { importer.apply(read.preview, read.unpacked, choices) }.isSuccess
         read.unpacked.deleteRecursively()
         ok
+    }
+
+    companion object {
+        /** A read left behind by process death is swept once it is a day old. */
+        const val STALE_MILLIS = 24L * 60 * 60 * 1000
+
+        /** Deletes unpacked reads in [imports] older than [STALE_MILLIS]; a read still on screen is younger than that. */
+        fun sweepStale(imports: File, now: Long) {
+            imports.listFiles().orEmpty().filter { now - it.lastModified() > STALE_MILLIS }.forEach { it.deleteRecursively() }
+        }
     }
 }
