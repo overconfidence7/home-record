@@ -416,7 +416,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
   - [x] T068a: `MappingStateMachine` `[unit]` and `MappingController` in :core mapping, `PowerMonitor` (sticky battery broadcast) and `MappingAlarm` (looping alarm sound + vibration) behind interfaces, `PanelRepository.confirmLink` marks the picked room/item link Confirmed (the AC claim waits for T068b, which shows it on screen)
   - [x] T068b: HM-Mapping screen from HM-Panel (Start, waiting/armed/alarm states, keep-screen-on, Silence, pick breaker + room/item sheet that calls confirmLink, leave stops it), previews, screenshots, H12 flow step (AC-C42)
-- [ ] T069: Legend PDF per panel (acceptance: AC-C43)
+- [x] T069: Legend PDF per panel (acceptance: AC-C43)
 - [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
 - [ ] R13: Review T066–T070
 - [ ] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)

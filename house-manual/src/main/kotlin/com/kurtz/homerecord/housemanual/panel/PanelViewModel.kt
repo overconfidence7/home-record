@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -42,13 +43,17 @@ import kotlinx.serialization.json.Json
 class PanelViewModel(
     private val repo: PanelRepository,
     private val itemId: String,
-    itemName: Flow<String?>,
-    choices: Flow<FeedChoices> = flowOf(FeedChoices()),
+    private val itemName: Flow<String?>,
+    private val choices: Flow<FeedChoices> = flowOf(FeedChoices()),
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val media: MediaFiles? = null,
     /** Opened from an item's breaker chip (AC-H7): the slot to scroll to and mark for [highlightMillis]. */
     highlightSlot: Int? = null,
     private val highlightMillis: Long = HIGHLIGHT_MILLIS,
+    /** Legend PDF (AC-C43). */
+    private val legendExporter: com.kurtz.homerecord.housemodel.pdf.LegendExporter = com.kurtz.homerecord.housemodel.pdf.LegendExporter { _, _, _, _ -> null },
+    /** Where the legend reads the database and writes the PDF; off the main thread so it never waits on the UI. */
+    private val legendDispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.Default,
 ) : ViewModel() {
     // Shown once: after rotation or process death the panel opens without marking the slot again.
     private val highlight = MutableStateFlow(highlightSlot?.takeUnless { saved[HIGHLIGHT_SHOWN] ?: false })
@@ -68,7 +73,14 @@ class PanelViewModel(
     /** The latest panel, for the editor's slot checks and saves. */
     private var current: PanelState? = null
 
-    private val extras = combine(facts, photo, highlight) { fa, ph, h -> Triple(fa, ph, h) }
+    /** Legend share: the URI for the share sheet, or failed. */
+    private data class LegendUi(val uri: String? = null, val failed: Boolean = false, val busy: Boolean = false)
+
+    private val legend = MutableStateFlow(LegendUi())
+
+    private val extras = combine(facts, photo, highlight, legend) { fa, ph, h, lg -> Extras(fa, ph, h, lg) }
+
+    private data class Extras(val fa: SavedFacts?, val ph: PhotoUi, val h: Int?, val lg: LegendUi)
 
     init {
         if (highlight.value != null) {
@@ -80,7 +92,7 @@ class PanelViewModel(
         }
     }
 
-    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph, h) ->
+    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph, h, lg) ->
         current = p
         when {
             name == null -> PanelUiState(loading = false, missing = true)
@@ -96,6 +108,7 @@ class PanelViewModel(
                 },
                 photoSheet = ph.sheet, photoLaunch = ph.launch, photoFailed = ph.failed,
                 highlightSlot = h,
+                legendUri = lg.uri, legendFailed = lg.failed, legendBusy = lg.busy,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
@@ -135,6 +148,8 @@ class PanelViewModel(
                 viewModelScope.launch { repo.deleteBreaker(id) }
             }
             PanelEvent.Map -> Unit
+            PanelEvent.ShareLegend -> shareLegend()
+            PanelEvent.LegendHandled -> legend.value = LegendUi()
             PanelEvent.EditFacts -> current?.panel?.let { p ->
                 val d = SavedFactsDraft.of(PanelDraft.of(p))
                 setFacts { SavedFacts(d, d) }
@@ -143,6 +158,25 @@ class PanelViewModel(
             PanelEvent.CloseFacts -> setFacts { null }
             PanelEvent.SaveFacts -> saveFacts()
             else -> onPhotoEvent(e)
+        }
+    }
+
+    /**
+     * Reads the panel, its links and the feed names straight from the repository, so the PDF always has the breakers'
+     * latest links even when the screen's state has not caught up yet.
+     */
+    private fun shareLegend() {
+        if (legend.value.busy) return
+        legend.value = LegendUi(busy = true)
+        viewModelScope.launch(legendDispatcher) {
+            val p = repo.observe(itemId).first()
+            val uri = if (p == null) null else {
+                val c = choices.first()
+                val names = (c.rooms + c.items).associate { it.id to it.name }
+                val feeds = p.links.mapValues { (_, links) -> links.mapNotNull { l -> (l.roomId ?: l.itemId)?.let(names::get) }.distinct() }
+                legendExporter.export(itemName.first().orEmpty(), p.panel, p.breakers, feeds)
+            }
+            legend.value = LegendUi(uri = uri, failed = uri == null)
         }
     }
 

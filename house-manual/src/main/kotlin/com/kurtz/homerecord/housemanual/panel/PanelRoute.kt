@@ -18,10 +18,11 @@ import kotlinx.coroutines.flow.map
 
 @Composable
 fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null, onMap: () -> Unit = {}) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val vm = viewModel<PanelViewModel>(
         key = "panel:$itemId:${highlightSlot ?: ""}",
         factory = viewModelFactory {
-            initializer { PanelViewModel(repo, itemId, items.observeItem(itemId).map { it?.name }, repo.observeChoices(homeId), createSavedStateHandle(), media, highlightSlot) }
+            initializer { PanelViewModel(repo, itemId, items.observeItem(itemId).map { it?.name }, repo.observeChoices(homeId), createSavedStateHandle(), media, highlightSlot, legendExporter = com.kurtz.homerecord.housemodel.pdf.PanelLegendExporter(context.applicationContext)) }
         },
     )
     val state = vm.state.collectAsState().value
@@ -32,6 +33,12 @@ fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, 
         vm.onEvent(PanelEvent.PhotoLaunchHandled)
         val target = launch.target
         if (target != null) camera.launch(Uri.parse(target.uri)) else gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+    val shareTitle = androidx.compose.ui.res.stringResource(com.kurtz.homerecord.housemanual.R.string.panel_legend_share_title)
+    LaunchedEffect(state.legendUri) {
+        val uri = state.legendUri ?: return@LaunchedEffect
+        vm.onEvent(PanelEvent.LegendHandled)
+        com.kurtz.homerecord.coreui.platform.Intents.shareUri(context, Uri.parse(uri), "application/pdf", shareTitle)
     }
     PanelScreen(state, onEvent = {
         when (it) {

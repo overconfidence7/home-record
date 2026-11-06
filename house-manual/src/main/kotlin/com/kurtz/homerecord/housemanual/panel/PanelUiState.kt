@@ -32,6 +32,10 @@ data class PanelUiState(
     val photoFailed: Boolean = false,
     /** The slot an item's breaker chip opened the panel at (AC-H7): scrolled into view and marked for 2 s; null after. */
     val highlightSlot: Int? = null,
+    /** Legend PDF ready for the share sheet (AC-C43); the route opens it, then sends LegendHandled. */
+    val legendUri: String? = null,
+    val legendFailed: Boolean = false,
+    val legendBusy: Boolean = false,
 ) {
     fun breaker(id: String): Breaker? = breakers.firstOrNull { it.id == id }
 
@@ -98,6 +102,10 @@ sealed interface PanelEvent {
 
     /** Top bar "Map breakers": opens HM-Mapping (AC-C42). */
     data object Map : PanelEvent
+
+    /** "Share legend": one PDF page with a row per slot (AC-C43). */
+    data object ShareLegend : PanelEvent
+    data object LegendHandled : PanelEvent
     data class ChangeFacts(val draft: PanelDraft) : PanelEvent
     data object SaveFacts : PanelEvent
     data object CloseFacts : PanelEvent

@@ -236,3 +236,16 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_panel_slot_12"
     timeout: 5000
+# T069: Share legend makes the one-page legend PDF and opens the share sheet (AC-C43).
+- scrollUntilVisible:
+    element:
+      id: "hm_panel_legend"
+    direction: UP
+- tapOn:
+    id: "hm_panel_legend"
+- takeScreenshot: H12-legend-share
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_legend"
+    timeout: 5000

@@ -130,8 +130,8 @@ class PanelScreenTest {
         val events = mutableListOf<PanelEvent>()
         show(state(listOf(b("r", listOf(1, 3), "Range"), b("k", listOf(2), "Kitchen counter"), b("a", listOf(5), "Porch lights"), b("g", listOf(5), "Garage door opener", at = 2)))) { events += it }
         rule.onNodeWithTag("hm_panel_hint").assertExists()
-        rule.onNodeWithTag("hm_panel_slot_4").performClick()
-        rule.onNodeWithTag("hm_panel_slot_1").performClick()
+        rule.onNodeWithTag("hm_panel_slot_4").performScrollTo().performClick()
+        rule.onNodeWithTag("hm_panel_slot_1").performScrollTo().performClick()
         rule.onNodeWithTag("hm_panel_slot_2").performScrollTo().performTouchInput { longClick() }
         rule.onNodeWithTag("hm_panel_slot_5_b").performScrollTo().performClick()
         assertThat(events).containsExactly(

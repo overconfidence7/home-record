@@ -132,7 +132,9 @@ class LogSendTest {
         v.onEvent(LogEvent.OpenSend)
         v.settled { it.editor is LogEditor.Send }
         v.onEvent(LogEvent.SendShare)
-        val shared = v.settled { it.sentAt != null }
+        // Also wait for the send to finish: the Sent row can arrive before `sending` clears, and a Send pressed in that
+        // moment is ignored as a double tap.
+        val shared = v.settled { it.sentAt != null && !it.sending }
         assertThat(sender.opened).containsExactly(false)
         assertThat(shared.sentTo).isEmpty()
 

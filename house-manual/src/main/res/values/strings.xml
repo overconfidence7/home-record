@@ -436,6 +436,9 @@
     <string name="panels_add">Add breaker panel</string>
     <!-- HM-Mapping (AC-C42) -->
     <string name="panel_map">Map breakers</string>
+    <string name="panel_legend_share">Share legend</string>
+    <string name="panel_legend_share_title">Share the panel legend</string>
+    <string name="panel_legend_failed">The legend could not be made. Check free storage and try again.</string>
     <string name="mapping_title">Map breakers</string>
     <string name="mapping_how_title">Find which breaker feeds an outlet</string>
     <string name="mapping_step_1">Plug this phone into the outlet you want to map, with the charger on.</string>
