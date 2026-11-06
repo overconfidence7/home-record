@@ -22,8 +22,10 @@ class ImportViewModel(
     private val saved: SavedStateHandle = SavedStateHandle(),
     /** Throws away a read that was never imported, when the screen goes. */
     private val discard: (ReadImport) -> Unit = {},
+    /** Restoring a backup (AC-H14): same plan and import, worded as a restore. */
+    private val restore: Boolean = false,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ImportUiState())
+    private val _state = MutableStateFlow(ImportUiState(restore = restore))
     val state: StateFlow<ImportUiState> = _state.asStateFlow()
     private var current: ReadImport? = null
 
@@ -33,7 +35,7 @@ class ImportViewModel(
 
     private suspend fun load() {
         when (val r = read()) {
-            is ImportRead.Failed -> _state.value = ImportUiState(loading = false, error = r.error)
+            is ImportRead.Failed -> _state.value = ImportUiState(loading = false, error = r.error, restore = restore)
             is ImportRead.Ok -> {
                 current = r.read
                 val picked = saved.get<ArrayList<String>>(KEY_PICKED).orEmpty().toSet()
@@ -42,7 +44,7 @@ class ImportViewModel(
                 val conflicts = plan.conflicts.map {
                     ImportConflict(it.type, it.id, ImportKind.of(it.type), nameOf(it.imported.fields, it.local?.fields), "${it.type}/${it.id}" in picked)
                 }
-                _state.value = ImportUiState(loading = false, homeName = r.read.homeName, counts = counts, conflicts = conflicts)
+                _state.value = ImportUiState(loading = false, homeName = r.read.homeName, counts = counts, conflicts = conflicts, restore = restore)
             }
         }
     }

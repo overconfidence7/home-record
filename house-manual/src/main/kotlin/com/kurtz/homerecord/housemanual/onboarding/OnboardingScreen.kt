@@ -138,6 +138,9 @@ fun OnboardingScreen(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Uni
         TextButton(onClick = { onEvent(OnboardingEvent.Skip) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_onboarding_skip")) {
             Text(stringResource(R.string.skip_for_now))
         }
+        TextButton(onClick = { onEvent(OnboardingEvent.Restore) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_onboarding_restore")) {
+            Text(stringResource(R.string.onboarding_restore))
+        }
     }
     if (pickingType) {
         OptionsSheet(

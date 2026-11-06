@@ -26,4 +26,6 @@ sealed interface OnboardingEvent {
     data class GarageChanged(val value: Boolean) : OnboardingEvent
     data object DrawPlan : OnboardingEvent
     data object Skip : OnboardingEvent
+    /** Restore from a backup instead (AC-C48): the route opens the file picker. */
+    data object Restore : OnboardingEvent
 }

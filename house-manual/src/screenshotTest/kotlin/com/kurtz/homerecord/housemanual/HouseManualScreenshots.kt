@@ -857,3 +857,43 @@ fun ReportFailedScreenshot() = ReportFailedPreview()
 @ThemePreviews
 @Composable
 fun ReportLoadingScreenshot() = ReportLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BackupEmptyScreenshot() = BackupEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BackupMismatchScreenshot() = BackupMismatchPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BackupMadeScreenshot() = BackupMadePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun BackupFailedScreenshot() = BackupFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RestorePassphraseScreenshot() = RestorePassphrasePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RestoreWrongPassphraseScreenshot() = RestoreWrongPassphrasePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RestorePreviewScreenshot() = RestorePreviewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RestoreDoneScreenshot() = RestoreDonePreview()

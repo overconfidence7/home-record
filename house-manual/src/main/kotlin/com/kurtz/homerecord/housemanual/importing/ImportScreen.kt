@@ -51,7 +51,7 @@ import com.kurtz.homerecord.housemanual.R
 @Composable
 fun ImportScreen(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
     ScreenScaffold(
-        title = stringResource(R.string.import_title),
+        title = stringResource(if (state.restore) R.string.restore_title else R.string.import_title),
         subtitle = state.homeName.ifBlank { null },
         onBack = { onEvent(ImportEvent.Back) },
     ) { padding ->
@@ -61,8 +61,8 @@ fun ImportScreen(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
             state.loading -> LoadingState(fill)
             state.done -> EmptyState(
                 icon = Icons.Rounded.TaskAlt,
-                headline = stringResource(R.string.import_done_title),
-                body = stringResource(R.string.import_done_body),
+                headline = stringResource(if (state.restore) R.string.restore_done_title else R.string.import_done_title),
+                body = stringResource(if (state.restore) R.string.restore_done_body else R.string.import_done_body),
                 actionLabel = stringResource(R.string.import_done_action),
                 onAction = { onEvent(ImportEvent.Finish) },
                 modifier = fill.testTag("hm_import_done"),
@@ -82,12 +82,15 @@ fun ImportScreen(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
     }
 }
 
-private fun errorText(error: ImportError): Int = when (error) {
+internal fun errorText(error: ImportError): Int = when (error) {
     ImportError.NewerVersion -> R.string.import_error_newer
     ImportError.NotABundle -> R.string.import_error_not_bundle
     ImportError.TooLarge -> R.string.import_error_too_large
     ImportError.Unreadable -> R.string.import_error_unreadable
     ImportError.Failed -> R.string.import_failed
+    ImportError.WrongPassphrase -> R.string.restore_error_passphrase
+    ImportError.Damaged -> R.string.restore_error_damaged
+    ImportError.NotABackup -> R.string.restore_error_not_backup
 }
 
 @Composable
@@ -95,7 +98,7 @@ private fun ImportContent(state: ImportUiState, onEvent: (ImportEvent) -> Unit, 
     Column(modifier) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                stringResource(R.string.import_intro),
+                stringResource(if (state.restore) R.string.restore_intro else R.string.import_intro),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
@@ -151,7 +154,7 @@ private fun ImportContent(state: ImportUiState, onEvent: (ImportEvent) -> Unit, 
                 enabled = !state.importing && (state.counts.isNotEmpty() || state.conflicts.any { it.useImported }),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("hm_import_confirm"),
             ) {
-                Text(stringResource(if (state.error == ImportError.Failed) R.string.import_retry else R.string.import_confirm))
+                Text(stringResource(if (state.error == ImportError.Failed) R.string.import_retry else if (state.restore) R.string.restore_confirm else R.string.import_confirm))
             }
         }
     }

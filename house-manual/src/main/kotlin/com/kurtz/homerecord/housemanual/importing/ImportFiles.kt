@@ -2,7 +2,10 @@ package com.kurtz.homerecord.housemanual.importing
 
 import android.content.Context
 import android.net.Uri
+import com.kurtz.homerecord.core.bundle.BackupError
+import com.kurtz.homerecord.core.bundle.BackupReadResult
 import com.kurtz.homerecord.core.bundle.BundleError
+import com.kurtz.homerecord.core.bundle.HomeBackup
 import com.kurtz.homerecord.core.bundle.BundleReadResult
 import com.kurtz.homerecord.core.bundle.BundleReader
 import com.kurtz.homerecord.core.bundle.ConflictChoice
@@ -68,6 +71,52 @@ class ImportFiles(
                 )
             }
             is BundleReadResult.Ok -> {
+                val mine = db.homeDao().observeAll().first().firstOrNull()?.id
+                val bundle = mine?.let(result.bundle::retargeted) ?: result.bundle
+                ImportRead.Ok(ReadImport(importer.preview(bundle), dir, ImportViewModel.homeName(result.bundle)))
+            }
+        }
+    }
+
+    /**
+     * Opens a `.hrbackup` (AC-C48) with [passphrase] into `cache/import/` and plans it like a handoff: on a fresh
+     * install the backup's home comes back as it was; with a home on this phone it merges into it (AC-C47).
+     */
+    suspend fun readBackup(uri: Uri, passphrase: CharArray): ImportRead = withContext(Dispatchers.IO) {
+        val imports = File(context.cacheDir, "import")
+        sweepStale(imports, System.currentTimeMillis())
+        val dir = File(imports, UUID.randomUUID().toString())
+        val scratch = File(context.cacheDir, "backup/${UUID.randomUUID()}.zip")
+        val result = try {
+            context.contentResolver.openInputStream(uri)?.buffered()?.use { HomeBackup.read(it, passphrase, scratch, dir) }
+        } catch (_: java.io.IOException) {
+            null
+        } catch (_: SecurityException) {
+            null
+        } finally {
+            passphrase.fill(' ')
+        }
+        when (result) {
+            null -> {
+                dir.deleteRecursively()
+                ImportRead.Failed(ImportError.Unreadable)
+            }
+            is BackupReadResult.Locked -> {
+                dir.deleteRecursively()
+                ImportRead.Failed(
+                    when (result.error) {
+                        BackupError.WrongPassphrase -> ImportError.WrongPassphrase
+                        BackupError.Damaged -> ImportError.Damaged
+                        BackupError.NotABackup -> ImportError.NotABackup
+                        is BackupError.NewerVersion -> ImportError.NewerVersion
+                    },
+                )
+            }
+            is BackupReadResult.Unreadable -> {
+                dir.deleteRecursively()
+                ImportRead.Failed(if (result.error is BundleError.NewerVersion) ImportError.NewerVersion else ImportError.Damaged)
+            }
+            is BackupReadResult.Ok -> {
                 val mine = db.homeDao().observeAll().first().firstOrNull()?.id
                 val bundle = mine?.let(result.bundle::retargeted) ?: result.bundle
                 ImportRead.Ok(ReadImport(importer.preview(bundle), dir, ImportViewModel.homeName(result.bundle)))

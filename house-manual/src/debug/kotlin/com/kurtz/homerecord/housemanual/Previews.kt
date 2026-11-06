@@ -1885,3 +1885,65 @@ fun ReportFailedPreview() = Frame {
 @ThemePreviews
 @Composable
 fun ReportLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.report.ReportScreen(com.kurtz.homerecord.housemanual.report.ReportUiState(), {}) }
+
+private val sampleBackup = com.kurtz.homerecord.housemanual.backup.BackupUiState(homeName = "Maple Street house")
+
+@ThemePreviews
+@Composable
+fun BackupEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.backup.BackupScreen(sampleBackup, {}) }
+
+@ThemePreviews
+@Composable
+fun BackupMismatchPreview() = Frame {
+    com.kurtz.homerecord.housemanual.backup.BackupScreen(
+        sampleBackup.copy(passphrase = "maple-street-1987", confirm = "maple-stret-1987", problem = com.kurtz.homerecord.housemanual.backup.PassphraseProblem.Mismatch), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun BackupMadePreview() = Frame {
+    com.kurtz.homerecord.housemanual.backup.BackupScreen(
+        sampleBackup.copy(passphrase = "maple-street-1987", confirm = "maple-street-1987", made = "Maple-Street-house-backup-2026-11-06.hrbackup"), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun BackupFailedPreview() = Frame {
+    com.kurtz.homerecord.housemanual.backup.BackupScreen(sampleBackup.copy(passphrase = "maple-street-1987", confirm = "maple-street-1987", failed = true), {})
+}
+
+@ThemePreviews
+@Composable
+fun RestorePassphrasePreview() = Frame { com.kurtz.homerecord.housemanual.importing.RestoreScreen(com.kurtz.homerecord.housemanual.importing.RestoreUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun RestoreWrongPassphrasePreview() = Frame {
+    com.kurtz.homerecord.housemanual.importing.RestoreScreen(
+        com.kurtz.homerecord.housemanual.importing.RestoreUiState(passphrase = "maple-street-1978", error = com.kurtz.homerecord.housemanual.importing.ImportError.WrongPassphrase), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun RestorePreviewPreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleRestore, {}) }
+
+private val sampleRestore = com.kurtz.homerecord.housemanual.importing.ImportUiState(
+    loading = false,
+    homeName = "Maple Street house",
+    restore = true,
+    counts = listOf(
+        com.kurtz.homerecord.housemanual.importing.ImportKind.Floors to 3,
+        com.kurtz.homerecord.housemanual.importing.ImportKind.Rooms to 12,
+        com.kurtz.homerecord.housemanual.importing.ImportKind.WallPhotos to 10,
+        com.kurtz.homerecord.housemanual.importing.ImportKind.Overlays to 15,
+        com.kurtz.homerecord.housemanual.importing.ImportKind.Items to 25,
+        com.kurtz.homerecord.housemanual.importing.ImportKind.Documents to 4,
+    ).map { (kind, n) -> com.kurtz.homerecord.housemanual.importing.ImportCount(kind, n) },
+)
+
+@ThemePreviews
+@Composable
+fun RestoreDonePreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleRestore.copy(done = true), {}) }

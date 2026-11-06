@@ -163,6 +163,9 @@ class AppContainer(private val app: Application) {
     )
     val reportFile = com.kurtz.homerecord.housemodel.pdf.HomeReportFile(app, reportSource, legendWords)
 
+    /** Passphrase-locked whole-home backups (AC-C48), written to cache/exports for the share sheet. */
+    val backupFiles = com.kurtz.homerecord.housemanual.backup.BackupFiles(app, db)
+
     /** HM-Reminders (AC-C49, AC-H12). */
     val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 

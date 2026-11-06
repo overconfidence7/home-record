@@ -11,7 +11,18 @@ enum class ImportKind(val type: String) {
 }
 
 /** Why the file could not be imported (docs/voice.md words each one). */
-enum class ImportError { NewerVersion, NotABundle, TooLarge, Unreadable, Failed }
+enum class ImportError {
+    NewerVersion, NotABundle, TooLarge, Unreadable, Failed,
+
+    /** Restore only (AC-C48): the passphrase does not open the backup. */
+    WrongPassphrase,
+
+    /** Restore only: the backup opened but is damaged or cut short. */
+    Damaged,
+
+    /** Restore only: the picked file is not a `.hrbackup`. */
+    NotABackup,
+}
 
 data class ImportCount(val kind: ImportKind, val count: Int)
 
@@ -28,6 +39,8 @@ data class ImportUiState(
     val conflicts: List<ImportConflict> = emptyList(),
     val importing: Boolean = false,
     val done: Boolean = false,
+    /** A backup being restored (AC-H14) rather than a contractor's handoff: the screen words it as a restore. */
+    val restore: Boolean = false,
 ) {
     /** Nothing in the file is new or changed for this phone. */
     val nothingNew: Boolean get() = !loading && error == null && counts.isEmpty() && conflicts.isEmpty()

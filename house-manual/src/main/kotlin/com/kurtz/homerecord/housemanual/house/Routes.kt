@@ -21,12 +21,19 @@ import com.kurtz.homerecord.housemodel.blueprint.LayerStore
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 
 @Composable
-fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawPlan: () -> Unit = {}) {
+fun OnboardingRoute(repo: HomeRepository, modifier: Modifier = Modifier, onDrawPlan: () -> Unit = {}, onRestore: (Uri) -> Unit = {}) {
     val vm = viewModel<OnboardingViewModel>(
         factory = viewModelFactory { initializer { OnboardingViewModel(repo, createSavedStateHandle()) } },
     )
     val state = vm.state.collectAsState().value
     // The ViewModel sets openEditor only when a valid form starts creating the home.
     LaunchedEffect(state.openEditor) { if (state.openEditor) onDrawPlan() }
-    OnboardingScreen(state, vm::onEvent, modifier)
+    val pickBackup = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri -> if (uri != null) onRestore(uri) }
+    OnboardingScreen(
+        state,
+        { if (it == com.kurtz.homerecord.housemanual.onboarding.OnboardingEvent.Restore) pickBackup.launch(com.kurtz.homerecord.housemanual.backup.PICK_TYPES) else vm.onEvent(it) },
+        modifier,
+    )
 }

@@ -45,6 +45,9 @@ import kotlinx.serialization.Serializable
 /** HM-Report: the home report PDF (AC-H13). */
 @Serializable data object ReportKey : NavKey
 
+/** HM-Backup: backup and restore (AC-C48, AC-H14). */
+@Serializable data object BackupKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

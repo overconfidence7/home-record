@@ -73,6 +73,8 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     var importUri by rememberSaveable { mutableStateOf<String?>(null) }
     // A claim link (`homerecord://handoff/<token>`) from the handoff email page; downloads, then opens the preview.
     var claimToken by rememberSaveable { mutableStateOf<String?>(null) }
+    // A `.hrbackup` picked on onboarding or HM-Backup (AC-C48); its passphrase prompt and preview go over everything.
+    var restoreUri by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(incoming) {
         if (incoming != null) {
             val token = com.kurtz.homerecord.core.bundle.HandoffLink.token(incoming.toString())
@@ -94,7 +96,11 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     var openEditor by rememberSaveable { mutableStateOf(false) }
     val pendingImport = importUri
     val pendingClaim = claimToken
+    val pendingRestore = restoreUri
     when {
+        pendingRestore != null -> com.kurtz.homerecord.housemanual.importing.RestoreRoute(
+            container.importFiles, android.net.Uri.parse(pendingRestore), onClose = { restoreUri = null },
+        )
         pendingClaim != null -> com.kurtz.homerecord.housemanual.importing.ClaimRoute(
             container.auth, container.handoffClaims, LocalContext.current.cacheDir, pendingClaim,
             onReady = { file ->
@@ -107,13 +113,19 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
             container.importFiles, android.net.Uri.parse(pendingImport), onClose = { importUri = null },
         )
         !loaded -> Scaffold { LoadingState(Modifier.padding(it)) }
-        current == null -> OnboardingRoute(container.homes, onDrawPlan = { openEditor = true })
-        else -> HouseManualTabs(container, current, openEditor, onImport = { importUri = it.toString() })
+        current == null -> OnboardingRoute(container.homes, onDrawPlan = { openEditor = true }, onRestore = { restoreUri = it.toString() })
+        else -> HouseManualTabs(container, current, openEditor, onImport = { importUri = it.toString() }, onRestore = { restoreUri = it.toString() })
     }
 }
 
 @Composable
-private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEditor: Boolean = false, onImport: (android.net.Uri) -> Unit = {}) {
+private fun HouseManualTabs(
+    container: AppContainer,
+    home: HomeEntity,
+    openEditor: Boolean = false,
+    onImport: (android.net.Uri) -> Unit = {},
+    onRestore: (android.net.Uri) -> Unit = {},
+) {
     val pickHandoff = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
     ) { uri -> if (uri != null) onImport(uri) }
@@ -231,6 +243,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onAdd = { addItem(scope, container, home.id, nav, subtypeId = "water_main") },
             )
         }
+        entry<BackupKey> {
+            com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop)
+        }
         entry<ReportKey> { com.kurtz.homerecord.housemanual.report.ReportRoute(container.reportSource, container.reportFile, home.id, onBack = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
@@ -269,6 +284,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
                             MoreEvent.OpenEmergency -> nav.push(EmergencyKey)
                             MoreEvent.OpenReport -> nav.push(ReportKey)
+                            MoreEvent.OpenBackup -> nav.push(BackupKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Contacts
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ElectricalServices
@@ -36,9 +37,11 @@ sealed interface MoreEvent {
     data object OpenImport : MoreEvent
     /** HM-Report (AC-H13). */
     data object OpenReport : MoreEvent
+    /** HM-Backup (AC-C48). */
+    data object OpenBackup : MoreEvent
 }
 
-/** HM-More root: Pro, Emergency, Breaker panels, Contacts, Documents, Home report, Import handoff, then the account panel ([account], sign-in or the signed-in summary) filling the rest. */
+/** HM-More root: Pro, Emergency, Breaker panels, Contacts, Documents, Home report, Backup and restore, Import handoff, then the account panel ([account], sign-in or the signed-in summary) filling the rest. */
 @Composable
 fun MoreScreen(onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier, account: @Composable (Modifier) -> Unit) {
     Scaffold(modifier) { padding ->
@@ -49,6 +52,7 @@ fun MoreScreen(onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier, acco
             MoreRow(R.string.more_contacts, R.string.more_contacts_supporting, Icons.Outlined.Contacts, "hm_more_contacts") { onEvent(MoreEvent.OpenContacts) }
             MoreRow(R.string.more_documents, R.string.more_documents_supporting, Icons.Outlined.Description, "hm_more_documents") { onEvent(MoreEvent.OpenDocuments) }
             MoreRow(R.string.more_report, R.string.more_report_supporting, Icons.Outlined.PictureAsPdf, "hm_more_report") { onEvent(MoreEvent.OpenReport) }
+            MoreRow(R.string.more_backup, R.string.more_backup_supporting, Icons.Outlined.Backup, "hm_more_backup") { onEvent(MoreEvent.OpenBackup) }
             MoreRow(R.string.more_import, R.string.more_import_supporting, Icons.Outlined.FileOpen, "hm_more_import") { onEvent(MoreEvent.OpenImport) }
             account(Modifier.weight(1f))
         }
