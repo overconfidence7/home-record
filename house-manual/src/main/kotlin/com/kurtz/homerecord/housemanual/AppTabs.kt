@@ -201,6 +201,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onOpenItem = { nav.push(ItemDetailKey(it)) },
                 roomChoices = { container.homes.roomChoices(home.id) },
                 onOpenRoom = { nav.push(RoomKey(it)) },
+                reminders = container.reminders,
             )
         }
         entry<ItemPlaceKey> { key ->

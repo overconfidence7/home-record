@@ -566,6 +566,11 @@ fun ItemDetailLinksScreenshot() = ItemDetailLinksPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemDetailRemindersScreenshot() = ItemDetailRemindersPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun OverlayKindListScreenshot() = OverlayKindListPreview()
 
 @PreviewTest

@@ -55,6 +55,9 @@ class ItemDetailViewModel(
     shutoffs: Flow<List<com.kurtz.homerecord.core.model.Shutoff>> = flowOf(emptyList()),
     /** The rooms for "Move to room", read when the sheet opens. */
     private val moveChoices: suspend () -> List<MoveChoice> = { emptyList() },
+    /** The home's reminders; the page keeps this item's Due now and Upcoming ones (AC-C49). */
+    private val reminderRepo: com.kurtz.homerecord.housemodel.reminders.ReminderRepository? = null,
+    private val today: () -> java.time.LocalDate = java.time.LocalDate::now,
 ) : ViewModel() {
     private val shutoffPicker = MutableStateFlow(saved[SHUTOFF_PICKER] ?: false)
 
@@ -135,7 +138,15 @@ class ItemDetailViewModel(
 
     private val moveUi = MutableStateFlow(MoveUi())
 
-    private val notices = combine(shutoffRefused, moveUi) { r, m -> r to m }
+    private val reminderSnooze = MutableStateFlow<String?>(null)
+
+    private val itemReminders = reminderRepo?.observe(homeId)
+        ?.map { rows -> rows.filter { it.itemId == itemId && it.bucket != com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DONE } }
+        ?: flowOf(emptyList())
+
+    private data class Notices(val refused: Boolean, val move: MoveUi, val reminders: List<com.kurtz.homerecord.housemodel.reminders.ReminderRow>, val snoozeFor: String?)
+
+    private val notices = combine(shutoffRefused, moveUi, itemReminders, reminderSnooze) { r, m, rem, sn -> Notices(r, m, rem, sn) }
 
     init {
         if (saved[MOVE] ?: false) showMove()
@@ -146,6 +157,7 @@ class ItemDetailViewModel(
         val (refused, move) = notice
         s.copy(
             showMove = move.show && s.detail != null, moveChoices = move.choices,
+            reminders = notice.reminders, reminderSnoozeFor = notice.snoozeFor?.takeIf { id -> notice.reminders.any { it.id == id } }, today = today(),
             nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = overlays, feeding = f,
             shutoff = sh.linked, shutoffChoices = sh.choices, showShutoffPicker = sh.picker && s.detail != null,
             shutoffRefused = refused,
@@ -229,6 +241,13 @@ class ItemDetailViewModel(
             }
             ItemDetailEvent.DismissShutoffNotice -> shutoffRefused.value = false
             ItemDetailEvent.ShowMove -> showMove()
+            is ItemDetailEvent.ReminderDone -> viewModelScope.launch { reminderRepo?.done(e.id) }
+            is ItemDetailEvent.ReminderOpenSnooze -> reminderSnooze.value = e.id
+            ItemDetailEvent.ReminderCloseSnooze -> reminderSnooze.value = null
+            is ItemDetailEvent.ReminderSnooze -> viewModelScope.launch {
+                reminderSnooze.value = null
+                reminderRepo?.snooze(e.id, e.length)
+            }
             ItemDetailEvent.HideMove -> hideMove()
             is ItemDetailEvent.MoveTo -> viewModelScope.launch {
                 repo.moveToRoom(itemId, e.roomId)

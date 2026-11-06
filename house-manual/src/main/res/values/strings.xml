@@ -68,6 +68,7 @@
     <string name="item_detail_more">More actions</string>
     <string name="item_detail_duplicate">Duplicate</string>
     <string name="item_detail_move">Move to room</string>
+    <string name="item_detail_reminders">Reminders</string>
     <string name="item_detail_move_title">Move to which room?</string>
     <string name="item_detail_move_here">Here now</string>
     <string name="item_detail_delete">Delete</string>

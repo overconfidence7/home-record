@@ -145,6 +145,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
                 ConsumablesSection(state.consumables, onEvent)
+                ItemRemindersSection(state, onEvent)
                 ServiceSection(state.service, state.contacts, onEvent)
                 DocumentsSection(state, onEvent)
                 ItemLinksSection(state.overlayLinks, onEvent)
@@ -251,6 +252,32 @@ private fun RoomChip(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).heightIn(min = 48.dp)
             .testTag("hm_item_detail_room"),
     )
+}
+
+/**
+ * Reminders (SPEC HM-Item, AC-C49): this item's Due now and Upcoming reminders with Done and Snooze, as on HM-Reminders.
+ * Hidden when the item has none still to do.
+ */
+@Composable
+internal fun ItemRemindersSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
+    if (state.reminders.isEmpty()) return
+    Section(stringResource(R.string.item_detail_reminders), Modifier.testTag("hm_item_detail_reminders")) {
+        state.reminders.forEachIndexed { i, r ->
+            com.kurtz.homerecord.housemanual.reminders.ReminderRowItem(
+                r, "hm_item_detail_reminder", "$i", state.today, state.reminderSnoozeFor == r.id,
+                onEvent = { e ->
+                    when (e) {
+                        com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.Done -> onEvent(ItemDetailEvent.ReminderDone(r.id))
+                        com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.OpenSnooze -> onEvent(ItemDetailEvent.ReminderOpenSnooze(r.id))
+                        com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.CloseSnooze -> onEvent(ItemDetailEvent.ReminderCloseSnooze)
+                        is com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.Snooze -> onEvent(ItemDetailEvent.ReminderSnooze(r.id, e.length))
+                        com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.Open -> Unit
+                    }
+                },
+                openable = false, showItemName = false,
+            )
+        }
+    }
 }
 
 /** Overflow "Move to room": every room of the home, bottom floor first, then Exterior and Whole house (SPEC HM-Item). */

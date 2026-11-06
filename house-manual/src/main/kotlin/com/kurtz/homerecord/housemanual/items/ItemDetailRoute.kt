@@ -55,6 +55,8 @@ fun ItemDetailRoute(
     roomChoices: suspend () -> List<com.kurtz.homerecord.housemodel.RoomChoice> = { emptyList() },
     /** The room chip under the hero opens the item's room (AC-H7). */
     onOpenRoom: (String) -> Unit = {},
+    /** This item's reminders on the page (AC-C49). */
+    reminders: com.kurtz.homerecord.housemodel.reminders.ReminderRepository? = null,
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -73,7 +75,8 @@ fun ItemDetailRoute(
                     moveChoices = {
                         roomChoices().map { MoveChoice(it.id, it.name, it.floorName) } +
                             listOf(PseudoRooms.EXTERIOR, PseudoRooms.WHOLE_HOUSE).map { MoveChoice(it, pseudo.getValue(it)) }
-                    })
+                    },
+                    reminderRepo = reminders)
             }
         },
     )

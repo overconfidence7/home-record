@@ -142,12 +142,43 @@ private fun LazyListScope.section(title: Int, rows: List<ReminderRow>, state: Re
         SectionHeader(stringResource(R.string.reminders_section, stringResource(title), rows.size), Modifier.testTag("hm_reminders_section_$bucket"))
     }
     itemsIndexed(rows, key = { _, r -> r.id }, contentType = { _, _ -> "row" }) { i, r ->
-        ReminderRowItem(r, "${bucket}_$i", state.today, state.snoozeMenuFor == r.id, onEvent, Modifier.animateItem())
+        ReminderRowItem(
+            r, "hm_reminders", "${bucket}_$i", state.today, state.snoozeMenuFor == r.id,
+            onEvent = { e ->
+                onEvent(
+                    when (e) {
+                        ReminderRowEvent.Done -> RemindersEvent.Done(r.id)
+                        ReminderRowEvent.OpenSnooze -> RemindersEvent.OpenSnooze(r.id)
+                        ReminderRowEvent.CloseSnooze -> RemindersEvent.CloseSnooze
+                        is ReminderRowEvent.Snooze -> RemindersEvent.Snooze(r.id, e.length)
+                        ReminderRowEvent.Open -> RemindersEvent.OpenItem(r.itemId.orEmpty())
+                    },
+                )
+            },
+            modifier = Modifier.animateItem(),
+        )
     }
 }
 
+/** What a reminder row's controls ask for; the screen that draws the row maps them to its own events. */
+sealed interface ReminderRowEvent {
+    data object Done : ReminderRowEvent
+    data object OpenSnooze : ReminderRowEvent
+    data object CloseSnooze : ReminderRowEvent
+    data class Snooze(val length: SnoozeLength) : ReminderRowEvent
+    data object Open : ReminderRowEvent
+}
+
+/**
+ * One reminder row with Done and Snooze (AC-C49), shared by HM-Reminders and the item page. Tags are
+ * `<prefix>_row_<tag>`, `<prefix>_done_<tag>`, `<prefix>_snooze_<tag>`, `<prefix>_snooze_week|month`. [openable] false
+ * drops the tap that opens the reminder's item (the item page is already there).
+ */
 @Composable
-private fun ReminderRowItem(row: ReminderRow, tag: String, today: LocalDate, snoozeOpen: Boolean, onEvent: (RemindersEvent) -> Unit, modifier: Modifier = Modifier) {
+fun ReminderRowItem(
+    row: ReminderRow, prefix: String, tag: String, today: LocalDate, snoozeOpen: Boolean, onEvent: (ReminderRowEvent) -> Unit,
+    modifier: Modifier = Modifier, openable: Boolean = true, showItemName: Boolean = true,
+) {
     val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     val due = row.snoozedUntil?.takeIf { it.isAfter(row.dueOn) } ?: row.dueOn
     val whenText = when (row.bucket) {
@@ -158,7 +189,7 @@ private fun ReminderRowItem(row: ReminderRow, tag: String, today: LocalDate, sno
             else stringResource(R.string.reminders_due_on, due.format(formatter))
     }
     val repeat = row.intervalMonths?.let { repeatLabel(it) }
-    val supporting = listOfNotNull(row.itemName, listOfNotNull(whenText, repeat).joinToString(stringResource(R.string.list_separator))).joinToString("\n")
+    val supporting = listOfNotNull(row.itemName?.takeIf { showItemName }, listOfNotNull(whenText, repeat).joinToString(stringResource(R.string.list_separator))).joinToString("\n")
     val icon = when {
         row.bucket == ReminderBucket.DONE -> Icons.Rounded.TaskAlt
         row.bucket == ReminderBucket.DUE -> Icons.Rounded.NotificationsActive
@@ -179,32 +210,32 @@ private fun ReminderRowItem(row: ReminderRow, tag: String, today: LocalDate, sno
         trailing = if (row.bucket == ReminderBucket.DONE) null else {
             {
                 Row {
-                    IconButton(onClick = { onEvent(RemindersEvent.Done(row.id)) }, modifier = Modifier.size(48.dp).testTag("hm_reminders_done_$tag")) {
+                    IconButton(onClick = { onEvent(ReminderRowEvent.Done) }, modifier = Modifier.size(48.dp).testTag("${prefix}_done_$tag")) {
                         Icon(Icons.Rounded.CheckCircle, contentDescription = stringResource(R.string.reminders_mark_done, row.title))
                     }
                     Box {
-                        IconButton(onClick = { onEvent(RemindersEvent.OpenSnooze(row.id)) }, modifier = Modifier.size(48.dp).testTag("hm_reminders_snooze_$tag")) {
+                        IconButton(onClick = { onEvent(ReminderRowEvent.OpenSnooze) }, modifier = Modifier.size(48.dp).testTag("${prefix}_snooze_$tag")) {
                             Icon(Icons.Rounded.Snooze, contentDescription = stringResource(R.string.reminders_snooze_label, row.title))
                         }
-                        DropdownMenu(expanded = snoozeOpen, onDismissRequest = { onEvent(RemindersEvent.CloseSnooze) }) {
+                        DropdownMenu(expanded = snoozeOpen, onDismissRequest = { onEvent(ReminderRowEvent.CloseSnooze) }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.reminders_snooze_week)) },
-                                onClick = { onEvent(RemindersEvent.Snooze(row.id, SnoozeLength.WEEK)) },
-                                modifier = Modifier.testTag("hm_reminders_snooze_week"),
+                                onClick = { onEvent(ReminderRowEvent.Snooze(SnoozeLength.WEEK)) },
+                                modifier = Modifier.testTag("${prefix}_snooze_week"),
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.reminders_snooze_month)) },
-                                onClick = { onEvent(RemindersEvent.Snooze(row.id, SnoozeLength.MONTH)) },
-                                modifier = Modifier.testTag("hm_reminders_snooze_month"),
+                                onClick = { onEvent(ReminderRowEvent.Snooze(SnoozeLength.MONTH)) },
+                                modifier = Modifier.testTag("${prefix}_snooze_month"),
                             )
                         }
                     }
                 }
             }
         },
-        onClick = row.itemId?.let { id -> { onEvent(RemindersEvent.OpenItem(id)) } },
-        onClickLabel = row.itemName?.let { stringResource(R.string.reminders_open_item, it) },
-        modifier = modifier.testTag("hm_reminders_row_$tag"),
+        onClick = row.itemId?.takeIf { openable }?.let { { onEvent(ReminderRowEvent.Open) } },
+        onClickLabel = row.itemName?.takeIf { openable }?.let { stringResource(R.string.reminders_open_item, it) },
+        modifier = modifier.testTag("${prefix}_row_$tag"),
     )
 }
 

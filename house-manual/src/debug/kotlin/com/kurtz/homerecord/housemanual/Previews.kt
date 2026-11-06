@@ -1834,3 +1834,24 @@ fun ReminderFormPreview() = Frame {
 fun ReminderFormErrorsPreview() = Frame {
     com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(), true, {})
 }
+
+private val furnaceReminders = listOf(
+    reminderRow("fr1", "Replace furnace filter", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, "2026-10-28", item = "Basement furnace", interval = 3),
+    reminderRow("fr2", "HVAC service", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2027-09-20", item = "Basement furnace", interval = 12),
+)
+
+/** The furnace page with its reminders; the section sits below Consumables (SPEC HM-Item, AC-C49). */
+@ThemePreviews
+@Composable
+fun ItemDetailRemindersPagePreview() = Frame {
+    ItemDetailScreen(ItemDetailUiState(loading = false, detail = furnaceDetail(false), reminders = furnaceReminders, today = reminderToday), {})
+}
+
+/** The item page's Reminders section on its own: an overdue filter change and next year's service, each with Done and Snooze. */
+@ThemePreviews
+@Composable
+fun ItemDetailRemindersPreview() = Frame {
+    androidx.compose.foundation.layout.Column(Modifier.padding(vertical = 16.dp)) {
+        com.kurtz.homerecord.housemanual.items.ItemRemindersSection(ItemDetailUiState(loading = false, detail = furnaceDetail(false), reminders = furnaceReminders, today = reminderToday)) {}
+    }
+}

@@ -55,6 +55,11 @@ data class ItemDetailUiState(
     val showShutoffPicker: Boolean = false,
     /** The picked shutoff could not be linked (deleted on another phone meanwhile); the section says so (r13). */
     val shutoffRefused: Boolean = false,
+    /** This item's reminders still to do, Due now first (SPEC HM-Item Reminders, AC-C49). */
+    val reminders: List<com.kurtz.homerecord.housemodel.reminders.ReminderRow> = emptyList(),
+    /** The reminder whose Snooze menu is open. */
+    val reminderSnoozeFor: String? = null,
+    val today: java.time.LocalDate = java.time.LocalDate.now(),
     /** Overflow "Move to room": the sheet is open (SPEC HM-Item). */
     val showMove: Boolean = false,
     /** The rooms the item can move to, bottom floor first, then Exterior and Whole house. */
@@ -143,6 +148,10 @@ sealed interface ItemDetailEvent {
     data class OpenShutoff(val id: String) : ItemDetailEvent
     data object ShowShutoffPicker : ItemDetailEvent
     data object ShowMove : ItemDetailEvent
+    data class ReminderDone(val id: String) : ItemDetailEvent
+    data class ReminderOpenSnooze(val id: String) : ItemDetailEvent
+    data object ReminderCloseSnooze : ItemDetailEvent
+    data class ReminderSnooze(val id: String, val length: com.kurtz.homerecord.housemodel.reminders.SnoozeLength) : ItemDetailEvent
     data object HideMove : ItemDetailEvent
     data class MoveTo(val roomId: String) : ItemDetailEvent
     /** The room chip under the hero: opens the item's room (AC-H7); routed, never reaches the ViewModel. */

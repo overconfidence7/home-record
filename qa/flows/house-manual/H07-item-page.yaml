@@ -152,3 +152,27 @@ appId: com.kurtz.homerecord.housemanual
     element:
       id: "hm_item_detail_place"
 - assertVisible: "Not on the plan yet.*"
+# SPEC HM-Item Reminders (AC-C49): the seeded furnace's page lists its overdue yearly service with Done and Snooze
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_search"
+    timeout: 5000
+- tapOn:
+    id: "hm_items_search"
+- eraseText
+- inputText: "59SC5A080"
+- extendedWaitUntil:
+    visible: "Furnace"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Furnace"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_reminders"
+- scrollUntilVisible:
+    element:
+      id: "hm_item_detail_reminder_done_0"
+- assertVisible: "Overdue since.*"
+- takeScreenshot: H07-item-reminders

@@ -98,6 +98,30 @@ class ItemDetailWarrantyTest {
     private suspend fun ItemDetailViewModel.await(until: (com.kurtz.homerecord.housemanual.items.ItemDetailUiState) -> Boolean) =
         kotlinx.coroutines.withContext(Dispatchers.Default) { kotlinx.coroutines.withTimeout(10_000) { state.first(until) } }
 
+    @AcceptanceCriterion("AC-C49")
+    @Test fun itemPageListsThisItemsRemindersAndDoneMovesTheNextDate() = runTest {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, context.resources::getString, today = { LocalDate.of(2026, 10, 24) })
+        val id = heater()
+        val other = items.save("h1", ItemDraft(subtypeId = "furnace", roomId = PseudoRooms.WHOLE_HOUSE, name = "Furnace")).orEmpty()
+        val vm = ItemDetailViewModel(items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", SavedStateHandle(), reminderRepo = reminders, today = { LocalDate.of(2026, 10, 24) }).also {
+            vms += it
+            it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        }
+        val rows = vm.await { it.reminders.isNotEmpty() }.reminders
+        assertThat(rows.map { it.itemId }.toSet()).containsExactly(id)
+        assertThat(db.maintenanceTaskDao().listFor("h1").any { it.itemId == other }).isTrue()
+        val first = rows.first()
+        vm.onEvent(ItemDetailEvent.ReminderOpenSnooze(first.id))
+        assertThat(vm.await { it.reminderSnoozeFor != null }.reminderSnoozeFor).isEqualTo(first.id)
+        vm.onEvent(ItemDetailEvent.ReminderSnooze(first.id, com.kurtz.homerecord.housemodel.reminders.SnoozeLength.WEEK))
+        val snoozed = vm.await { s -> s.reminderSnoozeFor == null && s.reminders.firstOrNull { it.id == first.id }?.snoozedUntil != null }
+        assertThat(snoozed.reminders.first { it.id == first.id }.snoozedUntil).isEqualTo(LocalDate.of(2026, 10, 31))
+        vm.onEvent(ItemDetailEvent.ReminderDone(first.id))
+        val after = vm.await { s -> s.reminders.firstOrNull { it.id == first.id }?.let { it.lastDoneOn != null } ?: true }
+        after.reminders.firstOrNull { it.id == first.id }?.let { assertThat(it.dueOn).isGreaterThan(first.dueOn) }
+    }
+
     @AcceptanceCriterion("AC-H7")
     @Test fun moveToRoomListsRoomsMovesTheItemAndSurvivesProcessDeath() = runTest {
         val id = heater()
