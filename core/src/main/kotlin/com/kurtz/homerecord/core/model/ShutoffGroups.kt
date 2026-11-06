@@ -14,6 +14,9 @@ data class Shutoff(
     val createdAt: Long,
 )
 
+/** The shutoff linked to an item (AC-C45): what the item page needs to name it and open it. */
+data class LinkedShutoff(val itemId: String, val name: String)
+
 data class ShutoffSection(val group: ShutoffGroup, val shutoffs: List<Shutoff>)
 
 /**

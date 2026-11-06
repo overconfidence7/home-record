@@ -50,7 +50,7 @@ class ItemDetailViewModel(
     /** The breakers that feed this item (AC-C41). */
     feeding: Flow<List<FeedingBreaker>> = flowOf(emptyList()),
     /** The shutoff that isolates this item (AC-C45). */
-    shutoff: Flow<com.kurtz.homerecord.core.data.ItemEntity?> = flowOf(null),
+    shutoff: Flow<com.kurtz.homerecord.core.model.LinkedShutoff?> = flowOf(null),
     /** The home's shutoffs, in Emergency order, for the picker. */
     shutoffs: Flow<List<com.kurtz.homerecord.core.model.Shutoff>> = flowOf(emptyList()),
     /** The rooms for "Move to room", read when the sheet opens. */
@@ -65,7 +65,7 @@ class ItemDetailViewModel(
 
     private val shutoffUi = combine(shutoff, shutoffs, shutoffPicker) { linked, all, picker ->
         val choices = all.filter { it.itemId != itemId }.map { ShutoffChoice(it.itemId, it.name, it.roomName) }
-        ShutoffUi(linked?.let { l -> choices.firstOrNull { it.id == l.id } ?: ShutoffChoice(l.id, l.name) }, choices, picker)
+        ShutoffUi(linked?.let { l -> choices.firstOrNull { it.id == l.itemId } ?: ShutoffChoice(l.itemId, l.name) }, choices, picker)
     }
 
     private val links = combine(overlayLinks, feeding, shutoffUi) { o, f, s -> Triple(o, f, s) }

@@ -281,7 +281,7 @@ class ItemRepositoryTest {
 
         assertThat(repo.observeShutoffFor("dw").first()).isNull()
         assertThat(repo.setShutoff("dw", "valve")).isTrue()
-        assertThat(checkNotNull(repo.observeShutoffFor("dw").first()).name).isEqualTo("Kitchen sink cold valve")
+        assertThat(repo.observeShutoffFor("dw").first()).isEqualTo(com.kurtz.homerecord.core.model.LinkedShutoff("valve", "Kitchen sink cold valve"))
         assertThat(changes).containsExactly("item/dw")
 
         assertThat(repo.setShutoff("dw", "fridge")).isFalse() // not a shutoff

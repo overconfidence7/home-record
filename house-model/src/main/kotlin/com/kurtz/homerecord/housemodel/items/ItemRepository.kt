@@ -253,9 +253,11 @@ class ItemRepository(
 
     /** The shutoff that isolates item [itemId] (AC-C45); null when none is linked or that shutoff was deleted. */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun observeShutoffFor(itemId: String): Flow<ItemEntity?> =
+    fun observeShutoffFor(itemId: String): Flow<com.kurtz.homerecord.core.model.LinkedShutoff?> =
         db.itemDao().observeOne(itemId).map { it?.shutoffItemId }.distinctUntilChanged()
             .flatMapLatest { sid -> sid?.let { db.itemDao().observeOne(it) } ?: flowOf(null) }
+            .map { row -> row?.let { com.kurtz.homerecord.core.model.LinkedShutoff(it.id, it.name) } }
+            .distinctUntilChanged()
 
     /**
      * Links item [itemId] to the shutoff that isolates it (AC-C45), or clears the link when [shutoffId] is null. Only a
