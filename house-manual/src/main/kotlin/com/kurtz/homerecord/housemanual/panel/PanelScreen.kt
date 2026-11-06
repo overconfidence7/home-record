@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.PowerOff
 import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
@@ -75,6 +76,11 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
         onBack = { onEvent(PanelEvent.Back) },
         actions = {
             if (panel != null && !state.loading) {
+                if (state.breakers.isNotEmpty()) {
+                    IconButton(onClick = { onEvent(PanelEvent.Map) }, modifier = Modifier.testTag("hm_panel_map")) {
+                        Icon(Icons.Rounded.PowerOff, contentDescription = stringResource(R.string.panel_map))
+                    }
+                }
                 IconButton(onClick = { onEvent(PanelEvent.EditFacts) }, modifier = Modifier.testTag("hm_panel_edit")) {
                     Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.panel_edit))
                 }

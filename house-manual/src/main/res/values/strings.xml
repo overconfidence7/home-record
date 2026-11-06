@@ -434,4 +434,38 @@
     <string name="panels_empty_title">No breaker panel yet</string>
     <string name="panels_empty_body">Add your panel as an item, then label its breakers slot by slot.</string>
     <string name="panels_add">Add breaker panel</string>
+    <!-- HM-Mapping (AC-C42) -->
+    <string name="panel_map">Map breakers</string>
+    <string name="mapping_title">Map breakers</string>
+    <string name="mapping_how_title">Find which breaker feeds an outlet</string>
+    <string name="mapping_step_1">Plug this phone into the outlet you want to map, with the charger on.</string>
+    <string name="mapping_step_2">Tap Start, then go to the panel and turn breakers off one at a time.</string>
+    <string name="mapping_step_3">When the phone loses power it sounds an alarm. Come back, silence it and pick the breaker you just turned off.</string>
+    <string name="mapping_plugged">The phone is charging.</string>
+    <string name="mapping_unplugged">The phone is not charging yet.</string>
+    <string name="mapping_no_breakers">Add breakers to this panel first, so there is one to pick.</string>
+    <string name="mapping_start">Start</string>
+    <string name="mapping_stop">Stop</string>
+    <string name="mapping_waiting_title">Plug the phone in</string>
+    <string name="mapping_waiting_body">Plug this phone into the outlet you want to map. It starts listening once it is charging.</string>
+    <string name="mapping_armed_title">Listening for a power drop</string>
+    <string name="mapping_armed_body">Turn off breakers one at a time at the panel. Keep this screen open; the alarm stops if you leave it.</string>
+    <string name="mapping_alarm_title">Power lost</string>
+    <string name="mapping_alarm_body">The breaker you just turned off feeds this outlet. Turn it back on, then silence the alarm.</string>
+    <string name="mapping_silence">Silence</string>
+    <string name="mapping_stopped_title">Mapping stopped</string>
+    <string name="mapping_stopped_body">Mapping stops when you leave this screen, so the alarm never sounds in the background.</string>
+    <string name="mapping_resume">Map again</string>
+    <string name="mapping_pick_breaker">Which breaker did you turn off?</string>
+    <string name="mapping_pick_feeds">What does this outlet feed?</string>
+    <string name="mapping_rooms">Room</string>
+    <string name="mapping_items">Item</string>
+    <string name="mapping_save">Save as confirmed</string>
+    <string name="mapping_skip">Skip this one</string>
+    <string name="mapping_breaker_number">Breaker %1$d</string>
+    <string name="mapping_breaker_named">%1$s · %2$s</string>
+    <plurals name="mapping_confirmed_count">
+        <item quantity="one">%1$d link confirmed this time.</item>
+        <item quantity="other">%1$d links confirmed this time.</item>
+    </plurals>
 </resources>

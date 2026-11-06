@@ -81,4 +81,23 @@ class MappingControllerTest {
         assertThat(alarm.starts).isEqualTo(0)
         assertThat(c.state.value.keepScreenOn).isFalse()
     }
+
+    @Test fun resumeAfterLeavingStartsFreshAndUnarmed() = runTest(UnconfinedTestDispatcher()) {
+        val power = FakePower(true)
+        val alarm = FakeAlarm()
+        val c = MappingController(backgroundScope, power, alarm, { clock })
+        c.attach()
+        c.start()
+        c.leave()
+        c.resume()
+        assertThat(c.state.value.phase).isEqualTo(MappingPhase.IDLE)
+        clock = 10_000
+        power.flow.value = false
+        assertThat(alarm.starts).isEqualTo(0)
+        power.flow.value = true
+        c.start()
+        clock = 20_000
+        power.flow.value = false
+        assertThat(alarm.playing).isTrue()
+    }
 }

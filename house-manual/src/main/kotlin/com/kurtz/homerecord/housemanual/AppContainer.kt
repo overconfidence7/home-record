@@ -133,6 +133,8 @@ class AppContainer(app: Application) {
     )
 
     /** Breaker panels and their breakers (AC-C40). */
+    val power: com.kurtz.homerecord.core.mapping.PowerMonitor = com.kurtz.homerecord.core.mapping.BatteryPowerMonitor(app)
+    val mappingAlarm: com.kurtz.homerecord.core.mapping.MappingAlarm = com.kurtz.homerecord.core.mapping.SystemMappingAlarm(app)
     val panels = com.kurtz.homerecord.housemodel.panel.PanelRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
 
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }

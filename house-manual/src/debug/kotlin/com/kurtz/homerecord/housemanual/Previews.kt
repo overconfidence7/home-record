@@ -1647,3 +1647,32 @@ fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panels
 @ThemePreviews
 @Composable
 fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }
+
+private fun mappingState(phase: com.kurtz.homerecord.core.mapping.MappingPhase, plugged: Boolean = true, confirmed: Int = 0) =
+    com.kurtz.homerecord.housemanual.mapping.MappingUiState(
+        loading = false, panelName = "Main panel", phase = phase, plugged = plugged,
+        breakers = sampleBreakers.sortedBy { it.number }.map { com.kurtz.homerecord.housemanual.mapping.MappingBreaker(it.id, it.number, it.label, it.amps) },
+        rooms = sampleFeedRooms, items = sampleFeedItems, confirmed = confirmed,
+    )
+
+@ThemePreviews
+@Composable
+fun MappingIdlePreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.IDLE, plugged = false), {}) }
+
+@ThemePreviews
+@Composable
+fun MappingArmedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.ARMED, confirmed = 2), {}) }
+
+@ThemePreviews
+@Composable
+fun MappingAlarmPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.ALARM), {}) }
+
+@ThemePreviews
+@Composable
+fun MappingPickPreview() = Frame {
+    com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.PICKING).copy(breakerId = "b3", roomId = "r2"), {})
+}
+
+@ThemePreviews
+@Composable
+fun MappingStoppedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.STOPPED, confirmed = 3), {}) }

@@ -17,7 +17,7 @@ import com.kurtz.homerecord.housemodel.panel.PanelRepository
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null) {
+fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null, onMap: () -> Unit = {}) {
     val vm = viewModel<PanelViewModel>(
         key = "panel:$itemId:${highlightSlot ?: ""}",
         factory = viewModelFactory {
@@ -36,6 +36,7 @@ fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, 
     PanelScreen(state, onEvent = {
         when (it) {
             PanelEvent.Back -> onBack()
+            PanelEvent.Map -> onMap()
             else -> vm.onEvent(it)
         }
     })

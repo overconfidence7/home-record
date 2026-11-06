@@ -208,7 +208,8 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             )
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
-        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot) }
+        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot, onMap = { nav.push(MappingKey(key.itemId)) }) }
+        entry<MappingKey> { key -> com.kurtz.homerecord.housemanual.mapping.MappingRoute(container.panels, container.items, container.power, container.mappingAlarm, home.id, key.itemId, onBack = nav::pop) }
         entry<PanelsKey> {
             com.kurtz.homerecord.housemanual.panel.PanelsRoute(
                 container.items, home.id, onBack = nav::pop, onOpen = { nav.push(PanelKey(it)) },

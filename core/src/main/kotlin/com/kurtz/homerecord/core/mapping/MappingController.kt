@@ -45,6 +45,13 @@ class MappingController(
         watch = null
     }
 
+    /** Back on the screen after [leave]: a fresh session at Start (nothing armed), watching the charger again. */
+    fun resume() {
+        if (_state.value.phase != MappingPhase.STOPPED) return
+        _state.value = MappingState(plugged = _state.value.plugged)
+        attach()
+    }
+
     private fun send(event: MappingEvent) {
         val next = machine.reduce(_state.value, event)
         _state.value = next

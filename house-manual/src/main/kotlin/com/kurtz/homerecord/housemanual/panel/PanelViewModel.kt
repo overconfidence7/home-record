@@ -134,6 +134,7 @@ class PanelViewModel(
                 setForm { null }
                 viewModelScope.launch { repo.deleteBreaker(id) }
             }
+            PanelEvent.Map -> Unit
             PanelEvent.EditFacts -> current?.panel?.let { p ->
                 val d = SavedFactsDraft.of(PanelDraft.of(p))
                 setFacts { SavedFacts(d, d) }

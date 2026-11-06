@@ -207,3 +207,32 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 10000
 - assertVisible: "Main panel"
 - takeScreenshot: H12-search-panel-highlight
+# T068b: Map breakers opens mapping mode (AC-C42); Start arms it while charging (the emulator reports AC power) or
+# waits for power; Stop and Back leave it with nothing sounding. Cutting the power needs `adb shell dumpsys battery unplug`,
+# which the device suite can run around this flow; the alarm, pick and Confirmed link are covered by MappingViewModelTest.
+- tapOn:
+    id: "hm_panel_map"
+- extendedWaitUntil:
+    visible:
+      id: "hm_mapping_start"
+    timeout: 10000
+- assertVisible: "Find which breaker feeds an outlet"
+- takeScreenshot: H12-mapping-start
+- tapOn:
+    id: "hm_mapping_start"
+- extendedWaitUntil:
+    visible:
+      id: "hm_mapping_stop"
+    timeout: 5000
+- takeScreenshot: H12-mapping-armed
+- tapOn:
+    id: "hm_mapping_stop"
+- extendedWaitUntil:
+    visible:
+      id: "hm_mapping_start"
+    timeout: 5000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_panel_slot_12"
+    timeout: 5000

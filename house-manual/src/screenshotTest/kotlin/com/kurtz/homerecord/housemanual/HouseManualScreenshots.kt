@@ -742,3 +742,28 @@ fun PanelFactsLockedScreenshot() = PanelFactsLockedPreview()
 @ThemePreviews
 @Composable
 fun PanelPhotoSheetScreenshot() = PanelPhotoSheetPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MappingIdleScreenshot() = MappingIdlePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MappingArmedScreenshot() = MappingArmedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MappingAlarmScreenshot() = MappingAlarmPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MappingPickScreenshot() = MappingPickPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MappingStoppedScreenshot() = MappingStoppedPreview()

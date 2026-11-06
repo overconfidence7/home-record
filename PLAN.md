@@ -413,9 +413,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T067b2: room page "Breakers feeding this room" with Confirmed/Likely/Unknown dots, breaker form "feeds" list, search hit on a breaker highlights its slot (AC-C41)
       - [x] T067b2a: House Manual room page "Breakers feeding this room": a row per breaker (number, label, panel, amps, confidence word) with a filled/half/ring dot; a row opens the panel at that slot (AC-C41, AC-H7)
       - [x] T067b2b: breaker form "feeds" list and Home search hit on a breaker opening its panel with the slot highlighted (AC-C41)
-- [ ] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
+- [x] T068: Mapping mode: `MappingStateMachine` `[unit]`, charging monitor, alarm, confirm flow, keep-screen-on (acceptance: AC-C42)
   - [x] T068a: `MappingStateMachine` `[unit]` and `MappingController` in :core mapping, `PowerMonitor` (sticky battery broadcast) and `MappingAlarm` (looping alarm sound + vibration) behind interfaces, `PanelRepository.confirmLink` marks the picked room/item link Confirmed (the AC claim waits for T068b, which shows it on screen)
-  - [ ] T068b: HM-Mapping screen from HM-Panel (Start, waiting/armed/alarm states, keep-screen-on, Silence, pick breaker + room/item sheet that calls confirmLink, leave stops it), previews, screenshots, H12 flow step (AC-C42)
+  - [x] T068b: HM-Mapping screen from HM-Panel (Start, waiting/armed/alarm states, keep-screen-on, Silence, pick breaker + room/item sheet that calls confirmLink, leave stops it), previews, screenshots, H12 flow step (AC-C42)
 - [ ] T069: Legend PDF per panel (acceptance: AC-C43)
 - [ ] T070: Shutoffs and Emergency: shutoff items with instructions/photo, HM-Emergency large type grouped with mains first, item "Shutoff" link chip (acceptance: AC-C44, AC-C45)
 - [ ] R13: Review T066–T070

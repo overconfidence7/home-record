@@ -95,6 +95,9 @@ sealed interface PanelEvent {
     data object ConfirmDeleteBreaker : PanelEvent
     data object CancelDeleteBreaker : PanelEvent
     data object EditFacts : PanelEvent
+
+    /** Top bar "Map breakers": opens HM-Mapping (AC-C42). */
+    data object Map : PanelEvent
     data class ChangeFacts(val draft: PanelDraft) : PanelEvent
     data object SaveFacts : PanelEvent
     data object CloseFacts : PanelEvent
