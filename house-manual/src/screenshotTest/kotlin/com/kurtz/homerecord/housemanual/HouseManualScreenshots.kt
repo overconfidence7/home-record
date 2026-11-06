@@ -802,3 +802,28 @@ fun ItemShutoffPickerScreenshot() = ItemShutoffPickerPreview()
 @ThemePreviews
 @Composable
 fun RoomShutoffsScreenshot() = RoomShutoffsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersListScreenshot() = RemindersListPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersEmptyScreenshot() = RemindersEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersLoadingScreenshot() = RemindersLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReminderFormScreenshot() = ReminderFormPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReminderFormErrorsScreenshot() = ReminderFormErrorsPreview()

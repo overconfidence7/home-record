@@ -293,8 +293,39 @@
     <string name="item_detail_where_no_room">No room</string>
     <string name="item_detail_where_place">Place on plan</string>
     <string name="item_detail_where_move">Move on plan</string>
+    <!-- HM-Reminders (T072b, AC-H12) -->
     <string name="reminders_empty_title">No reminders yet</string>
     <string name="reminders_empty_body">Filter changes, service visits and warranty dates for your items will show here.</string>
+    <string name="reminders_empty_body_zone">Pick your climate zone above for seasonal tasks. Filter changes and warranty dates for your items show up here too.</string>
+    <string name="reminders_add">Add reminder</string>
+    <string name="reminders_zone_title">Climate zone</string>
+    <string name="reminders_zone_hint">Pick yours and House Manual adds the seasonal jobs for your area.</string>
+    <string name="reminders_zone_picked">Seasonal jobs follow this zone. Pick another to swap them.</string>
+    <string name="reminders_due">Due now</string>
+    <string name="reminders_upcoming">Upcoming</string>
+    <string name="reminders_done">Done</string>
+    <!-- %1$s section name, %2$d rows in it -->
+    <string name="reminders_section">%1$s (%2$d)</string>
+    <string name="reminders_due_on">Due %1$s</string>
+    <string name="reminders_overdue_since">Overdue since %1$s</string>
+    <string name="reminders_snoozed_until">Snoozed until %1$s</string>
+    <string name="reminders_done_on">Done %1$s</string>
+    <string name="reminders_separator">" · "</string>
+    <string name="reminders_repeat_once">Once</string>
+    <string name="reminders_repeat_month">Every month</string>
+    <string name="reminders_repeat_months">Every %1$d months</string>
+    <string name="reminders_repeat_year">Every year</string>
+    <string name="reminders_mark_done">Mark %1$s done</string>
+    <string name="reminders_snooze_label">Snooze %1$s</string>
+    <string name="reminders_snooze_week">Snooze a week</string>
+    <string name="reminders_snooze_month">Snooze a month</string>
+    <string name="reminders_open_item">open %1$s</string>
+    <string name="reminders_form_title">Add reminder</string>
+    <string name="reminders_form_what">What to do</string>
+    <string name="reminders_form_what_helper">For example, Reseal the deck.</string>
+    <string name="reminders_form_due">Due</string>
+    <string name="reminders_form_due_error">Pick the day it\'s due.</string>
+    <string name="reminders_form_repeat">Repeat</string>
     <!-- HM-Import (T063d2, AC-H17) -->
     <string name="claim_title">Home record</string>
     <string name="claim_sign_in_intro">Sign in to add this home record to House Manual. The link works for one account, so use the one you\'ll keep.</string>

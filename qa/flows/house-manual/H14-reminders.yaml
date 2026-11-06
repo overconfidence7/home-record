@@ -1,0 +1,43 @@
+# Walkthrough H14 (T072b): the Reminders tab (AC-H12). Starts from the regression seed, whose items seeded their
+# default reminders on save and whose furnace reminders are 12 days overdue. Snooze puts a due reminder off a week;
+# Done moves one under Done with its next date a full interval out; picking a climate zone seeds its seasonal tasks.
+# The 08:00 notification deep link arrives with T072c.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_reminders"
+- extendedWaitUntil:
+    visible:
+      id: "hm_reminders_section_due"
+    timeout: 10000
+- assertVisible: "Overdue since.*"
+- takeScreenshot: H14-reminders
+# Snooze a week: the overdue reminder moves to Upcoming, "Snoozed until …"
+- tapOn:
+    id: "hm_reminders_snooze_due_0"
+- tapOn:
+    id: "hm_reminders_snooze_week"
+- scrollUntilVisible:
+    element: "Snoozed until.*"
+# AC-H12: Done rolls a reminder forward; it shows under Done
+- scrollUntilVisible:
+    element:
+      id: "hm_reminders_done_upcoming_0"
+    direction: UP
+- tapOn:
+    id: "hm_reminders_done_upcoming_0"
+- scrollUntilVisible:
+    element:
+      id: "hm_reminders_section_done"
+- takeScreenshot: H14-reminders-done
+# AC-H12: picking a zone seeds its seasonal tasks
+- scrollUntilVisible:
+    element:
+      id: "hm_reminders_zone_cold"
+    direction: UP
+- tapOn:
+    id: "hm_reminders_zone_cold"
+- scrollUntilVisible:
+    element: "Shut off and drain outdoor faucets"
+- takeScreenshot: H14-reminders-zone

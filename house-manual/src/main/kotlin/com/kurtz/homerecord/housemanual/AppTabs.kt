@@ -118,7 +118,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
     ) { uri -> if (uri != null) onImport(uri) }
     val tabs = tabDefs.map {
-        AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; else -> PlaceholderKey(it.id) })
+        AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; "reminders" -> RemindersKey; else -> PlaceholderKey(it.id) })
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     val scope = rememberCoroutineScope()
@@ -183,6 +183,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 overlays = container.overlays, media = container.media, overlayId = key.overlayId,
             )
         }
+        entry<RemindersKey> { com.kurtz.homerecord.housemanual.reminders.RemindersRoute(container.reminders, home.id, onOpenItem = { nav.push(ItemDetailKey(it)) }) }
         entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(
@@ -280,15 +281,6 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                         )
                     }
                 }
-            } else if (key.depth == 0) {
-                // Reminders arrive with T072; until then the tab says what it will hold, with no demo navigation.
-                com.kurtz.homerecord.coreui.components.EmptyState(
-                    icon = tabDefs.firstOrNull { it.id == key.title }?.icon ?: Icons.Outlined.Notifications,
-                    headline = stringResource(R.string.reminders_empty_title),
-                    body = stringResource(R.string.reminders_empty_body),
-                    actionLabel = null, onAction = {},
-                    modifier = Modifier.fillMaxSize().testTag("hm_${key.title}_empty"),
-                )
             } else {
                 PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }

@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class RoomWallKey(val roomId: String, val wallId: String, val stage: String, val overlayId: String? = null) : NavKey
 
 @Serializable data object ItemsKey : NavKey
+@Serializable data object RemindersKey : NavKey
 
 @Serializable data class ItemDetailKey(val itemId: String) : NavKey
 /** Place on plan for one item (AC-C30 position). */

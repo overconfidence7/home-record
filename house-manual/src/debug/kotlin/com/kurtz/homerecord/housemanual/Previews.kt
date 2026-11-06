@@ -1761,3 +1761,58 @@ fun MappingStoppedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.M
 @ThemePreviews
 @Composable
 fun PanelLegendFailedPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers).copy(legendFailed = true), {}) }
+
+private val reminderToday: java.time.LocalDate = java.time.LocalDate.of(2026, 11, 6)
+
+private fun reminderRow(
+    id: String, title: String, bucket: com.kurtz.homerecord.housemodel.reminders.ReminderBucket, due: String,
+    item: String? = null, interval: Int? = null, done: String? = null, snoozed: String? = null, seasonal: Boolean = false,
+) = com.kurtz.homerecord.housemodel.reminders.ReminderRow(
+    id = id, title = title, itemId = item?.let { "item-$id" }, itemName = item, bucket = bucket, dueOn = java.time.LocalDate.parse(due),
+    intervalMonths = interval, lastDoneOn = done?.let(java.time.LocalDate::parse), snoozedUntil = snoozed?.let(java.time.LocalDate::parse), seasonal = seasonal,
+)
+
+private val sampleReminderRows = run {
+    listOf(
+        reminderRow("r1", "Replace furnace filter", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, "2026-10-28", item = "Basement furnace", interval = 3),
+        reminderRow("r2", "Test sump pump", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, "2026-11-06", item = "Sump pump", interval = 3),
+        reminderRow("r3", "Check heating before winter", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2026-11-20", interval = 12, snoozed = "2026-11-20", seasonal = true),
+        reminderRow("r4", "Warranty ends soon: Dishwasher", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2026-12-14", item = "Dishwasher"),
+        reminderRow("r5", "Flush water heater", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2027-03-01", item = "Water heater", interval = 12),
+        reminderRow("r6", "Clean dryer vent", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DONE, "2027-11-02", item = "Dryer", interval = 12, done = "2026-11-02"),
+    )
+}
+
+@ThemePreviews
+@Composable
+fun RemindersListPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.RemindersScreen(
+        com.kurtz.homerecord.housemanual.reminders.RemindersUiState(
+            loading = false, rows = sampleReminderRows, zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.COLD, today = reminderToday,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun RemindersEmptyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(loading = false, today = reminderToday), {})
+}
+
+@ThemePreviews
+@Composable
+fun RemindersLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun ReminderFormPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(
+        com.kurtz.homerecord.housemodel.reminders.ReminderDraft(title = "Reseal the deck", dueOn = java.time.LocalDate.of(2027, 5, 1), intervalMonths = 12), false, {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ReminderFormErrorsPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(), true, {})
+}
