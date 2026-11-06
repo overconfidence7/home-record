@@ -6,6 +6,8 @@ import com.kurtz.homerecord.core.model.ShutoffSection
 data class EmergencyUiState(
     val loading: Boolean = true,
     val sections: List<ShutoffSection> = emptyList(),
+    /** A viewer on a shared home: no Add shutoff (AC-H16). */
+    val viewOnly: Boolean = false,
 ) {
     val count: Int get() = sections.sumOf { it.shutoffs.size }
 }

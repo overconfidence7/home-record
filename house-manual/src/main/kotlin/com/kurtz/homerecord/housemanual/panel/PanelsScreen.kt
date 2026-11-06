@@ -31,8 +31,8 @@ fun PanelsScreen(state: PanelsUiState, onEvent: (PanelsEvent) -> Unit) {
             state.panels.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.ElectricalServices,
                 headline = stringResource(R.string.panels_empty_title),
-                body = stringResource(R.string.panels_empty_body),
-                actionLabel = stringResource(R.string.panels_add),
+                body = stringResource(if (state.viewOnly) R.string.panels_empty_body_view_only else R.string.panels_empty_body),
+                actionLabel = if (state.viewOnly) null else stringResource(R.string.panels_add),
                 onAction = { onEvent(PanelsEvent.Add) },
                 modifier = Modifier.padding(padding),
                 actionModifier = Modifier.testTag("hm_panels_add"),

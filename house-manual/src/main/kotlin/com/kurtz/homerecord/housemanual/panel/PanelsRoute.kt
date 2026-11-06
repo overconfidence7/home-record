@@ -10,13 +10,13 @@ import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.items.PseudoRooms
 
 @Composable
-fun PanelsRoute(items: ItemRepository, homeId: String, onBack: () -> Unit, onOpen: (String) -> Unit, onAdd: () -> Unit) {
+fun PanelsRoute(items: ItemRepository, homeId: String, onBack: () -> Unit, onOpen: (String) -> Unit, onAdd: () -> Unit, viewOnly: Boolean = false) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
         PseudoRooms.WHOLE_HOUSE to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_whole_house),
     )
     val vm = viewModel<PanelsViewModel>(factory = viewModelFactory { initializer { PanelsViewModel(items.observeRows(homeId, pseudo)) } })
-    PanelsScreen(vm.state.collectAsState().value, onEvent = {
+    PanelsScreen(vm.state.collectAsState().value.copy(viewOnly = viewOnly), onEvent = {
         when (it) {
             PanelsEvent.Back -> onBack()
             is PanelsEvent.Open -> onOpen(it.itemId)

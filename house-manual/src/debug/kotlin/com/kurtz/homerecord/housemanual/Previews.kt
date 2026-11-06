@@ -1788,6 +1788,11 @@ fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panels
 @Composable
 fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }
 
+/** A viewer on a shared home with no panel yet (AC-H16): no Add panel. */
+@ThemePreviews
+@Composable
+fun PanelsEmptyViewOnlyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false, viewOnly = true), {}) }
+
 private val sampleShutoffSections = com.kurtz.homerecord.core.model.ShutoffGroups.sections(
     listOf(
         com.kurtz.homerecord.core.model.Shutoff(
@@ -1837,6 +1842,21 @@ fun EmergencyEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun EmergencyLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(), {}) }
+
+/** A viewer on a shared home (AC-H16): the shutoffs without Manage shutoffs. */
+@ThemePreviews
+@Composable
+fun EmergencyViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(
+        com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false, sections = sampleShutoffSections, viewOnly = true), {}, previewPhoto = sampleValvePhoto,
+    )
+}
+
+@ThemePreviews
+@Composable
+fun EmergencyEmptyViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false, viewOnly = true), {})
+}
 
 private fun mappingState(phase: com.kurtz.homerecord.core.mapping.MappingPhase, plugged: Boolean = true, confirmed: Int = 0) =
     com.kurtz.homerecord.housemanual.mapping.MappingUiState(

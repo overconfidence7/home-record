@@ -66,4 +66,19 @@ class ViewOnlyTest {
         rule.onNodeWithTag("hm_house_edit_plan").assertDoesNotExist()
         rule.onNodeWithTag("hm_house_floors").assertDoesNotExist()
     }
+
+    @Test fun emergencyAndPanelsOfferNoAdd() {
+        rule.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false, viewOnly = true), {})
+            }
+        }
+        rule.onNodeWithTag("hm_emergency_add").assertDoesNotExist()
+        rule.onNodeWithTag("hm_emergency_manage_add").assertDoesNotExist()
+    }
+
+    @Test fun panelsOfferNoAdd() {
+        rule.setContent { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false, viewOnly = true), {}) }
+        rule.onNodeWithTag("hm_panels_add").assertDoesNotExist()
+    }
 }

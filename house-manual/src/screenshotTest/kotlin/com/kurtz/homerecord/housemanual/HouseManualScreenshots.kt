@@ -1008,3 +1008,18 @@ fun ItemsEmptyViewOnlyScreenshot() = ItemsEmptyViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun HouseViewOnlyScreenshot() = HouseViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun EmergencyViewOnlyScreenshot() = EmergencyViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun EmergencyEmptyViewOnlyScreenshot() = EmergencyEmptyViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelsEmptyViewOnlyScreenshot() = PanelsEmptyViewOnlyPreview()

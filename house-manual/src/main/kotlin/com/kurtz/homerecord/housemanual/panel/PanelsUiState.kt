@@ -7,7 +7,8 @@ import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.panel.isPanelSubtype
 
 /** More → Breaker panels: the home's Breaker panel and Sub-panel items, oldest first (the main panel is usually first). */
-data class PanelsUiState(val loading: Boolean = true, val panels: List<ItemRow> = emptyList())
+/** [viewOnly]: a viewer on a shared home, no Add panel (AC-H16). */
+data class PanelsUiState(val loading: Boolean = true, val panels: List<ItemRow> = emptyList(), val viewOnly: Boolean = false)
 
 sealed interface PanelsEvent {
     data object Back : PanelsEvent

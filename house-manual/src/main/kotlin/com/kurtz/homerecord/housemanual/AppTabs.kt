@@ -255,13 +255,13 @@ private fun HouseManualTabs(
         entry<PanelsKey> {
             com.kurtz.homerecord.housemanual.panel.PanelsRoute(
                 container.items, home.id, onBack = nav::pop, onOpen = { nav.push(PanelKey(it)) },
-                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "breaker_panel") },
+                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "breaker_panel") }, viewOnly = !canEdit,
             )
         }
         entry<EmergencyKey> {
             com.kurtz.homerecord.housemanual.emergency.EmergencyRoute(
                 container.items, home.id, onBack = nav::pop, onOpen = { nav.push(ItemDetailKey(it)) },
-                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "water_main") },
+                onAdd = { addItem(scope, container, home.id, nav, subtypeId = "water_main") }, viewOnly = !canEdit,
             )
         }
         entry<BackupKey> {

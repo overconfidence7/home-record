@@ -258,6 +258,7 @@
         <item quantity="other">%d shutoffs</item>
     </plurals>
     <string name="emergency_empty_title">No shutoffs yet</string>
+    <string name="emergency_empty_body_view_only">The owner hasn\'t added the water main, gas valve or main breaker yet.</string>
     <string name="emergency_empty_body">Add the water main, gas meter valve and main breaker so anyone in the house can find them in a hurry.</string>
     <string name="emergency_main">Main</string>
     <string name="emergency_open">Open %1$s</string>
@@ -517,6 +518,7 @@
     <string name="more_panels_supporting">Which breaker feeds what</string>
     <string name="panels_title">Breaker panels</string>
     <string name="panels_empty_title">No breaker panel yet</string>
+    <string name="panels_empty_body_view_only">The owner hasn\'t added a breaker panel yet.</string>
     <string name="panels_empty_body">Add your panel as an item, then label its breakers slot by slot.</string>
     <string name="panels_add">Add breaker panel</string>
     <!-- HM-Mapping (AC-C42) -->

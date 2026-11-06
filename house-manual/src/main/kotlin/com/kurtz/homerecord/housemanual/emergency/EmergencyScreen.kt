@@ -77,8 +77,8 @@ fun EmergencyScreen(state: EmergencyUiState, onEvent: (EmergencyEvent) -> Unit, 
             state.sections.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.PowerOff,
                 headline = stringResource(R.string.emergency_empty_title),
-                body = stringResource(R.string.emergency_empty_body),
-                actionLabel = stringResource(R.string.home_emergency_add),
+                body = stringResource(if (state.viewOnly) R.string.emergency_empty_body_view_only else R.string.emergency_empty_body),
+                actionLabel = if (state.viewOnly) null else stringResource(R.string.home_emergency_add),
                 onAction = { onEvent(EmergencyEvent.Add) },
                 modifier = Modifier.padding(padding),
                 actionModifier = Modifier.testTag("hm_emergency_add"),
@@ -93,7 +93,7 @@ fun EmergencyScreen(state: EmergencyUiState, onEvent: (EmergencyEvent) -> Unit, 
                         ShutoffBlock(s, "${section.group.name.lowercase()}_${i + 1}", previewPhoto, onEvent)
                     }
                 }
-                item(key = "manage") { Manage(onEvent) }
+                if (!state.viewOnly) item(key = "manage") { Manage(onEvent) }
             }
         }
     }
