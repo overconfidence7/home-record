@@ -43,6 +43,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import com.kurtz.homerecord.core.net.LazyCallFactory
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -88,6 +89,8 @@ class AppContainer(private val app: Application) {
         { tenant ->
             syncEngine.sync(tenant).also { result ->
                 if (result is ApiResult.Err) Log.w(SYNC_LOG_TAG, "Sync of ${tenant.key} failed: ${result.failure}")
+                // The home is on the server now: its photo files follow, and photos from its other phones come down (T075a).
+                if (result is ApiResult.Ok && tenant.kind == TenantKind.Home) scope.launch { afterHomeSync(tenant.id) }
             }
         },
         auth.state.map { it is AuthState.SignedIn },
@@ -118,6 +121,42 @@ class AppContainer(private val app: Application) {
         }
     }
 
+    /** Photo files to and from R2 in the home tenant (T075a, AC-H15): queued after each sync, uploaded by WorkManager. */
+    private val mediaApi = com.kurtz.homerecord.core.media.RetrofitMediaTransferApi.create(BuildConfig.API_BASE_URL, http)
+    private val uploadedKeys = com.kurtz.homerecord.core.media.UploadedKeys(db, onChange = { entity, id -> recordHomeChange(entity, id) })
+    private val mediaUploader by lazy {
+        com.kurtz.homerecord.core.media.MediaUploader(db.mediaUploadDao(), mediaApi, onUploaded = { row, presigned ->
+            uploadedKeys.record(row.entity, row.entityId, presigned.key.ifEmpty { row.key.orEmpty() }, row.filename)
+        })
+    }
+    private val mediaCache by lazy {
+        com.kurtz.homerecord.core.media.MediaCache(
+            java.io.File(app.cacheDir, "downloads"),
+            com.kurtz.homerecord.core.media.PrefsMediaCacheSettings(app.getSharedPreferences("media", Context.MODE_PRIVATE)),
+            mediaApi,
+        )
+    }
+    private val mediaDownloads by lazy {
+        com.kurtz.homerecord.core.media.MediaDownloads(
+            db, mediaApi, mediaCache,
+            tenant = { currentHomeTenant.value },
+        )
+    }
+    private val currentHomeTenant = homeTenant.stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
+    private val homeMedia by lazy {
+        com.kurtz.homerecord.core.media.HomeMedia(
+            db,
+            enqueue = { tenant, entity, id, filename, path, mime -> mediaUploader.enqueue(tenant, entity, id, filename, path, mime) },
+            isOnPhone = { mediaDownloads.isOnPhone(it) },
+            fetchPhoto = { mediaDownloads.photo(it) },
+        )
+    }
+
+    private suspend fun afterHomeSync(homeId: String) {
+        val pass = homeMedia.afterSync(homeId)
+        if (pass.queued > 0) com.kurtz.homerecord.core.media.MediaUploadWorker.schedule(app)
+    }
+
     val homes = HomeRepository(
         db, app.resources::getString, onChange = { entity, id -> recordHomeChange(entity, id) },
         onPlanPhotosChanged = { changes -> scope.launch { wallPhotos.afterPlanChange(changes, wallTextures) } },
@@ -130,8 +169,10 @@ class AppContainer(private val app: Application) {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { media.discard(path) }
     }
 
+    /** Wall photos from the home's other phones come down when their room page opens (T075a); uploads follow the sync. */
     val wallPhotos = com.kurtz.homerecord.housemodel.walls.WallPhotoRepository(
-        db, onChange = { entity, id -> recordHomeChange(entity, id) }, sweep = replacedFiles::sweep,
+        db, onChange = { entity, id -> recordHomeChange(entity, id) },
+        fetchMissing = { if (auth.state.value is AuthState.SignedIn) mediaDownloads.wallPhotos(it) }, sweep = replacedFiles::sweep,
     )
     val wallTextures: com.kurtz.homerecord.housemodel.walls.WallTextureMaker = com.kurtz.homerecord.housemodel.walls.AndroidWallTextureMaker()
     /** Pipes, wires and boxes drawn on walls and the plan (AC-C25..C28). */
@@ -227,6 +268,7 @@ class AppContainer(private val app: Application) {
     val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing, items::countPanels)
 
     init {
+        com.kurtz.homerecord.core.media.MediaUploadWorker.provider = { mediaUploader }
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }
         syncCoordinator.start()

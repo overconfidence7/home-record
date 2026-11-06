@@ -66,6 +66,13 @@ interface WallPhotoDao {
             "WHERE wall.roomId = :roomId AND wall.deletedAt IS NULL AND wall_photo.deletedAt IS NULL ORDER BY wall_photo.createdAt",
     )
     fun observeForRoom(roomId: String): Flow<List<WallPhotoEntity>>
+    /** Every live wall photo of a home, through its room and floor (T075a: the home's files to the cloud). */
+    @Query(
+        "SELECT wall_photo.* FROM wall_photo LEFT JOIN wall ON wall.id = wall_photo.wallId " +
+            "JOIN room ON room.id = COALESCE(wall_photo.roomId, wall.roomId) JOIN floor ON floor.id = room.floorId " +
+            "WHERE floor.homeId = :homeId AND wall_photo.deletedAt IS NULL ORDER BY wall_photo.createdAt",
+    )
+    suspend fun listForHome(homeId: String): List<WallPhotoEntity>
     /** Photos of the room's removed walls (N001), newest first. */
     @Query("SELECT * FROM wall_photo WHERE roomId = :roomId AND wallId IS NULL AND deletedAt IS NULL ORDER BY takenAt DESC, createdAt DESC")
     fun observeRemovedForRoom(roomId: String): Flow<List<WallPhotoEntity>>
