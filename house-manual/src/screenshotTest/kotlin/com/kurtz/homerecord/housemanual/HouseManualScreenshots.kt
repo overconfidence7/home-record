@@ -421,17 +421,22 @@ fun PaywallLoadingScreenshot() = PaywallLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
-fun MoreSignedInScreenshot() = MoreSignedInPreview()
+fun MoreScreenshot() = MorePreview()
 
 @PreviewTest
 @ThemePreviews
 @Composable
-fun MoreSignedOutScreenshot() = MoreSignedOutPreview()
+fun AccountSignedInScreenshot() = AccountSignedInPreview()
 
 @PreviewTest
 @ThemePreviews
 @Composable
-fun MoreSignOutConfirmScreenshot() = MoreSignOutConfirmPreview()
+fun AccountSignedOutScreenshot() = AccountSignedOutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AccountSignOutConfirmScreenshot() = AccountSignOutConfirmPreview()
 
 @PreviewTest
 @ThemePreviews

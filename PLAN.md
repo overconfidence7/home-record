@@ -445,6 +445,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T075a: House Manual media to R2 in the home tenant: item photos, documents and wall photos (pass `upload`/`fetchMissing` to `WallPhotoRepository` as Field Log does since T048d) (AC-H15, AC-C17)
     - [x] T075a1: item and room photos and wall photos (as taken and straightened) queued for R2 after each sync of a signed-in home, item photos from the home's other phones fetched after the sync, wall photos fetched on the room page (`HomeMedia`) (AC-H15, AC-C17)
     - [x] T075a2: documents to R2: `document.r2Key` (Room migration, synced), queued and fetched like photos; the document viewer downloads a document that is only in the cloud (AC-H15)
+  - [x] T075b: HM-Account (More → Account and sync, `hm_more_account`): its own screen with sign-in when signed out, and when signed in the account, the sync chip, what sync does and Sign out; More becomes one scrolling list (AC-H15)
+  - [ ] T075c: Delete cloud copy on HM-Account: backend removes the home tenant's rows and R2 media for the owner (vitest), the app asks first, then signs out and keeps the local copy (AC-H15)
+  - [ ] T075d: H17 second-device half: clear data, sign in to the same account, the home and its photos come back; an edit after that syncs (AC-H15)
 - [ ] R14: Review T071–T075
 - [ ] T076: Sharing: editor/viewer invites by link, HM-Share people list, viewer mode hides edit controls; backend membership on homes (acceptance: AC-H16)
 - [ ] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)

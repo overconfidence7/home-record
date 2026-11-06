@@ -1,6 +1,6 @@
 # Walkthrough H17: signing in with an email code from the More tab (AC-H15 sign-in part, AC-B1).
 # Needs the dev backend (ENVIRONMENT=dev, PLAN Q005) for /dev/last-code. Env EMAIL defaults below.
-# The upload/second-device/merge parts of AC-H15 land with T075.
+# The second-device and delete-cloud-copy parts of AC-H15 land with T075c/T075d.
 appId: com.kurtz.homerecord.housemanual
 env:
   EMAIL: qa-hm@example.com
@@ -9,6 +9,16 @@ env:
     clearState: true
 - runFlow: _onboard.yaml
 - tapOn: "More"
+# AC-H15: More → Account and sync opens HM-Account (T075b)
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible: "Account and sync"
+    timeout: 5000
 - assertVisible: "Sign in"
 - tapOn:
     id: "hm_sign_in_email"
@@ -46,6 +56,9 @@ env:
 - assertVisible:
     id: "hm_account_email"
     text: "Signed in as ${EMAIL}"
+# AC-H15: HM-Account says what sync does
+- assertVisible:
+    id: "hm_account_sync_explainer"
 - takeScreenshot: H17-signed-in
 # Signing out asks first, then keeps the local copy (AC-H15)
 - tapOn:

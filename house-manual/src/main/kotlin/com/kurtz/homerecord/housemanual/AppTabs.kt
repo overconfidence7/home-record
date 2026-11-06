@@ -246,6 +246,21 @@ private fun HouseManualTabs(
         entry<BackupKey> {
             com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop)
         }
+        entry<AccountKey> {
+            com.kurtz.homerecord.housemanual.account.AccountSyncScreen(onEvent = { nav.pop() }) { accountModifier ->
+                AccountRoute(container.auth, accountModifier, loadEmail = container.account::email) {
+                    val phase by container.syncEngine.phase.collectAsState()
+                    val pending by container.syncEngine.pendingCount.collectAsState(0)
+                    val refused by container.syncEngine.refused.collectAsState(emptyList())
+                    SyncStatus(
+                        phase, pending, refused,
+                        onSyncNow = container.syncCoordinator::requestSync,
+                        onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
+                    )
+                    com.kurtz.homerecord.housemanual.account.SyncExplainer()
+                }
+            }
+        }
         entry<ReportKey> { com.kurtz.homerecord.housemanual.report.ReportRoute(container.reportSource, container.reportFile, home.id, onBack = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
@@ -285,6 +300,7 @@ private fun HouseManualTabs(
                             MoreEvent.OpenEmergency -> nav.push(EmergencyKey)
                             MoreEvent.OpenReport -> nav.push(ReportKey)
                             MoreEvent.OpenBackup -> nav.push(BackupKey)
+                            MoreEvent.OpenAccount -> nav.push(AccountKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }
@@ -292,18 +308,7 @@ private fun HouseManualTabs(
                             MoreEvent.OpenImport -> pickHandoff.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
                         }
                     },
-                ) { accountModifier ->
-                    AccountRoute(container.auth, accountModifier, loadEmail = container.account::email) {
-                        val phase by container.syncEngine.phase.collectAsState()
-                        val pending by container.syncEngine.pendingCount.collectAsState(0)
-                        val refused by container.syncEngine.refused.collectAsState(emptyList())
-                        SyncStatus(
-                            phase, pending, refused,
-                            onSyncNow = container.syncCoordinator::requestSync,
-                            onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
-                        )
-                    }
-                }
+                )
             } else {
                 PlaceholderDetail(title, onBack = nav::pop, onOpenDetail = { nav.push(key.copy(depth = key.depth + 1)) })
             }

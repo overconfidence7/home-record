@@ -48,6 +48,9 @@ import kotlinx.serialization.Serializable
 /** HM-Backup: backup and restore (AC-C48, AC-H14). */
 @Serializable data object BackupKey : NavKey
 
+/** HM-Account: sign in, what sync does, sign out (AC-H15). */
+@Serializable data object AccountKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

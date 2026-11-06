@@ -1022,33 +1022,40 @@ fun PaywallLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.paywall.P
 
 @ThemePreviews
 @Composable
-fun MoreSignedInPreview() = Frame {
-    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+fun MorePreview() = Frame { com.kurtz.homerecord.housemanual.more.MoreScreen({}) }
+
+@ThemePreviews
+@Composable
+fun AccountSignedInPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
             com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com"),
             {},
             modifier,
-        ) { com.kurtz.homerecord.coreui.components.SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }
+        ) {
+            com.kurtz.homerecord.coreui.components.SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {})
+            com.kurtz.homerecord.housemanual.account.SyncExplainer()
+        }
     }
 }
 
 @ThemePreviews
 @Composable
-fun MoreSignedOutPreview() = Frame {
-    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+fun AccountSignedOutPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.whitfield@gmail.com"), {}, modifier)
     }
 }
 
 @ThemePreviews
 @Composable
-fun MoreSignOutConfirmPreview() = Frame {
-    com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
+fun AccountSignOutConfirmPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
-            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, confirmSignOut = true),
+            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com", confirmSignOut = true),
             {},
             modifier,
-        )
+        ) { com.kurtz.homerecord.housemanual.account.SyncExplainer() }
     }
 }
 
