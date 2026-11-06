@@ -16,6 +16,10 @@ export const START_PER_IP: Limit = { name: "start-ip", max: 20, windowMs: HOUR }
 export const VERIFY_PER_EMAIL: Limit = { name: "verify-email", max: 10, windowMs: HOUR };
 export const VERIFY_PER_IP: Limit = { name: "verify-ip", max: 30, windowMs: HOUR };
 
+/** Handoff sends (AC-B40): each send emails an address and stores up to the bundle cap for 30 days. */
+export const HANDOFF_PER_COMPANY: Limit = { name: "handoff-company", max: 30, windowMs: HOUR };
+export const HANDOFF_PER_EMAIL: Limit = { name: "handoff-email", max: 5, windowMs: HOUR };
+
 const key = (limit: Limit, subject: string) => `${limit.name}:${subject}`;
 
 /** Counts one hit and returns false when it goes over the limit. One atomic statement, so concurrent requests cannot both slip under. */

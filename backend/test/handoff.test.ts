@@ -91,6 +91,36 @@ describe("AC-B40 POST /handoff", () => {
     );
     expect(res.status).toBe(413);
   });
+
+  // [r12:handoff-rate-limit]
+  it("limits sends to one homeowner address per hour (429), except on the dev Worker", async () => {
+    const { sender, co } = await seed("hs5");
+    const to = { companyId: co, email: "hs5-dana@example.com", homeName: "12 Elm St" };
+    for (let i = 0; i < 5; i++) expect((await send(sender, to)).status).toBe(201);
+    const over = await send(sender, to);
+    expect(over.status).toBe(429);
+    expect(await over.json()).toEqual({ error: "rate_limited" });
+    expect((await send(sender, { ...to, email: "hs5-other@example.com" })).status).toBe(201);
+    const dev = await app.request(
+      `/handoff?${new URLSearchParams(to)}`,
+      { method: "POST", headers: { Authorization: `Bearer ${sender}`, "Content-Type": "application/zip", "Content-Length": String(ZIP.length) }, body: ZIP },
+      { ...env, ENVIRONMENT: "dev" },
+    );
+    expect(dev.status).toBe(201);
+  });
+
+  it("removes the stored bundle when the handoff row cannot be written", async () => {
+    const { sender, co } = await seed("hs6");
+    await env.DB.prepare("ALTER TABLE handoffs RENAME TO handoffs_away").run();
+    try {
+      const res = await send(sender, { companyId: co, email: "hs6-dana@example.com", homeName: "12 Elm St" });
+      expect(res.status).toBe(500);
+      const left = await env.MEDIA.list({ prefix: `company/${co}/handoff/` });
+      expect(left.objects).toHaveLength(0);
+    } finally {
+      await env.DB.prepare("ALTER TABLE handoffs_away RENAME TO handoffs").run();
+    }
+  });
 });
 
 describe("AC-B40 claim link", () => {

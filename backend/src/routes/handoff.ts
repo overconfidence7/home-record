@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { normalizeEmail } from "../auth/emailCode";
 import { membershipFor, requireSession } from "../tenancy";
+import { HANDOFF_PER_COMPANY, HANDOFF_PER_EMAIL, hit, limitsApply } from "../auth/rateLimit";
 
 /**
  * Handoff to the homeowner (AC-B40, AC-F51). Owner, Office or a Lead sends the job's `.homerecord` bundle (the same
@@ -105,6 +106,14 @@ handoff.post("/handoff", requireSession, async (c) => {
   const length = Number(c.req.header("Content-Length") ?? "NaN");
   if (!Number.isInteger(length) || length <= 0) return c.json({ error: "length_required" }, 411);
   if (length > MAX_BUNDLE_BYTES) return c.json({ error: "too_large", maxBytes: MAX_BUNDLE_BYTES }, 413);
+  // [r12:handoff-rate-limit]: counted before the body is read, per sending company and per homeowner address.
+  if (limitsApply(c.env)) {
+    const [companyOk, emailOk] = await Promise.all([
+      hit(c.env.DB, HANDOFF_PER_COMPANY, companyId),
+      hit(c.env.DB, HANDOFF_PER_EMAIL, email),
+    ]);
+    if (!companyOk || !emailOk) return c.json({ error: "rate_limited" }, 429);
+  }
   const body = c.req.raw.body;
   if (!body) return c.json({ error: "bad_request" }, 400);
 
@@ -126,12 +135,18 @@ handoff.post("/handoff", requireSession, async (c) => {
   const now = Date.now();
   const expiresAt = now + HANDOFF_DAYS * 86_400_000;
   const token = newToken();
-  await c.env.DB.prepare(
-    `INSERT INTO handoffs (id, token_hash, company_id, job_id, home_name, email, object_key, size, created_by, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(id, await tokenHash(token), companyId, jobId ?? null, homeName, email, key, length, session.userId, now, expiresAt)
-    .run();
+  try {
+    await c.env.DB.prepare(
+      `INSERT INTO handoffs (id, token_hash, company_id, job_id, home_name, email, object_key, size, created_by, created_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(id, await tokenHash(token), companyId, jobId ?? null, homeName, email, key, length, session.userId, now, expiresAt)
+      .run();
+  } catch {
+    // No row points at the bundle, so the cron would never remove it: delete it now.
+    await c.env.MEDIA.delete(key);
+    return c.json({ error: "server_error" }, 500);
+  }
   const company = await c.env.DB.prepare("SELECT name FROM companies WHERE id = ?").bind(companyId).first<{ name: string }>();
   const link = `${new URL(c.req.url).origin}/handoff/${token}`;
   if (c.env.ENVIRONMENT === "dev") await c.env.CACHE.put(devHandoffKey(email), token, { expirationTtl: HANDOFF_DAYS * 86_400 });
