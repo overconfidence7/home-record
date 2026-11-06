@@ -274,11 +274,36 @@ if [ -n "$PER_APP" ] && [ -z "$MISSING" ] && [ -f "$FLOWDIR/_tour.yaml" ]; then
     case $v in
       dark) adb shell cmd uimode night yes ;;
       font200) adb shell cmd uimode night no; adb shell settings put system font_scale 2.0 ;;
-      landscape) adb shell settings put system font_scale 1.0; adb shell settings put system user_rotation 1 ;;
+      # [judge:qa-tour-landscape-flaky]: user_rotation alone left one app portrait per run; lock the window rotation too
+      # (the tour also rotates itself) and check the shots below
+      landscape) adb shell settings put system font_scale 1.0; adb shell settings put system accelerometer_rotation 0
+        adb shell settings put system user_rotation 1; adb shell cmd window user-rotation lock 1 >/dev/null 2>&1 || true ;;
     esac
     sleep 2
-    if run_flow "$FLOWDIR/_tour.yaml" "tour-$v" "$v"; then record "variant:$v" pass "tour ok"; else record "variant:$v" fail "tour failed under $v"; fi
+    if run_flow "$FLOWDIR/_tour.yaml" "tour-$v" "$v"; then
+      if [ "$v" = landscape ]; then
+        # A landscape shot must be wider than tall (PNG IHDR width/height); otherwise the stage would pass on portrait shots
+        portrait=$(python3 - "$OUT/screenshots" <<'PY'
+import glob, os, struct, sys
+bad = []
+for p in sorted(glob.glob(os.path.join(sys.argv[1], "tour-landscape-*.png"))):
+    with open(p, "rb") as f:
+        head = f.read(24)
+    if len(head) == 24:
+        w, h = struct.unpack(">II", head[16:24])
+        if w <= h: bad.append(f"{os.path.basename(p)} {w}x{h}")
+print("; ".join(bad))
+PY
+)
+        if [ -n "$portrait" ]; then record "variant:$v" fail "tour ran but shots are portrait: $portrait"
+        elif ls "$OUT"/screenshots/tour-landscape-*.png >/dev/null 2>&1; then record "variant:$v" pass "tour ok, shots landscape"
+        else record "variant:$v" fail "tour ran but took no tour-landscape shots"; fi
+      else
+        record "variant:$v" pass "tour ok"
+      fi
+    else record "variant:$v" fail "tour failed under $v"; fi
   done
+  adb shell cmd window user-rotation lock 0 >/dev/null 2>&1 || true
   adb shell settings put system user_rotation 0; adb shell settings put system font_scale 1.0; adb shell cmd uimode night no
 else
   if [ -n "$MISSING" ]; then record variants skip "skipped: install failed ($MISSING )"; else record variants skip "no _tour.yaml for $APP"; fi
