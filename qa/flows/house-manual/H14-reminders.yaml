@@ -1,7 +1,7 @@
 # Walkthrough H14 (T072b): the Reminders tab (AC-H12). Starts from the regression seed, whose items seeded their
 # default reminders on save and whose furnace reminders are 12 days overdue. Snooze puts a due reminder off a week;
 # Done moves one under Done with its next date a full interval out; picking a climate zone seeds its seasonal tasks.
-# The 08:00 notification deep link arrives with T072c.
+# T072c: the 08:00 notification deep link (open_reminders) at the end (AC-C50).
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
@@ -41,3 +41,17 @@ appId: com.kurtz.homerecord.housemanual
 - scrollUntilVisible:
     element: "Shut off and drain outdoor faucets"
 - takeScreenshot: H14-reminders-zone
+# T072c (AC-C50, AC-H12): the 08:00 summary notification starts House Manual with open_reminders; a cold start with
+# that argument lands on the Reminders tab even when Home was the last tab. (The notification itself is posted by
+# WorkManager at 08:00, so the suite proves its deep link; ReminderNotifierTest proves the posted intent carries it.)
+- tapOn:
+    id: "hm_tab_home"
+- launchApp:
+    appId: com.kurtz.homerecord.housemanual
+    arguments:
+      open_reminders: "true"
+- extendedWaitUntil:
+    visible:
+      id: "hm_reminders_list"
+    timeout: 10000
+- takeScreenshot: H14-notification-entry

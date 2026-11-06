@@ -122,6 +122,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     val scope = rememberCoroutineScope()
+    AskNotificationsOnceRemindersExist(container, home.id)
     HomeRecordApp(
         tabs = tabs,
         startTabId = if (openEditor) "house" else null,
@@ -298,5 +299,23 @@ private fun openOverlay(nav: com.kurtz.homerecord.coreui.shell.ShellNav, o: com.
     when (val target = OverlayTarget.of(o)) {
         is OverlayTarget.Wall -> nav.push(RoomWallKey(target.roomId, target.wallId, target.stage, target.overlayId))
         is OverlayTarget.Plan -> nav.push(PlanKey(overlayId = target.overlayId))
+    }
+}
+
+/**
+ * Asks for the notification permission (Android 13+) the first time the home has a reminder, so the 08:00 summary can
+ * show; never before there is something to remind of, and once per install (AC-C50).
+ */
+@Composable
+private fun AskNotificationsOnceRemindersExist(container: AppContainer, homeId: String) {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { }
+    LaunchedEffect(homeId) {
+        container.reminders.observe(homeId).first { it.isNotEmpty() }
+        val ask = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            container.shouldAskNotifications(homeId).also { if (it) container.markNotificationsAsked() }
+        }
+        if (ask) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
     }
 }

@@ -17,10 +17,13 @@ object EmergencyEntry {
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
     /** True when [intent] came from the tile or widget (or a flow passing `open_emergency`). */
-    fun wants(intent: Intent?): Boolean = intent?.extras?.let { extras ->
+    fun wants(intent: Intent?): Boolean = flag(intent, EXTRA)
+
+    /** The boolean launch extra [name]: true as a boolean (tile, widget, notification) or as the string "true" (Maestro). */
+    fun flag(intent: Intent?, name: String): Boolean = intent?.extras?.let { extras ->
         // Maestro passes launch arguments as strings; the tile and widget pass a boolean.
         @Suppress("DEPRECATION")
-        when (val v = extras.get(EXTRA)) {
+        when (val v = extras.get(name)) {
             is Boolean -> v
             is String -> v.equals("true", ignoreCase = true)
             else -> false

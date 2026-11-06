@@ -152,6 +152,30 @@ class AppContainer(private val app: Application) {
     /** HM-Reminders (AC-C49, AC-H12). */
     val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
+    /** The daily 08:00 reminder summary (AC-C50); run by [com.kurtz.homerecord.housemanual.reminders.ReminderCheckWorker]. */
+    val reminderNotifier = com.kurtz.homerecord.housemanual.reminders.ReminderNotifier(app)
+    val reminderCheck = com.kurtz.homerecord.housemodel.reminders.ReminderCheck(
+        homeIds = { db.homeDao().observeAll().first().map { it.id } }, repo = reminders, notices = reminderNotifier,
+    )
+
+    private val notificationAsk by lazy { app.getSharedPreferences("notifications", Context.MODE_PRIVATE) }
+
+    /**
+     * True once per install on Android 13+ when notifications are not allowed yet and the home has a reminder
+     * (AC-C50); call off the main thread.
+     */
+    suspend fun shouldAskNotifications(homeId: String): Boolean {
+        val granted = android.os.Build.VERSION.SDK_INT < 33 ||
+            app.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        return com.kurtz.homerecord.housemodel.reminders.DailyReminderCheck.shouldAskPermission(
+            android.os.Build.VERSION.SDK_INT, granted, notificationAsk.getBoolean(ASKED_KEY, false), reminders.count(homeId),
+        )
+    }
+
+    fun markNotificationsAsked() {
+        notificationAsk.edit().putBoolean(ASKED_KEY, true).apply()
+    }
+
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
     /** Data plate vision fallback (AC-B11) and recalls (AC-B12). */
@@ -195,6 +219,9 @@ class AppContainer(private val app: Application) {
     }
 }
 
+/** Device-level flag that the notification permission was asked, so signing out or a new home does not ask again. */
+private const val ASKED_KEY = "notification_permission_asked"
+
 /** Logcat tag for sync failures, so a "Sync failed" chip has a cause in the device log. */
 private const val SYNC_LOG_TAG = "HomeRecordSync"
 
@@ -205,5 +232,7 @@ class HomeRecordApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // The daily 08:00 reminder check (AC-C50); KEEP leaves an already scheduled one alone.
+        com.kurtz.homerecord.housemanual.reminders.ReminderCheckWorker.schedule(this)
     }
 }
