@@ -13,7 +13,7 @@ import com.kurtz.homerecord.housemodel.items.PseudoRooms
 import com.kurtz.homerecord.housemodel.items.labelRes
 
 @Composable
-fun ItemsRoute(repo: ItemRepository, homeId: String, onAdd: () -> Unit, onOpen: (String) -> Unit) {
+fun ItemsRoute(repo: ItemRepository, homeId: String, onAdd: () -> Unit, onOpen: (String) -> Unit, viewOnly: Boolean = false) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
         PseudoRooms.WHOLE_HOUSE to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_whole_house),
@@ -25,7 +25,7 @@ fun ItemsRoute(repo: ItemRepository, homeId: String, onAdd: () -> Unit, onOpen: 
             initializer { ItemsViewModel(repo, homeId, pseudo, createSavedStateHandle()) { resources.getString(it.labelRes) } }
         },
     )
-    ItemsScreen(vm.state.collectAsState().value.let { it.copy(filter = it.filter.copy(query = vm.query)) }, onEvent = {
+    ItemsScreen(vm.state.collectAsState().value.let { it.copy(filter = it.filter.copy(query = vm.query), viewOnly = viewOnly) }, onEvent = {
         when (it) {
             ItemsEvent.Add -> onAdd()
             is ItemsEvent.Open -> onOpen(it.itemId)

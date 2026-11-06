@@ -30,6 +30,8 @@ fun HomeRoute(
     onOpenEmergency: () -> Unit = {},
     onOpenOverlay: (String) -> Unit = {},
     onOpenPanel: (panelItemId: String, slot: Int?) -> Unit = { _, _ -> },
+    /** A viewer on a shared home (AC-H16). */
+    viewOnly: Boolean = false,
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -38,7 +40,7 @@ fun HomeRoute(
     val vm = viewModel<HomeViewModel>(
         factory = viewModelFactory { initializer { HomeViewModel(repo.observeHomeSummary(homeId, pseudo), homeName, search.observeIndex(homeId, pseudo), createSavedStateHandle()) } },
     )
-    HomeScreen(vm.state.collectAsState().value, onEvent = {
+    HomeScreen(vm.state.collectAsState().value.copy(viewOnly = viewOnly), onEvent = {
         when (it) {
             HomeEvent.AddItem -> onAddItem()
             HomeEvent.ScanDataPlate -> onScanDataPlate()

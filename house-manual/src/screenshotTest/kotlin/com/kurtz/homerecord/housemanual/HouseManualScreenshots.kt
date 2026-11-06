@@ -988,3 +988,23 @@ fun JoinOtherHomeScreenshot() = JoinOtherHomePreview()
 @Composable
 fun JoinUsedScreenshot() = JoinUsedPreview()
 
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeViewOnlyScreenshot() = HomeViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsViewOnlyScreenshot() = ItemsViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemsEmptyViewOnlyScreenshot() = ItemsEmptyViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HouseViewOnlyScreenshot() = HouseViewOnlyPreview()

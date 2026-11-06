@@ -41,6 +41,7 @@
     <string name="plan_row">Floor plan</string>
     <string name="plan_row_supporting">Draw and edit rooms floor by floor</string>
     <string name="items_empty_title">No items yet</string>
+    <string name="items_empty_body_view_only">Nothing has been added to this home yet.</string>
     <string name="items_empty_body">Add the furnace, the water heater, the dishwasher. Anything with a model number and a warranty.</string>
     <string name="items_add">Add item</string>
     <string name="items_search">Search items</string>
@@ -288,6 +289,7 @@
     <string name="home_search_clear">Clear search</string>
     <string name="home_search_none">Nothing matches \"%1$s\".</string>
     <string name="home_search_none_body">Check the spelling, or add it as an item.</string>
+    <string name="home_search_none_body_view_only">Check the spelling, or try another word.</string>
     <string name="search_kind_item">Item</string>
     <string name="search_kind_room">Room</string>
     <string name="search_kind_document">Document</string>
@@ -695,6 +697,8 @@
     <string name="share_failed">Couldn\'t load who is on this home. Tap Retry.</string>
     <string name="share_action_offline">That didn\'t go through: no connection. Try again when you\'re back online.</string>
     <string name="share_action_failed">That didn\'t go through. Try again.</string>
+    <string name="view_only_title">View only</string>
+    <string name="view_only_body">You can look at everything in this home. Ask the owner to make you family to change things.</string>
     <string name="share_sheet_title">Send the invite</string>
     <string name="share_sheet_subject">Join %1$s in House Manual</string>
     <string name="share_sheet_text">You\'re invited to %1$s in House Manual. Open this link on your phone: %2$s</string>

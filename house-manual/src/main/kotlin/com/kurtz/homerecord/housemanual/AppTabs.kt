@@ -151,6 +151,8 @@ private fun HouseManualTabs(
     }
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     val scope = rememberCoroutineScope()
+    // A viewer on a shared home sees every screen with its add and edit controls left out (AC-H16).
+    val canEdit by remember(home.id) { container.homeAccess.observeCanEdit(home.id) }.collectAsState(initial = container.homeAccess.canEdit(home.id))
     AskNotificationsOnceRemindersExist(container, home.id)
     HomeRecordApp(
         tabs = tabs,
@@ -172,6 +174,7 @@ private fun HouseManualTabs(
                     scope.launch { container.overlays.get(id)?.let { openOverlay(nav, it) } }
                 },
                 onOpenPanel = { panelItemId, slot -> nav.push(PanelKey(panelItemId, highlightSlot = slot)) },
+                viewOnly = !canEdit,
             )
         }
         entry<HouseKey> {
@@ -194,6 +197,7 @@ private fun HouseManualTabs(
                 overlays = container.overlays,
                 onOpenOverlay = { openOverlay(nav, it) },
                 onOpenItem = { itemId, _ -> nav.push(ItemDetailKey(itemId)) },
+                canEdit = canEdit,
             )
         }
         entry<House3DKey> { key ->
@@ -215,7 +219,7 @@ private fun HouseManualTabs(
             )
         }
         entry<RemindersKey> { com.kurtz.homerecord.housemanual.reminders.RemindersRoute(container.reminders, home.id, onOpenItem = { nav.push(ItemDetailKey(it)) }) }
-        entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }) }
+        entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }, viewOnly = !canEdit) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(
                 container.items, container.warrantyLookup, container.upkeep, container.documents, home.id, key.itemId, onBack = nav::pop, onEdit = { nav.push(ItemEditKey(itemId = key.itemId)) },
@@ -294,7 +298,7 @@ private fun HouseManualTabs(
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop, fetch = container::fetchDocument) }
         entry<RoomKey> { key -> RoomRoute(
             container.homes, container.items, container.wallPhotos, container.media, home.id, key.roomId, onBack = nav::pop,
-            onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = { addItem(scope, container, home.id, nav, it) },
+            onOpenItem = { nav.push(ItemDetailKey(it)) }, onAddItem = if (canEdit) ({ addItem(scope, container, home.id, nav, it) }) else null,
             onOutline = { nav.push(WallOutlineKey(key.roomId, it.wallId, it.stage.name, it.photoPath)) },
             onView3D = { nav.push(House3DKey(it.floorId, it.roomId)) },
             overlays = container.overlays,

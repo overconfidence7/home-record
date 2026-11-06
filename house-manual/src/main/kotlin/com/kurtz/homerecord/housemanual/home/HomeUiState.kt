@@ -13,6 +13,8 @@ data class HomeUiState(
     val recent: List<ItemRow> = emptyList(),
     val query: String = "",
     val results: List<SearchResultRow> = emptyList(),
+    /** A viewer on a shared home: no add actions, and a View only note under the name (AC-H16). */
+    val viewOnly: Boolean = false,
 ) {
     val searching: Boolean get() = query.isNotBlank()
 }

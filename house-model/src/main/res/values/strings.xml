@@ -47,9 +47,11 @@
     <string name="house_edit_plan">Edit plan</string>
     <string name="house_more_actions">More actions</string>
     <string name="house_blueprint_hint">Tap a room to open it. Press and hold for more.</string>
+    <string name="house_blueprint_hint_view_only">Tap a room to open it.</string>
     <string name="house_blueprint_hint_pins">Tap a pin to open its task, or a room to open the room.</string>
     <string name="house_floor_empty_title">No rooms on this floor</string>
     <string name="house_floor_empty_body">Draw the rooms in the plan editor and they show up here.</string>
+    <string name="house_floor_empty_body_view_only">No rooms have been drawn here yet.</string>
     <string name="house_room_rename">Rename</string>
     <string name="house_room_delete">Delete</string>
     <string name="house_room_delete_title">Delete %1$s?</string>

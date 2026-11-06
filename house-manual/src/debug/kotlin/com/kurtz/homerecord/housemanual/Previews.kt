@@ -339,6 +339,11 @@ fun HouseBlueprintPreview() = Frame { houseScreen(houseState()) }
 @Composable
 fun HouseBlueprintLandscapePreview() = Frame { houseScreen(houseState()) }
 
+/** A viewer on a shared home (AC-H16): the plan opens rooms; no Edit plan or Floors. */
+@ThemePreviews
+@Composable
+fun HouseViewOnlyPreview() = Frame { HouseScreen(houseState(), {}, {}, {}, {}, {}, on3D = {}, onOpenMark = {}, canEdit = false) }
+
 @ThemePreviews
 @Composable
 fun HouseLayersPreview() = Frame {
@@ -473,6 +478,15 @@ fun ItemsByCategoryPreview() = Frame { ItemsScreen(itemsState(), {}) }
 @ThemePreviews
 @Composable
 fun ItemsByRoomPreview() = Frame { ItemsScreen(itemsState(ItemGrouping.ROOM), {}) }
+
+/** A viewer on a shared home (AC-H16): no Add button. */
+@ThemePreviews
+@Composable
+fun ItemsViewOnlyPreview() = Frame { ItemsScreen(itemsState().copy(viewOnly = true), {}) }
+
+@ThemePreviews
+@Composable
+fun ItemsEmptyViewOnlyPreview() = Frame { ItemsScreen(ItemsUiState(loading = false, viewOnly = true), {}) }
 
 @ThemePreviews
 @Composable
@@ -961,6 +975,13 @@ fun HomeEmptyPreview() = Frame { HomeScreen(HomeUiState(loading = false, homeNam
 @Composable
 fun HomeFullPreview() = Frame {
     HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, shutoffCount = 3, attention = homeAttention, recent = homeRecent), {})
+}
+
+/** A viewer on a shared home (AC-H16): View only note, no Add item or Scan, Emergency opens only. */
+@ThemePreviews
+@Composable
+fun HomeViewOnlyPreview() = Frame {
+    HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 4, shutoffCount = 3, attention = homeAttention, recent = homeRecent, viewOnly = true), {})
 }
 
 @ThemePreviews

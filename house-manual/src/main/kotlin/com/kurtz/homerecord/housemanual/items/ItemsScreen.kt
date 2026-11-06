@@ -70,7 +70,7 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = { onEvent(ItemsEvent.Add) }, modifier = Modifier.testTag("hm_items_fab")) {
+            if (!state.viewOnly) FloatingActionButton(onClick = { onEvent(ItemsEvent.Add) }, modifier = Modifier.testTag("hm_items_fab")) {
                 Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.items_add))
             }
         },
@@ -80,8 +80,8 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
             state.totalCount == 0 -> EmptyState(
                 icon = Icons.Rounded.Inventory2,
                 headline = stringResource(R.string.items_empty_title),
-                body = stringResource(R.string.items_empty_body),
-                actionLabel = stringResource(R.string.items_add),
+                body = stringResource(if (state.viewOnly) R.string.items_empty_body_view_only else R.string.items_empty_body),
+                actionLabel = if (state.viewOnly) null else stringResource(R.string.items_add),
                 onAction = { onEvent(ItemsEvent.Add) },
                 modifier = Modifier.padding(padding),
                 actionModifier = Modifier.testTag("hm_items_add"),

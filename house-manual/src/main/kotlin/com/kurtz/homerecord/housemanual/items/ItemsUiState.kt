@@ -18,6 +18,8 @@ data class ItemsUiState(
     val roomOptions: List<RoomOption> = emptyList(),
     /** Keys of the groups the owner folded away; a search shows every group open so no match hides. */
     val collapsed: Set<String> = emptySet(),
+    /** A viewer on a shared home: no Add button (AC-H16). */
+    val viewOnly: Boolean = false,
 ) {
     val filtered: Boolean get() = filter != ItemFilter()
 

@@ -97,6 +97,12 @@ class AppContainer(private val app: Application) {
     val homeShare: com.kurtz.homerecord.core.share.HomeShareApi =
         com.kurtz.homerecord.core.share.RetrofitHomeShareApi.create(BuildConfig.API_BASE_URL, http)
 
+    /** Owner, family or viewer on this phone's home; a viewer's House Manual hides every edit control (AC-H16). */
+    val homeAccess = com.kurtz.homerecord.core.share.HomeAccess(
+        com.kurtz.homerecord.core.share.PrefsHomeRoleStore(app.getSharedPreferences("home_roles", Context.MODE_PRIVATE)),
+        account::homes,
+    )
+
     /** This phone's home, if it has one yet (one home per phone). */
     suspend fun localHomeId(): String? = db.homeDao().observeAll().first().firstOrNull()?.id
 
@@ -104,6 +110,7 @@ class AppContainer(private val app: Application) {
         homesOnAccount = account::homes,
         localHomeIds = { db.homeDao().observeAll().first().map { it.id } },
         sync = { tenant -> syncCoordinatorSync(tenant) },
+        onPicked = { homeAccess.remember(it.id, com.kurtz.homerecord.core.share.HomeRole.parse(it.role)) },
     )
 
     private val connectivity = AndroidConnectivityMonitor(app)
@@ -185,6 +192,8 @@ class AppContainer(private val app: Application) {
         if (auth.state.value is AuthState.SignedIn) mediaDownloads.document(id) else com.kurtz.homerecord.core.photo.OnPhone.NotUploaded
 
     private suspend fun afterHomeSync(homeId: String) {
+        // The owner may have changed this account's role since the last pass (AC-H16).
+        homeAccess.refresh(homeId)
         val pass = homeMedia.afterSync(homeId)
         if (pass.queued > 0) com.kurtz.homerecord.core.media.MediaUploadWorker.schedule(app)
     }

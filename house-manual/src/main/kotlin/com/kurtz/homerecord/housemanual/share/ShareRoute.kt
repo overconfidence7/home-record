@@ -59,7 +59,11 @@ fun JoinRoute(container: AppContainer, token: String, onClose: () -> Unit) {
         key = "join:$token",
         factory = viewModelFactory {
             initializer {
-                JoinViewModel(token, container.auth.state, container.homeShare::accept, { container.cloudRestore.restore(it) }, container::localHomeId)
+                JoinViewModel(token, container.auth.state, { t ->
+                    container.homeShare.accept(t).also { r ->
+                        if (r is com.kurtz.homerecord.core.share.AcceptResult.Joined) container.homeAccess.remember(r.home.homeId, r.home.role)
+                    }
+                }, { container.cloudRestore.restore(it) }, container::localHomeId)
             }
         },
     )

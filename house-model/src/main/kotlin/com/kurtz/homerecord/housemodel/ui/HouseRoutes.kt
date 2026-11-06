@@ -54,6 +54,8 @@ fun HouseRoute(
     showHeader: Boolean = true,
     /** Field Log's handoff (AC-F51); no button when null. */
     onHandoff: (() -> Unit)? = null,
+    /** False for a viewer on a shared home (AC-H16). */
+    canEdit: Boolean = true,
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
@@ -95,6 +97,7 @@ fun HouseRoute(
         onBehindWall = onBehindWall,
         showHeader = showHeader,
         onHandoff = onHandoff,
+        canEdit = canEdit,
         onOpenMark = onOpenOverlay?.let { openOverlay ->
             { mark ->
                 when (val target = mark.target) {

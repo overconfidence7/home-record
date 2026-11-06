@@ -65,13 +65,14 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(state.homeName, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.testTag("hm_home_title"))
+            if (state.viewOnly) com.kurtz.homerecord.housemanual.share.ViewOnlyNote(Modifier.testTag("hm_home_view_only"))
             SearchBar(state.query) { onEvent(HomeEvent.QueryChanged(it)) }
             if (state.searching) {
                 SearchResults(state, onEvent)
                 return@Column
             }
-            QuickActions(state, onEvent)
-            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddShutoff) }, onOpen = { onEvent(HomeEvent.OpenEmergency) })
+            if (!state.viewOnly) QuickActions(state, onEvent)
+            EmergencyCard(state.shutoffCount, onAdd = { onEvent(HomeEvent.AddShutoff) }.takeUnless { state.viewOnly }, onOpen = { onEvent(HomeEvent.OpenEmergency) })
             Section(stringResource(R.string.home_attention)) {
                 if (state.attention.isEmpty()) {
                     Text(stringResource(R.string.home_attention_none), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_home_attention_none"))
@@ -126,7 +127,7 @@ private fun ActionButton(icon: ImageVector, label: Int, tag: String, filled: Boo
 }
 
 @Composable
-private fun EmergencyCard(count: Int, onAdd: () -> Unit, onOpen: () -> Unit) {
+private fun EmergencyCard(count: Int, onAdd: (() -> Unit)?, onOpen: () -> Unit) {
     // With shutoffs recorded the button opens HM-Emergency (AC-H11); without, it adds the first one.
     val modifier = Modifier.fillMaxWidth().testTag("hm_home_emergency")
     val body: @Composable () -> Unit = {
@@ -138,7 +139,7 @@ private fun EmergencyCard(count: Int, onAdd: () -> Unit, onOpen: () -> Unit) {
                 style = MaterialTheme.typography.bodyLarge,
             )
             if (count == 0) {
-                OutlinedButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_emergency_add")) {
+                if (onAdd != null) OutlinedButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_emergency_add")) {
                     Icon(Icons.Rounded.PowerOff, contentDescription = null)
                     Text(stringResource(R.string.home_emergency_add), modifier = Modifier.padding(start = 8.dp))
                 }
@@ -190,7 +191,7 @@ private fun SearchBar(query: String, onChange: (String) -> Unit) {
 @Composable
 private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
     if (state.results.isEmpty()) {
-        NoResults(state.query.trim(), onEvent)
+        NoResults(state.query.trim(), canAdd = !state.viewOnly, onEvent)
         return
     }
     Column {
@@ -209,15 +210,15 @@ private fun SearchResults(state: HomeUiState, onEvent: (HomeEvent) -> Unit) {
 /** Rule 11: no results says so and offers to clear the search or add the thing as an item. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun NoResults(query: String, onEvent: (HomeEvent) -> Unit) {
+private fun NoResults(query: String, canAdd: Boolean, onEvent: (HomeEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.home_search_none, query), style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("hm_home_search_none"))
-        Text(stringResource(R.string.home_search_none_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(if (canAdd) R.string.home_search_none_body else R.string.home_search_none_body_view_only), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { onEvent(HomeEvent.QueryChanged("")) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_search_none_clear")) {
                 Text(stringResource(R.string.home_search_clear))
             }
-            Button(onClick = { onEvent(HomeEvent.AddItem) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_search_none_add")) {
+            if (canAdd) Button(onClick = { onEvent(HomeEvent.AddItem) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_home_search_none_add")) {
                 Text(stringResource(R.string.items_add))
             }
         }

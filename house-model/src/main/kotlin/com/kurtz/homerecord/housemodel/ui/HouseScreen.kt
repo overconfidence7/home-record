@@ -91,6 +91,8 @@ fun HouseScreen(
     showHeader: Boolean = true,
     /** Field Log's handoff summary and `.homerecord` export (AC-F51); no button when null. */
     onHandoff: (() -> Unit)? = null,
+    /** False for a viewer on a shared home (AC-H16): no Edit plan, Floors or room menu; the plan only opens rooms. */
+    canEdit: Boolean = true,
 ) {
     val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
     val header: @Composable () -> Unit = {
@@ -117,8 +119,8 @@ fun HouseScreen(
                 EmptyState(
                     icon = Icons.Rounded.GridView,
                     headline = stringResource(R.string.house_floor_empty_title),
-                    body = stringResource(R.string.house_floor_empty_body),
-                    actionLabel = stringResource(R.string.house_edit_plan),
+                    body = stringResource(if (canEdit) R.string.house_floor_empty_body else R.string.house_floor_empty_body_view_only),
+                    actionLabel = if (canEdit) stringResource(R.string.house_edit_plan) else null,
                     onAction = onEditPlan,
                     actionModifier = Modifier.testTag("${LocalTagPrefix.current}_house_edit_plan"),
                 )
@@ -133,7 +135,7 @@ fun HouseScreen(
                     pins = pins,
                     onPinClick = onOpenPin,
                     onRoomClick = onOpenRoom,
-                    onRoomLongClick = { onEvent(HouseEvent.LongPressRoom(it)) },
+                    onRoomLongClick = { if (canEdit) onEvent(HouseEvent.LongPressRoom(it)) },
                     onMarkClick = onOpenMark,
                 )
             }
@@ -141,7 +143,13 @@ fun HouseScreen(
     }
     val hint: @Composable () -> Unit = {
         if (state.rooms.isNotEmpty()) {
-            val base = stringResource(if (pins.isEmpty()) R.string.house_blueprint_hint else R.string.house_blueprint_hint_pins)
+            val base = stringResource(
+                when {
+                    pins.isNotEmpty() -> R.string.house_blueprint_hint_pins
+                    canEdit -> R.string.house_blueprint_hint
+                    else -> R.string.house_blueprint_hint_view_only
+                },
+            )
             val marksShown = onOpenMark != null &&
                 (PlanMarks.visible(state.marks, state.layers).isNotEmpty() || state.overlays.any { state.layers.shows(it) })
             Text(
@@ -160,9 +168,9 @@ fun HouseScreen(
                 add(HouseAction("${prefix}_house_behind_wall", Icons.Rounded.PhotoCamera, R.string.house_behind_wall, onClick = onBehindWall))
             }
             // An empty floor already offers Edit plan in its empty state; one primary action only.
-            if (state.rooms.isNotEmpty()) add(HouseAction("${prefix}_house_edit_plan", Icons.Rounded.Edit, R.string.house_edit_plan, onClick = onEditPlan))
+            if (canEdit && state.rooms.isNotEmpty()) add(HouseAction("${prefix}_house_edit_plan", Icons.Rounded.Edit, R.string.house_edit_plan, onClick = onEditPlan))
             if (on3D != null && state.rooms.isNotEmpty()) add(HouseAction("${prefix}_house_3d", Icons.Rounded.ViewInAr, R.string.house_3d, onClick = on3D))
-            add(HouseAction("${prefix}_house_floors", Icons.Rounded.Layers, R.string.floors_row, onClick = onOpenFloors))
+            if (canEdit) add(HouseAction("${prefix}_house_floors", Icons.Rounded.Layers, R.string.floors_row, onClick = onOpenFloors))
             add(
                 HouseAction(
                     "${prefix}_house_export", Icons.Rounded.PictureAsPdf, R.string.house_export_pdf,
@@ -226,8 +234,8 @@ fun HouseScreen(
             else -> EmptyState(
                 icon = Icons.Rounded.Layers,
                 headline = stringResource(R.string.plan_no_floors_title),
-                body = stringResource(R.string.plan_no_floors_body),
-                actionLabel = stringResource(R.string.plan_open_floors),
+                body = stringResource(if (canEdit) R.string.plan_no_floors_body else R.string.house_floor_empty_body_view_only),
+                actionLabel = if (canEdit) stringResource(R.string.plan_open_floors) else null,
                 onAction = onOpenFloors,
                 modifier = m,
             )
