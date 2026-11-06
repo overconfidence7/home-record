@@ -50,6 +50,11 @@ data class PlanEditorUiState(
     val selectedOpeningId: String? = null,
     /** The editor can draw overlays (the app gave it the overlays repository). */
     val canEditOverlays: Boolean = false,
+    /**
+     * A viewer of a shared home (AC-H16) who opened a plan overlay: the floor in Overlays mode, read only. Overlays pick
+     * to show what they are; no rooms, Rooms mode, Add overlay, handles, Edit or Delete.
+     */
+    val viewOnly: Boolean = false,
     /** Overlays mode (AC-C25, AC-C28): taps draw and pick overlays instead of rooms; rooms stay put. */
     val overlayMode: Boolean = false,
     /** The floor's plan overlays, points in plan inches. Shown in both modes, picked only in Overlays mode. */

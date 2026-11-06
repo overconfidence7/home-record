@@ -108,6 +108,7 @@ object ScreenCatalog {
         QaScreen("room-view-only", nonRoot = true) { RoomViewOnlyPreview() },
         QaScreen("wall-overlays-view-only", nonRoot = true) { WallOverlaysViewOnlyPreview() },
         QaScreen("house-3d-empty-view-only", nonRoot = true) { House3DEmptyViewOnlyPreview() },
+        QaScreen("plan-view-only", nonRoot = true) { PlanEditorViewOnlyPreview() },
         QaScreen("panel-empty", nonRoot = true) { PanelEmptyPreview() },
         QaScreen("panel-din", nonRoot = true) { PanelDinPreview() },
         QaScreen("panel-clash", nonRoot = true) { PanelClashPreview() },

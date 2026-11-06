@@ -88,6 +88,7 @@
     <string name="plan_mode_overlays">Overlays</string>
     <string name="plan_overlays_draw_hint">Tap along the pipe, wire or duct on the plan. One tap marks a single spot like a floor drain.</string>
     <string name="plan_overlays_empty">No pipes, wires or ducts drawn on this floor yet. Tap Add overlay, then tap along the line on the plan.</string>
+    <string name="plan_overlays_empty_view_only">No pipes, wires or ducts drawn on this floor yet.</string>
     <string name="plan_overlays_pick_hint">Tap a line or a spot to pick it.</string>
     <string name="plan_overlays_no_rooms">Draw a room first. An overlay on the plan belongs to the room it starts in.</string>
     <string name="plan_overlays_save_failed">Couldn\'t save the overlay. Draw a room on this floor and try again.</string>

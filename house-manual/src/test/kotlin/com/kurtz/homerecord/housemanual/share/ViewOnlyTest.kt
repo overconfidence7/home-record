@@ -221,6 +221,31 @@ class ViewOnlyTest {
         rule.onNodeWithTag("hm_3d_edit_plan").assertDoesNotExist()
     }
 
+    @Test fun aPlanOverlayOpensReadOnly() {
+        val kitchen = PlanRoom("r1", "Kitchen", points = listOf(Pt(0, 0), Pt(168, 0), Pt(168, 144), Pt(0, 144)))
+        val gas = overlay("o1", wallId = null).copy(
+            kind = com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, label = "Range gas line",
+            points = listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(20f, 20f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(120f, 20f)),
+        )
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                com.kurtz.homerecord.housemodel.ui.PlanEditorScreen(
+                    com.kurtz.homerecord.housemodel.ui.PlanEditorUiState(
+                        loading = false, floorId = "f1", rooms = listOf(kitchen), canEditOverlays = true, overlayMode = true,
+                        overlays = listOf(gas), overlaySelectedId = "o1", viewOnly = true,
+                    ),
+                    {}, {},
+                )
+            }
+        }
+        rule.onNodeWithTag("hm_plan_selection").assertIsDisplayed()
+        rule.onNodeWithTag("hm_plan_overlay_done").assertExists()
+        listOf(
+            "hm_plan_overlay_edit", "hm_plan_overlay_delete", "hm_plan_add_overlay", "hm_plan_add_room",
+            "hm_plan_mode_rooms", "hm_plan_mode_overlays", "hm_plan_undo", "hm_plan_redo",
+        ).forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
+    }
+
     private fun overlay(id: String, wallId: String?) = com.kurtz.homerecord.housemodel.overlays.Overlay(
         id, "h1", "r1", wallId, com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Sink supply", null,
         com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,

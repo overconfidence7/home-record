@@ -2221,3 +2221,10 @@ fun House3DEmptyViewOnlyPreview() = Frame {
         house3dState({ copy(floorId = "f3", scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(emptyList(), 96, emptyMap())) }), {}, {}, null,
     )
 }
+
+/** A viewer on a shared home (AC-H16) who opened the range gas line: the floor read only, the line picked without handles; no Rooms/Overlays switch, Add overlay, Undo, Edit or Delete. */
+@ThemePreviews
+@Composable
+fun PlanEditorViewOnlyPreview() = Frame {
+    PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays, overlaySelectedId = "p1", viewOnly = true) }), {}, {}, "Maple St")
+}

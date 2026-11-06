@@ -1073,3 +1073,8 @@ fun WallOverlaysViewOnlyScreenshot() = WallOverlaysViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun House3DEmptyViewOnlyScreenshot() = House3DEmptyViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PlanEditorViewOnlyScreenshot() = PlanEditorViewOnlyPreview()

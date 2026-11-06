@@ -42,6 +42,8 @@ fun DrawScope.drawPlanOverlays(
     halo: Color,
     icons: Map<OverlayKind, VectorPainter>,
     selectedId: String? = null,
+    /** False when the picked run cannot be dragged (a viewer, AC-H16): it is drawn thicker but without handles. */
+    handles: Boolean = true,
 ) {
     overlays.filter { it.points.size >= 2 }.forEach { o ->
         drawRun(o.points.map(toScreen), o.kind.color(dark), halo, density, selected = o.id == selectedId)
@@ -50,7 +52,7 @@ fun DrawScope.drawPlanOverlays(
         drawSpot(toScreen(o.points[0]), o.kind, dark, halo, density, icons[o.kind], selected = o.id == selectedId)
     }
     // A picked run shows a handle on each point; a picked spot is its own handle, drawn with a wider ring.
-    overlays.firstOrNull { it.id == selectedId && it.points.size >= 2 }?.let { o ->
+    if (handles) overlays.firstOrNull { it.id == selectedId && it.points.size >= 2 }?.let { o ->
         o.points.map(toScreen).forEach { drawHandle(it, o.kind.color(dark), halo, density) }
     }
 }

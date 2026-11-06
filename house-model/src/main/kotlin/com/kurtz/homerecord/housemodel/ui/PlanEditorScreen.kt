@@ -175,7 +175,7 @@ fun PlanEditorScreen(
                 Icon(Icons.Rounded.CenterFocusStrong, contentDescription = stringResource(R.string.plan_fit))
             }
             // Undo and Redo step through room edits, so they leave the bar while overlays are being drawn.
-            if (!state.overlayMode) {
+            if (!state.overlayMode && !state.viewOnly) {
                 IconButton(onClick = { onEvent(PlanEditorEvent.Undo) }, enabled = state.canUndo, modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_undo")) {
                     Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(R.string.plan_undo))
                 }
@@ -185,7 +185,9 @@ fun PlanEditorScreen(
             }
         },
         floatingActionButton = {
-            if (!state.loading && state.floorId != null && overlayIdle && state.rooms.isNotEmpty()) {
+            if (state.viewOnly) {
+                // A viewer adds nothing (AC-H16).
+            } else if (!state.loading && state.floorId != null && overlayIdle && state.rooms.isNotEmpty()) {
                 ExtendedFloatingActionButton(
                     onClick = { onOverlay(WallOverlaysEvent.StartDrawing) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
@@ -212,7 +214,7 @@ fun PlanEditorScreen(
                 icon = Icons.Rounded.GridView,
                 headline = stringResource(R.string.plan_no_floors_title),
                 body = stringResource(R.string.plan_no_floors_body),
-                actionLabel = stringResource(R.string.plan_open_floors),
+                actionLabel = if (state.viewOnly) null else stringResource(R.string.plan_open_floors),
                 onAction = onOpenFloors,
                 modifier = Modifier.padding(padding),
             )
@@ -269,7 +271,7 @@ private fun PlanArea(
     Column(modifier) {
         if (showFloors) {
             FloorSwitcher(state, onEvent)
-            if (state.canEditOverlays) ModeSwitch(state.overlayMode, onEvent)
+            if (state.canEditOverlays && !state.viewOnly) ModeSwitch(state.overlayMode, onEvent)
             if (state.unplaced.isNotEmpty() && !state.overlayMode) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
         }
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
@@ -359,11 +361,12 @@ private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent
             }
             when {
                 drawing != null -> DrawingBar(drawing.size, onOverlay, screen = "plan", emptyHint = R.string.plan_overlays_draw_hint)
-                selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onOverlay, screen = "plan")
+                selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onOverlay, screen = "plan", canEdit = !state.viewOnly)
                 else -> Text(
                     stringResource(
                         when {
                             state.rooms.isEmpty() -> R.string.plan_overlays_no_rooms
+                            state.overlays.isEmpty() && state.viewOnly -> R.string.plan_overlays_empty_view_only
                             state.overlays.isEmpty() -> R.string.plan_overlays_empty
                             else -> R.string.plan_overlays_pick_hint
                         },
@@ -371,7 +374,7 @@ private fun OverlayPanel(state: PlanEditorUiState, onOverlay: (WallOverlaysEvent
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     // Under the plan the hint leaves room for the Add overlay button; beside it the button sits lower.
-                    modifier = Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (beside) 12.dp else 88.dp).testTag("${prefix}_plan_overlays_hint"),
+                    modifier = Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (beside || state.viewOnly) 12.dp else 88.dp).testTag("${prefix}_plan_overlays_hint"),
                 )
             }
         }
@@ -560,7 +563,7 @@ private fun PlanCanvas(
         val shown = dragged?.let { (id, index, to) ->
             state.overlays.map { o -> if (o.id == id && index in o.points.indices) o.copy(points = o.points.toMutableList().also { it[index] = to }) else o }
         } ?: state.overlays
-        drawPlanOverlays(shown, toScreen, density, dark, scheme.surface, overlayIcons, selectedId = state.overlaySelectedId.takeIf { state.overlayMode })
+        drawPlanOverlays(shown, toScreen, density, dark, scheme.surface, overlayIcons, selectedId = state.overlaySelectedId.takeIf { state.overlayMode }, handles = !state.viewOnly)
         state.drawing?.let { drawPendingRun(it.map(toScreen), scheme.primary, scheme.surface, density) }
     }
 }
@@ -608,7 +611,7 @@ private fun PlanRoomNodes(state: PlanEditorUiState, onEvent: (PlanEditorEvent) -
 
 /** In Overlays mode only a point of the picked overlay is grabbed; anything else pans, or picks and draws on a tap. */
 private fun overlayHit(s: PlanEditorUiState, xDp: Float, yDp: Float): Target {
-    val picked = s.selectedOverlay?.takeIf { s.drawing == null } ?: return Target.None
+    val picked = s.selectedOverlay?.takeIf { s.drawing == null && !s.viewOnly } ?: return Target.None
     val onScreen = picked.points.map { OverlayPoint(it.x * s.zoom + s.panX, it.y * s.zoom + s.panY) }
     return OverlayHitTest.pointAt(onScreen, xDp, yDp, HANDLE_HIT_DP)?.let { Target.OverlayHandle(picked.id, it) } ?: Target.None
 }

@@ -32,6 +32,8 @@ fun PlanEditorRoute(
     media: MediaFiles? = null,
     overlayStage: WallStage = WallStage.HouseManualDefault,
     overlayId: String? = null,
+    /** A viewer of a shared home (AC-H16): the plan opens read only in Overlays mode, [overlayId] picked; changes are dropped. */
+    viewOnly: Boolean = false,
 ) {
     val system = LocalUnitSystem.current
     val vm = viewModel<PlanEditorViewModel>(
@@ -45,8 +47,8 @@ fun PlanEditorRoute(
         },
     )
     // Leaving the editor (back arrow, system back, Floors) keeps a name or size still being typed.
-    DisposableEffect(vm) { onDispose { vm.onEvent(PlanEditorEvent.CommitFields) } }
-    val state = vm.state.collectAsState().value.copy(system = system)
+    DisposableEffect(vm) { onDispose { if (!viewOnly) vm.onEvent(PlanEditorEvent.CommitFields) } }
+    val state = vm.state.collectAsState().value.let { if (viewOnly) it.copy(viewOnly = true, overlayMode = true) else it }.copy(system = system)
     val onOverlay: (WallOverlaysEvent) -> Unit = { vm.onEvent(PlanEditorEvent.OverlayEvent(it)) }
     OverlayPhotoLaunchers(state.photoLaunch, onOverlay)
     // The overlay form's own handler, composed later, asks before discarding changes.
@@ -59,5 +61,14 @@ fun PlanEditorRoute(
             },
         )
     }
-    PlanEditorScreen(state, vm::onEvent, onBack, homeName, onOpenFloors)
+    PlanEditorScreen(state, { if (!viewOnly || PlanViewOnly.allows(it)) vm.onEvent(it) }, onBack, homeName, onOpenFloors)
+}
+
+/** What a viewer may do on the plan (AC-H16): change floor, pan, zoom, fit, and pick overlays; every edit is dropped. */
+internal object PlanViewOnly {
+    fun allows(event: PlanEditorEvent): Boolean = when (event) {
+        is PlanEditorEvent.SelectFloor, is PlanEditorEvent.Transform, is PlanEditorEvent.Fit, is PlanEditorEvent.Reveal -> true
+        is PlanEditorEvent.OverlayEvent -> WallViewOnly.allows(event.event)
+        else -> false
+    }
 }

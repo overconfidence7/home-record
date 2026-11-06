@@ -216,6 +216,7 @@ private fun HouseManualTabs(
                 container.homes, home.id, home.name, onBack = nav::pop, onOpenFloors = { nav.push(FloorsKey) },
                 floorId = key.floorId, roomId = key.roomId, editShape = key.editShape,
                 overlays = container.overlays, media = container.media, overlayId = key.overlayId,
+                viewOnly = !canEdit,
             )
         }
         entry<RemindersKey> { com.kurtz.homerecord.housemanual.reminders.RemindersRoute(container.reminders, home.id, onOpenItem = { nav.push(ItemDetailKey(it)) }, viewOnly = !canEdit) }
