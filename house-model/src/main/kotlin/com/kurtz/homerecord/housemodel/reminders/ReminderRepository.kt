@@ -10,6 +10,8 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /** One reminder as HM-Reminders lists it. [itemName] is set when it belongs to a live item. */
 data class ReminderRow(
@@ -55,6 +57,22 @@ class ReminderRepository(
                     if (row.bucket == ReminderBucket.DONE) -(row.lastDoneOn?.toEpochDay() ?: 0) else effectiveDue(row).toEpochDay()
                 }.thenBy { it.title.lowercase() })
         }
+
+    /** The home's picked climate zone, or null before one is picked. */
+    fun observeZone(homeId: String): Flow<ClimateZone?> =
+        db.homeDao().observeAll().map { homes -> ClimateZone.fromId(homes.firstOrNull { it.id == homeId }?.climateZone) }.distinctUntilChanged()
+
+    /** Rewrites one item's warranty reminders from its stored warranty end date (after any warranty or item save). */
+    suspend fun syncWarrantyFor(itemId: String) {
+        val item = db.itemDao().get(itemId) ?: return
+        val endsOn = db.warrantyDao().listFor(itemId).firstNotNullOfOrNull { w -> w.endsOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() } }
+        syncWarrantyReminders(item.homeId, item.id, item.name, endsOn)
+    }
+
+    /** Brings every item's warranty reminders of the home in step, e.g. for warranties stored before reminders existed. */
+    suspend fun syncAllWarranties(homeId: String) {
+        db.itemDao().listFor(homeId).forEach { syncWarrantyFor(it.id) }
+    }
 
     /** Live reminders of the home that are due now: what the daily notification counts (AC-C50). */
     suspend fun dueNow(homeId: String): List<MaintenanceTaskEntity> {
@@ -134,12 +152,13 @@ class ReminderRepository(
             val id = warrantyReminderId(itemId, lead)
             val row = dao.get(id)
             val date = wanted[lead]
+            val title = strings(R.string.reminder_warranty_ends).format(itemName)
             when {
                 date == null && row != null -> { dao.softDelete(id, at); onChange("maintenance_task", id) }
-                date != null && (row == null || row.dueOn != date.toString()) -> {
+                date != null && (row == null || row.dueOn != date.toString() || row.title != title) -> {
                     dao.upsert(
                         MaintenanceTaskEntity(
-                            id = id, homeId = homeId, itemId = itemId, title = strings(R.string.reminder_warranty_ends).format(itemName),
+                            id = id, homeId = homeId, itemId = itemId, title = title,
                             dueOn = date.toString(), createdAt = row?.createdAt ?: at, updatedAt = at, source = source,
                         ),
                     )

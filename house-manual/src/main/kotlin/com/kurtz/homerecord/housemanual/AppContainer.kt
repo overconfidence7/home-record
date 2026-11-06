@@ -109,6 +109,13 @@ class AppContainer(private val app: Application) {
         }
         // The Emergency widget shows the shutoff count (AC-H11); any item change may move it.
         if (entity == "item") runCatching { com.kurtz.homerecord.housemanual.emergency.EmergencyWidget().updateAll(app) }
+        // Warranty reminders follow the stored warranty end date and the item's name (AC-C49); run apart from the
+        // writer, which may still be inside its transaction.
+        if (entity == "item") scope.launch { reminders.syncWarrantyFor(id) }
+        if (entity == "warranty") scope.launch {
+            val itemId = db.warrantyDao().get(id)?.itemId
+            if (itemId != null) reminders.syncWarrantyFor(itemId) else homeId?.let { reminders.syncAllWarranties(it) }
+        }
     }
 
     val homes = HomeRepository(
@@ -141,6 +148,9 @@ class AppContainer(private val app: Application) {
     val power: com.kurtz.homerecord.core.mapping.PowerMonitor = com.kurtz.homerecord.core.mapping.BatteryPowerMonitor(app)
     val mappingAlarm: com.kurtz.homerecord.core.mapping.MappingAlarm = com.kurtz.homerecord.core.mapping.SystemMappingAlarm(app)
     val panels = com.kurtz.homerecord.housemodel.panel.PanelRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
+
+    /** HM-Reminders (AC-C49, AC-H12). */
+    val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 
     val upkeep = UpkeepRepository(db) { entity, id -> recordHomeChange(entity, id) }
 
