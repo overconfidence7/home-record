@@ -543,4 +543,16 @@
         <item quantity="one">%1$d link confirmed this time.</item>
         <item quantity="other">%1$d links confirmed this time.</item>
     </plurals>
+    <!-- The 08:00 reminder summary notification (AC-C50) -->
+    <string name="reminder_channel">Reminders</string>
+    <string name="reminder_channel_desc">One note at 8 AM when upkeep is due.</string>
+    <plurals name="reminder_notice_title">
+        <item quantity="one">%d reminder due</item>
+        <item quantity="other">%d reminders due</item>
+    </plurals>
+    <string name="reminder_notice_join">", "</string>
+    <plurals name="reminder_notice_more">
+        <item quantity="one">%1$s and %2$d more</item>
+        <item quantity="other">%1$s and %2$d more</item>
+    </plurals>
 </resources>

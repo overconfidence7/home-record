@@ -43,6 +43,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         incoming.value = handoffUri(intent)
         openEmergency(intent)
+        openReminders(intent)
+    }
+
+    /** The 08:00 reminder notification: the Reminders tab (AC-C50, AC-H12). */
+    private fun openReminders(intent: android.content.Intent?) {
+        if (com.kurtz.homerecord.housemanual.reminders.ReminderEntry.wants(intent)) container.tabRequests.request("reminders")
     }
 
     /** The quick settings tile or the widget: Home → Emergency, once the tabs are up (AC-H11). */
@@ -55,6 +61,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             incoming.value = handoffUri(intent)
             openEmergency(intent)
+            openReminders(intent)
         }
         enableEdgeToEdge()
         setContent {
