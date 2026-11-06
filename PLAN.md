@@ -436,6 +436,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T072c: daily 08:00 WorkManager check with one summary notification deep-linking to Reminders; notification permission asked after the first reminder exists (AC-C50, AC-H12)
 - [x] T073: Home report PDF (cover, blueprints, rooms with items and warranty status, shutoffs, legend) under 5 s for 40 items (acceptance: AC-H13)
 - [ ] T074: Encrypted backup export/restore (`BundleCrypto` `[unit]`), onboarding "Restore from a backup" (acceptance: AC-C48, AC-H14)
+  - [x] T074a: `BundleCrypto` `[unit]` (AES-256-GCM in 1 MiB checked blocks, PBKDF2-HMAC-SHA256 210k, random salt; wrong passphrase, damaged, cut short, newer version told apart) and `HomeBackup` (the `.homerecord` zip sealed and opened through one cache file) in :core bundle; the backup AC claim waits for T074b/T074c, which put it on screen
+  - [ ] T074b: HM-Backup (More → Backup and restore): passphrase and confirm, Make backup and share (`<home>-backup-<date>.hrbackup`); restore from a picked file: passphrase prompt, then the import preview worded as a restore (AC-C48, AC-H14)
+  - [ ] T074c: onboarding "Restore from a backup" on a fresh install (the restore lands on the tabs with the home), H16 flow and a JVM round trip of the AC-H14 home (3 floors, 12 rooms, 25 items, 10 wall photos, 15 overlays) (AC-C48, AC-H14)
 - [ ] T075: House Manual cloud sync: sign-in uploads the home (reuse the sync engine with `homeId` tenancy), second device sees it, merges, sign out keeps local; HM-Account screen (acceptance: AC-H15)
   - [ ] T075a: House Manual media to R2 in the home tenant: item photos, documents and wall photos (pass `upload`/`fetchMissing` to `WallPhotoRepository` as Field Log does since T048d) (AC-H15, AC-C17)
 - [ ] R14: Review T071–T075
