@@ -165,7 +165,7 @@ class AppContainer(app: Application) {
             homeId = { db.homeDao().observeAll().first().firstOrNull()?.id },
         )
 
-    val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing)
+    val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing, items::countPanels)
 
     init {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.

@@ -36,9 +36,11 @@ fun ItemEditRoute(
     scanPlate: Boolean = false,
     onClose: () -> Unit,
     afterCreate: (String) -> Unit = {},
+    saveBlocked: suspend (com.kurtz.homerecord.housemodel.items.ItemDraft) -> Boolean = { false },
+    onLimit: () -> Unit = {},
 ) {
     val vm = viewModel<ItemEditViewModel>(
-        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, vision, roomId, afterCreate, subtypeId) } },
+        factory = viewModelFactory { initializer { ItemEditViewModel(items, homes, homeId, itemId, createSavedStateHandle(), media, recognizer, vision, roomId, afterCreate, subtypeId, saveBlocked) } },
     )
     val state = vm.state.collectAsState().value
     var scanOffered by rememberSaveable { mutableStateOf(false) }
@@ -49,6 +51,12 @@ fun ItemEditRoute(
         }
     }
     LaunchedEffect(state.savedItemId) { if (state.savedItemId != null) onClose() }
+    LaunchedEffect(state.limitReached) {
+        if (state.limitReached) {
+            vm.onEvent(ItemEditEvent.LimitHandled)
+            onLimit()
+        }
+    }
     // The pending kind and file live in the view model's SavedStateHandle, so a result after rotation or process death still lands.
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> vm.onEvent(ItemEditEvent.CameraResult(ok)) }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->

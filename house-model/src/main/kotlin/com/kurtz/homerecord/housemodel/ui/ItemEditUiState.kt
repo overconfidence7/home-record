@@ -52,6 +52,8 @@ data class ItemEditUiState(
     val saving: Boolean = false,
     /** Set once the item is stored; the route closes the form. */
     val savedItemId: String? = null,
+    /** The save was refused by the plan's limit; the route opens the paywall once and sends [ItemEditEvent.LimitHandled]. */
+    val limitReached: Boolean = false,
     val missing: Boolean = false,
 ) {
     val isNew: Boolean get() = draft.id == null
@@ -81,4 +83,5 @@ sealed interface ItemEditEvent {
     data object PlateApply : ItemEditEvent
     data object PlateDismiss : ItemEditEvent
     data object Save : ItemEditEvent
+    data object LimitHandled : ItemEditEvent
 }

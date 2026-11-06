@@ -102,6 +102,28 @@ class ItemEditViewModelTest {
         assertThat(items.get(checkNotNull(id))?.subtype).isEqualTo("furnace")
     }
 
+    @AcceptanceCriterion("AC-H18")
+    @Test fun aSaveTheFreeTierRefusesKeepsTheDraftAndAsksForThePaywallOnce() = runTest {
+        home()
+        val main = checkNotNull(items.save(homeId, com.kurtz.homerecord.housemodel.items.ItemDraft(subtypeId = "breaker_panel", roomId = PseudoRooms.WHOLE_HOUSE, name = "Main panel")))
+        assertThat(items.countPanels(homeId)).isEqualTo(1)
+        assertThat(items.countPanels(homeId, exceptItemId = main)).isEqualTo(0)
+        val vm = ItemEditViewModel(
+            items, homes, homeId, null, SavedStateHandle(), media, recognizer, vision, initialSubtypeId = "sub_panel",
+            saveBlocked = { items.countPanels(homeId, it.id) >= 1 },
+        ).also { created += it }
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.PickRoom(PseudoRooms.WHOLE_HOUSE))
+        vm.onEvent(ItemEditEvent.Save)
+        val refused = vm.state.first { it.limitReached }
+        assertThat(refused.savedItemId).isNull()
+        assertThat(refused.saving).isFalse()
+        assertThat(refused.draft.subtypeId).isEqualTo("sub_panel")
+        assertThat(items.countPanels(homeId)).isEqualTo(1)
+        vm.onEvent(ItemEditEvent.LimitHandled)
+        assertThat(vm.state.value.limitReached).isFalse()
+    }
+
     @AcceptanceCriterion("AC-H2")
     @Test fun addShutoffOpensWithTheShutoffTypeChosen() = runTest {
         home()

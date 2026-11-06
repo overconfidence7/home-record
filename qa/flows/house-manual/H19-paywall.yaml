@@ -1,4 +1,5 @@
-# Walkthrough H19: Pro paywall from the More tab (AC-H18). Plans need the Test Store key; without it the Retry state shows.
+# Walkthrough H19: Pro paywall from the More tab and from the second panel (AC-H18). Plans need the Test Store key;
+# without it the Retry state shows. QA builds have no key, so the free tier's limits hold.
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _onboard.yaml
@@ -10,3 +11,54 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_paywall_reason"
 - takeScreenshot: H19-paywall
+# AC-H18 (second panel): the free tier files one breaker panel; saving a second one opens the paywall instead
+- tapOn:
+    id: "hm_tab_items"
+- tapOn:
+    id: "hm_items_add"
+- tapOn:
+    id: "hm_item_type"
+- tapOn:
+    id: "hm_item_type_search"
+- inputText: "panel"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_type_breaker_panel"
+    timeout: 5000
+- tapOn:
+    id: "hm_item_type_breaker_panel"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Whole house"
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_fab"
+    timeout: 10000
+- assertVisible: "Breaker panel.*"
+- tapOn:
+    id: "hm_items_fab"
+- tapOn:
+    id: "hm_item_type"
+- tapOn:
+    id: "hm_item_type_search"
+- inputText: "panel"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_type_sub_panel"
+    timeout: 5000
+- tapOn:
+    id: "hm_item_type_sub_panel"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Whole house"
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    visible:
+      id: "hm_paywall_reason"
+      text: "The free tier holds one panel."
+    timeout: 10000
+- assertVisible: "Restore purchases"
+- takeScreenshot: H19-second-panel

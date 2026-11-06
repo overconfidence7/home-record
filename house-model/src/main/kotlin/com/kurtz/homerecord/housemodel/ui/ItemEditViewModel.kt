@@ -37,6 +37,8 @@ class ItemEditViewModel(
     initialRoomId: String? = null,
     private val afterCreate: (String) -> Unit = {},
     initialSubtypeId: String? = null,
+    /** True when the app's plan refuses this save (House Manual's free tier and a second panel, AC-H18); the draft stays and [ItemEditUiState.limitReached] is set. */
+    private val saveBlocked: suspend (com.kurtz.homerecord.housemodel.items.ItemDraft) -> Boolean = { false },
 ) : ViewModel() {
     private var original = ItemDraft(
         roomId = initialRoomId,
@@ -133,6 +135,7 @@ class ItemEditViewModel(
             }
             ItemEditEvent.PlateDismiss -> _state.update { it.copy(plateScan = null) }
             ItemEditEvent.Save -> save()
+            ItemEditEvent.LimitHandled -> _state.update { it.copy(limitReached = false) }
         }
     }
 
@@ -240,6 +243,10 @@ class ItemEditViewModel(
         }
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
+            if (saveBlocked(current.draft)) {
+                _state.update { it.copy(saving = false, limitReached = true) }
+                return@launch
+            }
             val id = items.save(homeId, current.draft)
             if (id != null && current.draft.id == null) afterCreate(id)
             _state.update { it.copy(saving = false, savedItemId = id, dirty = false) }

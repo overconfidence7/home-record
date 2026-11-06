@@ -44,6 +44,7 @@ import com.kurtz.homerecord.housemanual.house.OnboardingRoute
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.housemanual.more.MoreEvent
 import com.kurtz.homerecord.housemanual.more.MoreScreen
+import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.coreui.shell.AppTab
 import com.kurtz.homerecord.coreui.shell.HomeRecordApp
@@ -202,7 +203,9 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
             )
         }
         entry<ItemEditKey> { key ->
-            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty)
+            ItemEditRoute(container.items, container.homes, container.media, container.textRecognizer, container.lookupApi, home.id, key.itemId, key.roomId, key.subtypeId, key.scanPlate, onClose = nav::pop, afterCreate = container::autoLookupWarranty,
+                saveBlocked = { container.addItemGate.saveBlocked(home.id, it) }, onLimit = { nav.push(PaywallKey(LimitedFeature.SecondPanel)) },
+            )
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
         entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot) }
@@ -282,7 +285,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
     })
 }
 
-/** The 16th free item opens HM-Paywall instead of the form (AC-H18); [AddItemGate] decides. */
+/** The 16th free item, or a second free panel, opens HM-Paywall instead of the form (AC-H18); [AddItemGate] decides. */
 private fun addItem(scope: kotlinx.coroutines.CoroutineScope, container: AppContainer, homeId: String, nav: com.kurtz.homerecord.coreui.shell.ShellNav, roomId: String? = null, subtypeId: String? = null, scanPlate: Boolean = false) {
     scope.launch { nav.push(container.addItemGate.destination(homeId, roomId, subtypeId, scanPlate)) }
 }

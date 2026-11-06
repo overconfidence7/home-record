@@ -108,6 +108,10 @@ class ItemRepository(
     /** Items the home holds now (not deleted); the free tier's limit counts these. */
     suspend fun count(homeId: String): Int = db.itemDao().observeFor(homeId).first().size
 
+    /** Breaker panels the home holds now, leaving out [exceptItemId] (the item being edited); the free tier allows one (AC-H18). */
+    suspend fun countPanels(homeId: String, exceptItemId: String? = null): Int =
+        db.itemDao().observeFor(homeId).first().count { com.kurtz.homerecord.housemodel.panel.isPanelSubtype(it.subtype) && it.id != exceptItemId }
+
     /** Every live item of the home as list rows; warranty status is as of today. [pseudoNames] labels Exterior and Whole house. */
     fun observeRows(homeId: String, pseudoNames: Map<String, String>): Flow<List<ItemRow>> =
         combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId), db.warrantyDao().observeAll()) { items, rooms, warranties ->
