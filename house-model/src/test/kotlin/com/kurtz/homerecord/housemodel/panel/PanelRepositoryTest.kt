@@ -172,4 +172,25 @@ class PanelRepositoryTest {
         assertThat(rows.single().panelName).isEqualTo("Main panel")
         assertThat(rows.single().amps).isEqualTo(30)
     }
+
+    // AC-C42: a mapping-mode pick confirms the link (existing Likely link upgraded, a new one made Confirmed)
+    @AcceptanceCriterion("AC-C42")
+    @Test fun mappingPickConfirmsTheLink() = runTest {
+        val panel = repo.ensurePanel("panel-item")
+        val id = (repo.saveBreaker(panel, BreakerDraft(startSlot = 9, label = "Kitchen", roomIds = setOf("kitchen"))) as BreakerSave.Saved).id
+        assertThat(repo.confirmLink(id, roomId = null, itemId = null)).isFalse()
+        assertThat(repo.confirmLink("missing", roomId = "kitchen", itemId = null)).isFalse()
+
+        assertThat(repo.confirmLink(id, roomId = "kitchen", itemId = "fridge", endpointLabel = " Outlet left of sink ")).isTrue()
+        val state = checkNotNull(repo.observe("panel-item").first())
+        val links = state.links.getValue(id)
+        assertThat(links).hasSize(2)
+        assertThat(links.map { it.confidence }.toSet()).containsExactly("CONFIRMED")
+        assertThat(links.map { it.endpointLabel }.toSet()).containsExactly("Outlet left of sink")
+        assertThat(state.breaker(id)?.confidence).isEqualTo(com.kurtz.homerecord.core.model.LinkConfidence.CONFIRMED)
+
+        // Saving the breaker form afterwards keeps the confirmed links as they are.
+        repo.saveBreaker(panel, checkNotNull(repo.draftFor(id)))
+        assertThat(checkNotNull(repo.observe("panel-item").first()).links.getValue(id).map { it.confidence }.toSet()).containsExactly("CONFIRMED")
+    }
 }

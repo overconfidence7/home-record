@@ -209,6 +209,35 @@ class PanelRepository(
         onChange("breaker", id)
     }
 
+    /**
+     * Mapping mode found it (AC-C42): the breaker feeds [roomId] and/or [itemId], so those links become Confirmed (made
+     * when missing) and the breaker itself is marked Confirmed. False when the breaker is gone or nothing was picked.
+     */
+    suspend fun confirmLink(breakerId: String, roomId: String?, itemId: String?, endpointLabel: String? = null): Boolean {
+        if (roomId == null && itemId == null) return false
+        val breaker = db.breakerDao().get(breakerId)?.takeIf { it.deletedAt == null } ?: return false
+        val at = now()
+        val current = db.breakerLinkDao().listFor(breakerId)
+        val label = endpointLabel?.trim()?.ifBlank { null }
+        fun confirm(existing: BreakerLinkEntity?, room: String?, item: String?) = existing?.copy(
+            confidence = LinkConfidence.CONFIRMED.name, endpointLabel = label ?: existing.endpointLabel, updatedAt = at,
+        ) ?: BreakerLinkEntity(
+            id = Ids.newId(), breakerId = breakerId, roomId = room, itemId = item, endpointLabel = label,
+            confidence = LinkConfidence.CONFIRMED.name, createdAt = at, updatedAt = at,
+        )
+        val links = listOfNotNull(
+            roomId?.let { id -> confirm(current.firstOrNull { it.roomId == id }, id, null) },
+            itemId?.let { id -> confirm(current.firstOrNull { it.itemId == id }, null, id) },
+        )
+        links.forEach {
+            db.breakerLinkDao().upsert(it)
+            onChange("breaker_link", it.id)
+        }
+        db.breakerDao().upsert(breaker.copy(confidence = LinkConfidence.CONFIRMED.name, updatedAt = at))
+        onChange("breaker", breakerId)
+        return true
+    }
+
     private suspend fun syncLinks(breakerId: String, roomIds: Set<String>, itemIds: Set<String>, at: Long) {
         val current = db.breakerLinkDao().listFor(breakerId)
         current.filter { (it.roomId != null && it.roomId !in roomIds) || (it.itemId != null && it.itemId !in itemIds) }.forEach {
