@@ -214,4 +214,27 @@ class ItemRepositoryTest {
         assertThat(listOf(onPlan.wallId, onPlan.wallX, onPlan.wallY, onPlan.planX)).containsExactly(null, null, null, 80).inOrder()
         assertThat(repo.setWallSpot(id, "w-gone", 0.5f, 0.5f)).isFalse()
     }
+
+    // AC-C44: shutoffs for HM-Emergency carry the notes as instructions and the first photo, mains first per group
+    @Test
+    @AcceptanceCriterion("AC-C44")
+    fun shutoffsComeGroupedWithInstructionsPhotoAndRoom() = runTest {
+        db.floorDao().upsert(com.kurtz.homerecord.core.data.FloorEntity(id = "f1", homeId = "h1", name = "Main", sortOrder = 0, createdAt = 1, updatedAt = 1))
+        db.roomDao().upsert(RoomEntity(id = "base", floorId = "f1", name = "Basement", createdAt = 1, updatedAt = 1))
+        fun item(id: String, sub: String, name: String, notes: String? = null, cat: String = "SHUTOFFS", deleted: Long? = null) =
+            com.kurtz.homerecord.core.data.ItemEntity(id = id, homeId = "h1", roomId = "base", category = cat, subtype = sub, name = name, notes = notes, createdAt = 1, updatedAt = 1, deletedAt = deleted)
+        db.itemDao().upsert(item("sink", "fixture_shutoff", "Kitchen sink cold valve"))
+        db.itemDao().upsert(item("wm", "water_main", "Water main", notes = "  Turn the red handle a quarter turn.  "))
+        db.itemDao().upsert(item("old", "gas_main", "Old gas valve", deleted = 9))
+        db.itemDao().upsert(item("fridge", "refrigerator", "Refrigerator", cat = "APPLIANCES"))
+        db.photoDao().upsert(com.kurtz.homerecord.core.data.PhotoEntity(id = "p1", homeId = "h1", itemId = "wm", path = "/media/wm.jpg", takenAt = 1, createdAt = 1, updatedAt = 1))
+        val sections = repo.observeShutoffs("h1", emptyMap()).first()
+        assertThat(sections.map { it.group }).containsExactly(com.kurtz.homerecord.core.model.ShutoffGroup.WATER)
+        val main = sections.single().shutoffs.first()
+        assertThat(main.itemId).isEqualTo("wm")
+        assertThat(main.instructions).isEqualTo("Turn the red handle a quarter turn.")
+        assertThat(main.photoPath).isEqualTo("/media/wm.jpg")
+        assertThat(main.roomName).isEqualTo("Basement")
+        assertThat(sections.single().shutoffs.map { it.itemId }).containsExactly("wm", "sink").inOrder()
+    }
 }

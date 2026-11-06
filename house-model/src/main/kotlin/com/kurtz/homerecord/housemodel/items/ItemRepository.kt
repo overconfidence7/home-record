@@ -128,6 +128,24 @@ class ItemRepository(
             }
         }
 
+    /**
+     * HM-Emergency (AC-C44): the home's live shutoff items, grouped Water / Gas / Electrical / HVAC / Other with mains
+     * first. A shutoff's instructions are its notes and its photo the first photo taken of it.
+     */
+    fun observeShutoffs(homeId: String, pseudoNames: Map<String, String>): Flow<List<com.kurtz.homerecord.core.model.ShutoffSection>> =
+        combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId), db.photoDao().observeFor(homeId)) { items, rooms, photos ->
+            val roomNames = rooms.associate { it.id to it.name }
+            val firstPhoto = photos.filter { it.itemId != null && it.path.isNotEmpty() }.groupBy { it.itemId }.mapValues { (_, p) -> p.first().path }
+            val shutoffs = items.filter { ItemCategory.orOther(it.category) == ItemCategory.SHUTOFFS }.map { i ->
+                com.kurtz.homerecord.core.model.Shutoff(
+                    itemId = i.id, name = i.name, subtypeId = i.subtype,
+                    roomName = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }.orEmpty(),
+                    instructions = i.notes.orEmpty().trim(), photoPath = firstPhoto[i.id], createdAt = i.createdAt,
+                )
+            }
+            com.kurtz.homerecord.core.model.ShutoffGroups.sections(shutoffs)
+        }
+
     /** HM-Home: attention rows, recent items and the shutoff count, as of today (AC-H2). */
     fun observeHomeSummary(homeId: String, pseudoNames: Map<String, String>): Flow<com.kurtz.homerecord.housemodel.home.HomeSummary> =
         combine(observeRows(homeId, pseudoNames), db.maintenanceTaskDao().observeFor(homeId)) { rows, tasks ->
