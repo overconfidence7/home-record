@@ -54,7 +54,7 @@ class EmergencyScreenTest {
         show(EmergencyUiState(loading = false, sections = sections))
         rule.onNodeWithTag("hm_emergency_group_water").assertIsDisplayed()
         // Water main before the kitchen valve inside the Water group
-        val rows = rule.onAllNodesWithTag("hm_emergency_shutoff", useUnmergedTree = true).fetchSemanticsNodes()
+        val rows = rule.onAllNodes(tagPrefix("hm_emergency_shutoff_"), useUnmergedTree = true).fetchSemanticsNodes()
         val tops = rows.map { it.boundsInRoot.top }
         assertThat(tops).isInOrder()
         assertThat(rule.onNodeWithText("Water main shutoff").fetchSemanticsNode().boundsInRoot.top)
@@ -77,7 +77,7 @@ class EmergencyScreenTest {
     @Test
     fun tappingAShutoffOpensItsItem() {
         show(EmergencyUiState(loading = false, sections = sections))
-        rule.onAllNodesWithTag("hm_emergency_shutoff").onFirst().assertHeightIsAtLeast(48.dp).performClick()
+        rule.onNodeWithTag("hm_emergency_shutoff_water_1").assertHeightIsAtLeast(48.dp).performClick()
         assertThat(events.last()).isEqualTo(EmergencyEvent.Open("w"))
     }
 
@@ -88,4 +88,9 @@ class EmergencyScreenTest {
         rule.onNodeWithTag("hm_emergency_add").performClick()
         assertThat(events.last()).isEqualTo(EmergencyEvent.Add)
     }
+}
+
+/** Every node whose test tag starts with [prefix] (one tag per shutoff row). */
+private fun tagPrefix(prefix: String) = androidx.compose.ui.test.SemanticsMatcher("testTag starts with $prefix") {
+    androidx.compose.ui.semantics.SemanticsProperties.TestTag in it.config && it.config[androidx.compose.ui.semantics.SemanticsProperties.TestTag].startsWith(prefix)
 }

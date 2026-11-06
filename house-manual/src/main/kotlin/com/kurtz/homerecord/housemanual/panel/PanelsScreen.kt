@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ElectricalServices
 import androidx.compose.material3.Icon
@@ -37,7 +38,7 @@ fun PanelsScreen(state: PanelsUiState, onEvent: (PanelsEvent) -> Unit) {
                 actionModifier = Modifier.testTag("hm_panels_add"),
             )
             else -> LazyColumn(Modifier.padding(padding).fillMaxWidth(), contentPadding = PaddingValues(vertical = 8.dp)) {
-                items(state.panels, key = { it.id }) { row ->
+                itemsIndexed(state.panels, key = { _, row -> row.id }) { i, row ->
                     val type = ItemCategory.subtype(row.subtypeId)?.let { stringResource(it.labelRes) }
                     RecordListItem(
                         headline = row.name,
@@ -45,7 +46,7 @@ fun PanelsScreen(state: PanelsUiState, onEvent: (PanelsEvent) -> Unit) {
                             .joinToString(" · "),
                         leading = { Icon(Icons.Rounded.ElectricalServices, contentDescription = null) },
                         onClick = { onEvent(PanelsEvent.Open(row.id)) },
-                        modifier = Modifier.testTag("hm_panels_row"),
+                        modifier = Modifier.testTag("hm_panels_row_${i + 1}"),
                     )
                 }
             }

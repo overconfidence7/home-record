@@ -134,6 +134,9 @@ class PanelScreenTest {
         rule.onNodeWithTag("hm_panel_slot_1").performScrollTo().performClick()
         rule.onNodeWithTag("hm_panel_slot_2").performScrollTo().performTouchInput { longClick() }
         rule.onNodeWithTag("hm_panel_slot_5_b").performScrollTo().performClick()
+        // R13: each tandem half is a 48 dp touch target
+        rule.onNodeWithTag("hm_panel_slot_5_a").assertHeightIsAtLeast(48.dp)
+        rule.onNodeWithTag("hm_panel_slot_5_b").assertHeightIsAtLeast(48.dp)
         assertThat(events).containsExactly(
             PanelEvent.OpenSlot(4), PanelEvent.OpenBreaker("r"), PanelEvent.AddTandem(2), PanelEvent.OpenBreaker("g"),
         ).inOrder()

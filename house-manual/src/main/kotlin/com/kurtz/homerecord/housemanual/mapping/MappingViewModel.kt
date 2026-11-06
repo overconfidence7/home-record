@@ -37,7 +37,8 @@ class MappingViewModel(
 
     private val pick = MutableStateFlow(Pick())
     private val confirmed = MutableStateFlow(0)
-    private var panelId: String? = null
+    /** True while a Save is writing; a second tap must not confirm the link twice (R13). */
+    private var saving = false
 
     private val panel: Flow<PanelState?> = repo.observe(itemId)
 
@@ -45,7 +46,6 @@ class MappingViewModel(
         itemName, panel.onStart { emit(null) }, choices.onStart { emit(FeedChoices()) }, controller.state,
         combine(pick, confirmed) { p, c -> p to c },
     ) { name, p, c, m, (pk, count) ->
-        panelId = p?.panel?.id
         MappingUiState(
             loading = p == null,
             panelName = name.orEmpty(),
@@ -84,11 +84,16 @@ class MappingViewModel(
             MappingEvent.Save -> {
                 val p = pick.value
                 val breaker = p.breakerId ?: return
-                if (p.roomId == null && p.itemId == null) return
+                if (p.roomId == null && p.itemId == null || saving) return
+                saving = true
                 viewModelScope.launch {
-                    if (repo.confirmLink(breaker, p.roomId, p.itemId)) confirmed.value += 1
-                    pick.value = Pick()
-                    controller.pickDone()
+                    try {
+                        if (repo.confirmLink(breaker, p.roomId, p.itemId)) confirmed.value += 1
+                        pick.value = Pick()
+                        controller.pickDone()
+                    } finally {
+                        saving = false
+                    }
                 }
             }
         }

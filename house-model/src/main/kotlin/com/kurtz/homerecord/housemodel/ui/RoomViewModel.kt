@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,7 +41,7 @@ class RoomViewModel(
     /** Offers "Add an item here" when the room lists items; false for a member who may only read them. */
     canAddItem: Boolean = itemRows != null,
     /** Breakers feeding the room (AC-C41); null hides the section's rows where the app keeps no panels. */
-    feeding: Flow<List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>>? = null,
+    feeding: Flow<List<FeedingBreaker>>? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         RoomUiState(

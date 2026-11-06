@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -88,7 +89,9 @@ fun EmergencyScreen(state: EmergencyUiState, onEvent: (EmergencyEvent) -> Unit, 
             ) {
                 state.sections.forEach { section ->
                     item(key = "h-" + section.group.name) { GroupHeader(section.group) }
-                    items(section.shutoffs, key = { it.itemId }) { ShutoffBlock(it, previewPhoto, onEvent) }
+                    itemsIndexed(section.shutoffs, key = { _, s -> s.itemId }) { i, s ->
+                        ShutoffBlock(s, "${section.group.name.lowercase()}_${i + 1}", previewPhoto, onEvent)
+                    }
                 }
                 item(key = "manage") { Manage(onEvent) }
             }
@@ -110,12 +113,12 @@ private fun GroupHeader(group: ShutoffGroup) {
 }
 
 @Composable
-private fun ShutoffBlock(s: Shutoff, previewPhoto: Painter?, onEvent: (EmergencyEvent) -> Unit) {
+private fun ShutoffBlock(s: Shutoff, tag: String, previewPhoto: Painter?, onEvent: (EmergencyEvent) -> Unit) {
     Column(Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
         // The name opens the item to change instructions or photo; the whole row is the 48 dp target.
         Row(
             Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { onEvent(EmergencyEvent.Open(s.itemId)) }
-                .padding(horizontal = 16.dp, vertical = 8.dp).testTag("hm_emergency_shutoff"),
+                .padding(horizontal = 16.dp, vertical = 8.dp).testTag("hm_emergency_shutoff_$tag"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {

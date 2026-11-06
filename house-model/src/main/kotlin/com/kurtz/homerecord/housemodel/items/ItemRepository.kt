@@ -1,5 +1,10 @@
 package com.kurtz.homerecord.housemodel.items
 
+import com.kurtz.homerecord.core.model.Shutoff
+import com.kurtz.homerecord.core.model.ShutoffGroups
+import com.kurtz.homerecord.core.model.ShutoffSection
+import com.kurtz.homerecord.housemodel.panel.isPanelSubtype
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.kurtz.homerecord.core.units.Money
 import androidx.room.withTransaction
 import com.kurtz.homerecord.core.Ids
@@ -114,7 +119,7 @@ class ItemRepository(
 
     /** Breaker panels the home holds now, leaving out [exceptItemId] (the item being edited); the free tier allows one (AC-H18). */
     suspend fun countPanels(homeId: String, exceptItemId: String? = null): Int =
-        db.itemDao().observeFor(homeId).first().count { com.kurtz.homerecord.housemodel.panel.isPanelSubtype(it.subtype) && it.id != exceptItemId }
+        db.itemDao().observeFor(homeId).first().count { isPanelSubtype(it.subtype) && it.id != exceptItemId }
 
     /** Every live item of the home as list rows; warranty status is as of today. [pseudoNames] labels Exterior and Whole house. */
     fun observeRows(homeId: String, pseudoNames: Map<String, String>): Flow<List<ItemRow>> =
@@ -136,18 +141,18 @@ class ItemRepository(
      * HM-Emergency (AC-C44): the home's live shutoff items, grouped Water / Gas / Electrical / HVAC / Other with mains
      * first. A shutoff's instructions are its notes and its photo the first photo taken of it.
      */
-    fun observeShutoffs(homeId: String, pseudoNames: Map<String, String>): Flow<List<com.kurtz.homerecord.core.model.ShutoffSection>> =
+    fun observeShutoffs(homeId: String, pseudoNames: Map<String, String>): Flow<List<ShutoffSection>> =
         combine(db.itemDao().observeFor(homeId), db.roomDao().observeForHome(homeId), db.photoDao().observeFor(homeId)) { items, rooms, photos ->
             val roomNames = rooms.associate { it.id to it.name }
             val firstPhoto = photos.filter { it.itemId != null && it.path.isNotEmpty() }.groupBy { it.itemId }.mapValues { (_, p) -> p.first().path }
             val shutoffs = items.filter { ItemCategory.orOther(it.category) == ItemCategory.SHUTOFFS }.map { i ->
-                com.kurtz.homerecord.core.model.Shutoff(
+                Shutoff(
                     itemId = i.id, name = i.name, subtypeId = i.subtype,
                     roomName = i.roomId?.let { roomNames[it] ?: pseudoNames[it] }.orEmpty(),
                     instructions = i.notes.orEmpty().trim(), photoPath = firstPhoto[i.id], createdAt = i.createdAt,
                 )
             }
-            com.kurtz.homerecord.core.model.ShutoffGroups.sections(shutoffs)
+            ShutoffGroups.sections(shutoffs)
         }
 
     /** HM-Home: attention rows, recent items and the shutoff count, as of today (AC-H2). */
@@ -225,7 +230,7 @@ class ItemRepository(
     }
 
     /** The shutoff that isolates item [itemId] (AC-C45); null when none is linked or that shutoff was deleted. */
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun observeShutoffFor(itemId: String): Flow<ItemEntity?> =
         db.itemDao().observeOne(itemId).map { it?.shutoffItemId }.distinctUntilChanged()
             .flatMapLatest { sid -> sid?.let { db.itemDao().observeOne(it) } ?: flowOf(null) }

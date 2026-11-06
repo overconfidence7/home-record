@@ -30,14 +30,15 @@ data class LegendWords(
 
 /**
  * The panel legend (AC-C43): one row per slot in slot order. A breaker's row says its label, amps and what it feeds; a
- * two-pole breaker's second slot points back at its first ("with 1"); a tandem slot lists both halves.
+ * two-pole breaker's second slot points back at its first ("with 1"); a tandem slot, or a slot two breakers
+ * clash over, lists both.
  */
 object PanelLegend {
     fun rows(panel: Panel, breakers: List<Breaker>, feeds: Map<String, List<String>>, words: LegendWords): List<LegendRow> {
-        val grid = SlotOccupancy.grid(panel.layout, panel.slotCount, breakers)
-        val placed = breakers.filter { it.id !in grid.unplaced }
+        // Every breaker prints, even one whose slots clash with another (two phones edited the panel apart): the
+        // legend on the door must not hide a breaker the screen still shows under "Not placed".
         return (1..panel.slotCount).map { slot ->
-            val here = placed.filter { slot in it.slots }.sortedBy { it.createdAt }
+            val here = breakers.filter { slot in it.slots }.sortedBy { it.createdAt }
             when {
                 here.isEmpty() -> LegendRow(slot, words.open, open = true)
                 here.size == 1 && here[0].number != slot -> LegendRow(slot, "${describe(here[0], feeds, words)} (${words.withSlot(here[0].number)})", open = false)

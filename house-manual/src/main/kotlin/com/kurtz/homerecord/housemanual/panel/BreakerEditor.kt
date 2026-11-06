@@ -131,11 +131,11 @@ private fun FeedPicker(title: String, empty: String, options: List<FeedOption>, 
         return
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach { o ->
+        options.forEachIndexed { i, o ->
             FilterChip(
                 selected = o.id in selected, onClick = { onToggle(o.id) },
                 label = { Text(o.name) },
-                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_breaker_${tag}_chip"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_breaker_${tag}_${i + 1}"),
             )
         }
     }

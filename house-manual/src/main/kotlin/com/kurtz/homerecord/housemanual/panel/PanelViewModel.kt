@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.housemanual.panel
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -225,7 +227,11 @@ class PanelViewModel(
                 val path = saved.get<String>(PENDING_PHOTO) ?: return
                 saved[PENDING_PHOTO] = null
                 val files = media ?: return
-                if (e.ok && files.exists(path)) setPhoto(path) else files.discard(path)
+                // exists/discard touch the disk: off the main thread (StrictMode, S7).
+                viewModelScope.launch {
+                    val kept = withContext(Dispatchers.IO) { (e.ok && files.exists(path)).also { if (!it) files.discard(path) } }
+                    if (kept) setPhoto(path)
+                }
             }
             is PanelEvent.GalleryResult -> {
                 val uri = e.uri ?: return
@@ -260,13 +266,22 @@ class PanelViewModel(
             setForm { it.copy(showErrors = true) }
             return
         }
+        // A second tap while the first save is still writing would place the same new breaker twice (R13).
+        if (savingBreaker) return
+        savingBreaker = true
         viewModelScope.launch {
-            when (repo.saveBreaker(panelId, draft)) {
-                is BreakerSave.Saved -> if (form.value?.draft == f.draft) setForm { null }
-                is BreakerSave.Invalid -> setForm { it.copy(showErrors = true) }
+            try {
+                when (repo.saveBreaker(panelId, draft)) {
+                    is BreakerSave.Saved -> if (form.value?.draft == f.draft) setForm { null }
+                    is BreakerSave.Invalid -> setForm { it.copy(showErrors = true) }
+                }
+            } finally {
+                savingBreaker = false
             }
         }
     }
+
+    private var savingBreaker = false
 
     private fun setForm(change: (SavedForm) -> SavedForm?) {
         form.update { it?.let(change) }

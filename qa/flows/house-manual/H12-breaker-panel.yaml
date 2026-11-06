@@ -141,10 +141,10 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 5000
 - scrollUntilVisible:
     element:
-      id: "hm_breaker_items_chip"
+      id: "hm_breaker_item_[0-9]+"
       text: "Refrigerator"
 - tapOn:
-    id: "hm_breaker_items_chip"
+    id: "hm_breaker_item_[0-9]+"
     text: "Refrigerator"
 - tapOn:
     id: "hm_breaker_save"

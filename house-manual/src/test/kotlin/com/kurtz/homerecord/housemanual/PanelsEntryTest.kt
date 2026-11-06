@@ -3,8 +3,6 @@ package com.kurtz.homerecord.housemanual
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -54,7 +52,9 @@ class PanelsEntryTest {
         val events = mutableListOf<PanelsEvent>()
         var state by androidx.compose.runtime.mutableStateOf(PanelsUiState(loading = false, panels = listOf(main, sub)))
         rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { PanelsScreen(state) { events += it } } }
-        rule.onAllNodesWithTag("hm_panels_row").assertCountEquals(2)
+        rule.onNodeWithTag("hm_panels_row_1").assertExists()
+        rule.onNodeWithTag("hm_panels_row_2").assertExists()
+        rule.onNodeWithTag("hm_panels_row_3").assertDoesNotExist()
         rule.onNodeWithText("Garage sub-panel").performClick()
         state = PanelsUiState(loading = false)
         rule.onNodeWithText("No breaker panel yet").assertExists()

@@ -3176,6 +3176,21 @@ Open, found in the review:
 - [ ] [Minor] Reports loads every photo row of the company and recounts in Kotlin on every photo change; and `JobItemScreen` builds "• term" inline instead of from strings.xml [r12:reports-photo-count] (the "• term" half fixed in df90bf1a; the Reports recount is still open)
 - [x] [Minor] `PrefsUnitsStore` is created on the main thread in `setContent` on first launch (StrictMode disk read, S7) [r12:units-store-main-thread] - fixed in cefc32c8
 
+## Builder review R13 (T066–T070)
+
+Read the panel, breaker, mapping, legend PDF, shutoff and Emergency changes since R12 (0484bcee..75996f36) against AC-C40..C45, AC-H7, AC-H18 and docs/ui-standards.md. The AC-C42 safety rules hold: leaving HM-Mapping (stop, dispose, ViewModel cleared) is final in `MappingStateMachine`, cancels the charger watch and stops the alarm; keep-screen-on is cleared on dispose. Every DAO query used filters soft-deleted rows; slot math (`SlotOccupancy.place/grid`) matches AC-C40 for two-pole, tandem and DIN.
+- [x] [Minor] Two quick taps on the breaker form's Save could both pass the slot check and write two new breakers into one slot (one then shows under "Not placed") [r13:breaker-double-save] - fixed in R13 commit (in-flight guard in `PanelViewModel.save`)
+- [x] [Minor] Two quick taps on HM-Mapping Save confirmed the link twice (duplicate Confirmed link rows, count +2) [r13:mapping-double-save] - fixed in R13 commit (in-flight guard)
+- [x] [UI] Major (rule: 48 dp targets): each half of a tandem cell was ~31 dp tall at 100% text [r13:tandem-half-small] - fixed in R13 commit (a row holding a tandem is at least 97 dp in both columns; PanelScreenTest asserts both halves ≥ 48 dp; Panel PNGs updated)
+- [x] [Minor] The legend PDF silently left out a breaker whose slot clashes with another (two phones edited apart), though the screen shows it under "Not placed" [r13:legend-drops-clash] - fixed in R13 commit (both print, "Refrigerator · 20 A / Dryer · 30 A"; PanelLegendTest +1)
+- [x] [Minor] Repeated testTags (`hm_mapping_room_chip`, `hm_mapping_item_chip`, `hm_breaker_room_chip`, `hm_breaker_item_chip`, `hm_emergency_shutoff`, `hm_panels_row`, both tandem halves as `hm_mapping_breaker_<n>`) so a flow could not pick one; and H12 targeted `hm_breaker_items_chip`, a tag that never existed [r13:repeated-tags] - fixed in R13 commit (`hm_mapping_room_<n>`, `hm_breaker_item_<n>`, `hm_emergency_shutoff_<group>_<n>`, `hm_panels_row_<n>`, `hm_mapping_breaker_<n>_b`; H12 uses `hm_breaker_item_[0-9]+` + text)
+- [x] [Minor] Panel photo `CameraResult` checked and discarded the file on the main thread (StrictMode, S7) [r13:panel-photo-main-io] - fixed in R13 commit (Dispatchers.IO)
+- [x] [Minor] Dead code and duplicated rules: `MappingViewModel.panelId` written, never read; room "Shutoffs here" decided mains by `endsWith("_main")` instead of `ShutoffGroups.isMain`; fully qualified names in ItemRepository/Room state [r13:cleanup] - fixed in R13 commit
+- [ ] [Minor] `ItemDetailViewModel` takes the shutoff as a Room `ItemEntity`; ViewModels should get a domain model (same family as [cr:no-domain-models]) [r13:shutoff-entity-in-vm]
+- [ ] [Minor] Separators and step numbers built inline on panel, panels, mapping and Emergency rows (`" · "`, `"  "`, `"${i + 1}."`) instead of from strings.xml format strings (S3) [r13:inline-separators]
+- [ ] [Minor] HM-Item's shutoff picker closes with no notice when `setShutoff` refuses (the shutoff was deleted on another phone meanwhile) [r13:shutoff-pick-refused-silent]
+- Flaky under load: `PanelViewModelTest.shareLegendExportsThePanelWithFeedsAndClearsAfterHandled` timed out once in a full parallel run and passed alone and in the next full run; watch it.
+
 ## Builder visual review V5 (commit b269f671)
 
 Opened M5 PNGs: Changes list (light), Edit change (200%), Sign change order (drawn, light), Reports Photos (light, before and after the fix), Handoff (200%), Job item (200%), Materials and receipts (200%), FL-Paywall lapsed (200%), Settings (200%), Job overview (dark, after the fix). Rules checked: 2, 7-10, 13, 15, 16, 21, 24-26, 30-32, 34. The PRODUCT.md Field Log steps 1-10 walk was not run on a device here (no emulator in the builder container); the last QA judge walkthrough (323d8128) is the device record, and its Field Log findings are all fixed.

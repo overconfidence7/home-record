@@ -2,10 +2,12 @@ package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.core.media.CaptureTarget
 import com.kurtz.homerecord.core.model.ItemCategory
+import com.kurtz.homerecord.core.model.ShutoffGroups
 import com.kurtz.homerecord.core.model.WarrantyStatus
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
 import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.walls.RemovedWallPhoto
 import com.kurtz.homerecord.housemodel.walls.RoomWall
@@ -45,7 +47,7 @@ data class RoomUiState(
     /** A wall row opens HM-Wall to draw and edit overlays on it (AC-C28). */
     val canOpenWalls: Boolean = false,
     /** Breakers feeding the room with their link confidence (AC-C41); null where the app keeps no panels. */
-    val breakers: List<com.kurtz.homerecord.housemodel.panel.FeedingBreaker>? = null,
+    val breakers: List<FeedingBreaker>? = null,
     /** Shutoff items in this room, mains first (AC-C45 "Shutoffs here"); null where the app keeps no items. */
     val shutoffs: List<RoomItem>? = null,
 ) {
@@ -86,7 +88,7 @@ sealed interface RoomEvent {
     data class OpenItem(val id: String) : RoomEvent
     data object AddItem : RoomEvent
     /** A "Breakers feeding this room" row: open its panel at the slot (AC-H7). */
-    data class OpenBreaker(val breaker: com.kurtz.homerecord.housemodel.panel.FeedingBreaker) : RoomEvent
+    data class OpenBreaker(val breaker: FeedingBreaker) : RoomEvent
     data object View3D : RoomEvent
     data class SelectStage(val stage: WallStage) : RoomEvent
     data class PhotographWall(val wallId: String) : RoomEvent
@@ -119,4 +121,4 @@ fun roomItemsFor(rows: List<ItemRow>, roomId: String): List<RoomItem> =
 
 /** "Shutoffs here" (AC-C45): the room's shutoff items, mains first, then by name. */
 fun roomShutoffsFor(items: List<RoomItem>): List<RoomItem> =
-    items.filter { it.category == ItemCategory.SHUTOFFS }.sortedBy { !it.subtypeId.endsWith("_main") }
+    items.filter { it.category == ItemCategory.SHUTOFFS }.sortedBy { !ShutoffGroups.isMain(it.subtypeId) }

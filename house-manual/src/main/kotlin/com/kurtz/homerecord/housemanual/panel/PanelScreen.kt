@@ -239,12 +239,16 @@ private fun SlotGrid(grid: PanelGrid, state: PanelUiState, onEvent: (PanelEvent)
     val fontScale = LocalDensity.current.fontScale
     // Tall enough for a two-line label and the amps line at any text size (rule 32: the label wraps, it is not cut).
     val rowHeight = (64f * maxOf(1f, fontScale)).dp
+    // A row holding a tandem is tall enough for two 48 dp halves (touch targets, R13); both columns grow so they stay level.
+    val tandemRows = grid.cells.filter { it.isTandem }.map { it.row }.toSet()
+    val heightOf = { row: Int -> if (row in tandemRows) maxOf(rowHeight, TANDEM_MIN_HEIGHT) else rowHeight }
     val gap = 4.dp
     Row(modifier.fillMaxWidth().testTag("hm_panel_grid"), horizontalArrangement = Arrangement.spacedBy(gap)) {
         for (column in 0 until grid.columns) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
                 grid.cells.filter { it.column == column }.sortedBy { it.row }.forEach { cell ->
-                    SlotCell(cell, state, rowHeight * cell.rowSpan + gap * (cell.rowSpan - 1), onEvent)
+                    val height = (cell.row until cell.row + cell.rowSpan).fold(0.dp) { sum, r -> sum + heightOf(r) } + gap * (cell.rowSpan - 1)
+                    SlotCell(cell, state, height, onEvent)
                 }
             }
         }
@@ -377,3 +381,6 @@ private fun slotDescription(cell: PanelCell, breakers: List<Breaker>): String {
         else -> stringResource(R.string.panel_slot_description, cell.slot, parts.single())
     }
 }
+
+/** Two 48 dp halves of a tandem plus the divider between them. */
+private val TANDEM_MIN_HEIGHT = 97.dp

@@ -48,6 +48,13 @@ class PanelLegendTest {
         assertThat(rows.count { it.open }).isEqualTo(7)
     }
 
+    // R13: a breaker whose slot clashes with another (two phones edited apart) still prints, beside the one placed first.
+    @Test fun aClashingBreakerStillPrints() {
+        val clash = breakers + b("dryer", listOf(4), "Dryer", 30, at = 5)
+        val rows = PanelLegend.rows(panel, clash, emptyMap(), words)
+        assertThat(rows[3].text).isEqualTo("Refrigerator · 20 A / Dryer · 30 A")
+    }
+
     @Test fun headerSaysServiceSizeBrandAndSlots() {
         val writer = PanelLegendPdfWriter(words)
         assertThat(writer.headerLine(panel)).isEqualTo("200 A service · Square D QO · 12 slots")

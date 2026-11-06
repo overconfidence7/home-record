@@ -142,12 +142,14 @@ private fun StopButton(onEvent: (MappingEvent) -> Unit) {
 private fun Picking(state: MappingUiState, onEvent: (MappingEvent) -> Unit) {
     Text(stringResource(R.string.mapping_pick_breaker), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("hm_mapping_breakers")) {
-        state.breakers.forEach { b ->
+        state.breakers.forEachIndexed { i, b ->
+            // The second half of a tandem shares its slot number: it gets "_b" so each chip has its own tag.
+            val half = if (state.breakers.take(i).any { it.number == b.number }) "_b" else ""
             FilterChip(
                 selected = b.id == state.breakerId,
                 onClick = { onEvent(MappingEvent.PickBreaker(b.id)) },
                 label = { Text(breakerName(b)) },
-                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_mapping_breaker_${b.number}"),
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_mapping_breaker_${b.number}$half"),
             )
         }
     }
@@ -171,11 +173,12 @@ private fun Options(title: String, options: List<FeedOption>, selected: String?,
     if (options.isEmpty()) return
     Text(title, style = MaterialTheme.typography.labelLarge)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach { o ->
+        options.forEachIndexed { i, o ->
             FilterChip(
                 selected = o.id == selected, onClick = { onPick(o.id) },
                 label = { Text(o.name) },
-                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_mapping_${tag}_chip"),
+                // One tag per chip (hm_mapping_room_1, hm_mapping_item_2 …) so a flow can pick a single one.
+                modifier = Modifier.heightIn(min = 48.dp).testTag("hm_mapping_${tag}_${i + 1}"),
             )
         }
     }
