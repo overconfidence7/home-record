@@ -41,6 +41,16 @@
                 <data android:mimeType="application/zip" />
             </intent-filter>
         </activity>
+        <!-- 2×1 home-screen widget with the shutoff count, opening HM-Emergency (AC-H11). -->
+        <receiver
+            android:name=".emergency.EmergencyWidgetReceiver"
+            android:exported="true"
+            android:label="@string/emergency_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/emergency_widget_info" />
+        </receiver>
         <!-- Quick settings tile that opens HM-Emergency (AC-H11). -->
         <service
             android:name=".emergency.EmergencyTileService"

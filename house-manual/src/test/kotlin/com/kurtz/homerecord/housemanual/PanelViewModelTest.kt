@@ -294,6 +294,8 @@ class PanelViewModelTest {
         val vm = PanelViewModel(
             repo, "pi", db.itemDao().observeOne("pi").map { it?.name }, repo.observeChoices("h1"), SavedStateHandle(), media, null,
             legendExporter = { name, _, breakers, feeds -> got += name to feeds; sizes += breakers.size; answer },
+            // The export runs on the test dispatcher: on Dispatchers.Default it raced the unconfined state collector under load.
+            legendDispatcher = main,
         ).also { vms += it; it.state.launchIn(it.viewModelScope) }
         val panel = runBlocking { repo.ensurePanel("pi") }
         val id = runBlocking { (repo.saveBreaker(panel, BreakerDraft(startSlot = 4, label = "Fridge", roomIds = setOf("kitchen"))) as com.kurtz.homerecord.housemodel.panel.BreakerSave.Saved).id }

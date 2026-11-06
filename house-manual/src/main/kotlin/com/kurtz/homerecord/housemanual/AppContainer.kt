@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual
 
+import androidx.glance.appwidget.updateAll
 import com.kurtz.homerecord.housemodel.overlays.nameRes
 import android.app.Application
 import android.content.Context
@@ -47,7 +48,7 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
-class AppContainer(app: Application) {
+class AppContainer(private val app: Application) {
     /** Tabs and screens asked for from outside the UI: the Emergency tile and widget (AC-H11). */
     val tabRequests = com.kurtz.homerecord.coreui.shell.TabRequests()
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
@@ -106,6 +107,8 @@ class AppContainer(app: Application) {
             syncEngine.recordChange(TenantRef(TenantKind.Home, homeId), entity, id)
             syncCoordinator.requestSync()
         }
+        // The Emergency widget shows the shutoff count (AC-H11); any item change may move it.
+        if (entity == "item") runCatching { com.kurtz.homerecord.housemanual.emergency.EmergencyWidget().updateAll(app) }
     }
 
     val homes = HomeRepository(

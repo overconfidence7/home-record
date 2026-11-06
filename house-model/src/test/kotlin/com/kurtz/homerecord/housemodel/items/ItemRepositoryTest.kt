@@ -236,6 +236,8 @@ class ItemRepositoryTest {
         assertThat(main.photoPath).isEqualTo("/media/wm.jpg")
         assertThat(main.roomName).isEqualTo("Basement")
         assertThat(sections.single().shutoffs.map { it.itemId }).containsExactly("wm", "sink").inOrder()
+        // AC-H11: the Emergency widget's count leaves out the deleted valve and the refrigerator
+        assertThat(repo.countShutoffs("h1")).isEqualTo(2)
     }
 
     // AC-C45: an item links to the shutoff that isolates it; only a live shutoff of the same home, never itself

@@ -1,6 +1,7 @@
 # Walkthrough H13 (T070b): open Emergency from the Home card and from More (AC-C44). Starts from the regression
 # seed, which files a water main (Utility room) and a gas main (Exterior) with instructions. The quick settings
-# tile (T071a, below) and the widget (T071b) open it from outside the app (AC-H11).
+# tile (T071a, below) and the 2×1 widget (T071b, EmergencyWidgetTest; the suite cannot place a widget) open it from
+# outside the app with the same open_emergency extra (AC-H11).
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml

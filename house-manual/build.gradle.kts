@@ -28,6 +28,8 @@ fun revenueCatKey(prop: String, env: String): String =
 
 dependencies {
     implementation(project(":core"))
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
     implementation(project(":core-ui"))
     implementation(project(":house-model"))
     implementation(libs.coil.compose)

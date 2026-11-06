@@ -117,6 +117,10 @@ class ItemRepository(
     /** Items the home holds now (not deleted); the free tier's limit counts these. */
     suspend fun count(homeId: String): Int = db.itemDao().observeFor(homeId).first().size
 
+    /** Live shutoff items of the home, for the Emergency widget's count (AC-H11). */
+    suspend fun countShutoffs(homeId: String): Int =
+        db.itemDao().observeFor(homeId).first().count { ItemCategory.orOther(it.category) == ItemCategory.SHUTOFFS }
+
     /** Breaker panels the home holds now, leaving out [exceptItemId] (the item being edited); the free tier allows one (AC-H18). */
     suspend fun countPanels(homeId: String, exceptItemId: String? = null): Int =
         db.itemDao().observeFor(homeId).first().count { isPanelSubtype(it.subtype) && it.id != exceptItemId }

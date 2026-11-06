@@ -40,3 +40,20 @@ class EmergencyEntryTest {
         assertThat(EmergencyEntry.wants(started)).isTrue()
     }
 }
+
+// T071b (AC-H11): the 2×1 widget says how many shutoffs are recorded and opens HM-Emergency with the tile's extra.
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33], application = android.app.Application::class)
+@com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-H11")
+class EmergencyWidgetTest {
+    private val context = ApplicationProvider.getApplicationContext<android.app.Application>()
+
+    @Test
+    fun theCountLineAndTheLaunchExtra() {
+        assertThat(com.kurtz.homerecord.housemanual.emergency.EmergencyWidget.text(context, null)).isEqualTo("No shutoffs yet")
+        assertThat(com.kurtz.homerecord.housemanual.emergency.EmergencyWidget.text(context, 0)).isEqualTo("No shutoffs yet")
+        assertThat(com.kurtz.homerecord.housemanual.emergency.EmergencyWidget.text(context, 1)).isEqualTo("1 shutoff")
+        assertThat(com.kurtz.homerecord.housemanual.emergency.EmergencyWidget.text(context, 3)).isEqualTo("3 shutoffs")
+        assertThat(com.kurtz.homerecord.housemanual.emergency.EmergencyWidget.OPEN_EMERGENCY.name).isEqualTo(EmergencyEntry.EXTRA)
+    }
+}

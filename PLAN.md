@@ -422,9 +422,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T070b: HM-Emergency screen (24 sp instructions, full-width photos with pinch-zoom, offline, "Manage shutoffs" at the bottom), reached from More and the Home shutoff count; previews, screenshots, catalog, flow (AC-C44)
   - [x] T070c: item "Shutoff" link: pick the shutoff that isolates an item in the item form, "Shutoff: Kitchen sink cold valve" chip on HM-Item opening the shutoff; HM-Room "Shutoffs here" (AC-C45)
 - [x] R13: Review T066–T070
-- [ ] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)
+- [x] T071: Quick settings tile and 2×1 widget opening HM-Emergency; Home Emergency card (acceptance: AC-H11)
   - [x] T071a: Quick settings tile "Emergency" (unlock first from the lock screen) and an `open_emergency` launch intent that opens Home → HM-Emergency through the shell's tab requests; H13 flow step (AC-H11 claim waits for T071b)
-  - [ ] T071b: 2×1 Glance home-screen widget showing the shutoff count and opening HM-Emergency; then T071 claims AC-H11 (the Home card already opens it, T070b)
+  - [x] T071b: 2×1 Glance home-screen widget showing the shutoff count and opening HM-Emergency; then T071 claims AC-H11 (the Home card already opens it, T070b)
 - [ ] T072: Reminders: `MaintenanceRule` `[unit]`, seeds per subtype and climate zone, warranty-expiry reminders, HM-Reminders (Due/Upcoming/Done, Done/Snooze, zone chips, Add), WorkManager 08:00 notification with deep link, permission after first reminder (acceptance: AC-C49, AC-C50, AC-H12)
 - [ ] T073: Home report PDF (cover, blueprints, rooms with items and warranty status, shutoffs, legend) under 5 s for 40 items (acceptance: AC-H13)
 - [ ] T074: Encrypted backup export/restore (`BundleCrypto` `[unit]`), onboarding "Restore from a backup" (acceptance: AC-C48, AC-H14)

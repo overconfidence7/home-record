@@ -239,6 +239,12 @@
     <string name="home_emergency">Emergency</string>
     <string name="emergency_title">Emergency</string>
     <string name="tile_emergency">Emergency</string>
+    <string name="widget_emergency_description">Opens your shutoffs in large type</string>
+    <string name="widget_emergency_none">No shutoffs yet</string>
+    <plurals name="widget_emergency_count">
+        <item quantity="one">%d shutoff</item>
+        <item quantity="other">%d shutoffs</item>
+    </plurals>
     <string name="emergency_empty_title">No shutoffs yet</string>
     <string name="emergency_empty_body">Add the water main, gas meter valve and main breaker so anyone in the house can find them in a hurry.</string>
     <string name="emergency_main">Main</string>
