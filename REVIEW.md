@@ -3188,7 +3188,7 @@ Read the panel, breaker, mapping, legend PDF, shutoff and Emergency changes sinc
 - [x] [Minor] Dead code and duplicated rules: `MappingViewModel.panelId` written, never read; room "Shutoffs here" decided mains by `endsWith("_main")` instead of `ShutoffGroups.isMain`; fully qualified names in ItemRepository/Room state [r13:cleanup] - fixed in R13 commit
 - [ ] [Minor] `ItemDetailViewModel` takes the shutoff as a Room `ItemEntity`; ViewModels should get a domain model (same family as [cr:no-domain-models]) [r13:shutoff-entity-in-vm]
 - [x] [Minor] Separators and step numbers built inline on panel, panels, mapping and Emergency rows (`" · "`, `"  "`, `"${i + 1}."`) instead of from strings.xml format strings (S3) [r13:inline-separators] - fixed in 9b3926ea
-- [ ] [Minor] HM-Item's shutoff picker closes with no notice when `setShutoff` refuses (the shutoff was deleted on another phone meanwhile) [r13:shutoff-pick-refused-silent]
+- [x] [Minor] HM-Item's shutoff picker closes with no notice when `setShutoff` refuses (the shutoff was deleted on another phone meanwhile) [r13:shutoff-pick-refused-silent] - fixed in 1a8a600d
 - Flaky under load: `PanelViewModelTest.shareLegendExportsThePanelWithFeedsAndClearsAfterHandled` timed out once in a full parallel run and passed alone and in the next full run; watch it.
 
 ## Builder visual review V5 (commit b269f671)
