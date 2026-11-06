@@ -51,6 +51,9 @@ import kotlinx.serialization.Serializable
 /** HM-Account: sign in, what sync does, sign out (AC-H15). */
 @Serializable data object AccountKey : NavKey
 
+/** HM-Share (AC-H16). */
+@Serializable data object ShareKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

@@ -125,6 +125,18 @@ class CloudHomeRestoreTest {
         assertThat(phoneB.homeDao().get("h1")).isNull()
     }
 
+    @Test fun theHomeAnInviteJoinedIsPickedOverTheOwnedOne() { // AC-H16
+        val homes = listOf(AccountHome("h2", "Lake cabin", "owner"), AccountHome("h1", "Maple St", "editor"))
+        accountHomes = ApiResult.Ok(homes)
+        val synced = mutableListOf<TenantRef>()
+        val restore = CloudHomeRestore({ accountHomes }, { emptyList() }, { synced += it; ApiResult.Ok(Unit) })
+        runTest { restore.restore(preferHomeId = "h1") }
+        assertThat(synced.single().id).isEqualTo("h1")
+        synced.clear()
+        runTest { restore.restore(preferHomeId = "gone") }
+        assertThat(synced.single().id).isEqualTo("h2")
+    }
+
     @Test fun theOwnedHomeIsPickedBeforeAShareOne() {
         val picked = CloudHomeRestore.pick(
             listOf(AccountHome("h9", "Aunt Ruth's house", "viewer"), AccountHome("h1", "Maple St", "owner"), AccountHome("h2", "Lake cabin", "owner")),

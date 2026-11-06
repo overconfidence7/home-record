@@ -27,13 +27,14 @@ class CloudHomeRestore(
     private val localHomeIds: suspend () -> List<String>,
     private val sync: suspend (TenantRef) -> ApiResult<*>,
 ) {
-    suspend fun restore(): CloudRestoreResult {
+    /** [preferHomeId]: the home an invite link just joined (AC-H16), taken over the account's own. */
+    suspend fun restore(preferHomeId: String? = null): CloudRestoreResult {
         if (localHomeIds().isNotEmpty()) return CloudRestoreResult.AlreadyHasHome
         val homes = when (val result = homesOnAccount()) {
             is ApiResult.Ok -> result.value
             is ApiResult.Err -> return CloudRestoreResult.Failed(result.failure)
         }
-        val home = pick(homes) ?: return CloudRestoreResult.NoHome
+        val home = homes.firstOrNull { it.id == preferHomeId } ?: pick(homes) ?: return CloudRestoreResult.NoHome
         val synced = sync(TenantRef(TenantKind.Home, home.id))
         if (synced is ApiResult.Err) return CloudRestoreResult.Failed(synced.failure)
         // The server knew the membership but sent no home row (an empty or half-deleted home): nothing to show.

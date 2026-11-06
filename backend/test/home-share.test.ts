@@ -152,6 +152,18 @@ describe("AC-H16 home sharing", () => {
     expect((await app.request(`/invite/${"q".repeat(43)}`, {}, env)).status).toBe(404);
   });
 
+  it("dev: /dev/last-invite answers the owner's newest link so flows can join without a share sheet", async () => {
+    const home = await homeWithOwner();
+    const devEnv = { ...env, ENVIRONMENT: "dev" };
+    const made = await app.request(`/homes/${home.id}/invites`, {
+      method: "POST", headers: { Authorization: `Bearer ${home.owner}`, "Content-Type": "application/json" }, body: JSON.stringify({ role: "editor" }),
+    }, devEnv);
+    const { token } = await json<{ token: string }>(made);
+    const res = await app.request(`/dev/last-invite?email=${encodeURIComponent(`hs-o${n}@x.com`)}`, {}, devEnv);
+    expect(await json(res)).toEqual({ token, path: `/invite/${token}` });
+    expect((await app.request(`/dev/last-invite?email=hs-o${n}@x.com`, {}, env)).status).toBe(404);
+  });
+
   it("deleting the cloud copy removes the home's links too", async () => {
     const home = await homeWithOwner();
     await invite(home, "editor");

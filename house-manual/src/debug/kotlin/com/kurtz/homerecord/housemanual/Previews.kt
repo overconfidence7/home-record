@@ -2017,3 +2017,89 @@ private val sampleRestore = com.kurtz.homerecord.housemanual.importing.ImportUiS
 @ThemePreviews
 @Composable
 fun RestoreDonePreview() = Frame { com.kurtz.homerecord.housemanual.importing.ImportScreen(sampleRestore.copy(done = true), {}) }
+
+private val samplePeople = listOf(
+    com.kurtz.homerecord.core.share.HomePerson("u1", "Dana Whitfield", "dana.whitfield@gmail.com", com.kurtz.homerecord.core.share.HomeRole.Owner, you = true),
+    com.kurtz.homerecord.core.share.HomePerson("u2", "Sam Whitfield", "sam.whitfield@gmail.com", com.kurtz.homerecord.core.share.HomeRole.Editor, you = false),
+    com.kurtz.homerecord.core.share.HomePerson("u3", null, "petsitter.lena@outlook.com", com.kurtz.homerecord.core.share.HomeRole.Viewer, you = false),
+)
+private val sampleInvites = listOf(
+    com.kurtz.homerecord.core.share.OpenInvite("i1", com.kurtz.homerecord.core.share.HomeRole.Viewer, createdAt = 1_793_000_000_000, expiresAt = 1_794_209_600_000),
+)
+
+@Composable
+private fun ShareFrame(state: com.kurtz.homerecord.housemanual.share.ShareUiState) = Frame {
+    com.kurtz.homerecord.housemanual.share.ShareScreen(state, {}, zone = java.time.ZoneOffset.UTC)
+}
+
+/** HM-Share for the owner: invite rows, three people, one viewer link not used yet (AC-H16). */
+@ThemePreviews
+@Composable
+fun SharePeoplePreview() = ShareFrame(
+    com.kurtz.homerecord.housemanual.share.ShareUiState(com.kurtz.homerecord.housemanual.share.SharePhase.Loaded, samplePeople, sampleInvites),
+)
+
+/** HM-Share as family (an editor): the list only. */
+@ThemePreviews
+@Composable
+fun ShareEditorViewPreview() = ShareFrame(
+    com.kurtz.homerecord.housemanual.share.ShareUiState(
+        com.kurtz.homerecord.housemanual.share.SharePhase.Loaded,
+        samplePeople.map { it.copy(you = it.userId == "u2") },
+    ),
+)
+
+/** The owner tapped the remove icon on Sam: the dialog asks first. */
+@ThemePreviews
+@Composable
+fun ShareRemoveConfirmPreview() = ShareFrame(
+    com.kurtz.homerecord.housemanual.share.ShareUiState(
+        com.kurtz.homerecord.housemanual.share.SharePhase.Loaded, samplePeople, sampleInvites, confirmRemove = samplePeople[1],
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun ShareSignedOutPreview() = ShareFrame(com.kurtz.homerecord.housemanual.share.ShareUiState(com.kurtz.homerecord.housemanual.share.SharePhase.SignedOut))
+
+@ThemePreviews
+@Composable
+fun ShareOfflinePreview() = ShareFrame(
+    com.kurtz.homerecord.housemanual.share.ShareUiState(com.kurtz.homerecord.housemanual.share.SharePhase.Failed, offline = true),
+)
+
+@Composable
+private fun JoinFrame(state: com.kurtz.homerecord.housemanual.share.JoinUiState) = Frame {
+    com.kurtz.homerecord.housemanual.share.JoinScreen(state, {}) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "sam.whitfield@gmail.com"), {}, modifier)
+    }
+}
+
+/** An invite link opened while signed out: the line over the sign-in form. */
+@ThemePreviews
+@Composable
+fun JoinSignInPreview() = JoinFrame(com.kurtz.homerecord.housemanual.share.JoinUiState(com.kurtz.homerecord.housemanual.share.JoinPhase.SignIn))
+
+@ThemePreviews
+@Composable
+fun JoinRestoringPreview() = JoinFrame(
+    com.kurtz.homerecord.housemanual.share.JoinUiState(
+        com.kurtz.homerecord.housemanual.share.JoinPhase.Restoring, homeName = "14 Maple St", role = com.kurtz.homerecord.core.share.HomeRole.Editor,
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun JoinOtherHomePreview() = JoinFrame(
+    com.kurtz.homerecord.housemanual.share.JoinUiState(
+        com.kurtz.homerecord.housemanual.share.JoinPhase.OtherHome, homeName = "14 Maple St", role = com.kurtz.homerecord.core.share.HomeRole.Viewer,
+    ),
+)
+
+@ThemePreviews
+@Composable
+fun JoinUsedPreview() = JoinFrame(
+    com.kurtz.homerecord.housemanual.share.JoinUiState(
+        com.kurtz.homerecord.housemanual.share.JoinPhase.Failed, failure = com.kurtz.homerecord.core.share.InviteFailure.Used,
+    ),
+)

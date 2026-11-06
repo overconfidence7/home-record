@@ -77,6 +77,8 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     var importUri by rememberSaveable { mutableStateOf<String?>(null) }
     // A claim link (`homerecord://handoff/<token>`) from the handoff email page; downloads, then opens the preview.
     var claimToken by rememberSaveable { mutableStateOf<String?>(null) }
+    // An invite link (`homerecord://invite/<token>`) to someone's home (AC-H16); signs in, joins, pulls the home down.
+    var joinToken by rememberSaveable { mutableStateOf<String?>(null) }
     // A `.hrbackup` picked on onboarding or HM-Backup (AC-C48); its passphrase prompt and preview go over everything.
     var restoreUri by rememberSaveable { mutableStateOf<String?>(null) }
     // Onboarding → "Sign in to get your home" (AC-H15 second phone); closes on its own once the home arrives.
@@ -84,7 +86,10 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     LaunchedEffect(incoming) {
         if (incoming != null) {
             val token = com.kurtz.homerecord.core.bundle.HandoffLink.token(incoming.toString())
-            if (token != null) {
+            val invite = com.kurtz.homerecord.core.share.HomeInviteLink.token(incoming.toString())
+            if (invite != null) {
+                joinToken = invite
+            } else if (token != null) {
                 claimToken = token
                 importUri = null
             } else if (incoming.scheme != "homerecord") {
@@ -104,7 +109,9 @@ fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, o
     val pendingImport = importUri
     val pendingClaim = claimToken
     val pendingRestore = restoreUri
+    val pendingJoin = joinToken
     when {
+        pendingJoin != null -> com.kurtz.homerecord.housemanual.share.JoinRoute(container, pendingJoin, onClose = { joinToken = null })
         pendingRestore != null -> com.kurtz.homerecord.housemanual.importing.RestoreRoute(
             container.importFiles, android.net.Uri.parse(pendingRestore), onClose = { restoreUri = null },
         )
@@ -256,6 +263,9 @@ private fun HouseManualTabs(
         entry<BackupKey> {
             com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop)
         }
+        entry<ShareKey> {
+            com.kurtz.homerecord.housemanual.share.ShareRoute(container, home.id, home.name, onBack = nav::pop, onSignIn = { nav.push(AccountKey) })
+        }
         entry<AccountKey> {
             val cloud = viewModel<com.kurtz.homerecord.housemanual.account.CloudCopyViewModel>(
                 factory = viewModelFactory { initializer { com.kurtz.homerecord.housemanual.account.CloudCopyViewModel(home.id, container.cloudCopy::delete, createSavedStateHandle()) } },
@@ -318,6 +328,7 @@ private fun HouseManualTabs(
                             MoreEvent.OpenReport -> nav.push(ReportKey)
                             MoreEvent.OpenBackup -> nav.push(BackupKey)
                             MoreEvent.OpenAccount -> nav.push(AccountKey)
+                            MoreEvent.OpenShare -> nav.push(ShareKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }
