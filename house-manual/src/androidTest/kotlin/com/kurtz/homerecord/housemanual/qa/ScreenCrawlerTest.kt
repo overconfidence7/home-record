@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -52,6 +53,10 @@ class ScreenCrawlerTest {
             compose.waitUntil(10_000) {
                 runCatching { compose.onAllNodes(isRoot()).fetchSemanticsNodes().any { it.children.isNotEmpty() } }.getOrDefault(false)
             }
+        }
+        ScreenCatalog.entries.firstOrNull { it.id == id }?.scrollTo?.let { tag ->
+            val found = runCatching { compose.onAllNodesWithTag(tag, useUnmergedTree = true)[0].performScrollTo() }.isSuccess
+            assertTrue("$id ($variant): could not scroll to $tag, the part of the screen this entry shows", found)
         }
         compose.waitForIdle()
         inst.waitForIdleSync()

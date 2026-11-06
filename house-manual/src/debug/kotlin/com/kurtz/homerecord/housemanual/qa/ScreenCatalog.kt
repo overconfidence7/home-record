@@ -4,7 +4,11 @@ import androidx.compose.runtime.Composable
 import com.kurtz.homerecord.housemanual.*
 
 /** One screen with realistic fake state; shared by the OPEN_SCREEN intent and the crawler (SPEC AC-U12). */
-data class QaScreen(val id: String, val nonRoot: Boolean, val content: @Composable () -> Unit)
+/**
+ * One crawler screen. [scrollTo] names the testTag of what the entry exists to show when it sits below the fold;
+ * the crawler scrolls to it before each shot ([judge:qa-crawler-no-scroll]).
+ */
+data class QaScreen(val id: String, val nonRoot: Boolean, val scrollTo: String? = null, val content: @Composable () -> Unit)
 
 object ScreenCatalog {
     val entries: List<QaScreen> = listOf(
@@ -168,13 +172,13 @@ object ScreenCatalog {
         QaScreen("item-place-on-wall", nonRoot = true) { ItemPlaceOnWallPreview() },
         QaScreen("item-place-empty-floor", nonRoot = true) { ItemPlaceEmptyFloorPreview() },
         QaScreen("item-detail-no-warranty", nonRoot = true) { ItemDetailNoWarrantyPreview() },
-        QaScreen("item-detail-lookup-failed", nonRoot = true) { ItemDetailLookupNotePreview() },
-        QaScreen("item-detail-upkeep", nonRoot = true) { ItemDetailUpkeepPreview() },
-        QaScreen("item-detail-recalls", nonRoot = true) { ItemDetailRecallsPreview() },
+        QaScreen("item-detail-lookup-failed", nonRoot = true, scrollTo = "hm_item_detail_lookup_note") { ItemDetailLookupNotePreview() },
+        QaScreen("item-detail-upkeep", nonRoot = true, scrollTo = "hm_item_detail_service_edit") { ItemDetailUpkeepPreview() },
+        QaScreen("item-detail-recalls", nonRoot = true, scrollTo = "hm_item_detail_recalls") { ItemDetailRecallsPreview() },
         QaScreen("item-detail-consumable-form", nonRoot = true) { ItemDetailConsumableFormPreview() },
         QaScreen("item-detail-service-form", nonRoot = true) { ItemDetailServiceFormPreview() },
         QaScreen("item-detail-consumable-delete", nonRoot = true) { ItemDetailConsumableDeletePreview() },
-        QaScreen("item-detail-review-badge", nonRoot = true) { ItemDetailReviewBadgePreview() },
+        QaScreen("item-detail-review-badge", nonRoot = true, scrollTo = "hm_item_detail_review_badge") { ItemDetailReviewBadgePreview() },
         QaScreen("item-detail-review-sheet", nonRoot = false) { ItemDetailReviewSheetPreview() },
         QaScreen("item-detail-delete", nonRoot = true) { ItemDetailDeletePreview() },
         QaScreen("item-detail-missing", nonRoot = true) { ItemDetailMissingPreview() },
