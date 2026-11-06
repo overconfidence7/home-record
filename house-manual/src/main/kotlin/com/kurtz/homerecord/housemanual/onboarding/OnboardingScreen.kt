@@ -42,7 +42,10 @@ import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HouseType
 
 @Composable
-fun houseTypeLabel(type: HouseType): String = stringResource(
+fun houseTypeLabel(type: HouseType): String = stringResource(houseTypeLabelRes(type))
+
+/** The string resource naming [type]; the home report prints it outside Compose. */
+fun houseTypeLabelRes(type: HouseType): Int =
     when (type) {
         HouseType.RANCHER -> R.string.type_rancher
         HouseType.TWO_STORY -> R.string.type_two_story
@@ -53,8 +56,7 @@ fun houseTypeLabel(type: HouseType): String = stringResource(
         HouseType.TOWNHOUSE -> R.string.type_townhouse
         HouseType.BUNGALOW -> R.string.type_bungalow
         HouseType.OTHER -> R.string.type_other
-    },
-)
+    }
 
 @Composable
 fun foundationLabel(foundation: Foundation): String = stringResource(

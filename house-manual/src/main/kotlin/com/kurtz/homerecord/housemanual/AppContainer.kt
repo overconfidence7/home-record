@@ -149,6 +149,20 @@ class AppContainer(private val app: Application) {
     val mappingAlarm: com.kurtz.homerecord.core.mapping.MappingAlarm = com.kurtz.homerecord.core.mapping.SystemMappingAlarm(app)
     val panels = com.kurtz.homerecord.housemodel.panel.PanelRepository(db, onChange = { entity, id -> recordHomeChange(entity, id) })
 
+    /** The home report PDF (AC-H13): read from Room, written to cache/exports, shared through FileProvider. */
+    private val legendWords = com.kurtz.homerecord.housemodel.pdf.PanelLegendExporter(app).words
+    val reportSource = com.kurtz.homerecord.housemodel.pdf.HomeReportSource(
+        homes, items, panels,
+        com.kurtz.homerecord.housemodel.pdf.ReportSourceWords(
+            exterior = app.getString(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
+            wholeHouse = app.getString(com.kurtz.homerecord.housemodel.R.string.item_room_whole_house),
+            unassigned = app.getString(com.kurtz.homerecord.housemodel.R.string.report_unassigned),
+            houseType = { app.getString(com.kurtz.homerecord.housemanual.onboarding.houseTypeLabelRes(it)) },
+        ),
+        legendWords,
+    )
+    val reportFile = com.kurtz.homerecord.housemodel.pdf.HomeReportFile(app, reportSource, legendWords)
+
     /** HM-Reminders (AC-C49, AC-H12). */
     val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 

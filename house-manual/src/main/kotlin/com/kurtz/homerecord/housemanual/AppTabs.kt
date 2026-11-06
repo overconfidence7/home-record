@@ -231,6 +231,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                 onAdd = { addItem(scope, container, home.id, nav, subtypeId = "water_main") },
             )
         }
+        entry<ReportKey> { com.kurtz.homerecord.housemanual.report.ReportRoute(container.reportSource, container.reportFile, home.id, onBack = nav::pop) }
         entry<ContactsKey> { ContactsRoute(container.upkeep, home.id, onBack = nav::pop) }
         entry<DocumentsKey> { DocumentsRoute(container.documents, home.id, onBack = nav::pop, onOpen = { nav.push(DocumentViewerKey(it)) }) }
         entry<DocumentViewerKey> { key -> DocumentViewerRoute(container.documents, key.documentId, onBack = nav::pop) }
@@ -267,6 +268,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
                             MoreEvent.OpenEmergency -> nav.push(EmergencyKey)
+                            MoreEvent.OpenReport -> nav.push(ReportKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }

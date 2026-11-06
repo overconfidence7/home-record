@@ -842,3 +842,18 @@ fun ReminderFormScreenshot() = ReminderFormPreview()
 @ThemePreviews
 @Composable
 fun ReminderFormErrorsScreenshot() = ReminderFormErrorsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportReadyScreenshot() = ReportReadyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportFailedScreenshot() = ReportFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ReportLoadingScreenshot() = ReportLoadingPreview()

@@ -539,4 +539,20 @@
     <string name="climate_zone_hot_humid">Hot-humid</string>
     <string name="climate_zone_hot_dry">Hot-dry</string>
     <string name="climate_zone_marine">Marine</string>
+    <string name="report_title">Home report</string>
+    <string name="report_made_on">Made %1$s</string>
+    <string name="report_counts">%1$d rooms · %2$d items</string>
+    <string name="report_rooms">Rooms and items</string>
+    <string name="report_no_items">No items yet</string>
+    <string name="report_shutoffs">Shutoffs</string>
+    <string name="report_no_shutoffs">No shutoffs recorded yet</string>
+    <string name="report_separator">" · "</string>
+    <string name="report_serial">Serial %1$s</string>
+    <string name="report_in_service">In service %1$s</string>
+    <string name="report_warranty_unknown">Warranty unknown</string>
+    <string name="report_warranty_active">Warranty until %1$s</string>
+    <string name="report_warranty_expiring">Warranty ends %1$s</string>
+    <string name="report_warranty_expired">Warranty ended %1$s</string>
+    <string name="report_page">Page %1$d</string>
+    <string name="report_unassigned">No room</string>
 </resources>

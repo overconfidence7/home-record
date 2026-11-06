@@ -1864,3 +1864,24 @@ fun ItemDetailRemindersEmptyPreview() = Frame {
         com.kurtz.homerecord.housemanual.items.ItemRemindersSection(ItemDetailUiState(loading = false, detail = furnaceDetail(false), today = reminderToday)) {}
     }
 }
+
+private val sampleReportState = com.kurtz.homerecord.housemanual.report.ReportUiState(
+    loading = false, homeName = "Maple Street house",
+    contents = com.kurtz.homerecord.housemanual.report.ReportContents(floors = 3, rooms = 11, items = 38, shutoffs = 2, panels = 1),
+)
+
+@ThemePreviews
+@Composable
+fun ReportReadyPreview() = Frame { com.kurtz.homerecord.housemanual.report.ReportScreen(sampleReportState, {}) }
+
+@ThemePreviews
+@Composable
+fun ReportFailedPreview() = Frame {
+    com.kurtz.homerecord.housemanual.report.ReportScreen(
+        sampleReportState.copy(contents = com.kurtz.homerecord.housemanual.report.ReportContents(floors = 1, rooms = 4, items = 1, shutoffs = 0, panels = 0), failed = true), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun ReportLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.report.ReportScreen(com.kurtz.homerecord.housemanual.report.ReportUiState(), {}) }

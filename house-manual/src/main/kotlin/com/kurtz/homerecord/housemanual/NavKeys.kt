@@ -42,6 +42,9 @@ import kotlinx.serialization.Serializable
 /** HM-Emergency: shutoffs in large type (AC-C44). */
 @Serializable data object EmergencyKey : NavKey
 
+/** HM-Report: the home report PDF (AC-H13). */
+@Serializable data object ReportKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

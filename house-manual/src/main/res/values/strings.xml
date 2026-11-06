@@ -563,4 +563,41 @@
         <item quantity="one">%1$s and %2$d more</item>
         <item quantity="other">%1$s and %2$d more</item>
     </plurals>
+    <string name="more_report">Home report</string>
+    <string name="more_report_supporting">A PDF of every room and item for an insurer, a buyer or a house-sitter</string>
+    <string name="report_screen_title">Home report</string>
+    <string name="report_intro">A PDF of your home to send to an insurer, a buyer or a house-sitter. It is made from what is on this phone.</string>
+    <string name="report_whats_in">What\'s in it</string>
+    <string name="report_part_cover">Cover</string>
+    <string name="report_part_cover_body">Name, address and house type</string>
+    <string name="report_part_plans">Floor plans</string>
+    <plurals name="report_part_plans_body">
+        <item quantity="one">%1$d floor, drawn to scale</item>
+        <item quantity="other">%1$d floors, drawn to scale</item>
+    </plurals>
+    <string name="report_part_rooms">Rooms and items</string>
+    <plurals name="report_part_rooms_body">
+        <item quantity="one">%1$d room</item>
+        <item quantity="other">%1$d rooms</item>
+    </plurals>
+    <plurals name="report_part_items_body">
+        <item quantity="one">%1$d item with make, model, serial and warranty</item>
+        <item quantity="other">%1$d items with make, model, serial and warranty</item>
+    </plurals>
+    <string name="report_part_shutoffs">Shutoffs</string>
+    <plurals name="report_part_shutoffs_body">
+        <item quantity="one">%1$d shutoff with instructions and photo</item>
+        <item quantity="other">%1$d shutoffs with instructions and photos</item>
+    </plurals>
+    <string name="report_part_shutoffs_none">None recorded yet</string>
+    <string name="report_part_panels">Breaker panels</string>
+    <plurals name="report_part_panels_body">
+        <item quantity="one">%1$d panel legend</item>
+        <item quantity="other">%1$d panel legends</item>
+    </plurals>
+    <string name="report_part_panels_none">None recorded yet</string>
+    <string name="report_make">Make and share PDF</string>
+    <string name="report_making">Making the report…</string>
+    <string name="report_failed">Couldn\'t make the report. Check free space and try again.</string>
+    <string name="report_share_title">Share home report</string>
 </resources>

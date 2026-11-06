@@ -1,0 +1,43 @@
+# Walkthrough H15 (T073): More → Home report shows what the PDF holds (floors, rooms and items, shutoffs, panel
+# legends) counted from the regression seed, then Make and share PDF writes the report and opens the share sheet
+# (AC-H13). The PDF's contents and the 40-item time are proven on the JVM (HomeReportTest, HomeReportSourceTest).
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_report"
+- tapOn:
+    id: "hm_more_report"
+- extendedWaitUntil:
+    visible:
+      id: "hm_report_contents"
+    timeout: 10000
+# AC-H13: the screen lists every floor's plan, every room's items with warranty, shutoffs and legends
+- assertVisible:
+    id: "hm_report_part_plans"
+- assertVisible: ".*floors?, drawn to scale.*"
+- assertVisible: ".*items? with make, model, serial and warranty.*"
+- assertVisible:
+    id: "hm_report_part_shutoffs"
+- takeScreenshot: H15-home-report
+- scrollUntilVisible:
+    element:
+      id: "hm_report_make"
+# AC-H13: Make and share PDF writes the report without the failure notice and opens the share sheet
+- tapOn:
+    id: "hm_report_make"
+- extendedWaitUntil:
+    notVisible:
+      id: "hm_report_failed"
+    timeout: 5000
+- takeScreenshot: H15-report-share
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_report_make"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_report_failed"

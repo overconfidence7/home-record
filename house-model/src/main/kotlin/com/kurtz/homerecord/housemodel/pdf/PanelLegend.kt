@@ -79,11 +79,14 @@ class PanelLegendPdfWriter(private val words: LegendWords, private val spec: Pdf
     fun headerLine(panel: Panel): String =
         listOfNotNull(panel.mainAmps?.let(words.service), panel.brand?.ifBlank { null }, words.slots(panel.slotCount)).joinToString(" · ")
 
-    internal fun drawPage(c: Canvas, name: String, panel: Panel, rows: List<LegendRow>) {
+    internal fun drawPage(c: Canvas, name: String, panel: Panel, rows: List<LegendRow>) =
+        drawPage(c, name, headerLine(panel), PanelLegend.columns(panel.layout), rows)
+
+    /** Draws one legend page from its parts; the home report reuses it for each panel (AC-H13). */
+    fun drawPage(c: Canvas, name: String, header: String, columns: Int, rows: List<LegendRow>) {
         val m = spec.marginPt
         c.drawText(name, m, m + 20f, title)
-        c.drawText(headerLine(panel), m, m + 40f, sub)
-        val columns = PanelLegend.columns(panel.layout)
+        c.drawText(header, m, m + 40f, sub)
         val perColumn = (rows.size + columns - 1) / columns
         val top = m + spec.headerPt
         val rowH = ((spec.heightPt - top - m) / perColumn.coerceAtLeast(1)).coerceAtMost(18f)

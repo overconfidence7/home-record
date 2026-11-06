@@ -205,6 +205,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] T032b2: gates on the second panel (with the breaker work) and on Sign in / cloud sync (AC-H18)
     - [x] T032b2a: second-panel gate: Add panel and the item form's save open HM-Paywall when a free home already has a panel (AC-H18)
     - [ ] T032b2b: Sign in / cloud sync gate (AC-H18); needs a way for the keyless QA builds to sign in (H17, H18b, X02) — see BLOCKERS 2026-11-06 (T032b2a)
+    - [ ] T032b2c: Home report is Pro (SPEC pricing): More → Home report opens HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (H15 would stop at the paywall) — see BLOCKERS 2026-11-06 (T073)
 - [x] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5 (sampled; no emulator in this container)
 
 ## M3 Field Log core (Field Log usable)
@@ -433,7 +434,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T072a: `MaintenanceRule` `[unit]` (default intervals per subtype, seasonal tasks per climate zone, warranty-expiry dates 60/7 days, Done/Snooze math, Due/Upcoming/Done sections) and `ReminderRepository` in :house-model (list in sections, Done, Snooze, hand-written reminders, climate zone seeds seasonal tasks, warranty reminders) (AC-C49)
   - [x] T072b: HM-Reminders tab screen (Due now / Upcoming / Done, Done and Snooze per row, climate zone chips, Add reminder), warranty reminders kept in step with warranty saves; H flow (AC-H12)
   - [x] T072c: daily 08:00 WorkManager check with one summary notification deep-linking to Reminders; notification permission asked after the first reminder exists (AC-C50, AC-H12)
-- [ ] T073: Home report PDF (cover, blueprints, rooms with items and warranty status, shutoffs, legend) under 5 s for 40 items (acceptance: AC-H13)
+- [x] T073: Home report PDF (cover, blueprints, rooms with items and warranty status, shutoffs, legend) under 5 s for 40 items (acceptance: AC-H13)
 - [ ] T074: Encrypted backup export/restore (`BundleCrypto` `[unit]`), onboarding "Restore from a backup" (acceptance: AC-C48, AC-H14)
 - [ ] T075: House Manual cloud sync: sign-in uploads the home (reuse the sync engine with `homeId` tenancy), second device sees it, merges, sign out keeps local; HM-Account screen (acceptance: AC-H15)
   - [ ] T075a: House Manual media to R2 in the home tenant: item photos, documents and wall photos (pass `upload`/`fetchMissing` to `WallPhotoRepository` as Field Log does since T048d) (AC-H15, AC-C17)
