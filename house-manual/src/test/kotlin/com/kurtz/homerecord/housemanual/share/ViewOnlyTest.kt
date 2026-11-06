@@ -127,4 +127,20 @@ class ViewOnlyTest {
         rule.onNodeWithTag("hm_item_detail_shutoff_chip").assertExists()
         rule.onNodeWithTag("hm_item_detail_shutoff_change").assertDoesNotExist()
     }
+
+    @Test fun remindersTabHasNoAddZoneOrRowActions() {
+        val row = com.kurtz.homerecord.housemodel.reminders.ReminderRow(
+            id = "r1", title = "Change furnace filter", itemId = "i1", itemName = "Furnace",
+            bucket = com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, dueOn = java.time.LocalDate.of(2026, 11, 1),
+            intervalMonths = 3, lastDoneOn = null, snoozedUntil = null, seasonal = false,
+        )
+        rule.setContent {
+            com.kurtz.homerecord.housemanual.reminders.RemindersScreen(
+                com.kurtz.homerecord.housemanual.reminders.RemindersUiState(loading = false, rows = listOf(row), today = java.time.LocalDate.of(2026, 11, 6), viewOnly = true),
+                {},
+            )
+        }
+        rule.onNodeWithTag("hm_reminders_row_due_0").assertExists()
+        listOf("hm_reminders_fab", "hm_reminders_done_due_0", "hm_reminders_snooze_due_0", "hm_reminders_zone_cold").forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
+    }
 }

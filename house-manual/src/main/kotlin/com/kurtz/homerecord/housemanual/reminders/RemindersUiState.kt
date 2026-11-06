@@ -17,6 +17,8 @@ data class RemindersUiState(
     val showFormErrors: Boolean = false,
     /** The row whose Snooze menu is open. */
     val snoozeMenuFor: String? = null,
+    /** A viewer on a shared home: the list reads only; no Add, climate zone, Done or Snooze (AC-H16). */
+    val viewOnly: Boolean = false,
 ) {
     val due: List<ReminderRow> get() = rows.filter { it.bucket == ReminderBucket.DUE }
     val upcoming: List<ReminderRow> get() = rows.filter { it.bucket == ReminderBucket.UPCOMING }

@@ -218,7 +218,7 @@ private fun HouseManualTabs(
                 overlays = container.overlays, media = container.media, overlayId = key.overlayId,
             )
         }
-        entry<RemindersKey> { com.kurtz.homerecord.housemanual.reminders.RemindersRoute(container.reminders, home.id, onOpenItem = { nav.push(ItemDetailKey(it)) }) }
+        entry<RemindersKey> { com.kurtz.homerecord.housemanual.reminders.RemindersRoute(container.reminders, home.id, onOpenItem = { nav.push(ItemDetailKey(it)) }, viewOnly = !canEdit) }
         entry<ItemsKey> { ItemsRoute(container.items, home.id, onAdd = { addItem(scope, container, home.id, nav) }, onOpen = { nav.push(ItemDetailKey(it)) }, viewOnly = !canEdit) }
         entry<ItemDetailKey> { key ->
             ItemDetailRoute(

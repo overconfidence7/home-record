@@ -63,7 +63,7 @@ fun RemindersScreen(state: RemindersUiState, onEvent: (RemindersEvent) -> Unit, 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            if (!state.loading) {
+            if (!state.loading && !state.viewOnly) {
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(RemindersEvent.OpenForm) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
@@ -80,9 +80,10 @@ fun RemindersScreen(state: RemindersUiState, onEvent: (RemindersEvent) -> Unit, 
                 Modifier.padding(padding).fillMaxWidth().testTag("hm_reminders_list"),
                 contentPadding = PaddingValues(bottom = 96.dp),
             ) {
-                item(key = "zone", contentType = "zone") { ZoneChips(state.zone, onEvent) }
+                // Picking a zone seeds the home's seasonal tasks, so a viewer does not get the chips.
+                if (!state.viewOnly) item(key = "zone", contentType = "zone") { ZoneChips(state.zone, onEvent) }
                 if (state.rows.isEmpty()) {
-                    item(key = "empty", contentType = "empty") { EmptyLine(state.zone != null) }
+                    item(key = "empty", contentType = "empty") { EmptyLine(state.zone != null, state.viewOnly) }
                 }
                 section(R.string.reminders_due, state.due, state, onEvent)
                 section(R.string.reminders_upcoming, state.upcoming, state, onEvent)
@@ -125,11 +126,17 @@ private fun ZoneChips(zone: ClimateZone?, onEvent: (RemindersEvent) -> Unit) {
 }
 
 @Composable
-private fun EmptyLine(zonePicked: Boolean) {
+private fun EmptyLine(zonePicked: Boolean, viewOnly: Boolean = false) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 24.dp).testTag("hm_reminders_empty"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(stringResource(R.string.reminders_empty_title), style = MaterialTheme.typography.titleMedium)
         Text(
-            stringResource(if (zonePicked) R.string.reminders_empty_body else R.string.reminders_empty_body_zone),
+            stringResource(
+                when {
+                    viewOnly -> R.string.reminders_empty_body_view_only
+                    zonePicked -> R.string.reminders_empty_body
+                    else -> R.string.reminders_empty_body_zone
+                },
+            ),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -156,6 +163,7 @@ private fun LazyListScope.section(title: Int, rows: List<ReminderRow>, state: Re
                 )
             },
             modifier = Modifier.animateItem(),
+            actions = !state.viewOnly,
         )
     }
 }

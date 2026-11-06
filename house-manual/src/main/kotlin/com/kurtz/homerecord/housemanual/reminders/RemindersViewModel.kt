@@ -23,6 +23,8 @@ class RemindersViewModel(
     private val homeId: String,
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val today: () -> LocalDate = LocalDate::now,
+    /** False for a viewer on a shared home: opening the tab must not write warranty reminders (AC-H16). */
+    private val canEdit: Boolean = true,
 ) : ViewModel() {
     private val ui = MutableStateFlow(Ui(form = restore(), showErrors = saved[ERRORS] ?: false))
     private var saving = false
@@ -35,7 +37,7 @@ class RemindersViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RemindersUiState())
 
     init {
-        viewModelScope.launch { repo.syncAllWarranties(homeId) }
+        if (canEdit) viewModelScope.launch { repo.syncAllWarranties(homeId) }
     }
 
     fun onEvent(e: RemindersEvent) {

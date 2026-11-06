@@ -146,4 +146,17 @@ class RemindersViewModelTest {
         assertThat(state.rows.map { it.dueOn }).containsExactly(LocalDate.parse("2026-12-31"), LocalDate.parse("2027-02-22"))
         assertThat(state.rows.first().title).isEqualTo("Warranty ends soon: Basement furnace")
     }
+
+    // T076c2d: a viewer cannot edit (AC-H16), so opening the tab must not write warranty reminders on a viewer's phone.
+    @AcceptanceCriterion("AC-H16")
+    @Test fun aViewerOpeningTheTabWritesNothing() {
+        runBlocking { db.warrantyDao().upsert(WarrantyEntity(id = "w1", itemId = "i1", endsOn = "2027-03-01", createdAt = 1, updatedAt = 1)) }
+        val viewer = RemindersViewModel(repo, "h1", SavedStateHandle(), today = { day }, canEdit = false).also {
+            vms += it
+            it.state.launchIn(it.viewModelScope)
+        }
+        val state = viewer.await { !it.loading }
+        assertThat(state.rows).isEmpty()
+        assertThat(runBlocking { db.maintenanceTaskDao().listFor("h1") }).isEmpty()
+    }
 }

@@ -1938,6 +1938,25 @@ fun RemindersEmptyPreview() = Frame {
     com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(loading = false, today = reminderToday), {})
 }
 
+/** A viewer on a shared home (AC-H16): the list without Add, climate zone, Done or Snooze. */
+@ThemePreviews
+@Composable
+fun RemindersViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.RemindersScreen(
+        com.kurtz.homerecord.housemanual.reminders.RemindersUiState(
+            loading = false, rows = sampleReminderRows, zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.COLD, today = reminderToday, viewOnly = true,
+        ),
+        {},
+    )
+}
+
+/** A viewer on a shared home with no reminders yet (AC-H16). */
+@ThemePreviews
+@Composable
+fun RemindersEmptyViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(loading = false, today = reminderToday, viewOnly = true), {})
+}
+
 @ThemePreviews
 @Composable
 fun RemindersLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(), {}) }

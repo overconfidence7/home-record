@@ -320,6 +320,7 @@
     <string name="reminders_empty_title">No reminders yet</string>
     <string name="reminders_empty_body">Filter changes, service visits and warranty dates for your items will show here.</string>
     <string name="reminders_empty_body_zone">Pick your climate zone above for seasonal tasks. Filter changes and warranty dates for your items show up here too.</string>
+    <string name="reminders_empty_body_view_only">The owner hasn\'t added any reminders yet.</string>
     <string name="reminders_add">Add reminder</string>
     <string name="reminders_zone_title">Climate zone</string>
     <string name="reminders_zone_hint">Pick yours and House Manual adds the seasonal jobs for your area.</string>

@@ -133,6 +133,8 @@ object ScreenCatalog {
         QaScreen("report-loading", nonRoot = true) { ReportLoadingPreview() },
         QaScreen("reminders-list", nonRoot = false) { RemindersListPreview() },
         QaScreen("reminders-empty", nonRoot = false) { RemindersEmptyPreview() },
+        QaScreen("reminders-view-only", nonRoot = false) { RemindersViewOnlyPreview() },
+        QaScreen("reminders-empty-view-only", nonRoot = false) { RemindersEmptyViewOnlyPreview() },
         QaScreen("reminders-loading", nonRoot = false) { RemindersLoadingPreview() },
         QaScreen("reminder-form", nonRoot = true) { ReminderFormPreview() },
         QaScreen("reminder-form-errors", nonRoot = true) { ReminderFormErrorsPreview() },

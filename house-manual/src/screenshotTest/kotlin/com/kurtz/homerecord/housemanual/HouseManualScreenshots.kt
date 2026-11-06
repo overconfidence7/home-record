@@ -1038,3 +1038,13 @@ fun DocumentsViewOnlyScreenshot() = DocumentsViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun ItemDetailViewOnlyScreenshot() = ItemDetailViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersViewOnlyScreenshot() = RemindersViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersEmptyViewOnlyScreenshot() = RemindersEmptyViewOnlyPreview()
