@@ -13,7 +13,7 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_back"
 - assertVisible: "Kitchen"
-# AC-C4: the length H02 typed as 12'6" reads back as 12' 6"
+# AC-C4: the length H02 typed as 12.5 (12 ft 6 in) reads back as 12' 6"
 - assertVisible: '14'' by 12'' 6".*'
 # Room page sections are present as the T017 shell of AC-H10 (items list arrives with T021+)
 - assertVisible:

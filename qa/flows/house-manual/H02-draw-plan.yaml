@@ -34,9 +34,11 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_plan_room_length"
 - eraseText: 10
-- inputText: "12'6\""
-# AC-C4: the length field holds what was typed before Done commits it (H03 reads it back as 12' 6")
-- assertVisible: "12'6\""
+# AC-C4: Maestro's inputText can drop quote characters on the emulator, so the flow types 12.5 (12 ft 6 in, also
+# accepted per ui rule 22); `12'6"` typed into the field is covered by PlanEditorInspectorTest. The exact field text is
+# asserted (the helper line "Type 12'6", 12.5 or 12 6." does not match it), and H03 reads the room back as 12' 6".
+- inputText: "12.5"
+- assertVisible: "12.5"
 - hideKeyboard
 - tapOn:
     id: "hm_plan_done"
