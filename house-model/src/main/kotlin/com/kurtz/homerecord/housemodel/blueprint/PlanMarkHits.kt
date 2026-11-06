@@ -53,6 +53,29 @@ object PlanMarkHitTester {
 data class LabelBox(val left: Float, val top: Float, val right: Float, val bottom: Float) {
     fun overlaps(o: LabelBox): Boolean = left < o.right && right > o.left && top < o.bottom && bottom > o.top
     fun inside(o: LabelBox): Boolean = left >= o.left && right <= o.right && top >= o.top && bottom <= o.bottom
+
+    /**
+     * True when the box lies inside the closed [polygon] (canvas pixels): its four corners are inside and no corner of
+     * the polygon pokes into it, which holds for the right-angled rooms the plan draws.
+     */
+    fun insidePolygon(polygon: List<Pair<Float, Float>>): Boolean {
+        val corners = listOf(left to top, right to top, right to bottom, left to bottom)
+        if (!corners.all { (x, y) -> pointInPolygon(x, y, polygon) }) return false
+        return polygon.none { (x, y) -> x > left && x < right && y > top && y < bottom }
+    }
+}
+
+/** Even-odd ray test; points exactly on an edge may land either way, so callers keep a small gap from walls. */
+internal fun pointInPolygon(x: Float, y: Float, polygon: List<Pair<Float, Float>>): Boolean {
+    var inside = false
+    var j = polygon.size - 1
+    for (i in polygon.indices) {
+        val (xi, yi) = polygon[i]
+        val (xj, yj) = polygon[j]
+        if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside
+        j = i
+    }
+    return inside
 }
 
 /**
@@ -90,6 +113,10 @@ object LabelPlacer {
         hard: List<LabelBox>,
         soft: List<LabelBox>,
         gap: Float,
+        /** The room's outline in canvas pixels; when given, a spot inside it is preferred over one that is only inside [room]'s box (an L-shaped room). */
+        shape: List<Pair<Float, Float>>? = null,
+        /** With a [shape], only a spot inside it counts (null otherwise), so the caller can try a smaller size first. */
+        requireShape: Boolean = false,
     ): Pair<Float, Float>? {
         val candidates = ArrayList<Pair<Float, Float>>()
         candidates += anchorX to anchorY
@@ -97,12 +124,24 @@ object LabelPlacer {
             candidates += anchorX to anchorY - k * (height + gap)
             candidates += anchorX to anchorY + k * (height + gap)
         }
+        if (shape != null) {
+            for (k in 1..3) {
+                candidates += anchorX - k * (width / 2f + gap) to anchorY
+                candidates += anchorX + k * (width / 2f + gap) to anchorY
+            }
+        }
         for (o in hard + soft) {
             candidates += o.left - gap - width / 2f to anchorY
             candidates += o.right + gap + width / 2f to anchorY
         }
         val box = { c: Pair<Float, Float> -> LabelBox(c.first - width / 2f, c.second - height / 2f, c.first + width / 2f, c.second + height / 2f) }
         val all = hard + soft
+        if (shape != null && shape.size >= 3) {
+            val inShape = { b: LabelBox -> b.insidePolygon(shape) }
+            candidates.firstOrNull { c -> box(c).let { b -> b.inside(room) && inShape(b) && all.none(b::overlaps) } }?.let { return it }
+            candidates.firstOrNull { c -> box(c).let { b -> b.inside(room) && inShape(b) && hard.none(b::overlaps) } }?.let { return it }
+            if (requireShape) return null
+        }
         candidates.firstOrNull { c -> box(c).let { b -> b.inside(room) && all.none(b::overlaps) } }?.let { return it }
         candidates.firstOrNull { c -> box(c).let { b -> b.inside(room) && hard.none(b::overlaps) } }?.let { return it }
         // A name taller or wider than the room fits no candidate; it stays at its anchor unless that crosses stairs.

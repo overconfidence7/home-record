@@ -84,4 +84,22 @@ class PlanMarkHitsTest {
         // A room smaller than its name with nothing in it keeps the name at the anchor, as before.
         assertThat(LabelPlacer.place(20f, 10f, 120f, 30f, LabelBox(0f, 0f, 40f, 20f), emptyList(), emptyList(), 4f)).isEqualTo(20f to 10f)
     }
+
+    // builder:blueprint-l-room-label: an L-shaped room (box 0..400 x 0..300, its lower-right 200x150 corner outside) whose
+    // anchor sits on the inner corner: the name moves to a spot inside the outline, not just inside the box.
+    @Test
+    @AcceptanceCriterion("AC-C15")
+    fun `a name in an L-shaped room stays inside its outline`() {
+        val l = listOf(0f to 0f, 400f to 0f, 400f to 150f, 200f to 150f, 200f to 300f, 0f to 300f)
+        val at = checkNotNull(LabelPlacer.place(200f, 150f, 120f, 30f, room, emptyList(), emptyList(), 4f, l))
+        val placed = LabelBox(at.first - 60f, at.second - 15f, at.first + 60f, at.second + 15f)
+        assertThat(placed.insidePolygon(l)).isTrue()
+        // Without the outline the anchor is taken, over the inner corner.
+        assertThat(LabelPlacer.place(200f, 150f, 120f, 30f, room, emptyList(), emptyList(), 4f)).isEqualTo(200f to 150f)
+        assertThat(LabelBox(250f, 200f, 300f, 220f).insidePolygon(l)).isFalse()
+        assertThat(LabelBox(20f, 20f, 380f, 100f).insidePolygon(l)).isTrue()
+        // A name wider than either arm has no spot in the outline: strict placement says so, so a smaller size is tried.
+        assertThat(LabelPlacer.place(200f, 150f, 210f, 160f, room, emptyList(), emptyList(), 4f, l, requireShape = true)).isNull()
+        assertThat(LabelPlacer.place(200f, 150f, 210f, 160f, room, emptyList(), emptyList(), 4f, l)).isNotNull()
+    }
 }

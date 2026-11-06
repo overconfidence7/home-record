@@ -190,17 +190,25 @@ fun DrawScope.drawBlueprint(
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
         // Keep the name off any stairs, and off the overlays and items the layers show where there is room for it;
         // when the largest size has no spot beside the stairs, a smaller one may (judge:hm-blueprint-names-font200).
+        // An L-shaped room's box takes in the corner outside it; the name prefers a spot inside the outline (builder:blueprint-l-room-label).
+        val shape = room.points.map { view.x(it.x) to view.y(it.y) }
         val stairs = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
             LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
-        for (layout in roomNameLayouts(room, z, measurer, nameStyle.copy(color = colors.text), dimStyle.copy(color = colors.text))) {
-            val half = layout.size.width / 2f
-            val at = LabelPlacer.place(clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density)
-                ?: continue
-            val (cx, cy) = at
-            if (cx - half < room.minX * z + ox) continue
-            drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
-            break
+        // Every size inside the outline first, then (a name too big for any spot there) inside the room's box as before.
+        val layouts = roomNameLayouts(room, z, measurer, nameStyle.copy(color = colors.text), dimStyle.copy(color = colors.text)).toList()
+        placing@ for (strict in listOf(true, false)) {
+            for (layout in layouts) {
+                val half = layout.size.width / 2f
+                val at = LabelPlacer.place(
+                    clx * z + ox, cly * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairs, obstacles, 4f * density,
+                    shape, requireShape = strict,
+                ) ?: continue
+                val (cx, cy) = at
+                if (cx - half < room.minX * z + ox) continue
+                drawText(layout, topLeft = Offset(cx - half, cy - layout.size.height / 2f))
+                break@placing
+            }
         }
     }
     drawDimensions(rooms, view, density, measurer, dimStyle, colors, system)
