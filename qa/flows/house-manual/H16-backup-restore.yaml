@@ -1,0 +1,135 @@
+# Walkthrough H16 (T074c2): More → Backup and restore makes a passphrase backup of the seeded home and opens the
+# share sheet (AC-C48); then a fresh install restores qa/fixtures/maple-street.hrbackup (pushed to
+# Download/qa-fixtures by the suite) from onboarding: passphrase, the preview counts 3 floors, 12 rooms, 25 items,
+# 10 wall photos and 15 overlays, Restore, and the tabs show the home (AC-H14). The fixture's contents restoring
+# byte-for-byte is proven on the JVM (BackupFixtureTest, HomeBackupRoundTripTest). The picker is another app, so
+# its steps run only while it shows; the restore screens are checked whenever reached.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_backup"
+- tapOn:
+    id: "hm_more_backup"
+- extendedWaitUntil:
+    visible:
+      id: "hm_backup_contents"
+    timeout: 10000
+# AC-C48: a passphrase typed twice seals the whole home and opens the share sheet
+- tapOn:
+    id: "hm_backup_passphrase"
+- inputText: "maple-street-1987"
+- tapOn:
+    id: "hm_backup_confirm"
+- inputText: "maple-street-1987"
+- hideKeyboard
+- tapOn:
+    id: "hm_backup_make"
+- extendedWaitUntil:
+    notVisible:
+      id: "hm_backup_failed"
+    timeout: 5000
+- takeScreenshot: H16-backup-share
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_backup_make"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_backup_failed"
+# A fresh install: wipe the app, then onboarding offers Restore from a backup (AC-C48)
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "hm_onboarding_restore"
+    timeout: 15000
+- takeScreenshot: H16-onboarding
+- tapOn:
+    id: "hm_onboarding_restore"
+- runFlow:
+    when:
+      notVisible: "maple-street.hrbackup"
+    commands:
+      - tapOn:
+          label: "Open the drawer"
+          optional: true
+          point: "8%,7%"
+      - tapOn:
+          text: "Downloads"
+          optional: true
+      - tapOn:
+          text: "qa-fixtures"
+          optional: true
+- runFlow:
+    when:
+      visible: "maple-street.hrbackup"
+    commands:
+      - tapOn: "maple-street.hrbackup"
+      - extendedWaitUntil:
+          visible:
+            id: "hm_restore_passphrase"
+          timeout: 15000
+      # AC-C48: a wrong passphrase is refused under the field, the right one opens the backup
+      - tapOn:
+          id: "hm_restore_passphrase"
+      - inputText: "maple-street-1986"
+      - tapOn:
+          id: "hm_restore_open"
+      - extendedWaitUntil:
+          visible:
+            id: "hm_restore_passphrase"
+          timeout: 15000
+      - assertNotVisible:
+          id: "hm_import_confirm"
+      - takeScreenshot: H16-wrong-passphrase
+      - tapOn:
+          id: "hm_restore_passphrase"
+      - eraseText: 30
+      - inputText: "maple-street-1987"
+      - tapOn:
+          id: "hm_restore_open"
+      # AC-H14: the preview counts the walkthrough home before anything is written
+      - extendedWaitUntil:
+          visible:
+            id: "hm_import_confirm"
+          timeout: 30000
+      - assertVisible:
+          id: "hm_import_count_floor"
+      - assertVisible:
+          id: "hm_import_count_room"
+      - assertVisible:
+          id: "hm_import_count_item"
+      - assertVisible:
+          id: "hm_import_count_wall_photo"
+      - assertVisible:
+          id: "hm_import_count_overlay"
+      - takeScreenshot: H16-restore-preview
+      - tapOn:
+          id: "hm_import_confirm"
+      - extendedWaitUntil:
+          visible:
+            id: "hm_import_finish"
+          timeout: 30000
+      - takeScreenshot: H16-restore-done
+      - tapOn:
+          id: "hm_import_finish"
+      # AC-H14: the restored home is on the tabs: its rooms on the plan, its items with their makes
+      - extendedWaitUntil:
+          visible:
+            id: "hm_tab_house"
+          timeout: 15000
+      - tapOn:
+          id: "hm_tab_house"
+      - assertVisible: "Basement"
+      - takeScreenshot: H16-restored-house
+      - tapOn:
+          id: "hm_tab_items"
+      - scrollUntilVisible:
+          element: "Furnace"
+          direction: DOWN
+          timeout: 15000
+      - takeScreenshot: H16-restored-items
