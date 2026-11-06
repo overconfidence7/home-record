@@ -42,11 +42,20 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         incoming.value = handoffUri(intent)
+        openEmergency(intent)
+    }
+
+    /** The quick settings tile or the widget: Home → Emergency, once the tabs are up (AC-H11). */
+    private fun openEmergency(intent: android.content.Intent?) {
+        if (com.kurtz.homerecord.housemanual.emergency.EmergencyEntry.wants(intent)) container.tabRequests.request("home", listOf(EmergencyKey))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) incoming.value = handoffUri(intent)
+        if (savedInstanceState == null) {
+            incoming.value = handoffUri(intent)
+            openEmergency(intent)
+        }
         enableEdgeToEdge()
         setContent {
             HomeRecordTheme(Brand.HouseManual) {

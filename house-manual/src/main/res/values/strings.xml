@@ -238,6 +238,7 @@
     <string name="home_action_scan">Scan data plate</string>
     <string name="home_emergency">Emergency</string>
     <string name="emergency_title">Emergency</string>
+    <string name="tile_emergency">Emergency</string>
     <string name="emergency_empty_title">No shutoffs yet</string>
     <string name="emergency_empty_body">Add the water main, gas meter valve and main breaker so anyone in the house can find them in a hurry.</string>
     <string name="emergency_main">Main</string>

@@ -1,6 +1,6 @@
 # Walkthrough H13 (T070b): open Emergency from the Home card and from More (AC-C44). Starts from the regression
 # seed, which files a water main (Utility room) and a gas main (Exterior) with instructions. The quick settings
-# tile and the widget (AC-H11) extend this flow with T071.
+# tile (T071a, below) and the widget (T071b) open it from outside the app (AC-H11).
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
@@ -83,4 +83,21 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn: "Shutoff: Water main shutoff"
 - extendedWaitUntil:
     visible: ".*red handle on the meter side.*"
+    timeout: 5000
+# T071a (AC-H11): the quick settings tile starts House Manual with open_emergency; a cold start with that argument
+# lands on HM-Emergency over the Home tab, and Back returns to Home.
+- launchApp:
+    appId: com.kurtz.homerecord.housemanual
+    arguments:
+      open_emergency: "true"
+- extendedWaitUntil:
+    visible:
+      id: "hm_emergency_list"
+    timeout: 10000
+- assertVisible: "Water main shutoff"
+- takeScreenshot: H13-tile-entry
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_home"
     timeout: 5000

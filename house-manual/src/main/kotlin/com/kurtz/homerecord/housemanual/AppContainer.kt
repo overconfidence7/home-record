@@ -48,6 +48,8 @@ import okhttp3.OkHttpClient
 
 /** Manual DI: one container per process, created in [HomeRecordApplication.onCreate]. */
 class AppContainer(app: Application) {
+    /** Tabs and screens asked for from outside the UI: the Emergency tile and widget (AC-H11). */
+    val tabRequests = com.kurtz.homerecord.coreui.shell.TabRequests()
     /** Set by MainActivity while it is resumed so Credential Manager can show its sheet. */
     @Volatile var activityContext: Context? = null
 
