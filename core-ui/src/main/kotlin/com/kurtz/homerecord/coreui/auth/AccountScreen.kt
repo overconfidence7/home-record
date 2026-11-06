@@ -32,7 +32,11 @@ fun AccountScreen(state: AccountUiState, onEvent: (AccountEvent) -> Unit, modifi
         return
     }
     Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(stringResource(R.string.account_signed_in), style = MaterialTheme.typography.titleMedium)
+        Text(
+            state.email?.let { stringResource(R.string.account_signed_in_as, it) } ?: stringResource(R.string.account_signed_in),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.testTag("${prefix}_account_email"),
+        )
         syncStatus()
         Text(stringResource(R.string.account_sign_out_note), style = MaterialTheme.typography.bodyMedium)
         OutlinedButton(

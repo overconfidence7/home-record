@@ -61,4 +61,24 @@ class AccountViewModelTest {
         AccountViewModel(repo, saved).onEvent(AccountEvent.SignOut)
         assertThat(AccountViewModel(repo, saved).state.value.confirmSignOut).isTrue()
     }
+
+    // [judge:hm-more-signed-in-no-account]: the panel names the account; a failed /me keeps the plain line.
+    @Test fun signedInPanelShowsTheAccountEmailAndForgetsItOnSignOut() = kotlinx.coroutines.test.runTest {
+        var asked = 0
+        val vm = AccountViewModel(repo, loadEmail = { asked++; com.kurtz.homerecord.core.company.ApiResult.Ok("dana.ortiz@example.com") })
+        assertThat(vm.state.value.email).isEqualTo("dana.ortiz@example.com")
+        repo.onTokenRefreshed("tok2")
+        assertThat(asked).isEqualTo(1)
+        vm.onEvent(AccountEvent.SignOut)
+        vm.onEvent(AccountEvent.ConfirmSignOut)
+        assertThat(vm.state.value).isEqualTo(AccountUiState(AccountPhase.SignedOut))
+        repo.verifyEmailCode("sam@example.com", "123456")
+        assertThat(vm.state.value.email).isEqualTo("dana.ortiz@example.com")
+        assertThat(asked).isEqualTo(2)
+    }
+
+    @Test fun aFailedLookupLeavesTheEmailOut() {
+        val vm = AccountViewModel(repo, loadEmail = { com.kurtz.homerecord.core.company.ApiResult.Err(com.kurtz.homerecord.core.company.ApiFailure.Offline) })
+        assertThat(vm.state.value).isEqualTo(AccountUiState(AccountPhase.SignedIn))
+    }
 }

@@ -258,7 +258,7 @@ private fun HouseManualTabs(container: AppContainer, home: HomeEntity, openEdito
                         }
                     },
                 ) { accountModifier ->
-                    AccountRoute(container.auth, accountModifier) {
+                    AccountRoute(container.auth, accountModifier, loadEmail = container.account::email) {
                         val phase by container.syncEngine.phase.collectAsState()
                         val pending by container.syncEngine.pendingCount.collectAsState(0)
                         val refused by container.syncEngine.refused.collectAsState(emptyList())

@@ -60,6 +60,7 @@ class AppContainer(app: Application) {
 
     /** Client for authenticated calls (sync): adds the bearer token and handles refresh and 401. */
     val http: Call.Factory = LazyCallFactory { OkHttpClient.Builder().addInterceptor(SessionInterceptor(auth, tokens)).build() }
+    val account = com.kurtz.homerecord.core.auth.RetrofitAccountApi.create(BuildConfig.API_BASE_URL, http)
 
     /** The home is made offline; the first pass after sign-in creates it on the server (AC-H15). */
     private val homeRegistrar = HomeRegistrar(RetrofitHomeRegistrationApi.create(BuildConfig.API_BASE_URL, http), { db.homeDao().get(it)?.name })

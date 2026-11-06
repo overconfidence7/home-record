@@ -42,6 +42,10 @@ env:
     visible: "Everything is synced"
     timeout: 30000
 - assertNotVisible: "Sync failed. Tap to retry"
+# judge:hm-more-signed-in-no-account: the panel names the account that holds the backup
+- assertVisible:
+    id: "hm_account_email"
+    text: "Signed in as ${EMAIL}"
 - takeScreenshot: H17-signed-in
 # Signing out asks first, then keeps the local copy (AC-H15)
 - tapOn:

@@ -1016,7 +1016,7 @@ fun PaywallLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.paywall.P
 fun MoreSignedInPreview() = Frame {
     com.kurtz.homerecord.housemanual.more.MoreScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
-            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn),
+            com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com"),
             {},
             modifier,
         ) { com.kurtz.homerecord.coreui.components.SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }

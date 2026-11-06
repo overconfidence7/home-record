@@ -99,7 +99,7 @@ fun SignInEmailPreview() = Frame {
 @Composable
 fun AccountSignedInPreview() = Frame {
     com.kurtz.homerecord.coreui.auth.AccountScreen(
-        com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn),
+        com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com"),
         {},
     ) { SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }
 }

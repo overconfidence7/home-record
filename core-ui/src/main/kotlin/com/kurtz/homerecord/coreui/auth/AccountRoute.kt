@@ -11,8 +11,13 @@ import com.kurtz.homerecord.core.auth.AuthRepository
 
 /** Sign-in when signed out, [AccountScreen] when signed in. [syncStatus] shows under the account summary. */
 @Composable
-fun AccountRoute(repo: AuthRepository, modifier: Modifier = Modifier, syncStatus: @Composable () -> Unit = {}) {
-    val account = viewModel<AccountViewModel>(factory = viewModelFactory { initializer { AccountViewModel(repo, createSavedStateHandle()) } })
+fun AccountRoute(
+    repo: AuthRepository,
+    modifier: Modifier = Modifier,
+    loadEmail: (suspend () -> com.kurtz.homerecord.core.company.ApiResult<String>)? = null,
+    syncStatus: @Composable () -> Unit = {},
+) {
+    val account = viewModel<AccountViewModel>(factory = viewModelFactory { initializer { AccountViewModel(repo, createSavedStateHandle(), loadEmail) } })
     val state = account.state.collectAsState().value
     if (state.phase == AccountPhase.SignedOut) {
         val vm = viewModel<SignInViewModel>(factory = viewModelFactory { initializer { SignInViewModel(repo, createSavedStateHandle()) } })
