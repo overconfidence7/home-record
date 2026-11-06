@@ -17,7 +17,7 @@ import com.kurtz.homerecord.housemodel.panel.PanelRepository
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null, onMap: () -> Unit = {}) {
+fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, homeId: String, itemId: String, onBack: () -> Unit, highlightSlot: Int? = null, onMap: () -> Unit = {}, viewOnly: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val vm = viewModel<PanelViewModel>(
         key = "panel:$itemId:${highlightSlot ?: ""}",
@@ -25,7 +25,7 @@ fun PanelRoute(repo: PanelRepository, items: ItemRepository, media: MediaFiles, 
             initializer { PanelViewModel(repo, itemId, items.observeItem(itemId).map { it?.name }, repo.observeChoices(homeId), createSavedStateHandle(), media, highlightSlot, legendExporter = com.kurtz.homerecord.housemodel.pdf.PanelLegendExporter(context.applicationContext)) }
         },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(viewOnly = viewOnly)
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> vm.onEvent(PanelEvent.CameraResult(ok)) }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? -> vm.onEvent(PanelEvent.GalleryResult(uri?.toString())) }
     LaunchedEffect(state.photoLaunch) {

@@ -104,6 +104,7 @@ object ScreenCatalog {
         QaScreen("cloud-restore-no-home", nonRoot = true) { CloudRestoreNoHomePreview() },
         QaScreen("cloud-restore-offline", nonRoot = true) { CloudRestoreOfflinePreview() },
         QaScreen("panel", nonRoot = true) { PanelPreview() },
+        QaScreen("panel-view-only", nonRoot = true) { PanelViewOnlyPreview() },
         QaScreen("panel-empty", nonRoot = true) { PanelEmptyPreview() },
         QaScreen("panel-din", nonRoot = true) { PanelDinPreview() },
         QaScreen("panel-clash", nonRoot = true) { PanelClashPreview() },

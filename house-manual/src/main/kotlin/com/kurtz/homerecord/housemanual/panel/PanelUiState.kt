@@ -13,6 +13,8 @@ import com.kurtz.homerecord.core.media.CaptureTarget
 /** HM-Panel (AC-C40): the panel facts, the slot grid and any breaker whose slots clash with another. */
 data class PanelUiState(
     val loading: Boolean = true,
+    /** A viewer on a shared home: slots read only; no Map, Edit, photo change or breaker editor (AC-H16). */
+    val viewOnly: Boolean = false,
     /** The panel item's name ("Main panel"), the screen title. */
     val name: String = "",
     val panel: Panel? = null,

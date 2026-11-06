@@ -1053,3 +1053,8 @@ fun RemindersEmptyViewOnlyScreenshot() = RemindersEmptyViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun BackupViewOnlyScreenshot() = BackupViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelViewOnlyScreenshot() = PanelViewOnlyPreview()

@@ -251,7 +251,7 @@ private fun HouseManualTabs(
             )
         }
         entry<PaywallKey> { key -> PaywallRoute(container.billing, key.feature, onClose = nav::pop) }
-        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot, onMap = { nav.push(MappingKey(key.itemId)) }) }
+        entry<PanelKey> { key -> com.kurtz.homerecord.housemanual.panel.PanelRoute(container.panels, container.items, container.media, home.id, key.itemId, onBack = nav::pop, highlightSlot = key.highlightSlot, onMap = { nav.push(MappingKey(key.itemId)) }, viewOnly = !canEdit) }
         entry<MappingKey> { key -> com.kurtz.homerecord.housemanual.mapping.MappingRoute(container.panels, container.items, container.power, container.mappingAlarm, home.id, key.itemId, onBack = nav::pop) }
         entry<PanelsKey> {
             com.kurtz.homerecord.housemanual.panel.PanelsRoute(

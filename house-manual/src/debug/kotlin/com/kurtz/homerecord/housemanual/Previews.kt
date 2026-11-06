@@ -1591,6 +1591,11 @@ private fun panelState(panel: com.kurtz.homerecord.core.model.Panel, breakers: L
 @Composable
 fun PanelPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers), {}) }
 
+/** A viewer on a shared home (AC-H16): the slots and Share legend; no Map, Edit, photo change or slot taps. */
+@ThemePreviews
+@Composable
+fun PanelViewOnlyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers).copy(viewOnly = true), {}) }
+
 /** Opened from the refrigerator's "Breaker 4" chip (AC-H7): slot 4 is outlined for 2 s after the panel scrolls to it. */
 @ThemePreviews
 @Composable

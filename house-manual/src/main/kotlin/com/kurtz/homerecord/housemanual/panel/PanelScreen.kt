@@ -78,12 +78,12 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
         onBack = { onEvent(PanelEvent.Back) },
         actions = {
             if (panel != null && !state.loading) {
-                if (state.breakers.isNotEmpty()) {
+                if (state.breakers.isNotEmpty() && !state.viewOnly) {
                     IconButton(onClick = { onEvent(PanelEvent.Map) }, modifier = Modifier.testTag("hm_panel_map")) {
                         Icon(Icons.Rounded.PowerOff, contentDescription = stringResource(R.string.panel_map))
                     }
                 }
-                IconButton(onClick = { onEvent(PanelEvent.EditFacts) }, modifier = Modifier.testTag("hm_panel_edit")) {
+                if (!state.viewOnly) IconButton(onClick = { onEvent(PanelEvent.EditFacts) }, modifier = Modifier.testTag("hm_panel_edit")) {
                     Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.panel_edit))
                 }
             }
@@ -99,7 +99,7 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
             )
             state.loading || panel == null || grid == null -> LoadingState(Modifier.padding(padding).testTag("hm_panel_loading"))
             else -> Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("hm_panel_scroll")) {
-                PanelHeader(panel, state.breakers.size, onPhoto = { onEvent(PanelEvent.OpenPhotoSheet) })
+                PanelHeader(panel, state.breakers.size, onPhoto = if (state.viewOnly) null else ({ onEvent(PanelEvent.OpenPhotoSheet) }))
                 androidx.compose.material3.OutlinedButton(
                     onClick = { onEvent(PanelEvent.ShareLegend) },
                     enabled = !state.legendBusy,
@@ -135,7 +135,7 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
                     )
                 }
                 Text(
-                    stringResource(R.string.panel_grid_hint),
+                    stringResource(if (state.viewOnly) R.string.panel_grid_hint_view_only else R.string.panel_grid_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("hm_panel_hint"),
@@ -184,7 +184,7 @@ fun PanelScreen(state: PanelUiState, onEvent: (PanelEvent) -> Unit) {
 
 /** Photo (or the panel icon) beside the facts: main amps, brand, slot count and layout. */
 @Composable
-private fun PanelHeader(panel: Panel, breakerCount: Int, onPhoto: () -> Unit) {
+private fun PanelHeader(panel: Panel, breakerCount: Int, onPhoto: (() -> Unit)?) {
     Row(
         Modifier.fillMaxWidth().padding(16.dp).testTag("hm_panel_header"),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -193,13 +193,19 @@ private fun PanelHeader(panel: Panel, breakerCount: Int, onPhoto: () -> Unit) {
         val shape = RoundedCornerShape(12.dp)
         Box(
             Modifier.size(88.dp).clip(shape).background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .clickable(onClickLabel = stringResource(if (panel.photoPath == null) R.string.panel_photo_add else R.string.panel_photo_change), onClick = onPhoto)
+                .then(
+                    if (onPhoto == null) Modifier
+                    else Modifier.clickable(onClickLabel = stringResource(if (panel.photoPath == null) R.string.panel_photo_add else R.string.panel_photo_change), onClick = onPhoto),
+                )
                 .testTag("hm_panel_photo"),
             contentAlignment = Alignment.Center,
         ) {
             val photo = panel.photoPath
             if (photo != null) {
                 AsyncImage(File(photo), contentDescription = stringResource(R.string.panel_photo), contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            } else if (onPhoto == null) {
+                // A viewer cannot add the photo, so the tile shows the panel icon rather than an add-photo prompt.
+                Icon(Icons.Rounded.ElectricalServices, contentDescription = null, modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 Icon(Icons.Rounded.AddAPhoto, contentDescription = stringResource(R.string.panel_photo_add), modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
             }
@@ -265,6 +271,7 @@ private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp, onEvent: 
     // Tap opens HM-Breaker for the slot (a new breaker when open); touch and hold a single-pole breaker adds a tandem.
     // A tandem's halves each open their own breaker, so the cell itself takes no tap.
     val tap = when {
+        state.viewOnly -> Modifier
         breakers.isEmpty() -> Modifier.combinedClickable(onClickLabel = stringResource(R.string.panel_slot_add_action)) { onEvent(PanelEvent.OpenSlot(cell.slot)) }
         single != null -> Modifier.combinedClickable(
             onClickLabel = stringResource(R.string.panel_slot_edit_action),
@@ -315,7 +322,7 @@ private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp, onEvent: 
                 }
                 return@forEachIndexed
             }
-            val half = if (cell.isTandem) {
+            val half = if (cell.isTandem && !state.viewOnly) {
                 Modifier.clickable(onClickLabel = stringResource(R.string.panel_slot_edit_action)) { onEvent(PanelEvent.OpenBreaker(b.id)) }
                     .testTag("hm_panel_slot_${cell.slot}_${if (i == 0) "a" else "b"}")
             } else Modifier

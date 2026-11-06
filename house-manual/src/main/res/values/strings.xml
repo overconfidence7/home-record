@@ -445,6 +445,7 @@
     <string name="panel_two_pole_description">Slots %1$d and %2$d, two-pole, %3$s</string>
     <string name="panel_tandem_description">Slot %1$d, tandem: %2$s; %3$s</string>
     <string name="panel_grid_hint">Tap a slot to label its breaker. Touch and hold a breaker to add a tandem in the same slot.</string>
+    <string name="panel_grid_hint_view_only">Each slot shows what its breaker powers.</string>
     <string name="panel_slot_add_action">Add breaker</string>
     <string name="panel_slot_edit_action">Edit breaker</string>
     <string name="panel_slot_tandem_action">Add a tandem breaker</string>

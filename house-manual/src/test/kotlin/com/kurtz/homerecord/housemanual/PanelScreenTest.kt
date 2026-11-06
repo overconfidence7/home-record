@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -230,5 +231,19 @@ class PanelScreenTest {
         rule.onNodeWithText("Breakers fill slots up to 23, so the panel needs at least 23").assertExists()
         rule.onNodeWithText("The layout can't change once breakers are labeled, since each one would move.").assertExists()
         assertThat(rule.onAllNodesWithTag("hm_panel_facts_layout_din").fetchSemanticsNodes()).isEmpty()
+    }
+
+    // T076c2f: a viewer cannot edit (AC-H16): no Map or Edit, the photo and slots take no tap, the hint drops "Tap a slot".
+    @Test
+    @AcceptanceCriterion("AC-H16")
+    fun aViewerSeesTheSlotsButCannotEditThem() {
+        show(state(listOf(b("k", listOf(2), "Kitchen counter"))).copy(viewOnly = true))
+        rule.onNodeWithTag("hm_panel_map").assertDoesNotExist()
+        rule.onNodeWithTag("hm_panel_edit").assertDoesNotExist()
+        rule.onNodeWithTag("hm_panel_legend").assertExists()
+        rule.onNodeWithTag("hm_panel_photo").assertHasNoClickAction()
+        rule.onNodeWithTag("hm_panel_slot_1").assertHasNoClickAction()
+        rule.onNodeWithTag("hm_panel_slot_2").assertHasNoClickAction()
+        rule.onNodeWithText("Each slot shows what its breaker powers.").assertExists()
     }
 }
