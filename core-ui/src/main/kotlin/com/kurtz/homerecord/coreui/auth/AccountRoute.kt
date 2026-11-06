@@ -15,6 +15,7 @@ fun AccountRoute(
     repo: AuthRepository,
     modifier: Modifier = Modifier,
     loadEmail: (suspend () -> com.kurtz.homerecord.core.company.ApiResult<String>)? = null,
+    footer: @Composable () -> Unit = {},
     syncStatus: @Composable () -> Unit = {},
 ) {
     val account = viewModel<AccountViewModel>(factory = viewModelFactory { initializer { AccountViewModel(repo, createSavedStateHandle(), loadEmail) } })
@@ -23,6 +24,6 @@ fun AccountRoute(
         val vm = viewModel<SignInViewModel>(factory = viewModelFactory { initializer { SignInViewModel(repo, createSavedStateHandle()) } })
         SignInScreen(vm.state.collectAsState().value, vm::onEvent, modifier)
     } else {
-        AccountScreen(state, account::onEvent, modifier, syncStatus)
+        AccountScreen(state, account::onEvent, modifier, syncStatus, footer)
     }
 }

@@ -1,6 +1,6 @@
 # Walkthrough H17: signing in with an email code from the More tab (AC-H15 sign-in part, AC-B1).
 # Needs the dev backend (ENVIRONMENT=dev, PLAN Q005) for /dev/last-code. Env EMAIL defaults below.
-# The second-device and delete-cloud-copy parts of AC-H15 land with T075c/T075d.
+# The second-device part of AC-H15 lands with T075d; delete cloud copy (T075c) is the last block.
 appId: com.kurtz.homerecord.housemanual
 env:
   EMAIL: qa-hm@example.com
@@ -79,3 +79,68 @@ env:
     id: "hm_home_title"
     text: "Maple St"
 - takeScreenshot: H17-local-copy-kept
+# Delete cloud copy (T075c): sign in again, delete the cloud copy, the app signs out and keeps the home
+- tapOn: "More"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_email"
+    timeout: 5000
+- tapOn:
+    id: "hm_sign_in_email"
+- eraseText
+- inputText: ${EMAIL}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_send"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_code"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-code.js
+    env:
+      EMAIL: ${EMAIL}
+- tapOn:
+    id: "hm_sign_in_code"
+- inputText: ${output.devCode}
+- hideKeyboard
+- tapOn:
+    id: "hm_sign_in_verify"
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "hm_account_delete_cloud"
+    direction: DOWN
+- tapOn:
+    id: "hm_account_delete_cloud"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_delete_cloud_confirm"
+    timeout: 5000
+# AC-H15: deleting the cloud copy asks first, then signs out and keeps the local copy
+- assertVisible: "Delete cloud copy?"
+- tapOn:
+    id: "hm_account_delete_cloud_confirm"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_cloud_deleted"
+    timeout: 15000
+- assertVisible: "Sign in"
+- assertNotVisible:
+    id: "hm_account_delete_cloud_error"
+- takeScreenshot: H17-cloud-deleted
+- tapOn:
+    id: "hm_back"
+- tapOn:
+    id: "hm_tab_home"
+- assertVisible:
+    id: "hm_home_title"
+    text: "Maple St"

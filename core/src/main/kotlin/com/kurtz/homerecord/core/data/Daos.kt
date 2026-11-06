@@ -458,6 +458,8 @@ interface OutboxDao {
     @Query("DELETE FROM outbox WHERE sent = 1 AND serverSeq = :refused") suspend fun clearRefused(refused: Long): Int
     @Query("DELETE FROM outbox WHERE sent = 1 AND serverSeq = :refused AND tenantKind = :kind AND tenantId = :tenantId")
     suspend fun clearRefusedFor(kind: String, tenantId: String, refused: Long): Int
+    /** Every outbox row of a tenant, sent or not (HM-Account "Delete cloud copy": the phone starts that home over). */
+    @Query("DELETE FROM outbox WHERE tenantKind = :kind AND tenantId = :tenantId") suspend fun deleteForTenant(kind: String, tenantId: String): Int
     /** Drops rows the server accepted and this device has pulled back (serverSeq ≤ the tenant's cursor); refused rows (serverSeq < 0) stay for the log. */
     @Query("DELETE FROM outbox WHERE sent = 1 AND tenantKind = :kind AND tenantId = :tenantId AND serverSeq >= 0 AND serverSeq <= :upTo")
     suspend fun pruneConfirmed(kind: String, tenantId: String, upTo: Long): Int

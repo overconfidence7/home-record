@@ -70,14 +70,26 @@ class AppContainer(private val app: Application) {
     private val homeRegistrar = HomeRegistrar(RetrofitHomeRegistrationApi.create(BuildConfig.API_BASE_URL, http), { db.homeDao().get(it)?.name })
         .also { registrar -> auth.addSignOutListener(registrar::reset) }
 
+    private val rowStore = RoomRowStore(db)
+
     val syncEngine = SyncEngine(
         RetrofitSyncApi.create(BuildConfig.API_BASE_URL, http),
-        RoomRowStore(db),
+        rowStore,
         db.outboxDao(),
         db.syncCursorDao(),
         db.syncBaseDao(),
         DeviceIdStore.get(app),
         prepare = homeRegistrar::ensure,
+    )
+
+    /** HM-Account "Delete cloud copy" (AC-H15): the server copy goes, this phone signs out and keeps the home. */
+    val cloudCopy = com.kurtz.homerecord.core.sync.HomeCloudCopy(
+        com.kurtz.homerecord.core.sync.RetrofitHomeCloudCopyApi.create(BuildConfig.API_BASE_URL, http),
+        syncEngine,
+        rowStore,
+        { table, column, values -> rowStore.readWhere(table, column, values) },
+        db.outboxDao(),
+        auth::signOut,
     )
 
     private val connectivity = AndroidConnectivityMonitor(app)

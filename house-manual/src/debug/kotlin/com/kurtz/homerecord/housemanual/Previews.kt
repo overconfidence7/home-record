@@ -1026,16 +1026,46 @@ fun MorePreview() = Frame { com.kurtz.homerecord.housemanual.more.MoreScreen({})
 
 @ThemePreviews
 @Composable
-fun AccountSignedInPreview() = Frame {
+fun AccountSignedInPreview() = AccountSignedInFrame(com.kurtz.homerecord.housemanual.account.CloudCopyUiState())
+
+/** Signed in, scrolled to the bottom so the Cloud copy section shows: the dialog asking first. */
+@ThemePreviews
+@Composable
+fun AccountDeleteCloudConfirmPreview() = AccountSignedInFrame(com.kurtz.homerecord.housemanual.account.CloudCopyUiState(confirmOpen = true))
+
+/** The delete never reached the server: the error line under the button. */
+@ThemePreviews
+@Composable
+fun AccountDeleteCloudOfflinePreview() = AccountSignedInFrame(
+    com.kurtz.homerecord.housemanual.account.CloudCopyUiState(failed = true, offline = true),
+    syncPhase = com.kurtz.homerecord.core.sync.SyncPhase.Offline,
+)
+
+/** After the delete: signed out, the line above the sign-in form says the home is still here. */
+@ThemePreviews
+@Composable
+fun AccountCloudDeletedPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}, cloudDeleted = true) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.ortiz@example.com"), {}, modifier)
+    }
+}
+
+@Composable
+private fun AccountSignedInFrame(
+    cloud: com.kurtz.homerecord.housemanual.account.CloudCopyUiState,
+    syncPhase: com.kurtz.homerecord.core.sync.SyncPhase = com.kurtz.homerecord.core.sync.SyncPhase.Idle,
+) = Frame {
     com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
             com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com"),
             {},
             modifier,
-        ) {
-            com.kurtz.homerecord.coreui.components.SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {})
-            com.kurtz.homerecord.housemanual.account.SyncExplainer()
-        }
+            syncStatus = {
+                com.kurtz.homerecord.coreui.components.SyncStatusChip(syncPhase, pending = 0, onClick = {})
+                com.kurtz.homerecord.housemanual.account.SyncExplainer()
+            },
+            footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloud) {} },
+        )
     }
 }
 

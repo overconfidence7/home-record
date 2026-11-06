@@ -41,6 +41,10 @@ import com.kurtz.homerecord.housemanual.onboarding.houseTypeLabel
 import com.kurtz.homerecord.housemodel.Foundation
 import com.kurtz.homerecord.housemodel.HouseType
 import com.kurtz.homerecord.housemanual.house.OnboardingRoute
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.housemanual.more.MoreEvent
 import com.kurtz.homerecord.housemanual.more.MoreScreen
@@ -247,8 +251,15 @@ private fun HouseManualTabs(
             com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop)
         }
         entry<AccountKey> {
-            com.kurtz.homerecord.housemanual.account.AccountSyncScreen(onEvent = { nav.pop() }) { accountModifier ->
-                AccountRoute(container.auth, accountModifier, loadEmail = container.account::email) {
+            val cloud = viewModel<com.kurtz.homerecord.housemanual.account.CloudCopyViewModel>(
+                factory = viewModelFactory { initializer { com.kurtz.homerecord.housemanual.account.CloudCopyViewModel(home.id, container.cloudCopy::delete, createSavedStateHandle()) } },
+            )
+            val cloudState by cloud.state.collectAsState()
+            com.kurtz.homerecord.housemanual.account.AccountSyncScreen(onEvent = { nav.pop() }, cloudDeleted = cloudState.deleted) { accountModifier ->
+                AccountRoute(
+                    container.auth, accountModifier, loadEmail = container.account::email,
+                    footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloudState, cloud::onEvent) },
+                ) {
                     val phase by container.syncEngine.phase.collectAsState()
                     val pending by container.syncEngine.pendingCount.collectAsState(0)
                     val refused by container.syncEngine.refused.collectAsState(emptyList())

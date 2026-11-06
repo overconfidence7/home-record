@@ -441,6 +441,21 @@ fun AccountSignOutConfirmScreenshot() = AccountSignOutConfirmPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun AccountDeleteCloudConfirmScreenshot() = AccountDeleteCloudConfirmPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AccountDeleteCloudOfflineScreenshot() = AccountDeleteCloudOfflinePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AccountCloudDeletedScreenshot() = AccountCloudDeletedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun WallOutlineScreenshot() = WallOutlinePreview()
 
 @PreviewTest

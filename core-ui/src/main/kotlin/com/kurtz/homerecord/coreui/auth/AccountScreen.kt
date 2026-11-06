@@ -24,10 +24,17 @@ import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 
 /**
  * The signed-in account summary with Sign out (asks first), or a spinner while the token is read. [syncStatus] shows
- * under the summary (House Manual's sync chip, refused changes included). Signed out, [AccountRoute] shows sign-in instead.
+ * under the summary (House Manual's sync chip, refused changes included), [footer] under Sign out. Signed out, [AccountRoute] shows sign-in instead.
  */
 @Composable
-fun AccountScreen(state: AccountUiState, onEvent: (AccountEvent) -> Unit, modifier: Modifier = Modifier, syncStatus: @Composable () -> Unit = {}) {
+fun AccountScreen(
+    state: AccountUiState,
+    onEvent: (AccountEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    syncStatus: @Composable () -> Unit = {},
+    /** Below Sign out: House Manual's Delete cloud copy. */
+    footer: @Composable () -> Unit = {},
+) {
     val prefix = LocalTagPrefix.current
     if (state.phase == AccountPhase.Restoring) {
         LoadingState(modifier)
@@ -47,6 +54,7 @@ fun AccountScreen(state: AccountUiState, onEvent: (AccountEvent) -> Unit, modifi
         ) {
             Text(stringResource(R.string.account_sign_out))
         }
+        footer()
     }
     if (state.confirmSignOut) {
         AlertDialog(
