@@ -126,7 +126,7 @@ private fun ShutoffBlock(s: Shutoff, tag: String, previewPhoto: Painter?, onEven
                 val where = listOfNotNull(
                     if (ShutoffGroups.isMain(s.subtypeId)) stringResource(R.string.emergency_main) else null,
                     s.roomName.ifBlank { null },
-                ).joinToString(" · ")
+                ).joinToString(stringResource(R.string.list_separator))
                 if (where.isNotEmpty()) Text(where, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = stringResource(R.string.emergency_open, s.name))

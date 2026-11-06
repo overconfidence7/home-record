@@ -43,7 +43,7 @@ fun PanelsScreen(state: PanelsUiState, onEvent: (PanelsEvent) -> Unit) {
                     RecordListItem(
                         headline = row.name,
                         supporting = listOfNotNull(type, row.roomName.ifBlank { null }, listOfNotNull(row.make, row.model).joinToString(" ").ifBlank { null })
-                            .joinToString(" · "),
+                            .joinToString(stringResource(R.string.list_separator)),
                         leading = { Icon(Icons.Rounded.ElectricalServices, contentDescription = null) },
                         onClick = { onEvent(PanelsEvent.Open(row.id)) },
                         modifier = Modifier.testTag("hm_panels_row_${i + 1}"),

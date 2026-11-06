@@ -324,7 +324,7 @@ private fun SlotCell(cell: PanelCell, state: PanelUiState, height: Dp, onEvent: 
                 if (cell.isTandem) {
                     // Half a cell holds one line: the label, then the amps.
                     Text(
-                        listOfNotNull(label, facts).joinToString("  "),
+                        listOfNotNull(label, facts).joinToString(stringResource(R.string.tandem_separator)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor,
                         maxLines = 1,
@@ -357,7 +357,7 @@ private fun SlotNumber(text: String) {
 private fun breakerFacts(b: Breaker): String? = listOfNotNull(
     b.amps?.let { stringResource(R.string.panel_amps, it) },
     typeLabel(b.type),
-).joinToString(" · ").ifEmpty { null }
+).joinToString(stringResource(R.string.list_separator)).ifEmpty { null }
 
 @Composable
 private fun typeLabel(type: BreakerType): String? = when (type) {

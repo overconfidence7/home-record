@@ -293,6 +293,12 @@
     <string name="item_detail_where_no_room">No room</string>
     <string name="item_detail_where_place">Place on plan</string>
     <string name="item_detail_where_move">Move on plan</string>
+    <!-- Shared row punctuation (S3, r13:inline-separators) -->
+    <string name="list_separator">" · "</string>
+    <!-- Between a tandem half's label and its amps, on one line -->
+    <string name="tandem_separator">"  "</string>
+    <!-- A numbered step, e.g. "1." -->
+    <string name="step_number">%1$d.</string>
     <!-- HM-Reminders (T072b, AC-H12) -->
     <string name="reminders_empty_title">No reminders yet</string>
     <string name="reminders_empty_body">Filter changes, service visits and warranty dates for your items will show here.</string>
@@ -310,7 +316,6 @@
     <string name="reminders_overdue_since">Overdue since %1$s</string>
     <string name="reminders_snoozed_until">Snoozed until %1$s</string>
     <string name="reminders_done_on">Done %1$s</string>
-    <string name="reminders_separator">" · "</string>
     <string name="reminders_repeat_once">Once</string>
     <string name="reminders_repeat_month">Every month</string>
     <string name="reminders_repeat_months">Every %1$d months</string>

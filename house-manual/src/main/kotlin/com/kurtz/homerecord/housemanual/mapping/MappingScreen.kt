@@ -94,7 +94,7 @@ private fun Idle(state: MappingUiState, onEvent: (MappingEvent) -> Unit) {
     Text(stringResource(R.string.mapping_how_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
     listOf(R.string.mapping_step_1, R.string.mapping_step_2, R.string.mapping_step_3).forEachIndexed { i, res ->
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("${i + 1}.", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.step_number, i + 1), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(res), style = MaterialTheme.typography.bodyLarge)
         }
     }
