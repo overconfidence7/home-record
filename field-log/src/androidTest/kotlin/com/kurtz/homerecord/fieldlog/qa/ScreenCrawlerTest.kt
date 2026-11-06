@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.fieldlog.qa
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.ui.semantics.SemanticsNode
@@ -87,9 +88,41 @@ class ScreenCrawlerTest {
         }
     }
 
+    private fun ActivityScenario<QaActivity>.isNight(): Boolean {
+        var night = false
+        onActivity { night = it.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES }
+        return night
+    }
+
+    /** `cmd uimode night yes` takes effect asynchronously; until the app's configuration says night, shots come out light ([judge:qa-crawler-hm-dark-light]). */
+    private fun waitForNight() {
+        val deadline = System.currentTimeMillis() + 15_000
+        while (System.currentTimeMillis() < deadline) {
+            val mode = inst.targetContext.applicationContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (mode == Configuration.UI_MODE_NIGHT_YES) return
+            inst.waitForIdleSync()
+            Thread.sleep(200)
+        }
+    }
+
+    /** Opens [id] for its dark shot; re-opens once if it came up light, and fails rather than save a light "dark" PNG. */
+    private fun openDark(id: String): ActivityScenario<QaActivity> {
+        val first = open(id)
+        if (first.isNight()) return first
+        first.close()
+        waitForNight()
+        val second = open(id)
+        if (!second.isNight()) {
+            second.close()
+            throw AssertionError("$id: dark variant opened with a light configuration (uimode night yes not applied)")
+        }
+        return second
+    }
+
     @Test fun darkFontAndLandscapeVariants() {
         shell("cmd uimode night yes")
-        for (entry in ScreenCatalog.entries) open(entry.id).use { shoot(entry.id, "dark") }
+        waitForNight()
+        for (entry in ScreenCatalog.entries) openDark(entry.id).use { shoot(entry.id, "dark") }
         shell("cmd uimode night no")
         shell("settings put system font_scale 2.0")
         for (entry in ScreenCatalog.entries) open(entry.id).use { shoot(entry.id, "font200") }
