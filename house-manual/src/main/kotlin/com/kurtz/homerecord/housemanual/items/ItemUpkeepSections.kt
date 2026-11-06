@@ -62,12 +62,12 @@ import java.util.Locale
 
 /** Consumables on the item page (AC-C35): what to buy, how many, and where to reorder. The row opens the edit form. */
 @Composable
-fun ConsumablesSection(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) -> Unit) {
+fun ConsumablesSection(rows: List<ConsumableEntity>, viewOnly: Boolean = false, onEvent: (ItemDetailEvent) -> Unit) {
     UpkeepSection(
         title = stringResource(R.string.item_detail_consumables),
         addLabel = stringResource(R.string.item_detail_consumable_add),
         addTag = "hm_item_detail_consumable_add",
-        onAdd = { onEvent(ItemDetailEvent.OpenConsumable(null)) },
+        onAdd = if (viewOnly) null else ({ onEvent(ItemDetailEvent.OpenConsumable(null)) }),
         emptyText = stringResource(R.string.item_detail_consumables_empty),
         isEmpty = rows.isEmpty(),
     ) {
@@ -82,8 +82,8 @@ fun ConsumablesSection(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) 
                             Icon(Icons.Rounded.ShoppingCart, contentDescription = stringResource(R.string.item_detail_consumable_reorder, c.spec))
                         }
                     }
-                } ?: { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
-                onClick = { onEvent(ItemDetailEvent.OpenConsumable(c.id)) },
+                } ?: if (viewOnly) null else ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }),
+                onClick = if (viewOnly) null else ({ onEvent(ItemDetailEvent.OpenConsumable(c.id)) }),
                 onClickLabel = stringResource(R.string.item_detail_edit),
                 modifier = Modifier.testTag("hm_item_detail_consumable_edit"),
             )
@@ -93,12 +93,12 @@ fun ConsumablesSection(rows: List<ConsumableEntity>, onEvent: (ItemDetailEvent) 
 
 /** Service history on the item page, newest first (AC-C36). The row opens the edit form. */
 @Composable
-fun ServiceSection(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, onEvent: (ItemDetailEvent) -> Unit) {
+fun ServiceSection(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity>, viewOnly: Boolean = false, onEvent: (ItemDetailEvent) -> Unit) {
     UpkeepSection(
         title = stringResource(R.string.item_detail_service),
         addLabel = stringResource(R.string.item_detail_service_add),
         addTag = "hm_item_detail_service_add",
-        onAdd = { onEvent(ItemDetailEvent.OpenService(null)) },
+        onAdd = if (viewOnly) null else ({ onEvent(ItemDetailEvent.OpenService(null)) }),
         emptyText = stringResource(R.string.item_detail_service_empty),
         isEmpty = rows.isEmpty(),
     ) {
@@ -108,7 +108,7 @@ fun ServiceSection(rows: List<ServiceRecordEntity>, contacts: List<ContactEntity
                 headline = r.description,
                 supporting = listOfNotNull(shortDate(r.date), cost, contacts.firstOrNull { it.id == r.contactId }?.name).joinToString(", "),
                 leading = { Icon(Icons.Rounded.Build, contentDescription = null) },
-                onClick = { onEvent(ItemDetailEvent.OpenService(r.id)) },
+                onClick = if (viewOnly) null else ({ onEvent(ItemDetailEvent.OpenService(r.id)) }),
                 onClickLabel = stringResource(R.string.item_detail_edit),
                 modifier = Modifier.testTag("hm_item_detail_service_edit"),
             )
@@ -121,7 +121,8 @@ internal fun UpkeepSection(
     title: String,
     addLabel: String,
     addTag: String,
-    onAdd: () -> Unit,
+    /** Null for a viewer on a shared home: the section lists only (AC-H16). */
+    onAdd: (() -> Unit)?,
     emptyText: String,
     isEmpty: Boolean,
     modifier: Modifier = Modifier,
@@ -131,7 +132,7 @@ internal fun UpkeepSection(
         if (!isEmpty) rows()
         Inset {
             if (isEmpty) Text(emptyText, style = MaterialTheme.typography.bodyLarge)
-            OutlinedButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag(addTag)) {
+            if (onAdd != null) OutlinedButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag(addTag)) {
                 Icon(Icons.Rounded.Add, contentDescription = null)
                 Text(addLabel, Modifier.padding(start = 8.dp))
             }
@@ -300,6 +301,7 @@ private fun shortDate(iso: String): String =
     runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(iso)
 
 /** Documents attached to the item (AC-C37): open in the viewer, add from Files or the scanner, or attach one already in the home. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DocumentsSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     Section(stringResource(R.string.item_detail_documents)) {
@@ -321,8 +323,7 @@ fun DocumentsSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                     }
                 }
             }
-            @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (!state.viewOnly) FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { onEvent(ItemDetailEvent.UploadDocument) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_document_add")) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                     Text(stringResource(R.string.item_detail_document_add), Modifier.padding(start = 8.dp))

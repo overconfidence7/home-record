@@ -117,13 +117,13 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
         onBack = { onEvent(ItemDetailEvent.Back) },
         actions = {
             if (detail != null) {
-                IconButton(onClick = { onEvent(ItemDetailEvent.Edit) }, modifier = Modifier.testTag("hm_item_detail_edit")) {
+                if (!state.viewOnly) IconButton(onClick = { onEvent(ItemDetailEvent.Edit) }, modifier = Modifier.testTag("hm_item_detail_edit")) {
                     Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.item_detail_edit))
                 }
                 IconButton(onClick = { onEvent(ItemDetailEvent.Share) }, modifier = Modifier.testTag("hm_item_detail_share")) {
                     Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.item_detail_share))
                 }
-                OverflowMenu(onEvent)
+                if (!state.viewOnly) OverflowMenu(onEvent)
             }
         },
     ) { padding ->
@@ -142,15 +142,15 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 RoomChip(detail, onEvent)
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
                 DetailsSection(detail, onEvent)
-                WhereSection(detail, onEvent)
+                WhereSection(detail, viewOnly = state.viewOnly, onEvent = onEvent)
                 PowerSection(state.feeding, onEvent)
                 ShutoffSection(state, onEvent)
                 if (com.kurtz.homerecord.housemodel.panel.isPanelSubtype(detail.item.subtype)) PanelSection(onEvent)
                 WarrantySection(detail, state, onEvent)
                 RecallsSection(state.recalls, onEvent)
-                ConsumablesSection(state.consumables, onEvent)
+                ConsumablesSection(state.consumables, viewOnly = state.viewOnly, onEvent = onEvent)
                 ItemRemindersSection(state, onEvent)
-                ServiceSection(state.service, state.contacts, onEvent)
+                ServiceSection(state.service, state.contacts, viewOnly = state.viewOnly, onEvent = onEvent)
                 DocumentsSection(state, onEvent)
                 ItemLinksSection(state.overlayLinks, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
@@ -269,7 +269,7 @@ internal fun ItemRemindersSection(state: ItemDetailUiState, onEvent: (ItemDetail
         title = stringResource(R.string.item_detail_reminders),
         addLabel = stringResource(R.string.reminders_add),
         addTag = "hm_item_detail_reminder_add",
-        onAdd = { onEvent(ItemDetailEvent.OpenReminderForm) },
+        onAdd = if (state.viewOnly) null else ({ onEvent(ItemDetailEvent.OpenReminderForm) }),
         emptyText = stringResource(R.string.item_detail_reminders_empty),
         isEmpty = state.reminders.isEmpty(),
         modifier = Modifier.testTag("hm_item_detail_reminders"),
@@ -286,7 +286,7 @@ internal fun ItemRemindersSection(state: ItemDetailUiState, onEvent: (ItemDetail
                         com.kurtz.homerecord.housemanual.reminders.ReminderRowEvent.Open -> Unit
                     }
                 },
-                openable = false, showItemName = false,
+                openable = false, showItemName = false, actions = !state.viewOnly,
             )
         }
     }
@@ -414,10 +414,12 @@ private fun DetailsSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Uni
  * under Exterior or Whole house have no spot on a floor, so their row only says so.
  */
 @Composable
-internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit) {
+internal fun WhereSection(detail: ItemDetail, viewOnly: Boolean = false, onEvent: (ItemDetailEvent) -> Unit) {
     val i = detail.item
     val pseudo = com.kurtz.homerecord.housemodel.items.PseudoRooms.isPseudo(i.roomId) || i.roomId == null
     val placed = !pseudo && i.planX != null && i.planY != null
+    // A viewer cannot place or move the item, so the row only says where it is.
+    val opens = !pseudo && !viewOnly
     Section(stringResource(R.string.item_detail_where), Modifier.testTag("hm_item_detail_where")) {
         RecordListItem(
             headline = detail.roomName.ifBlank { stringResource(R.string.item_detail_where_no_room) },
@@ -426,12 +428,13 @@ internal fun WhereSection(detail: ItemDetail, onEvent: (ItemDetailEvent) -> Unit
                     when {
                         pseudo -> R.string.item_detail_where_off_plan
                         placed -> R.string.item_detail_where_placed
+                        viewOnly -> R.string.item_detail_where_not_placed_view_only
                         else -> R.string.item_detail_where_not_placed
                     },
                 ),
             leading = { Icon(if (placed) Icons.Rounded.PinDrop else Icons.Rounded.Place, contentDescription = null) },
-            trailing = if (pseudo) null else ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }),
-            onClick = if (pseudo) null else ({ onEvent(ItemDetailEvent.Place) }),
+            trailing = if (!opens) null else ({ Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }),
+            onClick = if (!opens) null else ({ onEvent(ItemDetailEvent.Place) }),
             onClickLabel = stringResource(if (placed) R.string.item_detail_where_move else R.string.item_detail_where_place),
             modifier = Modifier.testTag("hm_item_detail_place"),
         )
@@ -486,7 +489,7 @@ private fun WarrantySection(detail: ItemDetail, state: ItemDetailUiState, onEven
         Inset {
             if (awaiting) {
                 Text(stringResource(R.string.item_detail_warranty_review_badge), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("hm_item_detail_review_badge"))
-                Button(onClick = { onEvent(ItemDetailEvent.OpenReview) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review")) {
+                if (!state.viewOnly) Button(onClick = { onEvent(ItemDetailEvent.OpenReview) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_review")) {
                     Text(stringResource(R.string.item_detail_warranty_review))
                 }
                 return@Inset
@@ -503,7 +506,7 @@ private fun WarrantySection(detail: ItemDetail, state: ItemDetailUiState, onEven
                         modifier = Modifier.testTag("hm_item_detail_lookup_note"),
                     )
                 }
-                if (!queued) LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup, "hm_item_detail_lookup") { onEvent(ItemDetailEvent.LookUp(again = false)) }
+                if (!queued && !state.viewOnly) LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup, "hm_item_detail_lookup") { onEvent(ItemDetailEvent.LookUp(again = false)) }
                 return@Inset
             }
             w.partsMonths?.let { Text(stringResource(R.string.item_detail_warranty_parts, months(it)), style = MaterialTheme.typography.bodyLarge) }
@@ -530,17 +533,17 @@ private fun WarrantySection(detail: ItemDetail, state: ItemDetailUiState, onEven
                     modifier = Modifier.testTag("hm_item_detail_lookup_note"),
                 )
             }
-            LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup_again, "hm_item_detail_lookup_again") { onEvent(ItemDetailEvent.LookUp(again = true)) }
+            if (!state.viewOnly) LookupButton(state.lookupBusy, R.string.item_detail_warranty_lookup_again, "hm_item_detail_lookup_again") { onEvent(ItemDetailEvent.LookUp(again = true)) }
             val registeredLabel = stringResource(R.string.item_detail_warranty_registered)
             // The whole row toggles, so the target is the full-width 56 dp row rather than the 32 dp switch.
             Row(
                 Modifier.fillMaxWidth().height(56.dp)
-                    .toggleable(value = w.registered, role = Role.Switch, onValueChange = { onEvent(ItemDetailEvent.SetRegistered(it)) })
+                    .toggleable(value = w.registered, enabled = !state.viewOnly, role = Role.Switch, onValueChange = { onEvent(ItemDetailEvent.SetRegistered(it)) })
                     .testTag("hm_item_detail_registered"),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(registeredLabel, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                Switch(checked = w.registered, onCheckedChange = null)
+                Switch(checked = w.registered, onCheckedChange = null, enabled = !state.viewOnly)
             }
         }
     }

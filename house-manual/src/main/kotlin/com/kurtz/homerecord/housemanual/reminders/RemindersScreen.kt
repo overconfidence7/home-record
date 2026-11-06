@@ -178,6 +178,8 @@ sealed interface ReminderRowEvent {
 fun ReminderRowItem(
     row: ReminderRow, prefix: String, tag: String, today: LocalDate, snoozeOpen: Boolean, onEvent: (ReminderRowEvent) -> Unit,
     modifier: Modifier = Modifier, openable: Boolean = true, showItemName: Boolean = true,
+    /** False for a viewer on a shared home: no Done or Snooze (AC-H16). */
+    actions: Boolean = true,
 ) {
     val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     val due = row.snoozedUntil?.takeIf { it.isAfter(row.dueOn) } ?: row.dueOn
@@ -207,7 +209,7 @@ fun ReminderRowItem(
                 tint = if (row.bucket == ReminderBucket.DUE) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             )
         },
-        trailing = if (row.bucket == ReminderBucket.DONE) null else {
+        trailing = if (row.bucket == ReminderBucket.DONE || !actions) null else {
             {
                 Row {
                     IconButton(onClick = { onEvent(ReminderRowEvent.Done) }, modifier = Modifier.size(48.dp).testTag("${prefix}_done_$tag")) {

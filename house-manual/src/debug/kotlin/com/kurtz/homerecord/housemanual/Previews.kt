@@ -1961,6 +1961,19 @@ private val furnaceReminders = listOf(
     reminderRow("fr2", "HVAC service", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2027-09-20", item = "Basement furnace", interval = 12),
 )
 
+/** A viewer on a shared home (AC-H16): Share only in the bar, no Look up again or Add buttons, reminders without Done or Snooze. */
+@ThemePreviews
+@Composable
+fun ItemDetailViewOnlyPreview() = Frame {
+    ItemDetailScreen(
+        ItemDetailUiState(
+            loading = false, viewOnly = true, detail = furnaceDetail(), consumables = furnaceConsumables, service = furnaceService,
+            contacts = sampleContacts.map { it.contact }, reminders = furnaceReminders, today = reminderToday,
+        ),
+        {},
+    )
+}
+
 /** The furnace page with its reminders; the section sits below Consumables (SPEC HM-Item, AC-C49). */
 @ThemePreviews
 @Composable

@@ -236,6 +236,7 @@ private fun HouseManualTabs(
                 roomChoices = { container.homes.roomChoices(home.id) },
                 onOpenRoom = { nav.push(RoomKey(it)) },
                 reminders = container.reminders,
+                viewOnly = !canEdit,
             )
         }
         entry<ItemPlaceKey> { key ->

@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemanual.share
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -96,5 +97,34 @@ class ViewOnlyTest {
         rule.setContent { com.kurtz.homerecord.housemanual.documents.DocumentsScreen(com.kurtz.homerecord.housemanual.documents.DocumentsUiState(loading = false, viewOnly = true), {}) }
         rule.onNodeWithTag("hm_documents_fab").assertDoesNotExist()
         rule.onNodeWithTag("hm_documents_add").assertDoesNotExist()
+    }
+
+    @Test fun itemPageHidesEditOverflowPlaceAndAdds() {
+        val item = com.kurtz.homerecord.core.data.ItemEntity(
+            id = "i1", homeId = "h1", roomId = "r1", category = com.kurtz.homerecord.core.model.ItemCategory.HEATING_COOLING.name, subtype = "furnace",
+            name = "Furnace", createdAt = 1, updatedAt = 1,
+        )
+        val detail = com.kurtz.homerecord.housemodel.items.ItemDetail(
+            item, com.kurtz.homerecord.core.model.ItemCategory.HEATING_COOLING, "Furnace", "Basement", null, com.kurtz.homerecord.core.model.WarrantyStatus.Unknown, emptyList(),
+        )
+        val consumable = com.kurtz.homerecord.core.data.ConsumableEntity(id = "c1", itemId = "i1", kind = "FILTER", spec = "16x25x1 MERV 11", createdAt = 1, updatedAt = 1)
+        rule.setContent {
+            com.kurtz.homerecord.housemanual.items.ItemDetailScreen(
+                com.kurtz.homerecord.housemanual.items.ItemDetailUiState(
+                    loading = false, viewOnly = true, detail = detail, consumables = listOf(consumable),
+                    shutoff = com.kurtz.homerecord.housemanual.items.ShutoffChoice("valve", "Furnace gas valve", "Basement"),
+                ),
+                {},
+            )
+        }
+        rule.onNodeWithTag("hm_item_detail_share").assertIsDisplayed()
+        listOf(
+            "hm_item_detail_edit", "hm_item_detail_more", "hm_item_detail_lookup", "hm_item_detail_consumable_add", "hm_item_detail_service_add",
+            "hm_item_detail_reminder_add", "hm_item_detail_document_add", "hm_item_detail_document_scan", "hm_item_detail_document_attach",
+        ).forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
+        rule.onNodeWithTag("hm_item_detail_place").assertHasNoClickAction()
+        rule.onNodeWithTag("hm_item_detail_consumable_edit").assertHasNoClickAction()
+        rule.onNodeWithTag("hm_item_detail_shutoff_chip").assertExists()
+        rule.onNodeWithTag("hm_item_detail_shutoff_change").assertDoesNotExist()
     }
 }

@@ -68,6 +68,7 @@ object ScreenCatalog {
         QaScreen("wall-overlays-selected-linked", nonRoot = true) { WallOverlaysSelectedLinkedPreview() },
         QaScreen("item-detail-links", nonRoot = true) { ItemDetailLinksPagePreview() },
         QaScreen("item-detail-reminders", nonRoot = true) { ItemDetailRemindersPagePreview() },
+        QaScreen("item-detail-view-only", nonRoot = true) { ItemDetailViewOnlyPreview() },
         QaScreen("item-detail-power", nonRoot = true) { ItemDetailPowerPreview() },
         QaScreen("item-detail-shutoff", nonRoot = true) { ItemDetailShutoffPreview() },
         QaScreen("item-shutoff-picker", nonRoot = false) { ItemShutoffPickerPreview() },

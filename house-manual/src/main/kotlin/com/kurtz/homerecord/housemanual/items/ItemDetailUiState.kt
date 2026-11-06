@@ -14,6 +14,8 @@ import com.kurtz.homerecord.housemodel.upkeep.ServiceDraft
 
 data class ItemDetailUiState(
     val loading: Boolean = true,
+    /** A viewer on a shared home: the page reads only; no Edit, overflow, Place, Add or row edits (AC-H16). */
+    val viewOnly: Boolean = false,
     val detail: ItemDetail? = null,
     val confirmDelete: Boolean = false,
     val lookupBusy: Boolean = false,

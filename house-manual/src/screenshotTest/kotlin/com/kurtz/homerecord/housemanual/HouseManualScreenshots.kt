@@ -1033,3 +1033,8 @@ fun ContactsViewOnlyScreenshot() = ContactsViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun DocumentsViewOnlyScreenshot() = DocumentsViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ItemDetailViewOnlyScreenshot() = ItemDetailViewOnlyPreview()

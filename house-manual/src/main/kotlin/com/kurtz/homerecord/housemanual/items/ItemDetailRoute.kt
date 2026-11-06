@@ -57,6 +57,8 @@ fun ItemDetailRoute(
     onOpenRoom: (String) -> Unit = {},
     /** This item's reminders on the page (AC-C49). */
     reminders: com.kurtz.homerecord.housemodel.reminders.ReminderRepository? = null,
+    /** A viewer on a shared home: the page hides every edit control (AC-H16). */
+    viewOnly: Boolean = false,
 ) {
     val pseudo = mapOf(
         PseudoRooms.EXTERIOR to stringResource(com.kurtz.homerecord.housemodel.R.string.item_room_exterior),
@@ -88,7 +90,7 @@ fun ItemDetailRoute(
         onPdf = { vm.onEvent(ItemDetailEvent.DocumentPicked(it)) },
         onFailed = { vm.onEvent(ItemDetailEvent.DocumentScanFailed) },
     )
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(viewOnly = viewOnly)
     LaunchedEffect(state.nav) {
         when (val nav = state.nav ?: return@LaunchedEffect) {
             ItemDetailNav.Closed -> onBack()

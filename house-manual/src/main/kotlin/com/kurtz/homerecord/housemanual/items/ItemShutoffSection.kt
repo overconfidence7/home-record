@@ -39,6 +39,8 @@ import com.kurtz.homerecord.housemanual.R
 internal fun ShutoffSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     val linked = state.shutoff
     if (linked == null && state.shutoffChoices.isEmpty() && !state.shutoffRefused) return
+    // A viewer sees a linked shutoff but cannot pick or change it.
+    if (linked == null && state.viewOnly) return
     Section(stringResource(R.string.item_detail_shutoff), Modifier.testTag("hm_item_detail_shutoff")) {
         if (state.shutoffRefused) {
             Row(Modifier.padding(horizontal = 16.dp).testTag("hm_item_detail_shutoff_refused"), verticalAlignment = Alignment.CenterVertically) {
@@ -55,7 +57,7 @@ internal fun ShutoffSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent)
                     onOpen = { onEvent(ItemDetailEvent.OpenShutoff(linked.id)) },
                     modifier = Modifier.weight(1f).testTag("hm_item_detail_shutoff_chip"),
                 )
-                TextButton(
+                if (!state.viewOnly) TextButton(
                     onClick = { onEvent(ItemDetailEvent.ShowShutoffPicker) },
                     modifier = Modifier.heightIn(min = 48.dp).testTag("hm_item_detail_shutoff_change"),
                 ) { Text(stringResource(R.string.item_detail_shutoff_change)) }
