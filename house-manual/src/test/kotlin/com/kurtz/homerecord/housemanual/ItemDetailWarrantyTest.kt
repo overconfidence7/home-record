@@ -354,4 +354,23 @@ class ItemDetailWarrantyTest {
         vm.await { it.shutoff == null }
         assertThat(checkNotNull(items.get(id)).shutoffItemId).isNull()
     }
+
+    // r13:shutoff-pick-refused-silent: a shutoff deleted on another phone while the picker was open is not linked, and the page says so
+    @Test fun pickingAShutoffThatIsGoneShowsANotice() = runTest {
+        val valve = items.save("h1", ItemDraft(subtypeId = "fixture_shutoff", roomId = PseudoRooms.WHOLE_HOUSE, name = "Kitchen sink cold valve")).orEmpty()
+        val id = heater()
+        val vm = ItemDetailViewModel(
+            items, lookup, UpkeepRepository(db), docs, id, "h1", items.observeDetail(id, "h1", emptyMap()), "copy", SavedStateHandle(),
+            shutoff = items.observeShutoffFor(id), shutoffs = items.observeShutoffs("h1", emptyMap()).let { f -> kotlinx.coroutines.flow.flow { f.collect { s -> emit(s.flatMap { it.shutoffs }) } } },
+        ).also { vms += it; it.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main)) }
+        vm.await { it.shutoffChoices.size == 1 }
+        vm.onEvent(ItemDetailEvent.ShowShutoffPicker)
+        items.delete(valve)
+        vm.onEvent(ItemDetailEvent.PickShutoff(valve))
+        val refused = vm.await { it.shutoffRefused && !it.showShutoffPicker }
+        assertThat(refused.shutoff).isNull()
+        assertThat(checkNotNull(items.get(id)).shutoffItemId).isNull()
+        vm.onEvent(ItemDetailEvent.DismissShutoffNotice)
+        vm.await { !it.shutoffRefused }
+    }
 }

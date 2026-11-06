@@ -38,8 +38,16 @@ import com.kurtz.homerecord.housemanual.R
 @Composable
 internal fun ShutoffSection(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Unit) {
     val linked = state.shutoff
-    if (linked == null && state.shutoffChoices.isEmpty()) return
+    if (linked == null && state.shutoffChoices.isEmpty() && !state.shutoffRefused) return
     Section(stringResource(R.string.item_detail_shutoff), Modifier.testTag("hm_item_detail_shutoff")) {
+        if (state.shutoffRefused) {
+            Row(Modifier.padding(horizontal = 16.dp).testTag("hm_item_detail_shutoff_refused"), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.item_detail_shutoff_refused), Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { onEvent(ItemDetailEvent.DismissShutoffNotice) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.documents_dismiss))
+                }
+            }
+        }
         if (linked != null) {
             Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 LinkChipRow(

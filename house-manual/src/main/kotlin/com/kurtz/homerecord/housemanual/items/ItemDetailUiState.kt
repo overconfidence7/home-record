@@ -53,6 +53,8 @@ data class ItemDetailUiState(
     val shutoffChoices: List<ShutoffChoice> = emptyList(),
     /** The "Which shutoff turns this off?" sheet is open. */
     val showShutoffPicker: Boolean = false,
+    /** The picked shutoff could not be linked (deleted on another phone meanwhile); the section says so (r13). */
+    val shutoffRefused: Boolean = false,
     /** A one-shot navigation the route performs, then answers with [ItemDetailEvent.NavHandled]. */
     val nav: ItemDetailNav? = null,
 )
@@ -133,6 +135,7 @@ sealed interface ItemDetailEvent {
     /** The Shutoff chip: open the shutoff item's page (AC-H7). */
     data class OpenShutoff(val id: String) : ItemDetailEvent
     data object ShowShutoffPicker : ItemDetailEvent
+    data object DismissShutoffNotice : ItemDetailEvent
     data object HideShutoffPicker : ItemDetailEvent
     /** Links [id] as the shutoff that isolates this item, or clears the link when null (AC-C45). */
     data class PickShutoff(val id: String?) : ItemDetailEvent

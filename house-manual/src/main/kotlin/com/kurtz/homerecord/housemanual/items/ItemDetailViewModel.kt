@@ -127,11 +127,14 @@ class ItemDetailViewModel(
         )
     }
 
-    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, links) { s, n, p, l ->
+    private val shutoffRefused = MutableStateFlow(false)
+
+    val state: StateFlow<ItemDetailUiState> = combine(content, nav, upkeepDelete, links, shutoffRefused) { s, n, p, l, refused ->
         val (overlays, f, sh) = l
         s.copy(
             nav = n, confirmUpkeepDelete = p?.let { upkeepDeleteFor(it, s) }, overlayLinks = overlays, feeding = f,
             shutoff = sh.linked, shutoffChoices = sh.choices, showShutoffPicker = sh.picker && s.detail != null,
+            shutoffRefused = refused,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailUiState())
 
@@ -206,10 +209,14 @@ class ItemDetailViewModel(
             }
             ItemDetailEvent.DocumentScanFailed -> documentUi.update { it.copy(notice = true) }
             ItemDetailEvent.DismissDocumentNotice -> documentUi.update { it.copy(notice = false) }
-            ItemDetailEvent.ShowShutoffPicker -> setShutoffPicker(true)
+            ItemDetailEvent.ShowShutoffPicker -> {
+                shutoffRefused.value = false
+                setShutoffPicker(true)
+            }
+            ItemDetailEvent.DismissShutoffNotice -> shutoffRefused.value = false
             ItemDetailEvent.HideShutoffPicker -> setShutoffPicker(false)
             is ItemDetailEvent.PickShutoff -> viewModelScope.launch {
-                repo.setShutoff(itemId, e.id)
+                shutoffRefused.value = !repo.setShutoff(itemId, e.id)
                 setShutoffPicker(false)
             }
             ItemDetailEvent.ShowAttach -> setAttach(true)

@@ -487,6 +487,7 @@
     <string name="item_detail_shutoff">Shutoff</string>
     <string name="item_detail_shutoff_chip">Shutoff: %1$s</string>
     <string name="item_detail_shutoff_change">Change</string>
+    <string name="item_detail_shutoff_refused">That shutoff isn\'t in this home anymore. Pick another.</string>
     <string name="item_detail_shutoff_pick">Pick the shutoff that turns this off</string>
     <plurals name="item_detail_shutoff_pick_supporting">
         <item quantity="one">%1$d shutoff in this home</item>
