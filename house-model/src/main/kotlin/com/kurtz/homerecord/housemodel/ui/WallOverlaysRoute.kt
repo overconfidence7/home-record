@@ -36,6 +36,8 @@ fun WallOverlaysRoute(
     selectId: String?,
     onBack: () -> Unit,
     media: MediaFiles? = null,
+    /** False for a viewer of a shared home (AC-H16): the wall and its overlays show, nothing can be drawn or changed. */
+    canEdit: Boolean = true,
 ) {
     val vm = viewModel<WallOverlaysViewModel>(
         key = "wall-overlays:$wallId",
@@ -43,7 +45,7 @@ fun WallOverlaysRoute(
             initializer { WallOverlaysViewModel(repo, wallPhotos, overlays, maker, roomId, wallId, stage, selectId, createSavedStateHandle(), media) }
         },
     )
-    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current, canEdit = canEdit)
     OverlayPhotoLaunchers(state.photoLaunch, vm::onEvent)
     fun back(fromArrow: Boolean) {
         when (WallBack.step(state.form != null, state.drawing != null, state.selectedId, selectId, fromArrow)) {
@@ -56,7 +58,12 @@ fun WallOverlaysRoute(
     // The form's own handler, composed later, asks before discarding changes.
     val backSteps = WallBack.step(state.form != null, state.drawing != null, state.selectedId, selectId, fromArrow = false) != WallBackStep.Leave
     BackHandler(enabled = backSteps) { back(fromArrow = false) }
-    WallOverlaysScreen(state, { event -> if (event == WallOverlaysEvent.Back) back(fromArrow = true) else vm.onEvent(event) })
+    WallOverlaysScreen(state, { event ->
+        when {
+            event == WallOverlaysEvent.Back -> back(fromArrow = true)
+            canEdit || WallViewOnly.allows(event) -> vm.onEvent(event)
+        }
+    })
 }
 
 /**
@@ -76,4 +83,11 @@ internal fun OverlayPhotoLaunchers(launch: OverlayPhotoLaunch?, onEvent: (WallOv
         if (target != null) camera.launch(Uri.parse(target.uri))
         else gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
+}
+
+/** What a viewer may do on HM-Wall (AC-H16): look at stages and pick overlays; every change is dropped. */
+internal object WallViewOnly {
+    fun allows(event: WallOverlaysEvent): Boolean =
+        event is WallOverlaysEvent.SelectStage || event is WallOverlaysEvent.Select || event == WallOverlaysEvent.Back ||
+            event == WallOverlaysEvent.DismissError || event == WallOverlaysEvent.CancelDelete || event == WallOverlaysEvent.CloseForm
 }

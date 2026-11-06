@@ -1,0 +1,116 @@
+# Viewer mode (AC-H16, T076c). Not a walkthrough step: the x-share flow with a viewer link. The seeded QA House is
+# signed in and uploaded by its owner, who makes an Invite a viewer link; app data is cleared (the viewer's phone), the
+# link opens House Manual, sign-in as another account joins as a viewer, and every tab and the Kitchen's room and wall
+# pages show the home with no edit controls. The link comes from the dev backend (/dev/last-invite). Needs the dev backend (Q005).
+appId: com.kurtz.homerecord.housemanual
+env:
+  EMAIL: qa-hm-viewer-owner@example.com
+  VIEWER: qa-hm-viewer@example.com
+---
+# The owner's phone: the seeded home, signed in and uploaded
+- runFlow: _seed.yaml
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_sign_in_email"
+    timeout: 5000
+- runFlow: _sign-in.yaml
+- extendedWaitUntil:
+    visible: "Everything is synced"
+    timeout: 60000
+- tapOn:
+    id: "hm_back"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_share"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_share"
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_invite_viewer"
+    timeout: 15000
+- tapOn:
+    id: "hm_share_invite_viewer"
+- extendedWaitUntil:
+    visible: "Send the invite"
+    timeout: 15000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_link_0"
+    timeout: 15000
+- runScript:
+    file: ../_scripts/fetch-dev-invite.js
+    env:
+      OWNER_EMAIL: ${EMAIL}
+- assertTrue: ${output.inviteToken != null && output.inviteToken != ''}
+# The viewer's phone: no home; the link opens House Manual and asks for an account
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Set up your home"
+    timeout: 20000
+- openLink: homerecord://invite/${output.inviteToken}
+- extendedWaitUntil:
+    visible:
+      id: "hm_join_intro"
+    timeout: 15000
+- runFlow:
+    file: _sign-in.yaml
+    env:
+      EMAIL: ${VIEWER}
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 60000
+# AC-H16: Home says View only and offers no Add item or Scan
+- assertVisible:
+    id: "hm_home_view_only"
+- assertNotVisible:
+    id: "hm_home_add_item"
+- takeScreenshot: x-share-viewer-home
+# Items: the owner's items, no + button
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible: "Furnace"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_items_fab"
+# House tab: the plan, no Edit plan or Floors
+- tapOn:
+    id: "hm_tab_house"
+- extendedWaitUntil:
+    visible:
+      id: "hm_house_plan"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_house_edit_plan"
+- assertNotVisible:
+    id: "hm_house_floors"
+- takeScreenshot: x-share-viewer-house
+# The Kitchen's room page: walls listed, no Photograph or Add an item here
+- tapOn: "Kitchen"
+- scrollUntilVisible:
+    element: "North wall"
+- assertNotVisible: "Photograph"
+- assertNotVisible:
+    id: "hm_room_add_item"
+- takeScreenshot: x-share-viewer-room
+# The wall page: the wall and its overlays, no Add overlay
+- tapOn: "North wall"
+- extendedWaitUntil:
+    visible:
+      id: "hm_wall_picture"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_wall_add_overlay"
+- takeScreenshot: x-share-viewer-wall

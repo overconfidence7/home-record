@@ -2196,3 +2196,28 @@ fun JoinUsedPreview() = JoinFrame(
         com.kurtz.homerecord.housemanual.share.JoinPhase.Failed, failure = com.kurtz.homerecord.core.share.InviteFailure.Used,
     ),
 )
+
+/** A viewer on a shared home (AC-H16): the kitchen's walls with their photos and no Photograph or Retake; wall overlays open read-only, the plan overlay does not open the plan editor. */
+@ThemePreviews
+@Composable
+fun RoomViewOnlyPreview() = Frame {
+    RoomScreen(RoomUiState(loading = false, room = houseRooms[0], floorName = "Main floor", homeName = "Maple St", walls = kitchenWalls, wallStage = WallStage.ROUGH_IN,
+        canPhotograph = true, canOpenWalls = true, viewOnly = true,
+        overlays = sinkWallOverlays.take(2) + sampleOverlay("o9", com.kurtz.homerecord.housemodel.overlays.OverlayKind.GAS, "Range gas line", 0.2f, 0.2f, 0.6f, 0.2f).copy(wallId = null)), {})
+}
+
+/** A viewer on a shared home (AC-H16): the sink wall with the hot supply picked; no Add overlay, no drag hint, no Edit or Delete. */
+@ThemePreviews
+@Composable
+fun WallOverlaysViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(wallOverlaysState.copy(selectedId = "o1", canEdit = false), {}, sampleRoughInTexture)
+}
+
+/** A viewer on a shared home (AC-H16): an undrawn floor in 3D says the owner hasn't drawn it and offers no Edit plan. */
+@ThemePreviews
+@Composable
+fun House3DEmptyViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.House3DScreen(
+        house3dState({ copy(floorId = "f3", scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(emptyList(), 96, emptyMap())) }), {}, {}, null,
+    )
+}

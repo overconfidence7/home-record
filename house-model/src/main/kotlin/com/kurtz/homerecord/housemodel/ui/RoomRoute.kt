@@ -89,6 +89,8 @@ fun RoomRoute(
     /** The home's panels; with [onOpenBreaker], the room lists the breakers feeding it (AC-C41). */
     panels: com.kurtz.homerecord.housemodel.panel.PanelRepository? = null,
     onOpenBreaker: ((com.kurtz.homerecord.housemodel.panel.FeedingBreaker) -> Unit)? = null,
+    /** A viewer of a shared home (AC-H16): walls and overlays show, but no wall photo is taken and the plan editor stays shut. */
+    viewOnly: Boolean = false,
 ) {
     val vm = viewModel<RoomViewModel>(
         key = "room:$roomId",
@@ -105,19 +107,19 @@ fun RoomRoute(
             }
         },
     )
-    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current)
+    val state = vm.state.collectAsState().value.copy(system = LocalUnitSystem.current, viewOnly = viewOnly)
     WallPhotoLaunchers(state, vm, onOutline)
     RoomScreen(state) { event ->
         when (event) {
             RoomEvent.Back -> onBack()
             is RoomEvent.OpenItem -> onOpenItem(event.id)
+            is RoomEvent.OpenPlanOverlay -> if (!viewOnly) onOpenPlanOverlay(event.overlayId)
             is RoomEvent.OpenBreaker -> onOpenBreaker?.invoke(event.breaker)
             RoomEvent.AddItem -> onAddItem?.invoke(roomId)
             RoomEvent.View3D -> state.view3DTarget?.let { onView3D?.invoke(it) }
             is RoomEvent.SelectStage -> vm.selectStage(event.stage)
             is RoomEvent.OpenWall -> onOpenWall?.invoke(WallOpenRequest(event.wallId, state.wallStage, event.overlayId))
-            is RoomEvent.OpenPlanOverlay -> onOpenPlanOverlay(event.overlayId)
-            else -> vm.onPhotoEvent(event)
+            else -> if (!viewOnly) vm.onPhotoEvent(event)
         }
     }
 }

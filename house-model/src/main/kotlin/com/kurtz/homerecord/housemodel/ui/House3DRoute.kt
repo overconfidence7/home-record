@@ -27,7 +27,8 @@ fun House3DRoute(
     homeName: String,
     floorId: String?,
     onBack: () -> Unit,
-    onEditPlan: (floorId: String?) -> Unit,
+    /** Null for a viewer of a shared home (AC-H16): the empty floor offers no Edit plan. */
+    onEditPlan: ((floorId: String?) -> Unit)?,
     /** Field Log passes [WallStage.BehindTheWall] so a crew sees the rough-in photos first. */
     defaultStage: WallStage = WallStage.HouseManualDefault,
     /** Open standing inside this room ("View in 3D" on a room page, AC-C22). */

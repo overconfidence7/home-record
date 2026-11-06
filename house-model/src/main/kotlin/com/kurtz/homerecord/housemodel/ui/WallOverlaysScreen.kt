@@ -115,7 +115,7 @@ fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) 
         subtitle = state.roomName,
         onBack = { onEvent(WallOverlaysEvent.Back) },
         floatingActionButton = {
-            if (wall != null && idle && !state.loading) {
+            if (wall != null && idle && !state.loading && state.canEdit) {
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(WallOverlaysEvent.StartDrawing) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
@@ -161,8 +161,8 @@ fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) 
                 val selected = state.selected
                 when {
                     drawing != null -> DrawingBar(drawing.size, onEvent)
-                    selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onEvent)
-                    else -> OverlayList(state.overlays, onEvent, Modifier.weight(1f))
+                    selected != null -> SelectionBar(selected, state.item(selected.itemId)?.name, onEvent, canEdit = state.canEdit)
+                    else -> OverlayList(state.overlays, onEvent, Modifier.weight(1f), emptyText = if (state.canEdit) R.string.wall_overlays_empty else R.string.wall_overlays_empty_view_only)
                 }
             }
         }
@@ -234,7 +234,7 @@ private fun WallCanvas(state: WallOverlaysUiState, preview: Painter?, onEvent: (
                     val down = awaitFirstDown()
                     val s = current
                     val selected = s.selected
-                    val handle = if (s.drawing == null && selected != null) {
+                    val handle = if (s.canEdit && s.drawing == null && selected != null) {
                         OverlayHitTest.pointAt(selected.points.map(::toView), down.position.x, down.position.y, radius)
                     } else null
                     if (selected != null && handle != null) {
@@ -268,7 +268,7 @@ private fun WallCanvas(state: WallOverlaysUiState, preview: Painter?, onEvent: (
                     if (view.size >= 2) drawRun(view, pending, halo, selected = false)
                     view.forEach { drawHandle(it, pending, halo) }
                 }
-                state.selected?.let { sel -> shown.firstOrNull { it.id == sel.id }?.points?.map(::toView)?.forEach { drawHandle(it, sel.kind.color(dark), halo) } }
+                if (state.canEdit) state.selected?.let { sel -> shown.firstOrNull { it.id == sel.id }?.points?.map(::toView)?.forEach { drawHandle(it, sel.kind.color(dark), halo) } }
             }
             // Spots show their kind's icon on a disc of the kind's color (rule 26); runs are lines in that color.
             shown.filter { it.points.size == 1 }.forEach { o ->
@@ -347,7 +347,7 @@ internal fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit, scree
 
 /** The picked overlay ([screen] names the test tags): what it is, the item it serves and its photo (AC-C26), "Drag a dot to move it", Edit, Delete and Done. */
 @Composable
-internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall") {
+internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall", canEdit: Boolean = true) {
     val prefix = LocalTagPrefix.current
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val kindName = stringResource(overlay.kind.nameRes)
@@ -363,12 +363,14 @@ internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOve
                 }
             },
         )
-        Text(
-            stringResource(R.string.wall_overlays_drag_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp),
-        )
+        if (canEdit) {
+            Text(
+                stringResource(R.string.wall_overlays_drag_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
         // FlowRow, not Row: at 200% Edit and Delete fill the row and a Row clipped Done to "Don" (V4);
         // Done now wraps to its own line and keeps its whole label.
         FlowRow(
@@ -377,13 +379,15 @@ internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOve
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedButton(onClick = { onEvent(WallOverlaysEvent.EditSelected) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_edit")) {
-                Icon(Icons.Rounded.Edit, contentDescription = null)
-                Text(stringResource(R.string.wall_overlay_edit), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
-            }
-            TextButton(onClick = { onEvent(WallOverlaysEvent.AskDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_delete")) {
-                Icon(Icons.Rounded.Delete, contentDescription = null)
-                Text(stringResource(R.string.wall_overlay_delete), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
+            if (canEdit) {
+                OutlinedButton(onClick = { onEvent(WallOverlaysEvent.EditSelected) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_edit")) {
+                    Icon(Icons.Rounded.Edit, contentDescription = null)
+                    Text(stringResource(R.string.wall_overlay_edit), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
+                }
+                TextButton(onClick = { onEvent(WallOverlaysEvent.AskDelete) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_delete")) {
+                    Icon(Icons.Rounded.Delete, contentDescription = null)
+                    Text(stringResource(R.string.wall_overlay_delete), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
+                }
             }
             Spacer(Modifier.weight(1f))
             Button(onClick = { onEvent(WallOverlaysEvent.Select(null)) }, modifier = Modifier.heightIn(min = 48.dp).testTag("${prefix}_${screen}_overlay_done")) {
@@ -395,7 +399,7 @@ internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOve
 
 /** The wall's overlays as rows (rule 7): kind icon in its color, label, kind, depth and stage; a tap picks it on the wall. */
 @Composable
-private fun OverlayList(overlays: List<Overlay>, onEvent: (WallOverlaysEvent) -> Unit, modifier: Modifier) {
+private fun OverlayList(overlays: List<Overlay>, onEvent: (WallOverlaysEvent) -> Unit, modifier: Modifier, @androidx.annotation.StringRes emptyText: Int = R.string.wall_overlays_empty) {
     val prefix = LocalTagPrefix.current
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     LazyColumn(modifier.fillMaxWidth().testTag("${prefix}_wall_overlay_list"), contentPadding = PaddingValues(bottom = 88.dp)) {
@@ -408,7 +412,7 @@ private fun OverlayList(overlays: List<Overlay>, onEvent: (WallOverlaysEvent) ->
         if (overlays.isEmpty()) {
             item(key = "empty") {
                 Text(
-                    stringResource(R.string.wall_overlays_empty),
+                    stringResource(emptyText),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("${prefix}_wall_overlays_empty"),

@@ -203,7 +203,7 @@ private fun HouseManualTabs(
         entry<House3DKey> { key ->
             com.kurtz.homerecord.housemodel.ui.House3DRoute(
                 container.homes, container.wallPhotos, home.id, home.name, key.floorId, onBack = nav::pop,
-                onEditPlan = { nav.push(PlanKey(floorId = it)) },
+                onEditPlan = if (canEdit) ({ nav.push(PlanKey(floorId = it)) }) else null,
                 roomId = key.roomId,
                 overlays = container.overlays,
                 layerStore = container.layers,
@@ -307,11 +307,13 @@ private fun HouseManualTabs(
             onOpenPlanOverlay = { nav.push(PlanKey(overlayId = it)) },
             panels = container.panels,
             onOpenBreaker = { nav.push(PanelKey(it.panelItemId, highlightSlot = it.breaker.number)) },
+            viewOnly = !canEdit,
         ) }
         entry<RoomWallKey> { key ->
             com.kurtz.homerecord.housemodel.ui.WallOverlaysRoute(
                 container.homes, container.wallPhotos, container.overlays, container.wallTextures, key.roomId, key.wallId,
                 com.kurtz.homerecord.housemodel.walls.WallStage.fromStored(key.stage), key.overlayId, onBack = nav::pop, media = container.media,
+                canEdit = canEdit,
             )
         }
         entry<WallOutlineKey> { key ->

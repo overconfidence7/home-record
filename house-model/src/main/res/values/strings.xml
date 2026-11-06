@@ -396,6 +396,7 @@
     <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>
     <string name="house3d_empty_title">Nothing to show in 3D yet</string>
     <string name="house3d_empty_body">Draw this floor\'s rooms and they stand up here as walls.</string>
+    <string name="house3d_empty_body_view_only">The owner hasn\'t drawn this floor\'s rooms yet.</string>
     <string name="house3d_failed">Couldn\'t build the 3D view from this floor\'s plan. Tap Retry, or open the plan and check its rooms.</string>
     <!-- Overlay kinds and depths (AC-C25, AC-C26) -->
     <string name="overlay_kind_water_hot">Hot water</string>
@@ -440,6 +441,7 @@
     </plurals>
     <string name="wall_overlays_undo_point">Undo</string>
     <string name="wall_overlays_next">Next</string>
+    <string name="wall_overlays_empty_view_only">No pipes, wires or boxes drawn on this wall yet.</string>
     <string name="wall_overlays_drag_hint">Drag a dot to move it.</string>
     <plurals name="wall_overlays_picture_description">
         <item quantity="one">Wall photo with 1 overlay</item>

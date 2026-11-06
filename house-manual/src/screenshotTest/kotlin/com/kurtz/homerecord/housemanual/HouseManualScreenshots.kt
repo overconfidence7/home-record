@@ -1058,3 +1058,18 @@ fun BackupViewOnlyScreenshot() = BackupViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun PanelViewOnlyScreenshot() = PanelViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RoomViewOnlyScreenshot() = RoomViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun WallOverlaysViewOnlyScreenshot() = WallOverlaysViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun House3DEmptyViewOnlyScreenshot() = House3DEmptyViewOnlyPreview()

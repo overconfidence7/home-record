@@ -93,7 +93,8 @@ fun House3DScreen(
     state: House3DUiState,
     onEvent: (House3DEvent) -> Unit,
     onBack: () -> Unit,
-    onEditPlan: (floorId: String?) -> Unit,
+    /** Empty floor's "Edit plan"; null for a viewer of a shared home (AC-H16), who gets no action. */
+    onEditPlan: ((floorId: String?) -> Unit)?,
     onOpenMarker: (SceneMarker) -> Unit = {},
     sceneSlot: SceneSlot = StillScene,
 ) {
@@ -171,9 +172,9 @@ fun House3DScreen(
                 scene == null || scene.isEmpty -> EmptyState(
                     icon = Icons.Rounded.ViewInAr,
                     headline = stringResource(R.string.house3d_empty_title),
-                    body = stringResource(R.string.house3d_empty_body),
-                    actionLabel = stringResource(R.string.house_edit_plan),
-                    onAction = { onEditPlan(state.floorId) },
+                    body = stringResource(if (onEditPlan != null) R.string.house3d_empty_body else R.string.house3d_empty_body_view_only),
+                    actionLabel = if (onEditPlan != null) stringResource(R.string.house_edit_plan) else null,
+                    onAction = { onEditPlan?.invoke(state.floorId) },
                     modifier = m,
                     actionModifier = Modifier.testTag("${prefix}_3d_edit_plan"),
                 )

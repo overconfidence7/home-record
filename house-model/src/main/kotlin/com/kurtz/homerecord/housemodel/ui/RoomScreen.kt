@@ -233,7 +233,7 @@ private fun RoomWallsCard(state: RoomUiState, onEvent: (RoomEvent) -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("${prefix}_room_wall_photo_error"),
                 )
             }
-            state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph, state.canOpenWalls, onEvent) }
+            state.walls.forEach { wall -> RoomWallRow(wall, state.wallStage, state.system, state.canPhotograph && !state.viewOnly, state.canOpenWalls, onEvent) }
             if (state.removedWallPhotos.isNotEmpty()) RemovedWallPhotos(state.removedWallPhotos)
         }
     }
@@ -373,7 +373,7 @@ private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEven
             }
             if (overlays.isEmpty()) {
                 Text(
-                    stringResource(if (state.walls.isEmpty()) R.string.room_section_overlays_empty else R.string.room_section_overlays_empty_walls),
+                    stringResource(if (state.walls.isEmpty() || state.viewOnly) R.string.room_section_overlays_empty else R.string.room_section_overlays_empty_walls),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
@@ -384,16 +384,17 @@ private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEven
                 val wall = o.wallId?.let { id -> state.walls.firstOrNull { it.id == id } }
                 val where = wall?.let { wallName(it) } ?: stringResource(R.string.room_overlay_on_plan)
                 val wallId = o.wallId
+                val opens = state.canOpenWalls && (wallId != null || !state.viewOnly)
                 RecordListItem(
                     headline = o.title(kindName),
                     supporting = listOfNotNull(kindName.takeIf { o.label.isNotBlank() }, where, stringResource(R.string.wall_overlay_recorded_at, stringResource(o.stage.labelRes))).joinToString(" · "),
                     leading = { Icon(o.kind.icon, contentDescription = null, tint = o.kind.color(dark)) },
                     onClick = when {
-                        !state.canOpenWalls -> null
+                        !opens -> null
                         wallId != null -> ({ onEvent(RoomEvent.OpenWall(wallId, o.id)) })
                         else -> ({ onEvent(RoomEvent.OpenPlanOverlay(o.id)) })
                     },
-                    trailing = if (state.canOpenWalls) RecordListItemChevron else null,
+                    trailing = if (opens) RecordListItemChevron else null,
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.testTag("${prefix}_room_overlay_${o.id}"),
                 )

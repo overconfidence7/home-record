@@ -79,6 +79,8 @@ data class WallOverlaysUiState(
     val items: List<OverlayItemChoice> = emptyList(),
     /** Whether the form offers a photo (the app gave the screen a place to keep one). */
     val canAddPhoto: Boolean = false,
+    /** False for a viewer of a shared home (AC-H16): overlays show and can be picked, but nothing is drawn, moved, edited or deleted. */
+    val canEdit: Boolean = true,
     /** A camera or picker the route should open, then answer with PhotoLaunchHandled. */
     val photoLaunch: OverlayPhotoLaunch? = null,
 ) {

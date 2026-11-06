@@ -1,10 +1,12 @@
 package com.kurtz.homerecord.housemanual.share
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.housemanual.home.HomeScreen
@@ -149,4 +151,80 @@ class ViewOnlyTest {
         rule.onNodeWithTag("hm_backup_make").assertExists()
         rule.onNodeWithTag("hm_backup_restore").assertDoesNotExist()
     }
+
+    @Test fun theRoomPageTakesNoWallPhotoAndKeepsThePlanEditorShut() {
+        val walls = listOf(
+            com.kurtz.homerecord.housemodel.walls.RoomWall("w1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, null, 168, 96, mapOf(com.kurtz.homerecord.housemodel.walls.WallStage.FINISHED to "/media/sink.jpg")),
+            com.kurtz.homerecord.housemodel.walls.RoomWall("w2", com.kurtz.homerecord.housemodel.walls.WallSide.EAST, null, 144, 96),
+        )
+        val onWall = overlay("o1", wallId = "w1")
+        val onPlan = overlay("o2", wallId = null)
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                com.kurtz.homerecord.housemodel.ui.RoomScreen(
+                    com.kurtz.homerecord.housemodel.ui.RoomUiState(
+                        loading = false, room = PlanRoom("r1", "Kitchen", points = listOf(Pt(0, 0), Pt(168, 0), Pt(168, 144), Pt(0, 144))),
+                        walls = walls, canPhotograph = true, canOpenWalls = true, viewOnly = true, overlays = listOf(onWall, onPlan),
+                    ),
+                ) {}
+            }
+        }
+        rule.onNodeWithTag("hm_room_wall_w1").assertExists()
+        rule.onNodeWithTag("hm_room_wall_photograph_w1").assertDoesNotExist()
+        rule.onNodeWithTag("hm_room_wall_photograph_w2").assertDoesNotExist()
+        rule.onNodeWithTag("hm_room_overlay_o1").assertHasClickAction()
+        rule.onNodeWithTag("hm_room_overlay_o2").assertHasNoClickAction()
+    }
+
+    @Test fun theWallPageDrawsNothingAndOffersNoEditOrDelete() {
+        val wall = com.kurtz.homerecord.housemodel.walls.RoomWall("w1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, null, 168, 96)
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(
+                    com.kurtz.homerecord.housemodel.ui.WallOverlaysUiState(loading = false, wall = wall, roomName = "Kitchen", overlays = listOf(overlay("o1", "w1")), selectedId = "o1", canEdit = false),
+                    {},
+                )
+            }
+        }
+        rule.onNodeWithTag("hm_wall_selection").assertIsDisplayed()
+        rule.onNodeWithTag("hm_wall_overlay_done").assertExists()
+        listOf("hm_wall_add_overlay", "hm_wall_overlay_edit", "hm_wall_overlay_delete").forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
+    }
+
+    @Test fun theWallPageListHasNoAddOverlay() {
+        val wall = com.kurtz.homerecord.housemodel.walls.RoomWall("w1", com.kurtz.homerecord.housemodel.walls.WallSide.NORTH, null, 168, 96)
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                com.kurtz.homerecord.housemodel.ui.WallOverlaysScreen(
+                    com.kurtz.homerecord.housemodel.ui.WallOverlaysUiState(loading = false, wall = wall, roomName = "Kitchen", canEdit = false),
+                    {},
+                )
+            }
+        }
+        rule.onNodeWithTag("hm_wall_overlays_empty").assertExists()
+        rule.onNodeWithTag("hm_wall_add_overlay").assertDoesNotExist()
+    }
+
+    @Test fun anEmpty3DFloorOffersNoEditPlan() {
+        rule.setContent {
+            CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                com.kurtz.homerecord.housemodel.ui.House3DScreen(
+                    com.kurtz.homerecord.housemodel.ui.House3DUiState(
+                        loading = false, homeName = "Maple St", floorId = "f1",
+                        scene = com.kurtz.homerecord.housemodel.scene.FloorScene.build(emptyList(), 96, emptyMap()),
+                    ),
+                    {}, {}, null,
+                )
+            }
+        }
+        rule.onNodeWithText("The owner hasn't drawn this floor's rooms yet.").assertExists()
+        rule.onNodeWithTag("hm_3d_edit_plan").assertDoesNotExist()
+    }
+
+    private fun overlay(id: String, wallId: String?) = com.kurtz.homerecord.housemodel.overlays.Overlay(
+        id, "h1", "r1", wallId, com.kurtz.homerecord.housemodel.overlays.OverlayKind.WATER_COLD, "Sink supply", null,
+        com.kurtz.homerecord.housemodel.overlays.OverlayDepth.BEHIND_DRYWALL,
+        listOf(com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.2f, 0.5f), com.kurtz.homerecord.housemodel.overlays.OverlayPoint(0.6f, 0.5f)),
+        com.kurtz.homerecord.housemodel.walls.WallStage.ROUGH_IN, null, null, 0L,
+    )
 }

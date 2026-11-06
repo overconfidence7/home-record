@@ -26,6 +26,8 @@ data class RoomUiState(
     val items: List<RoomItem> = emptyList(),
     /** "Add an item here": House Manual, and on a job for whoever may edit its house (T062). */
     val canAddItem: Boolean = false,
+    /** A viewer of a shared home (AC-H16): no wall photos, plan overlays do not open the plan editor. */
+    val viewOnly: Boolean = false,
     /** The room's walls by side and length with a picture per photographed stage (AC-C17). */
     val walls: List<RoomWall> = emptyList(),
     /** Photos of walls a plan edit removed, kept on the room (N001); listed under the walls, newest first. */
