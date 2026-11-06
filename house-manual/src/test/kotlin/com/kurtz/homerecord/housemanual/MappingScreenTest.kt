@@ -93,4 +93,20 @@ class MappingScreenTest {
         rule.onNodeWithTag("hm_panel_map").performClick()
         assertThat(got).containsExactly(PanelEvent.Map)
     }
+
+    // AC-C43: the panel's Share legend button asks for the PDF; a failure says so
+    @Test
+    @AcceptanceCriterion("AC-C43")
+    fun thePanelSharesItsLegendAndSaysWhenItFails() {
+        val panel = Panel("p", "pi", 12, PanelLayout.NORTH_AMERICAN, 200, "Square D QO", null)
+        val got = mutableListOf<PanelEvent>()
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                PanelScreen(PanelUiState(loading = false, name = "Main panel", panel = panel, grid = SlotOccupancy.grid(panel.layout, panel.slotCount, emptyList()), legendFailed = true)) { got += it }
+            }
+        }
+        rule.onNodeWithTag("hm_panel_legend").assertHeightIsAtLeast(48.dp).performClick()
+        rule.onNodeWithTag("hm_panel_legend_failed").assertExists()
+        assertThat(got).containsExactly(PanelEvent.ShareLegend)
+    }
 }

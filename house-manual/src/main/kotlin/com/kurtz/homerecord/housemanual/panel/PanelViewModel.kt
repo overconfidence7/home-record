@@ -49,6 +49,8 @@ class PanelViewModel(
     /** Opened from an item's breaker chip (AC-H7): the slot to scroll to and mark for [highlightMillis]. */
     highlightSlot: Int? = null,
     private val highlightMillis: Long = HIGHLIGHT_MILLIS,
+    /** Legend PDF (AC-C43). */
+    private val legendExporter: com.kurtz.homerecord.housemodel.pdf.LegendExporter = com.kurtz.homerecord.housemodel.pdf.LegendExporter { _, _, _, _ -> null },
 ) : ViewModel() {
     // Shown once: after rotation or process death the panel opens without marking the slot again.
     private val highlight = MutableStateFlow(highlightSlot?.takeUnless { saved[HIGHLIGHT_SHOWN] ?: false })
@@ -68,7 +70,16 @@ class PanelViewModel(
     /** The latest panel, for the editor's slot checks and saves. */
     private var current: PanelState? = null
 
-    private val extras = combine(facts, photo, highlight) { fa, ph, h -> Triple(fa, ph, h) }
+    /** Legend share: the URI for the share sheet, or failed. */
+    private data class LegendUi(val uri: String? = null, val failed: Boolean = false, val busy: Boolean = false)
+
+    private val legend = MutableStateFlow(LegendUi())
+    private var lastName: String = ""
+    private var lastChoices: FeedChoices = FeedChoices()
+
+    private val extras = combine(facts, photo, highlight, legend) { fa, ph, h, lg -> Extras(fa, ph, h, lg) }
+
+    private data class Extras(val fa: SavedFacts?, val ph: PhotoUi, val h: Int?, val lg: LegendUi)
 
     init {
         if (highlight.value != null) {
@@ -80,8 +91,10 @@ class PanelViewModel(
         }
     }
 
-    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph, h) ->
+    val state: StateFlow<PanelUiState> = combine(itemName, panel, form, choices.onStart { emit(FeedChoices()) }, extras) { name, p, f, c, (fa, ph, h, lg) ->
         current = p
+        lastName = name.orEmpty()
+        lastChoices = c
         when {
             name == null -> PanelUiState(loading = false, missing = true)
             p == null -> PanelUiState(loading = true, name = name)
@@ -96,6 +109,7 @@ class PanelViewModel(
                 },
                 photoSheet = ph.sheet, photoLaunch = ph.launch, photoFailed = ph.failed,
                 highlightSlot = h,
+                legendUri = lg.uri, legendFailed = lg.failed, legendBusy = lg.busy,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PanelUiState())
@@ -135,6 +149,8 @@ class PanelViewModel(
                 viewModelScope.launch { repo.deleteBreaker(id) }
             }
             PanelEvent.Map -> Unit
+            PanelEvent.ShareLegend -> shareLegend()
+            PanelEvent.LegendHandled -> legend.value = LegendUi()
             PanelEvent.EditFacts -> current?.panel?.let { p ->
                 val d = SavedFactsDraft.of(PanelDraft.of(p))
                 setFacts { SavedFacts(d, d) }
@@ -143,6 +159,19 @@ class PanelViewModel(
             PanelEvent.CloseFacts -> setFacts { null }
             PanelEvent.SaveFacts -> saveFacts()
             else -> onPhotoEvent(e)
+        }
+    }
+
+    private fun shareLegend() {
+        val p = current ?: return
+        if (legend.value.busy) return
+        val c = lastChoices
+        legend.value = LegendUi(busy = true)
+        viewModelScope.launch {
+            val names = (c.rooms + c.items).associate { it.id to it.name }
+            val feeds = p.links.mapValues { (_, links) -> links.mapNotNull { l -> (l.roomId ?: l.itemId)?.let(names::get) }.distinct() }
+            val uri = legendExporter.export(lastName, p.panel, p.breakers, feeds)
+            legend.value = LegendUi(uri = uri, failed = uri == null)
         }
     }
 

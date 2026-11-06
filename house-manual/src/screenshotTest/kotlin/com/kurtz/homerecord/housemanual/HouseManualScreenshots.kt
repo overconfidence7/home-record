@@ -767,3 +767,8 @@ fun MappingPickScreenshot() = MappingPickPreview()
 @ThemePreviews
 @Composable
 fun MappingStoppedScreenshot() = MappingStoppedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelLegendFailedScreenshot() = PanelLegendFailedPreview()
