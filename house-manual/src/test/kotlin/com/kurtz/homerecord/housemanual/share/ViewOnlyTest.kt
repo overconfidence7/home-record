@@ -143,4 +143,10 @@ class ViewOnlyTest {
         rule.onNodeWithTag("hm_reminders_row_due_0").assertExists()
         listOf("hm_reminders_fab", "hm_reminders_done_due_0", "hm_reminders_snooze_due_0", "hm_reminders_zone_cold").forEach { rule.onNodeWithTag(it).assertDoesNotExist() }
     }
+
+    @Test fun backupKeepsMakeButHidesRestore() {
+        rule.setContent { com.kurtz.homerecord.housemanual.backup.BackupScreen(com.kurtz.homerecord.housemanual.backup.BackupUiState(homeName = "Maple St", viewOnly = true), {}) }
+        rule.onNodeWithTag("hm_backup_make").assertExists()
+        rule.onNodeWithTag("hm_backup_restore").assertDoesNotExist()
+    }
 }

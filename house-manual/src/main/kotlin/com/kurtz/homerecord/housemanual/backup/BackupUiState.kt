@@ -20,6 +20,8 @@ object BackupPassphrase {
  */
 data class BackupUiState(
     val homeName: String = "",
+    /** A viewer on a shared home: a backup can be made, but restoring would write into the owner's home (AC-H16). */
+    val viewOnly: Boolean = false,
     val passphrase: String = "",
     val confirm: String = "",
     val problem: PassphraseProblem? = null,

@@ -110,11 +110,11 @@ fun BackupScreen(state: BackupUiState, onEvent: (BackupEvent) -> Unit) {
             }
             SectionHeader(stringResource(R.string.backup_restore_header))
             Text(
-                stringResource(R.string.backup_restore_body),
+                stringResource(if (state.viewOnly) R.string.backup_restore_body_view_only else R.string.backup_restore_body),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("hm_backup_restore_body"),
             )
-            OutlinedButton(
+            if (!state.viewOnly) OutlinedButton(
                 onClick = { onEvent(BackupEvent.Restore) },
                 enabled = !state.busy,
                 modifier = Modifier.padding(16.dp).fillMaxWidth().heightIn(min = 56.dp).testTag("hm_backup_restore"),

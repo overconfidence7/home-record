@@ -14,9 +14,9 @@ import com.kurtz.homerecord.housemanual.R
 
 /** Wires HM-Backup to [files] for [homeId]; [onRestore] gets the backup file picked to restore. */
 @Composable
-fun BackupRoute(files: BackupFiles, homeId: String, homeName: String, onRestore: (Uri) -> Unit, onBack: () -> Unit) {
+fun BackupRoute(files: BackupFiles, homeId: String, homeName: String, onRestore: (Uri) -> Unit, onBack: () -> Unit, viewOnly: Boolean = false) {
     val vm = viewModel<BackupViewModel>(factory = viewModelFactory { initializer { BackupViewModel(homeName) { files.export(homeId, it) } } })
-    val state = vm.state.collectAsState().value
+    val state = vm.state.collectAsState().value.copy(viewOnly = viewOnly)
     val context = LocalContext.current
     val shareTitle = stringResource(R.string.backup_share_title)
     val pick = androidx.activity.compose.rememberLauncherForActivityResult(

@@ -154,6 +154,7 @@ object ScreenCatalog {
         QaScreen("import-error", nonRoot = true) { ImportErrorPreview() },
         QaScreen("import-loading", nonRoot = true) { ImportLoadingPreview() },
         QaScreen("backup-empty", nonRoot = true) { BackupEmptyPreview() },
+        QaScreen("backup-view-only", nonRoot = true) { BackupViewOnlyPreview() },
         QaScreen("backup-mismatch", nonRoot = true) { BackupMismatchPreview() },
         QaScreen("backup-made", nonRoot = true) { BackupMadePreview() },
         QaScreen("backup-failed", nonRoot = true) { BackupFailedPreview() },

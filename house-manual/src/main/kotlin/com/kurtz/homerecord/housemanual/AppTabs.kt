@@ -266,7 +266,7 @@ private fun HouseManualTabs(
             )
         }
         entry<BackupKey> {
-            com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop)
+            com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop, viewOnly = !canEdit)
         }
         entry<ShareKey> {
             com.kurtz.homerecord.housemanual.share.ShareRoute(container, home.id, home.name, onBack = nav::pop, onSignIn = { nav.push(AccountKey) })

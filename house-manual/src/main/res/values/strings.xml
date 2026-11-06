@@ -644,6 +644,7 @@
     <string name="backup_share_title">Share backup</string>
     <string name="backup_restore_header">Restore</string>
     <string name="backup_restore_body">Bring back a home from a .hrbackup file. Anything already on this phone stays unless you choose the backup\'s copy.</string>
+    <string name="backup_restore_body_view_only">Only the owner can restore a backup into this home. You can still make a backup to keep a copy.</string>
     <string name="backup_restore">Restore from a backup</string>
     <string name="onboarding_restore">Restore from a backup</string>
     <string name="onboarding_sign_in">Sign in to get your home</string>

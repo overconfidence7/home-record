@@ -2045,6 +2045,11 @@ private val sampleBackup = com.kurtz.homerecord.housemanual.backup.BackupUiState
 @Composable
 fun BackupEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.backup.BackupScreen(sampleBackup, {}) }
 
+/** A viewer on a shared home (AC-H16): Make backup stays; Restore is the owner's. */
+@ThemePreviews
+@Composable
+fun BackupViewOnlyPreview() = Frame { com.kurtz.homerecord.housemanual.backup.BackupScreen(sampleBackup.copy(viewOnly = true), {}) }
+
 @ThemePreviews
 @Composable
 fun BackupMismatchPreview() = Frame {
