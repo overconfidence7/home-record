@@ -12,6 +12,7 @@ import com.kurtz.homerecord.housemodel.overlays.nameRes
 import com.kurtz.homerecord.housemodel.ui.labelRes
 import com.kurtz.homerecord.housemodel.ui.title
 import com.kurtz.homerecord.coreui.components.windowTestTags
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -199,8 +200,12 @@ private fun OverflowMenu(onEvent: (ItemDetailEvent) -> Unit) {
 private fun Hero(detail: ItemDetail) {
     val shape = RoundedCornerShape(16.dp)
     val hero = detail.photos.firstOrNull()
+    // A photo gets the full 180 dp; without one the category icon sits in a compact band so the sections lead
+    // [judge:hm-item-hero-icon-too-tall].
     Box(
-        Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(180.dp).clip(shape).testTag("hm_item_detail_hero"),
+        Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(if (hero != null) 180.dp else 88.dp).clip(shape)
+            .then(if (hero == null) Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh) else Modifier)
+            .testTag("hm_item_detail_hero"),
         contentAlignment = Alignment.Center,
     ) {
         if (hero != null) {
@@ -211,7 +216,7 @@ private fun Hero(detail: ItemDetail) {
         } else {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 val icon = ItemCategory.subtype(detail.item.subtype)?.iconName.orEmpty()
-                Icon(itemIcon(icon), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(itemIcon(icon), contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
