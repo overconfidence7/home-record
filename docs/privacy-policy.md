@@ -50,7 +50,7 @@ Some features ask an outside service a question. Only what the question needs is
 - Resend (email delivery)
 - Anthropic (warranty lookup and data plate reading)
 - Google (Google sign-in, Firebase Cloud Messaging for Field Log alerts, Play billing)
-- RevenueCat (purchase status; it sees an app user ID and your purchases, not your records)
+- RevenueCat (purchase status: it sees an app user ID and your purchases, never your records)
 
 ## Who can see your data
 

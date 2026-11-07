@@ -475,9 +475,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 
 ## M7 Ship
 
-- [ ] T080: Language pass over both apps and docs per `docs/voice.md`
+- [x] T080: Language pass over both apps and docs per `docs/voice.md`
   - [x] T080a: both apps' strings.xml (house-manual, house-model, field-log, core-ui) and backend user-facing text through the voice.md checklist: no semicolons in prose, no en dash in the photo report range, "crew" for the team in empty states, "shutoff" for the gas and sink shutoffs
-  - [ ] T080b: the same pass over docs/store-listing.md, docs/privacy-policy.md and docs/data-safety.md once T081 writes them
+  - [x] T080b: the same pass over docs/store-listing.md, docs/privacy-policy.md and docs/data-safety.md once T081 writes them
 - [ ] T081: Store readiness: `docs/data-safety.md`, `docs/privacy-policy.md` (both apps, including backend data handling), `docs/store-listing.md`, release signing config, versioning scheme
   - [x] T081a: versioning scheme (root `version.properties` versionName MAJOR.MINOR.PATCH, versionCode MAJOR·1,000,000 + MINOR·10,000 + PATCH·100 + build, shared by both apps) and release signing from local.properties or HOMERECORD_* environment variables (CI secrets), keys never in the repo
   - [x] T081b: docs/privacy-policy.md (both apps and the backend: what is stored, where, retention, deletion, third parties Cloudflare, Resend, RevenueCat, Google sign-in, Firebase Cloud Messaging) and docs/data-safety.md per app, matching the manifests' permissions (contact details under Needs Nate)

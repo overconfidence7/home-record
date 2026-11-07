@@ -1,6 +1,6 @@
 # Google Play store listings
 
-Written to docs/voice.md. Play limits: title 30 characters, short description 80, full description 4000. Character counts are in brackets. Screenshots come from the QA tour (`qa/flows/<app>/_tour.yaml`, light variant) on the seed home and seed company; Nate picks the final set.
+Written to docs/voice.md. Play limits: title 30 characters, short description 80, full description 4000. Character counts are in brackets. Screenshots come from the QA tour (`qa/flows/<app>/_tour.yaml`, light variant) on the seed home and seed company. Nate picks the final set.
 
 ## House Manual
 

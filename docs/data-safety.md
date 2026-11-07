@@ -2,7 +2,7 @@
 
 What to enter in Play Console for each app. Keep it in step with docs/privacy-policy.md and the manifests. Last checked 2026-11-07 against `house-manual/src/main/AndroidManifest.xml`, `field-log/src/main/AndroidManifest.xml` and `core/src/main/AndroidManifest.xml`.
 
-Both apps: data is encrypted in transit (HTTPS only; release builds refuse plain HTTP). No data is sold. No ads, analytics or crash reporting SDKs. Users can ask for deletion (cloud copy in the app; whole account by email until T081d adds it in the app).
+Both apps: data is encrypted in transit (HTTPS only, release builds refuse plain HTTP). No data is sold. No ads, analytics or crash reporting SDKs. Users can ask for deletion (cloud copy in the app; whole account by email until T081d adds it in the app).
 
 ## House Manual
 
@@ -21,7 +21,7 @@ Not collected: location, contacts, messages, audio, health, web history, device 
 
 ## Field Log
 
-Permissions: INTERNET, CAMERA (job photos), RECORD_AUDIO (voice memos), ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION (while in use, at clock in and clock out only; no background location), POST_NOTIFICATIONS, VIBRATE.
+Permissions: INTERNET, CAMERA (job photos), RECORD_AUDIO (voice memos), ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION (while in use, at clock in and clock out only, never in the background), POST_NOTIFICATIONS, VIBRATE.
 
 | Data type (Play category) | Collected | Shared | Optional | Purpose |
 | --- | --- | --- | --- | --- |
