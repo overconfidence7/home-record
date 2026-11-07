@@ -49,7 +49,7 @@ class PhotoReportTest {
     }
 
     private fun content(n: Int) = PhotoReportContent(
-        company = "Ortiz Electric", companyLine = "(610) 555-0142", title = "Photo report, Oct 26 – Nov 1, 2026",
+        company = "Ortiz Electric", companyLine = "(610) 555-0142", title = "Photo report, Oct 26 to Nov 1, 2026",
         job = "Hale kitchen", jobLine = "Dana Hale · 14 Maple Ave", facts = listOf("$n photos"),
         photos = (1..n).map { PhotoReportCell("/m/$it.jpg", listOf("Kitchen · Rough-in", "Oct 28, 2026, 3:00 PM", "Note $it")) },
     )
@@ -60,8 +60,8 @@ class PhotoReportTest {
         assertThat(pages).hasSize(3)
         assertThat(pages.map { p -> p.filterIsInstance<LogPdfOp.Image>().size }).containsExactly(4, 4, 1).inOrder()
         val words = pages[0].filterIsInstance<LogPdfOp.Text>().map { it.text }
-        assertThat(words).containsAtLeast("Ortiz Electric", "Photo report, Oct 26 – Nov 1, 2026", "Hale kitchen", "9 photos", "Note 1", "Note 4", "Page 1 of 3")
-        assertThat(pages[2].filterIsInstance<LogPdfOp.Text>().map { it.text }).containsAtLeast("Hale kitchen · Photo report, Oct 26 – Nov 1, 2026", "Note 9", "Page 3 of 3")
+        assertThat(words).containsAtLeast("Ortiz Electric", "Photo report, Oct 26 to Nov 1, 2026", "Hale kitchen", "9 photos", "Note 1", "Note 4", "Page 1 of 3")
+        assertThat(pages[2].filterIsInstance<LogPdfOp.Text>().map { it.text }).containsAtLeast("Hale kitchen · Photo report, Oct 26 to Nov 1, 2026", "Note 9", "Page 3 of 3")
     }
 
     @AcceptanceCriterion("AC-F28")

@@ -476,6 +476,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 ## M7 Ship
 
 - [ ] T080: Language pass over both apps and docs per `docs/voice.md`
+  - [x] T080a: both apps' strings.xml (house-manual, house-model, field-log, core-ui) and backend user-facing text through the voice.md checklist: no semicolons in prose, no en dash in the photo report range, "crew" for the team in empty states, "shutoff" for the gas and sink shutoffs
+  - [ ] T080b: the same pass over docs/store-listing.md, docs/privacy-policy.md and docs/data-safety.md once T081 writes them
 - [ ] T081: Store readiness: `docs/data-safety.md`, `docs/privacy-policy.md` (both apps, including backend data handling), `docs/store-listing.md`, release signing config, versioning scheme
 - [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

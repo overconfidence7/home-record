@@ -60,6 +60,6 @@ class RoomShutoffsTest {
     @Test
     fun aRoomWithoutShutoffsSaysHowToAddOne() {
         rule.setContent { RoomScreen(RoomUiState(loading = false, room = kitchen, shutoffs = emptyList()), onEvent = {}) }
-        rule.onNodeWithText("No shutoffs in this room. Add the valve under the sink or the water main as an item here.").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("No shutoffs in this room. Add the shutoff under the sink or the water main as an item here.").performScrollTo().assertIsDisplayed()
     }
 }

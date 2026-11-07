@@ -262,8 +262,8 @@
         <item quantity="other">%d shutoffs</item>
     </plurals>
     <string name="emergency_empty_title">No shutoffs yet</string>
-    <string name="emergency_empty_body_view_only">The owner hasn\'t added the water main, gas valve or main breaker yet.</string>
-    <string name="emergency_empty_body">Add the water main, gas meter valve and main breaker so anyone in the house can find them in a hurry.</string>
+    <string name="emergency_empty_body_view_only">The owner hasn\'t added the water main, gas shutoff or main breaker yet.</string>
+    <string name="emergency_empty_body">Add the water main, gas shutoff and main breaker so anyone in the house can find them in a hurry.</string>
     <string name="emergency_main">Main</string>
     <string name="emergency_open">Open %1$s</string>
     <string name="emergency_photo">Photo of %1$s</string>
@@ -445,7 +445,7 @@
     <string name="panel_slot_open_description">Slot %1$d, open</string>
     <string name="panel_slot_description">Slot %1$d, %2$s</string>
     <string name="panel_two_pole_description">Slots %1$d and %2$d, two-pole, %3$s</string>
-    <string name="panel_tandem_description">Slot %1$d, tandem: %2$s; %3$s</string>
+    <string name="panel_tandem_description">Slot %1$d, tandem: %2$s and %3$s</string>
     <string name="panel_grid_hint">Tap a slot to label its breaker. Touch and hold a breaker to add a tandem in the same slot.</string>
     <string name="panel_grid_hint_view_only">Each slot shows what its breaker powers.</string>
     <string name="panel_slot_add_action">Add breaker</string>
@@ -546,7 +546,7 @@
     <string name="mapping_waiting_title">Plug the phone in</string>
     <string name="mapping_waiting_body">Plug this phone into the outlet you want to map. It starts listening once it is charging.</string>
     <string name="mapping_armed_title">Listening for a power drop</string>
-    <string name="mapping_armed_body">Turn off breakers one at a time at the panel. Keep this screen open; the alarm stops if you leave it.</string>
+    <string name="mapping_armed_body">Turn off breakers one at a time at the panel. Keep this screen open. The alarm stops if you leave it.</string>
     <string name="mapping_alarm_title">Power lost</string>
     <string name="mapping_alarm_body">The breaker you just turned off feeds this outlet. Turn it back on, then silence the alarm.</string>
     <string name="mapping_silence">Silence</string>
@@ -635,7 +635,7 @@
     <string name="account_sync_pro_title">Cloud sync is off</string>
     <string name="account_sync_pro_body">You\'re signed in, but this home stays on this phone: changes don\'t go to the cloud or to your other phones. Cloud sync is part of Pro. Your changes are kept and go up as soon as Pro is on.</string>
     <string name="account_sync_pro_button">See Pro</string>
-    <string name="account_sync_explainer">While you\'re signed in, this home, its photos and its documents are kept in the cloud. Sign in with the same account on another phone and the same home shows there; changes made on either phone come together.</string>
+    <string name="account_sync_explainer">While you\'re signed in, this home, its photos and its documents are kept in the cloud. Sign in with the same account on another phone and the same home shows there. Changes made on either phone come together.</string>
     <string name="backup_title">Backup and restore</string>
     <string name="backup_make_header">Make a backup</string>
     <string name="backup_intro">Saves your whole home in one file: floors, rooms, items, wall photos, overlays, documents and reminders. Keep it in Drive or on a computer.</string>
@@ -719,7 +719,7 @@
     <string name="share_sheet_subject">Join %1$s in House Manual</string>
     <string name="share_sheet_text">You\'re invited to %1$s in House Manual. Open this link on your phone: %2$s</string>
     <string name="join_title">Join a home</string>
-    <string name="join_intro">Sign in to join the home you were invited to. Any email works; the home is added to that account.</string>
+    <string name="join_intro">Sign in to join the home you were invited to. Any email works. The home is added to that account.</string>
     <string name="join_joining">Joining the home…</string>
     <string name="join_restoring">Getting %1$s…</string>
     <string name="join_other_home_title">You\'re on %1$s now</string>

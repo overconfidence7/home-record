@@ -76,7 +76,7 @@ class PanelScreenTest {
         show(state(listOf(b("a", listOf(5), "Porch lights"), b("g", listOf(5), "Garage door opener", at = 2))))
         rule.onNodeWithText("5A").assertExists()
         rule.onNodeWithText("5B").assertExists()
-        rule.onNodeWithContentDescription("Slot 5, tandem: Porch lights, 20 A; Garage door opener, 20 A").assertExists()
+        rule.onNodeWithContentDescription("Slot 5, tandem: Porch lights, 20 A and Garage door opener, 20 A").assertExists()
         rule.onNodeWithContentDescription("Slot 4, open").assertExists()
         rule.onNodeWithTag("hm_panel_slot_4").assertHeightIsAtLeast(48.dp)
     }

@@ -74,7 +74,7 @@ data class PhotoReportContent(
     val company: String,
     val companyLine: String? = null,
     val logoPath: String? = null,
-    /** "Photo report, Oct 26 – Nov 1, 2026". */
+    /** "Photo report, Oct 26 to Nov 1, 2026". */
     val title: String,
     val job: String,
     val jobLine: String? = null,

@@ -47,7 +47,7 @@ class PhotoReportPdfTest {
     @Test fun wordsTheHeaderAndEachCaption() {
         val c = PhotoReportPdfContent.build(res, company, job, client, picked, from, to, zone) { false }
         assertThat(c.company).isEqualTo("Ortiz Electric")
-        assertThat(c.title).isEqualTo("Photo report, Oct 26, 2026 – Nov 1, 2026")
+        assertThat(c.title).isEqualTo("Photo report, Oct 26, 2026 to Nov 1, 2026")
         assertThat(c.jobLine).isEqualTo("Dana Hale · 14 Maple Ave, Wayne, PA")
         assertThat(c.facts).containsExactly("2 photos", "1 photo still on another phone is not included.").inOrder()
         assertThat(c.photos[0].caption[0]).isEqualTo("Kitchen · Rough-in")

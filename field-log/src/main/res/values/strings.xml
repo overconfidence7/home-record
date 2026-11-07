@@ -166,7 +166,7 @@
     <string name="rep_photo_failed">Couldn\'t make the photo report. Try again.</string>
     <string name="rep_photo_none_here">The photos from these dates are still on another phone. Open the job\'s Photos to download them, then try again.</string>
     <string name="rep_photo_share_title">Share photo report</string>
-    <string name="rep_photo_title">Photo report, %1$s – %2$s</string>
+    <string name="rep_photo_title">Photo report, %1$s to %2$s</string>
     <string name="rep_photo_no_room">No room or phase</string>
     <plurals name="rep_photo_pdf_count">
         <item quantity="one">%d photo</item>
@@ -387,7 +387,7 @@
         <item quantity="other">%d tasks</item>
     </plurals>
     <string name="job_crew">Crew</string>
-    <string name="job_crew_empty">Your team shows up here once you are online. Invite people from More &gt; Team.</string>
+    <string name="job_crew_empty">Your crew shows up here once you are online. Invite people from More, then Team.</string>
     <string name="job_phases">Phases</string>
     <string name="job_phases_helper">In order, like Demo, Rough-in, Finish.</string>
     <string name="job_office_emails">Office emails</string>
@@ -468,7 +468,7 @@
     <string name="markup_text">Text</string>
     <string name="markup_highlight">Highlight</string>
     <string name="markup_undo">Undo last mark on this page</string>
-    <string name="markup_hint">Drag on the page to mark it. Saving makes a new version; the original stays as it is.</string>
+    <string name="markup_hint">Drag on the page to mark it. Saving makes a new version. The original stays as it is.</string>
     <string name="markup_saving">Saving the new version…</string>
     <string name="markup_failed">Couldn\'t save the new version. Check free space and try again.</string>
     <string name="markup_text_title">Add text</string>
@@ -577,7 +577,7 @@
     <string name="clock_gps_signal">Your company needs a location with every punch, and the phone hasn\'t found one yet. Move somewhere with a clear view of the sky and try again.</string>
     <string name="clock_open_settings">Open Settings</string>
     <string name="clock_crew_title">Clock in your crew</string>
-    <string name="clock_crew_empty">No one else is on the team yet.</string>
+    <string name="clock_crew_empty">No one else is on the crew yet.</string>
     <string name="clock_crew_on_clock">On the clock</string>
     <plurals name="clock_crew_in">
         <item quantity="one">Clock in %d person</item>
@@ -1080,7 +1080,7 @@
     </plurals>
     <string name="plan_status_solo">Your plan: Solo, for you alone.</string>
     <string name="plan_status_crew">Your plan: Crew, up to 10 people.</string>
-    <string name="plan_status_expired">The trial or plan has ended. Your jobs, photos and hours are all still here; pick a plan and your crew can clock in again.</string>
+    <string name="plan_status_expired">The trial or plan has ended. Your jobs, photos and hours are all still here. Pick a plan and your crew can clock in again.</string>
     <string name="plan_explain">Both plans have every feature: time clock, photos, daily logs, files, tasks, schedule and handoff to the homeowner. They differ only in how many people can sign in.</string>
     <string name="plan_solo">Solo</string>
     <string name="plan_solo_detail">Just you</string>
@@ -1104,7 +1104,7 @@
     </plurals>
     <string name="more_plan_ended">Ended</string>
     <string name="renew_title">Ask your owner to renew</string>
-    <string name="renew_body">Your company\'s Field Log plan has ended. Your own hours are below; clocking in comes back once it\'s renewed.</string>
+    <string name="renew_body">Your company\'s Field Log plan has ended. Your own hours are below. Clocking in comes back once it\'s renewed.</string>
     <string name="more_settings">Settings</string>
     <string name="more_about">About</string>
     <string name="more_signed_in_as">Signed in as %1$s</string>
