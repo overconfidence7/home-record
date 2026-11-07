@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.material.JobMaterialsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:01.625Z" hostname="runnervmwuk1x" time="0.282">
+  <properties/>
+  <testcase name="editKeepsTheIdAndDeleteHidesIt" classname="com.kurtz.homerecord.core.material.JobMaterialsTest" time="0.068"/>
+  <testcase name="receiptUploadsOnceAndKeepsItsKeyUntilReplaced" classname="com.kurtz.homerecord.core.material.JobMaterialsTest" time="0.042"/>
+  <testcase name="needsAJobAndAnAmount" classname="com.kurtz.homerecord.core.material.JobMaterialsTest" time="0.047"/>
+  <testcase name="noReceiptNoUpload" classname="com.kurtz.homerecord.core.material.JobMaterialsTest" time="0.053"/>
+  <testcase name="saveTrimsAndQueuesOneChange" classname="com.kurtz.homerecord.core.material.JobMaterialsTest" time="0.064"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

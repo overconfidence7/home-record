@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.MainThreadIoTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:02.181Z" hostname="runnervmwuk1x" time="0.233">
+  <properties/>
+  <testcase name="uploadAndDownloadRunOnTheIoDispatcher" classname="com.kurtz.homerecord.core.media.MainThreadIoTest" time="0.078"/>
+  <testcase name="cacheChecksAndDeletesFilesOnTheIoDispatcher" classname="com.kurtz.homerecord.core.media.MainThreadIoTest" time="0.07"/>
+  <testcase name="rowStoreLeavesMainButQueriesInPlaceInsideATransaction" classname="com.kurtz.homerecord.core.media.MainThreadIoTest" time="0.081"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

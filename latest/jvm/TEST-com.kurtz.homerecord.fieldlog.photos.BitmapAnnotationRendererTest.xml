@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRendererTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:13.311Z" hostname="runnervmwuk1x" time="0.312">
+  <properties/>
+  <testcase name="unreadableFileWritesNothing" classname="com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRendererTest" time="0.108"/>
+  <testcase name="rotate180PutsTheRightHalfOnTheLeft" classname="com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRendererTest" time="0.027"/>
+  <testcase name="uprightShotKeepsItsSizeAndOneMutableBitmap" classname="com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRendererTest" time="0.053"/>
+  <testcase name="portraitShotTaggedRotate90IsWrittenUprightWithMarksWhereDrawn" classname="com.kurtz.homerecord.fieldlog.photos.BitmapAnnotationRendererTest" time="0.115"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemShareTextTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:12.433Z" hostname="runnervmwuk1x" time="0.162">
+  <properties/>
+  <testcase name="shareTextNamesTheItemItsRoomIdsAndWarranty" classname="com.kurtz.homerecord.housemanual.items.ItemShareTextTest" time="0.034"/>
+  <testcase name="theTopBarShareButtonAsksToShare" classname="com.kurtz.homerecord.housemanual.items.ItemShareTextTest" time="0.084"/>
+  <testcase name="blankFieldsAreLeftOut" classname="com.kurtz.homerecord.housemanual.items.ItemShareTextTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="84.471" timestamp="2026-11-07T22:30:16">
+    <testcase id="H18b-claim-link" name="H18b-claim-link" classname="H18b-claim-link" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H18b-claim-link.yaml" time="84.438" timestamp="2026-11-07T22:30:16" status="ERROR">
+      <failure>Assertion is false: id: hm_share_invite_editor is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

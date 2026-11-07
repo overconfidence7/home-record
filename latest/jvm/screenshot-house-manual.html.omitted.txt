@@ -1,0 +1,1 @@
+Omitted by publish-results: latest/jvm/screenshot-house-manual.html was 181851814 bytes, over GitHub's 100 MB file limit even gzipped. It is in the run's workflow artifacts.

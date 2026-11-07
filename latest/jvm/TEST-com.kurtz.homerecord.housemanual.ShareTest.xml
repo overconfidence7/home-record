@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ShareTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:59.646Z" hostname="runnervmwuk1x" time="0.376">
+  <properties/>
+  <testcase name="joiningOnAPhoneWithAnotherHomeKeepsItAndSaysSo" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.031"/>
+  <testcase name="ownerSeesInviteRowsRemoveAndLinks" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.072"/>
+  <testcase name="aHomeNotUploadedYetAndOfflineAreTold" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.032"/>
+  <testcase name="signedOutAsksToSignInThenLoadsPeople" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.044"/>
+  <testcase name="onlyTheOwnerInvites" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.03"/>
+  <testcase name="aUsedLinkCannotBeRetriedButOfflineAndAFailedPullCan" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.029"/>
+  <testcase name="removeAsksFirstAndRevokeGoesStraightThrough" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.057"/>
+  <testcase name="joiningOnAPhoneWithNoHomePullsTheSharedHome" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.02"/>
+  <testcase name="familySeesTheListWithoutOwnerControls" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.03"/>
+  <testcase name="inviteHandsTheLinkToTheShareSheetAndReloads" classname="com.kurtz.homerecord.housemanual.ShareTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

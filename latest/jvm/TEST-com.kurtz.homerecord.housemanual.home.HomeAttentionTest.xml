@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.home.HomeAttentionTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:01.818Z" hostname="runnervmwuk1x" time="0.175">
+  <properties/>
+  <testcase name="overdueRemindersOpenRemindersAndWarrantyRowsOpenTheItem" classname="com.kurtz.homerecord.housemanual.home.HomeAttentionTest" time="0.161"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

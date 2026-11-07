@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:10.519Z" hostname="runnervmwuk1x" time="0.253">
+  <properties/>
+  <testcase name="formParsesTemperaturesAndRainAndFlagsBadInput" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.018"/>
+  <testcase name="lookItUpAgainClearsTheHandEditAndFetchesTheProxy" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.054"/>
+  <testcase name="saveWithErrorsShowsThemAndSavesNothing" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.04"/>
+  <testcase name="lookItUpAgainOfflineKeepsTheTypedWeatherShownButNoLongerHandEntered" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.043"/>
+  <testcase name="noLogOnThePhoneOrCrewShowTheErrorState" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.027"/>
+  <testcase name="typedWeatherIsSavedAndALaterLookupNeverReplacesIt" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.036"/>
+  <testcase name="theTypedFormSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.log.LogWeatherTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

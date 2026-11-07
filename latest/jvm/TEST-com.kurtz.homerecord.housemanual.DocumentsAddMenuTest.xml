@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.DocumentsAddMenuTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:32.219Z" hostname="runnervmwuk1x" time="0.514">
+  <properties/>
+  <testcase name="emptyStateAndFabOpenOneMenuWithUploadAndScan" classname="com.kurtz.homerecord.housemanual.DocumentsAddMenuTest" time="0.502"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

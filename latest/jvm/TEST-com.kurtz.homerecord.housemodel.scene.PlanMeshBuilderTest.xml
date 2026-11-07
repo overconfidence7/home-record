@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.626Z" hostname="runnervmwuk1x" time="0.013">
+  <properties/>
+  <testcase name="openingsStopUnderALowCeiling" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="planYBecomesWorldZSoTheTopOfThePlanIsNorth" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="wallPhotoIsNotMirroredWhenTheRoomsCornersRunCounterClockwise" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.002"/>
+  <testcase name="wallPhotoMapsAcrossTheInsideFaceTopDownFromTheFirstCorner" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="aRaisedFloorSitsAtItsElevation" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="nothingToDrawGivesAnEmptyMesh" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="aDoorIsAnOpeningFromTheFloor" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="everyTriangleWindsCounterClockwiseSeenFromItsNormal" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.002"/>
+  <testcase name="anInsideCornerWallIsItsLengthLessOneThicknessForEachOutsideCorner" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="insideFacesPointIntoTheRoomForEitherCornerOrder" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="boundsRadiusCoversTheHouse" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="aSharedWallHasNoOutsideFaceAndIsHalfAWallFromEachSide" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="rectangleGivesFourWallFacesAShellAndAFloor" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="aDoorOnASharedWallOpensBothRoomsFaces" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="wallsRiseToTheFloorsCeilingHeightInMetersAndTheFootprintIsCentered" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <testcase name="anLShapedRoomsFloorCoversItsWholeOutline" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.0"/>
+  <testcase name="aWindowIsAnOpeningUnderTheHeadFilledWithALighterPane" classname="com.kurtz.homerecord.housemodel.scene.PlanMeshBuilderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

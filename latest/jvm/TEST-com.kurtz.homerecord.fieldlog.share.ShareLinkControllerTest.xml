@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:27.452Z" hostname="runnervmwuk1x" time="0.065">
+  <properties/>
+  <testcase name="crewAndNoTargetHideTheControlAndIgnoreEvents" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" time="0.031"/>
+  <testcase name="aFailedShareSaysSoAndAnotherTargetClearsIt" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" time="0.007"/>
+  <testcase name="shareMakesTheLinkOnceAndOpensTheShareSheet" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" time="0.005"/>
+  <testcase name="turnOffAsksFirstAndTheNextShareMakesANewLink" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" time="0.009"/>
+  <testcase name="aLogLinkCarriesItsDayAndEachDayHasItsOwnLink" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkControllerTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

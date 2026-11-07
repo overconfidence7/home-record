@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:52.769Z" hostname="runnervmwuk1x" time="0.777">
+  <properties/>
+  <testcase name="photosShowWithRemoveAndTheSheetTicksAPhoto" classname="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" time="0.219"/>
+  <testcase name="formShowsLineAmountsTotalAndSpeak" classname="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" time="0.277"/>
+  <testcase name="listShowsStatusClientAndTotalAndOpensForManagers" classname="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" time="0.086"/>
+  <testcase name="crewGetNoNewButton" classname="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" time="0.045"/>
+  <testcase name="aBadQuantityShowsItsErrorAndSaveStaysOff" classname="com.kurtz.homerecord.fieldlog.changes.ChangesScreenTest" time="0.14"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

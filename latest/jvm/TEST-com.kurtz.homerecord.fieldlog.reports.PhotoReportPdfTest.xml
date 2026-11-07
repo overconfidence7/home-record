@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:25.846Z" hostname="runnervmwuk1x" time="0.192">
+  <properties/>
+  <testcase name="fileNameDropsCharactersAFileCannotHold" classname="com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfTest" time="0.034"/>
+  <testcase name="aPhotoNotDownloadedHasNoPath" classname="com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfTest" time="0.044"/>
+  <testcase name="laysOutFourToAPageWithTheAppsMeasure" classname="com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfTest" time="0.061"/>
+  <testcase name="wordsTheHeaderAndEachCaption" classname="com.kurtz.homerecord.fieldlog.reports.PhotoReportPdfTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

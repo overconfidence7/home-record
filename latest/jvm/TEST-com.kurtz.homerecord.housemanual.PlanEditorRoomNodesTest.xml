@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PlanEditorRoomNodesTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:52.264Z" hostname="runnervmwuk1x" time="0.339">
+  <properties/>
+  <testcase name="dragOnARoomStillReachesTheCanvas" classname="com.kurtz.homerecord.housemanual.PlanEditorRoomNodesTest" time="0.121"/>
+  <testcase name="everyRoomIsANamedButtonThatSelectsIt" classname="com.kurtz.homerecord.housemanual.PlanEditorRoomNodesTest" time="0.131"/>
+  <testcase name="selectedRoomReadsAsSelected" classname="com.kurtz.homerecord.housemanual.PlanEditorRoomNodesTest" time="0.083"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

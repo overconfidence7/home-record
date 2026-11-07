@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.377Z" hostname="runnervmwuk1x" time="0.216">
+  <properties/>
+  <testcase name="pickingAClimateZoneSeedsItsSeasonalTasksAndAnotherZoneReplacesThem" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.058"/>
+  <testcase name="aWarrantyReminderThatFellDueStaysUntilTheWarrantyEnds" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.041"/>
+  <testcase name="handWrittenReminderNeedsATitleAndADate" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.027"/>
+  <testcase name="warrantyRemindersFollowTheWarrantyEndDate" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.031"/>
+  <testcase name="doneRollsTheNextDueDateForwardAndSnoozeMovesItToUpcoming" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.031"/>
+  <testcase name="everySeasonalKeyHasItsOwnText" classname="com.kurtz.homerecord.housemodel.reminders.ReminderRepositoryTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

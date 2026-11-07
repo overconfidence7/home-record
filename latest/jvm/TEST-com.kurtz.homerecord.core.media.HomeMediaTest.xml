@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.HomeMediaTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:01.938Z" hostname="runnervmwuk1x" time="0.24">
+  <properties/>
+  <testcase name="queuesDocumentsOnThisPhoneWithNoKeyYet" classname="com.kurtz.homerecord.core.media.HomeMediaTest" time="0.051"/>
+  <testcase name="queuesWallPhotoAndItsStraightenedCopyUntilEachHasAKey" classname="com.kurtz.homerecord.core.media.HomeMediaTest" time="0.032"/>
+  <testcase name="fetchesPhotosTakenOnAnotherPhoneAndStopsWhenOffline" classname="com.kurtz.homerecord.core.media.HomeMediaTest" time="0.036"/>
+  <testcase name="deletedPhotosAndJobPhotosStayOut" classname="com.kurtz.homerecord.core.media.HomeMediaTest" time="0.032"/>
+  <testcase name="queuesItemPhotosOnThisPhoneWithNoKeyYet" classname="com.kurtz.homerecord.core.media.HomeMediaTest" time="0.08"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

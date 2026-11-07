@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:51.724Z" hostname="runnervmwuk1x" time="0.182">
+  <properties/>
+  <testcase name="aPhotoSharedWithTheOtherPartOfASplitWallIsKept" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.023"/>
+  <testcase name="replacingOrRemovingAnOverlayPhotoDeletesTheOldFile" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.024"/>
+  <testcase name="deletingAWallPhotoDeletesItsFiles" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.023"/>
+  <testcase name="retakingAWallPhotoDeletesTheOldPhotoAndItsStraightenedCopy" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.024"/>
+  <testcase name="aPhotoWhoseCopyIsItselfIsDeletedOnce" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.021"/>
+  <testcase name="aFailedDeleteDoesNotFailTheSave" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.024"/>
+  <testcase name="deletingAnOverlayDeletesItsPhoto" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.02"/>
+  <testcase name="aPhotoAtAnotherStageIsLeftAlone" classname="com.kurtz.homerecord.housemodel.walls.ReplacedFilesTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

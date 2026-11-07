@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.changeorder.ChangeOrderPdfLayoutTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:50.235Z" hostname="runnervmwuk1x" time="0.034">
+  <properties/>
+  <testcase name="anUnsignedOrderGetsABlankLineToSignOnAndNoDescriptionSectionWhenBlank" classname="com.kurtz.homerecord.core.changeorder.ChangeOrderPdfLayoutTest" time="0.013"/>
+  <testcase name="aSignedOrderPrintsCompanyJobDescriptionLinesTotalPhotosAndSignatureWithTime" classname="com.kurtz.homerecord.core.changeorder.ChangeOrderPdfLayoutTest" time="0.005"/>
+  <testcase name="manyLinesRunOnToMorePagesRowsStayWholeAndTheSignatureBlockIsNotSplit" classname="com.kurtz.homerecord.core.changeorder.ChangeOrderPdfLayoutTest" time="0.009"/>
+  <testcase name="numbersAreRightAlignedOnTheirRowAndTheTotalLinesUpWithTheAmounts" classname="com.kurtz.homerecord.core.changeorder.ChangeOrderPdfLayoutTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

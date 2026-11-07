@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:22.458Z" hostname="runnervmwuk1x" time="0.175">
+  <properties/>
+  <testcase name="signedInPanelShowsTheAccountEmailAndForgetsItOnSignOut" classname="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" time="0.146"/>
+  <testcase name="aFailedLookupLeavesTheEmailOut" classname="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" time="0.009"/>
+  <testcase name="signOutAsksAndCancelKeepsTheSession" classname="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" time="0.002"/>
+  <testcase name="confirmSignsOutAndClosesTheDialog" classname="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" time="0.01"/>
+  <testcase name="openDialogSurvivesProcessDeath" classname="com.kurtz.homerecord.coreui.auth.AccountViewModelTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

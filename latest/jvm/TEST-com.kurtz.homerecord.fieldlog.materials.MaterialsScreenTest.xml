@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.materials.MaterialsScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:11.474Z" hostname="runnervmwuk1x" time="0.375">
+  <properties/>
+  <testcase name="emptyListOffersAddReceipt" classname="com.kurtz.homerecord.fieldlog.materials.MaterialsScreenTest" time="0.09"/>
+  <testcase name="showsEachJobsTotalAndTheTotalForAllJobs" classname="com.kurtz.homerecord.fieldlog.materials.MaterialsScreenTest" time="0.097"/>
+  <testcase name="scannedReceiptOffersItsTotal" classname="com.kurtz.homerecord.fieldlog.materials.MaterialsScreenTest" time="0.108"/>
+  <testcase name="exportSharesTheCsvOfTheList" classname="com.kurtz.homerecord.fieldlog.materials.MaterialsScreenTest" time="0.069"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

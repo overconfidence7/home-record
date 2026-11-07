@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:03.948Z" hostname="runnervmwuk1x" time="8.277">
+  <properties/>
+  <testcase name="itemPageReviewBadge" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="6.686"/>
+  <testcase name="itemPageUpkeep" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="0.516"/>
+  <testcase name="itemPageRecalls" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="0.213"/>
+  <testcase name="itemPageNoWarranty" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="0.237"/>
+  <testcase name="itemPage" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="0.238"/>
+  <testcase name="itemPageLookupFailed" classname="com.kurtz.homerecord.housemanual.items.ItemDetailTouchTargetTest" time="0.21"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.DailyLogColumnsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:04.764Z" hostname="runnervmwuk1x" time="0.042">
+  <properties/>
+  <testcase name="anUnreadableColumnFallsBackInsteadOfFailing" classname="com.kurtz.homerecord.core.model.DailyLogColumnsTest" time="0.03"/>
+  <testcase name="everySectionRoundTripsThroughItsOwnColumn" classname="com.kurtz.homerecord.core.model.DailyLogColumnsTest" time="0.003"/>
+  <testcase name="aRowSavedBeforeTheSplitReadsFromItsSingleValue" classname="com.kurtz.homerecord.core.model.DailyLogColumnsTest" time="0.002"/>
+  <testcase name="aChangeToOneSectionChangesOnlyItsColumn" classname="com.kurtz.homerecord.core.model.DailyLogColumnsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

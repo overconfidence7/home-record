@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.CompanyRepositoryTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:51.333Z" hostname="runnervmwuk1x" time="0.087">
+  <properties/>
+  <testcase name="removedMemberLosesTheCompanyOnNextRefresh" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.012"/>
+  <testcase name="joinLandsAsCrew" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.003"/>
+  <testcase name="settingsComeFromTheCachedMembershipAndFollowRefresh" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.01"/>
+  <testcase name="createRefreshesAndLandsAsOwner" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.034"/>
+  <testcase name="offlineKeepsCachedCompany" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.008"/>
+  <testcase name="startsLoadingWithNoCache" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.0"/>
+  <testcase name="settingsAreTheDefaultsWithoutACompany" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.004"/>
+  <testcase name="refreshWithNoMembershipMeansNoCompany" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.002"/>
+  <testcase name="offlineWithoutCacheShowsFailure" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.002"/>
+  <testcase name="joinWithBadCodeReportsItAndStaysPut" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.002"/>
+  <testcase name="clearDropsCachedData" classname="com.kurtz.homerecord.core.company.CompanyRepositoryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

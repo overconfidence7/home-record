@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsApproveRowTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:33.184Z" hostname="runnervmwuk1x" time="0.253">
+  <properties/>
+  <testcase name="openedRowOffersApproveForThatPersonOnly" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsApproveRowTest" time="0.095"/>
+  <testcase name="approvedWeekShowsNoApproveEvenWhenOpen" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsApproveRowTest" time="0.078"/>
+  <testcase name="collapsedRowsHaveNoApproveButtons" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsApproveRowTest" time="0.077"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

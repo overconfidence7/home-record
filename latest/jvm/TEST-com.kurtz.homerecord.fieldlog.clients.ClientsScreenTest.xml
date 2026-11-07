@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.clients.ClientsScreenTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:53.576Z" hostname="runnervmwuk1x" time="0.452">
+  <properties/>
+  <testcase name="callEmailAndJobRowsSendTheirEvents" classname="com.kurtz.homerecord.fieldlog.clients.ClientsScreenTest" time="0.197"/>
+  <testcase name="clientWithoutDetailsHasNoCallOrEmail" classname="com.kurtz.homerecord.fieldlog.clients.ClientsScreenTest" time="0.099"/>
+  <testcase name="noClientsShowsTheEmptyState" classname="com.kurtz.homerecord.fieldlog.clients.ClientsScreenTest" time="0.149"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

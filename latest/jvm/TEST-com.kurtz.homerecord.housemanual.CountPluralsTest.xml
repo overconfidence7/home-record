@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.CountPluralsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:31.841Z" hostname="runnervmwuk1x" time="0.049">
+  <properties/>
+  <testcase name="monthsItemsAndCharacters" classname="com.kurtz.homerecord.housemanual.CountPluralsTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

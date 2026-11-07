@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.data.LocalDataWipeTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:58.282Z" hostname="runnervmwuk1x" time="0.224">
+  <properties/>
+  <testcase name="runsInsideTheExclusiveBlock" classname="com.kurtz.homerecord.core.data.LocalDataWipeTest" time="0.062"/>
+  <testcase name="missingDirectoryIsFine" classname="com.kurtz.homerecord.core.data.LocalDataWipeTest" time="0.06"/>
+  <testcase name="clearsTablesMediaAndPrefs" classname="com.kurtz.homerecord.core.data.LocalDataWipeTest" time="0.09"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

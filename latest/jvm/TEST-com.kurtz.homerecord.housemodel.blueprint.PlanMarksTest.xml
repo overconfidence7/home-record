@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:42.558Z" hostname="runnervmwuk1x" time="0.004">
+  <properties/>
+  <testcase name="the same wall stored the other way round puts the run in the same place" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" time="0.002"/>
+  <testcase name="a run across the north wall lies along it, set toward the room" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" time="0.001"/>
+  <testcase name="each mark shows only with its layer on, studs and other marks always show" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" time="0.0"/>
+  <testcase name="items sit at their plan spot on the Items layer with their icon, other floors and unknown walls are left out" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" time="0.001"/>
+  <testcase name="a riser straight up the wall and an outlet become spots where they stand" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarksTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

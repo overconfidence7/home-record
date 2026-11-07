@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:47.399Z" hostname="runnervmwuk1x" time="0.008">
+  <properties/>
+  <testcase name="aWallLengthenedByDraggingASideKeepsItsWallSpacePoints" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.001"/>
+  <testcase name="aSideDraggedAcrossTheRoomKeepsItsOverlay" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.0"/>
+  <testcase name="aRunAcrossTheNewCornerGoesWhereMostOfItIsAndStopsAtTheCorner" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.003"/>
+  <testcase name="mergedWallsKeepEveryOverlayAtItsPlaceAlongTheLine" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.0"/>
+  <testcase name="anOverlayWhoseWallIsGoneGoesOntoThePlanWhereItWas" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.001"/>
+  <testcase name="aWallShortenedWithNothingElseOnItsLineKeepsItsWallSpacePoints" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.001"/>
+  <testcase name="aSplitWallInARoomDrawnCounterClockwiseKeepsOverlaysLeftToRightFromInside" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.001"/>
+  <testcase name="aSplitWallHandsEachOverlayToThePartItSatOn" classname="com.kurtz.homerecord.housemodel.overlays.WallOverlayCarrierTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

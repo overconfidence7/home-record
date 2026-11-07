@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.House3DScreenTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:37.785Z" hostname="runnervmwuk1x" time="2.466">
+  <properties/>
+  <testcase name="theRoomPageOffersViewIn3D" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.134"/>
+  <testcase name="allFloorsTitlesTheView" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.254"/>
+  <testcase name="aFailedBuildOffersRetry" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.22"/>
+  <testcase name="tappingAShownMarkerOpensIt" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.177"/>
+  <testcase name="layerChipsToggleTheMarkersAndEachShownMarkerOffersAnOpenAction" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.21"/>
+  <testcase name="theSceneTagAndDescriptionSitOnAComposeBoxAroundTheRenderer" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.207"/>
+  <testcase name="showsTheFloorWithResetViewStagesAndFloors" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.204"/>
+  <testcase name="allFloorsChipShowsTheStackAndTheFadedFloorsAreNamed" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.208"/>
+  <testcase name="anEmptyFloorOffersEditPlanAndAFailureOffersRetry" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.232"/>
+  <testcase name="standingInARoomNamesItAndBackToFloorLeavesIt" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.216"/>
+  <testcase name="theFloorViewHasNoBackToFloorAndATapOnARoomStandsInIt" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.138"/>
+  <testcase name="theChosenStageIsExposedAsChecked" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.123"/>
+  <testcase name="theHouseTabOpens3DOnlyWhenTheFloorHasRooms" classname="com.kurtz.homerecord.housemanual.House3DScreenTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

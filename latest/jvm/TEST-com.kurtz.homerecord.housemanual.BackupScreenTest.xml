@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.BackupScreenTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:25.801Z" hostname="runnervmwuk1x" time="1.466">
+  <properties/>
+  <testcase name="restore keeps a wrong passphrase on screen and opens the preview on the right one" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.087"/>
+  <testcase name="a failed write says so and keeps the passphrase for another try" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.062"/>
+  <testcase name="a passphrase needs eight characters typed the same twice" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.094"/>
+  <testcase name="the restore prompt words a wrong passphrase and disables Open while empty" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.467"/>
+  <testcase name="the screen shows the mismatch, a 56 dp make button and restore" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.563"/>
+  <testcase name="the file is named for the home and the day" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.077"/>
+  <testcase name="make checks the passphrase first, then makes and hands the file to the share sheet" classname="com.kurtz.homerecord.housemanual.BackupScreenTest" time="0.106"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

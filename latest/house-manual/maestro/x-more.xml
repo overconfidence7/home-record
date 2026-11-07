@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="41.898" timestamp="2026-11-07T22:35:20">
+    <testcase id="x-more" name="x-more" classname="x-more" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/x-more.yaml" time="41.867" timestamp="2026-11-07T22:35:20" status="ERROR">
+      <failure>Assertion is false: "Cold" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

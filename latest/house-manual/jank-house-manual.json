@@ -1,0 +1,1 @@
+{"app":"house-manual","build":"benchmark","rows":200,"frames":102,"janky":93,"jankPercent":91,"softwareRenderer":true,"uiThread":{"uiFrames": 103, "uiJanky": 7, "uiJankPercent": 6, "uiP50Ms": 2.5, "uiP90Ms": 12.9, "budgetMs": 16.7}}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.334Z" hostname="runnervmwuk1x" time="0.005">
+  <properties/>
+  <testcase name="defaultIntervalsPerItemType" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.002"/>
+  <testcase name="doneRollsARecurringReminderForwardFromToday" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.001"/>
+  <testcase name="warrantyRemindersSixtyAndSevenDaysBeforeTheEnd" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.0"/>
+  <testcase name="doneFinishesAOneOffReminder" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.0"/>
+  <testcase name="dueOnTodayIsDueNowAndTomorrowIsUpcoming" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.001"/>
+  <testcase name="snoozeAWeekOrAMonthHidesItFromDueUntilThen" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.0"/>
+  <testcase name="everyClimateZoneHasSeasonalTasksDueOnTheNextFirstOfTheMonth" classname="com.kurtz.homerecord.housemodel.reminders.MaintenanceRuleTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

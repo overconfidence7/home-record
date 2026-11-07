@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:34.923Z" hostname="runnervmwuk1x" time="0.054">
+  <properties/>
+  <testcase name="recentPhotosComeFromThePhotosFlow" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.012"/>
+  <testcase name="completingATaskOffersUndoAndUndoReopensIt" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.012"/>
+  <testcase name="pullToRefreshEndsWhenTheTeamRefreshFails" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.006"/>
+  <testcase name="theCameraButtonOpensOnThePlainJobOrAsks" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.01"/>
+  <testcase name="opensByRefreshingTheTeamList" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.002"/>
+  <testcase name="pullToRefreshSyncsAndReloadsTheTeam" classname="com.kurtz.homerecord.fieldlog.today.TodayViewModelTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

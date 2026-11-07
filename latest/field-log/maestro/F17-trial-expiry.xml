@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="60.198" timestamp="2026-11-07T22:46:08">
+    <testcase id="F17-trial-expiry" name="F17-trial-expiry" classname="F17-trial-expiry" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F17-trial-expiry.yaml" time="60.161" timestamp="2026-11-07T22:46:08" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

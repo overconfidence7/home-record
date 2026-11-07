@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:01.944Z" hostname="runnervmwuk1x" time="1.123">
+  <properties/>
+  <testcase name="eachWallSaysWhichPhotoComesNextAndOpensTheCameraSheet" classname="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" time="0.266"/>
+  <testcase name="noRoomsOffersEditPlan" classname="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" time="0.162"/>
+  <testcase name="theHouseTabOffersBehindTheWallOnceRoomsAreDrawn" classname="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" time="0.284"/>
+  <testcase name="roomsShowTheirWallProgressAndOpenTheirWalls" classname="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" time="0.078"/>
+  <testcase name="theSheetNamesTheWallAndTheStage" classname="com.kurtz.homerecord.fieldlog.house.BehindWallScreenTest" time="0.33"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

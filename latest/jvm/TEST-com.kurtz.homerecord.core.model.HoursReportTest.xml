@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.HoursReportTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:04.847Z" hostname="runnervmwuk1x" time="0.019">
+  <properties/>
+  <testcase name="emptyRangeIsEmpty" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.005"/>
+  <testcase name="jobHoursSplitBySegmentAndLoseBreaks" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.005"/>
+  <testcase name="californiaDoubleTimePastTwelve" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.0"/>
+  <testcase name="weeklyRuleSplitsOvertimeAfterForty" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.0"/>
+  <testcase name="overtimeIsPerWeekAcrossTwoWeeks" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.001"/>
+  <testcase name="dailyRuleCountsTheTenHourDay" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.0"/>
+  <testcase name="totalsMatchTheTimesheetForTheSameWeek" classname="com.kurtz.homerecord.core.model.HoursReportTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

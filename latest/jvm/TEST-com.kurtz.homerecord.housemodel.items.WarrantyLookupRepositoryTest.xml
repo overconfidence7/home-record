@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:46.805Z" hostname="runnervmwuk1x" time="0.238">
+  <properties/>
+  <testcase name="needsMakeAndModel" classname="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" time="0.04"/>
+  <testcase name="offlineQueuesThenRunsWhenOnlineAndShowsReviewBadge" classname="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" time="0.095"/>
+  <testcase name="confirmStoresTermsOnceWithEndDate" classname="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" time="0.036"/>
+  <testcase name="editedTermsAreManualAndDiscardStoresNothing" classname="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" time="0.029"/>
+  <testcase name="offlineLookUpAgainDoesNotQueueOverStoredWarranty" classname="com.kurtz.homerecord.housemodel.items.WarrantyLookupRepositoryTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

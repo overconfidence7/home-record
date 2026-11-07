@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:51.559Z" hostname="runnervmwuk1x" time="0.151">
+  <properties/>
+  <testcase name="serviceHistoryIsNewestFirst" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.026"/>
+  <testcase name="consumableSavesEditsAndDeletes" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.024"/>
+  <testcase name="contactsLinkToServiceAndSurviveUnlink" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.03"/>
+  <testcase name="contactNeedsNameAndValidEmail" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.02"/>
+  <testcase name="consumableNeedsSpecQuantityAndHttpUrl" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.025"/>
+  <testcase name="serviceNeedsDateAndDescription" classname="com.kurtz.homerecord.housemodel.upkeep.UpkeepRepositoryTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

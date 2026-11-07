@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ReportScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:58.541Z" hostname="runnervmwuk1x" time="0.19">
+  <properties/>
+  <testcase name="whileMakingTheButtonIsOffAndAFailureShowsTheNotice" classname="com.kurtz.homerecord.housemanual.ReportScreenTest" time="0.065"/>
+  <testcase name="countsComeFromTheReportDataAndMakeSharesTheFile" classname="com.kurtz.homerecord.housemanual.ReportScreenTest" time="0.03"/>
+  <testcase name="screenListsThePartsAndTheMakeButtonSendsMake" classname="com.kurtz.homerecord.housemanual.ReportScreenTest" time="0.059"/>
+  <testcase name="aFailedExportSaysSoAndCanBeTriedAgain" classname="com.kurtz.homerecord.housemanual.ReportScreenTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:26.045Z" hostname="runnervmwuk1x" time="0.479">
+  <properties/>
+  <testcase name="noDelaysSaysSo" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.098"/>
+  <testcase name="aPhotoReportRowSharesAndAJobWithNoPhotosDoesNot" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.078"/>
+  <testcase name="eachReportIsOneTabAway" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.052"/>
+  <testcase name="noHoursIsOneRowAndTheDelaysStayInView" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.08"/>
+  <testcase name="delaysShowPerJobAndOpenTheDaysLog" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.088"/>
+  <testcase name="aJobSummaryRowAsksForItsPdfAndAFailureSaysSo" classname="com.kurtz.homerecord.fieldlog.reports.ReportsScreenTest" time="0.069"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

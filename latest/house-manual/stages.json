@@ -1,0 +1,222 @@
+[
+ {
+  "stage": "install:house-manual",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:house-manual",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "backend:house-manual",
+  "status": "pass",
+  "details": "GET /health answered"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "seed:house-manual",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "instrumented:house-manual",
+  "status": "fail",
+  "details": "1 failing of 22"
+ },
+ {
+  "stage": "flow:H01-onboarding",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H01b-home",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02-draw-plan",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H02b-shape-doors-stairs",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H03-blueprint-room",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H04-add-item",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H05-add-items",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H06-items",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H07-item-page",
+  "status": "fail",
+  "details": "see maestro/H07-item-page.log"
+ },
+ {
+  "stage": "flow:H08-offline-item",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H09-wall-photo",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H10-3d",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H11-overlay-pipe",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H12-breaker-panel",
+  "status": "fail",
+  "details": "see maestro/H12-breaker-panel.log"
+ },
+ {
+  "stage": "flow:H13-emergency",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H14-reminders",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H15-home-report",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H16-backup-restore",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H17-sign-in",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H17b-second-phone",
+  "status": "fail",
+  "details": "see maestro/H17b-second-phone.log"
+ },
+ {
+  "stage": "flow:H18-import-handoff",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:H18b-claim-link",
+  "status": "fail",
+  "details": "see maestro/H18b-claim-link.log"
+ },
+ {
+  "stage": "flow:H19-paywall",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-contacts",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-documents",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "flow:x-more",
+  "status": "fail",
+  "details": "see maestro/x-more.log"
+ },
+ {
+  "stage": "flow:x-share-viewer",
+  "status": "fail",
+  "details": "see maestro/x-share-viewer.log"
+ },
+ {
+  "stage": "flow:x-share",
+  "status": "fail",
+  "details": "see maestro/x-share.log"
+ },
+ {
+  "stage": "3d:house-manual",
+  "status": "pass",
+  "details": "3d/orbit.mp4; first frame 7803 ms; 2.8 fps; GLES: Google (Google Inc.), Android Emulator OpenGL ES Translator (Google SwiftShader)"
+ },
+ {
+  "stage": "variant:dark",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:font200",
+  "status": "pass",
+  "details": "tour ok"
+ },
+ {
+  "stage": "variant:landscape",
+  "status": "pass",
+  "details": "tour ok, shots landscape"
+ },
+ {
+  "stage": "monkey:house-manual",
+  "status": "pass",
+  "details": "1500 events, no crash; foreground after: com.google.android.googlequicksearchbox"
+ },
+ {
+  "stage": "jank:house-manual",
+  "status": "pass",
+  "details": "6% of 103 frames ran the UI thread past the frame budget (software renderer, overall 91% janky of 102; 200-row list, benchmark build)"
+ },
+ {
+  "stage": "release:house-manual",
+  "status": "pass",
+  "details": "R8 build launches (1545 ms)"
+ },
+ {
+  "stage": "coldstart:house-manual",
+  "status": "pass",
+  "details": "median 710 ms (release, profile compiled)"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.housemanual",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

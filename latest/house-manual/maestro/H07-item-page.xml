@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="91.567" timestamp="2026-11-07T22:09:07">
+    <testcase id="H07-item-page" name="H07-item-page" classname="H07-item-page" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H07-item-page.yaml" time="91.519" timestamp="2026-11-07T22:09:07" status="ERROR">
+      <failure>Element not found: Text matching regex: Dining room</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

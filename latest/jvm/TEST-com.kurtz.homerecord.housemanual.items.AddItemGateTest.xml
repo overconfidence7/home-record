@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.AddItemGateTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:01.995Z" hostname="runnervmwuk1x" time="0.028">
+  <properties/>
+  <testcase name="theFirstPanelAddsAndProAddsMore" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.016"/>
+  <testcase name="fifteenItemsOnFreeOpensThePaywall" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.002"/>
+  <testcase name="underTheLimitOpensTheFormWithItsPresets" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.001"/>
+  <testcase name="aSecondPanelOnFreeOpensThePaywallButOtherItemsStillAdd" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.004"/>
+  <testcase name="saveRefusesTurningAnotherItemIntoASecondPanelButTheOnePanelStillSaves" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.003"/>
+  <testcase name="proHasNoLimitAndCountsTheRightHome" classname="com.kurtz.homerecord.housemanual.items.AddItemGateTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

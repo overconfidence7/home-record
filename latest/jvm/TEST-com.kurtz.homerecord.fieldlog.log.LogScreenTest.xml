@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogScreenTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:06.754Z" hostname="runnervmwuk1x" time="1.63">
+  <properties/>
+  <testcase name="aDayWithNoWeatherDataSaysNoWeatherNotOffline" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.156"/>
+  <testcase name="crewGetNoDropPutBackOrWeatherControls" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.059"/>
+  <testcase name="delaySheetOffersTheFiveReasonsAndSavesOnlyWithOne" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.057"/>
+  <testcase name="leadCanLeaveRecordLinesOutPutThemBackAndCorrectTheWeather" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.323"/>
+  <testcase name="sectionEditButtonsAreFullTouchTargets" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.2"/>
+  <testcase name="savedSectionIsBroughtBackIntoView" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.244"/>
+  <testcase name="leadGetsAnEditControlOnEverySectionAndOfflineWeatherIsSaid" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.257"/>
+  <testcase name="weatherFormListsTheConditionsAndSaysWhatIsWrong" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.12"/>
+  <testcase name="crewSeeTheLogWithNoEditControls" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.053"/>
+  <testcase name="sendAtTheTopShowsTheSentLine" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.07"/>
+  <testcase name="sendAtTheTopShowsTheSentLineWithTheLinkRow" classname="com.kurtz.homerecord.fieldlog.log.LogScreenTest" time="0.087"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

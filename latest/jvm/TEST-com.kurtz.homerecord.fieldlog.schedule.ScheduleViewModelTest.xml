@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:26.988Z" hostname="runnervmwuk1x" time="0.056">
+  <properties/>
+  <testcase name="aDayOnAJobNowDoneCanStillComeOff" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.019"/>
+  <testcase name="aScheduledDayMovesOrComesOff" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.005"/>
+  <testcase name="crewSeeTheirOwnWeekReadOnly" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.005"/>
+  <testcase name="weekAndDaySurviveProcessDeathAndAPushOpensItsDay" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.007"/>
+  <testcase name="aPickedDayStaysPickedWhenTheDayChanges" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.006"/>
+  <testcase name="ownerSeesEveryoneAndAssignsByPicker" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.005"/>
+  <testcase name="leftOpenPastMidnightTheScreenMovesToTheNewDay" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.002"/>
+  <testcase name="leadSchedulesOnlyTheJobsTheyRun" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.005"/>
+  <testcase name="twoJobsTheSameDayShowAConflict" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

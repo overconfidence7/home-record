@@ -1,0 +1,7 @@
+--------- beginning of main
+11-07 22:40:06.394 21403 21403 I HomeRecord3D: first frame 1137 ms; - fps; 1 frames; 30 draws; 12 textures at 1024 px
+11-07 22:40:13.005 21403 21403 I HomeRecord3D: first frame 7803 ms; - fps; 1 frames; 53 draws; 20 textures at 512 px
+11-07 22:40:17.006 21403 21403 I HomeRecord3D: first frame 7803 ms; - fps; 2 frames; 53 draws; 20 textures at 512 px
+11-07 22:40:19.007 21403 21403 I HomeRecord3D: first frame 7803 ms; - fps; 3 frames; 53 draws; 20 textures at 512 px
+11-07 22:40:21.016 21403 21403 I HomeRecord3D: first frame 7803 ms; 2.4 fps; 6 frames; 53 draws; 20 textures at 512 px
+11-07 22:40:23.018 21403 21403 I HomeRecord3D: first frame 7803 ms; 2.8 fps; 8 frames; 53 draws; 20 textures at 512 px

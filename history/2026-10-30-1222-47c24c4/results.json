@@ -1,0 +1,359 @@
+{
+ "sha": "47c24c4b",
+ "at": "2026-10-30 12:22 UTC",
+ "stats": {
+  "unitTests": 880,
+  "unitFailures": 0,
+  "coverage": {
+   "acs_claimed": 217,
+   "acs_missing": 0,
+   "ticked_tasks": 118
+  },
+  "backendTests": 133,
+  "backendFailures": 0
+ },
+ "stages": [
+  [
+   "field-log",
+   "install:field-log",
+   "pass",
+   "debug apk"
+  ],
+  [
+   "field-log",
+   "install-test:field-log",
+   "pass",
+   "androidTest apk"
+  ],
+  [
+   "field-log",
+   "permissions",
+   "pass",
+   "granted where declared"
+  ],
+  [
+   "field-log",
+   "fixtures",
+   "pass",
+   "pushed to /sdcard/Download/qa-fixtures"
+  ],
+  [
+   "field-log",
+   "seed:field-log",
+   "pass",
+   "regression scenario seeded"
+  ],
+  [
+   "field-log",
+   "instrumented:field-log",
+   "pass",
+   "16 tests"
+  ],
+  [
+   "field-log",
+   "flow:F01-welcome",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F02-invite-join",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F03-jobs",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F04-clock-in",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F04b-location-allow",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F04c-today-clock-in",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F06-timesheets",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F07-files",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F07b-storage",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F08-capture",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F08b-capture-photo",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "flow:F15-reports",
+   "pass",
+   "ok"
+  ],
+  [
+   "field-log",
+   "variant:dark",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "field-log",
+   "variant:font200",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "field-log",
+   "variant:landscape",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "field-log",
+   "monkey:field-log",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "field-log",
+   "jank:field-log",
+   "skip",
+   "not measurable: long-list seed failed (Broadcasting: Intent { act=com.kurtz.homerecord.fieldlog.qa.SEED flg=0x400000 pkg=com.kurtz.homerecord.fieldlog (has extras) }\nBroadcast completed: result=0)"
+  ],
+  [
+   "field-log",
+   "release:field-log",
+   "pass",
+   "R8 build launches (1641 ms)"
+  ],
+  [
+   "field-log",
+   "coldstart:field-log",
+   "pass",
+   "median 839 ms (release, profile compiled)"
+  ],
+  [
+   "field-log",
+   "logcat:com.kurtz.homerecord.fieldlog",
+   "pass",
+   "0 crashes, 0 ANRs, 0 StrictMode violations"
+  ],
+  [
+   "house-manual",
+   "install:house-manual",
+   "pass",
+   "debug apk"
+  ],
+  [
+   "house-manual",
+   "install-test:house-manual",
+   "pass",
+   "androidTest apk"
+  ],
+  [
+   "house-manual",
+   "permissions",
+   "pass",
+   "granted where declared"
+  ],
+  [
+   "house-manual",
+   "fixtures",
+   "pass",
+   "pushed to /sdcard/Download/qa-fixtures"
+  ],
+  [
+   "house-manual",
+   "seed:house-manual",
+   "pass",
+   "regression scenario seeded"
+  ],
+  [
+   "house-manual",
+   "instrumented:house-manual",
+   "pass",
+   "20 tests"
+  ],
+  [
+   "house-manual",
+   "flow:H01-onboarding",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H01b-home",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H02-draw-plan",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H02b-shape-doors-stairs",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H03-blueprint-room",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H04-add-item",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H17-sign-in",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H19-paywall",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:x-contacts",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:x-documents",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "variant:dark",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "variant:font200",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "variant:landscape",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "monkey:house-manual",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "house-manual",
+   "jank:house-manual",
+   "skip",
+   "not measurable: long-list seed failed (Broadcasting: Intent { act=com.kurtz.homerecord.housemanual.qa.SEED flg=0x400000 pkg=com.kurtz.homerecord.housemanual (has extras) }\nBroadcast completed: result=0)"
+  ],
+  [
+   "house-manual",
+   "release:house-manual",
+   "pass",
+   "R8 build launches (1116 ms)"
+  ],
+  [
+   "house-manual",
+   "coldstart:house-manual",
+   "pass",
+   "median 953 ms (release, profile compiled)"
+  ],
+  [
+   "house-manual",
+   "logcat:com.kurtz.homerecord.housemanual",
+   "pass",
+   "0 crashes, 0 ANRs, 0 StrictMode violations"
+  ]
+ ],
+ "findings": [],
+ "new": [],
+ "stillOpen": [],
+ "skipped": [
+  [
+   "handoff",
+   "flows",
+   "no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run"
+  ],
+  [
+   "field-log",
+   "jank:field-log",
+   "not measurable: long-list seed failed (Broadcasting: Intent { act=com.kurtz.homerecord.fieldlog.qa.SEED flg=0x400000 pkg=com.kurtz.homerecord.fieldlog (has extras) }\nBroadcast completed: result=0)"
+  ],
+  [
+   "house-manual",
+   "jank:house-manual",
+   "not measurable: long-list seed failed (Broadcasting: Intent { act=com.kurtz.homerecord.housemanual.qa.SEED flg=0x400000 pkg=com.kurtz.homerecord.housemanual (has extras) }\nBroadcast completed: result=0)"
+  ]
+ ],
+ "walkthrough": {
+  "field-log:F01": "Pass",
+  "field-log:F02": "Pass",
+  "field-log:F03": "Pass",
+  "field-log:F04": "Pass",
+  "field-log:F04b": "Pass",
+  "field-log:F04c": "Pass",
+  "field-log:F06": "Pass",
+  "field-log:F07": "Pass",
+  "field-log:F07b": "Pass",
+  "field-log:F08": "Pass",
+  "field-log:F08b": "Pass",
+  "field-log:F15": "Pass",
+  "house-manual:H01": "Pass",
+  "house-manual:H01b": "Pass",
+  "house-manual:H02": "Pass",
+  "house-manual:H02b": "Pass",
+  "house-manual:H03": "Pass",
+  "house-manual:H04": "Pass",
+  "house-manual:H17": "Pass",
+  "house-manual:H19": "Pass"
+ }
+}

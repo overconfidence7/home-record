@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:48.102Z" hostname="runnervmwuk1x" time="1.522">
+  <properties/>
+  <testcase name="firstImportAddsTheHouseWithWallPhotosAndOverlays" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.199"/>
+  <testcase name="entityTypesThisVersionDoesNotKnowAreSkipped" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.23"/>
+  <testcase name="retargetedBundleJoinsTheHomeAlreadyOnThisPhone" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.239"/>
+  <testcase name="crewChangeOnlyUpdatesAndBothChangedIsAConflictThatKeepsMine" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.268"/>
+  <testcase name="importingTheSameBundleAgainChangesNothing" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.183"/>
+  <testcase name="eachWrittenRecordIsReportedForSync" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.208"/>
+  <testcase name="useImportedOverwritesTheConflict" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.179"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

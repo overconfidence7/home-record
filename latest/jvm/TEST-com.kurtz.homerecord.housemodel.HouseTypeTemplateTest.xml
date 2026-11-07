@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:42.508Z" hostname="runnervmwuk1x" time="0.018">
+  <properties/>
+  <testcase name="twoStoryAndColonialHaveMainAndUpper" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.01"/>
+  <testcase name="ceilingsDefaultToEightFeetAndFloorsRiseInOrder" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.004"/>
+  <testcase name="walkoutMarksBasementAtGrade" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.001"/>
+  <testcase name="rancherOnSlabOrCrawlspaceHasMainOnly" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="capeCodUpperIsHalfStory" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.001"/>
+  <testcase name="garageFallsBackToLowerWhenThereIsNoMain" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="garageGoesOnMainFloor" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.001"/>
+  <testcase name="raisedRanchHasLowerAndUpperRegardlessOfFoundation" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="rancherWithBasementHasBasementAndMain" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="parseFallsBackOnUnknownValues" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="townhouseAddsLowerOnlyWithBasement" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <testcase name="splitLevelHasThreeHalfLevelOffsets" classname="com.kurtz.homerecord.housemodel.HouseTypeTemplateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

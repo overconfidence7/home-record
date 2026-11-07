@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.house.JobItemScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:04.190Z" hostname="runnervmwuk1x" time="0.301">
+  <properties/>
+  <testcase name="theJobsRoomListsItsItemsAndOffersAddOnlyWhenAllowed" classname="com.kurtz.homerecord.fieldlog.house.JobItemScreenTest" time="0.08"/>
+  <testcase name="deleteAsksFirst" classname="com.kurtz.homerecord.fieldlog.house.JobItemScreenTest" time="0.109"/>
+  <testcase name="crewReadTheItemWithoutEditLookupOrDelete" classname="com.kurtz.homerecord.fieldlog.house.JobItemScreenTest" time="0.049"/>
+  <testcase name="aLeadSeesMakeModelSerialAndCanLookUpEditPlaceAndDelete" classname="com.kurtz.homerecord.fieldlog.house.JobItemScreenTest" time="0.059"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

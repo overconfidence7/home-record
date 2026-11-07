@@ -1,0 +1,67 @@
+[
+ {
+  "stage": "install:field-log",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:field-log",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "install:house-manual",
+  "status": "pass",
+  "details": "debug apk"
+ },
+ {
+  "stage": "install-test:house-manual",
+  "status": "pass",
+  "details": "androidTest apk"
+ },
+ {
+  "stage": "backend:handoff",
+  "status": "pass",
+  "details": "GET /health answered"
+ },
+ {
+  "stage": "permissions",
+  "status": "pass",
+  "details": "granted where declared"
+ },
+ {
+  "stage": "fixtures",
+  "status": "pass",
+  "details": "pushed to /sdcard/Download/qa-fixtures"
+ },
+ {
+  "stage": "seed:field-log",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "seed:house-manual",
+  "status": "pass",
+  "details": "regression scenario seeded"
+ },
+ {
+  "stage": "flow:X02-claim-link",
+  "status": "pass",
+  "details": "ok"
+ },
+ {
+  "stage": "variants",
+  "status": "skip",
+  "details": "no _tour.yaml for handoff"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.fieldlog",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ },
+ {
+  "stage": "logcat:com.kurtz.homerecord.housemanual",
+  "status": "pass",
+  "details": "0 crashes, 0 ANRs, 0 StrictMode violations"
+ }
+]

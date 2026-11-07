@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="28.295" timestamp="2026-11-07T22:23:07">
+    <testcase id="H15-home-report" name="H15-home-report" classname="H15-home-report" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H15-home-report.yaml" time="28.266" timestamp="2026-11-07T22:23:07" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

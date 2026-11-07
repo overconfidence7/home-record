@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.billing.SwitchableProBillingTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:33.988Z" hostname="runnervmwuk1x" time="0.049">
+  <properties/>
+  <testcase name="qaSwitchUnlocksProWithoutRestart" classname="com.kurtz.homerecord.core.billing.SwitchableProBillingTest" time="0.032"/>
+  <testcase name="storeCallsStillGoToTheRealBilling" classname="com.kurtz.homerecord.core.billing.SwitchableProBillingTest" time="0.008"/>
+  <testcase name="boughtProStaysProWithTheSwitchOff" classname="com.kurtz.homerecord.core.billing.SwitchableProBillingTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

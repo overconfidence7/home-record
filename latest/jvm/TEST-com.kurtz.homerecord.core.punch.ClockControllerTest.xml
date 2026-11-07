@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.punch.ClockControllerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:07.029Z" hostname="runnervmwuk1x" time="0.442">
+  <properties/>
+  <testcase name="deniedPermissionStillClocksInMarkedNoLocation" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.048"/>
+  <testcase name="clockInSavesFixWithAccuracyUnderFiveSecondCap" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.051"/>
+  <testcase name="requireGpsWithoutPermissionExplainsAndSavesNothing" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.043"/>
+  <testcase name="breakSwitchAndOutMakeTheRightPunches" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.07"/>
+  <testcase name="farFromJobAsksForReasonThenSavesFlagged" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.051"/>
+  <testcase name="actionsThatDoNotFitTheStateAreRefused" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.043"/>
+  <testcase name="noFixWithinTheCapSavesNoLocation" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.048"/>
+  <testcase name="requireGpsWithPermissionButNoFixIsNotPermissionMissing" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.046"/>
+  <testcase name="clockOutOnBreakEndsTheBreakFirst" classname="com.kurtz.homerecord.core.punch.ClockControllerTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

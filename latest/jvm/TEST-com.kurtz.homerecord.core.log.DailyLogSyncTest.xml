@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.log.DailyLogSyncTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:00.387Z" hostname="runnervmwuk1x" time="0.512">
+  <properties/>
+  <testcase name="typedSectionsOfflineSurviveTheOfficePhonesLaterAssembly" classname="com.kurtz.homerecord.core.log.DailyLogSyncTest" time="0.259"/>
+  <testcase name="aLogSavedBeforeTheSplitReadsWholeAndIsWrittenByColumnOnItsNextSave" classname="com.kurtz.homerecord.core.log.DailyLogSyncTest" time="0.13"/>
+  <testcase name="openingAnUnchangedDayQueuesNothing" classname="com.kurtz.homerecord.core.log.DailyLogSyncTest" time="0.118"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

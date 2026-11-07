@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.ItemCategoryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:04.867Z" hostname="runnervmwuk1x" time="0.013">
+  <properties/>
+  <testcase name="everySubtypeIsFoundByIdInItsCategory" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.012"/>
+  <testcase name="subtypeCountsMatchSpec" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <testcase name="hasTwelveCategories" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <testcase name="lookupAcrossCategories" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <testcase name="subtypeIdsAreUniqueAndEveryOneHasAnIcon" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <testcase name="furnaceDefaultsFilterAndServiceReminders" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <testcase name="maintenanceDefaultsMatchSpec" classname="com.kurtz.homerecord.core.model.ItemCategoryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

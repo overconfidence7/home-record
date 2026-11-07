@@ -1,0 +1,153 @@
+{
+ "sha": "cbf81fa",
+ "at": "2026-10-20 12:52 UTC",
+ "stats": {
+  "unitTests": 229,
+  "unitFailures": 0,
+  "coverage": {
+   "acs_claimed": 41,
+   "acs_missing": 21,
+   "ticked_tasks": 18
+  },
+  "backendTests": 51,
+  "backendFailures": 0
+ },
+ "stages": [],
+ "findings": [
+  {
+   "id": "auto:coverage:T004",
+   "severity": "Major",
+   "text": "T004 is ticked but these acceptance criteria have no test or flow: AC-C4, AC-U3, AC-U4, AC-U5, AC-U6, AC-U7",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T005",
+   "severity": "Major",
+   "text": "T005 is ticked but these acceptance criteria have no test or flow: AC-U12",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T006",
+   "severity": "Major",
+   "text": "T006 is ticked but these acceptance criteria have no test or flow: AC-C29",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T007",
+   "severity": "Major",
+   "text": "T007 is ticked but these acceptance criteria have no test or flow: AC-B60",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T008b",
+   "severity": "Major",
+   "text": "T008b is ticked but these acceptance criteria have no test or flow: AC-F4",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T008c",
+   "severity": "Major",
+   "text": "T008c is ticked but these acceptance criteria have no test or flow: AC-F4, AC-H15",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T009",
+   "severity": "Major",
+   "text": "T009 is ticked but these acceptance criteria have no test or flow: AC-F2, AC-F3",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T010",
+   "severity": "Major",
+   "text": "T010 is ticked but these acceptance criteria have no test or flow: AC-F53",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T011",
+   "severity": "Major",
+   "text": "T011 is ticked but these acceptance criteria have no test or flow: AC-C2",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T012",
+   "severity": "Major",
+   "text": "T012 is ticked but these acceptance criteria have no test or flow: AC-C8, AC-C11",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T014a",
+   "severity": "Major",
+   "text": "T014a is ticked but these acceptance criteria have no test or flow: AC-C7",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T014b",
+   "severity": "Major",
+   "text": "T014b is ticked but these acceptance criteria have no test or flow: AC-C9",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  },
+  {
+   "id": "auto:coverage:T015",
+   "severity": "Major",
+   "text": "T015 is ticked but these acceptance criteria have no test or flow: AC-C15",
+   "expected": "every AC of a ticked task is referenced by an instrumented test, a Maestro flow under qa/flows/, or (for [unit] ACs) a JVM test (CLAUDE.md QA rules)",
+   "actual": "no reference found",
+   "screenshot": "",
+   "app": ""
+  }
+ ],
+ "new": [
+  "auto:coverage:T004",
+  "auto:coverage:T005",
+  "auto:coverage:T006",
+  "auto:coverage:T007",
+  "auto:coverage:T008b",
+  "auto:coverage:T008c",
+  "auto:coverage:T009",
+  "auto:coverage:T010",
+  "auto:coverage:T011",
+  "auto:coverage:T012",
+  "auto:coverage:T014a",
+  "auto:coverage:T014b",
+  "auto:coverage:T015"
+ ],
+ "stillOpen": [],
+ "skipped": [],
+ "walkthrough": {}
+}

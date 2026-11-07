@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.qa.ScreenCatalogBackTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:15.186Z" hostname="runnervmwuk1x" time="4.892">
+  <properties/>
+  <testcase name="everyNonRootCatalogScreenHasABackOrClose" classname="com.kurtz.homerecord.fieldlog.qa.ScreenCatalogBackTest" time="4.889"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

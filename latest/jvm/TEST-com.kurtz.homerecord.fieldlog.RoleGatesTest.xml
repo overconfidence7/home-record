@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.RoleGatesTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:36.142Z" hostname="runnervmwuk1x" time="3.384">
+  <properties/>
+  <testcase name="todayEmptyStateForOwnerOffersAddJob" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.287"/>
+  <testcase name="todayEmptyStateForOwnerOffersInvite" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.161"/>
+  <testcase name="jobsShowNewJobForOwner" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.119"/>
+  <testcase name="officeSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.278"/>
+  <testcase name="photoHasNoDeleteWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.607"/>
+  <testcase name="jobOverviewHidesEditWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.094"/>
+  <testcase name="leadSeesMaterials" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.117"/>
+  <testcase name="crewDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.123"/>
+  <testcase name="signOutAsksFirst" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.425"/>
+  <testcase name="jobsHideNewJobWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.107"/>
+  <testcase name="filesAreViewOnlyWithoutTheRight" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.27"/>
+  <testcase name="todayEmptyStateForCrewHasNoInviteButton" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.097"/>
+  <testcase name="leadDoesNotSeeTeamOrCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.126"/>
+  <testcase name="photoActionsAreEvents" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.217"/>
+  <testcase name="ownerSeesTeamAndCompany" classname="com.kurtz.homerecord.fieldlog.RoleGatesTest" time="0.331"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

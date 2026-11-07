@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:49.584Z" hostname="runnervmwuk1x" time="0.501">
+  <properties/>
+  <testcase name="aDragMovesTheMarkerAndTheDropSavesTheSpot" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.08"/>
+  <testcase name="aTapInAnotherRoomMovesTheItemThereAndRemoveKeepsTheRoom" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.055"/>
+  <testcase name="onAWallHangsTheItemOnThePickedWallAndSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.069"/>
+  <testcase name="opensOnTheFloorOfTheItemsRoomAndATapSavesTheSpot" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.041"/>
+  <testcase name="aFailedReadShowsTheErrorStateAndRetryReadsAgain" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.056"/>
+  <testcase name="anotherFloorHidesTheMarkerAndThePickSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.057"/>
+  <testcase name="aDeletedItemShowsMissing" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.058"/>
+  <testcase name="theFloorsOtherPlacedItemsShowFaintly" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.043"/>
+  <testcase name="anItemWithNoRoomOnTheShownFloorCannotHang" classname="com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Nov 07, 2026 9:03:49 PM com.kurtz.homerecord.core.data.Reloadable _init_$lambda$0
+WARNING: Item place failed to load
+java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invokeSuspend(ItemPlaceViewModelTest.kt:159)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invoke(ItemPlaceViewModelTest.kt)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invoke(ItemPlaceViewModelTest.kt)
+	at kotlinx.coroutines.flow.SafeFlow.collectSafely(Builders.kt:57)
+	at kotlinx.coroutines.flow.AbstractFlow.collect(Flow.kt:226)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$withWalls$lambda$0$$inlined$map$1.collect(SafeCollector.common.kt:112)
+	at kotlinx.coroutines.flow.FlowKt__CollectKt.emitAll(Collect.kt:105)
+	at kotlinx.coroutines.flow.FlowKt.emitAll(Unknown Source)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invokeSuspend(Merge.kt:189)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invoke(Merge.kt)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invoke(Merge.kt)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invokeSuspend(Merge.kt:30)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invoke(Merge.kt)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invoke(Merge.kt)
+	at kotlinx.coroutines.intrinsics.UndispatchedKt.startCoroutineUndispatched(Undispatched.kt:20)
+	at kotlinx.coroutines.CoroutineStart.invoke(CoroutineStart.kt:360)
+	at kotlinx.coroutines.AbstractCoroutine.start(AbstractCoroutine.kt:134)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:209)
+	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch$default(Builders.common.kt:200)
+	at kotlinx.coroutines.BuildersKt.launch$default(Unknown Source)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1.emit(Merge.kt:29)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invokeSuspend(Zip.kt:29)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invoke(Zip.kt)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invoke(Zip.kt)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2.invokeSuspend(Combine.kt:73)
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at kotlinx.coroutines.flow.internal.ChannelFlow$collectToFun$1.invokeSuspend(ChannelFlow.kt:56)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt.catchImpl(Errors.kt:152)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt$catch$$inlined$unsafeFlow$1.collect(Errors.kt:112)
+	at com.kurtz.homerecord.core.data.Reloadable$wrap$$inlined$flatMapLatest$1.invokeSuspend(Reloadable.kt:189)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invokeSuspend(Merge.kt:30)
+Caused by: java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invokeSuspend(ItemPlaceViewModelTest.kt:159)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invoke(ItemPlaceViewModelTest.kt)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModelTest$aFailedReadShowsTheErrorStateAndRetryReadsAgain$1$vm$1$1.invoke(ItemPlaceViewModelTest.kt)
+	at kotlinx.coroutines.flow.SafeFlow.collectSafely(Builders.kt:57)
+	at kotlinx.coroutines.flow.AbstractFlow.collect(Flow.kt:226)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$withWalls$lambda$0$$inlined$map$1.collect(SafeCollector.common.kt:112)
+	at kotlinx.coroutines.flow.FlowKt__CollectKt.emitAll(Collect.kt:105)
+	at kotlinx.coroutines.flow.FlowKt.emitAll(Unknown Source)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invokeSuspend(Merge.kt:189)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invoke(Merge.kt)
+	at com.kurtz.homerecord.housemodel.ui.ItemPlaceViewModel$special$$inlined$flatMapLatest$2.invoke(Merge.kt)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invokeSuspend(Merge.kt:30)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invoke(Merge.kt)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invoke(Merge.kt)
+	at kotlinx.coroutines.intrinsics.UndispatchedKt.startCoroutineUndispatched(Undispatched.kt:20)
+	at kotlinx.coroutines.CoroutineStart.invoke(CoroutineStart.kt:360)
+	at kotlinx.coroutines.AbstractCoroutine.start(AbstractCoroutine.kt:134)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch(Builders.common.kt:209)
+	at kotlinx.coroutines.BuildersKt.launch(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_commonKt.launch$default(Builders.common.kt:200)
+	at kotlinx.coroutines.BuildersKt.launch$default(Unknown Source)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1.emit(Merge.kt:29)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invokeSuspend(Zip.kt:29)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invoke(Zip.kt)
+	at kotlinx.coroutines.flow.FlowKt__ZipKt$combine$1$1.invoke(Zip.kt)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2.invokeSuspend(Combine.kt:73)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.EventLoop.processUnconfinedEvent(EventLoop.common.kt:65)
+	at kotlinx.coroutines.internal.DispatchedContinuationKt.resumeCancellableWithInternal(DispatchedContinuation.kt:392)
+	at kotlinx.coroutines.DispatchedCoroutine.afterResume(Builders.common.kt:588)
+	at kotlinx.coroutines.AbstractCoroutine.resumeWith(AbstractCoroutine.kt:101)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:47)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+]]></system-err>
+</testsuite>

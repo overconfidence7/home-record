@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.HomeBackupRoundTripTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:37.497Z" hostname="runnervmwuk1x" time="9.471">
+  <properties/>
+  <testcase name="a backup restores the whole home on a fresh install with nothing missing" classname="com.kurtz.homerecord.core.bundle.HomeBackupRoundTripTest" time="8.448"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

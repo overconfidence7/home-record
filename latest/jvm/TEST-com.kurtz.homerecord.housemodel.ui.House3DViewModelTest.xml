@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.918Z" hostname="runnervmwuk1x" time="0.66">
+  <properties/>
+  <testcase name="buildsTheFloorWithRoomsAtItsCeilingHeight" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.073"/>
+  <testcase name="overlaysAndPlacedItemsBecomeMarkersShownByTheSharedLayerToggles" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.063"/>
+  <testcase name="theFloorAboveShowsOverAFadedMainAndAllFloorsSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.092"/>
+  <testcase name="theLayersOpenAsTheHouseTabLeftThem" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.036"/>
+  <testcase name="aNewWallPhotoShowsAtItsStageAndTheStageSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.07"/>
+  <testcase name="resetViewBumpsTheCounterAndAFailedBuildOffersRetry" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.059"/>
+  <testcase name="opensOnTheGivenFloorAndSwitchesFloors" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.041"/>
+  <testcase name="viewIn3DFromTheRoomPageOpensInsideTheRoom" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.047"/>
+  <testcase name="fieldLogOpensOnRoughInWithTheCrewsPhotoPaintedOn" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.076"/>
+  <testcase name="aTappedRoomPutsTheCameraInsideUntilBackToFloorAndSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.099"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

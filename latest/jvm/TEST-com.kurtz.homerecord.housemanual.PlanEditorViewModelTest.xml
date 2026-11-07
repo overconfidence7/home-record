@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:52.611Z" hostname="runnervmwuk1x" time="1.436">
+  <properties/>
+  <testcase name="tapAWallThenAddDoorSelectsItAndSaves" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.058"/>
+  <testcase name="revealPansTheSelectedRoomOutFromUnderThePanel" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.047"/>
+  <testcase name="dragMoveIsOneUndoStepAndSavesOnDragEnd" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.061"/>
+  <testcase name="aPendingNameAndSizeSurviveARecreatedViewModel" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.069"/>
+  <testcase name="typingANameIsOneUndoStepCommittedOnDone" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.092"/>
+  <testcase name="dragOpeningWidthDeleteAndUndo" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.093"/>
+  <testcase name="aHalfTypedSizeNeverResizesTheRoom" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.112"/>
+  <testcase name="fitCentersAllRoomsInTheViewport" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.061"/>
+  <testcase name="loadedStateAlreadyHoldsTheFloorsRooms" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.082"/>
+  <testcase name="floorSelectionViewAndSelectionSurviveARecreatedViewModel" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.06"/>
+  <testcase name="deleteRemovesRoomAndClearsSelection" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.085"/>
+  <testcase name="renameKindAndSizeStickAndUndoRedoWork" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.152"/>
+  <testcase name="editShapeAddsDragsAndDeletesCornersAndSavesTheLShape" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.066"/>
+  <testcase name="pinchKeepsThePointUnderTheFingersFixed" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.013"/>
+  <testcase name="opensOnTheFloorWithRoomsOrTheFirstFloorAndListsUnplacedRooms" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.031"/>
+  <testcase name="overlappingRoomIsFlaggedButStillSaved" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.073"/>
+  <testcase name="placeRoomGivesAnUnplacedRoomAShape" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.034"/>
+  <testcase name="stairsLinkToTheFloorAboveAndCanBeRelinked" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.097"/>
+  <testcase name="theNextEditCommitsATypedNameFirst" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.079"/>
+  <testcase name="addRoomSelectsItFocusesNameAndSavesAtOnce" classname="com.kurtz.homerecord.housemanual.PlanEditorViewModelTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

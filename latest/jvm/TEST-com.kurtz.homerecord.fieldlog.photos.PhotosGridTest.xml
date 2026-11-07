@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.PhotosGridTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:14.456Z" hostname="runnervmwuk1x" time="0.212">
+  <properties/>
+  <testcase name="fabTakesAPhotoFromTheGridAndFromEmpty" classname="com.kurtz.homerecord.fieldlog.photos.PhotosGridTest" time="0.056"/>
+  <testcase name="noFabWhileLoading" classname="com.kurtz.homerecord.fieldlog.photos.PhotosGridTest" time="0.078"/>
+  <testcase name="threeColumnsWithTwoDpGapsAndAPairSpansTwo" classname="com.kurtz.homerecord.fieldlog.photos.PhotosGridTest" time="0.071"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

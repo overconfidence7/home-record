@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.reminders.ReminderCheckTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.341Z" hostname="runnervmwuk1x" time="0.033">
+  <properties/>
+  <testcase name="dueRemindersOfEveryHomeMakeOneNotificationAndNoneClearsIt" classname="com.kurtz.homerecord.housemodel.reminders.ReminderCheckTest" time="0.031"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

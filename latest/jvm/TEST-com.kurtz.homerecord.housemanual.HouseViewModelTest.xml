@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.HouseViewModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:40.260Z" hostname="runnervmwuk1x" time="0.747">
+  <properties/>
+  <testcase name="deleteRemovesOnlyThatRoom" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.151"/>
+  <testcase name="renameFromTheLongPressMenuSavesTheRoom" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.152"/>
+  <testcase name="theBlueprintGetsTheFloorsPlanOverlaysOnly" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.148"/>
+  <testcase name="showsTheFloorsRooms" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.059"/>
+  <testcase name="exportPdfPassesEveryFloorToTheExporterAndSurfacesTheUri" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.069"/>
+  <testcase name="theBlueprintLaysWallOverlaysAlongTheirWallAndPlacesItems" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.097"/>
+  <testcase name="layerTogglesPersistPerHome" classname="com.kurtz.homerecord.housemanual.HouseViewModelTest" time="0.058"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

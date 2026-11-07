@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:45.505Z" hostname="runnervmwuk1x" time="0.658">
+  <properties/>
+  <testcase name="signedOrderShowsTheSignatureAndDuplicates" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.08"/>
+  <testcase name="signOnPhoneSavesThenOpensThePad" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.05"/>
+  <testcase name="editLoadsTheLinesRemovesOneAndDeleteAsksFirst" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.05"/>
+  <testcase name="shareMakesThePdfAndOpensTheShareSheetAndCanBeRetried" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.039"/>
+  <testcase name="aSignedOrderOpensLockedAndCrewCannotOpenTheForm" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.039"/>
+  <testcase name="aWebSignedOrderShowsItsDrawnSignature" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.041"/>
+  <testcase name="aBadQuantityOrPriceBlocksSaveAndABlankLineIsLeftOut" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.044"/>
+  <testcase name="shareSavesADraftsTypingFirstAndANewOrderCannotShare" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.047"/>
+  <testcase name="sendLinkToSignMakesOneLinkSharesItAndTurnsOff" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.079"/>
+  <testcase name="newOrderStartsWithTheJobClientAndOneLineThenSavesWithTheTotal" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.069"/>
+  <testcase name="photosArePickedTakenAndSavedInOrder" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.076"/>
+  <testcase name="typingSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormViewModelTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

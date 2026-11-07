@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.JobsEmptyStateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:05.626Z" hostname="runnervmwuk1x" time="0.196">
+  <properties/>
+  <testcase name="noMatchesOffersClearAndNew" classname="com.kurtz.homerecord.fieldlog.jobs.JobsEmptyStateTest" time="0.092"/>
+  <testcase name="emptyOffersNewJobForOwners" classname="com.kurtz.homerecord.fieldlog.jobs.JobsEmptyStateTest" time="0.047"/>
+  <testcase name="crewGetNoNewJobOnEmpty" classname="com.kurtz.homerecord.fieldlog.jobs.JobsEmptyStateTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

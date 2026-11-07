@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:08.149Z" hostname="runnervmwuk1x" time="0.126">
+  <properties/>
+  <testcase name="revokeAndRemoveDelete" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.035"/>
+  <testcase name="onlyAViewerIsReadOnlyAndUnknownRolesAreNeverOwner" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.001"/>
+  <testcase name="inviteSendsTheRoleAndReturnsTheLink" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.008"/>
+  <testcase name="peopleAndOpenLinksAreRead" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.009"/>
+  <testcase name="acceptJoinsOrSaysWhyNot" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.071"/>
+  <testcase name="inviteLinksAreRecognised" classname="com.kurtz.homerecord.core.share.RetrofitHomeShareApiTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

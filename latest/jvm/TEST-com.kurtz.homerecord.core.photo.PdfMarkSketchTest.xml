@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.PdfMarkSketchTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:06.435Z" hostname="runnervmwuk1x" time="0.004">
+  <properties/>
+  <testcase name="eachToolTurnsAGestureIntoItsMarkOnThatPage" classname="com.kurtz.homerecord.core.photo.PdfMarkSketchTest" time="0.002"/>
+  <testcase name="aStraightStrokeHighlightsOrBoxesAThinStripAlongIt" classname="com.kurtz.homerecord.core.photo.PdfMarkSketchTest" time="0.0"/>
+  <testcase name="aTapDrawsNothing" classname="com.kurtz.homerecord.core.photo.PdfMarkSketchTest" time="0.0"/>
+  <testcase name="boxesAndHighlightsKeepTheirCornersInOrderWhicheverWayTheyWereDragged" classname="com.kurtz.homerecord.core.photo.PdfMarkSketchTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

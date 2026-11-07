@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.FloorStackTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:48.616Z" hostname="runnervmwuk1x" time="0.002">
+  <properties/>
+  <testcase name="oneFloorGhostsTheFloorsBelowAndLeavesOutTheOnesAbove" classname="com.kurtz.homerecord.housemodel.scene.FloorStackTest" time="0.001"/>
+  <testcase name="floorsWithoutElevationsStillStackApartAndAnUnknownFloorShowsNothing" classname="com.kurtz.homerecord.housemodel.scene.FloorStackTest" time="0.001"/>
+  <testcase name="allFloorsAreSolidAndPulledApartBottomFirst" classname="com.kurtz.homerecord.housemodel.scene.FloorStackTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

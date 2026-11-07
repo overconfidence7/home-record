@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:33.845Z" hostname="runnervmwuk1x" time="0.016">
+  <properties/>
+  <testcase name="recentPhotosAreNewestOnLiveJobsOnly" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.004"/>
+  <testcase name="anUpcomingJobWhoseStartDateCameIsTodaysJob" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.003"/>
+  <testcase name="myJobsTodayAreAssignedActiveJobsOnly" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.0"/>
+  <testcase name="nextDayIsTomorrowOrTheNextScheduledDay" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.001"/>
+  <testcase name="myTasksAreOverdueThenDueTodayWithTheJobName" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.001"/>
+  <testcase name="theCameraButtonFollowsMyShift" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.003"/>
+  <testcase name="ownerSeesOpenShiftsWithPinAndCrewDoesNot" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.0"/>
+  <testcase name="clockCardFollowsMyOwnShiftAndIgnoresOthers" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.002"/>
+  <testcase name="noActiveJobsKeepsTheFirstRunEmptyState" classname="com.kurtz.homerecord.fieldlog.today.TodayMapperTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

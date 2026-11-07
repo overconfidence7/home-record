@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.RemindersScreenTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:57.953Z" hostname="runnervmwuk1x" time="0.358">
+  <properties/>
+  <testcase name="emptyAsksForAZoneAndOffersAdd" classname="com.kurtz.homerecord.housemanual.RemindersScreenTest" time="0.134"/>
+  <testcase name="sectionsRowsAndActions" classname="com.kurtz.homerecord.housemanual.RemindersScreenTest" time="0.217"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="99.304" timestamp="2026-11-07T22:37:58">
+    <testcase id="x-share" name="x-share" classname="x-share" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/x-share.yaml" time="99.26" timestamp="2026-11-07T22:37:58" status="ERROR">
+      <failure>Assertion is false: "Furnace" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

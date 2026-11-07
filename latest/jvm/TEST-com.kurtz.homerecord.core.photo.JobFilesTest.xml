@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.JobFilesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:05.524Z" hostname="runnervmwuk1x" time="0.191">
+  <properties/>
+  <testcase name="offlineOffClearsLocalPathAndDeleteHidesFile" classname="com.kurtz.homerecord.core.photo.JobFilesTest" time="0.057"/>
+  <testcase name="emptyFolderSurvivesAndDuplicateIsRefused" classname="com.kurtz.homerecord.core.photo.JobFilesTest" time="0.053"/>
+  <testcase name="searchMatchesNameAcrossFoldersIgnoringCase" classname="com.kurtz.homerecord.core.photo.JobFilesTest" time="0.026"/>
+  <testcase name="rootListsFoldersAndFilesSorted" classname="com.kurtz.homerecord.core.photo.JobFilesTest" time="0.024"/>
+  <testcase name="moveAndRenameQueueSync" classname="com.kurtz.homerecord.core.photo.JobFilesTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

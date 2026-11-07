@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.MoneyMathTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:04.945Z" hostname="runnervmwuk1x" time="0.006">
+  <properties/>
+  <testcase name="lineIsQuantityTimesPriceRoundedHalfUpToTheCent" classname="com.kurtz.homerecord.core.model.MoneyMathTest" time="0.001"/>
+  <testcase name="totalIsTheSumOfTheRoundedLines" classname="com.kurtz.homerecord.core.model.MoneyMathTest" time="0.001"/>
+  <testcase name="linesRoundTripThroughJsonAndBadJsonReadsAsNoLines" classname="com.kurtz.homerecord.core.model.MoneyMathTest" time="0.001"/>
+  <testcase name="quantitiesParseToThousandthsAndFormatBack" classname="com.kurtz.homerecord.core.model.MoneyMathTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

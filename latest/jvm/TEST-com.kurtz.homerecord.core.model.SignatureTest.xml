@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.SignatureTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:05.016Z" hostname="runnervmwuk1x" time="0.011">
+  <properties/>
+  <testcase name="strokesRoundTripAndBadTextIsBlank" classname="com.kurtz.homerecord.core.model.SignatureTest" time="0.011"/>
+  <testcase name="inkAddsUpAcrossStrokes" classname="com.kurtz.homerecord.core.model.SignatureTest" time="0.0"/>
+  <testcase name="aBlankPadOrATapIsNotSigned" classname="com.kurtz.homerecord.core.model.SignatureTest" time="0.0"/>
+  <testcase name="heightCountsAtThePadsAspect" classname="com.kurtz.homerecord.core.model.SignatureTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:04.502Z" hostname="runnervmwuk1x" time="0.25">
+  <properties/>
+  <testcase name="lookUpShowsTermsAndSavingStoresTheWarrantyForTheHandoff" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.055"/>
+  <testcase name="anInstalledItemCarriesMakeModelSerialShowsInItsRoomAndQueuesForSync" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.041"/>
+  <testcase name="crewCannotOpenTheDeleteConfirm" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.031"/>
+  <testcase name="deleteAsksFirstThenClosesAndTheConfirmSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.043"/>
+  <testcase name="noModelExplainsWhyAndOfflineQueuesTheLookup" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.044"/>
+  <testcase name="crewCannotDeleteLookUpOrRegisterEvenIfAnEventArrives" classname="com.kurtz.homerecord.fieldlog.house.JobItemViewModelTest" time="0.03"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

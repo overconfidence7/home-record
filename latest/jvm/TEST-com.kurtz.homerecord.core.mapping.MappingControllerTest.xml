@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.mapping.MappingControllerTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:01:01.592Z" hostname="runnervmwuk1x" time="0.021">
+  <properties/>
+  <testcase name="leavingStopsTheAlarmAndIgnoresTheCharger" classname="com.kurtz.homerecord.core.mapping.MappingControllerTest" time="0.012"/>
+  <testcase name="unplugWhileArmedStartsTheAlarmAndSilenceStopsIt" classname="com.kurtz.homerecord.core.mapping.MappingControllerTest" time="0.005"/>
+  <testcase name="leavingWhileArmedMeansNoAlarmOnALaterDrop" classname="com.kurtz.homerecord.core.mapping.MappingControllerTest" time="0.002"/>
+  <testcase name="resumeAfterLeavingStartsFreshAndUnarmed" classname="com.kurtz.homerecord.core.mapping.MappingControllerTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:02:59.086Z" hostname="runnervmwuk1x" time="0.555">
+  <properties/>
+  <testcase name="wallsShowSideLengthAndPhotographedStages" classname="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" time="0.265"/>
+  <testcase name="removedWallsPhotosListWithStageAndDate" classname="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" time="0.091"/>
+  <testcase name="photographSaysRetakeWhereTheStageHasAPhoto" classname="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" time="0.084"/>
+  <testcase name="aRoomWithNoWallsSaysHowToGetThem" classname="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" time="0.045"/>
+  <testcase name="noRemovedWallsMeansNoRemovedSection" classname="com.kurtz.homerecord.housemanual.RoomWallsSectionTest" time="0.062"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

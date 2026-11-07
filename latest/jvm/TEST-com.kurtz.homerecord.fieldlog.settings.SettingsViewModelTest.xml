@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.settings.SettingsViewModelTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:03:27.420Z" hostname="runnervmwuk1x" time="0.027">
+  <properties/>
+  <testcase name="pickingMetricStoresIt" classname="com.kurtz.homerecord.fieldlog.settings.SettingsViewModelTest" time="0.007"/>
+  <testcase name="refreshReadsTheNotificationSwitch" classname="com.kurtz.homerecord.fieldlog.settings.SettingsViewModelTest" time="0.002"/>
+  <testcase name="freeUpDropsCachedFilesAndRecounts" classname="com.kurtz.homerecord.fieldlog.settings.SettingsViewModelTest" time="0.008"/>
+  <testcase name="countsStorageWhenShown" classname="com.kurtz.homerecord.fieldlog.settings.SettingsViewModelTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

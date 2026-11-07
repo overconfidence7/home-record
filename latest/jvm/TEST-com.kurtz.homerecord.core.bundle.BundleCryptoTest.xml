@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.BundleCryptoTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T21:00:34.245Z" hostname="runnervmwuk1x" time="3.046">
+  <properties/>
+  <testcase name="a file cut at a block boundary is damaged, not short" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.721"/>
+  <testcase name="the plaintext does not appear in the file" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.117"/>
+  <testcase name="round trips across many blocks with PBKDF2 210k and a random salt" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.336"/>
+  <testcase name="a home backup round trips its records and media" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.339"/>
+  <testcase name="other files, newer versions and absurd iterations are refused before any key work" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.234"/>
+  <testcase name="a wrong passphrase is told apart and writes nothing" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.255"/>
+  <testcase name="a sealed file that is not a bundle inside reads as unreadable" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.189"/>
+  <testcase name="swapped blocks and a flipped byte are refused" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.332"/>
+  <testcase name="empty input and an exact multiple of the block size round trip" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.311"/>
+  <testcase name="a changed header (salt or iterations) does not open" classname="com.kurtz.homerecord.core.bundle.BundleCryptoTest" time="0.205"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
