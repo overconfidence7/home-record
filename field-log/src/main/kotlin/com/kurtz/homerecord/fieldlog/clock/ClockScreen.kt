@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ShiftFlag
 import com.kurtz.homerecord.fieldlog.timesheets.kindLabel
 import com.kurtz.homerecord.core.punch.ClockStatus
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
 import java.time.format.DateTimeFormatter
@@ -64,6 +65,10 @@ fun ClockScreen(
         )
         when {
             state.loading -> LoadingState(Modifier.weight(1f))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.clock_load_failed), { onEvent(ClockEvent.Retry) }, Modifier.weight(1f),
+                retryModifier = Modifier.testTag("fl_clock_retry"),
+            )
             readOnly -> ReadOnlyBody(state, onSignOut, listState, Modifier.weight(1f))
             else -> ClockBody(state, onEvent, listState, Modifier.weight(1f))
         }

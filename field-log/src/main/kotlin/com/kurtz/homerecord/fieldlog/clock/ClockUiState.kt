@@ -35,6 +35,8 @@ data class CrewNotice(val punched: Int, val skippedNames: List<String>)
 
 data class ClockUiState(
     val loading: Boolean = true,
+    /** The jobs and punches could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val status: ClockStatus = ClockStatus.Out,
     val jobs: List<ClockJobOption> = emptyList(),
     val selectedJobId: String? = null,
@@ -77,6 +79,8 @@ data class ClockUiState(
 }
 
 sealed interface ClockEvent {
+    /** Read the jobs and punches again after a failed read. */
+    data object Retry : ClockEvent
     /** A solo owner's "Invite crew" row: navigation, handled by the route. */
     data object InviteCrew : ClockEvent
     data class SelectJob(val id: String) : ClockEvent

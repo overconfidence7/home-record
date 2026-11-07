@@ -37,6 +37,8 @@ data class ScheduleUiState(
      * off the schedule even though it is no longer offered for new days (R11).
      */
     val changeable: Set<String> = emptySet(),
+    /** The week could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
 ) {
     val days: List<LocalDate> get() = ScheduleWeek.days(weekStart)
     val isThisWeek: Boolean get() = weekStart == ScheduleWeek.weekStart(today)
@@ -62,4 +64,6 @@ sealed interface ScheduleEvent {
     data class MoveTo(val day: LocalDate) : ScheduleEvent
     data object Remove : ScheduleEvent
     data object Dismiss : ScheduleEvent
+    /** Read the week again after a failed read. */
+    data object Retry : ScheduleEvent
 }

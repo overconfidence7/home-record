@@ -551,6 +551,8 @@
     <string name="job_ov_hours_value">%1$s h</string>
 
     <string name="clock_title">Clock</string>
+    <string name="clock_load_failed">Couldn\'t open your jobs and punches. Tap Retry to read them again.</string>
+    <string name="schedule_load_failed">Couldn\'t open the schedule. Tap Retry to read it again.</string>
     <string name="clock_out_status">Not clocked in</string>
     <string name="clock_working_status">Clocked in</string>
     <string name="clock_break_status">On break</string>

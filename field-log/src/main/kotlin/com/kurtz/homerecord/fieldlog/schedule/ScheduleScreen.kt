@@ -58,6 +58,7 @@ import androidx.compose.foundation.selection.selectable
 import com.kurtz.homerecord.core.model.ScheduleCell
 import com.kurtz.homerecord.core.model.ScheduleRow
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.OptionsSheet
 import com.kurtz.homerecord.coreui.components.SheetOption
@@ -78,6 +79,13 @@ private val monthDay = DateTimeFormatter.ofPattern("MMM d")
 @Composable
 fun ScheduleScreen(state: ScheduleUiState, onEvent: (ScheduleEvent) -> Unit, modifier: Modifier = Modifier) {
     if (state.loading) { LoadingState(modifier.fillMaxSize()); return }
+    if (state.loadFailed) {
+        ErrorState(
+            stringResource(R.string.schedule_load_failed), { onEvent(ScheduleEvent.Retry) }, modifier.fillMaxSize().statusBarsPadding(),
+            retryModifier = Modifier.testTag("fl_schedule_retry"),
+        )
+        return
+    }
     Column(modifier.fillMaxSize().statusBarsPadding().testTag("fl_schedule_week")) {
         WeekBar(state, onEvent)
         if (state.ownOnly) OwnWeek(state) else TeamDay(state, onEvent)

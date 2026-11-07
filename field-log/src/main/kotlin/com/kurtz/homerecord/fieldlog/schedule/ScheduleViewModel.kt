@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -60,6 +61,9 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
     val state: StateFlow<ScheduleUiState> = _state.asStateFlow()
     private val week = MutableStateFlow(_state.value.weekStart)
 
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Schedule")
+
     init {
         viewModelScope.launch {
             d.openDay.collect { day ->
@@ -83,7 +87,7 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
             }
         }
         viewModelScope.launch {
-            combine(d.members, d.jobs, d.entries, d.gates, combine(week, todayFlow, ::Pair)) { members, jobs, entries, gates, (weekStart, todayNow) ->
+            load.wrap<Shown?>(null) { combine(d.members, d.jobs, d.entries, d.gates, combine(week, todayFlow, ::Pair)) { members, jobs, entries, gates, (weekStart, todayNow) ->
                 val day = todayNow.toString()
                 val shown = jobs.filter { it.deletedAt == null && it.effectiveStatus(day) != JobStatus.ARCHIVED }
                 val names = shown.associate { it.id to it.name }
@@ -95,9 +99,14 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
                     .map { ScheduleJobOption(it.id, it.name) }
                 val changeable = if (ownOnly) emptySet() else shown.filter { gates.leads(it.id) }.map { it.id }.toSet()
                 Shown(ScheduleWeek.build(weekStart, people, entries, names), ownOnly, options, changeable)
-            }.collect { (rows, ownOnly, options, changeable) ->
+            } }.collect { shown ->
+                if (shown == null) {
+                    _state.update { it.copy(loading = false, loadFailed = true, sheet = null) }
+                    return@collect
+                }
+                val (rows, ownOnly, options, changeable) = shown
                 _state.update {
-                    it.copy(loading = false, rows = rows, ownOnly = ownOnly, jobs = options, changeable = changeable, sheet = it.sheet?.takeIf { s -> s.stillValid(rows) })
+                    it.copy(loading = false, loadFailed = false, rows = rows, ownOnly = ownOnly, jobs = options, changeable = changeable, sheet = it.sheet?.takeIf { s -> s.stillValid(rows) })
                 }
             }
         }
@@ -105,6 +114,7 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
 
     fun onEvent(e: ScheduleEvent) {
         when (e) {
+            ScheduleEvent.Retry -> load.retry()
             ScheduleEvent.PreviousWeek -> showWeek(_state.value.weekStart.minusWeeks(1))
             ScheduleEvent.NextWeek -> showWeek(_state.value.weekStart.plusWeeks(1))
             ScheduleEvent.ThisWeek -> showWeek(ScheduleWeek.weekStart(today), today)

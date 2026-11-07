@@ -623,6 +623,13 @@ fun ClockNoJobsPreview() = Frame {
 @Composable
 fun ClockLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(com.kurtz.homerecord.fieldlog.clock.ClockUiState(), {}) }
 
+/** The jobs and punches could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun ClockLoadFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(com.kurtz.homerecord.fieldlog.clock.ClockUiState(loading = false, loadFailed = true), {})
+}
+
 private val crewPicks = listOf(
     com.kurtz.homerecord.fieldlog.clock.CrewPick("m2", "Maria Soto"),
     com.kurtz.homerecord.fieldlog.clock.CrewPick("m3", "Dev Patel"),
@@ -2224,6 +2231,15 @@ fun ScheduleCrewPreview() = Frame {
             rows = com.kurtz.homerecord.core.model.ScheduleWeek.build(schedMonday, listOf("m2" to "Luis Romero"), schedEntries, schedJobs),
         ),
         {},
+    )
+}
+
+/** The week could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun ScheduleLoadFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(
+        com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(loading = false, loadFailed = true, today = schedWed, weekStart = schedMonday, selected = schedWed), {},
     )
 }
 

@@ -226,6 +226,11 @@ fun ClockNoJobsScreenshot() = ClockNoJobsPreview()
 @Composable
 fun ClockLoadingScreenshot() = ClockLoadingPreview()
 
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClockLoadFailedScreenshot() = ClockLoadFailedPreview()
+
 
 @PreviewTest
 @ThemePreviews
@@ -881,6 +886,11 @@ fun ScheduleCrewScreenshot() = ScheduleCrewPreview()
 @ThemePreviews
 @Composable
 fun ScheduleCrewEmptyScreenshot() = ScheduleCrewEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ScheduleLoadFailedScreenshot() = ScheduleLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews

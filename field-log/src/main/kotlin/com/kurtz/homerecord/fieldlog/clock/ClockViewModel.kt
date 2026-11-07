@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -83,16 +84,26 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     private var pending: String? = saved[PENDING] // "in", "switch" or "crew" while the reason sheet is open
     private var lastKind: String? = null // the punch that last ran, retried when GPS was the blocker
 
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Clock")
+
     init {
         // Collected on their own so a rule changed by the office reaches the next punch without waiting on the Room flows below.
         viewModelScope.launch { d.settings.collect { settings = it } }
         viewModelScope.launch {
             // The rules are live: a change from the office reflows the week sheet and applies to the next punch.
-            combine(
-                d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.punches.observePunches(d.companyId, d.memberId),
-                d.approvals, d.settings,
-            ) { jobs, shifts, punches, approved, rules -> ClockRows(jobs, shifts, punches, approved, rules) }
-                .collect { (jobs, shifts, punches, approved, company) ->
+            load.wrap<ClockRows?>(null) {
+                combine(
+                    d.jobs.observeFor(d.companyId), d.punches.observeShifts(d.companyId, d.memberId), d.punches.observePunches(d.companyId, d.memberId),
+                    d.approvals, d.settings,
+                ) { jobs, shifts, punches, approved, rules -> ClockRows(jobs, shifts, punches, approved, rules) }
+            }
+                .collect { rows ->
+                    if (rows == null) {
+                        _state.update { it.copy(loading = false, loadFailed = true) }
+                        return@collect
+                    }
+                    val (jobs, shifts, punches, approved, company) = rows
                     val now = d.now()
                     // Status is read for today, so a job whose start date has come shows here without a re-save.
                     val today = Instant.ofEpochMilli(now).atZone(d.zone).toLocalDate().toString()
@@ -107,7 +118,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     val lastJob = shifts.lastOrNull()?.segments?.lastOrNull()?.jobId?.takeIf { id -> options.any { it.id == id } }
                     _state.update { s ->
                         val selected = s.selectedJobId?.takeIf { id -> options.any { it.id == id } } ?: lastJob ?: options.singleOrNull()?.id
-                        s.copy(loading = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, changes = changes, now = now,
+                        s.copy(loading = false, loadFailed = false, jobs = options, status = status, selectedJobId = selected, sheet = sheet, changes = changes, now = now,
                             weekApproved = approved.any { it.weekStart == WeekKey.of(now, d.zone) }).gated()
                     }
                 }
@@ -140,6 +151,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
 
     fun onEvent(event: ClockEvent) {
         when (event) {
+            ClockEvent.Retry -> load.retry()
             is ClockEvent.SelectJob -> { saved[JOB] = event.id; _state.update { it.copy(selectedJobId = event.id).gated() } }
             is ClockEvent.Note -> { saved[NOTE] = event.text; _state.update { it.copy(note = event.text) } }
             ClockEvent.ClockIn -> {

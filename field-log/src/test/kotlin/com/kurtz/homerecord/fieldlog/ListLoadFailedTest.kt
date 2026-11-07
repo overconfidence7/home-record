@@ -108,4 +108,39 @@ class ListLoadFailedTest {
         rule.onNodeWithTag("fl_sync_retry").performClick()
         assertThat(events).containsExactly(SyncLogEvent.Retry)
     }
+
+    @Test fun scheduleShowsTheErrorStateAndRetryReadsAgain() {
+        val vm = com.kurtz.homerecord.fieldlog.schedule.ScheduleViewModel(
+            com.kurtz.homerecord.fieldlog.schedule.ScheduleDeps(
+                "m1",
+                failsOnce(listOf(com.kurtz.homerecord.core.data.MemberEntity("m1", "c1", name = "Dana Ortiz", role = "OWNER", createdAt = 1, updatedAt = 1))),
+                flowOf(emptyList()), flowOf(emptyList()),
+                flowOf(com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner, selfId = "m1")),
+                assign = { _, _, _ -> null }, move = { _, _ -> false }, remove = { false },
+                ticks = kotlinx.coroutines.flow.emptyFlow(),
+            ),
+        )
+        assertThat(vm.state.value.loadFailed).isTrue()
+        assertThat(vm.state.value.loading).isFalse()
+        vm.onEvent(com.kurtz.homerecord.fieldlog.schedule.ScheduleEvent.Retry)
+        assertThat(vm.state.value.loadFailed).isFalse()
+        assertThat(vm.state.value.rows.map { it.name }).containsExactly("Dana Ortiz")
+        vm.viewModelScope.cancel()
+    }
+
+    @Test fun scheduleRetrySendsTheEventAndHidesTheWeek() {
+        val events = mutableListOf<com.kurtz.homerecord.fieldlog.schedule.ScheduleEvent>()
+        show { com.kurtz.homerecord.fieldlog.schedule.ScheduleScreen(com.kurtz.homerecord.fieldlog.schedule.ScheduleUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("fl_schedule_retry").performClick()
+        rule.onAllNodesWithTag("fl_schedule_week").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.schedule.ScheduleEvent.Retry)
+    }
+
+    @Test fun clockRetrySendsTheEventAndHidesClockIn() {
+        val events = mutableListOf<com.kurtz.homerecord.fieldlog.clock.ClockEvent>()
+        show { com.kurtz.homerecord.fieldlog.clock.ClockScreen(com.kurtz.homerecord.fieldlog.clock.ClockUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("fl_clock_retry").performClick()
+        rule.onAllNodesWithTag("fl_clock_in").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.clock.ClockEvent.Retry)
+    }
 }
