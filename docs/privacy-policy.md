@@ -26,13 +26,13 @@ Everything sits in the app's private storage. Uninstalling the app removes it.
 | Email address | You sign in with an email code or Google | Your account, sign-in codes, invites | Until the account is deleted |
 | Sign-in sessions and limits | Each sign-in | Keep you signed in for 30 days, stop code guessing (counts per email and IP address, kept one hour) | 30 days for a session |
 | The home's or company's records listed above | While signed in (House Manual: with Pro) | Sync between phones and people you invited | Until you delete them or the cloud copy |
-| Photos, documents, voice memos, plans | While signed in | Same, stored as files in Cloudflare R2 | Until deleted; files no record points to are removed after 30 days |
+| Photos, documents, voice memos, plans | While signed in | Same, stored as files in Cloudflare R2 | Until deleted. Files no record points to are removed after 30 days |
 | Location of a punch | Field Log, when you clock in or out | The owner sees where a punch happened and "far from job" flags | As long as the punch |
-| Push token | Field Log, signed in | Task, schedule and approval alerts | Until you sign out; the alert log is kept 30 days |
+| Push token | Field Log, signed in | Task, schedule and approval alerts | Until you sign out. The alert log is kept 30 days |
 | Purchase status | You buy Pro or a Field Log plan | Unlock what you paid for | As long as the account |
 | Sync bookkeeping | Each sync | Avoid double writes and record merge conflicts | 90 days |
 | Handoff files | A contractor hands a house to a homeowner | Let the homeowner download it | 30 days |
-| Share links | You make a link for a client or an invite | Show the photos or log you picked to whoever has the link, or let an invited person join | Until you revoke them; invites expire after 14 days |
+| Share links | You make a link for a client or an invite | Show the photos or log you picked to whoever has the link, or let an invited person join | Until you revoke them. Invites expire after 14 days |
 
 ## Lookups that leave the server
 
