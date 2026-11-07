@@ -468,6 +468,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T078a: the walkthrough steps with no flow get one: H05-add-items (eight items from room pages and the Items tab, room preselected, grouped picker), H08-offline-item (airplane mode, cold start, the refrigerator's warranty with no error), H10-3d (Kitchen in 3D from the room, orbit, Reset, Back to floor, All floors on the 3D reference seed) (AC-H6, AC-C30, AC-H8)
   - [ ] T078b: score H1–H19 from the first published suite run after dc1ea1f4 (judge table) and fix every Blocked or Clunky step it shows (AC-H19)
 - [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
+  - [x] T079a: F14-materials flow (receipt from qa/fixtures/receipt.jpg through the document scanner when the emulator offers it, "Use $… from the receipt", else typed; list and job total) (AC-F44); F5 (break, switch job, clock out) stays inside F04-clock-in, which covers F4 and F5
+  - [ ] T079b: score F1–F18 from the first published suite run after dc1ea1f4 and fix every Blocked or Clunky step, starting with F09b and F12 (both stop after the share-link sheet in run 61) and F18 (stops after F18-clients) (AC-F57)
 - [ ] V6: Visual review of M6 screenshots
 
 ## M7 Ship

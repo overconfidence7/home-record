@@ -1,0 +1,102 @@
+# Walkthrough F14: snap qa/fixtures/receipt.jpg to a job (AC-F44). The receipt scanner is Google's document scanner,
+# another app, so the steps inside it run only when it offers the gallery import with the fixture; when it is not
+# available on the emulator the form says so and the receipt is typed in. Either way the list shows it with the job total.
+appId: com.kurtz.homerecord.fieldlog
+---
+- addMedia:
+    - "../../fixtures/receipt.jpg"
+- launchApp:
+    clearState: true
+- runFlow:
+    file: _owner-company.yaml
+    env:
+      EMAIL: "qa-owner-f14@example.test"
+- tapOn: "Jobs"
+- tapOn:
+    id: fl_jobs_new
+- tapOn:
+    id: fl_jobedit_name
+- inputText: "Ortiz basement"
+- hideKeyboard
+- tapOn:
+    id: fl_save
+- tapOn:
+    id: fl_tab_more
+- tapOn:
+    id: fl_more_materials
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_empty
+    timeout: 10000
+- tapOn: "Add receipt"
+- extendedWaitUntil:
+    visible:
+      id: fl_material_form_scan
+    timeout: 10000
+- assertVisible: "Ortiz basement"
+- takeScreenshot: F14-receipt-form
+- tapOn:
+    id: fl_material_form_scan
+# Inside the document scanner: import the fixture from the gallery, then accept the page
+- runFlow:
+    when:
+      visible: "(?i)(import|gallery).*"
+    commands:
+      - tapOn: "(?i)(import|gallery).*"
+      - runFlow:
+          when:
+            visible: "Photo taken on.*"
+          commands:
+            - tapOn:
+                text: "Photo taken on.*"
+                index: 0
+      - runFlow:
+          when:
+            visible: "(?i)(done|save)"
+          commands:
+            - tapOn: "(?i)(done|save)"
+- extendedWaitUntil:
+    visible:
+      id: fl_material_form_vendor
+    timeout: 30000
+- takeScreenshot: F14-after-scan
+# AC-F44: a read total is offered as "Use $… from the receipt"; tapping it fills the amount
+- runFlow:
+    when:
+      visible:
+        id: fl_material_form_use_total
+    commands:
+      - tapOn:
+          id: fl_material_form_use_total
+      - assertNotVisible:
+          id: fl_material_form_use_total
+      - takeScreenshot: F14-amount-from-receipt
+# No total read (scanner unavailable, cancelled or no total line): type it, as on a phone without the scanner
+- runFlow:
+    when:
+      notVisible: "\\$[0-9]+\\.[0-9]{2}"
+    commands:
+      - tapOn:
+          id: fl_material_form_amount
+      - inputText: "123.71"
+      - runFlow: _hide-keyboard.yaml
+- tapOn:
+    id: fl_material_form_vendor
+- inputText: "City Electric Supply"
+- runFlow: _hide-keyboard.yaml
+- scrollUntilVisible:
+    element:
+      id: fl_material_form_cat_tools
+    direction: DOWN
+- tapOn:
+    id: fl_material_form_cat_tools
+- tapOn:
+    id: fl_save
+- extendedWaitUntil:
+    visible:
+      id: fl_materials_list
+    timeout: 10000
+- assertVisible: "City Electric Supply"
+- assertVisible:
+    id: fl_materials_total
+- takeScreenshot: F14-materials-list
