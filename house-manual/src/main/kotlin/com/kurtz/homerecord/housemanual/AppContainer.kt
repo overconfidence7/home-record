@@ -303,12 +303,18 @@ class AppContainer(private val app: Application) {
     val layers = PrefsLayerStore(app)
 
     /** Pro state (AC-H18); without a RevenueCat key everyone stays on the free tier. */
-    val billing: com.kurtz.homerecord.core.billing.ProBilling =
+    private val storeBilling: com.kurtz.homerecord.core.billing.ProBilling =
         if (BuildConfig.REVENUECAT_API_KEY.isEmpty()) com.kurtz.homerecord.core.billing.UnavailableBilling
         else com.kurtz.homerecord.housemanual.billing.RevenueCatBilling(
             app, BuildConfig.REVENUECAT_API_KEY, { activityContext },
             homeId = { db.homeDao().observeAll().first().firstOrNull()?.id },
         )
+
+    /** Debug builds only: the QA seed's `pro` scenario turns this on so keyless QA builds can sign in (T032b2b). */
+    val qaForcePro = kotlinx.coroutines.flow.MutableStateFlow(false)
+
+    val billing: com.kurtz.homerecord.core.billing.ProBilling =
+        if (BuildConfig.DEBUG) com.kurtz.homerecord.core.billing.SwitchableProBilling(storeBilling, qaForcePro, scope) else storeBilling
 
     val addItemGate = com.kurtz.homerecord.housemanual.items.AddItemGate(items::count, billing, items::countPanels)
 
@@ -317,7 +323,7 @@ class AppContainer(private val app: Application) {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }
         syncCoordinator.start()
-        (billing as? com.kurtz.homerecord.housemanual.billing.RevenueCatBilling)?.let { rc -> scope.launch { rc.refresh() } }
+        (storeBilling as? com.kurtz.homerecord.housemanual.billing.RevenueCatBilling)?.let { rc -> scope.launch { rc.refresh() } }
         // Queued warranty lookups run when connectivity returns (AC-C34).
         scope.launch { connectivity.online.collect { if (it) warrantyLookup.runPending() } }
     }

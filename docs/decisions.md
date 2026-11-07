@@ -1001,3 +1001,8 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - Units is a phone display choice (same `PrefsUnitsStore` and `display` preferences file Field Log uses), picked in a radio dialog; House Manual now provides `LocalUnitSystem` from it, so plans, rooms and walls show metric when picked (AC-C4). It is not the synced `Home.units` column.
 - Climate zone on More writes the same home zone as the Reminders chips (`ReminderRepository.setClimateZone`, seeds the seasonal jobs); a viewer sees the zone ("…, set by the owner") but the row opens nothing.
 - HM-About (read only): version, "Kept on this phone", and how a contractor's Field Log handoff arrives.
+
+## 2026-11-07 — T032b2b Sign in gate
+- Sign in on HM-Account is House Manual's Pro gate (AC-H18): a signed-out free phone sees what signing in does and a Sign in button that opens HM-Paywall with the sync reason. Onboarding sign-in, claim links and invite links stay free, so a second phone, a contractor's handoff and a family member can always get the home. Rule: `accountSignInNeedsPro` (signed out and `LimitGate` blocks CloudSync).
+- QA Pro path: debug builds wrap the store billing in `SwitchableProBilling`; the debug seed's `pro` scenario turns Pro on for the app process (`_pro.yaml`). Chosen over a Test Store key in qa.yml so the suite runs without Nate's RevenueCat secrets; release builds never wrap the billing.
+- Cloud sync for a signed-in free phone is not gated client-side yet (T032b2e): a joined family member's phone is on the free tier, so the gate needs the home's Pro state from the backend.

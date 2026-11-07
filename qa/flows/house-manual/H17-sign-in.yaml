@@ -12,6 +12,31 @@ env:
       all: allow
       notifications: allow
 - runFlow: _onboard.yaml
+# AC-H18: on the free tier, Sign in on HM-Account opens HM-Paywall with the sync reason (T032b2b)
+- tapOn: "More"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_sign_in_pro"
+    timeout: 5000
+- assertNotVisible:
+    id: "hm_sign_in_email"
+- takeScreenshot: H17-free-sign-in
+- tapOn:
+    id: "hm_account_sign_in_pro"
+- extendedWaitUntil:
+    visible:
+      id: "hm_paywall_reason"
+    timeout: 5000
+- assertVisible: "Cloud backup and sign in are part of Pro."
+- takeScreenshot: H17-paywall-sync
+# Pro on (debug seed, no store key on QA builds); the app reopens on Home
+- runFlow: _pro.yaml
 - tapOn: "More"
 # AC-H15: More → Account and sync opens HM-Account (T075b)
 - scrollUntilVisible:

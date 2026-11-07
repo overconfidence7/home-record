@@ -456,6 +456,11 @@ fun AccountSignedOutScreenshot() = AccountSignedOutPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun AccountNeedsProScreenshot() = AccountNeedsProPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun AccountSignOutConfirmScreenshot() = AccountSignOutConfirmPreview()
 
 @PreviewTest

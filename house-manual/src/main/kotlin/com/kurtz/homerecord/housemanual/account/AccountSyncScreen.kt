@@ -18,21 +18,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Button
+import com.kurtz.homerecord.core.auth.AuthState
+import com.kurtz.homerecord.core.billing.LimitGate
+import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
 
 sealed interface AccountSyncEvent {
     data object Back : AccountSyncEvent
+    /** Sign in on the free tier: opens HM-Paywall for cloud sync (AC-H18). */
+    data object OpenPro : AccountSyncEvent
 }
+
+/**
+ * AC-H18: on the free tier, Sign in from HM-Account opens HM-Paywall instead of the sign-in form. Only a signed-out
+ * phone is held back; a signed-in account (from a claim link or a second phone) keeps its summary and Sign out.
+ */
+fun accountSignInNeedsPro(pro: Boolean, auth: AuthState): Boolean =
+    auth is AuthState.SignedOut && LimitGate.blockedBy(pro, LimitedFeature.CloudSync)
 
 /**
  * HM-Account (AC-H15): More → Account and sync. [account] is the shared sign-in form when signed out (it scrolls
  * itself) or the signed-in summary with the sync chip, what sync does, Sign out and Delete cloud copy. After a
- * delete, [cloudDeleted] puts one line above the sign-in form saying the home is still on this phone.
+ * delete, [cloudDeleted] puts one line above the sign-in form saying the home is still on this phone. With
+ * [needsPro] (free tier, signed out) the form is replaced by what signing in does and a Sign in button that opens
+ * HM-Paywall (AC-H18).
  */
 @Composable
-fun AccountSyncScreen(onEvent: (AccountSyncEvent) -> Unit, cloudDeleted: Boolean = false, account: @Composable (Modifier) -> Unit) {
+fun AccountSyncScreen(
+    onEvent: (AccountSyncEvent) -> Unit,
+    cloudDeleted: Boolean = false,
+    needsPro: Boolean = false,
+    account: @Composable (Modifier) -> Unit,
+) {
     ScreenScaffold(title = stringResource(R.string.account_sync_title), onBack = { onEvent(AccountSyncEvent.Back) }) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             if (cloudDeleted) {
@@ -42,8 +64,24 @@ fun AccountSyncScreen(onEvent: (AccountSyncEvent) -> Unit, cloudDeleted: Boolean
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).testTag("hm_account_cloud_deleted"),
                 )
             }
-            account(Modifier.weight(1f))
+            if (needsPro) SignInNeedsPro(onEvent, Modifier.weight(1f)) else account(Modifier.weight(1f))
         }
+    }
+}
+
+/** Free tier, signed out: what signing in does, that it is part of Pro, and Sign in (opens HM-Paywall). */
+@Composable
+private fun SignInNeedsPro(onEvent: (AccountSyncEvent) -> Unit, modifier: Modifier) {
+    Column(
+        modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(stringResource(R.string.account_pro_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.account_pro_body), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("hm_account_pro_body"))
+        Button(
+            onClick = { onEvent(AccountSyncEvent.OpenPro) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_account_sign_in_pro"),
+        ) { Text(stringResource(R.string.account_pro_sign_in)) }
     }
 }
 

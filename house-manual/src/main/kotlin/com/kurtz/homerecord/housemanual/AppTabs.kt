@@ -282,7 +282,18 @@ private fun HouseManualTabs(
                 factory = viewModelFactory { initializer { com.kurtz.homerecord.housemanual.account.CloudCopyViewModel(home.id, container.cloudCopy::delete, createSavedStateHandle()) } },
             )
             val cloudState by cloud.state.collectAsState()
-            com.kurtz.homerecord.housemanual.account.AccountSyncScreen(onEvent = { nav.pop() }, cloudDeleted = cloudState.deleted) { accountModifier ->
+            val pro by container.billing.isPro.collectAsState()
+            val authState by container.auth.state.collectAsState()
+            com.kurtz.homerecord.housemanual.account.AccountSyncScreen(
+                onEvent = { event ->
+                    when (event) {
+                        com.kurtz.homerecord.housemanual.account.AccountSyncEvent.Back -> nav.pop()
+                        com.kurtz.homerecord.housemanual.account.AccountSyncEvent.OpenPro -> nav.push(PaywallKey(LimitedFeature.CloudSync))
+                    }
+                },
+                cloudDeleted = cloudState.deleted,
+                needsPro = com.kurtz.homerecord.housemanual.account.accountSignInNeedsPro(pro, authState),
+            ) { accountModifier ->
                 AccountRoute(
                     container.auth, accountModifier, loadEmail = container.account::email,
                     footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloudState, cloud::onEvent) },

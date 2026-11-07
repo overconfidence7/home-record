@@ -99,6 +99,7 @@ object ScreenCatalog {
         QaScreen("join-other-home", nonRoot = true) { JoinOtherHomePreview() },
         QaScreen("join-used", nonRoot = true) { JoinUsedPreview() },
         QaScreen("account-signed-out", nonRoot = true) { AccountSignedOutPreview() },
+        QaScreen("account-needs-pro", nonRoot = true) { AccountNeedsProPreview() },
         QaScreen("account-sign-out-confirm", nonRoot = true) { AccountSignOutConfirmPreview() },
         QaScreen("account-delete-cloud-confirm", nonRoot = true) { AccountDeleteCloudConfirmPreview() },
         QaScreen("account-delete-cloud-offline", nonRoot = true) { AccountDeleteCloudOfflinePreview() },

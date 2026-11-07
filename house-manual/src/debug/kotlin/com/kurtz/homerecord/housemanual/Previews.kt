@@ -1146,6 +1146,15 @@ fun AccountSignedOutPreview() = Frame {
     }
 }
 
+/** Free tier, signed out: Sign in on HM-Account opens HM-Paywall (AC-H18). */
+@ThemePreviews
+@Composable
+fun AccountNeedsProPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}, needsPro = true) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(email = "dana.whitfield@gmail.com"), {}, modifier)
+    }
+}
+
 /** Onboarding → Sign in to get your home, signed out: the line on what signing in does over the sign-in form. */
 @ThemePreviews
 @Composable

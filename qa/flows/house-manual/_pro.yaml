@@ -1,0 +1,11 @@
+# Helper, not a walkthrough step: turn on Pro for this app process through the debug seed's `pro` scenario
+# (T032b2b). QA builds carry no RevenueCat key, so on the free tier Sign in on HM-Account opens HM-Paywall
+# (AC-H18); flows that sign in from More run this first, after their clearState and seed. It reopens the app
+# on Home. A cleared app or a killed process is back on the free tier.
+appId: com.kurtz.homerecord.housemanual
+---
+- openLink: "homerecord-qa-hm://seed?scenario=pro"
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 30000

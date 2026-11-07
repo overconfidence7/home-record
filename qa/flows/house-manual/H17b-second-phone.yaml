@@ -10,6 +10,8 @@ env:
 ---
 # Phone one: the seeded home, signed in and uploaded
 - runFlow: _seed.yaml
+# Sign in from More is Pro (AC-H18); QA builds have no store key, so turn Pro on for this process
+- runFlow: _pro.yaml
 - tapOn:
     id: "hm_tab_more"
 - scrollUntilVisible:

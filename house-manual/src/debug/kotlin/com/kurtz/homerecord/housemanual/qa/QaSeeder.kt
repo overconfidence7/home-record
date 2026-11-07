@@ -6,7 +6,7 @@ import java.io.File
 
 /** Debug-only: the seed scenarios, shared by [SeedReceiver] (adb broadcast) and [SeedActivity] (Maestro `openLink`). */
 object QaSeeder {
-    /** Runs [scenario] (`regression`, `long-list`, `3d-reference` or `reset`); false for an unknown one. Throws when a scenario fails. */
+    /** Runs [scenario] (`regression`, `long-list`, `3d-reference`, `pro` or `reset`); false for an unknown one. Throws when a scenario fails. */
     suspend fun run(context: Context, scenario: String): Boolean {
         val container = (context.applicationContext as HomeRecordApplication).container
         val documents = File(context.filesDir, "documents")
@@ -28,6 +28,11 @@ object QaSeeder {
             "3d-reference" -> {
                 val homeId = RegressionSeed.seed(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
                 Reference3DSeed.seed(container.db, container.homes, container.wallPhotos, homeId, File(context.filesDir, "media"))
+                true
+            }
+            // AC-H18 on keyless QA builds: Pro for this app process, so Sign in on HM-Account opens the form (T032b2b)
+            "pro" -> {
+                container.qaForcePro.value = true
                 true
             }
             "reset" -> {
