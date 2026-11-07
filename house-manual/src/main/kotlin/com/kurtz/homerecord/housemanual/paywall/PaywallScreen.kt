@@ -88,5 +88,6 @@ private fun limitReason(feature: LimitedFeature?): Int = when (feature) {
     LimitedFeature.SecondPanel -> R.string.paywall_reason_panel
     LimitedFeature.SecondHome -> R.string.paywall_reason_home
     LimitedFeature.CloudSync -> R.string.paywall_reason_sync
+    LimitedFeature.HomeReport -> R.string.paywall_reason_report
     null -> R.string.paywall_reason_general
 }

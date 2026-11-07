@@ -207,7 +207,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T032b2b: Sign in / cloud sync gate (AC-H18); needs a way for the keyless QA builds to sign in (H17, H18b, X02) — see BLOCKERS 2026-11-06 (T032b2a)
     - [ ] T032b2e: a signed-in free home does not run cloud sync (AC-H18 "no cloud sync"), using the home's Pro state from the backend so a family member who joined a Pro home on a free phone still syncs
     - [ ] T032b2d: Share this house is Pro (SPEC pricing "sync and sharing"): Invite family / Invite a viewer open HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (x-share would stop at the paywall)
-    - [ ] T032b2c: Home report is Pro (SPEC pricing): More → Home report opens HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (H15 would stop at the paywall) — see BLOCKERS 2026-11-06 (T073)
+    - [x] T032b2c: Home report is Pro (SPEC pricing): More → Home report opens HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (H15 would stop at the paywall) — see BLOCKERS 2026-11-06 (T073)
 - [x] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5 (sampled; no emulator in this container)
 
 ## M3 Field Log core (Field Log usable)

@@ -4,6 +4,22 @@
 appId: com.kurtz.homerecord.housemanual
 ---
 - runFlow: _seed.yaml
+# AC-H18: the home report is Pro (SPEC pricing); on the free tier More → Home report opens HM-Paywall
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_report"
+- tapOn:
+    id: "hm_more_report"
+- extendedWaitUntil:
+    visible:
+      id: "hm_paywall_reason"
+    timeout: 5000
+- assertVisible: "The home report is part of Pro."
+- takeScreenshot: H15-report-paywall
+# Pro on (debug seed, no store key on QA builds); the app reopens on Home
+- runFlow: _pro.yaml
 - tapOn:
     id: "hm_tab_more"
 - scrollUntilVisible:

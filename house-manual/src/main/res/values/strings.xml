@@ -185,6 +185,7 @@
     <string name="paywall_reason_panel">The free tier holds one panel.</string>
     <string name="paywall_reason_home">The free tier holds one home.</string>
     <string name="paywall_reason_sync">Cloud backup and sign in are part of Pro.</string>
+    <string name="paywall_reason_report">The home report is part of Pro.</string>
     <string name="paywall_adds">Pro removes the 15 item and one panel limits and adds cloud backup across your devices. Annual or lifetime, your call.</string>
     <string name="paywall_annual">Annual</string>
     <string name="paywall_lifetime">Lifetime</string>

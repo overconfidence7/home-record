@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.housemanual.more.MoreEvent
+import com.kurtz.homerecord.core.billing.LimitGate
 import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.coreui.shell.AppTab
@@ -351,7 +352,10 @@ private fun HouseManualTabs(
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
                             MoreEvent.OpenEmergency -> nav.push(EmergencyKey)
-                            MoreEvent.OpenReport -> nav.push(ReportKey)
+                            // The home report is Pro (SPEC pricing, T032b2c); the free tier gets HM-Paywall
+                            MoreEvent.OpenReport -> nav.push(
+                                if (LimitGate.blocked(container.billing, LimitedFeature.HomeReport, 0)) PaywallKey(LimitedFeature.HomeReport) else ReportKey,
+                            )
                             MoreEvent.OpenBackup -> nav.push(BackupKey)
                             MoreEvent.OpenAccount -> nav.push(AccountKey)
                             MoreEvent.OpenShare -> nav.push(ShareKey)

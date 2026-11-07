@@ -22,6 +22,12 @@ class LimitGateTest {
         assertTrue(LimitGate.blockedBy(false, LimitedFeature.CloudSync))
     }
 
+    @Test fun homeReportIsPro() { // AC-H18, SPEC pricing: the home report is Pro
+        assertFalse(LimitGate.canMakeReport(false))
+        assertTrue(LimitGate.blockedBy(false, LimitedFeature.HomeReport))
+        assertFalse(LimitGate.blockedBy(true, LimitedFeature.HomeReport))
+    }
+
     @Test fun proHasNoLimits() { // AC-H18
         assertTrue(LimitGate.canAddItem(true, 500))
         assertTrue(LimitGate.canAddHome(true, 9))
