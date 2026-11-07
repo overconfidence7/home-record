@@ -47,7 +47,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.coreui.auth.AccountRoute
 import com.kurtz.homerecord.housemanual.more.MoreEvent
-import com.kurtz.homerecord.housemanual.more.MoreScreen
 import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.coreui.components.SyncStatus
 import com.kurtz.homerecord.coreui.shell.AppTab
@@ -269,6 +268,12 @@ private fun HouseManualTabs(
         entry<BackupKey> {
             com.kurtz.homerecord.housemanual.backup.BackupRoute(container.backupFiles, home.id, home.name, onRestore = onRestore, onBack = nav::pop, viewOnly = !canEdit)
         }
+        entry<AboutKey> {
+            com.kurtz.homerecord.housemanual.more.AboutScreen(
+                com.kurtz.homerecord.housemanual.more.AboutUiState(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                onEvent = { nav.pop() },
+            )
+        }
         entry<ShareKey> {
             com.kurtz.homerecord.housemanual.share.ShareRoute(container, home.id, home.name, onBack = nav::pop, onSignIn = { nav.push(AccountKey) })
         }
@@ -327,8 +332,10 @@ private fun HouseManualTabs(
         entry<PlaceholderKey> { key ->
             val title = titles[key.title] ?: key.title
             if (key.depth == 0 && key.title == "more") {
-                MoreScreen(
-                    onEvent = { event ->
+                com.kurtz.homerecord.housemanual.more.MoreRoute(
+                    container.unitsStore, container.reminders, home.id,
+                    canEdit = remember(home.id) { container.homeAccess.observeCanEdit(home.id) },
+                    onNavigate = { event ->
                         when (event) {
                             MoreEvent.OpenPro -> nav.push(PaywallKey())
                             MoreEvent.OpenContacts -> nav.push(ContactsKey)
@@ -337,11 +344,13 @@ private fun HouseManualTabs(
                             MoreEvent.OpenBackup -> nav.push(BackupKey)
                             MoreEvent.OpenAccount -> nav.push(AccountKey)
                             MoreEvent.OpenShare -> nav.push(ShareKey)
+                            MoreEvent.OpenAbout -> nav.push(AboutKey)
                             MoreEvent.OpenPanels -> scope.launch {
                                 nav.push(com.kurtz.homerecord.housemanual.panel.PanelsEntry.destination(container.items.observeRows(home.id, emptyMap()).first()))
                             }
                             MoreEvent.OpenDocuments -> nav.push(DocumentsKey)
                             MoreEvent.OpenImport -> pickHandoff.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
+                            else -> Unit
                         }
                     },
                 )

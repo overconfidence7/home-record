@@ -54,6 +54,9 @@ import kotlinx.serialization.Serializable
 /** HM-Share (AC-H16). */
 @Serializable data object ShareKey : NavKey
 
+/** HM-About (T077). */
+@Serializable data object AboutKey : NavKey
+
 @Serializable data object ContactsKey : NavKey
 @Serializable data object DocumentsKey : NavKey
 @Serializable data class DocumentViewerKey(val documentId: String) : NavKey

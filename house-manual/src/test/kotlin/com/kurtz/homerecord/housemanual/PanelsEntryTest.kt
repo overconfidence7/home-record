@@ -65,7 +65,7 @@ class PanelsEntryTest {
     @Test
     fun moreHasABreakerPanelsRow() {
         val events = mutableListOf<MoreEvent>()
-        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen({ events += it }) } }
+        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen(com.kurtz.homerecord.housemanual.more.MoreUiState(), { events += it }) } }
         rule.onNodeWithText("Breaker panels").assertExists()
         rule.onNodeWithTag("hm_more_panels").performClick()
         assertThat(events).containsExactly(MoreEvent.OpenPanels)

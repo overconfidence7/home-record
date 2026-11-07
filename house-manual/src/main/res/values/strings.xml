@@ -723,4 +723,23 @@
     <string name="join_offline">Couldn\'t reach your account. Check your connection and tap Retry.</string>
     <string name="join_failed">The server didn\'t answer. Tap Retry.</string>
     <string name="join_restore_failed">You joined, but the home didn\'t come down yet. Check your connection and tap Retry.</string>
+    <string name="more_units">Units</string>
+    <string name="more_units_imperial">Feet and inches</string>
+    <string name="more_units_metric">Metric</string>
+    <string name="more_units_help">Plans, rooms and walls on this phone show lengths this way. Length fields take either.</string>
+    <string name="more_zone">Climate zone</string>
+    <string name="more_zone_none">Not picked yet. Pick one to add seasonal jobs.</string>
+    <string name="more_zone_none_view_only">The owner hasn’t picked one yet</string>
+    <string name="more_zone_view_only">%1$s, set by the owner</string>
+    <string name="more_about">About</string>
+    <string name="more_about_supporting">Version and where your home is kept</string>
+    <string name="more_dialog_close">Close</string>
+    <string name="about_title">About</string>
+    <string name="about_body">A manual for your house: rooms, appliances, what’s behind the walls, and who to call.</string>
+    <string name="about_version">Version</string>
+    <string name="about_version_detail">%1$s (build %2$d)</string>
+    <string name="about_local">Kept on this phone</string>
+    <string name="about_local_detail">Your home is saved on this phone first and works without signal. Sign in under Account and sync to keep a copy in the cloud.</string>
+    <string name="about_field_log">From your contractor</string>
+    <string name="about_field_log_detail">A contractor using Field Log can hand off the house they mapped. Open the .homerecord file with Import handoff.</string>
 </resources>

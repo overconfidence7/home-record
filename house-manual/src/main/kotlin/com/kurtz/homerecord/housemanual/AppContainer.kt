@@ -248,6 +248,10 @@ class AppContainer(private val app: Application) {
     /** Passphrase-locked whole-home backups (AC-C48), written to cache/exports for the share sheet. */
     val backupFiles = com.kurtz.homerecord.housemanual.backup.BackupFiles(app, db)
 
+    /** Lengths on this phone: feet and inches or metric (AC-C4), picked under More → Units. */
+    val unitsStore: com.kurtz.homerecord.core.units.UnitsStore =
+        com.kurtz.homerecord.core.units.PrefsUnitsStore({ app.getSharedPreferences("display", Context.MODE_PRIVATE) }, scope)
+
     /** HM-Reminders (AC-C49, AC-H12). */
     val reminders = com.kurtz.homerecord.housemodel.reminders.ReminderRepository(db, app.resources::getString) { entity, id -> recordHomeChange(entity, id) }
 

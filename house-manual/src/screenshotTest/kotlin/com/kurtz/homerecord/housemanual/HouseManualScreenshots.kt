@@ -426,6 +426,26 @@ fun MoreScreenshot() = MorePreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun MoreUnitsScreenshot() = MoreUnitsPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreZoneScreenshot() = MoreZonePreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreViewOnlyScreenshot() = MoreViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AboutScreenshot() = AboutPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun AccountSignedInScreenshot() = AccountSignedInPreview()
 
 @PreviewTest

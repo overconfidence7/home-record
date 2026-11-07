@@ -1,0 +1,63 @@
+# Not a walkthrough step (x- prefix): HM-More (T077). Every SPEC row is a ListItem with an icon (AC-U3); Units switches
+# this phone to metric (AC-C4); Climate zone seeds the zone's seasonal jobs into Reminders (AC-H12); About shows the version.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _onboard.yaml
+- tapOn:
+    id: "hm_tab_more"
+# AC-U3: the rows in SPEC order, top of the list
+- assertVisible:
+    id: "hm_more_emergency"
+- assertVisible:
+    id: "hm_more_panels"
+- assertVisible:
+    id: "hm_more_documents"
+# AC-C4: Units → Metric; the row says Metric
+- scrollUntilVisible:
+    element:
+      id: "hm_more_units"
+- assertVisible: "Feet and inches"
+- tapOn:
+    id: "hm_more_units"
+- tapOn:
+    id: "hm_more_units_metric"
+- extendedWaitUntil:
+    visible: "Metric"
+    timeout: 5000
+- takeScreenshot: x-more-units
+# AC-H12: Climate zone → Cold; the row names it and Reminders has the zone's seasonal jobs
+- tapOn:
+    id: "hm_more_zone"
+- tapOn:
+    id: "hm_more_zone_cold"
+- extendedWaitUntil:
+    visible: "Cold"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: "hm_more_about"
+- assertVisible:
+    id: "hm_more_pro"
+- tapOn:
+    id: "hm_more_about"
+- assertVisible:
+    id: "hm_about_version"
+- takeScreenshot: x-more-about
+- tapOn:
+    id: "hm_back"
+- tapOn:
+    id: "hm_tab_reminders"
+- assertNotVisible:
+    id: "hm_reminders_empty"
+- scrollUntilVisible:
+    element: "Shut off and drain outdoor faucets"
+# back to feet and inches so later flows on this install start from the default
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_units"
+- tapOn:
+    id: "hm_more_units"
+- tapOn:
+    id: "hm_more_units_imperial"

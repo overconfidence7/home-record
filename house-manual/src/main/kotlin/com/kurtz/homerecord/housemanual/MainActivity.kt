@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -66,7 +68,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HomeRecordTheme(Brand.HouseManual) {
-                CompositionLocalProvider(LocalTagPrefix provides "hm") {
+                val units by container.unitsStore.units.collectAsState()
+                CompositionLocalProvider(LocalTagPrefix provides "hm", com.kurtz.homerecord.housemodel.ui.LocalUnitSystem provides units) {
                     Box(Modifier.semantics { testTagsAsResourceId = true }) {
                         HouseManualApp(container, incoming.value, onIncomingHandled = { incoming.value = null })
                     }
