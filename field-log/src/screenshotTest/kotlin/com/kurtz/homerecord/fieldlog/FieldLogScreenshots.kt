@@ -655,6 +655,11 @@ fun TasksLoadingScreenshot() = TasksLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun TasksLoadFailedScreenshot() = TasksLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun TaskFormEditScreenshot() = TaskFormEditPreview()
 
 @PreviewTest

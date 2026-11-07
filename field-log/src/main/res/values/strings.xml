@@ -776,6 +776,7 @@
     <string name="log_pdf_subject">%1$s: %2$s</string>
     <!-- FL-Tasks (AC-F34) -->
     <string name="tasks_add">Add task</string>
+    <string name="tasks_load_failed">Couldn\'t open this job\'s tasks. Tap Retry to read them again.</string>
     <string name="tasks_filter_all">All</string>
     <string name="tasks_filter_punch">Punch list</string>
     <string name="tasks_punch">Punch list</string>

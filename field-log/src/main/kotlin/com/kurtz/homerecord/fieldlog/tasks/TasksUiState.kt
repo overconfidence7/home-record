@@ -30,6 +30,8 @@ data class TaskUndo(val id: String, val title: String)
 @Immutable
 data class TasksUiState(
     val loading: Boolean = true,
+    /** The job's tasks could not be read; the tab shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val filter: TaskFilter = TaskFilter.ALL,
     val open: List<TaskRow> = emptyList(),
     val done: List<TaskRow> = emptyList(),
@@ -46,6 +48,8 @@ data class TasksUiState(
 }
 
 sealed interface TasksEvent {
+    /** Read the job's tasks again after a failed read. */
+    data object Retry : TasksEvent
     data class SetFilter(val filter: TaskFilter) : TasksEvent
     data class SetDone(val id: String, val done: Boolean) : TasksEvent
     /** Drops the open task [id] at position [to] of the open list (drag to reorder, or Move up / Move down). */

@@ -138,6 +138,7 @@ object ScreenCatalog {
         QaScreen("tasks-crew-empty", nonRoot = true) { TasksCrewEmptyPreview() },
         QaScreen("tasks-no-punch", nonRoot = true) { TasksNoPunchPreview() },
         QaScreen("tasks-loading", nonRoot = true) { TasksLoadingPreview() },
+        QaScreen("tasks-load-failed", nonRoot = true) { TasksLoadFailedPreview() },
         QaScreen("task-form-edit", nonRoot = true) { TaskFormEditPreview() },
         QaScreen("task-form-new", nonRoot = true) { TaskFormNewPreview() },
         QaScreen("task-form-failed", nonRoot = true) { TaskFormFailedPreview() },

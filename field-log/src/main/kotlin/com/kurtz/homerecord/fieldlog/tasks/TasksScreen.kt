@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.TaskDue
 import com.kurtz.homerecord.core.model.TaskFilter
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.SectionHeader
@@ -95,6 +96,13 @@ fun TasksScreen(
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     if (state.loading) { LoadingState(modifier.fillMaxSize()); return }
+    if (state.loadFailed) {
+        ErrorState(
+            stringResource(R.string.tasks_load_failed), { onEvent(TasksEvent.Retry) }, modifier.fillMaxSize(),
+            retryModifier = Modifier.testTag("fl_tasks_retry"),
+        )
+        return
+    }
     val undoMessage = state.undo?.let { stringResource(R.string.tasks_done_snackbar, it.title) }
     val undoLabel = stringResource(R.string.tasks_undo)
     LaunchedEffect(state.undo) {

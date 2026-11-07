@@ -143,4 +143,12 @@ class ListLoadFailedTest {
         rule.onAllNodesWithTag("fl_clock_in").assertCountEquals(0)
         assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.clock.ClockEvent.Retry)
     }
+
+    @Test fun tasksRetrySendsTheEvent() {
+        val events = mutableListOf<com.kurtz.homerecord.fieldlog.tasks.TasksEvent>()
+        show { com.kurtz.homerecord.fieldlog.tasks.TasksScreen(com.kurtz.homerecord.fieldlog.tasks.TasksUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("fl_tasks_retry").performClick()
+        rule.onAllNodesWithTag("fl_tasks_empty_add").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.tasks.TasksEvent.Retry)
+    }
 }

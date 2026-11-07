@@ -3,6 +3,7 @@ package com.kurtz.homerecord.fieldlog.tasks
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.model.TaskFilter
 import com.kurtz.homerecord.core.task.JobTasks
 import java.time.LocalDate
@@ -35,9 +36,17 @@ class TasksViewModel(private val d: TasksDeps, private val saved: SavedStateHand
     private val undo = MutableStateFlow<TaskUndo?>(null)
     private val canManage = d.canManage.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val state: StateFlow<TasksUiState> = combine(
-        d.tasks.observeForJob(d.jobId), filter, combine(d.names, d.rooms, ::Pair), canManage, undo,
-    ) { tasks, f, (names, rooms), manage, u ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Tasks")
+
+    /** The job's tasks with the member and room names, or null once a read has thrown. */
+    private val rows = load.wrap<Triple<List<com.kurtz.homerecord.core.model.JobTask>, Map<String, String>, Map<String, String>>?>(null) {
+        combine(d.tasks.observeForJob(d.jobId), d.names, d.rooms) { tasks, names, rooms -> Triple(tasks, names, rooms) }
+    }
+
+    val state: StateFlow<TasksUiState> = combine(rows, filter, canManage, undo) { r, f, manage, u ->
+        if (r == null) return@combine TasksUiState(loading = false, loadFailed = true, filter = f)
+        val (tasks, names, rooms) = r
         TasksMapper.build(tasks, f, manage, d.me, names, rooms, d.today()).copy(undo = u)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TasksUiState())
 
@@ -51,6 +60,7 @@ class TasksViewModel(private val d: TasksDeps, private val saved: SavedStateHand
                 viewModelScope.launch { d.tasks.setDone(u.id, false) }
             }
             TasksEvent.DismissUndo -> undo.value = null
+            TasksEvent.Retry -> load.retry()
             is TasksEvent.Open, TasksEvent.Add -> Unit
         }
     }

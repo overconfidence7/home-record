@@ -496,6 +496,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] S5b2a: Item place (HM and FL, shared house-model screen) error state: Reloadable over the item, plan and walls read, load-failed state with Retry (`<app>_item_place_retry`), Done hidden while failed
     - [x] S5b3: FL Clients, a job's Changes tab and Sync log: Reloadable, load-failed state with Retry (`fl_clients_retry`, `fl_changes_retry`, `fl_sync_retry`)
     - [x] S5b4a: FL Clock and Schedule: Reloadable over the jobs/punches and week reads, load-failed state with Retry (`fl_clock_retry`, `fl_schedule_retry`)
-    - [ ] S5b4: FL Tasks, Photos, Job overview, Mapping
+    - [x] S5b4b: FL Tasks tab: Reloadable over the tasks, member and room names read, load-failed state with Retry (`fl_tasks_retry`)
+    - [ ] S5b4: FL Photos, Job overview, Mapping
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

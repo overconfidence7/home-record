@@ -1526,6 +1526,11 @@ fun TasksNoPunchPreview() = Frame {
 @Composable
 fun TasksLoadingPreview() = Frame { TasksTab(com.kurtz.homerecord.fieldlog.tasks.TasksUiState()) }
 
+/** The job's tasks could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun TasksLoadFailedPreview() = Frame { TasksTab(com.kurtz.homerecord.fieldlog.tasks.TasksUiState(loading = false, loadFailed = true)) }
+
 private val taskPeople = listOf(
     com.kurtz.homerecord.fieldlog.tasks.PersonOption("m2", "Dana Ortiz", onJob = true),
     com.kurtz.homerecord.fieldlog.tasks.PersonOption("m3", "Marcus Bell", onJob = true),

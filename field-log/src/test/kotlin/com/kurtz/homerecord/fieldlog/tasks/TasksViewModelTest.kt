@@ -69,6 +69,21 @@ class TasksViewModelTest {
         withTimeout(5_000) { state.first { !it.loading && until(it) } }
     }
 
+    // AC-U4: a read that throws shows the error state with Retry instead of ending the ViewModel; Retry reads again.
+    @AcceptanceCriterion("AC-U4")
+    @Test fun aFailedReadShowsTheErrorStateAndRetryReadsAgain() {
+        var reads = 0
+        val names = kotlinx.coroutines.flow.flow {
+            if (reads++ == 0) throw IllegalStateException("database disk image is malformed")
+            emit(mapOf("m9" to "Luis Romero"))
+        }
+        val vm = TasksViewModel(TasksDeps("j1", tasks, names = names, canManage = manage, me = "m9", today = { LocalDate.of(2026, 10, 31) })).also { vms += it }
+        val failed = vm.current { it.loadFailed }
+        assertThat(failed.open).isEmpty()
+        vm.onEvent(TasksEvent.Retry)
+        assertThat(vm.current { !it.loadFailed && it.open.size == 2 }.open.map { it.title }).containsExactly("Set the outlets", "Cover plate").inOrder()
+    }
+
     @Test fun tickMovesTaskToDoneAndUndoBringsItBack() {
         val vm = vm()
         assertThat(vm.current { it.open.size == 2 }.open.map { it.title }).containsExactly("Set the outlets", "Cover plate").inOrder()
