@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.documents
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.housemodel.documents.DocumentRepository
 import com.kurtz.homerecord.housemodel.documents.DocumentScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,15 +22,19 @@ class DocumentsViewModel(
 ) : ViewModel() {
     private val ui = MutableStateFlow(Ui(form = restoreForm(), showErrors = saved[ERRORS] ?: false))
 
-    val state: StateFlow<DocumentsUiState> = combine(repo.observeFolders(homeId), ui) { folders, u ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Documents")
+
+    val state: StateFlow<DocumentsUiState> = load.wrap(DocumentsUiState(loading = false, loadFailed = true)) { combine(repo.observeFolders(homeId), ui) { folders, u ->
         DocumentsUiState(
             loading = false, folders = folders, form = u.form, showFormErrors = u.showErrors,
             confirmDeleteId = u.confirmDeleteId, unsupportedNotice = u.unsupported, addMenuOpen = u.addMenuOpen,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DocumentsUiState())
+    } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DocumentsUiState())
 
     fun onEvent(e: DocumentsEvent) {
         when (e) {
+            DocumentsEvent.Retry -> load.retry()
             is DocumentsEvent.Picked -> viewModelScope.launch {
                 val id = repo.add(homeId, DocumentScope.Home, e.uri)
                 ui.update { it.copy(unsupported = id == null) }

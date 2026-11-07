@@ -10,6 +10,8 @@ import java.time.LocalDate
 /** HM-Reminders (AC-H12): Due now / Upcoming / Done, the climate zone chips and the Add reminder form. */
 data class RemindersUiState(
     val loading: Boolean = true,
+    /** The reminders could not be read; the tab shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val rows: List<ReminderRow> = emptyList(),
     val zone: ClimateZone? = null,
     val today: LocalDate = LocalDate.now(),
@@ -38,4 +40,5 @@ sealed interface RemindersEvent {
     data class ChangeForm(val draft: ReminderDraft) : RemindersEvent
     data object SaveForm : RemindersEvent
     data object CloseForm : RemindersEvent
+    data object Retry : RemindersEvent
 }

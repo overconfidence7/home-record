@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.data.DocumentEntity
 import com.kurtz.homerecord.core.media.ByteSize
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
@@ -62,7 +63,7 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
     ScreenScaffold(
         title = stringResource(R.string.documents_title),
         onBack = { onEvent(DocumentsEvent.Back) },
-        floatingActionButton = { if (!state.viewOnly) DocumentsAddMenu(state.addMenuOpen, onEvent) },
+        floatingActionButton = { if (!state.viewOnly && !state.loadFailed) DocumentsAddMenu(state.addMenuOpen, onEvent) },
     ) { padding ->
         Column(Modifier.padding(padding)) {
             if (state.unsupportedNotice) {
@@ -80,6 +81,10 @@ fun DocumentsScreen(state: DocumentsUiState, onEvent: (DocumentsEvent) -> Unit) 
             }
             when {
                 state.loading -> LoadingState()
+                state.loadFailed -> ErrorState(
+                    stringResource(R.string.documents_load_failed), { onEvent(DocumentsEvent.Retry) },
+                    retryModifier = Modifier.testTag("hm_documents_retry"),
+                )
                 state.folders.isEmpty() -> EmptyState(
                     icon = Icons.Rounded.Description,
                     headline = stringResource(R.string.documents_empty_title),

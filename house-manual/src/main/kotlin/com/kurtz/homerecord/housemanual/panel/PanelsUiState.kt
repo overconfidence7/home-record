@@ -8,13 +8,20 @@ import com.kurtz.homerecord.housemodel.panel.isPanelSubtype
 
 /** More → Breaker panels: the home's Breaker panel and Sub-panel items, oldest first (the main panel is usually first). */
 /** [viewOnly]: a viewer on a shared home, no Add panel (AC-H16). */
-data class PanelsUiState(val loading: Boolean = true, val panels: List<ItemRow> = emptyList(), val viewOnly: Boolean = false)
+/** [loadFailed]: the panels could not be read; the screen shows what failed and Retry (AC-U4). */
+data class PanelsUiState(
+    val loading: Boolean = true,
+    val panels: List<ItemRow> = emptyList(),
+    val viewOnly: Boolean = false,
+    val loadFailed: Boolean = false,
+)
 
 sealed interface PanelsEvent {
     data object Back : PanelsEvent
     data class Open(val itemId: String) : PanelsEvent
     /** Empty state: add a Breaker panel item. */
     data object Add : PanelsEvent
+    data object Retry : PanelsEvent
 }
 
 /** Where More → Breaker panels goes: straight to the panel when the home has exactly one, else the list (AC-C40). */

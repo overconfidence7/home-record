@@ -7,6 +7,8 @@ data class DocumentForm(val id: String, val name: String, val folder: String)
 
 data class DocumentsUiState(
     val loading: Boolean = true,
+    /** The documents could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val folders: List<DocumentFolder> = emptyList(),
     val form: DocumentForm? = null,
     val showFormErrors: Boolean = false,
@@ -35,4 +37,5 @@ sealed interface DocumentsEvent {
     data class AskDelete(val id: String) : DocumentsEvent
     data object CancelDelete : DocumentsEvent
     data object ConfirmDelete : DocumentsEvent
+    data object Retry : DocumentsEvent
 }

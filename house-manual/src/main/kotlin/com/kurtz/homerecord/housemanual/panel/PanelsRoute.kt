@@ -21,6 +21,7 @@ fun PanelsRoute(items: ItemRepository, homeId: String, onBack: () -> Unit, onOpe
             PanelsEvent.Back -> onBack()
             is PanelsEvent.Open -> onOpen(it.itemId)
             PanelsEvent.Add -> onAdd()
+            PanelsEvent.Retry -> vm.retry()
         }
     })
 }

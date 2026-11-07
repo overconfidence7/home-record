@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.reminders
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.housemodel.reminders.ReminderDraft
 import com.kurtz.homerecord.housemodel.reminders.ReminderRepository
 import java.time.LocalDate
@@ -29,12 +30,15 @@ class RemindersViewModel(
     private val ui = MutableStateFlow(Ui(form = restore(), showErrors = saved[ERRORS] ?: false))
     private var saving = false
 
-    val state: StateFlow<RemindersUiState> = combine(repo.observe(homeId), repo.observeZone(homeId), ui) { rows, zone, u ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Reminders")
+
+    val state: StateFlow<RemindersUiState> = load.wrap(RemindersUiState(loading = false, loadFailed = true)) { combine(repo.observe(homeId), repo.observeZone(homeId), ui) { rows, zone, u ->
         RemindersUiState(
             loading = false, rows = rows, zone = zone, today = today(), form = u.form, showFormErrors = u.showErrors,
             snoozeMenuFor = u.snoozeFor?.takeIf { id -> rows.any { it.id == id } },
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RemindersUiState())
+    } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RemindersUiState())
 
     init {
         if (canEdit) viewModelScope.launch { repo.syncAllWarranties(homeId) }
@@ -42,6 +46,7 @@ class RemindersViewModel(
 
     fun onEvent(e: RemindersEvent) {
         when (e) {
+            RemindersEvent.Retry -> load.retry()
             is RemindersEvent.Done -> viewModelScope.launch { repo.done(e.id) }
             is RemindersEvent.OpenSnooze -> ui.update { it.copy(snoozeFor = e.id) }
             RemindersEvent.CloseSnooze -> ui.update { it.copy(snoozeFor = null) }

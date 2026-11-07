@@ -36,6 +36,11 @@
     <string name="required_marker">%1$s (required)</string>
     <string name="field_required">Required.</string>
     <string name="items_load_failed">Couldn\'t open your items. Tap Retry to read them again.</string>
+    <string name="emergency_load_failed">Couldn\'t open your shutoffs. Tap Retry to read them again.</string>
+    <string name="panels_load_failed">Couldn\'t open your breaker panels. Tap Retry to read them again.</string>
+    <string name="contacts_load_failed">Couldn\'t open your contacts. Tap Retry to read them again.</string>
+    <string name="documents_load_failed">Couldn\'t open your documents. Tap Retry to read them again.</string>
+    <string name="reminders_load_failed">Couldn\'t open your reminders. Tap Retry to read them again.</string>
     <string name="items_empty_title">No items yet</string>
     <string name="items_empty_body_view_only">Nothing has been added to this home yet.</string>
     <string name="items_empty_body">Add the furnace, the water heater, the dishwasher. Anything with a model number and a warranty.</string>

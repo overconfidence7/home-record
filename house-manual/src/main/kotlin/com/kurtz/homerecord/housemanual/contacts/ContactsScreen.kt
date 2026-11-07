@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
@@ -53,13 +54,17 @@ fun ContactsScreen(state: ContactsUiState, onEvent: (ContactsEvent) -> Unit) {
         title = stringResource(R.string.contacts_title),
         onBack = { onEvent(ContactsEvent.Back) },
         floatingActionButton = {
-            if (!state.viewOnly) FloatingActionButton(onClick = { onEvent(ContactsEvent.OpenForm(null)) }, modifier = Modifier.testTag("hm_contacts_fab")) {
+            if (!state.viewOnly && !state.loadFailed) FloatingActionButton(onClick = { onEvent(ContactsEvent.OpenForm(null)) }, modifier = Modifier.testTag("hm_contacts_fab")) {
                 Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.contacts_add))
             }
         },
     ) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.contacts_load_failed), { onEvent(ContactsEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_contacts_retry"),
+            )
             state.rows.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.Contacts,
                 headline = stringResource(R.string.contacts_empty_title),

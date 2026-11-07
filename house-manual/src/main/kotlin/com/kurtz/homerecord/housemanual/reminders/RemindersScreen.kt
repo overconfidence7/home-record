@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.DateField
 import com.kurtz.homerecord.coreui.components.LabeledField
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.SectionHeader
@@ -66,7 +67,7 @@ fun RemindersScreen(state: RemindersUiState, onEvent: (RemindersEvent) -> Unit, 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            if (!state.loading && !state.viewOnly) {
+            if (!state.loading && !state.loadFailed && !state.viewOnly) {
                 val addLabel = stringResource(R.string.reminders_add)
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(RemindersEvent.OpenForm) },
@@ -80,6 +81,11 @@ fun RemindersScreen(state: RemindersUiState, onEvent: (RemindersEvent) -> Unit, 
     ) { padding ->
         if (state.loading) {
             LoadingState(Modifier.padding(padding))
+        } else if (state.loadFailed) {
+            ErrorState(
+                stringResource(R.string.reminders_load_failed), { onEvent(RemindersEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_reminders_retry"),
+            )
         } else {
             LazyColumn(
                 Modifier.padding(padding).fillMaxWidth().testTag("hm_reminders_list"),

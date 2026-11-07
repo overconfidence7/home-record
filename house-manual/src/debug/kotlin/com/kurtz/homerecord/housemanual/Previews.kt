@@ -875,6 +875,10 @@ fun ContactsLoadingPreview() = Frame { ContactsScreen(ContactsUiState(), {}) }
 
 @ThemePreviews
 @Composable
+fun ContactsLoadFailedPreview() = Frame { ContactsScreen(ContactsUiState(loading = false, loadFailed = true), {}) }
+
+@ThemePreviews
+@Composable
 fun ContactFormPreview() = Frame {
     FormScreenScaffold(stringResource(R.string.contacts_form_new), "hm_contacts_save", true, {}, {}) {
         ContactFormContent(ContactDraft(name = "Dale Harlan", company = "Harlan Heating", trade = "HVAC", phone = "555-0142", email = "dale@harlan"), true, {})
@@ -916,6 +920,10 @@ fun DocumentsAddMenuPreview() = Frame { DocumentsScreen(DocumentsUiState(loading
 @ThemePreviews
 @Composable
 fun DocumentsLoadingPreview() = Frame { DocumentsScreen(DocumentsUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun DocumentsLoadFailedPreview() = Frame { DocumentsScreen(DocumentsUiState(loading = false, loadFailed = true), {}) }
 
 @ThemePreviews
 @Composable
@@ -1890,6 +1898,10 @@ fun PanelsEmptyPreview() = Frame { com.kurtz.homerecord.housemanual.panel.Panels
 @Composable
 fun PanelsLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(), {}) }
 
+@ThemePreviews
+@Composable
+fun PanelsLoadFailedPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelsScreen(com.kurtz.homerecord.housemanual.panel.PanelsUiState(loading = false, loadFailed = true), {}) }
+
 /** A viewer on a shared home with no panel yet (AC-H16): no Add panel. */
 @ThemePreviews
 @Composable
@@ -1944,6 +1956,10 @@ fun EmergencyEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun EmergencyLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun EmergencyLoadFailedPreview() = Frame { com.kurtz.homerecord.housemanual.emergency.EmergencyScreen(com.kurtz.homerecord.housemanual.emergency.EmergencyUiState(loading = false, loadFailed = true), {}) }
 
 /** A viewer on a shared home (AC-H16): the shutoffs without Manage shutoffs. */
 @ThemePreviews
@@ -2052,6 +2068,10 @@ fun RemindersEmptyViewOnlyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun RemindersLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun RemindersLoadFailedPreview() = Frame { com.kurtz.homerecord.housemanual.reminders.RemindersScreen(com.kurtz.homerecord.housemanual.reminders.RemindersUiState(loading = false, loadFailed = true), {}) }
 
 @ThemePreviews
 @Composable

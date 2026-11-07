@@ -59,6 +59,7 @@ import com.kurtz.homerecord.core.model.Shutoff
 import com.kurtz.homerecord.core.model.ShutoffGroup
 import com.kurtz.homerecord.core.model.ShutoffGroups
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
 import com.kurtz.homerecord.housemanual.R
@@ -74,6 +75,10 @@ fun EmergencyScreen(state: EmergencyUiState, onEvent: (EmergencyEvent) -> Unit, 
     ScreenScaffold(title = stringResource(R.string.emergency_title), onBack = { onEvent(EmergencyEvent.Back) }) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.emergency_load_failed), { onEvent(EmergencyEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_emergency_retry"),
+            )
             state.sections.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.PowerOff,
                 headline = stringResource(R.string.emergency_empty_title),

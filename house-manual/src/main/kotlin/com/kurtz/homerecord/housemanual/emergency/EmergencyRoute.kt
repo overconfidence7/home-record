@@ -21,6 +21,7 @@ fun EmergencyRoute(items: ItemRepository, homeId: String, onBack: () -> Unit, on
             EmergencyEvent.Back -> onBack()
             is EmergencyEvent.Open -> onOpen(it.itemId)
             EmergencyEvent.Add -> onAdd()
+            EmergencyEvent.Retry -> vm.retry()
         }
     })
 }

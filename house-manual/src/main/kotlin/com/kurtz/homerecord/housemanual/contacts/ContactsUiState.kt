@@ -5,6 +5,8 @@ import com.kurtz.homerecord.housemodel.upkeep.ContactRow
 
 data class ContactsUiState(
     val loading: Boolean = true,
+    /** The contacts could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val rows: List<ContactRow> = emptyList(),
     val form: ContactDraft? = null,
     /** The open form differs from what it opened with: Save is enabled and Close asks before discarding. */
@@ -28,4 +30,5 @@ sealed interface ContactsEvent {
     data class AskDelete(val id: String) : ContactsEvent
     data object CancelDelete : ContactsEvent
     data object ConfirmDelete : ContactsEvent
+    data object Retry : ContactsEvent
 }

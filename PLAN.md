@@ -491,5 +491,9 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] S4: accessibility: ScreenCatalogLabelsTest (both apps) checks every clickable node on every catalog screen has a label; 7 unnamed controls fixed (Add room, Add overlay on plan and wall, Add reminder, Add material FABs; pin-mode PDF page); 48 dp stays with the device crawler
   - [x] S5a: a list's read that throws shows an error state with Retry instead of ending the ViewModel: shared `Reloadable` in :core (catch, log, retry by re-subscribing); HM Items and FL Jobs use it, with load-failed catalog entries, previews and reference PNGs (AC-U4)
   - [ ] S5b: the same error state on the other Room-backed lists that have none: HM Home, Floors, Reminders, Emergency, Panels, Contacts, Documents, Item place, Sync log; FL Clients, Changes, Clock, Schedule, Tasks, Photos, Job overview, Mapping (AC-U4)
+    - [x] S5b1: HM Emergency, Breaker panels, Contacts, Documents, Reminders: Reloadable, load-failed state with Retry (`hm_<screen>_retry`), Add hidden while failed, catalog entries and reference PNGs (AC-U4)
+    - [ ] S5b2: HM Home, Floors, Item place, Sync log
+    - [ ] S5b3: FL Clients, Changes, Clock, Schedule
+    - [ ] S5b4: FL Tasks, Photos, Job overview, Mapping
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

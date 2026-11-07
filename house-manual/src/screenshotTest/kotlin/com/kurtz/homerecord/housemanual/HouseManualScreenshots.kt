@@ -336,6 +336,11 @@ fun ContactsLoadingScreenshot() = ContactsLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ContactsLoadFailedScreenshot() = ContactsLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ContactFormScreenshot() = ContactFormPreview()
 
 @PreviewTest
@@ -352,6 +357,11 @@ fun DocumentsEmptyScreenshot() = DocumentsEmptyPreview()
 @ThemePreviews
 @Composable
 fun DocumentsLoadingScreenshot() = DocumentsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun DocumentsLoadFailedScreenshot() = DocumentsLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews
@@ -811,6 +821,11 @@ fun EmergencyLoadingScreenshot() = EmergencyLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun EmergencyLoadFailedScreenshot() = EmergencyLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PanelsListScreenshot() = PanelsListPreview()
 
 @PreviewTest
@@ -822,6 +837,11 @@ fun PanelsEmptyScreenshot() = PanelsEmptyPreview()
 @ThemePreviews
 @Composable
 fun PanelsLoadingScreenshot() = PanelsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PanelsLoadFailedScreenshot() = PanelsLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews
@@ -922,6 +942,11 @@ fun RemindersEmptyScreenshot() = RemindersEmptyPreview()
 @ThemePreviews
 @Composable
 fun RemindersLoadingScreenshot() = RemindersLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun RemindersLoadFailedScreenshot() = RemindersLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews

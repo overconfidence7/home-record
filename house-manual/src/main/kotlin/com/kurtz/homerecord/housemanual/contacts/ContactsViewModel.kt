@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.contacts
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.housemodel.upkeep.ContactDraft
 import com.kurtz.homerecord.housemodel.upkeep.UpkeepRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,13 +22,17 @@ class ContactsViewModel(
 ) : ViewModel() {
     private val ui = MutableStateFlow(Ui(form = restore(FORM), original = restore(ORIGINAL), showErrors = saved[ERRORS] ?: false))
 
-    val state: StateFlow<ContactsUiState> = combine(repo.observeContacts(homeId), ui) { rows, u ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Contacts")
+
+    val state: StateFlow<ContactsUiState> = load.wrap(ContactsUiState(loading = false, loadFailed = true)) { combine(repo.observeContacts(homeId), ui) { rows, u ->
         ContactsUiState(loading = false, rows = rows, form = u.form, formDirty = u.form != null && u.form != u.original,
             formCanSave = u.form != null && (u.form.id == null || u.form != u.original), showFormErrors = u.showErrors, confirmDeleteId = u.confirmDeleteId)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ContactsUiState())
+    } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ContactsUiState())
 
     fun onEvent(e: ContactsEvent) {
         when (e) {
+            ContactsEvent.Retry -> load.retry()
             is ContactsEvent.OpenForm ->
                 if (e.id == null) openForm(ContactDraft())
                 else viewModelScope.launch { openForm(repo.draftFor(e.id) ?: ContactDraft()) }

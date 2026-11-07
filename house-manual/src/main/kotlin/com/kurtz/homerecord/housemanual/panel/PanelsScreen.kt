@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
@@ -28,6 +29,10 @@ fun PanelsScreen(state: PanelsUiState, onEvent: (PanelsEvent) -> Unit) {
     ScreenScaffold(title = stringResource(R.string.panels_title), onBack = { onEvent(PanelsEvent.Back) }) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.panels_load_failed), { onEvent(PanelsEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_panels_retry"),
+            )
             state.panels.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.ElectricalServices,
                 headline = stringResource(R.string.panels_empty_title),
