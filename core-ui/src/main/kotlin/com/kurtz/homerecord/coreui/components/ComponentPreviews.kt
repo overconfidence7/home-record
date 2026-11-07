@@ -101,7 +101,9 @@ fun AccountSignedInPreview() = Frame {
     com.kurtz.homerecord.coreui.auth.AccountScreen(
         com.kurtz.homerecord.coreui.auth.AccountUiState(com.kurtz.homerecord.coreui.auth.AccountPhase.SignedIn, email = "dana.ortiz@example.com"),
         {},
-    ) { SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) }
+        // By name: since T075c the last slot is `footer`, so a trailing lambda put the chip under Sign out
+        syncStatus = { SyncStatusChip(com.kurtz.homerecord.core.sync.SyncPhase.Idle, pending = 0, onClick = {}) },
+    )
 }
 
 @ThemePreviews

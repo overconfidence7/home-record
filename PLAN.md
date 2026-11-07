@@ -470,7 +470,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
   - [x] T079a: F14-materials flow (receipt from qa/fixtures/receipt.jpg through the document scanner when the emulator offers it, "Use $… from the receipt", else typed; list and job total) (AC-F44); F5 (break, switch job, clock out) stays inside F04-clock-in, which covers F4 and F5
   - [ ] T079b: score F1–F18 from the first published suite run after dc1ea1f4 and fix every Blocked or Clunky step, starting with F09b and F12 (both stop after the share-link sheet in run 61) and F18 (stops after F18-clients) (AC-F57)
-- [ ] V6: Visual review of M6 screenshots
+- [x] V6: Visual review of M6 screenshots
 
 ## M7 Ship
 
