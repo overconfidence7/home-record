@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.HomeRepositoryTest" tests="24" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:06.087Z" hostname="runnervmwuk1x" time="4.631">
+  <properties/>
+  <testcase name="savePlanOnlyRecordsRowsThatChanged" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="2.843"/>
+  <testcase name="attachedGarageSeedsGarageRoomOnMain" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.056"/>
+  <testcase name="skipForNowKeepsTheTypesFloorsButSeedsNoRooms" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.044"/>
+  <testcase name="deleteFloorSoftDeletesItsRooms" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.06"/>
+  <testcase name="removingARoomOrFloorHandsOnItsWallAndOverlayPhotoFiles" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.081"/>
+  <testcase name="anOverlayOnAWallThatIsGoneMovesOntoThePlanInsteadOfBeingDeleted" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.057"/>
+  <testcase name="reshapingARoomKeepsItsWallsAndTheirPhotos" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.065"/>
+  <testcase name="aSplitWallsPhotoIsCutAtTheNewCornerAndBothPartsGetTheirOwnTexture" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.061"/>
+  <testcase name="createHomeSeedsFloorsFromTemplateAndTrimsName" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.029"/>
+  <testcase name="deletingARoomTakesItsWallsOpeningsAndStairsAndMovesItsItems" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.05"/>
+  <testcase name="planCodecIgnoresDamagedJson" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.013"/>
+  <testcase name="deletingAFloorCascadesToItsRoomsAndUnlinksStairsThatLedThere" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.04"/>
+  <testcase name="doorsWindowsAndStairsRoundTripThroughWallRows" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.037"/>
+  <testcase name="moveFloorSwapsNeighboursAndStopsAtTheEnds" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.04"/>
+  <testcase name="savePlanRoundTripsAndSoftDeletesRemovedRooms" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.048"/>
+  <testcase name="noGarageMeansNoRooms" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.028"/>
+  <testcase name="wallOverlaysFollowTheirWallThroughAResizeASplitAndARemovedCorner" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.051"/>
+  <testcase name="everyWriteIsReportedForSync" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.025"/>
+  <testcase name="addFloorGoesOnTopAndUpdateWorks" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.031"/>
+  <testcase name="aRecutPhotosOldStraightenedCopyIsDeletedAfterTheRemake" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.051"/>
+  <testcase name="removedWallsPhotosAreKeptUntilTheirRoomGoesAndANewWallThereDoesNotReclaimThem" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.057"/>
+  <testcase name="aWallWhoseEdgeIsGoneIsDeletedButItsPhotosStayOnTheRoomAndItemsLeaveIt" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.058"/>
+  <testcase name="aFailedRemakeStillDeletesTheDroppedCopy" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.02"/>
+  <testcase name="seededFloorAndGarageNamesComeFromStringResources" classname="com.kurtz.homerecord.housemodel.HomeRepositoryTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

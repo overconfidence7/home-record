@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:13.930Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="aSpotOutsideEveryRoomGoesToTheNearestWall" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <testcase name="aSpotInARoomInsideAnotherGoesToTheSmallerRoom" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <testcase name="aRunIsFiledUnderTheRoomItStartsIn" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <testcase name="noRoomsOrNoPointsFileNowhere" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <testcase name="aFloorShowsOnlyThePlanOverlaysOfItsRooms" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <testcase name="distanceToWallsIsZeroOnAWallAndMeasuresStraightOut" classname="com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

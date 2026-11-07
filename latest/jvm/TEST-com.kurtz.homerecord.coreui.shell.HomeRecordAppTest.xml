@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:18.530Z" hostname="runnervmwuk1x" time="2.211">
+  <properties/>
+  <testcase name="fullScreenKeyHidesTheTabBar" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.633"/>
+  <testcase name="tabsShowIconAndLabelAndSwitch" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.154"/>
+  <testcase name="tabRequestOpensTabOnceAndRotationKeepsTheChosenTab" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.529"/>
+  <testcase name="requestWithKeysOpensTheScreenOnThatTabOverItsRoot" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.223"/>
+  <testcase name="tabsAndBackArrowCarryTestTags" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.149"/>
+  <testcase name="tabKeepsItsOwnStackAndReselectPopsToRoot" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.304"/>
+  <testcase name="detailHasBackArrowAndBackReturns" classname="com.kurtz.homerecord.coreui.shell.HomeRecordAppTest" time="0.209"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

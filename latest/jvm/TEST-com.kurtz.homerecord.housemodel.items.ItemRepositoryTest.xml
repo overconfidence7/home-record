@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:13.088Z" hostname="runnervmwuk1x" time="0.437">
+  <properties/>
+  <testcase name="registeredToggleUpdatesWarrantyAndQueuesSync" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.031"/>
+  <testcase name="newItemSeedsConsumablesAndRemindersFromSubtype" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.023"/>
+  <testcase name="draftNeedsSubtypeRoomAndName" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.012"/>
+  <testcase name="hangingAnItemOnAWallMovesItIntoThatRoomBesideTheWallAndAPlanTapTakesItOff" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.037"/>
+  <testcase name="newItemPhotosAreQueuedForUpload" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.024"/>
+  <testcase name="editingKeepsDefaultsAndCreatedAt" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.019"/>
+  <testcase name="moveToRoomClearsTheSpotsAndRefusesRoomsOfAnotherHome" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.025"/>
+  <testcase name="deleteTakesWarrantyRemindersConsumablesAndPhotosWithIt" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.042"/>
+  <testcase name="priceParsesToCents" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.013"/>
+  <testcase name="anItemLinksToTheShutoffThatIsolatesIt" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.035"/>
+  <testcase name="shutoffsComeGroupedWithInstructionsPhotoAndRoom" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.025"/>
+  <testcase name="editingKeepsTheSpotUnlessTheRoomChanges" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.022"/>
+  <testcase name="detailCombinesItemRoomWarrantyAndPhotos" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.03"/>
+  <testcase name="placingAnItemSavesItsSpotAndRoomAndRemovingKeepsTheRoom" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.04"/>
+  <testcase name="invalidDraftSavesNothing" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.015"/>
+  <testcase name="duplicateCopiesDetailsWithoutPhotos" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.018"/>
+  <testcase name="saveTrimsAndRoundTripsThroughDraft" classname="com.kurtz.homerecord.housemodel.items.ItemRepositoryTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

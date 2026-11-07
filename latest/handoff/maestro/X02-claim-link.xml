@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="142.484" timestamp="2026-11-07T13:36:04">
+    <testcase id="X02-claim-link" name="X02-claim-link" classname="X02-claim-link" file="/home/runner/work/home-record/home-record/qa/flows/handoff/X02-claim-link.yaml" time="142.455" timestamp="2026-11-07T13:36:04" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

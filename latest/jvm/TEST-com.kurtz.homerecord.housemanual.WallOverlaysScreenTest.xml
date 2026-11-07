@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:44.482Z" hostname="runnervmwuk1x" time="0.899">
+  <properties/>
+  <testcase name="withoutAPhotoTheFormOffersAddPhotoAndNothingLinked" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.064"/>
+  <testcase name="aTapOnARunPicksItAndATapOnBareWallClearsThePick" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.056"/>
+  <testcase name="theFormShowsTheLinkedItemAndPhotoWithReplaceAndRemove" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.07"/>
+  <testcase name="theRoomPageListsItsOverlaysAndOpensTheirWall" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.077"/>
+  <testcase name="deleteAsksFirst" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.062"/>
+  <testcase name="theFormAsksForAKindAndOffersEveryFieldAndTheKindSheet" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.104"/>
+  <testcase name="addOverlayStartsDrawingAndTapsOnTheWallAddPointsInWallSpace" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.062"/>
+  <testcase name="aHouseWithNoItemsSaysSoInsteadOfASearch" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.051"/>
+  <testcase name="thePickedOverlayShowsTheItemItServesAndItsPhoto" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.054"/>
+  <testcase name="draggingAPointOfThePickedRunMovesItAndEditAndDeleteAreThere" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.084"/>
+  <testcase name="whileDrawingATapAddsThePointUnderTheFinger" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.081"/>
+  <testcase name="theItemSheetSearchesPicksAndOffersClearWhenNothingMatches" classname="com.kurtz.homerecord.housemanual.WallOverlaysScreenTest" time="0.125"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

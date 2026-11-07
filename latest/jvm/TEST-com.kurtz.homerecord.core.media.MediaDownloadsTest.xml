@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.MediaDownloadsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:24.796Z" hostname="runnervmwuk1x" time="0.32">
+  <properties/>
+  <testcase name="droppedFromCacheDownloadsAgain" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.047"/>
+  <testcase name="documentFromAnotherPhoneDownloadsOnce" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.037"/>
+  <testcase name="twoAsksForTheSamePhotoFetchItOnce" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.023"/>
+  <testcase name="pulledVoiceMemoDownloadsByKey" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.027"/>
+  <testcase name="pulledReceiptDownloadsByKey" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.024"/>
+  <testcase name="notUploadedOfflineAndFailedLeaveThePathEmpty" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.021"/>
+  <testcase name="photoOnPhoneIsNotDownloadedAgain" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.022"/>
+  <testcase name="missingListsPathsNotOnThePhone" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.012"/>
+  <testcase name="pulledWallPhotoDownloadsBothFilesOnce" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.033"/>
+  <testcase name="wallPhotoWithoutKeysOrOfflineKeepsItsPlainTile" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.023"/>
+  <testcase name="pulledPhotoDownloadsByKeyAndKeepsUpdatedAt" classname="com.kurtz.homerecord.core.media.MediaDownloadsTest" time="0.044"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

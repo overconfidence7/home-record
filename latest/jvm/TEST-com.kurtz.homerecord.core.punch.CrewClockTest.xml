@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.punch.CrewClockTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:28.071Z" hostname="runnervmwuk1x" time="0.206">
+  <properties/>
+  <testcase name="alreadyClockedInMembersAreSkipped" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.031"/>
+  <testcase name="oneTapPunchesEveryoneWithLeadFixAndClockedInBy" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.021"/>
+  <testcase name="approveLocksTheWeekAndRefusesEdits" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.024"/>
+  <testcase name="farFromJobAsksOnceForOneReasonForAll" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.041"/>
+  <testcase name="approveAllCountsOnlyNewApprovals" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.04"/>
+  <testcase name="emptySelectionAndRequiredGps" classname="com.kurtz.homerecord.core.punch.CrewClockTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

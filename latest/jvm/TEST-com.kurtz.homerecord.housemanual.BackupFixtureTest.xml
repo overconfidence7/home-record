@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.BackupFixtureTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:19.769Z" hostname="runnervmwuk1x" time="0.548">
+  <properties/>
+  <testcase name="fixtureRestoresTheWalkthroughHomeWithNothingMissing" classname="com.kurtz.homerecord.housemanual.BackupFixtureTest" time="0.537"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

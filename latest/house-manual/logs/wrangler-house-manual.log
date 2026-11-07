@@ -1,0 +1,131 @@
+
+ ⛅️ wrangler 4.151.2 (update available 4.158.0)
+───────────────────────────────────────────────
+
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+Using secrets defined in .dev.vars
+Your Worker has access to the following bindings:
+Binding                                                 Resource                  Mode
+env.CACHE (00000000000000000000000000000000)            KV Namespace              local
+env.DB (homerecord)                                     D1 Database               local
+env.MEDIA (homerecord-media)                            R2 Bucket                 local
+env.ENVIRONMENT ("(hidden)")                            Environment Variable      local
+env.JWT_SECRET ("(hidden)")                             Environment Variable      local
+
+⎔ Starting local server...
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mScheduled Workers are not automatically triggered during local development.[0m
+
+  To manually trigger a scheduled event, run:
+    curl "http://localhost:8787/cdn-cgi/local/scheduled"
+  For more details, see [4mhttps://developers.cloudflare.com/workers/configuration/cron-triggers/#test-cron-triggers-locally[0m
+
+
+[wrangler:info] Ready on http://localhost:8787
+[wrangler:info] GET /health 200 OK (596ms)
+[wrangler:info] GET /health 200 OK (4ms)
+[wrangler:info] POST /lookup/warranty 401 Unauthorized (13ms)
+[dev] sign-in code for qa-hm@example.com: 952872
+[wrangler:info] POST /auth/email/start 200 OK (169ms)
+[wrangler:info] GET /dev/last-code 200 OK (8ms)
+[wrangler:info] POST /auth/email/verify 200 OK (14ms)
+[wrangler:info] GET /me 200 OK (19ms)
+[wrangler:info] GET /me 200 OK (23ms)
+[wrangler:info] PUT /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b 201 Created (20ms)
+[wrangler:info] POST /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b/sync/push 200 OK (22ms)
+[wrangler:info] GET /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b/sync/pull 200 OK (9ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[dev] sign-in code for qa-hm@example.com: 340298
+[wrangler:info] POST /auth/email/start 200 OK (11ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (11ms)
+[wrangler:info] GET /me 200 OK (15ms)
+[wrangler:info] GET /me 200 OK (22ms)
+[wrangler:info] PUT /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b 200 OK (21ms)
+[wrangler:info] GET /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b/sync/pull 200 OK (18ms)
+[wrangler:info] GET /me 200 OK (10ms)
+[wrangler:info] DELETE /homes/3fbb86be-0d45-4ce7-b42c-df6c082e1b1b 200 OK (37ms)
+[dev] sign-in code for qa-hm-second@example.com: 628567
+[wrangler:info] POST /auth/email/start 200 OK (12ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (8ms)
+[wrangler:info] PUT /homes/274aa906-7760-4059-9afa-6b4cd3b344eb 201 Created (9ms)
+[wrangler:info] GET /me 200 OK (18ms)
+[wrangler:info] GET /me 200 OK (17ms)
+[wrangler:info] POST /homes/274aa906-7760-4059-9afa-6b4cd3b344eb/sync/push 200 OK (213ms)
+[wrangler:info] GET /homes/274aa906-7760-4059-9afa-6b4cd3b344eb/sync/pull 200 OK (8ms)
+[wrangler:info] GET /me 200 OK (10ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (5ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (6ms)
+[dev] sign-in code for qa-hm-second@example.com: 807300
+[wrangler:info] POST /auth/email/start 200 OK (13ms)
+[wrangler:info] GET /dev/last-code 200 OK (4ms)
+[wrangler:info] POST /auth/email/verify 200 OK (8ms)
+[wrangler:info] GET /me 200 OK (16ms)
+[wrangler:info] PUT /homes/274aa906-7760-4059-9afa-6b4cd3b344eb 200 OK (6ms)
+[wrangler:info] GET /homes/274aa906-7760-4059-9afa-6b4cd3b344eb/sync/pull 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] GET /me 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (9ms)
+[wrangler:info] GET /homes/274aa906-7760-4059-9afa-6b4cd3b344eb/sync/pull 200 OK (22ms)
+[wrangler:info] GET /me 200 OK (21ms)
+[dev] sign-in code for qa-hm-claim@example.com: 443479
+[wrangler:info] POST /auth/email/start 200 OK (10ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (21ms)
+[wrangler:info] GET /me 200 OK (10ms)
+[wrangler:info] POST /handoff/QaNeverIssuedHandoffToken0000000000000000000/claim 404 Not Found (8ms)
+[wrangler:info] GET /homes/9fb8873b-25ae-461e-b4bb-fa99de6a834f/people 404 Not Found (19ms)
+[dev] sign-in code for qa-hm-viewer-owner@example.com: 145056
+[wrangler:info] POST /auth/email/start 200 OK (12ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (13ms)
+[wrangler:info] GET /me 200 OK (9ms)
+[wrangler:info] PUT /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4 201 Created (18ms)
+[wrangler:info] POST /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/sync/push 200 OK (176ms)
+[wrangler:info] GET /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/sync/pull 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (7ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (5ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (3ms)
+[wrangler:info] GET /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/people 200 OK (13ms)
+[wrangler:info] POST /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/invites 201 Created (22ms)
+[wrangler:info] GET /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/people 200 OK (12ms)
+[wrangler:info] GET /dev/last-invite 200 OK (4ms)
+[dev] sign-in code for qa-hm-viewer@example.com: 580416
+[wrangler:info] POST /auth/email/start 200 OK (13ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (7ms)
+[wrangler:info] POST /invite/6NKA0UKpTxfaFfmY-lt42vhQXcNS7IPQyvWRb_mOSss/accept 201 Created (28ms)
+[wrangler:info] GET /me 200 OK (9ms)
+[wrangler:info] PUT /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4 200 OK (7ms)
+[wrangler:info] GET /homes/e6daa856-09d7-4b17-b55e-5f292c9abac4/sync/pull 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] GET /me 200 OK (7ms)
+[dev] sign-in code for qa-hm-share-owner@example.com: 797011
+[wrangler:info] POST /auth/email/start 200 OK (12ms)
+[wrangler:info] GET /dev/last-code 200 OK (4ms)
+[wrangler:info] POST /auth/email/verify 200 OK (9ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] PUT /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666 201 Created (9ms)
+[wrangler:info] GET /me 200 OK (12ms)
+[wrangler:info] POST /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/sync/push 200 OK (223ms)
+[wrangler:info] GET /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/sync/pull 200 OK (7ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (7ms)
+[wrangler:info] POST /media/presign 503 Service Unavailable (5ms)
+[wrangler:info] GET /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/people 200 OK (8ms)
+[wrangler:info] POST /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/invites 201 Created (24ms)
+[wrangler:info] GET /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/people 200 OK (15ms)
+[wrangler:info] GET /dev/last-invite 200 OK (3ms)
+[dev] sign-in code for qa-hm-share-family@example.com: 825933
+[wrangler:info] POST /auth/email/start 200 OK (15ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (8ms)
+[wrangler:info] POST /invite/H0l8dRXdUgc47XBu4yBPsCNs-sgEccG3dzttdxzFeO8/accept 201 Created (24ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] PUT /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666 200 OK (13ms)
+[wrangler:info] GET /homes/f2a4960a-ed27-4c53-949d-bba28bfb6666/sync/pull 200 OK (6ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] POST /lookup/warranty 401 Unauthorized (3ms)
+[wrangler:info] POST /lookup/warranty 401 Unauthorized (5ms)

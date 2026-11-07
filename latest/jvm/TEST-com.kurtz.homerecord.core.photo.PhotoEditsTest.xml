@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.PhotoEditsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:27.765Z" hostname="runnervmwuk1x" time="0.105">
+  <properties/>
+  <testcase name="missingPhotoChangesNothing" classname="com.kurtz.homerecord.core.photo.PhotoEditsTest" time="0.021"/>
+  <testcase name="captionIsTrimmedAndBlankClearsIt" classname="com.kurtz.homerecord.core.photo.PhotoEditsTest" time="0.038"/>
+  <testcase name="beforeMarkKeepsThePhaseAndCanBeTakenOff" classname="com.kurtz.homerecord.core.photo.PhotoEditsTest" time="0.024"/>
+  <testcase name="deleteIsSoftAndQueued" classname="com.kurtz.homerecord.core.photo.PhotoEditsTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

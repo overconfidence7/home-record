@@ -1,0 +1,680 @@
+{
+ "sha": "82537dd",
+ "at": "2026-10-21 10:50 UTC",
+ "stats": {
+  "unitTests": 233,
+  "unitFailures": 0,
+  "coverage": {
+   "acs_claimed": 67,
+   "acs_missing": 0,
+   "ticked_tasks": 21
+  },
+  "backendTests": 51,
+  "backendFailures": 0
+ },
+ "stages": [
+  [
+   "field-log",
+   "install:field-log",
+   "fail",
+   "adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.kurtz.homerecord.fieldlog signatures do not match newer version; ignoring!]  "
+  ],
+  [
+   "field-log",
+   "install-test:field-log",
+   "fail",
+   ""
+  ],
+  [
+   "field-log",
+   "permissions",
+   "pass",
+   "granted where declared"
+  ],
+  [
+   "field-log",
+   "fixtures",
+   "pass",
+   "pushed to /sdcard/Download/qa-fixtures"
+  ],
+  [
+   "field-log",
+   "coldstart:field-log",
+   "fail",
+   "MainActivity did not start"
+  ],
+  [
+   "field-log",
+   "seed:field-log",
+   "skip",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "field-log",
+   "instrumented:field-log",
+   "fail",
+   "runner did not report (see instrumented/field-log.txt)"
+  ],
+  [
+   "field-log",
+   "flow:F01-welcome",
+   "fail",
+   "see maestro/F01-welcome.log"
+  ],
+  [
+   "field-log",
+   "flow:F02-invite-join",
+   "fail",
+   "see maestro/F02-invite-join.log"
+  ],
+  [
+   "field-log",
+   "variant:dark",
+   "fail",
+   "tour failed under dark"
+  ],
+  [
+   "field-log",
+   "variant:font200",
+   "fail",
+   "tour failed under font200"
+  ],
+  [
+   "field-log",
+   "variant:landscape",
+   "fail",
+   "tour failed under landscape"
+  ],
+  [
+   "field-log",
+   "jank:field-log",
+   "skip",
+   "gfxinfo reported no frames"
+  ],
+  [
+   "field-log",
+   "monkey:field-log",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "field-log",
+   "release:field-log",
+   "pass",
+   "R8 build launches (1787 ms)"
+  ],
+  [
+   "field-log",
+   "logcat:com.kurtz.homerecord.fieldlog",
+   "warn",
+   "0 crashes, 0 ANRs, 2 StrictMode violations"
+  ],
+  [
+   "handoff",
+   "install:field-log",
+   "fail",
+   "adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.kurtz.homerecord.fieldlog signatures do not match newer version; ignoring!]  "
+  ],
+  [
+   "handoff",
+   "install-test:field-log",
+   "fail",
+   ""
+  ],
+  [
+   "handoff",
+   "install:house-manual",
+   "pass",
+   "debug apk"
+  ],
+  [
+   "handoff",
+   "install-test:house-manual",
+   "pass",
+   "androidTest apk"
+  ],
+  [
+   "handoff",
+   "permissions",
+   "pass",
+   "granted where declared"
+  ],
+  [
+   "handoff",
+   "fixtures",
+   "pass",
+   "pushed to /sdcard/Download/qa-fixtures"
+  ],
+  [
+   "handoff",
+   "coldstart:field-log",
+   "fail",
+   "MainActivity did not start"
+  ],
+  [
+   "handoff",
+   "coldstart:house-manual",
+   "fail",
+   "median 4692 ms over 1500 ms (AC-U11)"
+  ],
+  [
+   "handoff",
+   "seed:field-log",
+   "skip",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "handoff",
+   "seed:house-manual",
+   "skip",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "handoff",
+   "instrumented:field-log",
+   "fail",
+   "runner did not report (see instrumented/field-log.txt)"
+  ],
+  [
+   "handoff",
+   "instrumented:house-manual",
+   "fail",
+   "2 failing of 18"
+  ],
+  [
+   "handoff",
+   "flows",
+   "skip",
+   "no flows in qa/flows/handoff yet (PLAN Q004)"
+  ],
+  [
+   "handoff",
+   "variants",
+   "skip",
+   "no _tour.yaml for handoff"
+  ],
+  [
+   "handoff",
+   "jank:field-log",
+   "skip",
+   "gfxinfo reported no frames"
+  ],
+  [
+   "handoff",
+   "jank:house-manual",
+   "fail",
+   "100% janky frames of 6 (AC-U11)"
+  ],
+  [
+   "handoff",
+   "monkey:field-log",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "handoff",
+   "monkey:house-manual",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "handoff",
+   "release:field-log",
+   "pass",
+   "R8 build launches (2677 ms)"
+  ],
+  [
+   "handoff",
+   "release:house-manual",
+   "pass",
+   "R8 build launches (1991 ms)"
+  ],
+  [
+   "handoff",
+   "logcat:com.kurtz.homerecord.fieldlog",
+   "warn",
+   "0 crashes, 0 ANRs, 3 StrictMode violations"
+  ],
+  [
+   "handoff",
+   "logcat:com.kurtz.homerecord.housemanual",
+   "warn",
+   "0 crashes, 0 ANRs, 3 StrictMode violations"
+  ],
+  [
+   "house-manual",
+   "install:house-manual",
+   "pass",
+   "debug apk"
+  ],
+  [
+   "house-manual",
+   "install-test:house-manual",
+   "pass",
+   "androidTest apk"
+  ],
+  [
+   "house-manual",
+   "permissions",
+   "pass",
+   "granted where declared"
+  ],
+  [
+   "house-manual",
+   "fixtures",
+   "pass",
+   "pushed to /sdcard/Download/qa-fixtures"
+  ],
+  [
+   "house-manual",
+   "coldstart:house-manual",
+   "fail",
+   "median 4403 ms over 1500 ms (AC-U11)"
+  ],
+  [
+   "house-manual",
+   "seed:house-manual",
+   "skip",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "house-manual",
+   "instrumented:house-manual",
+   "fail",
+   "2 failing of 18"
+  ],
+  [
+   "house-manual",
+   "flow:H01-onboarding",
+   "pass",
+   "ok"
+  ],
+  [
+   "house-manual",
+   "flow:H02-draw-plan",
+   "fail",
+   "see maestro/H02-draw-plan.log"
+  ],
+  [
+   "house-manual",
+   "flow:H02b-shape-doors-stairs",
+   "fail",
+   "see maestro/H02b-shape-doors-stairs.log"
+  ],
+  [
+   "house-manual",
+   "flow:H03-blueprint-room",
+   "fail",
+   "see maestro/H03-blueprint-room.log"
+  ],
+  [
+   "house-manual",
+   "flow:H15-sign-in",
+   "fail",
+   "see maestro/H15-sign-in.log"
+  ],
+  [
+   "house-manual",
+   "variant:dark",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "variant:font200",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "variant:landscape",
+   "pass",
+   "tour ok"
+  ],
+  [
+   "house-manual",
+   "jank:house-manual",
+   "fail",
+   "100% janky frames of 3 (AC-U11)"
+  ],
+  [
+   "house-manual",
+   "monkey:house-manual",
+   "pass",
+   "1500 events, no crash"
+  ],
+  [
+   "house-manual",
+   "release:house-manual",
+   "pass",
+   "R8 build launches (1557 ms)"
+  ],
+  [
+   "house-manual",
+   "logcat:com.kurtz.homerecord.housemanual",
+   "pass",
+   "0 crashes, 0 ANRs, 0 StrictMode violations"
+  ]
+ ],
+ "findings": [
+  {
+   "id": "auto:install:field-log:field-log",
+   "severity": "Critical",
+   "text": "field-log: install failed",
+   "expected": "APK installs on the emulator",
+   "actual": "adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.kurtz.homerecord.fieldlog signatures do not match newer version; ignoring!]  ",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:install-test:field-log:field-log",
+   "severity": "Critical",
+   "text": "field-log: install-test failed",
+   "expected": "APK installs on the emulator",
+   "actual": "",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:coldstart:field-log:field-log",
+   "severity": "Major",
+   "text": "field-log cold start too slow",
+   "expected": "under 1,500 ms (AC-U11)",
+   "actual": "MainActivity did not start",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:instrumented:field-log:field-log",
+   "severity": "Major",
+   "text": "Instrumented tests fail on field-log",
+   "expected": "all acceptance tests and the screen crawler pass",
+   "actual": "runner did not report (see instrumented/field-log.txt) (qa-results latest/field-log/instrumented/field-log.txt)",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:flow:field-log:F01-welcome",
+   "severity": "Major",
+   "text": "Flow F01-welcome fails on field-log",
+   "expected": "walkthrough step F01 passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/field-log/maestro/F01-welcome.log",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:flow:field-log:F02-invite-join",
+   "severity": "Major",
+   "text": "Flow F02-invite-join fails on field-log",
+   "expected": "walkthrough step F02 passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/field-log/maestro/F02-invite-join.log",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:variant:field-log:dark",
+   "severity": "Major",
+   "text": "Tour fails under dark on field-log",
+   "expected": "every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9)",
+   "actual": "tour failed under dark",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:variant:field-log:font200",
+   "severity": "Major",
+   "text": "Tour fails under font200 on field-log",
+   "expected": "every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9)",
+   "actual": "tour failed under font200",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:variant:field-log:landscape",
+   "severity": "Major",
+   "text": "Tour fails under landscape on field-log",
+   "expected": "every screen survives dark mode, 200% font and landscape (AC-U8, AC-U9)",
+   "actual": "tour failed under landscape",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:logcat:field-log:com.kurtz.homerecord.fieldlog",
+   "severity": "Minor",
+   "text": "logcat for com.kurtz.homerecord.fieldlog: 0 crashes, 0 ANRs, 2 StrictMode violations",
+   "expected": "no crashes or ANRs; StrictMode clean (S7)",
+   "actual": "see qa-results latest/field-log/logs/crashes.txt and strictmode.txt",
+   "screenshot": "",
+   "app": "field-log"
+  },
+  {
+   "id": "auto:install:handoff:field-log",
+   "severity": "Critical",
+   "text": "field-log: install failed",
+   "expected": "APK installs on the emulator",
+   "actual": "adb: failed to install qa-out/apk/field-log-debug.apk: Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.kurtz.homerecord.fieldlog signatures do not match newer version; ignoring!]  ",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:install-test:handoff:field-log",
+   "severity": "Critical",
+   "text": "field-log: install-test failed",
+   "expected": "APK installs on the emulator",
+   "actual": "",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:coldstart:handoff:field-log",
+   "severity": "Major",
+   "text": "field-log cold start too slow",
+   "expected": "under 1,500 ms (AC-U11)",
+   "actual": "MainActivity did not start",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:coldstart:handoff:house-manual",
+   "severity": "Major",
+   "text": "house-manual cold start too slow",
+   "expected": "under 1,500 ms (AC-U11)",
+   "actual": "median 4692 ms over 1500 ms (AC-U11)",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:instrumented:handoff:field-log",
+   "severity": "Major",
+   "text": "Instrumented tests fail on field-log",
+   "expected": "all acceptance tests and the screen crawler pass",
+   "actual": "runner did not report (see instrumented/field-log.txt) (qa-results latest/handoff/instrumented/field-log.txt)",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:instrumented:handoff:house-manual",
+   "severity": "Major",
+   "text": "Instrumented tests fail on house-manual",
+   "expected": "all acceptance tests and the screen crawler pass",
+   "actual": "2 failing of 18 (qa-results latest/handoff/instrumented/house-manual.txt)",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:jank:handoff:house-manual",
+   "severity": "Major",
+   "text": "house-manual scroll jank",
+   "expected": "under 10% janky frames (AC-U11)",
+   "actual": "100% janky frames of 6 (AC-U11)",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:logcat:handoff:com.kurtz.homerecord.fieldlog",
+   "severity": "Minor",
+   "text": "logcat for com.kurtz.homerecord.fieldlog: 0 crashes, 0 ANRs, 3 StrictMode violations",
+   "expected": "no crashes or ANRs; StrictMode clean (S7)",
+   "actual": "see qa-results latest/handoff/logs/crashes.txt and strictmode.txt",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:logcat:handoff:com.kurtz.homerecord.housemanual",
+   "severity": "Minor",
+   "text": "logcat for com.kurtz.homerecord.housemanual: 0 crashes, 0 ANRs, 3 StrictMode violations",
+   "expected": "no crashes or ANRs; StrictMode clean (S7)",
+   "actual": "see qa-results latest/handoff/logs/crashes.txt and strictmode.txt",
+   "screenshot": "",
+   "app": "handoff"
+  },
+  {
+   "id": "auto:coldstart:house-manual:house-manual",
+   "severity": "Major",
+   "text": "house-manual cold start too slow",
+   "expected": "under 1,500 ms (AC-U11)",
+   "actual": "median 4403 ms over 1500 ms (AC-U11)",
+   "screenshot": "",
+   "app": "house-manual"
+  },
+  {
+   "id": "auto:instrumented:house-manual:house-manual",
+   "severity": "Major",
+   "text": "Instrumented tests fail on house-manual",
+   "expected": "all acceptance tests and the screen crawler pass",
+   "actual": "2 failing of 18 (qa-results latest/house-manual/instrumented/house-manual.txt)",
+   "screenshot": "",
+   "app": "house-manual"
+  },
+  {
+   "id": "auto:flow:house-manual:H02-draw-plan",
+   "severity": "Major",
+   "text": "Flow H02-draw-plan fails on house-manual",
+   "expected": "walkthrough step H02 passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/house-manual/maestro/H02-draw-plan.log",
+   "screenshot": "",
+   "app": "house-manual",
+   "regressed": true
+  },
+  {
+   "id": "auto:flow:house-manual:H02b-shape-doors-stairs",
+   "severity": "Major",
+   "text": "Flow H02b-shape-doors-stairs fails on house-manual",
+   "expected": "walkthrough step H02b passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/house-manual/maestro/H02b-shape-doors-stairs.log",
+   "screenshot": "",
+   "app": "house-manual",
+   "regressed": true
+  },
+  {
+   "id": "auto:flow:house-manual:H03-blueprint-room",
+   "severity": "Major",
+   "text": "Flow H03-blueprint-room fails on house-manual",
+   "expected": "walkthrough step H03 passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/house-manual/maestro/H03-blueprint-room.log",
+   "screenshot": "",
+   "app": "house-manual",
+   "regressed": true
+  },
+  {
+   "id": "auto:flow:house-manual:H15-sign-in",
+   "severity": "Major",
+   "text": "Flow H15-sign-in fails on house-manual",
+   "expected": "walkthrough step H15 passes (qa/product-walkthrough.md)",
+   "actual": "see qa-results latest/house-manual/maestro/H15-sign-in.log",
+   "screenshot": "",
+   "app": "house-manual",
+   "regressed": true
+  },
+  {
+   "id": "auto:jank:house-manual:house-manual",
+   "severity": "Major",
+   "text": "house-manual scroll jank",
+   "expected": "under 10% janky frames (AC-U11)",
+   "actual": "100% janky frames of 3 (AC-U11)",
+   "screenshot": "",
+   "app": "house-manual"
+  }
+ ],
+ "new": [
+  "auto:install:field-log:field-log",
+  "auto:install-test:field-log:field-log",
+  "auto:variant:field-log:dark",
+  "auto:variant:field-log:font200",
+  "auto:variant:field-log:landscape",
+  "auto:install:handoff:field-log",
+  "auto:install-test:handoff:field-log",
+  "auto:flow:house-manual:H02-draw-plan",
+  "auto:flow:house-manual:H02b-shape-doors-stairs",
+  "auto:flow:house-manual:H03-blueprint-room",
+  "auto:flow:house-manual:H15-sign-in"
+ ],
+ "stillOpen": [
+  "auto:coldstart:field-log:field-log",
+  "auto:instrumented:field-log:field-log",
+  "auto:flow:field-log:F01-welcome",
+  "auto:flow:field-log:F02-invite-join",
+  "auto:logcat:field-log:com.kurtz.homerecord.fieldlog",
+  "auto:coldstart:handoff:field-log",
+  "auto:coldstart:handoff:house-manual",
+  "auto:instrumented:handoff:field-log",
+  "auto:instrumented:handoff:house-manual",
+  "auto:jank:handoff:house-manual",
+  "auto:logcat:handoff:com.kurtz.homerecord.fieldlog",
+  "auto:logcat:handoff:com.kurtz.homerecord.housemanual",
+  "auto:coldstart:house-manual:house-manual",
+  "auto:instrumented:house-manual:house-manual",
+  "auto:jank:house-manual:house-manual"
+ ],
+ "skipped": [
+  [
+   "field-log",
+   "seed:field-log",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "field-log",
+   "jank:field-log",
+   "gfxinfo reported no frames"
+  ],
+  [
+   "handoff",
+   "seed:field-log",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "handoff",
+   "seed:house-manual",
+   "no debug seed receiver yet (PLAN Q005)"
+  ],
+  [
+   "handoff",
+   "flows",
+   "no flows in qa/flows/handoff yet (PLAN Q004)"
+  ],
+  [
+   "handoff",
+   "variants",
+   "no _tour.yaml for handoff"
+  ],
+  [
+   "handoff",
+   "jank:field-log",
+   "gfxinfo reported no frames"
+  ],
+  [
+   "house-manual",
+   "seed:house-manual",
+   "no debug seed receiver yet (PLAN Q005)"
+  ]
+ ],
+ "walkthrough": {
+  "field-log:F01": "Fail",
+  "field-log:F02": "Fail",
+  "house-manual:H02": "Fail",
+  "house-manual:H02b": "Fail",
+  "house-manual:H03": "Fail",
+  "house-manual:H15": "Fail",
+  "house-manual:H01": "Pass"
+ }
+}

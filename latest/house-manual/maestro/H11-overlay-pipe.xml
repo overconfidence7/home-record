@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="225.376" timestamp="2026-11-07T12:57:51">
+    <testcase id="H11-overlay-pipe" name="H11-overlay-pipe" classname="H11-overlay-pipe" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H11-overlay-pipe.yaml" time="225.338" timestamp="2026-11-07T12:57:51" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

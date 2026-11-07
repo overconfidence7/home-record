@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:02.772Z" hostname="runnervmwuk1x" time="1.289">
+  <properties/>
+  <testcase name="crewGetNoAddAndRowsOpenTheirTask" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.084"/>
+  <testcase name="undoSnackbarSendsUndo" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.049"/>
+  <testcase name="emptyJobOffersAddTaskOnlyToTheOffice" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.035"/>
+  <testcase name="aShortHeldNudgeDoesNotTickIt" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.057"/>
+  <testcase name="aDragThatStopsBeforeLiftingStillTicksItDone" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.063"/>
+  <testcase name="emptyPunchFilterOffersShowAll" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.07"/>
+  <testcase name="tickingTheTopTaskOfALongListKeepsTheListInPlace" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.156"/>
+  <testcase name="managersGetDragHandlesAndMoveActions" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.057"/>
+  <testcase name="aShortSwipeFromTheMiddleTicksItDone" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.08"/>
+  <testcase name="noHandlesOnThePunchListOrForCrew" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.075"/>
+  <testcase name="aRowBackFromUndoAfterASwipeSwipesDoneAgain" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.198"/>
+  <testcase name="swipingAnOpenTaskTicksItDone" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.078"/>
+  <testcase name="tickSendsSetDoneAndRowOpensTheTask" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.056"/>
+  <testcase name="swipingTheOtherWayTicksItToo" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.045"/>
+  <testcase name="aRowBackFromUndoAfterATickStillSwipesDone" classname="com.kurtz.homerecord.fieldlog.tasks.TasksScreenTest" time="0.173"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

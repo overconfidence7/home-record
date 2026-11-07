@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:32.526Z" hostname="runnervmwuk1x" time="0.368">
+  <properties/>
+  <testcase name="aSaveTheFreeTierRefusesKeepsTheDraftAndAsksForThePaywallOnce" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.041"/>
+  <testcase name="offlineVisionKeepsTheOcrResultAndSkipsWhenOcrFoundTheModel" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.029"/>
+  <testcase name="unreadablePlateOpensNoSheet" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.022"/>
+  <testcase name="draftSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.023"/>
+  <testcase name="editingAnItemLoadsItsDraftAndMissingItemsAreReported" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.021"/>
+  <testcase name="cameraResultAfterProcessDeathKeepsThePlateKindAndScans" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.021"/>
+  <testcase name="dataPlatePhotoProposesValuesAndTapAssignsLines" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.019"/>
+  <testcase name="noModelFromOcrFallsBackToServerVision" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.02"/>
+  <testcase name="roomPickerListsEveryRoomOfTheHome" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.02"/>
+  <testcase name="closingWithoutSavingDeletesOnlyTheUnsavedPhotoFiles" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.032"/>
+  <testcase name="addShutoffOpensWithTheShutoffTypeChosen" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.02"/>
+  <testcase name="removingAnUnsavedPhotoDeletesItsFile" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.016"/>
+  <testcase name="serialFillsManufacturedOnWithANoteAndTheHomeownerCanOverride" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.017"/>
+  <testcase name="photosAreAddedRemovedAndStoredWithTheItem" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.026"/>
+  <testcase name="cancelledCameraDiscardsTheFileAndGalleryKeepsItsKindAcrossRecreation" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.018"/>
+  <testcase name="saveNeedsTypeRoomAndNameThenStoresTheItem" classname="com.kurtz.homerecord.housemanual.ItemEditViewModelTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

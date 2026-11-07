@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:30.117Z" hostname="runnervmwuk1x" time="0.067">
+  <properties/>
+  <testcase name="local writes sync after a short debounce" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.043"/>
+  <testcase name="does nothing while signed out or without a tenant" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.006"/>
+  <testcase name="signing out stops syncing" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.004"/>
+  <testcase name="a pass that throws does not stop later syncs" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.003"/>
+  <testcase name="syncs once when sign-in and tenant are both present" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.002"/>
+  <testcase name="syncs again when the network returns" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.003"/>
+  <testcase name="polls every 30 seconds only while in the foreground" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.003"/>
+  <testcase name="a disabled tenant does not sync until it is enabled" classname="com.kurtz.homerecord.core.sync.SyncCoordinatorTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

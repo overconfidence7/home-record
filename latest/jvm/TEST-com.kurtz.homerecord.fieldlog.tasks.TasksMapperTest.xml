@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:02.765Z" hostname="runnervmwuk1x" time="0.004">
+  <properties/>
+  <testcase name="officeSeesEveryTaskWithNamesRoomAndDue" classname="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" time="0.003"/>
+  <testcase name="crewSeeOnlyTheirOwnTasksAndMayTickThem" classname="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" time="0.0"/>
+  <testcase name="unknownAssigneeAndRoomShowNothingRatherThanAnId" classname="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" time="0.0"/>
+  <testcase name="punchFilterKeepsOnlyPunchItems" classname="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" time="0.001"/>
+  <testcase name="signedOutCrewSeeNothing" classname="com.kurtz.homerecord.fieldlog.tasks.TasksMapperTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

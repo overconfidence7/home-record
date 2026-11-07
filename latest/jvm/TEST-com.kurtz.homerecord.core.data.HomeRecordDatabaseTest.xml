@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:18.981Z" hostname="runnervmwuk1x" time="0.28">
+  <properties/>
+  <testcase name="homeRoundTrips" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.055"/>
+  <testcase name="floorsListInOrder" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.036"/>
+  <testcase name="upsertReplacesSameId" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.055"/>
+  <testcase name="outboxReturnsPendingInOrderAndMarksSent" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.05"/>
+  <testcase name="fieldLogEntitiesPersist" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.038"/>
+  <testcase name="softDeleteHidesRowAndBumpsUpdatedAt" classname="com.kurtz.homerecord.core.data.HomeRecordDatabaseTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

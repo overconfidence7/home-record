@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:15.888Z" hostname="runnervmwuk1x" time="0.205">
+  <properties/>
+  <testcase name="aWallPhotoCanComeFromTheGalleryAndACancelledCameraLeavesNoFile" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.022"/>
+  <testcase name="stageStartsOnTheAppDefaultAndTheChoiceSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.014"/>
+  <testcase name="listsTheBreakersFeedingTheRoomOnlyWhereTheAppKeepsPanels" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.016"/>
+  <testcase name="photographThisWallTakesAPhotoAndOpensTheOutlineAtTheChosenStage" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.017"/>
+  <testcase name="viewIn3DPointsAtTheRoomsFloorOnlyWhereTheAppHas3D" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.021"/>
+  <testcase name="followsRenameAndDelete" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.022"/>
+  <testcase name="listsOnlyThisRoomsItemsAndUpdates" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.02"/>
+  <testcase name="loadsTheRoomWithFloorAndHome" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.02"/>
+  <testcase name="noPhotographWithoutSomewhereToKeepThePhoto" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.015"/>
+  <testcase name="unknownRoomIsNotFound" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.015"/>
+  <testcase name="listsTheRoomsWallsFromThePlanAndFollowsAResize" classname="com.kurtz.homerecord.housemodel.ui.RoomViewModelTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

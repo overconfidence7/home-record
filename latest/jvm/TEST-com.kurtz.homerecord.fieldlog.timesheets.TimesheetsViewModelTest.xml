@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:05.211Z" hostname="runnervmwuk1x" time="0.349">
+  <properties/>
+  <testcase name="approveLocksThePersonsWeekAndEditsAreRefused" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.069"/>
+  <testcase name="showsThisWeekPerPerson" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.048"/>
+  <testcase name="editFormIsDirtyOnlyAfterAChange" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.045"/>
+  <testcase name="approveAllAsksFirstThenApprovesEveryoneWithPunches" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.029"/>
+  <testcase name="overtimeRuleChangeRecomputesTheWeek" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.023"/>
+  <testcase name="editFormSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.031"/>
+  <testcase name="expandedPersonSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.024"/>
+  <testcase name="editNeedsAReasonAndKeepsAnAuditEntry" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.025"/>
+  <testcase name="previousWeekIsEmptyAndNextIsBlockedAtThisWeek" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.024"/>
+  <testcase name="startWeekOpensThatWeekAndSavedStateWins" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsViewModelTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:36.380Z" hostname="runnervmwuk1x" time="0.168">
+  <properties/>
+  <testcase name="signStoresImageSignerAndTimeAndMakesItSigned" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" time="0.045"/>
+  <testcase name="signedOrCrewCannotSign" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" time="0.032"/>
+  <testcase name="signerStartsAsTheClientAndSignNeedsANameAndInk" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" time="0.036"/>
+  <testcase name="nameAndStrokesSurviveProcessDeath" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" time="0.028"/>
+  <testcase name="aFailedImageKeepsTheDrawingAndStaysDraft" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignViewModelTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:35.657Z" hostname="runnervmwuk1x" time="0.719">
+  <properties/>
+  <testcase name="signedFormShowsSignerAndDuplicateAndNoSignButton" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" time="0.225"/>
+  <testcase name="draftFormSignsOnlyWithAPricedLine" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" time="0.147"/>
+  <testcase name="linkSectionSendsAndTurnsOffAndHidesWithoutTheRole" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" time="0.169"/>
+  <testcase name="signAndClearSendTheirEventsOnceDrawn" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" time="0.085"/>
+  <testcase name="drawingOnThePadSendsAStrokeAndSignStaysOffWhileBlank" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderSignScreenTest" time="0.089"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

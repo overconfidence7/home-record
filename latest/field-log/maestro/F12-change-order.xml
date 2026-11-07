@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="214.713" timestamp="2026-11-07T13:13:41">
+    <testcase id="F12-change-order" name="F12-change-order" classname="F12-change-order" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F12-change-order.yaml" time="214.666" timestamp="2026-11-07T13:13:41" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.RegressionSeedTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:39.927Z" hostname="runnervmwuk1x" time="2.131">
+  <properties/>
+  <testcase name="regressionSeedFillsItemsWarrantiesRemindersContactsAndDocuments" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.136"/>
+  <testcase name="longListSeedGivesItemsTwoHundredRowsWithDistinctNames" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.191"/>
+  <testcase name="seededItemsGiveTheH06FlowItsGroupsFilterAndSearch" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.071"/>
+  <testcase name="regressionSeedHasWaterAndGasMainsWithInstructions" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.059"/>
+  <testcase name="regressionSeedBuildsThreeFloorsWithTwelveRooms" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.066"/>
+  <testcase name="reference3DSeedReachesTheSpecSizeWithTwentyPhotographedWalls" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="1.539"/>
+  <testcase name="seedingTwiceReplacesTheHomeAndResetEmptiesIt" classname="com.kurtz.homerecord.housemanual.RegressionSeedTest" time="0.067"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.overlays.OverlaySearchTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:13.921Z" hostname="runnervmwuk1x" time="0.007">
+  <properties/>
+  <testcase name="findsByLabelWordPrefix" classname="com.kurtz.homerecord.housemodel.overlays.OverlaySearchTest" time="0.002"/>
+  <testcase name="everyWordMustMatchAndBlankListsNewestFirst" classname="com.kurtz.homerecord.housemodel.overlays.OverlaySearchTest" time="0.001"/>
+  <testcase name="findsByKindNameAndKindTerms" classname="com.kurtz.homerecord.housemodel.overlays.OverlaySearchTest" time="0.004"/>
+  <testcase name="labelMatchesRankAboveKindMatches" classname="com.kurtz.homerecord.housemodel.overlays.OverlaySearchTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.798Z" hostname="runnervmwuk1x" time="0.006">
+  <properties/>
+  <testcase name="layerTogglesShowTheSameMarkersAsTheBlueprint" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <testcase name="nothingIsPlacedOnFadedFloorsUnknownWallsOrWithoutPoints" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <testcase name="planOverlaysAndItemsSitOnTheirRoomsFloorOnTheirOwnStorey" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.0"/>
+  <testcase name="anItemHungOnAWallSitsOnThatWallAtTheSameSpotAsAnOverlayThere" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <testcase name="aCounterClockwiseRoomPutsWallOverlaysOnTheSameSideAsItsPhoto" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <testcase name="aWallRunKeepsItsPointsInOrderAndFacesIntoTheRoom" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <testcase name="anItemWhoseWallIsGoneOrInAnotherRoomFallsBackToItsFloorSpot" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.0"/>
+  <testcase name="aWallOverlayLandsWhereTheFacePaintsThatSpotOfThePhoto" classname="com.kurtz.homerecord.housemodel.scene.SceneMarkersTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

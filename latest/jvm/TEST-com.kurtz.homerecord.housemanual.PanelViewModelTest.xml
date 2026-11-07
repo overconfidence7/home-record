@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PanelViewModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:36.407Z" hostname="runnervmwuk1x" time="0.574">
+  <properties/>
+  <testcase name="tappingAnOpenSlotAddsALabeledBreakerThatFeedsARoomAndAnItem" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.068"/>
+  <testcase name="aDeletedItemShowsTheMissingStateAndMakesNoPanel" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.024"/>
+  <testcase name="panelDetailsSaveSlotCountMainAmpsAndBrandButNotBelowTheBreakersInUse" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.035"/>
+  <testcase name="touchAndHoldOnASinglePoleBreakerAddsATandemInTheSameSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.039"/>
+  <testcase name="openedFromABreakerChipTheSlotIsMarkedForTwoSecondsAndNotAgainAfterRotation" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.046"/>
+  <testcase name="openedFromMoreThePanelMarksNoSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.036"/>
+  <testcase name="twoPolesIntoATakenSlotSaysWhichSlotAndDoesNotSave" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.035"/>
+  <testcase name="openingAPanelItemMakesItsFortySlotPanelOnceAndNamesTheScreenAfterTheItem" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.043"/>
+  <testcase name="aPanelPhotoComesFromTheCameraOrThePickerAndCanBeRemoved" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.057"/>
+  <testcase name="aTwoPoleBreakerShowsAsOneTallCellAndATandemAsTwoHalves" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.031"/>
+  <testcase name="editingABreakerSurvivesProcessDeathAndDeleteAsksThenFreesTheSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.065"/>
+  <testcase name="shareLegendExportsThePanelWithFeedsAndClearsAfterHandled" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.087"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

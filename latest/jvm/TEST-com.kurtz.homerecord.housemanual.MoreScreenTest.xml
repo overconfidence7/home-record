@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.MoreScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:34.833Z" hostname="runnervmwuk1x" time="0.396">
+  <properties/>
+  <testcase name="aViewerSeesTheZoneButCannotChangeIt" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.054"/>
+  <testcase name="viewModelStoresUnitsAndSetsTheZoneOnlyWhenEditable" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.028"/>
+  <testcase name="unitsRowOpensThePickerAndPicksMetric" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.073"/>
+  <testcase name="zonePickerSendsThePickedZone" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.063"/>
+  <testcase name="aboutShowsTheVersion" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.062"/>
+  <testcase name="everySpecRowIsThereInOrder" classname="com.kurtz.homerecord.housemanual.MoreScreenTest" time="0.11"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

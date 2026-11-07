@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:10.746Z" hostname="runnervmwuk1x" time="0.004">
+  <properties/>
+  <testcase name="a diagonal run blocks only its own path, and stairs always win" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.003"/>
+  <testcase name="a name over an item steps clear of it inside the room" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.0"/>
+  <testcase name="a name in an L-shaped room stays inside its outline" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.0"/>
+  <testcase name="a name with nothing in the way stays at its anchor" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.0"/>
+  <testcase name="an item drawn over a run wins the tap, as it is drawn on top" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.001"/>
+  <testcase name="a tap on a wall run opens it where it is drawn, set into the room" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.0"/>
+  <testcase name="of two spots in reach the nearer one opens" classname="com.kurtz.homerecord.housemodel.blueprint.PlanMarkHitsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

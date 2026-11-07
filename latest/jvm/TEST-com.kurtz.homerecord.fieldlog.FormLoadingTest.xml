@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.FormLoadingTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:24.317Z" hostname="runnervmwuk1x" time="0.566">
+  <properties/>
+  <testcase name="companyLoadingHasClose" classname="com.kurtz.homerecord.fieldlog.FormLoadingTest" time="0.328"/>
+  <testcase name="jobEditLoadingHasCloseAndSave" classname="com.kurtz.homerecord.fieldlog.FormLoadingTest" time="0.128"/>
+  <testcase name="companyFailedHasClose" classname="com.kurtz.homerecord.fieldlog.FormLoadingTest" time="0.099"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:46.289Z" hostname="runnervmwuk1x" time="0.31">
+  <properties/>
+  <testcase name="twoHundredJobsAreGroupedOnTheMappingDispatcher" classname="com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest" time="0.145"/>
+  <testcase name="aFailedReadShowsTheErrorStateAndRetryRecovers" classname="com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest" time="0.157"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Nov 07, 2026 11:51:46 AM com.kurtz.homerecord.core.data.Reloadable _init_$lambda$0
+WARNING: Jobs failed to load
+java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invokeSuspend(JobsViewModelTest.kt:83)
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invoke(JobsViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invoke(JobsViewModelTest.kt)
+	at kotlinx.coroutines.flow.SafeFlow.collectSafely(Builders.kt:57)
+	at kotlinx.coroutines.flow.AbstractFlow.collect(Flow.kt:226)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2$1.invokeSuspend(Combine.kt:28)
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2$1.invokeSuspend(Combine.kt:28)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt.catchImpl(Errors.kt:152)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt$catch$$inlined$unsafeFlow$1.collect(Errors.kt:112)
+	at com.kurtz.homerecord.core.data.Reloadable$wrap$$inlined$flatMapLatest$1.invokeSuspend(Reloadable.kt:189)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invokeSuspend(Merge.kt:30)
+Caused by: java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invokeSuspend(JobsViewModelTest.kt:83)
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invoke(JobsViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.jobs.JobsViewModelTest$aFailedReadShowsTheErrorStateAndRetryRecovers$gates$1.invoke(JobsViewModelTest.kt)
+	at kotlinx.coroutines.flow.SafeFlow.collectSafely(Builders.kt:57)
+	at kotlinx.coroutines.flow.AbstractFlow.collect(Flow.kt:226)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2$1.invokeSuspend(Combine.kt:28)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+]]></system-err>
+</testsuite>

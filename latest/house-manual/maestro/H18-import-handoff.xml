@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="44.884" timestamp="2026-11-07T13:10:23">
+    <testcase id="H18-import-handoff" name="H18-import-handoff" classname="H18-import-handoff" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H18-import-handoff.yaml" time="44.864" timestamp="2026-11-07T13:10:23" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.821Z" hostname="runnervmwuk1x" time="0.027">
+  <properties/>
+  <testcase name="stagesReadBackByNameAndEachAppHasItsDefault" classname="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" time="0.006"/>
+  <testcase name="crossedTinyOrInsideOutOutlinesAreNotUsable" classname="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" time="0.005"/>
+  <testcase name="cornersRoundTripThroughJsonAndDamagedJsonReadsAsNone" classname="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" time="0.006"/>
+  <testcase name="aDraggedHandleStaysInsideThePhoto" classname="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" time="0.005"/>
+  <testcase name="handlesStartInsetTenPercent" classname="com.kurtz.homerecord.housemodel.walls.WallOutlineTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

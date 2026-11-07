@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.ImportPlannerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:17.522Z" hostname="runnervmwuk1x" time="0.009">
+  <properties/>
+  <testcase name="withNoLedgerADifferingRecordIsAConflictNotAnOverwrite" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.004"/>
+  <testcase name="newRecordsAreAddedAndDeletedOnesAreSkipped" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.001"/>
+  <testcase name="aKeptRecordIsAConflictAgainWhenTheCrewChangesItLater" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.001"/>
+  <testcase name="anOlderImportNeverOverwritesALocalEdit" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.0"/>
+  <testcase name="bothSidesChangedIsAConflictTheUserDecides" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.0"/>
+  <testcase name="theSameRecordIsLeftAloneEvenWithANewerTimestamp" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.001"/>
+  <testcase name="importingTheSameBundleAgainChangesNothing" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.001"/>
+  <testcase name="onlyTheImportedSideChangedSinceTheLastImportUpdates" classname="com.kurtz.homerecord.core.bundle.ImportPlannerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

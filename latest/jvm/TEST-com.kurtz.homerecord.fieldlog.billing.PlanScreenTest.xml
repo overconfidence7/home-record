@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:27.457Z" hostname="runnervmwuk1x" time="0.701">
+  <properties/>
+  <testcase name="pricesFailedShowsRetry" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.059"/>
+  <testcase name="planRowIsTheOwnersOnly" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.197"/>
+  <testcase name="crewAfterThePlanEndsSeesRenewAndNoClockIn" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.122"/>
+  <testcase name="lapsedOwnerSeesPricesBuysAndCanSignOutButHasNoBack" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.146"/>
+  <testcase name="currentPlanHasNoBuyButton" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.095"/>
+  <testcase name="trialFromMoreShowsDaysLeftAndBack" classname="com.kurtz.homerecord.fieldlog.billing.PlanScreenTest" time="0.074"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

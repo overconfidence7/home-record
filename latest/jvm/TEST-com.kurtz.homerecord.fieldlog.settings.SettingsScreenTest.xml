@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:00.855Z" hostname="runnervmwuk1x" time="0.372">
+  <properties/>
+  <testcase name="freeUpIsOffWithNothingCached" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.037"/>
+  <testcase name="freeUpSendsTheEvent" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.061"/>
+  <testcase name="storageShowsLoadingWhileCounted" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.056"/>
+  <testcase name="unitsPickerSendsTheChoice" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.038"/>
+  <testcase name="notificationsOffSaysSoAndOpensPhoneSettings" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.035"/>
+  <testcase name="aboutShowsTheVersion" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.054"/>
+  <testcase name="moreNamesTheAccountAndOpensSettingsAndAbout" classname="com.kurtz.homerecord.fieldlog.settings.SettingsScreenTest" time="0.085"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:55.330Z" hostname="runnervmwuk1x" time="0.643">
+  <properties/>
+  <testcase name="panelsOfferNoAdd" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.036"/>
+  <testcase name="contactsAndDocumentsOfferNoAddOrEdit" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.028"/>
+  <testcase name="documentsOfferNoAdd" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.036"/>
+  <testcase name="theWallPageListHasNoAddOverlay" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.035"/>
+  <testcase name="theRoomPageTakesNoWallPhotoAndKeepsThePlanEditorShut" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.035"/>
+  <testcase name="theHouseTabHasNoEditPlanOrFloors" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.06"/>
+  <testcase name="anOwnerStillSeesTheAddActions" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.041"/>
+  <testcase name="remindersTabHasNoAddZoneOrRowActions" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.036"/>
+  <testcase name="itemsHaveNoAddButton" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.028"/>
+  <testcase name="anEmpty3DFloorOffersNoEditPlan" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.037"/>
+  <testcase name="itemPageHidesEditOverflowPlaceAndAdds" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.031"/>
+  <testcase name="theWallPageDrawsNothingAndOffersNoEditOrDelete" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.032"/>
+  <testcase name="aPlanOverlayOpensReadOnly" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.048"/>
+  <testcase name="emergencyAndPanelsOfferNoAdd" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.032"/>
+  <testcase name="homeSearchWithNoMatchOffersNoAdd" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.03"/>
+  <testcase name="backupKeepsMakeButHidesRestore" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.034"/>
+  <testcase name="homeHidesTheAddActionsAndSaysViewOnly" classname="com.kurtz.homerecord.housemanual.share.ViewOnlyTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,49 @@
+{
+ "sha": "c6e9b307",
+ "at": "2026-11-03 22:33 UTC",
+ "stats": {
+  "unitTests": 0,
+  "unitFailures": 0,
+  "coverage": {
+   "acs_claimed": null,
+   "acs_missing": null,
+   "ticked_tasks": null
+  }
+ },
+ "stages": [],
+ "findings": [
+  {
+   "id": "auto:device:field-log:no-results",
+   "severity": "Critical",
+   "text": "device suite produced no results for field-log",
+   "expected": "a device job that produces no results is a finding, and the run does not count as tested",
+   "actual": "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run",
+   "screenshot": "",
+   "app": "field-log",
+   "regressed": true
+  },
+  {
+   "id": "auto:device:house-manual:no-results",
+   "severity": "Critical",
+   "text": "device suite produced no results for house-manual",
+   "expected": "a device job that produces no results is a finding, and the run does not count as tested",
+   "actual": "output directory or stages.json missing or empty: the emulator job failed before running stages; see the job's failing step in the workflow run",
+   "screenshot": "",
+   "app": "house-manual",
+   "regressed": true
+  }
+ ],
+ "new": [
+  "auto:device:field-log:no-results",
+  "auto:device:house-manual:no-results"
+ ],
+ "stillOpen": [],
+ "skipped": [
+  [
+   "handoff",
+   "flows",
+   "no flows in qa/flows/handoff yet (PLAN Q004); handoff job not run"
+  ]
+ ],
+ "walkthrough": {}
+}

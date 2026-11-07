@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:38.940Z" hostname="runnervmwuk1x" time="0.801">
+  <properties/>
+  <testcase name="leadClocksInSelectedCrewOnTheSelectedJob" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.112"/>
+  <testcase name="upcomingJobJoinsThePickerOnItsStartDate" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.038"/>
+  <testcase name="requireGpsStillDeniedAfterSettingsPunchesNothing" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.025"/>
+  <testcase name="leadGetsNoCrewCardOnAJobTheyAreNotOn" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.029"/>
+  <testcase name="otherReasonNeedsText" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.022"/>
+  <testcase name="preselectsTheLastJobWorked" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.053"/>
+  <testcase name="farFromJobAsksForAReasonThenSaves" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.041"/>
+  <testcase name="crewFarFromJobAsksOnceThenPunchesAll" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.06"/>
+  <testcase name="ownerEditOfMyPunchShowsWhoWhenAndWhy" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.039"/>
+  <testcase name="requireGpsSetAfterOpeningApplies" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.026"/>
+  <testcase name="showsApprovedWhenThisWeekIsApproved" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.053"/>
+  <testcase name="requireGpsWithoutPermissionOffersSettings" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.035"/>
+  <testcase name="crewMembersGetNoCrewCard" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.024"/>
+  <testcase name="breakSwitchAndClockOut" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.047"/>
+  <testcase name="listsActiveJobsAndClockInNeedsOne" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.028"/>
+  <testcase name="crewFarFromJobUsesTheCompanyDistance" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.033"/>
+  <testcase name="presetReasonsStoreCodes" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.021"/>
+  <testcase name="requireGpsRetriesTheClockInAfterSettings" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.056"/>
+  <testcase name="explainsLocationOnFirstClockInOnly" classname="com.kurtz.homerecord.fieldlog.clock.ClockViewModelTest" time="0.04"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

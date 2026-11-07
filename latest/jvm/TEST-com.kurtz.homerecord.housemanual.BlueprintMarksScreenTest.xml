@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.BlueprintMarksScreenTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:21.484Z" hostname="runnervmwuk1x" time="0.574">
+  <properties/>
+  <testcase name="tappingThePipeOrTheItemOpensIt" classname="com.kurtz.homerecord.housemanual.BlueprintMarksScreenTest" time="0.453"/>
+  <testcase name="withoutAnOpenerMarksStayOutOfTheWayAndTheRoomOpens" classname="com.kurtz.homerecord.housemanual.BlueprintMarksScreenTest" time="0.115"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:17.005Z" hostname="runnervmwuk1x" time="0.002">
+  <properties/>
+  <testcase name="aPipeDrawnOnRoughInStaysPutOnFinished" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.001"/>
+  <testcase name="photoToWallUndoesWallToPhoto" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="pointsOffTheWallClampToItsEdgeAndTapsOffItAreRefused" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="perspectiveIsNotTreatedAsAStretch" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="aRectangleOutlineIsAPlainScale" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="theTextureAndPlainWallAreAlreadyWallSpace" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="theOutlineCornersAreTheWallCorners" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <testcase name="aCrossedOutlinePlacesNothing" classname="com.kurtz.homerecord.housemodel.walls.WallSpaceMapperTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.BundleCodecTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:06.638Z" hostname="runnervmwuk1x" time="0.092">
+  <properties/>
+  <testcase name="zipSlipEntriesAreRefusedAndNothingIsLeftBehind" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.022"/>
+  <testcase name="aWrittenBundleReadsBackWithItsRecordsAndMedia" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.048"/>
+  <testcase name="aNewerFormatVersionFailsCleanlyAndUnpacksNothing" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.004"/>
+  <testcase name="anOversizedRecordStopsAtItsOwnCapBeforeTheBundleCap" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.004"/>
+  <testcase name="anOversizedBundleStopsAtTheCap" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.001"/>
+  <testcase name="unknownFieldsAndEntityTypesAreKept" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.0"/>
+  <testcase name="theWriterRefusesAMediaNameThatClimbsOut" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.005"/>
+  <testcase name="notABundleIsSaidPlainly" classname="com.kurtz.homerecord.core.bundle.BundleCodecTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

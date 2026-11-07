@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:42.511Z" hostname="runnervmwuk1x" time="0.732">
+  <properties/>
+  <testcase name="sendToHomeownerTakesTheAddressAndSends" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.093"/>
+  <testcase name="makingAndFailedAreShownUnderExport" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.103"/>
+  <testcase name="sentSaysWhereAndUntilWhenAndOffersSendAgain" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.122"/>
+  <testcase name="aBadAddressShowsTheFieldError" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.076"/>
+  <testcase name="whileSendingBothActionsWait" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.074"/>
+  <testcase name="summaryListsEveryKindWithItsCountAndExportSendsTheEvent" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.112"/>
+  <testcase name="offlineSaysSoWithRetryAndTooLargePointsAtExport" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.077"/>
+  <testcase name="anEmptyHouseSaysSoAndExportWaits" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffScreenTest" time="0.072"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

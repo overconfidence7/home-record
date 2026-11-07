@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.timesheets.PunchEditScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:04.354Z" hostname="runnervmwuk1x" time="0.643">
+  <properties/>
+  <testcase name="editIsAFullScreenFormWithCloseAndSave" classname="com.kurtz.homerecord.fieldlog.timesheets.PunchEditScreenTest" time="0.111"/>
+  <testcase name="timeComesFromTheTimePicker" classname="com.kurtz.homerecord.fieldlog.timesheets.PunchEditScreenTest" time="0.224"/>
+  <testcase name="closeAfterAChangeAsksFirst" classname="com.kurtz.homerecord.fieldlog.timesheets.PunchEditScreenTest" time="0.204"/>
+  <testcase name="missingReasonShowsItsError" classname="com.kurtz.homerecord.fieldlog.timesheets.PunchEditScreenTest" time="0.095"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

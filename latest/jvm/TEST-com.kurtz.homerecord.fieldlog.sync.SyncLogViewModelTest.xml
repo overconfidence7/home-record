@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.sync.SyncLogViewModelTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:01.822Z" hostname="runnervmwuk1x" time="0.01">
+  <properties/>
+  <testcase name="reconnectingAndSyncingEmptiesThePendingCount" classname="com.kurtz.homerecord.fieldlog.sync.SyncLogViewModelTest" time="0.006"/>
+  <testcase name="showsPhasePendingAndTheLog" classname="com.kurtz.homerecord.fieldlog.sync.SyncLogViewModelTest" time="0.001"/>
+  <testcase name="clearEmptiesTheLog" classname="com.kurtz.homerecord.fieldlog.sync.SyncLogViewModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.562Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="revealPansARoomBelowTheCanvasUpIntoView" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <testcase name="revealPansARoomOffTheRightEdgeLeft" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <testcase name="fitWithNoRoomsOrNoCanvasLeavesTheViewAlone" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <testcase name="fitCentresEveryRoomAndFillsTheTighterSide" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.001"/>
+  <testcase name="turnedIsTrueOnlyWhenPortraitBecomesLandscapeOrBack" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <testcase name="revealZoomsOutOnlyWhenTheRoomIsBiggerThanTheCanvas" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <testcase name="revealLeavesAVisibleRoomWhereItIs" classname="com.kurtz.homerecord.housemodel.plan.PlanViewportTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

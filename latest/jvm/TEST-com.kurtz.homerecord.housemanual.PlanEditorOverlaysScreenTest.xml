@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:38.086Z" hostname="runnervmwuk1x" time="0.565">
+  <properties/>
+  <testcase name="whileDrawingTheRoomsAreNamedButDoNotPick" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.06"/>
+  <testcase name="aPickedOverlayDragsItsPointAndOffersEditAndDelete" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.09"/>
+  <testcase name="whileDrawingATapOnThePlanAddsAPointInPlanInches" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.055"/>
+  <testcase name="anOpenFormShowsInPlaceOfThePlan" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.082"/>
+  <testcase name="inOverlaysModeAddOverlayStartsDrawing" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.086"/>
+  <testcase name="deleteAsksFirst" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.093"/>
+  <testcase name="theModeSwitchTurnsOverlaysOn" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.049"/>
+  <testcase name="anOverlayIsANamedNodeThatPicksIt" classname="com.kurtz.homerecord.housemanual.PlanEditorOverlaysScreenTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:37.192Z" hostname="runnervmwuk1x" time="0.009">
+  <properties/>
+  <testcase name="phonesReadFormatted" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.005"/>
+  <testcase name="jobStatusIsReadAsOfToday" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.003"/>
+  <testcase name="blankContactDetailsReadAsNone" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.0"/>
+  <testcase name="clientsSortByNameWithTheirJobsActiveFirst" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.001"/>
+  <testcase name="dialableKeepsDigitsAndLeadingPlus" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.0"/>
+  <testcase name="clientsWithoutLiveJobsAreLeftOut" classname="com.kurtz.homerecord.fieldlog.clients.ClientListBuilderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

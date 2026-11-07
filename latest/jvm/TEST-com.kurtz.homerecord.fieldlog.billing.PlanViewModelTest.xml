@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:28.163Z" hostname="runnervmwuk1x" time="0.077">
+  <properties/>
+  <testcase name="purchaseStopsReadingMeAfterTheBackoff" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.066"/>
+  <testcase name="purchaseBuysForTheCompanyAndRefreshesMembership" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.005"/>
+  <testcase name="purchaseKeepsReadingMeUntilTheWebhookLands" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.003"/>
+  <testcase name="failedPurchaseAndEmptyRestoreSaySoWithoutRefreshing" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.001"/>
+  <testcase name="noPricesShowsRetryAndRetryRecovers" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.001"/>
+  <testcase name="loadsSoloThenCrewWithStorePrices" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.001"/>
+  <testcase name="restoreFindsTheCompanyPlan" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.0"/>
+  <testcase name="upgradeFromTrialWaitsForTheBoughtPlan" classname="com.kurtz.homerecord.fieldlog.billing.PlanViewModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

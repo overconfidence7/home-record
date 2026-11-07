@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:40.015Z" hostname="runnervmwuk1x" time="0.017">
+  <properties/>
+  <testcase name="pickedTimeZoneSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.011"/>
+  <testcase name="blankNameBlocksSave" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="punchDistanceMustBeInRange" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="failedSaveKeepsTheFormAndShowsWhy" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.002"/>
+  <testcase name="untouchedTimeZoneStaysUnsetAndASetOneLoads" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="loadFailureCanRetry" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.001"/>
+  <testcase name="loadsProfileIntoTheForm" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="unsavedEditsSurviveProcessDeath" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="saveSendsEverythingAndReportsSaved" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.001"/>
+  <testcase name="pickingATimeZoneSavesIt" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.0"/>
+  <testcase name="editingMakesItDirtyAndSavable" classname="com.kurtz.homerecord.fieldlog.company.CompanyViewModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

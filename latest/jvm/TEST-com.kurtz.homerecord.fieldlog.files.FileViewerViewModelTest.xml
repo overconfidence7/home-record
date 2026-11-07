@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:41.304Z" hostname="runnervmwuk1x" time="0.183">
+  <properties/>
+  <testcase name="damagedPdfIsUnreadable" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.021"/>
+  <testcase name="fileNotOnPhoneShowsPromptAndOpensNothing" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.024"/>
+  <testcase name="pdfOpensAsPages" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.019"/>
+  <testcase name="otherKindsCanOnlyBeShared" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.019"/>
+  <testcase name="photoOpensAsOnePage" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.03"/>
+  <testcase name="deletedOrUnknownFileIsMissing" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.027"/>
+  <testcase name="downloadThatFailsShowsPromptAndRetryTriesAgain" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.02"/>
+  <testcase name="fileNotOnPhoneDownloadsOnOpenThenShowsPages" classname="com.kurtz.homerecord.fieldlog.files.FileViewerViewModelTest" time="0.019"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.EmergencyScreenTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:27.010Z" hostname="runnervmwuk1x" time="0.401">
+  <properties/>
+  <testcase name="emptyHomeOffersToAddTheFirstShutoff" classname="com.kurtz.homerecord.housemanual.EmergencyScreenTest" time="0.127"/>
+  <testcase name="tappingAShutoffOpensItsItem" classname="com.kurtz.homerecord.housemanual.EmergencyScreenTest" time="0.072"/>
+  <testcase name="groupsWithTheMainFirstAndLargeInstructions" classname="com.kurtz.homerecord.housemanual.EmergencyScreenTest" time="0.196"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

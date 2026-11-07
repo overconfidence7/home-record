@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:47.952Z" hostname="runnervmwuk1x" time="0.452">
+  <properties/>
+  <testcase name="aSharedLogSaysItWentThroughTheShareSheetAndCrewOnlyPreview" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.037"/>
+  <testcase name="theSentLineScrollsIntoViewWhenTheLogIsMarkedSentWhileOpen" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.044"/>
+  <testcase name="theEmptyLogWarningOffersCancelAndSendAnyway" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.068"/>
+  <testcase name="theLeadPreviewsAndSendsFromTheBarUnderTheLog" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.04"/>
+  <testcase name="nothingLoggedCountsEverySectionAButTheWeather" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.024"/>
+  <testcase name="withNoEmailsShareIsTheOneActionAndWhileMakingTheButtonsWait" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.037"/>
+  <testcase name="theSheetListsWhoGetsItAndOffersEmailOrShare" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.04"/>
+  <testcase name="aSentLogChangedLaterSaysSoOnTheSentLine" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.083"/>
+  <testcase name="aSentLogSaysWhenAndToWhomAndOffersSendAgain" classname="com.kurtz.homerecord.fieldlog.log.LogSendScreenTest" time="0.075"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

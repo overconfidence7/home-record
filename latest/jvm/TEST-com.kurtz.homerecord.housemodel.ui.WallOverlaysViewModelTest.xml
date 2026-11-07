@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.271Z" hostname="runnervmwuk1x" time="0.319">
+  <properties/>
+  <testcase name="anOverlayDrawnAtRoughInStaysPutWhenTheWallSwitchesToFinished" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.035"/>
+  <testcase name="saveWithoutAKindShowsTheErrorAndSavesNothing" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.025"/>
+  <testcase name="drawingTapsThenSavingStoresARunInWallSpaceWithItsFields" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.025"/>
+  <testcase name="aGalleryPhotoReplacesAFreshOneAndClosingDeletesWhatWasNotSaved" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.025"/>
+  <testcase name="draggingAPointMovesItAndDeleteRemovesTheOverlay" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.036"/>
+  <testcase name="aCancelledCameraLeavesNoPhotoAndEditKeepsOrClearsTheSavedOne" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.034"/>
+  <testcase name="opensWithTheOverlayPickedFromTheRoomPageAndPlainWallWithoutAPhoto" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.027"/>
+  <testcase name="oneTapMakesASpotAndUndoAndCancelDropPoints" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.02"/>
+  <testcase name="thePhotoTheLinkedItemAndThePendingCameraSurviveProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.025"/>
+  <testcase name="aPhotoFromTheCameraAndALinkedItemAreSavedWithTheOverlay" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.022"/>
+  <testcase name="theDrawingTheFormAndTheStageSurviveProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.023"/>
+  <testcase name="editChangesTheFieldsAndKeepsThePoints" classname="com.kurtz.homerecord.housemodel.ui.WallOverlaysViewModelTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

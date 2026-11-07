@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:32.073Z" hostname="runnervmwuk1x" time="3.575">
+  <properties/>
+  <testcase name="aSignedOrderCarriesCompanyJobDescriptionLinesTotalPhotosSignatureAndTime" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" time="2.906"/>
+  <testcase name="aDraftPrintsNotSignedYetWithoutASignature" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" time="0.057"/>
+  <testcase name="fileNamesDropCharactersAFileCannotHold" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" time="0.032"/>
+  <testcase name="theSignatureImageIsDrawnWholeOnThePage" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" time="0.283"/>
+  <testcase name="theMakerHasNothingToWriteForAnOrderOrJobThatIsGone" classname="com.kurtz.homerecord.fieldlog.changes.ChangeOrderPdfTest" time="0.194"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

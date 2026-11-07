@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.schedule.JobScheduleTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:28.488Z" hostname="runnervmwuk1x" time="0.191">
+  <properties/>
+  <testcase name="moveChangesDayAndPersonAndMergesATwin" classname="com.kurtz.homerecord.core.schedule.JobScheduleTest" time="0.048"/>
+  <testcase name="removeSoftDeletesOnce" classname="com.kurtz.homerecord.core.schedule.JobScheduleTest" time="0.047"/>
+  <testcase name="secondJobSameDayIsKept" classname="com.kurtz.homerecord.core.schedule.JobScheduleTest" time="0.043"/>
+  <testcase name="assignQueuesOneChangeAndIsNotDoubled" classname="com.kurtz.homerecord.core.schedule.JobScheduleTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

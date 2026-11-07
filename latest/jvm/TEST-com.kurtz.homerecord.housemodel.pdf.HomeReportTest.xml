@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.pdf.HomeReportTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.411Z" hostname="runnervmwuk1x" time="0.081">
+  <properties/>
+  <testcase name="roomsGoFloorByFloorThenPseudoRoomsThenItemsWithNoRoom" classname="com.kurtz.homerecord.housemodel.pdf.HomeReportTest" time="0.011"/>
+  <testcase name="itemLinesCarryMakeModelSerialInServiceAndWarrantyStatus" classname="com.kurtz.homerecord.housemodel.pdf.HomeReportTest" time="0.009"/>
+  <testcase name="aHomeWithNoShutoffsSaysSoAndAMissingPhotoIsSkipped" classname="com.kurtz.homerecord.housemodel.pdf.HomeReportTest" time="0.019"/>
+  <testcase name="aFortyItemHomePrintsEveryFloorAndEveryItemInUnderFiveSeconds" classname="com.kurtz.homerecord.housemodel.pdf.HomeReportTest" time="0.04"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

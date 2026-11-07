@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.MediaUploaderTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:25.123Z" hostname="runnervmwuk1x" time="0.677">
+  <properties/>
+  <testcase name="failedDownloadLeavesNothingBehind" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.039"/>
+  <testcase name="freeUpKeepsAvailableOfflineFiles" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.028"/>
+  <testcase name="cacheDownloadsOnceAndEvictsOldestOverCap" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.04"/>
+  <testcase name="aFileTooLargeOrRefusedByTheServerGivesUp" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.051"/>
+  <testcase name="expiredUrlIsReplacedBeforeUpload" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.05"/>
+  <testcase name="missingFileFailsWithoutNetwork" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.039"/>
+  <testcase name="queueSurvivesProcessDeathMidUpload" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.037"/>
+  <testcase name="aFreshUrlTheServerKeepsRefusingStopsAfterTheLimit" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.067"/>
+  <testcase name="noMembershipOnServerGivesUp" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.03"/>
+  <testcase name="offlineKeepsFileQueuedAndRetriesAfterBackoff" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.03"/>
+  <testcase name="aRefusedReusedUrlDoesNotCountAgainstTheFile" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.028"/>
+  <testcase name="lapsedPlanKeepsTheFileUntilTheCompanyRenews" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.05"/>
+  <testcase name="rejectedSignatureAsksForAFreshUrlAtOnce" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.06"/>
+  <testcase name="queuingTheSameFileTwiceUploadsOnce" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.034"/>
+  <testcase name="backoffDoublesAndCaps" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.019"/>
+  <testcase name="uploadsThroughPresignedUrl" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.023"/>
+  <testcase name="repeatedServerFailureStopsThenRetryFailedRequeues" classname="com.kurtz.homerecord.core.media.MediaUploaderTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

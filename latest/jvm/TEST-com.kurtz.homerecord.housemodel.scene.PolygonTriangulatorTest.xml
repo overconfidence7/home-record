@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.PolygonTriangulatorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.787Z" hostname="runnervmwuk1x" time="0.0">
+  <properties/>
+  <testcase name="concaveOutlineIsCoveredExactlyAndEveryTriangleWindsTheSameWay" classname="com.kurtz.homerecord.housemodel.scene.PolygonTriangulatorTest" time="0.0"/>
+  <testcase name="squareIsTwoTriangles" classname="com.kurtz.homerecord.housemodel.scene.PolygonTriangulatorTest" time="0.0"/>
+  <testcase name="aStraightThroughCornerAddsNoSliver" classname="com.kurtz.homerecord.housemodel.scene.PolygonTriangulatorTest" time="0.0"/>
+  <testcase name="degenerateOutlinesGiveNothing" classname="com.kurtz.homerecord.housemodel.scene.PolygonTriangulatorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

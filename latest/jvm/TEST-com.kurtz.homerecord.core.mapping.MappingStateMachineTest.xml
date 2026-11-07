@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:24.199Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="startUnpluggedWaitsThenArmsWhenPlugged" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="eventsOutOfPlaceChangeNothing" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="pickDoneRearmsWhenChargingOrWaitsForTheNextOutlet" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="leaveIsFinalNoAlarmAfterward" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="powerDropWhileArmedSoundsTheAlarm" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.001"/>
+  <testcase name="dropRightAfterArmingIsAShakyPlugNotABreaker" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="stopGoesBackToIdle" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="startWhileChargingArms" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <testcase name="alarmKeepsSoundingWhenPowerComesBackUntilSilenced" classname="com.kurtz.homerecord.core.mapping.MappingStateMachineTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

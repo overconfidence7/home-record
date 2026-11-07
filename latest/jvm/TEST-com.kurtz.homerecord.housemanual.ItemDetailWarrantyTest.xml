@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:31.257Z" hostname="runnervmwuk1x" time="1.143">
+  <properties/>
+  <testcase name="pickingAShutoffThatIsGoneShowsANotice" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.121"/>
+  <testcase name="addReminderFromTheItemPageSavesItForThisItem" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.084"/>
+  <testcase name="upkeepFormIsDirtyOnlyAfterAChangeAndKeepsDraftThroughProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.099"/>
+  <testcase name="autoLookupLeavesFoundTermsAsABadgeWithoutASheet" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.059"/>
+  <testcase name="itemPageListsThisItemsRemindersAndDoneMovesTheNextDate" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.062"/>
+  <testcase name="upkeepDeleteAsksFirstCancelKeepsAndConfirmDeletesThroughProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.087"/>
+  <testcase name="checkRecallsShowsMatchesNoneOfflineAndNeedsMake" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.072"/>
+  <testcase name="upkeepFormsSaveConsumableAndServiceNewestFirst" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.066"/>
+  <testcase name="duplicateAsksTheRouteToOpenTheCopyAndHandledClearsIt" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.054"/>
+  <testcase name="deleteAsksTheRouteToCloseOnceAndTheRequestSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.075"/>
+  <testcase name="documentsAddAttachAndRejectUnsupportedFiles" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.072"/>
+  <testcase name="offlineQueuesThenRunPendingLeavesTermsForReview" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.055"/>
+  <testcase name="moveToRoomListsRoomsMovesTheItemAndSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.056"/>
+  <testcase name="serviceFormOffersContactsAndSavesTheChosenOne" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.035"/>
+  <testcase name="lookUpShowsTermsThenEditedConfirmStoresThemAsManual" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.034"/>
+  <testcase name="discardStoresNothingAndMissingModelExplainsWhy" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.04"/>
+  <testcase name="pickingAShutoffLinksItAndNoShutoffClearsIt" classname="com.kurtz.homerecord.housemanual.ItemDetailWarrantyTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

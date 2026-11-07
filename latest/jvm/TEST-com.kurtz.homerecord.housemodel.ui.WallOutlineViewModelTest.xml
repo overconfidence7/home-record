@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.100Z" hostname="runnervmwuk1x" time="0.167">
+  <properties/>
+  <testcase name="opensOnThePhotoWithTheHandlesTenPercentIn" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.022"/>
+  <testcase name="backDropsTheNewPhoto" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.02"/>
+  <testcase name="crossedCornersAreNotSaved" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.019"/>
+  <testcase name="draggingAHandleMovesThatCornerAndShowsTheLoupeUntilLetGo" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.024"/>
+  <testcase name="anUnreadablePhotoOrAMissingWallSaysSo" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.022"/>
+  <testcase name="useStraightensThePhotoAndSavesItAtTheStage" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.02"/>
+  <testcase name="backWhileUseIsSavingKeepsThePhotoAndTheSaveFinishes" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.018"/>
+  <testcase name="aFailedTextureKeepsTheScreenWithTheReason" classname="com.kurtz.homerecord.housemodel.ui.WallOutlineViewModelTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

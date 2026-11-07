@@ -1,0 +1,1 @@
+{"app":"field-log","build":"benchmark","rows":200,"frames":115,"janky":90,"jankPercent":78,"softwareRenderer":true,"uiThread":{"uiFrames": 120, "uiJanky": 17, "uiJankPercent": 14, "uiP50Ms": 3.5, "uiP90Ms": 22.1, "budgetMs": 16.7}}

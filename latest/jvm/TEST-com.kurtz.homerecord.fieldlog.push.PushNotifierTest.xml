@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:52.119Z" hostname="runnervmwuk1x" time="0.142">
+  <properties/>
+  <testcase name="wordingForEachKind" classname="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" time="0.037"/>
+  <testcase name="taskAssignedShowsTheTaskOnTheTasksChannel" classname="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" time="0.063"/>
+  <testcase name="aSecondPushAboutTheSameDayReplacesTheFirst" classname="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" time="0.012"/>
+  <testcase name="nothingIsShownWithoutPermission" classname="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" time="0.009"/>
+  <testcase name="tappingTheNotificationCarriesTheMessageBackToTheApp" classname="com.kurtz.homerecord.fieldlog.push.PushNotifierTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

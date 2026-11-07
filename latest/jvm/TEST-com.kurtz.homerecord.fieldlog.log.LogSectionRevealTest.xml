@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:47.949Z" hostname="runnervmwuk1x" time="0.002">
+  <properties/>
+  <testcase name="aSectionAlreadyInViewIsLeftAlone" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.001"/>
+  <testcase name="savedTextBelowTheBottomEdgeScrollsJustEnough" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.0"/>
+  <testcase name="workDoneRevealsItsLastEntryOrTheNoneLine" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.001"/>
+  <testcase name="headerOnTheEdgeWithTextOutOfViewPutsTheHeaderAtTheTop" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.0"/>
+  <testcase name="aSectionScrolledAwayEntirelyIsNotChased" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.0"/>
+  <testcase name="neverPushesTheHeaderAboveTheTop" classname="com.kurtz.homerecord.fieldlog.log.LogSectionRevealTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

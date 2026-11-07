@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogSendTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:48.415Z" hostname="runnervmwuk1x" time="0.335">
+  <properties/>
+  <testcase name="aSentLogOffersAShareLinkWithItsDayAndTurnOff" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.097"/>
+  <testcase name="aDayWithNothingLoggedAsksBeforeSendingAndCancelSendsNothing" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.029"/>
+  <testcase name="withNoEmailsOnTheJobEmailFallsBackToTheShareSheet" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.027"/>
+  <testcase name="crewReadTheLogButCannotSendIt" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.019"/>
+  <testcase name="crewSeeNoShareLinkOnASentLog" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.026"/>
+  <testcase name="theShareSheetMarksItSentWithNoRecipientsAndASecondSendReplacesTheFirst" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.026"/>
+  <testcase name="sendAnywayDoesNothingUnlessTheWarningIsOpen" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.02"/>
+  <testcase name="aFailedPdfOrNoAppKeepsTheSheetOpenWithTheErrorAndTheLogUnsent" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.024"/>
+  <testcase name="previewMakesThePdfForTheSavedLogAndRetryTriesAgain" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.036"/>
+  <testcase name="emailingTheLogMarksItSentWithTheTimeAndRecipients" classname="com.kurtz.homerecord.fieldlog.log.LogSendTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

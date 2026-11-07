@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.753Z" hostname="runnervmwuk1x" time="0.019">
+  <properties/>
+  <testcase name="stackedFloorsShareOneOriginAndTheFloorsBelowAreGhosts" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.015"/>
+  <testcase name="stillPictureDropsHiddenFacesAndDrawsFarToNear" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.001"/>
+  <testcase name="countsWallsAndTintsRoomsByKind" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.001"/>
+  <testcase name="allFloorsFramesTheWholeStackAndAnEmptyChosenFloorIsEmpty" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.001"/>
+  <testcase name="picturesFollowTheChosenStage" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.0"/>
+  <testcase name="aFloorWithNoRoomsIsEmpty" classname="com.kurtz.homerecord.housemodel.scene.FloorSceneTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

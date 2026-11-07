@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:24.510Z" hostname="runnervmwuk1x" time="0.279">
+  <properties/>
+  <testcase name="goneFileWithNoCloudCopyIsMissingNotOffline" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.061"/>
+  <testcase name="missingFileOrRecordShowsMissingState" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.066"/>
+  <testcase name="documentOnlyInTheCloudIsFetchedThenOpened" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.082"/>
+  <testcase name="offlineShowsNoConnectionAndRetryFetchesAgain" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.037"/>
+  <testcase name="opensStoredDocumentAsPages" classname="com.kurtz.homerecord.housemanual.DocumentViewerViewModelTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

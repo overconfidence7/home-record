@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.SegmentLabelSizeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.094Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="keepsTheLargestSizeWhenEveryLabelFits" classname="com.kurtz.homerecord.housemodel.ui.SegmentLabelSizeTest" time="0.001"/>
+  <testcase name="aMaximumAtOrBelowTheMinimumReturnsTheMinimum" classname="com.kurtz.homerecord.housemodel.ui.SegmentLabelSizeTest" time="0.0"/>
+  <testcase name="fallsBackToTheMinimumWhenNothingFits" classname="com.kurtz.homerecord.housemodel.ui.SegmentLabelSizeTest" time="0.0"/>
+  <testcase name="stepsDownToTheFirstSizeAtWhichTheLongestLabelFits" classname="com.kurtz.homerecord.housemodel.ui.SegmentLabelSizeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

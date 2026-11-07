@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:02.342Z" hostname="runnervmwuk1x" time="0.357">
+  <properties/>
+  <testcase name="pinOnTheHouseTabOpensItsTask" classname="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" time="0.136"/>
+  <testcase name="formShowsWhereTheTaskIsPinnedAndOpensThePicker" classname="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" time="0.081"/>
+  <testcase name="tapOnThePlanPlacesThePinAndDoneAndRemoveWork" classname="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" time="0.056"/>
+  <testcase name="pickerWithoutAPinSaysWhereToTapAndOffersNoRemove" classname="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" time="0.04"/>
+  <testcase name="noPlanHidesThePinField" classname="com.kurtz.homerecord.fieldlog.tasks.TaskPinScreenTest" time="0.039"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

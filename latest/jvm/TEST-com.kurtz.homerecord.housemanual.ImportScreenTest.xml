@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ImportScreenTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:30.929Z" hostname="runnervmwuk1x" time="0.291">
+  <properties/>
+  <testcase name="countsConflictPickAndImport" classname="com.kurtz.homerecord.housemanual.ImportScreenTest" time="0.159"/>
+  <testcase name="doneOffersToShowTheHome" classname="com.kurtz.homerecord.housemanual.ImportScreenTest" time="0.066"/>
+  <testcase name="nothingNewDisablesImport" classname="com.kurtz.homerecord.housemanual.ImportScreenTest" time="0.062"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.materials.MaterialFormTypingTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:49.471Z" hostname="runnervmwuk1x" time="0.3">
+  <properties/>
+  <testcase name="amountTypedOneKeyAtATimeAfterAFailedSaveKeepsEveryDigit" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormTypingTest" time="0.298"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

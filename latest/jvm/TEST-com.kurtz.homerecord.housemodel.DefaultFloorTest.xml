@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.DefaultFloorTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:05.871Z" hostname="runnervmwuk1x" time="0.022">
+  <properties/>
+  <testcase name="floorWithRoomsWins" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.014"/>
+  <testcase name="drawnHomeOpensOnMainNotTheBasement" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.0"/>
+  <testcase name="emptyHomeOpensOnEntranceLevel" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.0"/>
+  <testcase name="onlyTheBasementDrawnOpensOnTheBasement" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.0"/>
+  <testcase name="allBelowGradeFallsBackToFirstAndEmptyIsNull" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.002"/>
+  <testcase name="splitLevelOpensOnLowestAtOrAboveGrade" classname="com.kurtz.homerecord.housemodel.DefaultFloorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

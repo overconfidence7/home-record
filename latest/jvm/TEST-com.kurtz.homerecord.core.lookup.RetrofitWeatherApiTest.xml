@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:23.998Z" hostname="runnervmwuk1x" time="0.188">
+  <properties/>
+  <testcase name="readsTheDayAndStampsTheFetch" classname="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" time="0.049"/>
+  <testcase name="failuresMapToOfflineNotYetAndFailed" classname="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" time="0.041"/>
+  <testcase name="theSnapshotCarriesTheBackendsFetchTimeNotThePhones" classname="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" time="0.037"/>
+  <testcase name="anEmptyDayIsOkWithNoSnapshot" classname="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" time="0.03"/>
+  <testcase name="missingValuesStayMissing" classname="com.kurtz.homerecord.core.lookup.RetrofitWeatherApiTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

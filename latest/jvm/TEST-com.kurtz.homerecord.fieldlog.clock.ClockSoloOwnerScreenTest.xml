@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.clock.ClockSoloOwnerScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:37.797Z" hostname="runnervmwuk1x" time="0.444">
+  <properties/>
+  <testcase name="withACrewTheCardAndButtonStay" classname="com.kurtz.homerecord.fieldlog.clock.ClockSoloOwnerScreenTest" time="0.104"/>
+  <testcase name="aWeekWithHoursKeepsItsRows" classname="com.kurtz.homerecord.fieldlog.clock.ClockSoloOwnerScreenTest" time="0.12"/>
+  <testcase name="soloOwnerGetsOneInviteRowThatOpensTeam" classname="com.kurtz.homerecord.fieldlog.clock.ClockSoloOwnerScreenTest" time="0.117"/>
+  <testcase name="aWeekWithNoHoursIsOneLine" classname="com.kurtz.homerecord.fieldlog.clock.ClockSoloOwnerScreenTest" time="0.096"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

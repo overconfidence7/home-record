@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:14.563Z" hostname="runnervmwuk1x" time="0.001">
+  <properties/>
+  <testcase name="typingANameInTheEditorSetsTheKind" classname="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" time="0.001"/>
+  <testcase name="namesGiveTheirKind" classname="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" time="0.0"/>
+  <testcase name="wordsMatchWholeAndUnknownNamesGiveNothing" classname="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" time="0.0"/>
+  <testcase name="aKindThePersonPickedIsKept" classname="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" time="0.0"/>
+  <testcase name="theMoreSpecificWordWins" classname="com.kurtz.homerecord.housemodel.plan.RoomKindGuessTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

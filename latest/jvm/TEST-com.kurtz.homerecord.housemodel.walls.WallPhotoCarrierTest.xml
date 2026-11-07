@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.850Z" hostname="runnervmwuk1x" time="0.003">
+  <properties/>
+  <testcase name="theCutFollowsThePhotosPerspectiveSoOverlaysStayOnTheirPart" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.001"/>
+  <testcase name="aWallWhoseCornersMovedKeepsItsOutline" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.0"/>
+  <testcase name="aSplitWallKeepsItsHalfOfThePhotoAndTheNewPartGetsTheOtherHalf" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.001"/>
+  <testcase name="aSplitWallInARoomDrawnCounterClockwiseKeepsTheHalfOnItsSide" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.0"/>
+  <testcase name="eachStageIsCutAndAPhotoWithoutAnOutlineIsTheWholeWall" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.0"/>
+  <testcase name="aMergedWallStretchesItsOwnPhotoAlongTheWallWhenThePhotoSawThatFar" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.0"/>
+  <testcase name="aMergedWallWithoutAPhotoTakesItsNeighboursKeepingTheOutlineWhenItRunsOffThePhoto" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoCarrierTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

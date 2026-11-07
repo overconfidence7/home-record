@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:22.047Z" hostname="runnervmwuk1x" time="1.091">
+  <properties/>
+  <testcase name="snapshotIsCachedForSixHoursAndKeptWhenARefreshFails" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.182"/>
+  <testcase name="anUnchangedReassemblyWritesAndQueuesNothing" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.066"/>
+  <testcase name="aNoteIsFiledUnderItsOwnDayNotTheViewersZone" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.042"/>
+  <testcase name="markSentRecordsTimeRecipientsAndPdfAndASecondSendReplacesThem" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.048"/>
+  <testcase name="theIdIsTheSameOnEveryPhone" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.024"/>
+  <testcase name="rangeListsEveryJobsLogOncePerDayWithItsDelays" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.043"/>
+  <testcase name="aSnapshotTakenAfterTheDayEndedIsFinal" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.033"/>
+  <testcase name="offlineWithNoSnapshotSaysNoWeather" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.036"/>
+  <testcase name="aCachedEveningForecastHandedOutAfterMidnightIsNotFinal" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.086"/>
+  <testcase name="assemblesTheDayFromRoomAndSavesTheDraft" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.063"/>
+  <testcase name="aDayOpenMeteoHasNoValuesForSaysNoWeatherNotOffline" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.064"/>
+  <testcase name="daysListNewestFirstAndMissingJobIsNull" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.082"/>
+  <testcase name="editsSavedTogetherOrDuringAssemblyAllLand" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.072"/>
+  <testcase name="reassemblingKeepsHandEditsAndPicksUpNewRecords" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.099"/>
+  <testcase name="noLocationAndTooFarAheadAreToldApart" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.064"/>
+  <testcase name="aSentLogEditedOrReassembledLaterIsChangedSinceSent" classname="com.kurtz.homerecord.core.log.DailyLogRepositoryTest" time="0.066"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

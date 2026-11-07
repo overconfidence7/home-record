@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ClaimScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:22.956Z" hostname="runnervmwuk1x" time="0.381">
+  <properties/>
+  <testcase name="offlineOffersRetryAndClose" classname="com.kurtz.homerecord.housemanual.ClaimScreenTest" time="0.108"/>
+  <testcase name="signedOutShowsTheIntroAndTheSignInForm" classname="com.kurtz.homerecord.housemanual.ClaimScreenTest" time="0.082"/>
+  <testcase name="downloadingNamesTheContractor" classname="com.kurtz.homerecord.housemanual.ClaimScreenTest" time="0.091"/>
+  <testcase name="anExpiredLinkOnlyCloses" classname="com.kurtz.homerecord.housemanual.ClaimScreenTest" time="0.095"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

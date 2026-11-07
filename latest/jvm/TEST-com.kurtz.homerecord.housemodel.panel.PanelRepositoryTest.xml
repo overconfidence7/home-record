@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:13.940Z" hostname="runnervmwuk1x" time="0.311">
+  <properties/>
+  <testcase name="roomsAndItemsFedAreLinksThatFollowTheEditor" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.052"/>
+  <testcase name="panelFactsSaveAndCannotShrinkBelowABreakerOrSwitchLayoutUnderOne" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.032"/>
+  <testcase name="tandemPutsTwoBreakersInOneSlot" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.023"/>
+  <testcase name="panelIsCreatedOnceWithFortySlotsAndTwoColumns" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.019"/>
+  <testcase name="homeSearchSeesEveryLiveBreakerWithItsPanelItem" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.025"/>
+  <testcase name="twoPoleBreakerFillsTwoSlotsAndTakenSlotsAreRefused" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.038"/>
+  <testcase name="panelOpenedFromTwoPlacesAtOnceIsStillMadeOnce" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.033"/>
+  <testcase name="itemsAndRoomsListTheBreakersFeedingThemWithThePanelNameAndConfidence" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.04"/>
+  <testcase name="aBreakerFeedsRoomsAndItemsButNotThePanels" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.021"/>
+  <testcase name="mappingPickConfirmsTheLink" classname="com.kurtz.homerecord.housemodel.panel.PanelRepositoryTest" time="0.024"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

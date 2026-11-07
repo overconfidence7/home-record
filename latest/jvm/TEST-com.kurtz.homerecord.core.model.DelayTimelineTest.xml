@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.model.DelayTimelineTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:26.158Z" hostname="runnervmwuk1x" time="0.002">
+  <properties/>
+  <testcase name="groupsByJobOldestFirstInTypedOrder" classname="com.kurtz.homerecord.core.model.DelayTimelineTest" time="0.001"/>
+  <testcase name="noDelaysIsEmpty" classname="com.kurtz.homerecord.core.model.DelayTimelineTest" time="0.001"/>
+  <testcase name="skipsDaysWithoutDelaysAndUnknownJobsAndTrimsNotes" classname="com.kurtz.homerecord.core.model.DelayTimelineTest" time="0.0"/>
+  <testcase name="mostDelayedJobFirstThenByName" classname="com.kurtz.homerecord.core.model.DelayTimelineTest" time="0.0"/>
+  <testcase name="keepsOnlyTheRangeInclusive" classname="com.kurtz.homerecord.core.model.DelayTimelineTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:01.838Z" hostname="runnervmwuk1x" time="0.5">
+  <properties/>
+  <testcase name="pinOnPlanDropsThePinAndFillsTheRoom" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.038"/>
+  <testcase name="editLoadsTheTaskAndSavesOverIt" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.042"/>
+  <testcase name="aTaskArrivingOnAnotherJobKeepsTheError" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.025"/>
+  <testcase name="crewCannotOpenTheForm" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.019"/>
+  <testcase name="removeFilePinTakesTheTaskOffTheFile" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.028"/>
+  <testcase name="savingTheFormKeepsAFilePinDroppedWhileItWasOpen" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.024"/>
+  <testcase name="crewOpenTheirOwnTaskReadOnly" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.018"/>
+  <testcase name="managersStillGetTheFormForTheirOwnTask" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.018"/>
+  <testcase name="noPlanMeansNoPinPicker" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.02"/>
+  <testcase name="crewTaskArrivingBySyncLoadsReadOnly" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.018"/>
+  <testcase name="pinOnAnotherFloorKeepsTheRoomAlreadyChosenAndCanBeRemoved" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.018"/>
+  <testcase name="newTaskSavesEveryField" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.025"/>
+  <testcase name="crewCannotOpenSomeoneElsesTask" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.019"/>
+  <testcase name="readOnlyChangesNothing" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.024"/>
+  <testcase name="newTaskHereSavesPinnedOnThePage" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.019"/>
+  <testcase name="theFormLoadsOnceTheRightToEditArrives" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.021"/>
+  <testcase name="aTaskFromAnotherJobDoesNotOpen" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.018"/>
+  <testcase name="typingSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.016"/>
+  <testcase name="aTaskArrivingBySyncLoadsTheFormThatWasOnTheError" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.021"/>
+  <testcase name="blankTitleDoesNotSaveAndShowsTheError" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.029"/>
+  <testcase name="deleteAsksThenRemoves" classname="com.kurtz.homerecord.fieldlog.tasks.TaskFormViewModelTest" time="0.03"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

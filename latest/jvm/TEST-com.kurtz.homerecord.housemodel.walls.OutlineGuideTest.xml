@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.689Z" hostname="runnervmwuk1x" time="0.002">
+  <properties/>
+  <testcase name="aTouchPicksTheNearestHandleWithinReach" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.001"/>
+  <testcase name="noGuideWithoutASize" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.0"/>
+  <testcase name="theLoupeSitsAwayFromTheFinger" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.0"/>
+  <testcase name="theGuideHasTheWallsShapeCenteredInThePhoto" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.0"/>
+  <testcase name="theTextureSitsBesideThePhoto" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.001"/>
+  <testcase name="aTallWallInAPortraitPhotoIsBoundByHeight" classname="com.kurtz.homerecord.housemodel.walls.OutlineGuideTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

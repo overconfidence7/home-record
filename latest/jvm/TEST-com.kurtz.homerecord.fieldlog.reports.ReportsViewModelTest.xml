@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:00.379Z" hostname="runnervmwuk1x" time="0.119">
+  <properties/>
+  <testcase name="photoReportsCountTheRangeAndShareForThoseDates" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.055"/>
+  <testcase name="emptyRangeRefusesToExport" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.002"/>
+  <testcase name="lastFourWeeksAddsEarlierHoursAndIsRemembered" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.012"/>
+  <testcase name="jobSummariesListJobsAndShareThePdf" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.005"/>
+  <testcase name="thisWeekTotalsByPersonAndJob" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.005"/>
+  <testcase name="delaysShowAsAJobTimelineForTheRange" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.006"/>
+  <testcase name="theReportTabIsRemembered" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.017"/>
+  <testcase name="exportsShareAFileAndFailureShowsANotice" classname="com.kurtz.homerecord.fieldlog.reports.ReportsViewModelTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

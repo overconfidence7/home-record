@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:52:16.854Z" hostname="runnervmwuk1x" time="0.15">
+  <properties/>
+  <testcase name="aDeletedWallTakesNoPhotoAndDeleteRemovesOne" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.012"/>
+  <testcase name="wallPicturesForTheFloorAreKeyedByRoomAndEdge" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.014"/>
+  <testcase name="newPhotosGoToTheCloudAndPulledOnesAreFetched" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.018"/>
+  <testcase name="roomWallsFollowNewPhotosAndRemovedWalls" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.015"/>
+  <testcase name="fieldLogPhotosAreMarkedAsTheirs" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.015"/>
+  <testcase name="aWallKeepsOnePhotoPerStage" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.043"/>
+  <testcase name="photographingTheSameStageAgainReplacesTheEarlierPhoto" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.015"/>
+  <testcase name="twoPhonesPhotographingTheSameStageShowTheLaterShot" classname="com.kurtz.homerecord.housemodel.walls.WallPhotoRepositoryTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PanelScreenTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:35.246Z" hostname="runnervmwuk1x" time="1.153">
+  <properties/>
+  <testcase name="aPanelItemPageOpensItsSlots" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.17"/>
+  <testcase name="theBreakerFormSaysWhatItFeeds" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.095"/>
+  <testcase name="aViewerSeesTheSlotsButCannotEditThem" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.055"/>
+  <testcase name="noBreakersYetSaysWhatTheGridHolds" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.045"/>
+  <testcase name="theBreakerFormTakesLabelAmpsPolesTypeRoomsAndItemsAndAsksBeforeDelete" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.089"/>
+  <testcase name="aBreakerThatClashesIsListedUnderTheGridAndAnEmptyPanelSaysSo" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.05"/>
+  <testcase name="tapASlotToEditItsBreakerAndTouchAndHoldForATandem" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.111"/>
+  <testcase name="aDinPanelIsOneColumnInSlotOrder" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.045"/>
+  <testcase name="aTwoPoleBreakerIsOneCellAsTallAsTwoSlots" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.07"/>
+  <testcase name="panelDetailsSayTheBreakersNeedTheSlotsAndKeepTheLayout" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.076"/>
+  <testcase name="thePanelPhotoAndEditOpenTheirFormsAndTheDetailsFormShowsWhyItRefuses" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.073"/>
+  <testcase name="aTwoPoleIntoATakenSlotSaysWhichAndATandemHasNoPoleChoice" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.083"/>
+  <testcase name="aTandemShowsBothBreakersInOneSlotAndOpenSlotsSayOpen" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.092"/>
+  <testcase name="backLeavesAndAMissingPanelSaysItIsGone" classname="com.kurtz.homerecord.housemanual.PanelScreenTest" time="0.077"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

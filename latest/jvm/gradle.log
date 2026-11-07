@@ -1,0 +1,860 @@
+== testDebugUnitTest 11:48:43
+               total        used        free      shared  buff/cache   available
+Mem:           15983        1213        7833          48        7329       14769
+Swap:           6143           0        6143
+/dev/root       145G   57G   89G  39% /
+
+Welcome to Gradle 9.8.1!
+
+Here are the highlights of this release:
+ - Java 27 support
+ - Maven mirror settings reuse
+ - Linked problem locations in build output
+
+For more details see https://docs.gradle.org/9.8.1/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:pluginDescriptors
+> Task :build-logic:convention:processResources
+
+> Task :build-logic:convention:compileKotlin
+w: file:///home/runner/work/home-record/home-record/build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt:59:20 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+w: file:///home/runner/work/home-record/home-record/build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt:60:20 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+w: file:///home/runner/work/home-record/home-record/build-logic/convention/src/main/kotlin/AndroidApplicationConventionPlugin.kt:61:17 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:classes
+> Task :build-logic:convention:jar
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core:generateDebugResources FROM-CACHE
+> Task :core:packageDebugResources FROM-CACHE
+> Task :core:processDebugNavigationResources FROM-CACHE
+> Task :core-ui:generateDebugResources
+> Task :core-ui:packageDebugResources
+> Task :core-ui:processDebugNavigationResources
+> Task :core:parseDebugLocalResources FROM-CACHE
+> Task :core:generateDebugRFile FROM-CACHE
+> Task :core-ui:parseDebugLocalResources
+> Task :core-ui:generateDebugRFile
+> Task :core-ui:javaPreCompileDebug FROM-CACHE
+> Task :core-ui:preDebugUnitTestBuild UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata
+> Task :core-ui:mapDebugSourceSetPaths
+> Task :core-ui:compileDebugLibraryResources
+> Task :core-ui:mapDebugUnitTestSourceSetPaths
+> Task :core-ui:generateDebugUnitTestResources FROM-CACHE
+> Task :core-ui:mergeDebugUnitTestResources
+> Task :core:javaPreCompileDebug FROM-CACHE
+> Task :core:preDebugUnitTestBuild UP-TO-DATE
+> Task :core:writeDebugAarMetadata
+> Task :core:checkDebugUnitTestAarMetadata
+> Task :core:mapDebugSourceSetPaths
+> Task :core:compileDebugLibraryResources FROM-CACHE
+> Task :core:mapDebugUnitTestSourceSetPaths
+> Task :core:generateDebugUnitTestResources FROM-CACHE
+> Task :core:mergeDebugUnitTestResources FROM-CACHE
+> Task :core:extractDeepLinksDebug FROM-CACHE
+> Task :core:processDebugManifest FROM-CACHE
+> Task :core:mergeDebugUnitTestManifest
+> Task :core:processDebugUnitTestManifest
+> Task :core:processDebugUnitTestResources FROM-CACHE
+> Task :core:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core:generateDebugUnitTestAssets UP-TO-DATE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:mergeDebugAssets
+> Task :core:mergeDebugUnitTestAssets
+> Task :core:packageDebugUnitTestForUnitTest
+> Task :core:generateDebugUnitTestConfig
+> Task :core-ui:checkDebugUnitTestAarMetadata
+> Task :core-ui:extractDeepLinksDebug FROM-CACHE
+> Task :core-ui:processDebugManifest FROM-CACHE
+> Task :core-ui:mergeDebugUnitTestManifest
+> Task :core-ui:processDebugUnitTestManifest
+> Task :core-ui:processDebugUnitTestResources
+> Task :core-ui:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core-ui:generateDebugUnitTestAssets UP-TO-DATE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugAssets
+> Task :core-ui:mergeDebugUnitTestAssets
+> Task :core-ui:packageDebugUnitTestForUnitTest
+> Task :core-ui:generateDebugUnitTestConfig
+> Task :field-log:preBuild UP-TO-DATE
+> Task :field-log:preDebugBuild UP-TO-DATE
+> Task :field-log:generateDebugBuildConfig
+> Task :field-log:generateDebugResources
+> Task :field-log:packageDebugResources
+> Task :house-model:preBuild UP-TO-DATE
+> Task :house-model:preDebugBuild UP-TO-DATE
+> Task :house-model:processDebugNavigationResources
+> Task :field-log:processDebugNavigationResources
+> Task :field-log:parseDebugLocalResources
+> Task :field-log:generateDebugRFile
+> Task :house-model:generateDebugResources
+> Task :house-model:packageDebugResources
+> Task :house-model:parseDebugLocalResources
+> Task :house-model:generateDebugRFile
+> Task :house-model:javaPreCompileDebug FROM-CACHE
+> Task :field-log:javaPreCompileDebug FROM-CACHE
+> Task :house-model:writeDebugAarMetadata
+> Task :field-log:checkDebugAarMetadata
+> Task :field-log:mapDebugSourceSetPaths
+> Task :field-log:compileDebugNavigationResources FROM-CACHE
+> Task :field-log:mergeDebugResources
+> Task :field-log:createDebugCompatibleScreenManifests
+> Task :field-log:extractDeepLinksDebug FROM-CACHE
+> Task :house-model:extractDeepLinksDebug FROM-CACHE
+> Task :house-model:processDebugManifest FROM-CACHE
+> Task :field-log:processDebugMainManifest
+> Task :field-log:processDebugManifest
+> Task :field-log:processDebugManifestForPackage
+> Task :house-model:mapDebugSourceSetPaths
+> Task :house-model:compileDebugLibraryResources
+> Task :field-log:processDebugResources
+> Task :field-log:preDebugUnitTestBuild UP-TO-DATE
+> Task :field-log:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :field-log:generateDebugAssets UP-TO-DATE
+> Task :house-model:generateDebugAssets UP-TO-DATE
+> Task :house-model:mergeDebugAssets
+> Task :field-log:mergeDebugAssets
+> Task :field-log:packageDebugUnitTestForUnitTest
+> Task :field-log:mergeDebugUnitTestManifest
+> Task :field-log:processDebugUnitTestManifest
+> Task :field-log:generateDebugUnitTestConfig
+> Task :house-manual:preBuild UP-TO-DATE
+> Task :house-manual:preDebugBuild UP-TO-DATE
+> Task :house-manual:generateDebugBuildConfig
+> Task :house-manual:generateDebugResources
+> Task :house-manual:packageDebugResources
+> Task :house-manual:processDebugNavigationResources
+> Task :house-manual:parseDebugLocalResources
+> Task :house-manual:generateDebugRFile
+> Task :house-manual:javaPreCompileDebug FROM-CACHE
+> Task :house-manual:checkDebugAarMetadata
+> Task :house-manual:mapDebugSourceSetPaths
+> Task :house-manual:compileDebugNavigationResources FROM-CACHE
+> Task :house-manual:mergeDebugResources
+> Task :house-manual:createDebugCompatibleScreenManifests
+> Task :house-manual:extractDeepLinksDebug FROM-CACHE
+> Task :house-manual:processDebugMainManifest
+> Task :house-manual:processDebugManifest
+> Task :house-manual:processDebugManifestForPackage
+> Task :house-manual:processDebugResources
+> Task :house-manual:preDebugUnitTestBuild UP-TO-DATE
+> Task :house-manual:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :house-manual:generateDebugAssets UP-TO-DATE
+> Task :house-manual:mergeDebugAssets
+> Task :house-manual:packageDebugUnitTestForUnitTest
+> Task :house-manual:mergeDebugUnitTestManifest
+> Task :house-manual:processDebugUnitTestManifest
+> Task :house-manual:generateDebugUnitTestConfig
+> Task :house-model:preDebugUnitTestBuild UP-TO-DATE
+> Task :house-model:checkDebugUnitTestAarMetadata
+> Task :house-model:mapDebugUnitTestSourceSetPaths
+> Task :house-model:generateDebugUnitTestResources FROM-CACHE
+> Task :house-model:mergeDebugUnitTestResources
+> Task :house-model:mergeDebugUnitTestManifest
+> Task :house-model:processDebugUnitTestManifest
+> Task :house-model:processDebugUnitTestResources
+> Task :house-model:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :house-model:generateDebugUnitTestAssets UP-TO-DATE
+> Task :house-model:mergeDebugUnitTestAssets
+> Task :house-model:packageDebugUnitTestForUnitTest
+> Task :house-model:generateDebugUnitTestConfig
+> Task :core:kspDebugKotlin
+
+> Task :core:compileDebugKotlin
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/AccountDeletion.kt:28:89 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:16:9 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:13 'class MasterKey : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:23 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:53 'class MasterKey : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:19:63 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:20:13 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:20:40 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:21:13 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/auth/DeviceAuth.kt:21:40 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/punch/ClockController.kt:95:113 Unnecessary safe call on a non-null receiver of type 'ClockJob'.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/punch/CrewClock.kt:33:113 Unnecessary safe call on a non-null receiver of type 'ClockJob'.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/share/HomeShareApi.kt:114:130 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/share/HomeShareApi.kt:116:126 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/sync/HomeCloudCopy.kt:32:102 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/main/kotlin/com/kurtz/homerecord/core/sync/HomeRegistrar.kt:31:72 Expression is unused.
+
+> Task :core:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:bundleLibRuntimeToJarDebug
+> Task :core:bundleLibCompileToJarDebug
+> Task :core:processDebugJavaRes
+> Task :core:kspDebugUnitTestKotlin
+
+> Task :core-ui:compileDebugKotlin
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/RecordListItem.kt:40:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/Sheets.kt:53:103 'fun rememberModalBottomSheetState(skipPartiallyExpanded: Boolean = ..., confirmValueChange: (SheetValue) -> Boolean = ...): SheetState' is deprecated. Use rememberBottomSheetState with Hidden initial value.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/Sheets.kt:108:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/components/WarrantyStatusLine.kt:36:59 'val Icons.Rounded.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.HelpOutline.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/pages/PdfViewer.kt:70:21 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/pages/RenderGate.kt:26:15 'fun CoroutineScope.launch(context: NonCancellable, start: CoroutineStart = ..., block: suspend CoroutineScope.() -> Unit): Job' is deprecated. Passing a NonCancellable to `launch` breaks structured concurrency, leading to hard-to-diagnose errors. This pattern should be avoided. This overload will be deprecated with an error in the future.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/main/kotlin/com/kurtz/homerecord/coreui/shell/HomeRecordApp.kt:93:22 'fun currentWindowAdaptiveInfo(supportLargeAndXLargeWidth: Boolean = ...): WindowAdaptiveInfo' is deprecated. Please use V2 version of this function to support L and XL width size classes.
+
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibRuntimeToJarDebug
+> Task :core-ui:bundleLibCompileToJarDebug
+
+> Task :core-ui:compileDebugUnitTestKotlin
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/ComponentsTest.kt:23:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/EnumPickerTouchTargetTest.kt:19:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/LinkChipTouchTargetTest.kt:21:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/OptionsSheetScrollTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/PickerFieldTapTest.kt:22:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/components/SyncStatusTest.kt:30:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/core-ui/src/test/kotlin/com/kurtz/homerecord/coreui/pages/PdfViewerTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :core-ui:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :core-ui:processDebugJavaRes
+> Task :core-ui:processDebugUnitTestJavaRes
+
+> Task :core:compileDebugUnitTestKotlin
+w: file:///home/runner/work/home-record/home-record/core/src/test/kotlin/com/kurtz/homerecord/core/data/LocalDataWipeTest.kt:46:112 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/test/kotlin/com/kurtz/homerecord/core/data/LocalDataWipeTest.kt:67:53 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/core/src/test/kotlin/com/kurtz/homerecord/core/push/PushRegistrarTest.kt:120:50 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/core/src/test/kotlin/com/kurtz/homerecord/core/push/PushRegistrarTest.kt:136:50 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+
+> Task :core:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :core:processDebugUnitTestJavaRes
+> Task :core-ui:testDebugUnitTest
+> Task :core:testDebugUnitTest
+
+> Task :house-model:compileDebugKotlin
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/BehindWallScreen.kt:186:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:268:22 'fun rememberModalBottomSheetState(skipPartiallyExpanded: Boolean = ..., confirmValueChange: (SheetValue) -> Boolean = ...): SheetState' is deprecated. Use rememberBottomSheetState with Hidden initial value.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:304:21 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:310:21 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/ItemEditScreen.kt:353:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/OverlayFormScreen.kt:276:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/OverlayFormScreen.kt:309:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/OverlayFormScreen.kt:379:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/RoomScreen.kt:150:40 'val Icons.Rounded.StickyNote2: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.StickyNote2.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/RoomScreen.kt:272:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/RoomScreen.kt:345:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-model/src/main/kotlin/com/kurtz/homerecord/housemodel/ui/WallOutlineViewModel.kt:98:24 'fun CoroutineScope.launch(context: NonCancellable, start: CoroutineStart = ..., block: suspend CoroutineScope.() -> Unit): Job' is deprecated. Passing a NonCancellable to `launch` breaks structured concurrency, leading to hard-to-diagnose errors. This pattern should be avoided. This overload will be deprecated with an error in the future.
+
+> Task :house-model:compileDebugJavaWithJavac NO-SOURCE
+> Task :house-model:bundleLibCompileToJarDebug
+> Task :house-model:bundleLibRuntimeToJarDebug
+> Task :house-model:processDebugJavaRes
+
+> Task :house-manual:compileDebugKotlin
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/emergency/EmergencyScreen.kt:157:21 'fun rememberTransformableState(onTransformation: (Float, Offset, Float) -> Unit): TransformableState' is deprecated. Prefer remembering a TransformableState with a onTransformation lambda that takes the centroid. This centroid (if specified) is the point at which zooming or rotation should happen around which allows for more natural transformations.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailScreen.kt:260:34 Condition is always 'true'.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/more/AboutScreen.kt:61:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/more/MoreScreen.kt:177:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/onboarding/OnboardingScreen.kt:129:9 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/main/kotlin/com/kurtz/homerecord/housemanual/report/ReportScreen.kt:107:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+
+> Task :house-manual:compileDebugJavaWithJavac
+> Task :house-manual:bundleDebugClassesToRuntimeJar
+> Task :house-manual:bundleDebugClassesToCompileJar
+
+> Task :field-log:compileDebugKotlin
+w: file:///home/runner/work/home-record/home-record/field-log/src/debug/kotlin/com/kurtz/homerecord/fieldlog/qa/QaSeeder.kt:68:31 Unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/AppContainer.kt:133:132 Expression is unused.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/capture/CaptureRoute.kt:85:21 'val LocalLifecycleOwner: ProvidableCompositionLocal<LifecycleOwner>' is deprecated. Moved to lifecycle-runtime-compose library in androidx.lifecycle.compose package.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/changes/ChangeOrderFormViewModel.kt:107:38 Condition is always 'true'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/FileViewerScreen.kt:163:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/FileViewerViewModel.kt:120:51 Condition is always 'true'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/files/MarkupViewModel.kt:49:38 Condition is always 'true'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:215:17 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:255:94 'val Icons.Rounded.ReceiptLong: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.ReceiptLong.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:369:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:499:45 'val Icons.Rounded.FactCheck: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.FactCheck.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:609:26 'fun rememberModalBottomSheetState(skipPartiallyExpanded: Boolean = ..., confirmValueChange: (SheetValue) -> Boolean = ...): SheetState' is deprecated. Use rememberBottomSheetState with Hidden initial value.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreen.kt:616:26 'fun rememberModalBottomSheetState(skipPartiallyExpanded: Boolean = ..., confirmValueChange: (SheetValue) -> Boolean = ...): SheetState' is deprecated. Use rememberBottomSheetState with Hidden initial value.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/log/LogWeatherUiState.kt:60:34 Condition is always 'false'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/more/MoreScreen.kt:186:44 'val Icons.Rounded.Logout: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.Logout.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/push/FieldLogMessagingService.kt:12:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/push/FirebasePush.kt:51:49 'val token: Task<String!>' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/schedule/ScheduleScreen.kt:209:5 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/schedule/ScheduleScreen.kt:270:13 'fun ListItem(headlineContent: ComposableFunction0<Unit>, modifier: Modifier = ..., overlineContent: ComposableFunction0<Unit>? = ..., supportingContent: ComposableFunction0<Unit>? = ..., leadingContent: ComposableFunction0<Unit>? = ..., trailingContent: ComposableFunction0<Unit>? = ..., colors: ListItemColors = ..., tonalElevation: Dp = ..., shadowElevation: Dp = ...): Unit' is deprecated. Use the overload where `headlineContent` is now a trailing `content` lambda.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/tasks/TaskFormViewModel.kt:80:98 Unnecessary safe call on a non-null receiver of type 'JobTask'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModel.kt:62:55 Unchecked cast of 'Any' to 'List<PunchEntity>'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModel.kt:62:85 Unchecked cast of 'Any' to 'List<MemberEntity>'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModel.kt:63:37 Unchecked cast of 'Any' to 'List<JobEntity>'.
+w: file:///home/runner/work/home-record/home-record/field-log/src/main/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModel.kt:63:65 Unchecked cast of 'Any' to 'List<AssignmentEntity>'.
+
+> Task :field-log:compileDebugJavaWithJavac
+> Task :field-log:bundleDebugClassesToRuntimeJar
+> Task :field-log:bundleDebugClassesToCompileJar
+
+> Task :house-manual:compileDebugUnitTestKotlin
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/AccountNeedsProTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/AccountSyncScreenTest.kt:35:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/BackupScreenTest.kt:51:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/BlueprintMarksScreenTest.kt:40:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/CatalogScrollTargetsTest.kt:22:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ClaimScreenTest.kt:31:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/CloudCopyTest.kt:47:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/CloudRestoreTest.kt:43:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/DocumentsAddMenuTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/EmergencyScreenTest.kt:37:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/FlowTagsTest.kt:31:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/FormScreenDialogTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/HomeSearchBreakerTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/HomeSearchNoneTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/House3DScreenTest.kt:50:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ImportScreenTest.kt:30:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ItemEditLoadingTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ItemLinksSectionTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ItemPlaceScreenTest.kt:43:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ItemSheetsTest.kt:39:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ListLoadFailedTest.kt:67:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/MappingScreenTest.kt:42:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/MoreScreenTest.kt:45:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/PanelScreenTest.kt:47:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/PanelsEntryTest.kt:32:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/PlanEditorInspectorTest.kt:36:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/PlanEditorOverlaysScreenTest.kt:42:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/PlanEditorRoomNodesTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/RecordRowsTest.kt:32:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/RemindersScreenTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ReportScreenTest.kt:47:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/RoomBreakersTest.kt:32:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/RoomShutoffsTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/RoomWallsSectionTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/ShareTest.kt:60:29 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/SoftInputModeTest.kt:25:51 'static field SOFT_INPUT_ADJUST_RESIZE: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/WallOutlineScreenTest.kt:44:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/WallOverlaysScreenTest.kt:53:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/home/HomeAttentionTest.kt:21:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailPowerTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailRemindersTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailRoomTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailShutoffTest.kt:25:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailTitleTest.kt:19:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemDetailTouchTargetTest.kt:34:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemSectionRowsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemShareTextTest.kt:25:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/items/ItemsActiveChipTest.kt:21:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/qa/ScreenCatalogLabelsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/house-manual/src/test/kotlin/com/kurtz/homerecord/housemanual/share/ViewOnlyTest.kt:31:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+
+> Task :field-log:processDebugJavaRes
+> Task :house-manual:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :house-manual:processDebugJavaRes
+> Task :house-manual:processDebugUnitTestJavaRes
+
+> Task :field-log:compileDebugUnitTestKotlin
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/FabLabelsTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/FormLoadingTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/ListLoadFailedTest.kt:52:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/RoleGatesTest.kt:41:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/billing/PlanScreenTest.kt:34:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/capture/CaptureLayoutTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/capture/CaptureViewModelTest.kt:63:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/capture/CaptureViewModelTest.kt:63:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/capture/CaptureViewModelTest.kt:84:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/changes/ChangeOrderFormTouchTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/changes/ChangeOrderSignScreenTest.kt:32:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/changes/ChangesScreenTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/clients/ClientsScreenTest.kt:22:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/clock/ClockChangesScreenTest.kt:19:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/clock/ClockSoloOwnerScreenTest.kt:23:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/clock/ClockTargetsTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/company/CompanyTimeZoneTagsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/company/TeamTagsTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/company/WelcomeTagsTest.kt:20:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/files/FileViewerPinScreenTest.kt:37:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/files/FilesAddMenuTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/handoff/HandoffScreenTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/house/BehindWallScreenTest.kt:35:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/house/HouseUnitsTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/house/JobHouseLargeTextTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/house/JobItemScreenTest.kt:34:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/house/SharedHouseTagsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobOverviewViewModelTest.kt:34:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobOverviewViewModelTest.kt:34:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobOverviewViewModelTest.kt:43:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobsEmptyStateTest.kt:21:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobsRowsTest.kt:22:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobsViewModelTest.kt:41:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobsViewModelTest.kt:41:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/jobs/JobsViewModelTest.kt:59:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/log/LogScreenTest.kt:42:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/log/LogSendScreenTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/log/LogViewModelTest.kt:186:75 Cast is redundant.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/materials/MaterialFormTypingTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/materials/MaterialsScreenTest.kt:35:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/more/DeleteAccountRowTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/more/MoreViewModelTest.kt:17:30 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/more/MoreViewModelTest.kt:21:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/more/MoreViewModelTest.kt:23:41 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/more/SignOutDialogTest.kt:22:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/photos/AnnotateDiscardTest.kt:26:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/photos/AnnotateToolsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/photos/PhotoDetailMarkedBadgeTest.kt:20:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/photos/PhotoDetailMissingTest.kt:23:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/photos/PhotosGridTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/qa/ScreenCatalogBackTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/qa/ScreenCatalogLabelsTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/reports/ListRowsLayoutTest.kt:39:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/reports/ReportsScreenTest.kt:30:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/schedule/ScheduleScreenTest.kt:25:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/settings/SettingsScreenTest.kt:31:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/settings/SettingsViewModelTest.kt:26:30 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/settings/SettingsViewModelTest.kt:32:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/settings/SettingsViewModelTest.kt:34:41 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/share/ShareLinkSectionTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/sync/SyncLogScreenTest.kt:33:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/sync/SyncLogViewModelTest.kt:20:30 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/sync/SyncLogViewModelTest.kt:28:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/sync/SyncLogViewModelTest.kt:34:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/tasks/TaskPinScreenTest.kt:36:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/tasks/TaskViewScreenTest.kt:25:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/tasks/TasksScreenTest.kt:38:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/timesheets/PunchEditScreenTest.kt:29:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/timesheets/TimesheetsApproveRowTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayNextDayScreenTest.kt:24:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayPhotosScreenTest.kt:28:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodaySyncChipTest.kt:27:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayTasksScreenTest.kt:38:26 'fun createComposeRule(effectContext: CoroutineContext = ...): ComposeContentTestRule' is deprecated. Use `androidx.compose.ui.test.junit4.v2.createComposeRule` instead. The v2 APIs use StandardTestDispatcher instead of UnconfinedTestDispatcher, which aligns with standard coroutine behavior by queuing tasks rather than executing them immediately. Tests relying on immediate execution may require explicit synchronization. Please refer to the migration guide for more details.
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModelTest.kt:18:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModelTest.kt:18:47 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///home/runner/work/home-record/home-record/field-log/src/test/kotlin/com/kurtz/homerecord/fieldlog/today/TodayViewModelTest.kt:25:21 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+
+> Task :field-log:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :field-log:processDebugUnitTestJavaRes
+> Task :house-manual:testDebugUnitTest
+> Task :field-log:testDebugUnitTest
+
+> Task :house-model:compileDebugUnitTestKotlin
+w: file:///home/runner/work/home-record/home-record/house-model/src/test/kotlin/com/kurtz/homerecord/housemodel/ui/House3DViewModelTest.kt:187:97 Unnecessary safe call on a non-null receiver of type 'FloorScene'.
+w: file:///home/runner/work/home-record/home-record/house-model/src/test/kotlin/com/kurtz/homerecord/housemodel/ui/House3DViewModelTest.kt:190:29 Unnecessary non-null assertion (!!) on a non-null receiver of type 'FloorScene'.
+w: file:///home/runner/work/home-record/home-record/house-model/src/test/kotlin/com/kurtz/homerecord/housemodel/ui/House3DViewModelTest.kt:196:29 Unnecessary non-null assertion (!!) on a non-null receiver of type 'FloorScene'.
+
+> Task :house-model:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :house-model:processDebugUnitTestJavaRes
+> Task :house-model:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///home/runner/work/home-record/home-record/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3m 33s
+158 actionable tasks: 127 executed, 31 from cache
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
+== testDebugUnitTest exit 0
+== lintDebug 11:52:17
+               total        used        free      shared  buff/cache   available
+Mem:           15983        3020        5579          49        7777       12962
+Swap:           6143           0        6143
+/dev/root       145G   57G   88G  40% /
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core-ui:generateDebugResources UP-TO-DATE
+> Task :core-ui:packageDebugResources UP-TO-DATE
+> Task :core-ui:processDebugNavigationResources UP-TO-DATE
+> Task :core-ui:parseDebugLocalResources UP-TO-DATE
+> Task :core-ui:generateDebugRFile UP-TO-DATE
+> Task :core-ui:extractDeepLinksForAarDebug FROM-CACHE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugAssets UP-TO-DATE
+> Task :core-ui:javaPreCompileDebug UP-TO-DATE
+> Task :core-ui:prepareDebugArtProfile
+> Task :core-ui:prepareLintJarForPublish
+> Task :core-ui:processDebugManifest UP-TO-DATE
+> Task :core:generateDebugResources UP-TO-DATE
+> Task :core:checkDebugAarMetadata
+> Task :core:packageDebugResources UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata UP-TO-DATE
+> Task :core-ui:preDebugAndroidTestBuild UP-TO-DATE
+> Task :core:processDebugNavigationResources UP-TO-DATE
+> Task :core:parseDebugLocalResources UP-TO-DATE
+> Task :core-ui:writeDebugLintModelMetadata
+> Task :core:generateDebugRFile UP-TO-DATE
+> Task :core-ui:extractProguardFiles
+> Task :core-ui:preDebugUnitTestBuild UP-TO-DATE
+> Task :house-model:preBuild UP-TO-DATE
+> Task :house-model:preDebugBuild UP-TO-DATE
+> Task :house-model:generateDebugResources UP-TO-DATE
+> Task :house-model:packageDebugResources UP-TO-DATE
+> Task :house-model:processDebugNavigationResources UP-TO-DATE
+> Task :house-model:parseDebugLocalResources UP-TO-DATE
+> Task :house-model:generateDebugRFile UP-TO-DATE
+> Task :house-model:extractDeepLinksForAarDebug FROM-CACHE
+> Task :house-model:generateDebugAssets UP-TO-DATE
+> Task :house-model:mergeDebugAssets UP-TO-DATE
+> Task :house-model:javaPreCompileDebug UP-TO-DATE
+> Task :house-model:prepareDebugArtProfile
+> Task :house-model:prepareLintJarForPublish
+> Task :house-model:processDebugManifest UP-TO-DATE
+> Task :house-model:writeDebugAarMetadata UP-TO-DATE
+> Task :field-log:preBuild UP-TO-DATE
+> Task :field-log:preDebugBuild UP-TO-DATE
+> Task :field-log:generateDebugBuildConfig UP-TO-DATE
+> Task :field-log:generateDebugResources UP-TO-DATE
+> Task :field-log:packageDebugResources UP-TO-DATE
+> Task :core:kspDebugKotlin UP-TO-DATE
+> Task :core:extractDebugAnnotations
+> Task :core:extractDeepLinksForAarDebug FROM-CACHE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:mergeDebugAssets UP-TO-DATE
+> Task :core:compileDebugKotlin UP-TO-DATE
+> Task :core:javaPreCompileDebug UP-TO-DATE
+> Task :core:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:mergeDebugGeneratedProguardFiles
+> Task :core:mergeDebugConsumerProguardFiles
+> Task :core:prepareDebugArtProfile
+> Task :core:prepareLintJarForPublish
+> Task :core:processDebugManifest UP-TO-DATE
+> Task :core:processDebugJavaRes UP-TO-DATE
+> Task :field-log:processDebugNavigationResources UP-TO-DATE
+> Task :core:writeDebugAarMetadata UP-TO-DATE
+> Task :core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:mergeDebugJavaResource
+> Task :core:createFullJarDebug
+> Task :core-ui:checkDebugAarMetadata
+> Task :house-model:checkDebugAarMetadata
+> Task :field-log:parseDebugLocalResources UP-TO-DATE
+> Task :field-log:generateDebugRFile UP-TO-DATE
+> Task :field-log:javaPreCompileDebug UP-TO-DATE
+> Task :core-ui:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core-ui:compileDebugLibraryResources UP-TO-DATE
+> Task :field-log:checkDebugAarMetadata UP-TO-DATE
+> Task :field-log:mapDebugSourceSetPaths UP-TO-DATE
+> Task :field-log:compileDebugNavigationResources UP-TO-DATE
+> Task :field-log:mergeDebugResources UP-TO-DATE
+> Task :field-log:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :core-ui:extractDeepLinksDebug UP-TO-DATE
+> Task :field-log:extractDeepLinksDebug UP-TO-DATE
+> Task :house-model:extractDeepLinksDebug UP-TO-DATE
+> Task :house-model:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-model:compileDebugLibraryResources UP-TO-DATE
+> Task :field-log:preDebugAndroidTestBuild SKIPPED
+> Task :house-model:writeDebugLintModelMetadata
+> Task :field-log:extractProguardFiles
+> Task :house-model:extractProguardFiles
+> Task :field-log:preDebugUnitTestBuild UP-TO-DATE
+> Task :house-model:preDebugAndroidTestBuild UP-TO-DATE
+> Task :house-model:preDebugUnitTestBuild UP-TO-DATE
+> Task :house-manual:preBuild UP-TO-DATE
+> Task :house-manual:preDebugBuild UP-TO-DATE
+> Task :house-manual:generateDebugBuildConfig UP-TO-DATE
+> Task :house-manual:generateDebugResources UP-TO-DATE
+> Task :core:syncDebugLibJars
+> Task :house-manual:packageDebugResources UP-TO-DATE
+> Task :core:bundleDebugLocalLintAar
+> Task :house-manual:processDebugNavigationResources UP-TO-DATE
+> Task :core:preDebugAndroidTestBuild UP-TO-DATE
+> Task :core:writeDebugLintModelMetadata
+> Task :core:extractProguardFiles
+> Task :house-manual:parseDebugLocalResources UP-TO-DATE
+> Task :house-manual:generateDebugRFile UP-TO-DATE
+> Task :house-manual:javaPreCompileDebug UP-TO-DATE
+> Task :house-manual:checkDebugAarMetadata UP-TO-DATE
+> Task :house-manual:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-manual:compileDebugNavigationResources UP-TO-DATE
+> Task :house-manual:mergeDebugResources UP-TO-DATE
+> Task :house-manual:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :house-manual:extractDeepLinksDebug UP-TO-DATE
+> Task :house-manual:preDebugAndroidTestBuild SKIPPED
+> Task :house-manual:extractProguardFiles
+> Task :house-manual:preDebugUnitTestBuild UP-TO-DATE
+> Task :core:generateDebugLintReportModel
+> Task :core:generateDebugAndroidTestLintModel
+> Task :core:preDebugUnitTestBuild UP-TO-DATE
+> Task :core:generateDebugUnitTestLintModel
+> Task :core:lintAnalyzeDebugAndroidTest
+> Task :core:lintAnalyzeDebugUnitTest
+> Task :core:generateDebugLintModel
+> Task :core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:lintAnalyzeDebug
+> Task :core-ui:extractDebugAnnotations
+> Task :core-ui:compileDebugKotlin UP-TO-DATE
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:mergeDebugGeneratedProguardFiles
+> Task :core-ui:mergeDebugConsumerProguardFiles
+> Task :core-ui:processDebugJavaRes UP-TO-DATE
+> Task :core-ui:mergeDebugJavaResource
+> Task :core-ui:syncDebugLibJars
+> Task :core-ui:bundleDebugLocalLintAar
+> Task :core-ui:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core-ui:createFullJarDebug
+> Task :core-ui:generateDebugAndroidTestLintModel
+> Task :core-ui:generateDebugLintReportModel
+> Task :core-ui:generateDebugUnitTestLintModel
+> Task :core-ui:lintAnalyzeDebugAndroidTest
+> Task :core-ui:lintAnalyzeDebugUnitTest
+> Task :core-ui:generateDebugLintModel
+> Task :core-ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :house-model:extractDebugAnnotations
+> Task :house-model:compileDebugKotlin UP-TO-DATE
+> Task :house-model:compileDebugJavaWithJavac NO-SOURCE
+> Task :house-model:mergeDebugGeneratedProguardFiles
+> Task :house-model:mergeDebugConsumerProguardFiles
+> Task :house-model:processDebugJavaRes UP-TO-DATE
+> Task :house-model:mergeDebugJavaResource
+> Task :house-model:syncDebugLibJars
+> Task :house-model:bundleDebugLocalLintAar
+> Task :house-model:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :field-log:compileDebugKotlin UP-TO-DATE
+> Task :field-log:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:compileDebugLibraryResources UP-TO-DATE
+> Task :core:extractDeepLinksDebug UP-TO-DATE
+> Task :field-log:processDebugMainManifest UP-TO-DATE
+> Task :field-log:processDebugManifest UP-TO-DATE
+> Task :field-log:processDebugManifestForPackage UP-TO-DATE
+> Task :field-log:processDebugResources UP-TO-DATE
+> Task :field-log:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :house-model:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :house-model:createFullJarDebug
+> Task :field-log:generateDebugAndroidTestLintModel
+> Task :house-model:generateDebugLintModel
+> Task :field-log:generateDebugLintReportModel
+> Task :field-log:generateDebugUnitTestLintModel
+> Task :field-log:lintAnalyzeDebugAndroidTest
+
+> Task :core:lintReportDebug
+Wrote HTML report to file:///home/runner/work/home-record/home-record/core/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/runner/work/home-record/home-record/core/build/reports/lint-results-debug.sarif
+
+> Task :core:lintDebug
+> Task :field-log:lintAnalyzeDebugUnitTest
+> Task :house-model:generateDebugAndroidTestLintModel
+> Task :house-model:generateDebugUnitTestLintModel
+> Task :house-model:lintAnalyzeDebugAndroidTest
+> Task :core-ui:lintAnalyzeDebug
+
+> Task :core-ui:lintReportDebug
+Wrote HTML report to file:///home/runner/work/home-record/home-record/core-ui/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/runner/work/home-record/home-record/core-ui/build/reports/lint-results-debug.sarif
+
+> Task :core-ui:lintDebug
+> Task :house-model:lintAnalyzeDebugUnitTest
+> Task :house-manual:compileDebugKotlin UP-TO-DATE
+> Task :house-manual:compileDebugJavaWithJavac UP-TO-DATE
+> Task :house-manual:processDebugMainManifest UP-TO-DATE
+> Task :house-manual:processDebugManifest UP-TO-DATE
+> Task :house-manual:processDebugManifestForPackage UP-TO-DATE
+> Task :house-manual:processDebugResources UP-TO-DATE
+> Task :house-manual:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :house-manual:generateDebugAndroidTestLintModel
+> Task :house-manual:generateDebugLintReportModel
+> Task :house-manual:generateDebugUnitTestLintModel
+> Task :house-manual:lintAnalyzeDebugAndroidTest
+> Task :house-manual:lintAnalyzeDebugUnitTest
+> Task :house-model:generateDebugLintReportModel
+> Task :house-model:lintAnalyzeDebug
+> Task :house-manual:lintAnalyzeDebug
+
+> Task :house-manual:lintReportDebug
+Wrote HTML report to file:///home/runner/work/home-record/home-record/house-manual/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/runner/work/home-record/home-record/house-manual/build/reports/lint-results-debug.sarif
+
+> Task :house-manual:lintDebug
+
+> Task :house-model:lintReportDebug
+Wrote HTML report to file:///home/runner/work/home-record/home-record/house-model/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/runner/work/home-record/home-record/house-model/build/reports/lint-results-debug.sarif
+
+> Task :house-model:lintDebug
+> Task :field-log:lintAnalyzeDebug
+
+> Task :field-log:lintReportDebug
+Wrote HTML report to file:///home/runner/work/home-record/home-record/field-log/build/reports/lint-results-debug.html
+Wrote SARIF report to file:///home/runner/work/home-record/home-record/field-log/build/reports/lint-results-debug.sarif
+
+> Task :field-log:lintDebug
+
+[Incubating] Problems report is available at: file:///home/runner/work/home-record/home-record/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2m 32s
+177 actionable tasks: 81 executed, 3 from cache, 93 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
+== lintDebug exit 0
+== validateDebugScreenshotTest 11:54:50
+               total        used        free      shared  buff/cache   available
+Mem:           15983        1536        6993          49        7847       14446
+Swap:           6143           0        6143
+/dev/root       145G   57G   88G  40% /
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+> Task :core:preBuild UP-TO-DATE
+> Task :core:preDebugBuild UP-TO-DATE
+> Task :core:generateDebugResources UP-TO-DATE
+> Task :core:packageDebugResources UP-TO-DATE
+> Task :core:processDebugNavigationResources UP-TO-DATE
+> Task :core:parseDebugLocalResources UP-TO-DATE
+> Task :core:generateDebugRFile UP-TO-DATE
+> Task :core:kspDebugKotlin UP-TO-DATE
+> Task :core:compileDebugKotlin UP-TO-DATE
+> Task :core:javaPreCompileDebug UP-TO-DATE
+> Task :core:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :core-ui:generateDebugResources UP-TO-DATE
+> Task :core-ui:packageDebugResources UP-TO-DATE
+> Task :core-ui:processDebugNavigationResources UP-TO-DATE
+> Task :core-ui:parseDebugLocalResources UP-TO-DATE
+> Task :core-ui:generateDebugRFile UP-TO-DATE
+> Task :core-ui:compileDebugKotlin UP-TO-DATE
+> Task :core-ui:javaPreCompileDebug UP-TO-DATE
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core-ui:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core-ui:preDebugScreenshotTestBuild UP-TO-DATE
+> Task :core:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:compileDebugLibraryResources UP-TO-DATE
+> Task :core:writeDebugAarMetadata UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata UP-TO-DATE
+> Task :core-ui:checkDebugScreenshotTestAarMetadata
+> Task :core-ui:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core-ui:compileDebugLibraryResources UP-TO-DATE
+> Task :core-ui:mapDebugScreenshotTestSourceSetPaths
+> Task :core-ui:generateDebugScreenshotTestResources FROM-CACHE
+> Task :core-ui:mergeDebugScreenshotTestResources
+> Task :core:extractDeepLinksDebug UP-TO-DATE
+> Task :core:processDebugManifest UP-TO-DATE
+> Task :core-ui:extractDeepLinksDebug UP-TO-DATE
+> Task :core-ui:processDebugManifest UP-TO-DATE
+> Task :core-ui:mergeDebugScreenshotTestManifest
+> Task :core-ui:processDebugScreenshotTestManifest
+> Task :core-ui:processDebugScreenshotTestResources
+> Task :core-ui:compileDebugScreenshotTestKotlin
+> Task :core-ui:javaPreCompileDebugScreenshotTest FROM-CACHE
+> Task :core-ui:compileDebugScreenshotTestJavaWithJavac NO-SOURCE
+> Task :core:generateDebugAssets UP-TO-DATE
+> Task :core:mergeDebugAssets UP-TO-DATE
+> Task :core-ui:generateDebugScreenshotTestAssets UP-TO-DATE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugScreenshotTestAssets
+> Task :core-ui:packageDebugScreenshotTestForScreenshotTest
+> Task :core-ui:validateDebugScreenshotTest
+> Task :field-log:preBuild UP-TO-DATE
+> Task :field-log:preDebugBuild UP-TO-DATE
+> Task :field-log:generateDebugBuildConfig UP-TO-DATE
+> Task :field-log:generateDebugResources UP-TO-DATE
+> Task :field-log:packageDebugResources UP-TO-DATE
+> Task :house-model:preBuild UP-TO-DATE
+> Task :house-model:preDebugBuild UP-TO-DATE
+> Task :house-model:processDebugNavigationResources UP-TO-DATE
+> Task :field-log:processDebugNavigationResources UP-TO-DATE
+> Task :field-log:parseDebugLocalResources UP-TO-DATE
+> Task :field-log:generateDebugRFile UP-TO-DATE
+> Task :house-model:generateDebugResources UP-TO-DATE
+> Task :house-model:packageDebugResources UP-TO-DATE
+> Task :house-model:parseDebugLocalResources UP-TO-DATE
+> Task :house-model:generateDebugRFile UP-TO-DATE
+> Task :house-model:compileDebugKotlin UP-TO-DATE
+> Task :house-model:javaPreCompileDebug UP-TO-DATE
+> Task :house-model:compileDebugJavaWithJavac NO-SOURCE
+> Task :house-model:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :field-log:compileDebugKotlin UP-TO-DATE
+> Task :field-log:javaPreCompileDebug UP-TO-DATE
+> Task :field-log:compileDebugJavaWithJavac UP-TO-DATE
+> Task :house-model:writeDebugAarMetadata UP-TO-DATE
+> Task :field-log:checkDebugAarMetadata UP-TO-DATE
+> Task :field-log:mapDebugSourceSetPaths UP-TO-DATE
+> Task :field-log:compileDebugNavigationResources UP-TO-DATE
+> Task :field-log:mergeDebugResources UP-TO-DATE
+> Task :field-log:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :field-log:extractDeepLinksDebug UP-TO-DATE
+> Task :house-model:extractDeepLinksDebug UP-TO-DATE
+> Task :house-model:processDebugManifest UP-TO-DATE
+> Task :field-log:processDebugMainManifest UP-TO-DATE
+> Task :field-log:processDebugManifest UP-TO-DATE
+> Task :field-log:processDebugManifestForPackage UP-TO-DATE
+> Task :house-model:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-model:compileDebugLibraryResources UP-TO-DATE
+> Task :field-log:processDebugResources UP-TO-DATE
+> Task :field-log:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :field-log:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :house-model:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :field-log:preDebugScreenshotTestBuild UP-TO-DATE
+> Task :field-log:compileDebugScreenshotTestKotlin
+> Task :field-log:javaPreCompileDebugScreenshotTest FROM-CACHE
+> Task :field-log:compileDebugScreenshotTestJavaWithJavac NO-SOURCE
+> Task :field-log:generateDebugAssets UP-TO-DATE
+> Task :house-model:generateDebugAssets UP-TO-DATE
+> Task :house-model:mergeDebugAssets UP-TO-DATE
+> Task :field-log:mergeDebugAssets UP-TO-DATE
+> Task :field-log:packageDebugScreenshotTestForScreenshotTest
+> Task :field-log:validateDebugScreenshotTest
+> Task :house-manual:preBuild UP-TO-DATE
+> Task :house-manual:preDebugBuild UP-TO-DATE
+> Task :house-manual:generateDebugBuildConfig UP-TO-DATE
+> Task :house-manual:generateDebugResources UP-TO-DATE
+> Task :house-manual:packageDebugResources UP-TO-DATE
+> Task :house-manual:processDebugNavigationResources UP-TO-DATE
+> Task :house-manual:parseDebugLocalResources UP-TO-DATE
+> Task :house-manual:generateDebugRFile UP-TO-DATE
+> Task :house-manual:compileDebugKotlin UP-TO-DATE
+> Task :house-manual:javaPreCompileDebug UP-TO-DATE
+> Task :house-manual:compileDebugJavaWithJavac UP-TO-DATE
+> Task :house-manual:checkDebugAarMetadata UP-TO-DATE
+> Task :house-manual:mapDebugSourceSetPaths UP-TO-DATE
+> Task :house-manual:compileDebugNavigationResources UP-TO-DATE
+> Task :house-manual:mergeDebugResources UP-TO-DATE
+> Task :house-manual:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :house-manual:extractDeepLinksDebug UP-TO-DATE
+> Task :house-manual:processDebugMainManifest UP-TO-DATE
+> Task :house-manual:processDebugManifest UP-TO-DATE
+> Task :house-manual:processDebugManifestForPackage UP-TO-DATE
+> Task :house-manual:processDebugResources UP-TO-DATE
+> Task :house-manual:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :house-manual:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :house-manual:preDebugScreenshotTestBuild UP-TO-DATE
+> Task :house-manual:compileDebugScreenshotTestKotlin
+> Task :house-manual:javaPreCompileDebugScreenshotTest FROM-CACHE
+> Task :house-manual:compileDebugScreenshotTestJavaWithJavac NO-SOURCE
+> Task :house-manual:generateDebugAssets UP-TO-DATE
+> Task :house-manual:mergeDebugAssets UP-TO-DATE
+> Task :house-manual:packageDebugScreenshotTestForScreenshotTest
+> Task :house-manual:validateDebugScreenshotTest
+
+[Incubating] Problems report is available at: file:///home/runner/work/home-record/home-record/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 6m 33s
+114 actionable tasks: 16 executed, 4 from cache, 94 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
+== validateDebugScreenshotTest exit 0

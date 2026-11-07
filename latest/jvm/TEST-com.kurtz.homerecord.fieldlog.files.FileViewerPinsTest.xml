@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:40.938Z" hostname="runnervmwuk1x" time="0.363">
+  <properties/>
+  <testcase name="chooseAsksForTheRoleAgainBeforeWriting" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.098"/>
+  <testcase name="losingTheRoleWhileChoosingPinsNothing" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.052"/>
+  <testcase name="choosingADeletedTaskSaysSo" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.064"/>
+  <testcase name="pinsOnAPageTheFileNoLongerHasAreLeftOffAndDoneTasksDropOut" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.049"/>
+  <testcase name="tapInPinModeThenChooseATaskPinsItWhereTapped" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.035"/>
+  <testcase name="crewSeeOnlyTheirPinsAndCannotPin" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.034"/>
+  <testcase name="newTaskHereHandsTheSpotToTheFormAndLeavesPinMode" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinsTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

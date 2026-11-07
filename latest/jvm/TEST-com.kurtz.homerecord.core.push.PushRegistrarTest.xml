@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.push.PushRegistrarTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:28.461Z" hostname="runnervmwuk1x" time="0.016">
+  <properties/>
+  <testcase name="sameTokenAndUserIsNotSentAgain" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.006"/>
+  <testcase name="refreshedTokenWhileSignedOutWaitsForSignIn" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <testcase name="explicitSignOutRemovesTheToken" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <testcase name="failedRegisterIsRetriedOnTheNextSession" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <testcase name="refreshedTokenIsRegisteredWhileSignedIn" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <testcase name="anotherAccountOnTheSamePhoneRegistersAgain" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.002"/>
+  <testcase name="endedSessionForgetsLocallyWithoutCallingTheServer" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <testcase name="noFirebaseConfigMeansNothingIsSent" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.002"/>
+  <testcase name="signInRegistersTheTokenForFieldLog" classname="com.kurtz.homerecord.core.push.PushRegistrarTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

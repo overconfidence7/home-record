@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.RemindersViewModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:42.334Z" hostname="runnervmwuk1x" time="0.185">
+  <properties/>
+  <testcase name="openingTheTabWritesWarrantyRemindersForStoredWarranties" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.037"/>
+  <testcase name="openFormSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.023"/>
+  <testcase name="doneRollsARecurringReminderForwardIntoUpcoming" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.026"/>
+  <testcase name="pickingAZoneSeedsSeasonalTasksAndMarksTheChip" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.027"/>
+  <testcase name="addReminderNeedsTitleAndDateThenListsIt" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.024"/>
+  <testcase name="snoozeMovesADueReminderToUpcomingAndClosesTheMenu" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.026"/>
+  <testcase name="aViewerOpeningTheTabWritesNothing" classname="com.kurtz.homerecord.housemanual.RemindersViewModelTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

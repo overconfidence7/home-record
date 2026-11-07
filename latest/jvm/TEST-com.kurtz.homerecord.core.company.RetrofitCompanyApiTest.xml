@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:50:18.650Z" hostname="runnervmwuk1x" time="0.157">
+  <properties/>
+  <testcase name="planRefusalsMapToTheirOwnFailures" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.028"/>
+  <testcase name="secondCompanyMapsToAlreadyInCompany" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.005"/>
+  <testcase name="membersMapRolesAndRates" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.006"/>
+  <testcase name="updateProfileSendsSettingsWireNames" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.008"/>
+  <testcase name="timeZoneIsReadAndSentOnlyWhenSet" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.017"/>
+  <testcase name="meKeepsOnlyCompanyMemberships" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.007"/>
+  <testcase name="networkFailureIsOffline" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.008"/>
+  <testcase name="createSendsTrimmedFieldsAndOmitsBlanks" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.007"/>
+  <testcase name="statusCodesMap" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.021"/>
+  <testcase name="meReadsTheEntitlementExpiry" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.005"/>
+  <testcase name="badCodeMapsToInvalidCode" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.009"/>
+  <testcase name="meReadsTheClockRulesForAnyRole" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.011"/>
+  <testcase name="profileReadsSettingsWithDefaults" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.01"/>
+  <testcase name="setRoleAndRateUsePatchOnTheMember" classname="com.kurtz.homerecord.core.company.RetrofitCompanyApiTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

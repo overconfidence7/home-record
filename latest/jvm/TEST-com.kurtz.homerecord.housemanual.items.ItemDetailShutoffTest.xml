@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-07T11:51:46.332Z" hostname="runnervmwuk1x" time="0.303">
+  <properties/>
+  <testcase name="withNoneLinkedTheRowOffersThePicker" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.065"/>
+  <testcase name="anItemThatIsNotAShutoffKeepsItsNotesAtTheEnd" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.047"/>
+  <testcase name="aLinkedShutoffShowsAsAChipThatOpensIt" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.055"/>
+  <testcase name="thePickerListsShutoffsAndNoShutoffClears" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.045"/>
+  <testcase name="aHomeWithNoShutoffsHidesTheSection" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.037"/>
+  <testcase name="aShutoffsInstructionsLeadItsPage" classname="com.kurtz.homerecord.housemanual.items.ItemDetailShutoffTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
