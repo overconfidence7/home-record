@@ -127,6 +127,16 @@ fun JobsNoMatchesScreenshot() = JobsNoMatchesPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun JobsLoadingScreenshot() = JobsLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun JobsLoadFailedScreenshot() = JobsLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun JobEditScreenshot() = JobEditPreview()
 
 @PreviewTest

@@ -205,6 +205,7 @@ object ScreenCatalog {
         QaScreen("items-filtered", nonRoot = false) { ItemsFilteredPreview() },
         QaScreen("items-no-match", nonRoot = false) { ItemsNoMatchPreview() },
         QaScreen("items-loading", nonRoot = false) { ItemsLoadingPreview() },
+        QaScreen("items-load-failed", nonRoot = false) { ItemsLoadFailedPreview() },
         QaScreen("item-detail", nonRoot = true) { ItemDetailPreview() },
         QaScreen("item-place", nonRoot = true) { ItemPlacePreview() },
         QaScreen("item-place-unplaced", nonRoot = true) { ItemPlaceUnplacedPreview() },

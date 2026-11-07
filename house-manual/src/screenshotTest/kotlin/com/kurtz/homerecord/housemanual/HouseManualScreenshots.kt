@@ -216,6 +216,11 @@ fun ItemsLoadingScreenshot() = ItemsLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemsLoadFailedScreenshot() = ItemsLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ItemEditNewScreenshot() = ItemEditNewPreview()
 
 @PreviewTest

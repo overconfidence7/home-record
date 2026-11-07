@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
@@ -59,7 +60,10 @@ class ItemsViewModel(
 
     private val collapsed = MutableStateFlow(saved.get<ArrayList<String>>(COLLAPSED)?.toSet().orEmpty())
 
-    val state: StateFlow<ItemsUiState> = combine(rows, grouping, filter, collapsed) { all, g, f, c ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Items")
+
+    val state: StateFlow<ItemsUiState> = load.wrap(ItemsUiState(loading = false, loadFailed = true)) { combine(rows, grouping, filter, collapsed) { all, g, f, c ->
         ItemsUiState(
             collapsed = c,
             loading = false, totalCount = all.size, grouping = g, filter = f,
@@ -67,10 +71,11 @@ class ItemsViewModel(
             categoryOptions = all.map { it.category }.distinct().sorted(),
             roomOptions = all.filter { it.roomId != null }.map { RoomOption(it.roomId.orEmpty(), it.roomName) }.distinct().sortedBy { it.name.lowercase() },
         )
-    }.flowOn(mapping).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsUiState())
+    } }.flowOn(mapping).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemsUiState())
 
     fun onEvent(e: ItemsEvent) {
         when (e) {
+            ItemsEvent.Retry -> load.retry()
             is ItemsEvent.SetGrouping -> { grouping.value = e.grouping; saved[GROUPING] = e.grouping.name }
             is ItemsEvent.SetQuery -> update { copy(query = e.query) }
             is ItemsEvent.SetCategory -> update { copy(category = e.category) }

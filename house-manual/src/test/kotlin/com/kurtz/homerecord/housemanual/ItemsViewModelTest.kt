@@ -144,4 +144,23 @@ class ItemsViewModelTest {
             mapping.close()
         }
     }
+
+    // AC-U4: when the items cannot be read the tab shows its error state, and Retry reads them again
+    @Test @AcceptanceCriterion("AC-U4")
+    fun aFailedReadShowsTheErrorStateAndRetryRecovers() {
+        var calls = 0
+        val source = kotlinx.coroutines.flow.flow {
+            calls++
+            if (calls == 1) throw IllegalStateException("database disk image is malformed")
+            emit(rows)
+        }
+        val vm = ItemsViewModel(source, SavedStateHandle(), Dispatchers.Main) { it.name }
+        val job = vm.state.onEach { }.launchIn(kotlinx.coroutines.CoroutineScope(Dispatchers.Main))
+        assertThat(vm.state.value.loadFailed).isTrue()
+        assertThat(vm.state.value.loading).isFalse()
+        vm.onEvent(ItemsEvent.Retry)
+        assertThat(vm.state.value.loadFailed).isFalse()
+        assertThat(vm.state.value.totalCount).isEqualTo(2)
+        job.cancel()
+    }
 }

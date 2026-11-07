@@ -73,4 +73,23 @@ class JobsViewModelTest {
         assertThat(synchronized(mappedOn) { mappedOn.toList() }).isNotEmpty()
         assertThat(synchronized(mappedOn) { mappedOn.toSet() }).containsExactly("jobs-mapping")
     }
+
+    // AC-U4: a jobs read that throws shows the error state with Retry, and Retry reads the list again
+    @com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-U4")
+    @Test fun aFailedReadShowsTheErrorStateAndRetryRecovers() {
+        var calls = 0
+        val gates = kotlinx.coroutines.flow.flow {
+            calls++
+            if (calls == 1) throw IllegalStateException("database disk image is malformed")
+            emit(RoleGates(CompanyRole.Owner))
+        }
+        val vm = JobsViewModel("c1", db.jobDao(), db.clientDao(), db.assignmentDao(), gates, SavedStateHandle(), { "2026-10-31" }, mapping)
+            .also { created = it }
+        val failed = runBlocking { withTimeout(10_000) { vm.state.first { it.loadFailed } } }
+        assertThat(failed.loading).isFalse()
+        assertThat(failed.canAddJob).isFalse()
+        vm.onEvent(JobsEvent.Retry)
+        val state = runBlocking { withTimeout(10_000) { vm.state.first { !it.loading && !it.loadFailed } } }
+        assertThat(state.groups.active).hasSize(200)
+    }
 }

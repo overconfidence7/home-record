@@ -56,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.WarrantyStatusLine
@@ -79,6 +80,10 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
     ) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.items_load_failed), { onEvent(ItemsEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_items_retry"),
+            )
             state.totalCount == 0 -> EmptyState(
                 icon = Icons.Rounded.Inventory2,
                 headline = stringResource(R.string.items_empty_title),

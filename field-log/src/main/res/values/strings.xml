@@ -338,6 +338,7 @@
     <string name="company_tz_hawaii">Hawaii</string>
     <string name="company_photo_on_punch_helper">Asks for a quick photo with each punch. Off by default.</string>
     <string name="jobs_title">Jobs</string>
+    <string name="jobs_load_failed">Couldn\'t open the jobs list. Tap Retry to read it again.</string>
     <string name="jobs_empty_title">No jobs yet</string>
     <string name="jobs_empty_body">Jobs you add show up here, grouped by Active, Upcoming and Done.</string>
     <string name="jobs_search">Search jobs</string>

@@ -35,6 +35,8 @@ object ScreenCatalog {
         QaScreen("jobs-crew", nonRoot = false) { JobsCrewPreview() },
         QaScreen("jobs-empty", nonRoot = false) { JobsEmptyPreview() },
         QaScreen("jobs-no-matches", nonRoot = false) { JobsNoMatchesPreview() },
+        QaScreen("jobs-loading", nonRoot = false) { JobsLoadingPreview() },
+        QaScreen("jobs-load-failed", nonRoot = false) { JobsLoadFailedPreview() },
         QaScreen("job-edit", nonRoot = true) { JobEditPreview() },
         QaScreen("job-edit-remove-room", nonRoot = true) { JobEditRemoveRoomPreview() },
         QaScreen("job-overview", nonRoot = true) { JobOverviewPreview() },

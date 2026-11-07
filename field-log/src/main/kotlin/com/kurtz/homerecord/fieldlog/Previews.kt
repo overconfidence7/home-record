@@ -456,6 +456,14 @@ fun JobsNoMatchesPreview() = Frame {
 
 @ThemePreviews
 @Composable
+fun JobsLoadingPreview() = Frame { JobsScreen(JobsUiState(canAddJob = false), {}) }
+
+@ThemePreviews
+@Composable
+fun JobsLoadFailedPreview() = Frame { JobsScreen(JobsUiState(loading = false, loadFailed = true, canAddJob = false), {}) }
+
+@ThemePreviews
+@Composable
 fun JobEditPreview() = Frame {
     val draft = JobDraft(
         name = "Panel upgrade 200A", clientName = "Rivera family", clientPhone = "(937) 555-0142", clientEmail = "ana.rivera@example.com",

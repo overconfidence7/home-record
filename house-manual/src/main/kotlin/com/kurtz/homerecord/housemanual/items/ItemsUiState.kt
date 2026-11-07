@@ -10,6 +10,8 @@ data class RoomOption(val id: String, val name: String)
 
 data class ItemsUiState(
     val loading: Boolean = true,
+    /** The items could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val totalCount: Int = 0,
     val grouping: ItemGrouping = ItemGrouping.CATEGORY,
     val filter: ItemFilter = ItemFilter(),
@@ -36,4 +38,5 @@ sealed interface ItemsEvent {
     data class ToggleGroup(val key: String) : ItemsEvent
     data class Open(val itemId: String) : ItemsEvent
     data object Add : ItemsEvent
+    data object Retry : ItemsEvent
 }

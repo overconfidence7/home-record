@@ -66,12 +66,13 @@ fun ErrorState(
     message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    retryModifier: Modifier = Modifier,
 ) {
     CenteredColumn(modifier) {
         Icon(Icons.Rounded.CloudOff, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
-        Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
+        Button(onClick = onRetry, modifier = retryModifier) { Text(stringResource(R.string.retry)) }
     }
 }
 

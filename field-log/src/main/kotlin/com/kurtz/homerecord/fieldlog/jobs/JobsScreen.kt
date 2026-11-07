@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.fieldlog.R
@@ -50,6 +51,10 @@ fun JobsScreen(state: JobsUiState, onEvent: (JobsEvent) -> Unit, modifier: Modif
         )
         when {
             state.loading -> LoadingState(Modifier.weight(1f))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.jobs_load_failed), { onEvent(JobsEvent.Retry) }, Modifier.weight(1f),
+                retryModifier = Modifier.testTag("fl_jobs_retry"),
+            )
             state.groups.isEmpty && !state.noMatches && state.query.isBlank() -> JobsEmpty(state.canAddJob, onEvent, Modifier.weight(1f))
             else -> JobsList(state, onEvent, Modifier.weight(1f))
         }

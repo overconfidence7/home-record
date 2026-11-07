@@ -1029,3 +1029,6 @@ Both apps share one version in `version.properties` at the repo root (`versionNa
 - `DELETE /me` deletes owned homes and companies outright (same as delete cloud copy) and only ends memberships in tenants the caller does not own; records a crew member made stay with the company, since they are the company's records. Handoffs the caller claimed are deleted with their bundles rather than released, so a claimed link never becomes claimable again.
 - House Manual keeps the home on the phone after Delete account (local-first, like delete cloud copy); Field Log clears the phone, as sign-out does.
 - FL has no account page, so Delete account is a row under Sign out on FL-More; its supporting line names the consequence per role.
+
+## 2026-11-07: list load failures (S5a)
+A list's Room flow is wrapped in `Reloadable` (:core data): an exception becomes a `loadFailed` UiState with Retry (AC-U4) rather than an uncaught exception in viewModelScope. Retry re-subscribes the upstream through `flatMapLatest` on an attempt counter. The cause is logged through java.util.logging (reaches logcat on Android, works in plain JVM tests without mocking android.util.Log). Rolled out list by list (S5a Items and Jobs, S5b the rest).

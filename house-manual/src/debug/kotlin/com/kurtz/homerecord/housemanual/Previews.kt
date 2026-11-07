@@ -502,6 +502,10 @@ fun ItemsLoadingPreview() = Frame { ItemsScreen(ItemsUiState(), {}) }
 
 @ThemePreviews
 @Composable
+fun ItemsLoadFailedPreview() = Frame { ItemsScreen(ItemsUiState(loading = false, loadFailed = true), {}) }
+
+@ThemePreviews
+@Composable
 fun ItemEditNewPreview() = Frame { ItemEditScreen(ItemEditUiState(loading = false, rooms = itemRooms), {}, {}) }
 
 @ThemePreviews

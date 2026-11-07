@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class JobsUiState(
     val loading: Boolean = true,
+    /** The jobs could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val query: String = "",
     val showArchived: Boolean = false,
     val groups: JobRowGroups = JobRowGroups(emptyList(), emptyList(), emptyList(), emptyList()),
@@ -21,4 +23,5 @@ sealed interface JobsEvent {
     data object ToggleArchived : JobsEvent
     data class Open(val jobId: String) : JobsEvent
     data object New : JobsEvent
+    data object Retry : JobsEvent
 }

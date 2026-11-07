@@ -35,6 +35,7 @@
     <string name="house_summary">%1$s · %2$s</string>
     <string name="required_marker">%1$s (required)</string>
     <string name="field_required">Required.</string>
+    <string name="items_load_failed">Couldn\'t open your items. Tap Retry to read them again.</string>
     <string name="items_empty_title">No items yet</string>
     <string name="items_empty_body_view_only">Nothing has been added to this home yet.</string>
     <string name="items_empty_body">Add the furnace, the water heater, the dishwasher. Anything with a model number and a warranty.</string>

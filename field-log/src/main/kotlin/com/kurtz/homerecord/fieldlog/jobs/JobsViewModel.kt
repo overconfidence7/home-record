@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
@@ -32,7 +33,10 @@ class JobsViewModel(
     private val query = saved.getStateFlow(QUERY, "")
     private val showArchived = saved.getStateFlow(ARCHIVED, false)
 
-    val state: StateFlow<JobsUiState> = combine(
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Jobs")
+
+    val state: StateFlow<JobsUiState> = load.wrap(JobsUiState(loading = false, loadFailed = true, canAddJob = false)) { combine(
         combine(jobs.observeFor(companyId), gates) { j, g -> j to g },
         clients.observeFor(companyId),
         assignments.observeForCompany(companyId),
@@ -51,12 +55,13 @@ class JobsViewModel(
             today = today,
             canAddJob = g.canEditJobs,
         )
-    }.flowOn(mapping).stateIn(viewModelScope, SharingStarted.Eagerly, JobsUiState(query = saved.get<String>(QUERY).orEmpty(), canAddJob = false))
+    } }.flowOn(mapping).stateIn(viewModelScope, SharingStarted.Eagerly, JobsUiState(query = saved.get<String>(QUERY).orEmpty(), canAddJob = false))
 
     fun onEvent(event: JobsEvent) {
         when (event) {
             is JobsEvent.Query -> saved[QUERY] = event.text
             JobsEvent.ToggleArchived -> saved[ARCHIVED] = !(saved.get<Boolean>(ARCHIVED) ?: false)
+            JobsEvent.Retry -> load.retry()
             is JobsEvent.Open, JobsEvent.New -> Unit // routed by JobsRoute
         }
     }
