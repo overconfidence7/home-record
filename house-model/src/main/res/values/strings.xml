@@ -27,8 +27,10 @@
     <string name="floor_ceiling">Ceiling height</string>
     <string name="floor_edit_title">Edit floor</string>
     <string name="floor_add_title">Add floor</string>
-    <string name="floor_rooms">%1$d rooms</string>
-    <string name="floor_room_one">1 room</string>
+    <plurals name="floor_rooms">
+        <item quantity="one">%d room</item>
+        <item quantity="other">%d rooms</item>
+    </plurals>
     <string name="floor_row_supporting">%1$s · %2$s ceilings</string>
     <string name="floor_half_level">half level</string>
     <string name="floor_more">More actions for %1$s</string>
@@ -38,8 +40,10 @@
     <string name="floor_delete">Delete</string>
     <string name="floor_delete_title">Delete %1$s?</string>
     <string name="floor_delete_body_empty">This floor has no rooms.</string>
-    <string name="floor_delete_body_one">The 1 room on this floor is removed too.</string>
-    <string name="floor_delete_body_many">The %1$d rooms on this floor are removed too.</string>
+    <plurals name="floor_delete_body_rooms">
+        <item quantity="one">The %d room on this floor is removed too.</item>
+        <item quantity="other">The %d rooms on this floor are removed too.</item>
+    </plurals>
     <string name="cancel">Cancel</string>
     <string name="save_floor">Save</string>
     <string name="house_export_pdf">Export PDF</string>
@@ -237,7 +241,10 @@
     <string name="legend_with_slot">with %1$d</string>
     <string name="legend_feeds">feeds %1$s</string>
     <string name="legend_service">%1$d A service</string>
-    <string name="legend_slots">%1$d slots</string>
+    <plurals name="legend_slots">
+        <item quantity="one">%d slot</item>
+        <item quantity="other">%d slots</item>
+    </plurals>
     <!-- Item types, their seeded consumables and reminders (cr:seed-strings); ids match ItemCategory -->
     <string name="item_subtype_refrigerator">Refrigerator</string>
     <string name="item_subtype_freezer">Freezer</string>
@@ -386,7 +393,10 @@
     <string name="house3d_reset">Reset view</string>
     <string name="house3d_all_floors">All floors</string>
     <string name="house3d_ghost_hint">Floors below are shown faded.</string>
-    <string name="house3d_walls_photographed">%3$s photos on %1$d of %2$d walls</string>
+    <plurals name="house3d_walls_photographed">
+        <item quantity="one">%3$s photos on %1$d of %2$d wall</item>
+        <item quantity="other">%3$s photos on %1$d of %2$d walls</item>
+    </plurals>
     <string name="house3d_hint">Drag to turn, pinch to zoom, two fingers to move. Tap a room to stand inside it.</string>
     <string name="house3d_room_hint">Drag to look around, pinch to step closer.</string>
     <string name="house3d_back_to_floor">Back to floor</string>
@@ -394,7 +404,10 @@
     <string name="house3d_open_marker">Open %1$s</string>
     <string name="house3d_room_description">Inside %1$s in 3D, looking at its longest wall</string>
     <string name="room_view_3d">View in 3D</string>
-    <string name="house3d_scene_description">3D view of %1$s: %2$d rooms</string>
+    <plurals name="house3d_scene_description">
+        <item quantity="one">3D view of %1$s: %2$d room</item>
+        <item quantity="other">3D view of %1$s: %2$d rooms</item>
+    </plurals>
     <string name="house3d_empty_title">Nothing to show in 3D yet</string>
     <string name="house3d_empty_body">Draw this floor\'s rooms and they stand up here as walls.</string>
     <string name="house3d_empty_body_view_only">The owner hasn\'t drawn this floor\'s rooms yet.</string>
@@ -495,7 +508,10 @@
     <string name="house_behind_wall">Behind the wall</string>
     <string name="behind_wall_title">Behind the wall</string>
     <string name="behind_wall_intro">Pick a room, then a wall. Before drywall the photo is the wall\'s Rough-in photo. After drywall, photograph the same wall again for the Finished photo.</string>
-    <string name="behind_wall_room_progress">Rough-in %1$d of %2$d walls · Finished %3$d of %2$d</string>
+    <plurals name="behind_wall_room_progress">
+        <item quantity="one">Rough-in %1$d of %2$d wall · Finished %3$d of %2$d</item>
+        <item quantity="other">Rough-in %1$d of %2$d walls · Finished %3$d of %2$d</item>
+    </plurals>
     <string name="behind_wall_room_no_walls">Not on the plan yet</string>
     <string name="behind_wall_empty_title">No rooms on the plan yet</string>
     <string name="behind_wall_empty_body">Draw the job\'s rooms on the plan. Each side of a room becomes a wall to photograph.</string>
@@ -546,7 +562,15 @@
     <string name="climate_zone_marine">Marine</string>
     <string name="report_title">Home report</string>
     <string name="report_made_on">Made %1$s</string>
-    <string name="report_counts">%1$d rooms · %2$d items</string>
+    <string name="report_counts">%1$s · %2$s</string>
+    <plurals name="report_count_rooms">
+        <item quantity="one">%d room</item>
+        <item quantity="other">%d rooms</item>
+    </plurals>
+    <plurals name="report_count_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
     <string name="report_rooms">Rooms and items</string>
     <string name="report_no_items">No items yet</string>
     <string name="report_shutoffs">Shutoffs</string>

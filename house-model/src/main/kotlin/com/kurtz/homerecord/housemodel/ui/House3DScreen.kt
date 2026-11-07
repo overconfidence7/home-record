@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -140,7 +141,7 @@ fun House3DScreen(
             LayerToggleRow(state.layers, { onEvent(House3DEvent.ToggleLayer(it)) })
             if (scene != null && !scene.isEmpty) {
                 Text(
-                    stringResource(R.string.house3d_walls_photographed, state.photographedWalls, scene.wallCount, stringResource(state.stage.labelRes)),
+                    pluralStringResource(R.plurals.house3d_walls_photographed, scene.wallCount, state.photographedWalls, scene.wallCount, stringResource(state.stage.labelRes)),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp).testTag("${prefix}_3d_walls"),
                 )
@@ -182,7 +183,7 @@ fun House3DScreen(
                     val description = if (room != null) {
                         stringResource(R.string.house3d_room_description, room.name)
                     } else {
-                        stringResource(R.string.house3d_scene_description, floorName.orEmpty(), scene.roomCount)
+                        pluralStringResource(R.plurals.house3d_scene_description, scene.roomCount, floorName.orEmpty(), scene.roomCount)
                     }
                     // The tag and description sit on a plain Compose box around the scene: SceneView is an AndroidView,
                     // whose own accessibility node replaces the semantics set on it, so Maestro and TalkBack would never

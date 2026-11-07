@@ -485,5 +485,5 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T081c: docs/store-listing.md for both apps per voice.md (title, short and full description, screenshots list from the tour)
 - [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
   - [x] S1: lint warnings fixed or justified in REVIEW.md (Builder ship-ready S1)
-  - [ ] S1a: the 16 PluralsCandidate count strings as `<plurals>` ([s1:plurals])
+  - [x] S1a: the 16 PluralsCandidate count strings as `<plurals>` ([s1:plurals])
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

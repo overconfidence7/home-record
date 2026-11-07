@@ -56,7 +56,10 @@
     <string name="items_group_expand">Expand</string>
     <string name="items_no_room">No room</string>
     <string name="items_no_match_title">No items match</string>
-    <string name="items_no_match_body">Nothing fits those filters. Clear them to see all %1$d items.</string>
+    <plurals name="items_no_match_body">
+        <item quantity="one">Nothing fits those filters. Clear them to see the %d item.</item>
+        <item quantity="other">Nothing fits those filters. Clear them to see all %d items.</item>
+    </plurals>
     <string name="items_clear_filters">Clear filters</string>
     <string name="items_row_supporting">%1$s, %2$s</string>
     <string name="item_copy_suffix">(copy)</string>
@@ -95,7 +98,10 @@
     <string name="item_detail_warranty_none">No warranty on file yet.</string>
     <string name="item_detail_warranty_parts">Parts: %1$s</string>
     <string name="item_detail_warranty_labor">Labor: %1$s</string>
-    <string name="item_detail_warranty_months">%1$d months</string>
+    <plurals name="item_detail_warranty_months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
     <string name="item_detail_warranty_looked_up">Looked up %1$s</string>
     <string name="item_detail_warranty_source">Open source page</string>
     <string name="item_detail_recalls">Recalls</string>
@@ -329,8 +335,10 @@
     <string name="reminders_snoozed_until">Snoozed until %1$s</string>
     <string name="reminders_done_on">Done %1$s</string>
     <string name="reminders_repeat_once">Once</string>
-    <string name="reminders_repeat_month">Every month</string>
-    <string name="reminders_repeat_months">Every %1$d months</string>
+    <plurals name="reminders_repeat_months">
+        <item quantity="one">Every month</item>
+        <item quantity="other">Every %d months</item>
+    </plurals>
     <string name="reminders_repeat_year">Every year</string>
     <string name="reminders_mark_done">Mark %1$s done</string>
     <string name="reminders_snooze_label">Snooze %1$s</string>
@@ -635,8 +643,14 @@
     <string name="backup_make_header">Make a backup</string>
     <string name="backup_intro">Saves your whole home in one file: floors, rooms, items, wall photos, overlays, documents and reminders. Keep it in Drive or on a computer.</string>
     <string name="backup_passphrase">Passphrase</string>
-    <string name="backup_passphrase_helper">At least %1$d characters. You need it to restore, and nobody can reset it.</string>
-    <string name="backup_passphrase_short">Use at least %1$d characters.</string>
+    <plurals name="backup_passphrase_helper">
+        <item quantity="one">At least %d character. You need it to restore, and nobody can reset it.</item>
+        <item quantity="other">At least %d characters. You need it to restore, and nobody can reset it.</item>
+    </plurals>
+    <plurals name="backup_passphrase_short">
+        <item quantity="one">Use at least %d character.</item>
+        <item quantity="other">Use at least %d characters.</item>
+    </plurals>
     <string name="backup_confirm">Type the passphrase again</string>
     <string name="backup_confirm_mismatch">The two passphrases don\'t match.</string>
     <string name="backup_show_passphrase">Show passphrase</string>

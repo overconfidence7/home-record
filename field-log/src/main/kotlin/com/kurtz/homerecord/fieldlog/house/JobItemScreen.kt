@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -352,7 +353,7 @@ fun JobItemReviewContent(terms: WarrantyTerms, onEvent: (JobItemEvent) -> Unit, 
 }
 
 @Composable
-private fun months(n: Int) = stringResource(R.string.jobitem_warranty_months, n)
+private fun months(n: Int) = pluralStringResource(R.plurals.jobitem_warranty_months, n, n)
 
 private fun displayDate(iso: String): String =
     runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(iso)

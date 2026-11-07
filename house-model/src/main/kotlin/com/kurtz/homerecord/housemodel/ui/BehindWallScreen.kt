@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -109,7 +110,7 @@ private fun BehindWallRooms(state: BehindWallUiState, padding: PaddingValues, on
                 RecordListItem(
                     headline = room.name.ifBlank { stringResource(R.string.plan_unnamed_room) },
                     supporting = if (p.total == 0) stringResource(R.string.behind_wall_room_no_walls)
-                    else stringResource(R.string.behind_wall_room_progress, p.roughIn, p.total, p.finished),
+                    else pluralStringResource(R.plurals.behind_wall_room_progress, p.total, p.roughIn, p.total, p.finished),
                     leading = {
                         if (p.complete) Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         else Icon(Icons.Rounded.MeetingRoom, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)

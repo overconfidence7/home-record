@@ -1013,7 +1013,10 @@
     <string name="jobitem_warranty_none">No warranty on file yet.</string>
     <string name="jobitem_warranty_parts">Parts: %1$s</string>
     <string name="jobitem_warranty_labor">Labor: %1$s</string>
-    <string name="jobitem_warranty_months">%1$d months</string>
+    <plurals name="jobitem_warranty_months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
     <string name="jobitem_warranty_looked_up">Looked up %1$s</string>
     <string name="jobitem_warranty_source">Open source page</string>
     <string name="jobitem_warranty_lookup">Look up warranty</string>

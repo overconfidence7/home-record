@@ -227,7 +227,7 @@ fun reportWords(context: android.content.Context): ReportWords {
     return ReportWords(
         title = r.getString(R.string.report_title),
         madeOn = { r.getString(R.string.report_made_on, longDate(it)) },
-        counts = { rooms, items -> r.getString(R.string.report_counts, rooms, items) },
+        counts = { rooms, items -> r.getString(R.string.report_counts, r.getQuantityString(R.plurals.report_count_rooms, rooms, rooms), r.getQuantityString(R.plurals.report_count_items, items, items)) },
         roomsAndItems = r.getString(R.string.report_rooms),
         noItems = r.getString(R.string.report_no_items),
         shutoffs = r.getString(R.string.report_shutoffs),

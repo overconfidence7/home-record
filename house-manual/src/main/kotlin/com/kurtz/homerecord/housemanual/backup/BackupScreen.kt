@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -65,8 +66,8 @@ fun BackupScreen(state: BackupUiState, onEvent: (BackupEvent) -> Unit) {
                     label = stringResource(R.string.backup_passphrase),
                     value = state.passphrase,
                     onValueChange = { onEvent(BackupEvent.PassphraseChanged(it)) },
-                    helper = stringResource(R.string.backup_passphrase_helper, BackupPassphrase.MIN_LENGTH),
-                    error = if (state.problem == PassphraseProblem.TooShort) stringResource(R.string.backup_passphrase_short, BackupPassphrase.MIN_LENGTH) else null,
+                    helper = pluralStringResource(R.plurals.backup_passphrase_helper, BackupPassphrase.MIN_LENGTH, BackupPassphrase.MIN_LENGTH),
+                    error = if (state.problem == PassphraseProblem.TooShort) pluralStringResource(R.plurals.backup_passphrase_short, BackupPassphrase.MIN_LENGTH, BackupPassphrase.MIN_LENGTH) else null,
                     imeAction = ImeAction.Next,
                     tag = "hm_backup_passphrase",
                     enabled = !state.busy,

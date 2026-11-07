@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ItemCategory
@@ -100,7 +101,7 @@ fun ItemsScreen(state: ItemsUiState, onEvent: (ItemsEvent) -> Unit, modifier: Mo
                         Column(Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Icon(Icons.Rounded.SearchOff, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(stringResource(R.string.items_no_match_title), style = MaterialTheme.typography.titleMedium)
-                            Text(stringResource(R.string.items_no_match_body, state.totalCount), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                            Text(pluralStringResource(R.plurals.items_no_match_body, state.totalCount, state.totalCount), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
                             TextButton(onClick = { onEvent(ItemsEvent.ClearFilters) }, modifier = Modifier.heightIn(min = 48.dp).testTag("hm_items_clear")) {
                                 Text(stringResource(R.string.items_clear_filters))
                             }

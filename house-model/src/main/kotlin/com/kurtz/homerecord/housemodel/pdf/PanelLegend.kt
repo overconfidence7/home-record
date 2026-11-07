@@ -127,7 +127,7 @@ class PanelLegendExporter(private val context: Context) : LegendExporter {
         withSlot = { context.getString(R.string.legend_with_slot, it) },
         feeds = { context.getString(R.string.legend_feeds, it) },
         service = { context.getString(R.string.legend_service, it) },
-        slots = { context.getString(R.string.legend_slots, it) },
+        slots = { context.resources.getQuantityString(R.plurals.legend_slots, it, it) },
     )
 
     override suspend fun export(name: String, panel: Panel, breakers: List<Breaker>, feeds: Map<String, List<String>>): String? = withContext(Dispatchers.IO) {

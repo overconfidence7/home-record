@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
@@ -103,8 +104,7 @@ fun FloorsScreen(
                 Text(
                     when (dialog.floor.roomCount) {
                         0 -> stringResource(R.string.floor_delete_body_empty)
-                        1 -> stringResource(R.string.floor_delete_body_one)
-                        else -> stringResource(R.string.floor_delete_body_many, dialog.floor.roomCount)
+                        else -> pluralStringResource(R.plurals.floor_delete_body_rooms, dialog.floor.roomCount, dialog.floor.roomCount)
                     },
                 )
             },
@@ -118,7 +118,7 @@ fun FloorsScreen(
 @Composable
 private fun FloorRow(floor: FloorSummary, canMoveUp: Boolean, canMoveDown: Boolean, system: UnitSystem, onEvent: (FloorsEvent) -> Unit) {
     var menu by rememberSaveable { mutableStateOf(false) }
-    val rooms = if (floor.roomCount == 1) stringResource(R.string.floor_room_one) else stringResource(R.string.floor_rooms, floor.roomCount)
+    val rooms = pluralStringResource(R.plurals.floor_rooms, floor.roomCount, floor.roomCount)
     val ceiling = LengthParser.format(floor.ceilingHeightIn, system)
     val supporting = stringResource(R.string.floor_row_supporting, rooms, ceiling) +
         if (floor.halfLevel) " · " + stringResource(R.string.floor_half_level) else ""

@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -253,8 +254,7 @@ fun ReminderRowItem(
 @Composable
 private fun repeatLabel(months: Int): String = when (months) {
     12 -> stringResource(R.string.reminders_repeat_year)
-    1 -> stringResource(R.string.reminders_repeat_month)
-    else -> stringResource(R.string.reminders_repeat_months, months)
+    else -> pluralStringResource(R.plurals.reminders_repeat_months, months, months)
 }
 
 /** Repeat choices on the Add reminder form; null is "Once". */
