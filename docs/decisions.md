@@ -1020,3 +1020,7 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - HM-Account, signed in without sync: "Cloud sync is off" with what that means and a See Pro button (HM-Paywall, sync reason) in place of the sync chip.
 - `SyncCoordinator` takes an `enabled` flow per tenant (default always on), so Field Log is unchanged.
 
+
+## 2026-11-07 Versioning scheme and release signing (T081a)
+
+Both apps share one version in `version.properties` at the repo root (`versionName`, MAJOR.MINOR.PATCH). The versionCode is derived in build-logic `AppVersion.kt`: MAJOR × 1,000,000 + MINOR × 10,000 + PATCH × 100 + BUILD, where BUILD (0..99, `HOMERECORD_BUILD` or `homerecord.build`, default 0) covers a re-upload of the same version. Why: Play needs a code that only rises, and deriving it from the name means nobody has to remember to bump two numbers; one shared version keeps the handoff format and the backend's client checks simple. 0.1.0 is 10000. Release signing reads `homerecord.storeFile`, `storePassword`, `keyAlias`, `keyPassword` from local.properties or `HOMERECORD_STOREFILE`, `_STOREPASSWORD`, `_KEYALIAS`, `_KEYPASSWORD` from the environment so a CI job can sign from secrets; without them the release APK is unsigned. The upload key itself is Nate's (Play App Signing) and never enters the repo.

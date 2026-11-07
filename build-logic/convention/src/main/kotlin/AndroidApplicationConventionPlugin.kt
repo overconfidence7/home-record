@@ -15,22 +15,24 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         configureAndroid(android)
         android.defaultConfig.apply {
             targetSdk = 37
-            versionCode = 1
-            versionName = "0.1.0"
+            val version = appVersion()
+            versionCode = version.code
+            versionName = version.name
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("google.webClientId", "")}\"")
         }
         android.buildFeatures.buildConfig = true
-        // Release key from local.properties (homerecord.storeFile, storePassword, keyAlias, keyPassword); the
+        // Release key from local.properties (homerecord.storeFile, storePassword, keyAlias, keyPassword) or the
+        // HOMERECORD_STOREFILE, _STOREPASSWORD, _KEYALIAS, _KEYPASSWORD environment variables (CI secrets); the
         // testing-apks workflow writes its testing key there, a store build puts the upload key there. Without
-        // them the release APK comes out unsigned.
-        val storeFile = localProp("homerecord.storeFile", "")
+        // them the release APK comes out unsigned. Keys never go in the repo (*.jks and *.keystore are ignored).
+        val storeFile = signingProp("storeFile")
         if (storeFile.isNotEmpty()) {
             android.signingConfigs.create("release") {
                 this.storeFile = file(storeFile)
-                storePassword = localProp("homerecord.storePassword", "")
-                keyAlias = localProp("homerecord.keyAlias", "")
-                keyPassword = localProp("homerecord.keyPassword", "")
+                storePassword = signingProp("storePassword")
+                keyAlias = signingProp("keyAlias")
+                keyPassword = signingProp("keyPassword")
             }
         }
         android.buildTypes.getByName("debug") {

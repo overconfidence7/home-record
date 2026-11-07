@@ -479,5 +479,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T080a: both apps' strings.xml (house-manual, house-model, field-log, core-ui) and backend user-facing text through the voice.md checklist: no semicolons in prose, no en dash in the photo report range, "crew" for the team in empty states, "shutoff" for the gas and sink shutoffs
   - [ ] T080b: the same pass over docs/store-listing.md, docs/privacy-policy.md and docs/data-safety.md once T081 writes them
 - [ ] T081: Store readiness: `docs/data-safety.md`, `docs/privacy-policy.md` (both apps, including backend data handling), `docs/store-listing.md`, release signing config, versioning scheme
+  - [x] T081a: versioning scheme (root `version.properties` versionName MAJOR.MINOR.PATCH, versionCode MAJOR·1,000,000 + MINOR·10,000 + PATCH·100 + build, shared by both apps) and release signing from local.properties or HOMERECORD_* environment variables (CI secrets), keys never in the repo
+  - [ ] T081b: docs/privacy-policy.md (both apps and the backend: what is stored, where, retention, deletion, third parties Cloudflare, Resend, RevenueCat, Google sign-in, Firebase Cloud Messaging) and docs/data-safety.md per app, matching the manifests' permissions
+  - [ ] T081c: docs/store-listing.md for both apps per voice.md (title, short and full description, screenshots list from the tour)
 - [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
