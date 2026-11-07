@@ -488,4 +488,5 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] S1a: the 16 PluralsCandidate count strings as `<plurals>` ([s1:plurals])
   - [x] S2: every `[unit]` criterion in SPEC.md (28) and every AC-B (15) named by a JVM test or vitest file
   - [x] S3: strings: no hardcoded user-facing text in screens; Reports' no-job row from strings.xml; voice.md pass was T080
+  - [x] S4: accessibility: ScreenCatalogLabelsTest (both apps) checks every clickable node on every catalog screen has a label; 9 unnamed controls fixed (Add room, Add overlay on plan and wall, Add reminder, Add material FABs; pin-mode PDF page); 48 dp stays with the device crawler
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

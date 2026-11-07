@@ -29,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.material.JobMaterialGroup
@@ -61,11 +63,13 @@ fun MaterialsScreen(state: MaterialsUiState, onEvent: (MaterialsEvent) -> Unit, 
         },
         floatingActionButton = {
             if (!state.loading && state.groups.isNotEmpty()) {
+                val addLabel = stringResource(R.string.materials_add)
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(MaterialsEvent.Add) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.materials_add)) },
-                    modifier = Modifier.testTag("fl_materials_add"),
+                    text = { Text(addLabel) },
+                    // The clickable FAB carries its label itself so TalkBack and uiautomator name it (AC-U10).
+                    modifier = Modifier.semantics { contentDescription = addLabel }.testTag("fl_materials_add"),
                 )
             }
         },

@@ -186,14 +186,17 @@ fun PlanEditorScreen(
             }
         },
         floatingActionButton = {
+            // The clickable FAB carries its label itself so TalkBack and uiautomator name it (AC-U10).
+            val addOverlayLabel = stringResource(R.string.wall_overlays_add)
+            val addRoomLabel = stringResource(R.string.plan_add_room)
             if (state.viewOnly) {
                 // A viewer adds nothing (AC-H16).
             } else if (!state.loading && state.floorId != null && overlayIdle && state.rooms.isNotEmpty()) {
                 ExtendedFloatingActionButton(
                     onClick = { onOverlay(WallOverlaysEvent.StartDrawing) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.wall_overlays_add)) },
-                    modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_add_overlay"),
+                    text = { Text(addOverlayLabel) },
+                    modifier = Modifier.semantics { contentDescription = addOverlayLabel }.testTag("${LocalTagPrefix.current}_plan_add_overlay"),
                 )
             } else if (!state.loading && state.floorId != null && !state.overlayMode && state.selected == null) {
                 ExtendedFloatingActionButton(
@@ -203,8 +206,8 @@ fun PlanEditorScreen(
                         onEvent(PlanEditorEvent.AddRoom(center))
                     },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.plan_add_room)) },
-                    modifier = Modifier.testTag("${LocalTagPrefix.current}_plan_add_room"),
+                    text = { Text(addRoomLabel) },
+                    modifier = Modifier.semantics { contentDescription = addRoomLabel }.testTag("${LocalTagPrefix.current}_plan_add_room"),
                 )
             }
         },

@@ -116,11 +116,13 @@ fun WallOverlaysScreen(state: WallOverlaysUiState, onEvent: (WallOverlaysEvent) 
         onBack = { onEvent(WallOverlaysEvent.Back) },
         floatingActionButton = {
             if (wall != null && idle && !state.loading && state.canEdit) {
+                val addLabel = stringResource(R.string.wall_overlays_add)
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(WallOverlaysEvent.StartDrawing) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.wall_overlays_add)) },
-                    modifier = Modifier.testTag("${prefix}_wall_add_overlay"),
+                    text = { Text(addLabel) },
+                    // The clickable FAB carries its label itself so TalkBack and uiautomator name it (AC-U10).
+                    modifier = Modifier.semantics { contentDescription = addLabel }.testTag("${prefix}_wall_add_overlay"),
                 )
             }
         },

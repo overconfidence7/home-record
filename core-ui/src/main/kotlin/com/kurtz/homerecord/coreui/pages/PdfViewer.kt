@@ -91,12 +91,13 @@ fun PdfViewer(
                 // Until the page has rendered its placeholder has a guessed shape, so a tap there would land in the
                 // wrong place on the real page: it reports nothing (R09g).
                 val rendered by rememberUpdatedState(shown != null)
-                // TalkBack users double-tap the page to mark its middle; the spot can be moved by tapping again.
+                // TalkBack users double-tap the page to mark its middle; the spot can be moved by tapping again. The tap
+                // target merges the page's own description, so TalkBack reads "Page 1 of 3" on it (AC-U10).
                 val tapping = if (onPageTap == null) Modifier else Modifier.pointerInput(index) {
                     detectTapGestures { at ->
                         if (rendered && size.width > 0 && size.height > 0) tap?.invoke(index, at.x / size.width, at.y / size.height)
                     }
-                }.semantics { onClick(label) { if (rendered) tap?.invoke(index, 0.5f, 0.5f); rendered } }
+                }.semantics(mergeDescendants = true) { onClick(label) { if (rendered) tap?.invoke(index, 0.5f, 0.5f); rendered } }
                 Box(Modifier.fillMaxWidth().testTag("${tagPrefix}_page_${index + 1}").then(tapping)) {
                     if (shown == null) {
                         Box(Modifier.fillMaxWidth().aspectRatio(0.77f).semantics { contentDescription = label })

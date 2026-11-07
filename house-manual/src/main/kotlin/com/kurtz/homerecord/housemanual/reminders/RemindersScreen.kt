@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -66,11 +67,13 @@ fun RemindersScreen(state: RemindersUiState, onEvent: (RemindersEvent) -> Unit, 
         modifier = modifier,
         floatingActionButton = {
             if (!state.loading && !state.viewOnly) {
+                val addLabel = stringResource(R.string.reminders_add)
                 ExtendedFloatingActionButton(
                     onClick = { onEvent(RemindersEvent.OpenForm) },
                     icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.reminders_add)) },
-                    modifier = Modifier.testTag("hm_reminders_fab"),
+                    text = { Text(addLabel) },
+                    // The clickable FAB carries its label itself so TalkBack and uiautomator name it (AC-U10).
+                    modifier = Modifier.semantics { contentDescription = addLabel }.testTag("hm_reminders_fab"),
                 )
             }
         },
