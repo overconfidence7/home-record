@@ -481,6 +481,16 @@ fun AccountDeleteCloudOfflineScreenshot() = AccountDeleteCloudOfflinePreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun AccountDeleteAccountConfirmScreenshot() = AccountDeleteAccountConfirmPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun AccountDeletedScreenshot() = AccountDeletedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun AccountCloudDeletedScreenshot() = AccountCloudDeletedPreview()
 
 @PreviewTest

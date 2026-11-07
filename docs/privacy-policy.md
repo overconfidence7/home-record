@@ -63,7 +63,7 @@ Some features ask an outside service a question. Only what the question needs is
 - Deny location in Field Log. You can still clock in unless your company requires location.
 - Delete the cloud copy of a home in House Manual (More, Account and sync). The server removes its records and files. Your phone keeps its copy.
 - Sign out at any time. The records stay on the phone.
-- To delete your account and everything tied to it, write to the contact address above. (An in-app delete account is planned, PLAN.md T081d.)
+- Delete your account in the app: House Manual (More, Account and sync, Delete account) or Field Log (More, Delete account). The server deletes your account, your sign-in, your phones' push tokens and every home or company you own, with all their records and files. Homes and companies you were invited to keep the records you added and lose you as a member. House Manual keeps its copy of the home on your phone. Field Log clears the company from your phone. You can also write to the contact address above.
 
 ## Children
 

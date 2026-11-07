@@ -104,6 +104,8 @@ object ScreenCatalog {
         QaScreen("account-sign-out-confirm", nonRoot = true) { AccountSignOutConfirmPreview() },
         QaScreen("account-delete-cloud-confirm", nonRoot = true) { AccountDeleteCloudConfirmPreview() },
         QaScreen("account-delete-cloud-offline", nonRoot = true) { AccountDeleteCloudOfflinePreview() },
+        QaScreen("account-delete-account-confirm", nonRoot = true) { AccountDeleteAccountConfirmPreview() },
+        QaScreen("account-deleted", nonRoot = true) { AccountDeletedPreview() },
         QaScreen("account-cloud-deleted", nonRoot = true) { AccountCloudDeletedPreview() },
         QaScreen("cloud-restore-signed-out", nonRoot = true) { CloudRestoreSignedOutPreview() },
         QaScreen("cloud-restore-working", nonRoot = true) { CloudRestoreWorkingPreview() },

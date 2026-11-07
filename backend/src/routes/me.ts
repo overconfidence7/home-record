@@ -4,6 +4,7 @@ import type { AppEnv } from "../env";
 import { requireSession } from "../tenancy";
 import { DEFAULT_SETTINGS } from "./company";
 import { activeEntitlement, companyPlan, memberLimit } from "../billing/plan";
+import { deleteTenant } from "./tenants";
 
 export const me = new Hono<AppEnv>();
 me.use("*", requireSession);
@@ -79,4 +80,44 @@ me.delete("/push-token", async (c) => {
   if (!parsed.success) return c.json({ error: "invalid" }, 400);
   await c.env.DB.prepare("DELETE FROM push_tokens WHERE token = ? AND user_id = ?").bind(parsed.data.token, c.get("session").userId).run();
   return c.body(null, 204);
+});
+
+/**
+ * T081d (Play's account deletion rule): deletes the caller's account. Every home and company the caller owns goes
+ * with all its rows and files, as delete cloud copy does; memberships elsewhere end (the records they made stay with
+ * that home or company); then the user's push tokens, push log, lookup log and quota, sign-in code, handoffs it claimed
+ * (and their bundles), invites it accepted, and the user row. Every token of the account answers 401 afterwards. Answers how many
+ * homes and companies went.
+ */
+me.delete("/", async (c) => {
+  const session = c.get("session");
+  const db = c.env.DB;
+  const user = await db.prepare("SELECT email FROM users WHERE id = ?").bind(session.userId).first<{ email: string }>();
+  let homes = 0;
+  let companies = 0;
+  for (const m of session.memberships) {
+    if (m.role !== "owner") continue;
+    await deleteTenant(c.env, m.tenantKind, m.tenantId);
+    if (m.tenantKind === "home") homes++;
+    else companies++;
+  }
+  const userId = session.userId;
+  // A handoff the caller claimed is bound to this account only; it and its bundle go rather than becoming claimable again.
+  const claimed = await db.prepare("SELECT object_key FROM handoffs WHERE claimed_by = ?").bind(userId).all<{ object_key: string }>();
+  if (claimed.results.length > 0) await c.env.MEDIA.delete(claimed.results.map((r) => r.object_key));
+  await db.batch([
+    db.prepare("DELETE FROM memberships WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM push_tokens WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM push_log WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM lookup_log WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM lookup_quota WHERE user_id = ?").bind(userId),
+    db.prepare("DELETE FROM task_seen WHERE member_id = ?").bind(userId),
+    db.prepare("UPDATE media_objects SET owner_user_id = NULL WHERE owner_user_id = ?").bind(userId),
+    db.prepare("DELETE FROM handoffs WHERE claimed_by = ?").bind(userId),
+    db.prepare("DELETE FROM home_invites WHERE accepted_by = ?").bind(userId),
+    db.prepare("DELETE FROM email_codes WHERE email = ?").bind(user?.email ?? ""),
+    db.prepare("DELETE FROM users WHERE id = ?").bind(userId),
+  ]);
+  c.set("sessionEnded", true);
+  return c.json({ deleted: true, homesRemoved: homes, companiesRemoved: companies });
 });

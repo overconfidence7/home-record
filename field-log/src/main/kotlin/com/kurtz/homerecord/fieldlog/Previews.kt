@@ -334,6 +334,17 @@ fun MoreCrewPreview() = Frame {
     MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Crew, userEmail = "sam.ortiz@gmail.com", versionName = "0.1.0"), {})
 }
 
+/** Delete account (T081d): the Owner's confirm, which says the company goes too. */
+@ThemePreviews
+@Composable
+fun MoreDeleteAccountConfirmPreview() = Frame {
+    MoreScreen(
+        MoreUiState("Kurtz Electric", CompanyRole.Owner, userEmail = "nate@kurtzelectric.com", versionName = "0.1.0"),
+        {},
+        deleteAccount = com.kurtz.homerecord.coreui.account.DeleteAccountUiState(confirmOpen = true),
+    )
+}
+
 @ThemePreviews
 @Composable
 fun MoreLeadPreview() = Frame { MoreScreen(MoreUiState("Kurtz Electric", CompanyRole.Lead), {}) }

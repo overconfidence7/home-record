@@ -285,6 +285,10 @@ private fun HouseManualTabs(
                 factory = viewModelFactory { initializer { com.kurtz.homerecord.housemanual.account.CloudCopyViewModel(home.id, container.cloudCopy::delete, createSavedStateHandle()) } },
             )
             val cloudState by cloud.state.collectAsState()
+            val deleteAccount = viewModel<com.kurtz.homerecord.coreui.account.DeleteAccountViewModel>(
+                factory = viewModelFactory { initializer { com.kurtz.homerecord.coreui.account.DeleteAccountViewModel({ container.deleteAccount(home.id) }, createSavedStateHandle()) } },
+            )
+            val deleteAccountState by deleteAccount.state.collectAsState()
             val pro by container.billing.isPro.collectAsState()
             val authState by container.auth.state.collectAsState()
             val homePro by remember(home.id) { container.homeAccess.observeHomePro(home.id) }.collectAsState(container.homeAccess.homePro(home.id))
@@ -296,11 +300,20 @@ private fun HouseManualTabs(
                     }
                 },
                 cloudDeleted = cloudState.deleted,
+                accountDeleted = deleteAccountState.deleted,
                 needsPro = com.kurtz.homerecord.housemanual.account.accountSignInNeedsPro(pro, authState),
             ) { accountModifier ->
                 AccountRoute(
                     container.auth, accountModifier, loadEmail = container.account::email,
-                    footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloudState, cloud::onEvent) },
+                    footer = {
+                        com.kurtz.homerecord.housemanual.account.CloudCopySection(cloudState, cloud::onEvent)
+                        com.kurtz.homerecord.coreui.account.DeleteAccountSection(
+                            deleteAccountState, deleteAccount::onEvent,
+                            body = stringResource(R.string.account_delete_body),
+                            confirmBody = stringResource(R.string.account_delete_confirm_body),
+                            tag = "hm_account",
+                        )
+                    },
                 ) {
                     if (com.kurtz.homerecord.housemanual.account.accountSyncNeedsPro(pro, homePro)) {
                         com.kurtz.homerecord.housemanual.account.SyncNeedsPro {

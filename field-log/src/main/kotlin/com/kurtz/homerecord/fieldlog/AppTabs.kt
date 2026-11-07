@@ -184,6 +184,7 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
                     onOpenSettings = { nav.push(SettingsKey) },
                     onOpenAbout = { nav.push(AboutKey) },
                     onSignOut = container::signOut,
+                    deleteAccount = container::deleteAccount,
                 )
                 key.depth == 0 && key.title == "jobs" -> JobsRoute(
                     membership.companyId, container.db.jobDao(), container.db.clientDao(), container.db.assignmentDao(), container.roleGates,

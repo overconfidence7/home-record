@@ -148,6 +148,20 @@ class AppContainer(private val app: Application) {
         runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
     }
 
+    private val accountDeletion by lazy {
+        com.kurtz.homerecord.core.auth.AccountDeletion(
+            com.kurtz.homerecord.core.auth.RetrofitAccountDeletionApi.create(BuildConfig.API_BASE_URL, http),
+        ) {
+            // The server already dropped this phone's push token with the account; the session is gone, so no unregister.
+            auth.signOut()
+            localWipe.run()
+            runCatching { com.kurtz.homerecord.fieldlog.widget.ClockWidget().updateAll(app) }
+        }
+    }
+
+    /** FL-More "Delete account" (T081d): the server deletes the account (and the company, for its Owner), then this phone is cleared. */
+    suspend fun deleteAccount(): com.kurtz.homerecord.core.company.ApiResult<Unit> = accountDeletion.delete()
+
     /** Re-reads `/me` and returns the company's plan now (null when there is no company), for FL-Paywall (AC-F56). */
     suspend fun refreshPlan(): com.kurtz.homerecord.core.billing.FieldLogPlan? {
         company.refresh()

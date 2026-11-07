@@ -98,6 +98,11 @@ fun MoreCrewScreenshot() = MoreCrewPreview()
 @Composable
 fun MoreLeadScreenshot() = MoreLeadPreview()
 
+@PreviewTest
+@ThemePreviews
+@Composable
+fun MoreDeleteAccountConfirmScreenshot() = MoreDeleteAccountConfirmPreview()
+
 
 @PreviewTest
 @ThemePreviews

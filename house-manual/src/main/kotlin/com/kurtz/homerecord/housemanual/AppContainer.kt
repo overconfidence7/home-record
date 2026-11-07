@@ -93,6 +93,20 @@ class AppContainer(private val app: Application) {
         auth::signOut,
     )
 
+    private val accountDeletionApi = com.kurtz.homerecord.core.auth.RetrofitAccountDeletionApi.create(BuildConfig.API_BASE_URL, http)
+
+    /**
+     * HM-Account "Delete account" (T081d): the server deletes the account and every home it owns; this phone signs out
+     * and keeps [homeId]. A home this account owned (or never shared) is reset like a deleted cloud copy, so a later
+     * sign-in uploads it in full; a home shared with this account stays with its owner on the server.
+     */
+    suspend fun deleteAccount(homeId: String): com.kurtz.homerecord.core.company.ApiResult<Unit> =
+        com.kurtz.homerecord.core.auth.AccountDeletion(accountDeletionApi) {
+            val owned = homeAccess.role(homeId).let { it == null || it == com.kurtz.homerecord.core.share.HomeRole.Owner }
+            auth.signOut()
+            if (owned) cloudCopy.resetForUpload(homeId)
+        }.delete()
+
     /** Onboarding sign-in on a phone with no home: the account's home comes down with one sync pass (AC-H15). */
     /** HM-Share and invite links (AC-H16). */
     val homeShare: com.kurtz.homerecord.core.share.HomeShareApi =

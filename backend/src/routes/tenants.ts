@@ -75,38 +75,64 @@ tenants.delete("/:kind{homes}/:tenantId", requireSession, requireTenant(["owner"
 
 /** Removes everything the server holds for home [homeId]; answers how many R2 objects it deleted. */
 export async function deleteHomeTenant(env: AppEnv["Bindings"], homeId: string): Promise<number> {
+  return deleteTenant(env, "home", homeId);
+}
+
+/**
+ * Removes everything the server holds for a tenant: R2 media (every object under `<id>/`, the key prefix
+ * /media/presign signs, any `media_objects` row of the tenant and, for a company, its handoff bundles), synced rows,
+ * counters, applied marks, conflicts, push log, invites, task bookkeeping, memberships and the tenant row.
+ * Answers how many R2 objects it deleted. Used by delete cloud copy (AC-H15) and delete account (T081d).
+ */
+export async function deleteTenant(env: AppEnv["Bindings"], kind: "home" | "company", id: string): Promise<number> {
   const db = env.DB;
   // R2 first: if the Worker stops half way, the rows still name the tenant and a retry finds the rest.
   let removed = 0;
   const keys = new Set<string>();
-  let cursor: string | undefined;
-  do {
-    const page = await env.MEDIA.list({ prefix: `${homeId}/`, cursor });
-    page.objects.forEach((o) => keys.add(o.key));
-    cursor = page.truncated ? page.cursor : undefined;
-  } while (cursor);
+  for (const prefix of kind === "company" ? [`${id}/`, `company/${id}/`] : [`${id}/`]) {
+    let cursor: string | undefined;
+    do {
+      const page = await env.MEDIA.list({ prefix, cursor });
+      page.objects.forEach((o) => keys.add(o.key));
+      cursor = page.truncated ? page.cursor : undefined;
+    } while (cursor);
+  }
   const { results } = await db
-    .prepare("SELECT object_key FROM media_objects WHERE tenant_kind = 'home' AND tenant_id = ?")
-    .bind(homeId)
+    .prepare("SELECT object_key FROM media_objects WHERE tenant_kind = ? AND tenant_id = ?")
+    .bind(kind, id)
     .all<{ object_key: string }>();
   results.forEach((r) => keys.add(r.object_key));
+  if (kind === "company") {
+    const handoffs = await db.prepare("SELECT object_key FROM handoffs WHERE company_id = ?").bind(id).all<{ object_key: string }>();
+    handoffs.results.forEach((r) => keys.add(r.object_key));
+  }
   const all = [...keys];
   for (let i = 0; i < all.length; i += 1000) {
     const batch = all.slice(i, i + 1000);
     await env.MEDIA.delete(batch);
     removed += batch.length;
   }
-  const tenant = ["home", homeId] as const;
-  await db.batch([
+  const tenant = [kind, id] as const;
+  const common = [
     db.prepare("DELETE FROM sync_rows WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM sync_applied WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM sync_conflicts WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM sync_counters WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
     db.prepare("DELETE FROM media_objects WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
-    db.prepare("DELETE FROM push_log WHERE tenant_id = ?").bind(homeId),
-    db.prepare("DELETE FROM home_invites WHERE home_id = ?").bind(homeId),
+    db.prepare("DELETE FROM push_log WHERE tenant_id = ?").bind(id),
     db.prepare("DELETE FROM memberships WHERE tenant_kind = ? AND tenant_id = ?").bind(...tenant),
-    db.prepare("DELETE FROM homes WHERE id = ?").bind(homeId),
-  ]);
+  ];
+  const specific = kind === "home"
+    ? [
+        db.prepare("DELETE FROM home_invites WHERE home_id = ?").bind(id),
+        db.prepare("DELETE FROM homes WHERE id = ?").bind(id),
+      ]
+    : [
+        db.prepare("DELETE FROM company_invites WHERE company_id = ?").bind(id),
+        db.prepare("DELETE FROM task_seen WHERE tenant_id = ?").bind(id),
+        db.prepare("DELETE FROM handoffs WHERE company_id = ?").bind(id),
+        db.prepare("DELETE FROM companies WHERE id = ?").bind(id),
+      ];
+  await db.batch([...common, ...specific]);
   return removed;
 }

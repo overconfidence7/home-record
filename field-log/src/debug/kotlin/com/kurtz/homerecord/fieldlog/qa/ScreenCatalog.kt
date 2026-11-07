@@ -188,6 +188,7 @@ object ScreenCatalog {
         QaScreen("more-owner", nonRoot = false) { MoreOwnerPreview() },
         QaScreen("more-crew", nonRoot = false) { MoreCrewPreview() },
         QaScreen("more-lead", nonRoot = false) { MoreLeadPreview() },
+        QaScreen("more-delete-account-confirm", nonRoot = false) { MoreDeleteAccountConfirmPreview() },
         QaScreen("clients-list", nonRoot = true) { ClientsListPreview() },
         QaScreen("clients-empty", nonRoot = true) { ClientsEmptyPreview() },
         QaScreen("materials-list", nonRoot = true) { MaterialsListPreview() },

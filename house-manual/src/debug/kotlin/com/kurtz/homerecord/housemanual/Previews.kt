@@ -1115,6 +1115,23 @@ fun AccountDeleteCloudOfflinePreview() = AccountSignedInFrame(
     syncPhase = com.kurtz.homerecord.core.sync.SyncPhase.Offline,
 )
 
+/** Delete account (T081d): the dialog asking first, over the signed-in account page. */
+@ThemePreviews
+@Composable
+fun AccountDeleteAccountConfirmPreview() = AccountSignedInFrame(
+    com.kurtz.homerecord.housemanual.account.CloudCopyUiState(),
+    deleteAccount = com.kurtz.homerecord.coreui.account.DeleteAccountUiState(confirmOpen = true),
+)
+
+/** After Delete account: signed out, the line above the sign-in form says the home is still here. */
+@ThemePreviews
+@Composable
+fun AccountDeletedPreview() = Frame {
+    com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}, accountDeleted = true) { modifier ->
+        com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(), {}, modifier)
+    }
+}
+
 /** After the delete: signed out, the line above the sign-in form says the home is still here. */
 @ThemePreviews
 @Composable
@@ -1129,6 +1146,7 @@ private fun AccountSignedInFrame(
     cloud: com.kurtz.homerecord.housemanual.account.CloudCopyUiState,
     syncPhase: com.kurtz.homerecord.core.sync.SyncPhase = com.kurtz.homerecord.core.sync.SyncPhase.Idle,
     syncNeedsPro: Boolean = false,
+    deleteAccount: com.kurtz.homerecord.coreui.account.DeleteAccountUiState = com.kurtz.homerecord.coreui.account.DeleteAccountUiState(),
 ) = Frame {
     com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
@@ -1143,7 +1161,15 @@ private fun AccountSignedInFrame(
                     com.kurtz.homerecord.housemanual.account.SyncExplainer()
                 }
             },
-            footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloud) {} },
+            footer = {
+                com.kurtz.homerecord.housemanual.account.CloudCopySection(cloud) {}
+                com.kurtz.homerecord.coreui.account.DeleteAccountSection(
+                    deleteAccount, {},
+                    body = androidx.compose.ui.res.stringResource(R.string.account_delete_body),
+                    confirmBody = androidx.compose.ui.res.stringResource(R.string.account_delete_confirm_body),
+                    tag = "hm_account",
+                )
+            },
         )
     }
 }

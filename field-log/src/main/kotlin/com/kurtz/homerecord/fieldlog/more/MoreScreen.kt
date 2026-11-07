@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Handshake
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material.icons.rounded.PersonRemove
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
@@ -37,6 +38,10 @@ import com.kurtz.homerecord.core.billing.FieldLogPlan
 import com.kurtz.homerecord.core.billing.FieldLogPlanKind
 import com.kurtz.homerecord.core.company.CompanyRole
 import com.kurtz.homerecord.core.units.UnitSystem
+import com.kurtz.homerecord.coreui.account.DeleteAccountDialog
+import com.kurtz.homerecord.coreui.account.DeleteAccountError
+import com.kurtz.homerecord.coreui.account.DeleteAccountEvent
+import com.kurtz.homerecord.coreui.account.DeleteAccountUiState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.fieldlog.R
@@ -74,7 +79,13 @@ sealed interface MoreEvent {
 
 /** FL-More. Team and Company are shown only to Owner and Office; Crew never sees them (AC-F3). A Lead gets Materials. */
 @Composable
-fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modifier = Modifier) {
+fun MoreScreen(
+    state: MoreUiState,
+    onEvent: (MoreEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    deleteAccount: DeleteAccountUiState = DeleteAccountUiState(),
+    onDeleteAccount: (DeleteAccountEvent) -> Unit = {},
+) {
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
     Column(modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
         Text(state.companyName, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp))
@@ -177,7 +188,18 @@ fun MoreScreen(state: MoreUiState, onEvent: (MoreEvent) -> Unit, modifier: Modif
             onClick = { confirmSignOut = true },
             modifier = Modifier.testTag("fl_more_sign_out"),
         )
+        // T081d: Play requires an in-app delete for apps with sign-in; below Sign out, in the error colour, behind a confirm.
+        RecordListItem(
+            headline = stringResource(if (deleteAccount.deleting) com.kurtz.homerecord.coreui.R.string.account_deleting else com.kurtz.homerecord.coreui.R.string.account_delete),
+            supporting = stringResource(if (state.role == CompanyRole.Owner) R.string.more_delete_account_owner else R.string.more_delete_account_member),
+            leading = { Icon(Icons.Rounded.PersonRemove, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            trailing = null,
+            onClick = { if (!deleteAccount.deleting) onDeleteAccount(DeleteAccountEvent.Delete) },
+            modifier = Modifier.testTag("fl_more_delete_account"),
+        )
+        DeleteAccountError(deleteAccount, "fl_more", Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
     }
+    DeleteAccountDialog(deleteAccount, onDeleteAccount, stringResource(R.string.more_delete_account_confirm_body), "fl_more")
     if (confirmSignOut) {
         AlertDialog(
             modifier = Modifier.windowTestTags(),

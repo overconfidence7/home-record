@@ -44,7 +44,7 @@ fun accountSignInNeedsPro(pro: Boolean, auth: AuthState): Boolean =
 /**
  * HM-Account (AC-H15): More → Account and sync. [account] is the shared sign-in form when signed out (it scrolls
  * itself) or the signed-in summary with the sync chip, what sync does, Sign out and Delete cloud copy. After a
- * delete, [cloudDeleted] puts one line above the sign-in form saying the home is still on this phone. With
+ * delete, [cloudDeleted] (or [accountDeleted] after Delete account, T081d) puts one line above the sign-in form saying the home is still on this phone. With
  * [needsPro] (free tier, signed out) the form is replaced by what signing in does and a Sign in button that opens
  * HM-Paywall (AC-H18).
  */
@@ -52,6 +52,7 @@ fun accountSignInNeedsPro(pro: Boolean, auth: AuthState): Boolean =
 fun AccountSyncScreen(
     onEvent: (AccountSyncEvent) -> Unit,
     cloudDeleted: Boolean = false,
+    accountDeleted: Boolean = false,
     needsPro: Boolean = false,
     account: @Composable (Modifier) -> Unit,
 ) {
@@ -62,6 +63,13 @@ fun AccountSyncScreen(
                     stringResource(R.string.account_cloud_deleted),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).testTag("hm_account_cloud_deleted"),
+                )
+            }
+            if (accountDeleted) {
+                Text(
+                    stringResource(R.string.account_deleted),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).testTag("hm_account_deleted"),
                 )
             }
             if (needsPro) SignInNeedsPro(onEvent, Modifier.weight(1f)) else account(Modifier.weight(1f))
