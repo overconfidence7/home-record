@@ -131,7 +131,7 @@ private fun LazyListScope.hours(state: ReportsUiState, onEvent: (ReportsEvent) -
         item(key = "by-person-h") { SectionHeading(stringResource(R.string.rep_by_person)) }
         items(state.byPerson, key = { "p-${it.id}" }) { LineRow(it, Icons.Rounded.Person, "fl_reports_person_${it.id}") }
         item(key = "by-job-h") { SectionHeading(stringResource(R.string.rep_by_job)) }
-        items(state.byJob, key = { "j-${it.id}" }) { LineRow(it, Icons.Rounded.Work, "fl_reports_job_${it.id}") }
+        items(state.byJob, key = { "j-${it.id}" }) { LineRow(it, Icons.Rounded.Work, "fl_reports_job_${it.id}", noJobName = it.id == null) }
     }
     item(key = "exports") { ExportButtons(state, onEvent, Modifier.padding(start = 16.dp, end = 16.dp, top = if (state.isEmpty) 8.dp else 16.dp)) }
 }
@@ -182,10 +182,10 @@ private fun SectionHeading(text: String) {
 
 /** One person or job: a list row with a leading icon and the hours trailing (rules 7 and 8). Totals stay the one card. */
 @Composable
-private fun LineRow(line: HoursLine, icon: ImageVector, tag: String) {
+private fun LineRow(line: HoursLine, icon: ImageVector, tag: String, noJobName: Boolean = false) {
     val extra = line.overtimeMillis + line.doubleMillis
     RecordListItem(
-        headline = line.name,
+        headline = if (noJobName) stringResource(R.string.ts_punch_no_job) else line.name,
         supporting = if (extra > 0) stringResource(R.string.ts_overtime, WeekSheetBuilder.hm(extra)) else null,
         leading = { Icon(icon, contentDescription = null) },
         trailing = { Text(WeekSheetBuilder.hm(line.workedMillis), style = MaterialTheme.typography.titleMedium) },

@@ -57,6 +57,20 @@ class ListRowsLayoutTest {
         rule.onNodeWithTag("fl_reports_export_shifts").assertIsEnabled()
     }
 
+    // S3: time worked with no job reads the app's "No job" string, not text from :core.
+    @AcceptanceCriterion("AC-F15")
+    @Test fun reportsTimeWithNoJobUsesTheStringResource() {
+        val state = ReportsUiState(
+            loading = false,
+            byPerson = listOf(HoursLine("m1", "Luis Ortiz", 3 * hour)),
+            byJob = listOf(HoursLine(null, "", 3 * hour)),
+            totalMillis = 3 * hour, regularMillis = 3 * hour,
+        )
+        rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(state, {}, {}) } }
+        rule.onNodeWithTag("fl_reports_list").performScrollToNode(hasText("No job"))
+        rule.onNodeWithTag("fl_reports_job_null").assertIsDisplayed()
+    }
+
     @AcceptanceCriterion("AC-U4", "AC-F15")
     @Test fun emptyReportsRangeHasHeadlineAndDisablesExports() {
         rule.setContent { HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { ReportsScreen(ReportsUiState(loading = false), {}, {}) } }
