@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.reminders
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -227,7 +228,7 @@ fun ReminderRowItem(
                         IconButton(onClick = { onEvent(ReminderRowEvent.OpenSnooze) }, modifier = Modifier.size(48.dp).testTag("${prefix}_snooze_$tag")) {
                             Icon(Icons.Rounded.Snooze, contentDescription = stringResource(R.string.reminders_snooze_label, row.title))
                         }
-                        DropdownMenu(expanded = snoozeOpen, onDismissRequest = { onEvent(ReminderRowEvent.CloseSnooze) }) {
+                        DropdownMenu(modifier = Modifier.windowTestTags(), expanded = snoozeOpen, onDismissRequest = { onEvent(ReminderRowEvent.CloseSnooze) }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.reminders_snooze_week)) },
                                 onClick = { onEvent(ReminderRowEvent.Snooze(SnoozeLength.WEEK)) },

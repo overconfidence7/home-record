@@ -14,7 +14,13 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_paywall_reason"
 - takeScreenshot: H19-paywall
-# AC-H18 (second panel): the free tier files one breaker panel; saving a second one opens the paywall instead
+# AC-H18 (second panel): the free tier files one breaker panel; saving a second one opens the paywall instead.
+# The paywall is full screen with no tab bar: Back returns to More
+- back
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 5000
 - tapOn:
     id: "hm_tab_items"
 - tapOn:

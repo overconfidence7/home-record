@@ -55,6 +55,13 @@ appId: com.kurtz.homerecord.fieldlog
             visible: "(?i)(done|save)"
           commands:
             - tapOn: "(?i)(done|save)"
+# Google Play services can't load the scanner on the CI emulator ("Something went wrong / Try again later"):
+# Cancel returns to the form, the same as a phone where the scanner fails; the amount is then typed below
+- runFlow:
+    when:
+      visible: "Something went wrong"
+    commands:
+      - tapOn: "Cancel"
 - extendedWaitUntil:
     visible:
       id: fl_material_form_vendor

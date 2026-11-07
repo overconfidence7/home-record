@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemanual.R
 import com.kurtz.homerecord.housemodel.reminders.ClimateZone
@@ -142,6 +143,8 @@ private class Option(val label: String, val selected: Boolean, val tag: String, 
 private fun PickerDialog(title: Int, body: Int, options: List<Option>, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        // A dialog is its own window: export its tags as resource ids so Maestro finds the options (x-more)
+        modifier = Modifier.windowTestTags(),
         title = { Text(stringResource(title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {

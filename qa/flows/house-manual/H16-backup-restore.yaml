@@ -32,6 +32,10 @@ appId: com.kurtz.homerecord.housemanual
     notVisible:
       id: "hm_backup_failed"
     timeout: 5000
+# wait for the system share sheet: Back while "Making backup…" still shows leaves Backup instead of the sheet
+- extendedWaitUntil:
+    visible: ".*\\.hrbackup"
+    timeout: 30000
 - takeScreenshot: H16-backup-share
 - back
 - extendedWaitUntil:

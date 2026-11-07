@@ -1,5 +1,7 @@
 package com.kurtz.homerecord.coreui.components
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.kurtz.homerecord.core.units.Money
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -145,10 +147,19 @@ fun LabeledField(
     imeAction: ImeAction = ImeAction.Next,
     singleLine: Boolean = true,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    cursorAtEnd: Boolean = false,
 ) {
+    // The field keeps its own cursor. After a failed save, the amount's state was rebuilt mid-typing with the cursor
+    // at the start, so "123.71" landed as "23.711" (QA F18). [cursorAtEnd] (money) starts the cursor after the text;
+    // other fields start at the beginning, as Material's String field, so a long prefilled value shows its start.
+    var field by remember { mutableStateOf(TextFieldValue(value, if (cursorAtEnd) TextRange(value.length) else TextRange.Zero)) }
+    val shown = if (field.text == value) field else TextFieldValue(value, TextRange(value.length))
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = shown,
+        onValueChange = {
+            field = it
+            if (it.text != value) onValueChange(it.text)
+        },
         modifier = modifier.fillMaxWidth(),
         label = { Text(if (required) stringResource(R.string.required_label, label) else label) },
         supportingText = (error ?: helper)?.let { { Text(it) } },
@@ -230,6 +241,7 @@ fun MoneyField(
         error = error ?: if (invalid) stringResource(R.string.money_error) else null,
         keyboardType = KeyboardType.Decimal,
         imeAction = imeAction,
+        cursorAtEnd = true,
     )
 }
 

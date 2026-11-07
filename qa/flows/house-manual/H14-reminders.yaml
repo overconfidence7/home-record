@@ -15,7 +15,7 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_reminders_section_due"
     timeout: 10000
-- assertVisible: "Overdue since.*"
+- assertVisible: "(?s).*Overdue since.*"  # the row reads "Furnace" then "Overdue since …" on the next line
 - takeScreenshot: H14-reminders
 # Snooze a week: the overdue reminder moves to Upcoming, "Snoozed until …"
 - tapOn:
@@ -23,7 +23,7 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_reminders_snooze_week"
 - scrollUntilVisible:
-    element: "Snoozed until.*"
+    element: "(?s).*Snoozed until.*"
 # AC-H12: Done rolls a reminder forward; it shows under Done
 - scrollUntilVisible:
     element:

@@ -133,7 +133,7 @@ private fun FloorRow(floor: FloorSummary, canMoveUp: Boolean, canMoveDown: Boole
                 IconButton(onClick = { menu = true }, modifier = Modifier.testTag("${LocalTagPrefix.current}_floors_menu_${floor.id}")) {
                     Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.floor_more, floor.name))
                 }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenu(modifier = Modifier.windowTestTags(), expanded = menu, onDismissRequest = { menu = false }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.floor_move_up)) },
                         enabled = canMoveUp,

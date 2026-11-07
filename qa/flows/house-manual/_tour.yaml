@@ -28,6 +28,13 @@ appId: com.kurtz.homerecord.housemanual
 - tapOn:
     id: "hm_tab_house"
 - takeScreenshot: tour-${output.variant}-house
+# At 200% text the House tab keeps Edit plan in view and moves Floors, 3D view and Export PDF into its overflow menu
+- runFlow:
+    when:
+      notVisible: "Floors"
+    commands:
+      - tapOn:
+          id: "hm_house_more"
 - tapOn: "Floors"
 - takeScreenshot: tour-${output.variant}-floors
 - tapOn: "Back"

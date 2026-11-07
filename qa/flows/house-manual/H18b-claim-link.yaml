@@ -60,7 +60,9 @@ env:
       id: "hm_tab_more"
     timeout: 10000
 # AC-H18: sharing is Pro (SPEC pricing, T032b2d). This phone signed in through the claim link (free) and is on the
-# free tier, so Invite family on Share this house opens HM-Paywall instead of making a link
+# free tier, so Invite family on Share this house opens HM-Paywall instead of making a link. Close lands on Home.
+- tapOn:
+    id: "hm_tab_more"
 - scrollUntilVisible:
     element:
       id: "hm_more_share"

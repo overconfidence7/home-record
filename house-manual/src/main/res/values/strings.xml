@@ -132,6 +132,7 @@
     <string name="item_detail_photos">Photos</string>
     <string name="item_detail_photo">Photo of %1$s</string>
     <string name="item_detail_notes">Notes</string>
+    <string name="item_detail_shutoff_how">How to shut it off</string>
     <string name="item_detail_save">Save</string>
     <string name="form_close">Close</string>
     <string name="form_save">Save</string>

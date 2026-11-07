@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
@@ -246,7 +247,7 @@ private fun MenuChip(label: String, selected: Boolean, options: List<Pair<String
     var open by remember { mutableStateOf(false) }
     Box {
         FilterChip(selected = selected, onClick = { open = true }, label = { Text(label) }, modifier = Modifier.testTag(tag))
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        DropdownMenu(modifier = Modifier.windowTestTags(), expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(text = { Text(stringResource(R.string.items_filter_any)) }, onClick = { open = false; onPick(null) })
             options.forEach { (value, text) ->
                 DropdownMenuItem(text = { Text(text) }, onClick = { open = false; onPick(value) }, modifier = Modifier.testTag("${tag}_$value"))

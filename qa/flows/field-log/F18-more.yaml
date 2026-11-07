@@ -100,7 +100,7 @@ appId: com.kurtz.homerecord.fieldlog
       id: fl_materials_list
     timeout: 10000
 - assertVisible: "City Electric Supply"
-- assertVisible: "$123.71"
+- assertVisible: "\\$123\\.71"
 - assertVisible:
     id: fl_materials_total
 - takeScreenshot: F18-materials

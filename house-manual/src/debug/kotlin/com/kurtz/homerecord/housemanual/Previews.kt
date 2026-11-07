@@ -2052,15 +2052,20 @@ fun RemindersLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.reminde
 @ThemePreviews
 @Composable
 fun ReminderFormPreview() = Frame {
-    com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(
-        com.kurtz.homerecord.housemodel.reminders.ReminderDraft(title = "Reseal the deck", dueOn = java.time.LocalDate.of(2027, 5, 1), intervalMonths = 12), false, {},
-    )
+    // As the app shows it: the full-screen form with Close and Save (crawler: every non-root screen has hm_close)
+    FormScreenScaffold(stringResource(R.string.reminders_form_title), "hm_reminders_save", true, {}, {}) {
+        com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(
+            com.kurtz.homerecord.housemodel.reminders.ReminderDraft(title = "Reseal the deck", dueOn = java.time.LocalDate.of(2027, 5, 1), intervalMonths = 12), false, {},
+        )
+    }
 }
 
 @ThemePreviews
 @Composable
 fun ReminderFormErrorsPreview() = Frame {
-    com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(), true, {})
+    FormScreenScaffold(stringResource(R.string.reminders_form_title), "hm_reminders_save", true, {}, {}) {
+        com.kurtz.homerecord.housemanual.reminders.ReminderFormContent(com.kurtz.homerecord.housemodel.reminders.ReminderDraft(), true, {})
+    }
 }
 
 private val furnaceReminders = listOf(

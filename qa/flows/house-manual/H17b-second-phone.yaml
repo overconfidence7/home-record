@@ -42,6 +42,7 @@ env:
     element:
       id: "hm_onboarding_sign_in"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "hm_onboarding_sign_in"
 - extendedWaitUntil:
@@ -121,6 +122,7 @@ env:
     element:
       id: "hm_onboarding_sign_in"
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: "hm_onboarding_sign_in"
 - extendedWaitUntil:

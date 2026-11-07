@@ -21,6 +21,19 @@ class DefaultFloorTest {
         assertEquals("Upper", floors.defaultFloor()?.name)
     }
 
+    // AC-H2: every floor drawn (the 3D reference home) opens on Main, not the basement listed first
+    @Test
+    fun drawnHomeOpensOnMainNotTheBasement() {
+        val floors = listOf(floor("Basement", -96, rooms = 3), floor("Main", 0, rooms = 5), floor("Upper", 108, rooms = 4))
+        assertEquals("Main", floors.defaultFloor()?.name)
+    }
+
+    @Test
+    fun onlyTheBasementDrawnOpensOnTheBasement() {
+        val floors = listOf(floor("Basement", -96, rooms = 3), floor("Main", 0), floor("Upper", 108))
+        assertEquals("Basement", floors.defaultFloor()?.name)
+    }
+
     @Test
     fun splitLevelOpensOnLowestAtOrAboveGrade() {
         val floors = listOf(floor("Lower", -48), floor("Upper", 48))

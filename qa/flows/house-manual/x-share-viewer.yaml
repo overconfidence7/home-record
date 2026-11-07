@@ -42,7 +42,7 @@ env:
 - tapOn:
     id: "hm_share_invite_viewer"
 - extendedWaitUntil:
-    visible: "Send the invite"
+    visible: "(Send the invite|Sharing text)"
     timeout: 15000
 - back
 - extendedWaitUntil:

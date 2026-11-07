@@ -13,7 +13,7 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 5000
 - tapOn:
     id: "hm_item_type_${TYPE}"
-- hideKeyboard
+- runFlow: _hide-keyboard.yaml
 - tapOn:
     id: "hm_save"
 - extendedWaitUntil:

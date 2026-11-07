@@ -174,7 +174,7 @@ appId: com.kurtz.homerecord.housemanual
 - scrollUntilVisible:
     element:
       id: "hm_item_detail_reminder_done_0"
-- assertVisible: "Overdue since.*"
+- assertVisible: "(?s).*Overdue since.*"  # the row reads "Furnace" then "Overdue since …" on the next line
 - takeScreenshot: H07-item-reminders
 # SPEC HM-Item: Share sits in the top bar beside Edit
 - assertVisible:

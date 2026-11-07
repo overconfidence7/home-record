@@ -46,9 +46,14 @@ data class FloorPlan(val placed: List<PlanRoom>, val unplaced: List<UnplacedRoom
 /** A floor with the number of rooms on it, for the floor list (AC-C3). */
 data class FloorSummary(val id: String, val name: String, val ceilingHeightIn: Int, val halfLevel: Boolean, val roomCount: Int, val elevationIn: Int = 0)
 
-/** The floor a screen opens on: the one with rooms, else the entrance level (lowest at or above grade), never the basement. */
+/**
+ * The floor a screen opens on: the entrance level (lowest at or above grade) that has rooms, else any floor with
+ * rooms, else the entrance level, never a basement while a floor above grade has rooms (QA auto H10: a drawn
+ * basement listed first won over Main).
+ */
 fun List<FloorSummary>.defaultFloor(): FloorSummary? =
-    firstOrNull { it.roomCount > 0 }
+    filter { it.roomCount > 0 && it.elevationIn >= 0 }.minByOrNull { it.elevationIn }
+        ?: firstOrNull { it.roomCount > 0 }
         ?: filter { it.elevationIn >= 0 }.minByOrNull { it.elevationIn }
         ?: firstOrNull()
 

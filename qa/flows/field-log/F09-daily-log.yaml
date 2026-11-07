@@ -117,10 +117,12 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - tapOn:
     id: fl_log_next
+# centre the row: a sliver of it at the list's bottom edge counts as visible before its text is on screen
 - scrollUntilVisible:
     element:
       id: fl_log_visitors_text
     direction: DOWN
+    centerElement: true
 - assertVisible: "Township inspector"
 - takeScreenshot: F09-daily-log
 # AC-F30: the weather is editable: typed on its full-screen form, it shows on the log marked as typed in by hand

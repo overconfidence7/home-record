@@ -1,0 +1,12 @@
+# Subflow: put the keyboard away inside a form. With no keyboard up, Maestro's hideKeyboard is a Back, and a dirty form
+# rightly asks "Discard changes?" (H05 on cc6c4af0: the type picker had already closed the keyboard); keep editing.
+appId: com.kurtz.homerecord.housemanual
+---
+- hideKeyboard
+- runFlow:
+    when:
+      visible:
+        id: hm_keep_editing
+    commands:
+      - tapOn:
+          id: hm_keep_editing

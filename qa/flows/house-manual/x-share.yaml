@@ -49,7 +49,7 @@ env:
     id: "hm_share_invite_editor"
 # The share sheet opens with the link; close it and the link is listed as not used yet
 - extendedWaitUntil:
-    visible: "Send the invite"
+    visible: "(Send the invite|Sharing text)"
     timeout: 15000
 - back
 - extendedWaitUntil:

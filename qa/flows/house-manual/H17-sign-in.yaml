@@ -108,14 +108,19 @@ env:
     id: "hm_home_title"
     text: "Maple St"
 - takeScreenshot: H17-local-copy-kept
-# Delete cloud copy (T075c): sign in again, delete the cloud copy, the app signs out and keeps the home
+# Delete cloud copy (T075c): sign in again, delete the cloud copy, the app signs out and keeps the home.
+# Each tab keeps its own back stack, so More reopens on Account and sync, where this flow left it
 - tapOn: "More"
-- scrollUntilVisible:
-    element:
-      id: "hm_more_account"
-    direction: DOWN
-- tapOn:
-    id: "hm_more_account"
+- extendedWaitUntil:
+    visible: "Account and sync"
+    timeout: 5000
+- runFlow:
+    when:
+      visible:
+        id: "hm_more_account"
+    commands:
+      - tapOn:
+          id: "hm_more_account"
 - extendedWaitUntil:
     visible:
       id: "hm_sign_in_email"

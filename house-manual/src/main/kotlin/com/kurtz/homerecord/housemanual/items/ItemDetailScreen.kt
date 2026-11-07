@@ -141,6 +141,13 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 Hero(detail)
                 RoomChip(detail, onEvent)
                 WarrantyStatusLine(detail.status, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).testTag("hm_item_detail_status"))
+                // A shutoff's notes are its instructions (AC-C44): in an emergency they lead the page, not trail it
+                val shutoffNotes = detail.item.notes?.takeIf { isShutoff(detail.item.subtype) }
+                shutoffNotes?.let { notes ->
+                    Section(stringResource(R.string.item_detail_shutoff_how)) {
+                        Inset { Text(notes, style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("hm_item_detail_shutoff_how")) }
+                    }
+                }
                 DetailsSection(detail, onEvent)
                 WhereSection(detail, viewOnly = state.viewOnly, onEvent = onEvent)
                 PowerSection(state.feeding, onEvent)
@@ -154,7 +161,7 @@ fun ItemDetailScreen(state: ItemDetailUiState, onEvent: (ItemDetailEvent) -> Uni
                 DocumentsSection(state, onEvent)
                 ItemLinksSection(state.overlayLinks, onEvent)
                 if (detail.photos.isNotEmpty()) PhotosRow(detail)
-                detail.item.notes?.let { notes ->
+                detail.item.notes?.takeIf { shutoffNotes == null }?.let { notes ->
                     Section(stringResource(R.string.item_detail_notes)) { Inset { Text(notes, style = MaterialTheme.typography.bodyLarge) } }
                 }
             }
@@ -194,7 +201,7 @@ private fun OverflowMenu(onEvent: (ItemDetailEvent) -> Unit) {
     IconButton(onClick = { open = true }, modifier = Modifier.testTag("hm_item_detail_more")) {
         Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.item_detail_more))
     }
-    DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+    DropdownMenu(modifier = Modifier.windowTestTags(), expanded = open, onDismissRequest = { open = false }) {
         DropdownMenuItem(
             text = { Text(stringResource(R.string.item_detail_move)) },
             onClick = { open = false; onEvent(ItemDetailEvent.ShowMove) },
@@ -705,3 +712,5 @@ internal fun ItemLinksSection(links: List<OverlayLink>, onEvent: (ItemDetailEven
         }
     }
 }
+
+private fun isShutoff(subtype: String): Boolean = ItemCategory.subtype(subtype)?.category == ItemCategory.SHUTOFFS

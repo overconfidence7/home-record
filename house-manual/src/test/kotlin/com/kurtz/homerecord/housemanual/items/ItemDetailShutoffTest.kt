@@ -71,6 +71,31 @@ class ItemDetailShutoffTest {
         assertThat(events).containsExactly(ItemDetailEvent.PickShutoff("main"), ItemDetailEvent.PickShutoff(null)).inOrder()
     }
 
+    @Test
+    @AcceptanceCriterion("AC-C44")
+    fun aShutoffsInstructionsLeadItsPage() { // AC-C44: QA auto H13, the notes trailed the page below Recalls
+        val waterMain = ItemEntity(
+            id = "wm", homeId = "h1", category = ItemCategory.SHUTOFFS.name, subtype = "water_main", name = "Water main shutoff",
+            notes = "Quarter turn on the red handle on the meter side.", createdAt = 1, updatedAt = 1,
+        )
+        val s = ItemDetailUiState(
+            loading = false,
+            detail = ItemDetail(waterMain, ItemCategory.SHUTOFFS, "Water main", "Utility room", null, WarrantyStatus.Unknown, emptyList()),
+        )
+        rule.setContent { ItemDetailScreen(s, onEvent = {}) }
+        rule.onNodeWithText("How to shut it off").assertIsDisplayed()
+        rule.onNodeWithTag("hm_item_detail_shutoff_how").assertIsDisplayed()
+        rule.onNodeWithText("Notes").assertDoesNotExist()
+    }
+
+    @Test
+    fun anItemThatIsNotAShutoffKeepsItsNotesAtTheEnd() {
+        val s = state(null, emptyList()).let { it.copy(detail = it.detail?.copy(item = dishwasher.copy(notes = "Rinse aid every month"))) }
+        rule.setContent { ItemDetailScreen(s, onEvent = {}) }
+        rule.onNodeWithTag("hm_item_detail_shutoff_how").assertDoesNotExist()
+        rule.onNodeWithText("Notes").performScrollTo().assertIsDisplayed()
+    }
+
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.onNodeWithContentDescriptionLinked() =
         onNode(androidx.compose.ui.test.hasContentDescription("Linked"), useUnmergedTree = true).assertExists()
 }

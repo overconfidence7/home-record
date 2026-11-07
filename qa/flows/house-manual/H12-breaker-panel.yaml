@@ -139,13 +139,10 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_breaker_form"
     timeout: 5000
+# The chip's id node carries no text (its label is a child node); "Refrigerator" is only under Items it feeds
 - scrollUntilVisible:
-    element:
-      id: "hm_breaker_item_[0-9]+"
-      text: "Refrigerator"
-- tapOn:
-    id: "hm_breaker_item_[0-9]+"
-    text: "Refrigerator"
+    element: "Refrigerator"
+- tapOn: "Refrigerator"
 - tapOn:
     id: "hm_breaker_save"
 - extendedWaitUntil:

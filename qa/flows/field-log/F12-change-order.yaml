@@ -280,10 +280,15 @@ appId: com.kurtz.homerecord.fieldlog
     direction: DOWN
 - tapOn:
     id: fl_co_form_duplicate
+# the duplicate opens as a new draft at the top of the form; Sign is below the line items
 - extendedWaitUntil:
-    visible:
-      id: fl_co_form_sign
+    visible: "Edit change order"
     timeout: 10000
+- assertVisible: "Second outlet on the island"
+- scrollUntilVisible:
+    element:
+      id: fl_co_form_sign
+    direction: DOWN
 - tapOn:
     id: fl_close
 - extendedWaitUntil:

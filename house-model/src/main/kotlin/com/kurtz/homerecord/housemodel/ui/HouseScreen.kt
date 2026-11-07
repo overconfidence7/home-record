@@ -204,7 +204,7 @@ fun HouseScreen(
                         IconButton(onClick = { open = true }, modifier = Modifier.testTag("${prefix}_house_more")) {
                             Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.house_more_actions))
                         }
-                        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                        DropdownMenu(modifier = Modifier.windowTestTags(), expanded = open, onDismissRequest = { open = false }) {
                             rest.forEach { a ->
                                 DropdownMenuItem(
                                     text = { Text(stringResource(a.label)) },
