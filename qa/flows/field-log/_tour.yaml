@@ -7,17 +7,24 @@ appId: com.kurtz.homerecord.fieldlog
 # variant's shots tour-light-*. The variant comes from -e QA_VARIANT, light when unset.
 - evalScript: ${output.variant = (typeof QA_VARIANT !== 'undefined' && QA_VARIANT) || 'light'}
 - launchApp
-# `settings put system user_rotation 1` left the emulator portrait; rotate from the flow instead
-- runFlow:
-    when:
-      true: ${output.variant == 'landscape'}
-    commands:
-      - setOrientation: LANDSCAPE_LEFT
 # The first frame takes 4-5 s on a cold emulator; a shot right after launchApp was blank and the
 # tour "passed" having seen nothing ([judge:qa-fl-tour-blank]). Wait for whichever root shows.
 - extendedWaitUntil:
     visible: "Sign in|Set up your company|Today"
     timeout: 20000
+# Rotate once the app is on top ([auto:variant:field-log:landscape]): launchApp stops the app and shows
+# the launcher, which holds the display portrait (lastOrientation=5, NOSENSOR), and a setOrientation
+# that writes the user_rotation the suite already set changes no setting, so nothing rotated back.
+# Going through PORTRAIT first makes LANDSCAPE_LEFT a real change.
+- runFlow:
+    when:
+      true: ${output.variant == 'landscape'}
+    commands:
+      - setOrientation: PORTRAIT
+      - setOrientation: LANDSCAPE_LEFT
+      - extendedWaitUntil:
+          visible: "Sign in|Set up your company|Today"
+          timeout: 20000
 - takeScreenshot: tour-${output.variant}-launch
 - runFlow:
     when:
