@@ -199,13 +199,13 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [x] T031: Backend data plate fallback and recalls: `POST /lookup/dataplate` (Claude vision) used when on-device OCR finds no model; `GET /recalls` CPSC proxy with cache; item page shows "Check recalls" result (acceptance: AC-B11, AC-B12)
   - [x] T031a: backend `POST /lookup/dataplate` (Claude vision, shared quota, cost log) and `GET /recalls` (CPSC proxy, 24 h KV cache, model matches first) with vitest (AC-B11, AC-B12)
   - [x] T031b: app side: data-plate scan falls back to `/lookup/dataplate` when OCR finds no model; item page "Check recalls" button and result list (AC-B11, AC-B12)
-- [ ] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
+- [x] T032: Free limits and Pro for House Manual: `Entitlements` interface, RevenueCat SDK, `LimitGate` `[unit]` (1 home, 15 items, 1 panel, sync), HM-Paywall with prices and Restore, Test Store on debug (acceptance: AC-H18)
   - [x] T032a: `Entitlements` interface (Unavailable/Fake), `LimitGate` `[unit]` (1 home, 15 items, 1 panel, no sync) in :core billing (AC-H18)
   - [x] T032b1: RevenueCat `purchases` behind `ProBilling`/`Entitlements`, key via BuildConfig per docs/billing.md, HM-Paywall with prices, Restore and Retry, More > House Manual Pro, gate on the 16th item (AC-H18)
-  - [ ] T032b2: gates on the second panel (with the breaker work) and on Sign in / cloud sync (AC-H18)
+  - [x] T032b2: gates on the second panel (with the breaker work) and on Sign in / cloud sync (AC-H18)
     - [x] T032b2a: second-panel gate: Add panel and the item form's save open HM-Paywall when a free home already has a panel (AC-H18)
     - [x] T032b2b: Sign in / cloud sync gate (AC-H18); needs a way for the keyless QA builds to sign in (H17, H18b, X02) — see BLOCKERS 2026-11-06 (T032b2a)
-    - [ ] T032b2e: a signed-in free home does not run cloud sync (AC-H18 "no cloud sync"), using the home's Pro state from the backend so a family member who joined a Pro home on a free phone still syncs
+    - [x] T032b2e: a signed-in free home does not run cloud sync (AC-H18 "no cloud sync"), using the home's Pro state from the backend so a family member who joined a Pro home on a free phone still syncs
     - [x] T032b2d: Share this house is Pro (SPEC pricing "sync and sharing"): Invite family / Invite a viewer open HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (x-share would stop at the paywall)
     - [x] T032b2c: Home report is Pro (SPEC pricing): More → Home report opens HM-Paywall on the free tier; waits with T032b2b on the QA Pro path (H15 would stop at the paywall) — see BLOCKERS 2026-11-06 (T073)
 - [x] V2: Visual review of M2 screenshots; also install on the emulator yourself if available and walk PRODUCT.md House Manual steps 1–5 (sampled; no emulator in this container)

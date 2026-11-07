@@ -18,8 +18,13 @@ interface AccountApi {
     suspend fun homes(): ApiResult<List<AccountHome>>
 }
 
-/** A home membership of the signed-in account. */
-data class AccountHome(val id: String, val name: String, val role: String)
+/**
+ * A home membership of the signed-in account. [entitlement] is the home's entitlement still in force on the server
+ * (`pro` once anyone on the home bought House Manual Pro; AC-B50), so a family member's free phone syncs a Pro home.
+ */
+data class AccountHome(val id: String, val name: String, val role: String, val entitlement: String? = null) {
+    val pro: Boolean get() = entitlement == com.kurtz.homerecord.core.billing.HomeBillingRules.PRO_ENTITLEMENT
+}
 
 interface AccountService {
     @GET("me") suspend fun me(): MeResponse
@@ -29,7 +34,7 @@ class RetrofitAccountApi(private val service: AccountService) : AccountApi {
     override suspend fun email(): ApiResult<String> = apiCall { service.me().user.email }
 
     override suspend fun homes(): ApiResult<List<AccountHome>> = apiCall {
-        service.me().memberships.filter { it.kind == "home" }.map { AccountHome(it.id, it.name, it.role) }
+        service.me().memberships.filter { it.kind == "home" }.map { AccountHome(it.id, it.name, it.role, it.entitlement) }
     }
 
     companion object {

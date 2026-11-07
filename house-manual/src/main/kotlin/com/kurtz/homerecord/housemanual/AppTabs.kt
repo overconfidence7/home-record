@@ -287,6 +287,7 @@ private fun HouseManualTabs(
             val cloudState by cloud.state.collectAsState()
             val pro by container.billing.isPro.collectAsState()
             val authState by container.auth.state.collectAsState()
+            val homePro by remember(home.id) { container.homeAccess.observeHomePro(home.id) }.collectAsState(container.homeAccess.homePro(home.id))
             com.kurtz.homerecord.housemanual.account.AccountSyncScreen(
                 onEvent = { event ->
                     when (event) {
@@ -301,15 +302,21 @@ private fun HouseManualTabs(
                     container.auth, accountModifier, loadEmail = container.account::email,
                     footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloudState, cloud::onEvent) },
                 ) {
-                    val phase by container.syncEngine.phase.collectAsState()
-                    val pending by container.syncEngine.pendingCount.collectAsState(0)
-                    val refused by container.syncEngine.refused.collectAsState(emptyList())
-                    SyncStatus(
-                        phase, pending, refused,
-                        onSyncNow = container.syncCoordinator::requestSync,
-                        onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
-                    )
-                    com.kurtz.homerecord.housemanual.account.SyncExplainer()
+                    if (com.kurtz.homerecord.housemanual.account.accountSyncNeedsPro(pro, homePro)) {
+                        com.kurtz.homerecord.housemanual.account.SyncNeedsPro {
+                            nav.push(PaywallKey(LimitedFeature.CloudSync))
+                        }
+                    } else {
+                        val phase by container.syncEngine.phase.collectAsState()
+                        val pending by container.syncEngine.pendingCount.collectAsState(0)
+                        val refused by container.syncEngine.refused.collectAsState(emptyList())
+                        SyncStatus(
+                            phase, pending, refused,
+                            onSyncNow = container.syncCoordinator::requestSync,
+                            onClearRefused = { scope.launch { container.syncEngine.clearRefused() } },
+                        )
+                        com.kurtz.homerecord.housemanual.account.SyncExplainer()
+                    }
                 }
             }
         }

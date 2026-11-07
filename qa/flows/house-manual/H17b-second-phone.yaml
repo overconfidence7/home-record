@@ -59,6 +59,24 @@ env:
     id: "hm_home_title"
     text: "QA House"
 - takeScreenshot: H17b-home-back
+# AC-H18 (T032b2e): the second phone is on the free tier and the server does not know this QA home as Pro (no
+# store key, so no RevenueCat webhook), so it got the home but does not sync: Account and sync says so
+- tapOn:
+    id: "hm_tab_more"
+- scrollUntilVisible:
+    element:
+      id: "hm_more_account"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_account"
+- extendedWaitUntil:
+    visible:
+      id: "hm_account_sync_pro_body"
+    timeout: 10000
+- assertNotVisible: "Everything is synced"
+- takeScreenshot: H17b-sync-needs-pro
+# The buyer's second phone has Pro too (RevenueCat's user is the home); turn it on for this process
+- runFlow: _pro.yaml
 - tapOn:
     id: "hm_tab_items"
 - extendedWaitUntil:
@@ -114,6 +132,8 @@ env:
     visible:
       id: "hm_tab_items"
     timeout: 60000
+# Pro for this phone too, so its Account and sync shows the sync chip for the clean-up below (AC-H18)
+- runFlow: _pro.yaml
 - tapOn:
     id: "hm_tab_more"
 - tapOn:

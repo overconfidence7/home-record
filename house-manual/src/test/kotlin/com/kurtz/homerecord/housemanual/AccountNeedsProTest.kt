@@ -62,4 +62,26 @@ class AccountNeedsProTest {
         rule.onNodeWithTag("form").assertExists()
         rule.onNodeWithTag("hm_account_sign_in_pro").assertDoesNotExist()
     }
+
+    @Test
+    @AcceptanceCriterion("AC-H18")
+    fun aSignedInFreePhoneSyncsOnlyAProHome() {
+        assertThat(com.kurtz.homerecord.housemanual.account.accountSyncNeedsPro(phonePro = false, homePro = false)).isTrue()
+        assertThat(com.kurtz.homerecord.housemanual.account.accountSyncNeedsPro(phonePro = false, homePro = true)).isFalse()
+        assertThat(com.kurtz.homerecord.housemanual.account.accountSyncNeedsPro(phonePro = true, homePro = false)).isFalse()
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-H18")
+    fun syncOffNoteOpensPro() {
+        var opened = 0
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                com.kurtz.homerecord.housemanual.account.SyncNeedsPro { opened++ }
+            }
+        }
+        rule.onNodeWithTag("hm_account_sync_pro_body").assertIsDisplayed()
+        rule.onNodeWithTag("hm_account_sync_pro").assertIsDisplayed().performClick()
+        assertThat(opened).isEqualTo(1)
+    }
 }

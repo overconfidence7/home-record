@@ -1012,3 +1012,11 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 ## 2026-11-07 — T032b2d Sharing is Pro
 - SPEC pricing puts sharing under Pro: on the free tier Invite family and Invite a viewer on Share this house open HM-Paywall ("Sharing this house is part of Pro.", `LimitedFeature.Sharing`). Revoking an invite, removing a person and joining through an invite link stay free, so a family member never meets the paywall. H18b checks it on its claim-link phone (signed in, free tier).
+
+## 2026-11-07 — T032b2e Cloud sync is Pro on a signed-in phone
+- AC-H18 "no cloud sync" on the free tier: House Manual's `SyncCoordinator` runs a home's passes only while `LimitGate.canSyncHome(phonePro, homePro)` holds: this phone has Pro, or `GET /me` says the home's entitlement is `pro` (AC-B50; the webhook keeps it on the home). A family member who joined a Pro home on a free phone therefore syncs; a phone signed in from a claim link on a free home, or one whose Pro lapsed, keeps the home on the phone only.
+- The home's Pro state is kept with its role in `HomeAccess` (prefs, so it holds offline and across restarts) and refreshed from `GET /me` whenever the phone is signed in with a home, after each sync pass, and when onboarding sign-in picks a home. A home owner buying Pro reaches a family member's free phone at its next launch or sign-in (no push for entitlement changes yet).
+- Edits keep queuing in the outbox while sync is off and go up on the first pass once it is on. The onboarding restore ("Sign in to get your home") and invite/claim pulls stay free: they are one pass that brings the home down, not ongoing sync.
+- HM-Account, signed in without sync: "Cloud sync is off" with what that means and a See Pro button (HM-Paywall, sync reason) in place of the sync chip.
+- `SyncCoordinator` takes an `enabled` flow per tenant (default always on), so Field Log is unchanged.
+

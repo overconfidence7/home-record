@@ -20,7 +20,11 @@ class SyncCoordinatorTest {
         override val online: Flow<Boolean> = state
     }
 
-    private class Fixture(scope: TestScope, private val failFirst: Boolean = false) {
+    private class Fixture(
+        scope: TestScope,
+        private val failFirst: Boolean = false,
+        val enabled: MutableStateFlow<Boolean> = MutableStateFlow(true),
+    ) {
         val signedIn = MutableStateFlow(false)
         val tenant = MutableStateFlow<TenantRef?>(null)
         val net = Net()
@@ -37,6 +41,7 @@ class SyncCoordinatorTest {
             net,
             intervalMs = 30_000,
             writeDebounceMs = 1_000,
+            enabled = { enabled },
         ).also { it.start() }
     }
 
@@ -126,5 +131,25 @@ class SyncCoordinatorTest {
         f.coordinator.requestSync()
         advanceTimeBy(1_100)
         assertThat(f.calls).hasSize(2)
+    }
+
+    @Test
+    fun `a disabled tenant does not sync until it is enabled`() = runTest { // AC-H18: no cloud sync on the free tier
+        val f = Fixture(this, enabled = MutableStateFlow(false))
+        f.tenant.value = home
+        f.signedIn.value = true
+        f.coordinator.setForeground(true)
+        runCurrent()
+        f.coordinator.requestSync()
+        advanceTimeBy(65_000)
+        assertThat(f.calls).isEmpty()
+        // Pro bought (or the server says the home is Pro): the queued changes go up at once
+        f.enabled.value = true
+        runCurrent()
+        assertThat(f.calls).containsExactly(home)
+        // Pro lapses: the polling stops
+        f.enabled.value = false
+        advanceTimeBy(65_000)
+        assertThat(f.calls).hasSize(1)
     }
 }

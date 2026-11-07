@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -36,8 +37,8 @@ interface ConnectivityMonitor {
 /**
  * Decides when to sync (AC-F53): on sign-in or when the tenant appears, shortly after each local write
  * ([requestSync]), when the network returns, and every [intervalMs] while the app is in the foreground.
- * Nothing runs while signed out or without a tenant; local writes keep queuing in the outbox meanwhile.
- * A pass that throws is dropped so the loop keeps running and the next trigger retries.
+ * Nothing runs while signed out, without a tenant, or while [enabled] says no for the tenant (House Manual's free
+ * tier, AC-H18); local writes keep queuing in the outbox meanwhile and go up once it says yes. A pass that throws is dropped so the loop keeps running and the next trigger retries.
  */
 class SyncCoordinator(
     private val scope: CoroutineScope,
@@ -47,6 +48,7 @@ class SyncCoordinator(
     private val connectivity: ConnectivityMonitor,
     private val intervalMs: Long = 30_000,
     private val writeDebounceMs: Long = 1_000,
+    private val enabled: (TenantRef) -> Flow<Boolean> = { flowOf(true) },
 ) {
     private val foreground = MutableStateFlow(false)
     private val kicks = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -63,7 +65,10 @@ class SyncCoordinator(
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     fun start() {
-        val active = combine(signedIn, tenant) { auth, t -> t.takeIf { auth } }.distinctUntilChanged()
+        val active = combine(signedIn, tenant) { auth, t -> t.takeIf { auth } }
+            .distinctUntilChanged()
+            .flatMapLatest { t -> if (t == null) flowOf(null) else enabled(t).map { on -> t.takeIf { on } } }
+            .distinctUntilChanged()
         val ticks = foreground.flatMapLatest { on ->
             if (on) flow { while (true) { delay(intervalMs); emit(Unit) } } else emptyFlow()
         }

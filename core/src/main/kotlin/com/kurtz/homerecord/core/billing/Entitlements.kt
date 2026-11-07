@@ -26,6 +26,12 @@ object LimitGate {
     fun canAddItem(pro: Boolean, items: Int): Boolean = pro || items < FREE_ITEMS
     fun canAddPanel(pro: Boolean, panels: Int): Boolean = pro || panels < FREE_PANELS
     fun canSync(pro: Boolean): Boolean = pro
+
+    /**
+     * Cloud sync for a signed-in phone (AC-H18 "no cloud sync" on the free tier): this phone has Pro, or the server
+     * says the home is Pro ([homePro], from `GET /me`), so a family member who joined a Pro home on a free phone syncs.
+     */
+    fun canSyncHome(phonePro: Boolean, homePro: Boolean): Boolean = phonePro || homePro
     fun canMakeReport(pro: Boolean): Boolean = pro
     fun canShare(pro: Boolean): Boolean = pro
 
@@ -52,6 +58,9 @@ enum class ProPlanKind { Annual, Lifetime }
 /** What the paywall needs from the store: the plans, buying one, and restoring. */
 /** House Manual Pro belongs to the home: RevenueCat's app user id is `home:<homeId>`, which the backend webhook keeps (AC-B50). */
 object HomeBillingRules {
+    /** The entitlement id RevenueCat grants for House Manual Pro, and the one `GET /me` reports on a Pro home. */
+    const val PRO_ENTITLEMENT = "pro"
+
     fun appUserId(homeId: String): String = "home:$homeId"
 }
 

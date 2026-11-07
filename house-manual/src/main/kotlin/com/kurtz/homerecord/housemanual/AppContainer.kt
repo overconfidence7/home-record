@@ -40,6 +40,7 @@ import com.kurtz.homerecord.core.sync.TenantRef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
@@ -110,7 +111,10 @@ class AppContainer(private val app: Application) {
         homesOnAccount = account::homes,
         localHomeIds = { db.homeDao().observeAll().first().map { it.id } },
         sync = { tenant -> syncCoordinatorSync(tenant) },
-        onPicked = { homeAccess.remember(it.id, com.kurtz.homerecord.core.share.HomeRole.parse(it.role)) },
+        onPicked = {
+            homeAccess.remember(it.id, com.kurtz.homerecord.core.share.HomeRole.parse(it.role))
+            homeAccess.rememberPro(it.id, it.pro)
+        },
     )
 
     private val connectivity = AndroidConnectivityMonitor(app)
@@ -131,7 +135,16 @@ class AppContainer(private val app: Application) {
         auth.state.map { it is AuthState.SignedIn },
         homeTenant,
         connectivity,
+        // AC-H18 "no cloud sync" on the free tier: a home syncs when this phone has Pro or the server says the home is
+        // Pro (a family member's free phone on a Pro home); edits keep queuing in the outbox until then (T032b2e).
+        enabled = { tenant -> homeSyncAllowed(tenant) },
     )
+
+    private fun homeSyncAllowed(tenant: TenantRef): kotlinx.coroutines.flow.Flow<Boolean> =
+        if (tenant.kind != TenantKind.Home) kotlinx.coroutines.flow.flowOf(true)
+        else kotlinx.coroutines.flow.combine(billing.isPro, homeAccess.observeHomePro(tenant.id)) { phonePro, homePro ->
+            com.kurtz.homerecord.core.billing.LimitGate.canSyncHome(phonePro, homePro)
+        }
 
     init {
         // A home that is gone (or replaced) starts from scratch if it comes back (cr:sync-global-cursor).
@@ -323,6 +336,13 @@ class AppContainer(private val app: Application) {
         // Keystore-backed prefs are slow to open; keep them off the main thread during cold start.
         scope.launch(Dispatchers.IO) { auth.restore() }
         syncCoordinator.start()
+        // The home's Pro state (and role) from GET /me whenever this phone signs in with a home; a free phone does not
+        // sync, so the after-sync refresh alone would never learn that the home became Pro (T032b2e).
+        scope.launch {
+            kotlinx.coroutines.flow.combine(auth.state.map { it is AuthState.SignedIn }, homeTenant) { signedIn, t -> t.takeIf { signedIn } }
+                .distinctUntilChanged()
+                .collect { t -> if (t != null && t.kind == TenantKind.Home) homeAccess.refresh(t.id) }
+        }
         (storeBilling as? com.kurtz.homerecord.housemanual.billing.RevenueCatBilling)?.let { rc -> scope.launch { rc.refresh() } }
         // Queued warranty lookups run when connectivity returns (AC-C34).
         scope.launch { connectivity.online.collect { if (it) warrantyLookup.runPending() } }

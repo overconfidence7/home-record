@@ -1097,6 +1097,11 @@ fun AboutPreview() = Frame { com.kurtz.homerecord.housemanual.more.AboutScreen(c
 @Composable
 fun AccountSignedInPreview() = AccountSignedInFrame(com.kurtz.homerecord.housemanual.account.CloudCopyUiState())
 
+/** Signed in on the free tier (a claim link or a lapsed Pro): sync is off and the note leads to Pro (AC-H18, T032b2e). */
+@ThemePreviews
+@Composable
+fun AccountSyncNeedsProPreview() = AccountSignedInFrame(com.kurtz.homerecord.housemanual.account.CloudCopyUiState(), syncNeedsPro = true)
+
 /** Signed in, scrolled to the bottom so the Cloud copy section shows: the dialog asking first. */
 @ThemePreviews
 @Composable
@@ -1123,6 +1128,7 @@ fun AccountCloudDeletedPreview() = Frame {
 private fun AccountSignedInFrame(
     cloud: com.kurtz.homerecord.housemanual.account.CloudCopyUiState,
     syncPhase: com.kurtz.homerecord.core.sync.SyncPhase = com.kurtz.homerecord.core.sync.SyncPhase.Idle,
+    syncNeedsPro: Boolean = false,
 ) = Frame {
     com.kurtz.homerecord.housemanual.account.AccountSyncScreen({}) { modifier ->
         com.kurtz.homerecord.coreui.auth.AccountScreen(
@@ -1130,8 +1136,12 @@ private fun AccountSignedInFrame(
             {},
             modifier,
             syncStatus = {
-                com.kurtz.homerecord.coreui.components.SyncStatusChip(syncPhase, pending = 0, onClick = {})
-                com.kurtz.homerecord.housemanual.account.SyncExplainer()
+                if (syncNeedsPro) {
+                    com.kurtz.homerecord.housemanual.account.SyncNeedsPro {}
+                } else {
+                    com.kurtz.homerecord.coreui.components.SyncStatusChip(syncPhase, pending = 0, onClick = {})
+                    com.kurtz.homerecord.housemanual.account.SyncExplainer()
+                }
             },
             footer = { com.kurtz.homerecord.housemanual.account.CloudCopySection(cloud) {} },
         )

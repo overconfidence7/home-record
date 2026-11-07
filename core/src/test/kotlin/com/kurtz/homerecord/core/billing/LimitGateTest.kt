@@ -51,4 +51,11 @@ class LimitGateTest {
     @Test fun unavailableBillingStaysFree() { // AC-H18
         assertFalse(UnavailableEntitlements.isPro.value)
     }
+
+    @Test fun aFreePhoneSyncsOnlyAProHome() { // AC-H18 "no cloud sync" on the free tier (T032b2e)
+        assertFalse(LimitGate.canSyncHome(phonePro = false, homePro = false))
+        // A family member who joined a Pro home on a free phone still syncs
+        assertTrue(LimitGate.canSyncHome(phonePro = false, homePro = true))
+        assertTrue(LimitGate.canSyncHome(phonePro = true, homePro = false))
+    }
 }

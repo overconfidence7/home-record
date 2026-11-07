@@ -41,6 +41,20 @@ class HomeAccessTest {
         assertThat(access.canEdit("h1")).isTrue()
     }
 
+    @Test @AcceptanceCriterion("AC-H18") fun refreshKeepsTheHomesProStateAndHoldsItOffline() = runTest {
+        assertThat(access.observeHomePro("h1").first()).isFalse()
+        account = ApiResult.Ok(listOf(AccountHome("h1", "Maple St", "editor", entitlement = "pro")))
+        access.refresh("h1")
+        assertThat(access.observeHomePro("h1").first()).isTrue()
+        account = ApiResult.Err(ApiFailure.Offline)
+        access.refresh("h1")
+        assertThat(access.homePro("h1")).isTrue()
+        // Pro lapsed on the server: GET /me reports no entitlement.
+        account = ApiResult.Ok(listOf(AccountHome("h1", "Maple St", "editor", entitlement = null)))
+        access.refresh("h1")
+        assertThat(access.homePro("h1")).isFalse()
+    }
+
     @Test fun aHomeNotOnTheAccountKeepsItsLastRole() = runTest {
         access.remember("h1", HomeRole.Owner)
         account = ApiResult.Ok(emptyList())

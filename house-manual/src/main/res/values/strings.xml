@@ -632,6 +632,9 @@
     <string name="account_pro_title">Keep this home in the cloud</string>
     <string name="account_pro_body">Signing in keeps this home, its photos and its documents in the cloud, so the same home shows on your other phones and on a family member\'s. Sign in and cloud backup are part of House Manual Pro.</string>
     <string name="account_pro_sign_in">Sign in</string>
+    <string name="account_sync_pro_title">Cloud sync is off</string>
+    <string name="account_sync_pro_body">You\'re signed in, but this home stays on this phone: changes don\'t go to the cloud or to your other phones. Cloud sync is part of Pro. Your changes are kept and go up as soon as Pro is on.</string>
+    <string name="account_sync_pro_button">See Pro</string>
     <string name="account_sync_explainer">While you\'re signed in, this home, its photos and its documents are kept in the cloud. Sign in with the same account on another phone and the same home shows there; changes made on either phone come together.</string>
     <string name="backup_title">Backup and restore</string>
     <string name="backup_make_header">Make a backup</string>

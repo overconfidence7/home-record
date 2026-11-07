@@ -85,6 +85,29 @@ private fun SignInNeedsPro(onEvent: (AccountSyncEvent) -> Unit, modifier: Modifi
     }
 }
 
+/**
+ * AC-H18 "no cloud sync" on the free tier (T032b2e): a signed-in phone syncs only when it has Pro or the server says
+ * the home is Pro (a family member's free phone on a Pro home). Otherwise HM-Account shows [SyncNeedsPro].
+ */
+fun accountSyncNeedsPro(phonePro: Boolean, homePro: Boolean): Boolean = !LimitGate.canSyncHome(phonePro, homePro)
+
+/** Signed in on the free tier: in place of the sync chip, that this home stays on this phone and a button to Pro. */
+@Composable
+fun SyncNeedsPro(onOpenPro: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(R.string.account_sync_pro_title), style = MaterialTheme.typography.titleSmall)
+        Text(
+            stringResource(R.string.account_sync_pro_body),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.testTag("hm_account_sync_pro_body"),
+        )
+        Button(
+            onClick = onOpenPro,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("hm_account_sync_pro"),
+        ) { Text(stringResource(R.string.account_sync_pro_button)) }
+    }
+}
+
 /** What sync does for a signed-in home; shown under the sync chip on HM-Account. */
 @Composable
 fun SyncExplainer() {
