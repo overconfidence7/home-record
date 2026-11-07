@@ -486,4 +486,5 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
 - [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
   - [x] S1: lint warnings fixed or justified in REVIEW.md (Builder ship-ready S1)
   - [x] S1a: the 16 PluralsCandidate count strings as `<plurals>` ([s1:plurals])
+  - [x] S2: every `[unit]` criterion in SPEC.md (28) and every AC-B (15) named by a JVM test or vitest file
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
