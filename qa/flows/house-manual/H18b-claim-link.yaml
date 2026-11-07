@@ -59,3 +59,23 @@ env:
     visible:
       id: "hm_tab_more"
     timeout: 10000
+# AC-H18: sharing is Pro (SPEC pricing, T032b2d). This phone signed in through the claim link (free) and is on the
+# free tier, so Invite family on Share this house opens HM-Paywall instead of making a link
+- scrollUntilVisible:
+    element:
+      id: "hm_more_share"
+    direction: DOWN
+- tapOn:
+    id: "hm_more_share"
+- extendedWaitUntil:
+    visible:
+      id: "hm_share_invite_editor"
+    timeout: 30000
+- tapOn:
+    id: "hm_share_invite_editor"
+- extendedWaitUntil:
+    visible:
+      id: "hm_paywall_reason"
+    timeout: 5000
+- assertVisible: "Sharing this house is part of Pro."
+- takeScreenshot: H18b-share-paywall

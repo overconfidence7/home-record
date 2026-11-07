@@ -28,6 +28,12 @@ class LimitGateTest {
         assertFalse(LimitGate.blockedBy(true, LimitedFeature.HomeReport))
     }
 
+    @Test fun sharingIsPro() { // AC-H18, SPEC pricing: sync and sharing are Pro
+        assertFalse(LimitGate.canShare(false))
+        assertTrue(LimitGate.blockedBy(false, LimitedFeature.Sharing))
+        assertFalse(LimitGate.blockedBy(true, LimitedFeature.Sharing))
+    }
+
     @Test fun proHasNoLimits() { // AC-H18
         assertTrue(LimitGate.canAddItem(true, 500))
         assertTrue(LimitGate.canAddHome(true, 9))

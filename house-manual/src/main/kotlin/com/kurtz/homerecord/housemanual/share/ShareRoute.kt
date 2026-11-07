@@ -12,13 +12,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kurtz.homerecord.core.auth.AuthState
+import com.kurtz.homerecord.core.billing.LimitGate
+import com.kurtz.homerecord.core.billing.LimitedFeature
 import com.kurtz.homerecord.housemanual.AppContainer
 import com.kurtz.homerecord.housemanual.R
 import kotlinx.coroutines.flow.map
 
-/** Wires HM-Share for [homeId]: each new link opens the share sheet; Sign in opens HM-Account. */
+/**
+ * Wires HM-Share for [homeId]: each new link opens the share sheet; Sign in opens HM-Account. Sharing is Pro (SPEC
+ * pricing, T032b2d): on the free tier Invite family or Invite a viewer calls [onPro] (HM-Paywall) instead of making a link.
+ */
 @Composable
-fun ShareRoute(container: AppContainer, homeId: String, homeName: String, onBack: () -> Unit, onSignIn: () -> Unit) {
+fun ShareRoute(container: AppContainer, homeId: String, homeName: String, onBack: () -> Unit, onSignIn: () -> Unit, onPro: () -> Unit) {
     val vm = viewModel<ShareViewModel>(
         key = "share:$homeId",
         factory = viewModelFactory {
@@ -44,6 +49,8 @@ fun ShareRoute(container: AppContainer, homeId: String, homeName: String, onBack
         when (event) {
             ShareEvent.Back -> onBack()
             ShareEvent.SignIn -> onSignIn()
+            is ShareEvent.Invite ->
+                if (LimitGate.blocked(container.billing, LimitedFeature.Sharing, 0)) onPro() else vm.onEvent(event)
             else -> vm.onEvent(event)
         }
     })

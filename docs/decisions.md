@@ -1009,3 +1009,6 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 
 ## 2026-11-07 — T032b2c Home report is Pro
 - SPEC pricing lists the home report under Pro, so More → Home report opens HM-Paywall ("The home report is part of Pro.") on the free tier (`LimitedFeature.HomeReport`, `LimitGate.canMakeReport`). H15 checks the paywall, then turns Pro on with `_pro.yaml` and makes the PDF as before.
+
+## 2026-11-07 — T032b2d Sharing is Pro
+- SPEC pricing puts sharing under Pro: on the free tier Invite family and Invite a viewer on Share this house open HM-Paywall ("Sharing this house is part of Pro.", `LimitedFeature.Sharing`). Revoking an invite, removing a person and joining through an invite link stay free, so a family member never meets the paywall. H18b checks it on its claim-link phone (signed in, free tier).

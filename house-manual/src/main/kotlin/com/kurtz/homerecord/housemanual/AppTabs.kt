@@ -276,7 +276,9 @@ private fun HouseManualTabs(
             )
         }
         entry<ShareKey> {
-            com.kurtz.homerecord.housemanual.share.ShareRoute(container, home.id, home.name, onBack = nav::pop, onSignIn = { nav.push(AccountKey) })
+            com.kurtz.homerecord.housemanual.share.ShareRoute(container, home.id, home.name, onBack = nav::pop, onSignIn = { nav.push(AccountKey) },
+                onPro = { nav.push(PaywallKey(LimitedFeature.Sharing)) },
+            )
         }
         entry<AccountKey> {
             val cloud = viewModel<com.kurtz.homerecord.housemanual.account.CloudCopyViewModel>(

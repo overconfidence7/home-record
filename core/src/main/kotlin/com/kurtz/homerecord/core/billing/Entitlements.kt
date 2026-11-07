@@ -14,9 +14,9 @@ object UnavailableEntitlements : Entitlements {
 }
 
 /** What the free tier can't do; each maps to an HM-Paywall opening. */
-enum class LimitedFeature { SecondHome, SixteenthItem, SecondPanel, CloudSync, HomeReport }
+enum class LimitedFeature { SecondHome, SixteenthItem, SecondPanel, CloudSync, HomeReport, Sharing }
 
-/** Free-tier limits: one home, 15 items, one panel, no cloud sync, no home report (SPEC pricing). Pro has none. */
+/** Free-tier limits: one home, 15 items, one panel, no cloud sync, no home report, no sharing (SPEC pricing). Pro has none. */
 object LimitGate {
     const val FREE_HOMES = 1
     const val FREE_ITEMS = 15
@@ -27,6 +27,7 @@ object LimitGate {
     fun canAddPanel(pro: Boolean, panels: Int): Boolean = pro || panels < FREE_PANELS
     fun canSync(pro: Boolean): Boolean = pro
     fun canMakeReport(pro: Boolean): Boolean = pro
+    fun canShare(pro: Boolean): Boolean = pro
 
     fun blockedBy(pro: Boolean, feature: LimitedFeature, current: Int = 0): Boolean = when (feature) {
         LimitedFeature.SecondHome -> !canAddHome(pro, current)
@@ -34,6 +35,7 @@ object LimitGate {
         LimitedFeature.SecondPanel -> !canAddPanel(pro, current)
         LimitedFeature.CloudSync -> !canSync(pro)
         LimitedFeature.HomeReport -> !canMakeReport(pro)
+        LimitedFeature.Sharing -> !canShare(pro)
     }
 
     /** Same checks as [blockedBy], re-evaluated whenever Pro changes so limits lift without a restart. */
