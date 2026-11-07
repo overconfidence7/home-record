@@ -228,7 +228,6 @@
     <string name="ts_hours">%1$s total</string>
     <string name="ts_overtime">%1$s overtime</string>
     <string name="ts_approved">Approved</string>
-    <string name="ts_approve">Approve</string>
     <string name="ts_approve_person">Approve %1$s</string>
     <string name="ts_approve_all">Approve all</string>
     <string name="ts_approve_all_title">Approve all timesheets?</string>
@@ -521,7 +520,6 @@
     <string name="annotate_text">Text</string>
     <string name="annotate_measure">Measure</string>
     <string name="annotate_undo">Undo last mark</string>
-    <string name="annotate_save">Save a marked-up copy</string>
     <string name="annotate_hint">Drag on the photo to mark it. The original stays as it is.</string>
     <string name="annotate_saving">Saving the copy…</string>
     <string name="annotate_failed">Could not save the copy. Try again.</string>
@@ -542,7 +540,6 @@
     <string name="job_ov_no_crew">No crew on this job yet.</string>
     <string name="job_ov_dates">Dates</string>
     <string name="job_ov_phases">Phases</string>
-    <string name="job_ov_status">Status</string>
     <string name="job_status_active">Active</string>
     <string name="job_status_upcoming">Upcoming</string>
     <string name="job_status_done">Done</string>
@@ -633,7 +630,6 @@
     <string name="cap_denied">Field Log uses the camera to take job photos. Without it you can still add photos from the gallery, notes and voice memos.</string>
     <string name="cap_note">Note</string>
     <string name="cap_voice">Voice</string>
-    <string name="cap_voice_stop">Stop</string>
     <string name="cap_recording">Stop %1$s</string>
     <string name="cap_note_title">Add a note</string>
     <string name="cap_note_hint">What happened on site?</string>
@@ -889,7 +885,6 @@
     <string name="co_form_line_qty_error">Enter a number above 0.</string>
     <string name="co_form_line_price">Price each</string>
     <string name="co_form_line_amount">Line total %1$s</string>
-    <string name="co_form_line_remove">Remove line</string>
     <string name="co_form_line_remove_description">Remove line %1$d</string>
     <string name="co_form_line_add">Add line</string>
     <string name="co_form_photos">Photos</string>

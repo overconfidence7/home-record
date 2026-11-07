@@ -94,7 +94,7 @@ fun HouseScreen(
     /** False for a viewer on a shared home (AC-H16): no Edit plan, Floors or room menu; the plan only opens rooms. */
     canEdit: Boolean = true,
 ) {
-    val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
+    val landscape = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     val header: @Composable () -> Unit = {
         if (showHeader) Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(state.homeName, style = MaterialTheme.typography.headlineMedium)

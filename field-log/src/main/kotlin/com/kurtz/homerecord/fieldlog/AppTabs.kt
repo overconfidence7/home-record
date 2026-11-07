@@ -486,7 +486,10 @@ private fun NotificationPermissionAsk(container: AppContainer) {
         val ask = withContext(Dispatchers.IO) {
             container.shouldAskNotifications().also { if (it) container.markNotificationsAsked() }
         }
-        if (ask) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        // Below Android 13 notifications need no runtime permission
+        if (ask && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }
 

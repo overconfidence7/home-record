@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application>
         <activity android:name="com.kurtz.homerecord.fieldlog.qa.QaActivity" android:exported="true">
             <intent-filter>
@@ -16,7 +17,8 @@
                 <data android:scheme="homerecord-qa-fl" android:host="seed" />
             </intent-filter>
         </activity>
-        <receiver android:name="com.kurtz.homerecord.fieldlog.qa.SeedReceiver" android:exported="true">
+        <!-- Debug only: adb and the QA suite send the seed broadcast, so it is exported without a permission -->
+        <receiver android:name="com.kurtz.homerecord.fieldlog.qa.SeedReceiver" android:exported="true" tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.kurtz.homerecord.fieldlog.qa.SEED" />
             </intent-filter>

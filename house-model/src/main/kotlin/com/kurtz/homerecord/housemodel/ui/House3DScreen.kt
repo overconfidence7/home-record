@@ -102,7 +102,7 @@ fun House3DScreen(
     val floorName = if (state.allFloors) stringResource(R.string.house3d_all_floors) else state.floor?.name
     val room = state.room
     BackHandler(enabled = room != null && !state.openedOnRoom) { onEvent(House3DEvent.BackToFloor) }
-    val landscape = LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
+    val landscape = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
     ScreenScaffold(
         title = (room?.name ?: floorName)?.let { stringResource(R.string.house3d_title, it) } ?: stringResource(R.string.house3d_title_plain),
         subtitle = state.homeName.ifBlank { null },

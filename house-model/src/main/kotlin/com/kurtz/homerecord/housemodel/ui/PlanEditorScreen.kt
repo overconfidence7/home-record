@@ -51,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -162,8 +163,8 @@ fun PlanEditorScreen(
         OverlayFormScreen(form, onOverlay, items = state.itemRows, linked = state.item(form.itemId), canAddPhoto = state.canAddPhoto, houseHasItems = state.items.isNotEmpty())
         return
     }
-    var canvasWidthDp by remember { mutableStateOf(0f) }
-    var canvasHeightDp by remember { mutableStateOf(0f) }
+    var canvasWidthDp by remember { mutableFloatStateOf(0f) }
+    var canvasHeightDp by remember { mutableFloatStateOf(0f) }
     val overlayIdle = state.overlayMode && state.drawing == null && state.selectedOverlay == null
     if (state.confirmDeleteOverlay) state.selectedOverlay?.let { OverlayDeleteDialog(it, onOverlay, screen = "plan") }
     ScreenScaffold(

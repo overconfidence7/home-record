@@ -318,8 +318,8 @@ private fun DragHandle(title: String, modifier: Modifier) {
 private fun TaskListRow(
     row: TaskRow,
     onEvent: (TasksEvent) -> Unit,
-    handle: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
+    handle: (@Composable () -> Unit)? = null,
 ) {
     val checkLabel = stringResource(if (row.done) R.string.tasks_mark_open else R.string.tasks_mark_done, row.title)
     RecordListItem(

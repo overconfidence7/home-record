@@ -32,14 +32,9 @@
     <string name="foundation_walkout">Walkout basement</string>
     <string name="foundation_crawlspace">Crawlspace</string>
     <string name="foundation_slab">Slab</string>
-    <string name="house_title">House</string>
     <string name="house_summary">%1$s · %2$s</string>
-    <string name="floors_row_count">%1$d floors</string>
-    <string name="floors_loading">Loading floors</string>
     <string name="required_marker">%1$s (required)</string>
     <string name="field_required">Required.</string>
-    <string name="plan_row">Floor plan</string>
-    <string name="plan_row_supporting">Draw and edit rooms floor by floor</string>
     <string name="items_empty_title">No items yet</string>
     <string name="items_empty_body_view_only">Nothing has been added to this home yet.</string>
     <string name="items_empty_body">Add the furnace, the water heater, the dishwasher. Anything with a model number and a warranty.</string>
@@ -95,7 +90,6 @@
     <string name="item_detail_in_service">In service</string>
     <string name="item_detail_price">Price</string>
     <string name="item_detail_vendor">Vendor</string>
-    <string name="item_detail_manual">Manual</string>
     <string name="item_detail_open_manual">Open manual</string>
     <string name="item_detail_warranty">Warranty</string>
     <string name="item_detail_warranty_none">No warranty on file yet.</string>
@@ -133,7 +127,6 @@
     <string name="item_detail_photo">Photo of %1$s</string>
     <string name="item_detail_notes">Notes</string>
     <string name="item_detail_shutoff_how">How to shut it off</string>
-    <string name="item_detail_save">Save</string>
     <string name="form_close">Close</string>
     <string name="form_save">Save</string>
     <string name="item_detail_consumables">Consumables</string>
@@ -206,7 +199,6 @@
     <string name="document_viewer_offline_title">No connection</string>
     <string name="document_viewer_offline_body">This document was added on another phone and is saved in your account. Check your connection and tap Retry.</string>
     <string name="document_viewer_retry">Retry</string>
-    <string name="document_viewer_open">Open %1$s</string>
     <string name="documents_title">Documents</string>
     <string name="documents_add">Add document</string>
     <string name="documents_scan">Scan a document</string>
@@ -246,7 +238,6 @@
     <string name="contacts_email_field">Email address</string>
     <string name="contacts_email_error">Enter an email like name@example.com.</string>
     <string name="contacts_notes">Notes</string>
-    <string name="contacts_save">Save</string>
     <string name="contacts_delete">Delete</string>
     <string name="contacts_delete_title">Delete %1$s?</string>
     <string name="contacts_delete_body">Service records that name this contact stay, without the link.</string>

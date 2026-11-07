@@ -425,6 +425,9 @@ private fun AskNotificationsOnceRemindersExist(container: AppContainer, homeId: 
         val ask = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             container.shouldAskNotifications(homeId).also { if (it) container.markNotificationsAsked() }
         }
-        if (ask) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        // Below Android 13 notifications need no runtime permission
+        if (ask && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 }
