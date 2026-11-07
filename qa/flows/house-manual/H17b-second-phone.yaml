@@ -29,6 +29,10 @@ env:
 # Phone two: no home, sign in from onboarding
 - launchApp:
     clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
 - extendedWaitUntil:
     visible: "Set up your home"
     timeout: 20000
@@ -86,6 +90,10 @@ env:
 # A third clean install sees the second phone's edit
 - launchApp:
     clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
 - extendedWaitUntil:
     visible: "Set up your home"
     timeout: 20000

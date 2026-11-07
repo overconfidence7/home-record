@@ -4,6 +4,10 @@ appId: com.kurtz.homerecord.housemanual
 ---
 - launchApp:
     clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
 - extendedWaitUntil:
     visible: "Set up your home"
     timeout: 20000

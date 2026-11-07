@@ -43,6 +43,10 @@ appId: com.kurtz.homerecord.housemanual
 # A fresh install: wipe the app, then onboarding offers Restore from a backup (AC-C48)
 - launchApp:
     clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
 - extendedWaitUntil:
     visible:
       id: "hm_onboarding_restore"

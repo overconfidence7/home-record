@@ -15,6 +15,31 @@ set -euo pipefail
 PUB="$1"; FULL="$2"; SHA="${FULL:0:7}"
 IN="${QA_INPUT_DIR:-qa-in}"
 STAMP="$(date -u +%Y-%m-%d-%H%M)-$SHA"
+LIMIT=$((90 * 1024 * 1024))
+KEEP_LOG=$((20 * 1024 * 1024))
+
+# Keep every published file under GitHub's 100 MB push limit (see the call below).
+cap_large_files() {
+  find "$1" -type f -size +"$((LIMIT / 1024))"k -print0 | while IFS= read -r -d '' f; do
+    size=$(stat -c %s "$f")
+    case "$f" in
+      *.txt|*.log)
+        tmp="$f.tail"
+        { echo "[publish-results: cut from $size bytes; last $KEEP_LOG bytes kept]"; tail -c "$KEEP_LOG" "$f"; } > "$tmp"
+        mv "$tmp" "$f"
+        echo "capped $f ($size bytes) to its last $KEEP_LOG bytes" ;;
+      *)
+        gzip -9 -f "$f"
+        if [ "$(stat -c %s "$f.gz")" -gt "$LIMIT" ]; then
+          rm -f "$f.gz"
+          echo "Omitted by publish-results: $f was $size bytes, over GitHub's 100 MB file limit even gzipped. It is in the run's workflow artifacts." > "$f.omitted.txt"
+          echo "omitted $f ($size bytes)"
+        else
+          echo "gzipped $f ($size bytes)"
+        fi ;;
+    esac
+  done
+}
 work=$(mktemp -d)
 rmdir "$work"
 git worktree add -q --detach "$work" HEAD
@@ -41,6 +66,10 @@ git worktree add -q --detach "$work" HEAD
     # Per-flow device logcats from Maestro (the suite's logs/logcat.txt covers the run) are not published
     find "latest/$app" -path '*/maestro/*' -name 'device-logcat.txt' -type f -delete 2>/dev/null || true
   done
+  # GitHub refuses any file over 100 MB (GH001), and one such file rejects the whole push, so no results land at all
+  # (runs 56-61, 2026-11-05..07: a 109 MB logcat.txt and a 153 MB screenshot HTML report). Logs keep their last
+  # 20 MB; other large files are gzipped, and dropped with a note if still too big.
+  cap_large_files latest
   ls -1d history/* 2>/dev/null | sort | head -n -60 | xargs -r rm -rf
   cat > README.md <<EOF
 # qa-results

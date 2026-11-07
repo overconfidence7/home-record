@@ -63,6 +63,10 @@ env:
 # The family member's phone: no home; the link opens House Manual and asks for an account
 - launchApp:
     clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
 - extendedWaitUntil:
     visible: "Set up your home"
     timeout: 20000

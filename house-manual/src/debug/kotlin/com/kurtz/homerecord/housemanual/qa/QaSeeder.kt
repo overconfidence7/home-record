@@ -10,6 +10,10 @@ object QaSeeder {
     suspend fun run(context: Context, scenario: String): Boolean {
         val container = (context.applicationContext as HomeRecordApplication).container
         val documents = File(context.filesDir, "documents")
+        // Every seeded home has reminders, so since T072c the app would put the system notification prompt over the
+        // tabs on its first frame; a flow's clearState also wipes the grant the suite made. A seeded phone counts as
+        // already asked, so flows reach the tabs (the ask itself: DailyReminderCheckTest, AC-C50).
+        if (scenario != "reset") container.markNotificationsAsked()
         return when (scenario) {
             "regression" -> {
                 RegressionSeed.seed(container.db, container.homes, context.resources::getString, documentsDir = documents, pdf = samplePdf(context))
