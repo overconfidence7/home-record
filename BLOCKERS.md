@@ -2,6 +2,8 @@
 
 ## Needs Nate
 
+- Privacy policy contact (T081b, 2026-11-07): docs/privacy-policy.md needs the operator's legal name (the LLC replacing `kurtz`) and a contact email for privacy and account deletion requests, plus a public URL to host the policy for Play Console. Until then the policy points here.
+
 (Things the builder cannot do without Nate: credentials, accounts, purchases, device-only checks.)
 
 - 2026-11-06 ([judge:qa-yml-main-lag], REVIEW Minor): a qa.yml fix on `build` takes effect one scheduled run late, because GitHub reads scheduled workflows from `main` and the copy-to-main job inside qa.yml runs after the stale run has started. Both fixes the judge suggests change `main` (a push-triggered sync workflow on `build` that copies qa.yml to main, or a trampoline on main that runs `gh workflow run qa.yml --ref build`); the builder may not push main and its permission mode refused adding a workflow that does. Needed: Nate picks one and adds it to `main` (or approves the push-triggered sync workflow), or accepts the one-cycle lag.
