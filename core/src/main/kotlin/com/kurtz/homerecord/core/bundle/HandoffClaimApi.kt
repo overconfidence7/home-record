@@ -3,6 +3,9 @@ package com.kurtz.homerecord.core.bundle
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.ApiResult
 import com.kurtz.homerecord.core.net.apiCall
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.Call
@@ -86,7 +89,14 @@ internal interface HandoffClaimService {
     suspend fun bundle(@Path("token") token: String): ResponseBody
 }
 
-class RetrofitHandoffClaimApi internal constructor(private val service: HandoffClaimService) : HandoffClaimApi {
+/**
+ * [io] runs the bundle download: Retrofit's suspend call returns the streaming body on the caller's
+ * dispatcher, so reading it there (Main, from ClaimViewModel) is network on the main thread.
+ */
+class RetrofitHandoffClaimApi internal constructor(
+    private val service: HandoffClaimService,
+    private val io: CoroutineDispatcher = Dispatchers.IO,
+) : HandoffClaimApi {
     override suspend fun claim(token: String): HandoffClaimResult {
         var status: HandoffClaimFailure? = null
         return when (val r = apiCall({ e -> status = failureFor(e.code()); ApiFailure.Failed }) { service.claim(token) }) {
@@ -95,7 +105,7 @@ class RetrofitHandoffClaimApi internal constructor(private val service: HandoffC
         }
     }
 
-    override suspend fun download(token: String, dest: File): HandoffDownloadResult {
+    override suspend fun download(token: String, dest: File): HandoffDownloadResult = withContext(io) {
         var status: HandoffClaimFailure? = null
         val part = File(dest.path + ".part")
         val r = apiCall({ e -> status = failureFor(e.code()); ApiFailure.Failed }) {
@@ -106,7 +116,7 @@ class RetrofitHandoffClaimApi internal constructor(private val service: HandoffC
                 dest
             }
         }
-        return when (r) {
+        when (r) {
             is ApiResult.Ok -> HandoffDownloadResult.Saved(r.value)
             is ApiResult.Err -> {
                 part.delete()
@@ -130,13 +140,13 @@ class RetrofitHandoffClaimApi internal constructor(private val service: HandoffC
         private val json = Json { ignoreUnknownKeys = true }
 
         /** [client] must add the session token (the server answers 401 otherwise). */
-        fun create(baseUrl: String, client: Call.Factory): RetrofitHandoffClaimApi {
+        fun create(baseUrl: String, client: Call.Factory, io: CoroutineDispatcher = Dispatchers.IO): RetrofitHandoffClaimApi {
             val retrofit = Retrofit.Builder()
                 .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
                 .callFactory(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
-            return RetrofitHandoffClaimApi(retrofit.create(HandoffClaimService::class.java))
+            return RetrofitHandoffClaimApi(retrofit.create(HandoffClaimService::class.java), io)
         }
     }
 }

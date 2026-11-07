@@ -22,7 +22,13 @@ class RetrofitHandoffClaimApiTest {
     private val requests = mutableListOf<Request>()
     private val token = "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_-abcd"
 
-    private fun api(code: Int = 200, body: ByteArray = "{}".toByteArray(), type: String = "application/json", fail: Boolean = false) =
+    private fun api(
+        code: Int = 200,
+        body: ByteArray = "{}".toByteArray(),
+        type: String = "application/json",
+        fail: Boolean = false,
+        io: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO,
+    ) =
         RetrofitHandoffClaimApi.create(
             "http://x.test",
             OkHttpClient.Builder().addInterceptor(Interceptor { chain ->
@@ -32,6 +38,7 @@ class RetrofitHandoffClaimApiTest {
                 Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).message("x")
                     .body(body.toResponseBody(type.toMediaType())).build()
             }).build(),
+            io,
         )
 
     @Test fun claimPostsTheTokenAndReadsWhoSentIt() = runTest { // AC-H17
@@ -59,6 +66,20 @@ class RetrofitHandoffClaimApiTest {
         assertThat(dest.readBytes()).isEqualTo(bytes)
         assertThat(requests.single().method).isEqualTo("GET")
         assertThat(requests.single().url.encodedPath).isEqualTo("/handoff/$token/bundle")
+    }
+
+    @Test fun downloadReadsTheBundleOnTheIoDispatcher() = runTest { // AC-H17 (QA auto: NetworkOnMainThreadException on claim)
+        val dest = tmp.root.resolve("handoff/claimed.homerecord")
+        var ranOnIo = 0
+        val io = object : kotlinx.coroutines.CoroutineDispatcher() {
+            override fun dispatch(context: kotlin.coroutines.CoroutineContext, block: Runnable) {
+                ranOnIo++
+                kotlinx.coroutines.Dispatchers.IO.dispatch(context, block)
+            }
+        }
+        val r = api(body = byteArrayOf(1, 2, 3), type = "application/zip", io = io).download(token, dest)
+        assertThat(r).isEqualTo(HandoffDownloadResult.Saved(dest))
+        assertThat(ranOnIo).isGreaterThan(0)
     }
 
     @Test fun failedDownloadLeavesNoPartialFile() = runTest { // AC-H17
