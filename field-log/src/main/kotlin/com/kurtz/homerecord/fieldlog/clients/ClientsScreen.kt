@@ -22,6 +22,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
@@ -35,6 +36,10 @@ fun ClientsScreen(state: ClientsUiState, onEvent: (ClientsEvent) -> Unit, onBack
     ScreenScaffold(title = stringResource(R.string.clients_title), onBack = onBack) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.clients_load_failed), { onEvent(ClientsEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("fl_clients_retry"),
+            )
             state.clients.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.Handshake,
                 headline = stringResource(R.string.clients_empty_title),

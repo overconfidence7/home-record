@@ -735,6 +735,11 @@ fun SyncLogLoadingScreenshot() = SyncLogLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun SyncLogLoadFailedScreenshot() = SyncLogLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun TaskViewScreenshot() = TaskViewPreview()
 
 @PreviewTest
@@ -776,6 +781,11 @@ fun ChangesEmptyScreenshot() = ChangesEmptyPreview()
 @ThemePreviews
 @Composable
 fun ChangesCrewScreenshot() = ChangesCrewPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ChangesLoadFailedScreenshot() = ChangesLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews
@@ -881,6 +891,11 @@ fun ClientsListScreenshot() = ClientsListPreview()
 @ThemePreviews
 @Composable
 fun ClientsEmptyScreenshot() = ClientsEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ClientsLoadFailedScreenshot() = ClientsLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews

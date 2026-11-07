@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.data.JobEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
@@ -19,7 +20,14 @@ class ClientsDeps(
 
 /** FL-Clients (AC-F45): clients from jobs, kept current as jobs and clients change. */
 class ClientsViewModel(deps: ClientsDeps) : ViewModel() {
-    val state: StateFlow<ClientsUiState> = combine(deps.clients, deps.jobs) { clients, jobs ->
-        ClientsUiState(loading = false, clients = ClientListBuilder.build(clients, jobs, deps.today()))
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Clients")
+
+    val state: StateFlow<ClientsUiState> = load.wrap(ClientsUiState(loading = false, loadFailed = true)) {
+        combine(deps.clients, deps.jobs) { clients, jobs ->
+            ClientsUiState(loading = false, clients = ClientListBuilder.build(clients, jobs, deps.today()))
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ClientsUiState())
+
+    fun retry() = load.retry()
 }

@@ -12,10 +12,13 @@ data class SyncLogUiState(
     val pending: Int = 0,
     val entries: List<ConflictEntry> = emptyList(),
     val loading: Boolean = true,
+    /** The log or the outbox could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
 )
 
 sealed interface SyncLogEvent {
     data object SyncNow : SyncLogEvent
     data object Clear : SyncLogEvent
     data object Back : SyncLogEvent
+    data object Retry : SyncLogEvent
 }

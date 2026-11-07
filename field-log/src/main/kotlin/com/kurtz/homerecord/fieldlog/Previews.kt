@@ -421,6 +421,10 @@ fun SyncLogOfflinePreview() = Frame {
 @Composable
 fun SyncLogLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(), {}) }
 
+@ThemePreviews
+@Composable
+fun SyncLogLoadFailedPreview() = Frame { com.kurtz.homerecord.fieldlog.sync.SyncLogScreen(com.kurtz.homerecord.fieldlog.sync.SyncLogUiState(loading = false, loadFailed = true), {}) }
+
 private fun job(id: String, name: String, status: JobStatus, client: String?, address: String?, next: String? = null, start: String? = null) =
     JobRow(JobSummary(id, name, status, startDate = start), client, address, next)
 
@@ -2004,6 +2008,10 @@ fun ChangesEmptyPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.cha
 @Composable
 fun ChangesCrewPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.changes.ChangesUiState(loading = false, rows = coRows.take(2), canManage = false)) }
 
+@ThemePreviews
+@Composable
+fun ChangesLoadFailedPreview() = Frame { ChangesTab(com.kurtz.homerecord.fieldlog.changes.ChangesUiState(loading = false, loadFailed = true)) }
+
 private val coDraft = com.kurtz.homerecord.fieldlog.changes.ChangeOrderFormDraft(
     title = "Pantry light on a motion switch",
     clientName = "Dana Hale",
@@ -2277,6 +2285,10 @@ fun ClientsListPreview() = Frame {
 fun ClientsEmptyPreview() = Frame {
     com.kurtz.homerecord.fieldlog.clients.ClientsScreen(com.kurtz.homerecord.fieldlog.clients.ClientsUiState(loading = false), {}, {})
 }
+
+@ThemePreviews
+@Composable
+fun ClientsLoadFailedPreview() = Frame { com.kurtz.homerecord.fieldlog.clients.ClientsScreen(com.kurtz.homerecord.fieldlog.clients.ClientsUiState(loading = false, loadFailed = true), {}, {}) }
 
 private fun previewMaterial(id: String, job: String, vendor: String?, cents: Long, cat: com.kurtz.homerecord.core.material.MaterialCategory, date: String, note: String? = null) =
     com.kurtz.homerecord.core.material.Material(id, job, vendor, cents, cat, date, null, note)

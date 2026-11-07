@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ChangeOrderStatus
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.EmptyState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
@@ -54,6 +55,13 @@ internal fun statusLabel(status: ChangeOrderStatus): String = stringResource(
 @Composable
 fun ChangesScreen(state: ChangesUiState, onEvent: (ChangesEvent) -> Unit, modifier: Modifier = Modifier) {
     if (state.loading) { LoadingState(modifier.fillMaxSize()); return }
+    if (state.loadFailed) {
+        ErrorState(
+            stringResource(R.string.changes_load_failed), { onEvent(ChangesEvent.Retry) }, modifier.fillMaxSize(),
+            retryModifier = Modifier.testTag("fl_changes_retry"),
+        )
+        return
+    }
     Box(modifier.fillMaxSize()) {
         if (state.rows.isEmpty()) {
             EmptyState(

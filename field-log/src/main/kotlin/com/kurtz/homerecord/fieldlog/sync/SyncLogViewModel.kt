@@ -7,6 +7,7 @@ import com.kurtz.homerecord.core.sync.SyncPhase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import com.kurtz.homerecord.core.data.Reloadable
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -21,11 +22,16 @@ class SyncLogDeps(
 )
 
 class SyncLogViewModel(private val deps: SyncLogDeps) : ViewModel() {
-    val state: StateFlow<SyncLogUiState> = combine(deps.phase, deps.pending, deps.entries) { phase, pending, entries ->
-        SyncLogUiState(phase, pending, entries, loading = false)
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Sync log")
+
+    val state: StateFlow<SyncLogUiState> = load.wrap(SyncLogUiState(loading = false, loadFailed = true)) {
+        combine(deps.phase, deps.pending, deps.entries) { phase, pending, entries -> SyncLogUiState(phase, pending, entries, loading = false) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SyncLogUiState())
 
     fun syncNow() = deps.syncNow()
+
+    fun retry() = load.retry()
 
     /** Empties the log only; the records stay as they are. */
     fun clear() {

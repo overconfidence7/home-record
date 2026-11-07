@@ -15,10 +15,12 @@ fun ChangesRoute(deps: ChangesDeps, onOpen: (String?) -> Unit, modifier: Modifie
     ChangesScreen(
         state,
         { e ->
+            if (e == ChangesEvent.Retry) { vm.retry(); return@ChangesScreen }
             if (!vm.state.value.canManage) return@ChangesScreen
             when (e) {
                 is ChangesEvent.Open -> onOpen(e.id)
                 ChangesEvent.Add -> onOpen(null)
+                ChangesEvent.Retry -> Unit
             }
         },
         modifier,

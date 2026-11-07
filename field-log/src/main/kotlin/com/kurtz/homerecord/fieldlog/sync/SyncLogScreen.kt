@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.sync.ConflictEntry
 import com.kurtz.homerecord.core.sync.ConflictOutcome
 import com.kurtz.homerecord.core.sync.SyncPhase
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.coreui.components.SectionHeader
@@ -65,6 +66,13 @@ fun SyncLogScreen(state: SyncLogUiState, onEvent: (SyncLogEvent) -> Unit, modifi
     ) { padding ->
         if (state.loading) {
             LoadingState(Modifier.padding(padding))
+            return@ScreenScaffold
+        }
+        if (state.loadFailed) {
+            ErrorState(
+                stringResource(R.string.sync_log_load_failed), { onEvent(SyncLogEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("fl_sync_retry"),
+            )
             return@ScreenScaffold
         }
         LazyColumn(

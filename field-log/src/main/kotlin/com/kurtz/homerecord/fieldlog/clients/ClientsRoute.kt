@@ -24,6 +24,7 @@ fun ClientsRoute(deps: () -> ClientsDeps, onBack: () -> Unit, onOpenJob: (String
             is ClientsEvent.Call -> launch(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + ClientListBuilder.dialable(event.phone))))
             is ClientsEvent.Email -> launch(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + event.email)))
             is ClientsEvent.OpenJob -> onOpenJob(event.jobId)
+            ClientsEvent.Retry -> vm.retry()
         }
     }, onBack = onBack)
 }

@@ -149,6 +149,7 @@ object ScreenCatalog {
         QaScreen("changes-list", nonRoot = true) { ChangesListPreview() },
         QaScreen("changes-empty", nonRoot = true) { ChangesEmptyPreview() },
         QaScreen("changes-crew", nonRoot = true) { ChangesCrewPreview() },
+        QaScreen("changes-load-failed", nonRoot = true) { ChangesLoadFailedPreview() },
         QaScreen("co-form-edit", nonRoot = true) { ChangeOrderFormEditPreview() },
         QaScreen("co-form-photo-sheet", nonRoot = true) { ChangeOrderFormPhotoSheetOpen() },
         QaScreen("co-form-new", nonRoot = true) { ChangeOrderFormNewPreview() },
@@ -193,6 +194,7 @@ object ScreenCatalog {
         QaScreen("more-delete-account-confirm", nonRoot = false) { MoreDeleteAccountConfirmPreview() },
         QaScreen("clients-list", nonRoot = true) { ClientsListPreview() },
         QaScreen("clients-empty", nonRoot = true) { ClientsEmptyPreview() },
+        QaScreen("clients-load-failed", nonRoot = true) { ClientsLoadFailedPreview() },
         QaScreen("materials-list", nonRoot = true) { MaterialsListPreview() },
         QaScreen("materials-empty", nonRoot = true) { MaterialsEmptyPreview() },
         QaScreen("material-form-new", nonRoot = true) { MaterialFormNewPreview() },
@@ -206,6 +208,7 @@ object ScreenCatalog {
         QaScreen("sync-log-conflicts", nonRoot = true) { SyncLogConflictsPreview() },
         QaScreen("sync-log-offline", nonRoot = true) { SyncLogOfflinePreview() },
         QaScreen("sync-log-loading", nonRoot = true) { SyncLogLoadingPreview() },
+        QaScreen("sync-log-load-failed", nonRoot = true) { SyncLogLoadFailedPreview() },
     )
 
     fun find(id: String?): QaScreen? = entries.firstOrNull { it.id == id }

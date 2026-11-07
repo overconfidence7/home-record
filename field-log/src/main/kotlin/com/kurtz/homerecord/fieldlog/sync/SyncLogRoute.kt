@@ -16,6 +16,7 @@ fun SyncLogRoute(deps: () -> SyncLogDeps, onBack: () -> Unit) {
             SyncLogEvent.SyncNow -> vm.syncNow()
             SyncLogEvent.Clear -> vm.clear()
             SyncLogEvent.Back -> onBack()
+            SyncLogEvent.Retry -> vm.retry()
         }
     })
 }

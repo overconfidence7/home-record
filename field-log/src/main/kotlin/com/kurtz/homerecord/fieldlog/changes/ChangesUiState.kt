@@ -21,6 +21,8 @@ data class ChangesUiState(
     val rows: List<ChangeRow> = emptyList(),
     /** Owner, Office and the job's Lead write and open change orders (AC-F3); Crew see the list only. */
     val canManage: Boolean = false,
+    /** The change orders could not be read; the tab shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
 ) {
     /** What the drafts still waiting on the client add up to; null when there are none. */
     val draftsTotalCents: Long? get() = rows.filter { it.status == ChangeOrderStatus.DRAFT }.takeIf { it.isNotEmpty() }?.sumOf { it.totalCents }
@@ -36,4 +38,5 @@ data class ChangesUiState(
 sealed interface ChangesEvent {
     data class Open(val id: String) : ChangesEvent
     data object Add : ChangesEvent
+    data object Retry : ChangesEvent
 }

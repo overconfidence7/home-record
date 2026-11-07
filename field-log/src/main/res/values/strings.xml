@@ -339,6 +339,9 @@
     <string name="company_photo_on_punch_helper">Asks for a quick photo with each punch. Off by default.</string>
     <string name="jobs_title">Jobs</string>
     <string name="jobs_load_failed">Couldn\'t open the jobs list. Tap Retry to read it again.</string>
+    <string name="clients_load_failed">Couldn\'t open the clients. Tap Retry to read them again.</string>
+    <string name="changes_load_failed">Couldn\'t open this job\'s change orders. Tap Retry to read them again.</string>
+    <string name="sync_log_load_failed">Couldn\'t open the sync log. Tap Retry to read it again.</string>
     <string name="jobs_empty_title">No jobs yet</string>
     <string name="jobs_empty_body">Jobs you add show up here, grouped by Active, Upcoming and Done.</string>
     <string name="jobs_search">Search jobs</string>
