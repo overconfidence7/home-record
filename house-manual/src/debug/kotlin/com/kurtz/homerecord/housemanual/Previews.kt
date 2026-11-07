@@ -160,6 +160,10 @@ fun FloorsLoadingPreview() = Frame { FloorsScreen(FloorsUiState(), {}, {}, "Mapl
 
 @ThemePreviews
 @Composable
+fun FloorsLoadFailedPreview() = Frame { FloorsScreen(FloorsUiState(loading = false, loadFailed = true), {}, {}, "Maple St") }
+
+@ThemePreviews
+@Composable
 fun FloorsDeleteDialogPreview() = Frame {
     FloorsScreen(FloorsUiState(loading = false, floors = floors, dialog = FloorsDialog.Delete(floors[1])), {}, {}, "Maple St")
 }
@@ -1037,6 +1041,10 @@ fun HomeSearchNonePreview() = Frame { HomeScreen(HomeUiState(loading = false, ho
 @ThemePreviews
 @Composable
 fun HomeLoadingPreview() = Frame { HomeScreen(HomeUiState(), {}) }
+
+@ThemePreviews
+@Composable
+fun HomeLoadFailedPreview() = Frame { HomeScreen(HomeUiState(loading = false, loadFailed = true, homeName = "12 Maple Street"), {}) }
 
 private val samplePlans = listOf(
     com.kurtz.homerecord.core.billing.ProPlan("pro_annual", com.kurtz.homerecord.core.billing.ProPlanKind.Annual, "$24.99 / year"),

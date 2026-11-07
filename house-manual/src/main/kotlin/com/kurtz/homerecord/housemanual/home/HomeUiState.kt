@@ -6,6 +6,8 @@ import com.kurtz.homerecord.housemodel.items.ItemRow
 
 data class HomeUiState(
     val loading: Boolean = true,
+    /** The home's summary could not be read; the tab shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val homeName: String = "",
     val itemCount: Int = 0,
     val shutoffCount: Int = 0,
@@ -43,6 +45,7 @@ sealed interface HomeEvent {
     /** HM-Emergency from the Emergency card (AC-H11). */
     data object OpenEmergency : HomeEvent
     data class QueryChanged(val query: String) : HomeEvent
+    data object Retry : HomeEvent
     /** [id] is what opens: the record itself, or for a breaker its panel item, with the breaker's [slot]. */
     data class OpenResult(val kind: SearchKind, val id: String, val slot: Int? = null) : HomeEvent
 }

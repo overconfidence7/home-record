@@ -32,7 +32,15 @@ import com.kurtz.homerecord.housemanual.panel.PanelsViewModel
 import com.kurtz.homerecord.housemanual.reminders.RemindersEvent
 import com.kurtz.homerecord.housemanual.reminders.RemindersScreen
 import com.kurtz.homerecord.housemanual.reminders.RemindersUiState
+import com.kurtz.homerecord.housemanual.home.HomeEvent
+import com.kurtz.homerecord.housemanual.home.HomeScreen
+import com.kurtz.homerecord.housemanual.home.HomeUiState
+import com.kurtz.homerecord.housemanual.home.HomeViewModel
+import com.kurtz.homerecord.housemodel.home.HomeSummary
 import com.kurtz.homerecord.housemodel.items.ItemRow
+import com.kurtz.homerecord.housemodel.ui.FloorsEvent
+import com.kurtz.homerecord.housemodel.ui.FloorsScreen
+import com.kurtz.homerecord.housemodel.ui.FloorsUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -50,7 +58,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 // AC-U4: every list has an error state. When a list's read throws, Emergency, Breaker panels, Contacts, Documents
-// and Reminders show what failed and a Retry that reads again, with no Add button over a list that never loaded.
+// Reminders, Home and Floors show what failed and a Retry that reads again, with no Add button over a list that never loaded.
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = android.app.Application::class)
@@ -135,5 +143,31 @@ class ListLoadFailedTest {
         rule.onNodeWithTag("hm_reminders_retry").performClick()
         rule.onAllNodesWithTag("hm_reminders_fab").assertCountEquals(0)
         assertThat(events).containsExactly(RemindersEvent.Retry)
+    }
+
+    @Test fun homeShowsTheErrorStateAndRetryReadsAgain() {
+        val vm = HomeViewModel(failsOnce(HomeSummary(1, emptyList(), emptyList(), 3)), "12 Maple Street")
+        vm.state.launchIn(vm.viewModelScope)
+        assertThat(vm.state.value.loadFailed).isTrue()
+        vm.onEvent(HomeEvent.Retry)
+        assertThat(vm.state.value.loadFailed).isFalse()
+        assertThat(vm.state.value.itemCount).isEqualTo(3)
+        vm.viewModelScope.cancel()
+    }
+
+    @Test fun homeRetrySendsTheEvent() {
+        val events = mutableListOf<HomeEvent>()
+        show { HomeScreen(HomeUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("hm_home_retry").performClick()
+        rule.onAllNodesWithTag("hm_home_search").assertCountEquals(0)
+        assertThat(events).containsExactly(HomeEvent.Retry)
+    }
+
+    @Test fun floorsRetrySendsTheEventAndHidesAdd() {
+        val events = mutableListOf<FloorsEvent>()
+        show { FloorsScreen(FloorsUiState(loading = false, loadFailed = true), { events += it }, {}, "Maple St") }
+        rule.onNodeWithTag("hm_floors_retry").performClick()
+        rule.onAllNodesWithTag("hm_floors_fab").assertCountEquals(0)
+        assertThat(events).containsExactly(FloorsEvent.Retry)
     }
 }

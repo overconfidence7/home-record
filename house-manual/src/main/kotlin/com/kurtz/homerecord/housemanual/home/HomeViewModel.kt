@@ -3,6 +3,7 @@ package com.kurtz.homerecord.housemanual.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.model.SearchDocument
 import com.kurtz.homerecord.core.model.SearchEngine
 import com.kurtz.homerecord.housemodel.home.HomeSummary
@@ -23,7 +24,10 @@ class HomeViewModel(
 ) : ViewModel() {
     private val query = saved.getStateFlow(QUERY, "")
 
-    val state: StateFlow<HomeUiState> = combine(summary, query, index) { s, q, docs ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Home")
+
+    val state: StateFlow<HomeUiState> = load.wrap(HomeUiState(loading = false, loadFailed = true, homeName = homeName)) { combine(summary, query, index) { s, q, docs ->
         HomeUiState(
             loading = false, homeName = homeName, itemCount = s.itemCount, shutoffCount = s.shutoffCount,
             attention = s.attention, recent = s.recent, query = q,
@@ -32,11 +36,12 @@ class HomeViewModel(
                 SearchResultRow(d.kind, d.id, d.title, d.subtitle, d.subkind, d.openId, d.slot)
             },
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState(homeName = homeName))
+    } }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState(homeName = homeName))
 
     fun onEvent(e: HomeEvent) {
         when (e) {
             is HomeEvent.QueryChanged -> saved[QUERY] = e.query
+            HomeEvent.Retry -> load.retry()
             else -> Unit
         }
     }

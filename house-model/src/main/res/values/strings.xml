@@ -16,6 +16,7 @@
     </plurals>
     <string name="floors_row">Floors</string>
     <string name="floors_title">Floors</string>
+    <string name="floors_load_failed">Couldn\'t open the floors. Tap Retry to read them again.</string>
     <string name="floors_empty_title">No floors yet</string>
     <string name="floors_empty_body">Add a floor, then draw its rooms.</string>
     <string name="floors_add">Add floor</string>

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.units.LengthParser
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LabeledField
 import com.kurtz.homerecord.coreui.components.LengthField
 import com.kurtz.homerecord.coreui.components.LoadingState
@@ -57,7 +58,7 @@ fun FloorsScreen(
         subtitle = homeName,
         onBack = onBack,
         floatingActionButton = {
-            if (!state.loading && state.floors.isNotEmpty()) {
+            if (!state.loading && !state.loadFailed && state.floors.isNotEmpty()) {
                 FloatingActionButton(onClick = { onEvent(FloorsEvent.AddClicked) }, modifier = Modifier.testTag("${LocalTagPrefix.current}_floors_fab")) {
                     Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.floors_add))
                 }
@@ -66,6 +67,10 @@ fun FloorsScreen(
     ) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.floors_load_failed), { onEvent(FloorsEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("${LocalTagPrefix.current}_floors_retry"),
+            )
             state.floors.isEmpty() -> EmptyState(
                 icon = Icons.Rounded.Layers,
                 headline = stringResource(R.string.floors_empty_title),

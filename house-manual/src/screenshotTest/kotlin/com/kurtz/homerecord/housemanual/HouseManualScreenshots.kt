@@ -38,6 +38,11 @@ fun FloorsLoadingScreenshot() = FloorsLoadingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun FloorsLoadFailedScreenshot() = FloorsLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun FloorsDeleteDialogScreenshot() = FloorsDeleteDialogPreview()
 
 @PreviewTest
@@ -417,6 +422,11 @@ fun HomeSearchNoneScreenshot() = HomeSearchNonePreview()
 @ThemePreviews
 @Composable
 fun HomeLoadingScreenshot() = HomeLoadingPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun HomeLoadFailedScreenshot() = HomeLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews

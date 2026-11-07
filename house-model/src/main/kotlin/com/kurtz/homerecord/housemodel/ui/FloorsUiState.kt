@@ -11,6 +11,8 @@ sealed interface FloorsDialog {
 
 data class FloorsUiState(
     val loading: Boolean = true,
+    /** The floors could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     /** Bottom floor first, as stored. The screen lists them top floor first. */
     val floors: List<FloorSummary> = emptyList(),
     val dialog: FloorsDialog? = null,
@@ -26,4 +28,5 @@ sealed interface FloorsEvent {
     data class ConfirmAdd(val name: String) : FloorsEvent
     data class ConfirmEdit(val floorId: String, val name: String, val ceilingHeightIn: Int) : FloorsEvent
     data class ConfirmDelete(val floorId: String) : FloorsEvent
+    data object Retry : FloorsEvent
 }

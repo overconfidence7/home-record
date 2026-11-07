@@ -45,6 +45,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.core.model.ItemCategory
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.components.RecordListItem
 import com.kurtz.homerecord.housemanual.R
@@ -58,6 +59,13 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
     Scaffold(modifier = modifier) { padding ->
         if (state.loading) {
             LoadingState(Modifier.padding(padding))
+            return@Scaffold
+        }
+        if (state.loadFailed) {
+            ErrorState(
+                stringResource(R.string.home_load_failed), { onEvent(HomeEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("hm_home_retry"),
+            )
             return@Scaffold
         }
         Column(

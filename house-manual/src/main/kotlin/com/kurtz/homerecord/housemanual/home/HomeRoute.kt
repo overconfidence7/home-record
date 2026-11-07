@@ -48,7 +48,7 @@ fun HomeRoute(
             HomeEvent.OpenEmergency -> onOpenEmergency()
             is HomeEvent.OpenItem -> onOpenItem(it.itemId)
             HomeEvent.OpenReminders -> onOpenReminders()
-            is HomeEvent.QueryChanged -> vm.onEvent(it)
+            is HomeEvent.QueryChanged, HomeEvent.Retry -> vm.onEvent(it)
             is HomeEvent.OpenResult -> when (it.kind) {
                 SearchKind.ITEM -> onOpenItem(it.id)
                 SearchKind.ROOM -> onOpenRoom(it.id)

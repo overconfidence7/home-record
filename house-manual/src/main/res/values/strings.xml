@@ -36,6 +36,7 @@
     <string name="required_marker">%1$s (required)</string>
     <string name="field_required">Required.</string>
     <string name="items_load_failed">Couldn\'t open your items. Tap Retry to read them again.</string>
+    <string name="home_load_failed">Couldn\'t open your home. Tap Retry to read it again.</string>
     <string name="emergency_load_failed">Couldn\'t open your shutoffs. Tap Retry to read them again.</string>
     <string name="panels_load_failed">Couldn\'t open your breaker panels. Tap Retry to read them again.</string>
     <string name="contacts_load_failed">Couldn\'t open your contacts. Tap Retry to read them again.</string>
