@@ -1,0 +1,37 @@
+# Walkthrough H8: in airplane mode, reopen an item: the warranty is still shown, with no spinner and no error
+# (PRODUCT.md non-negotiable: local-first; no AC is specific to this step). Starts from the regression seed: the LG refrigerator in the Kitchen has a
+# warranty that ends in 45 days.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: _seed.yaml
+- setAirplaneMode: enabled
+# Reopen the app cold with no network
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_items"
+    timeout: 15000
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 15000
+- tapOn:
+    id: "hm_items_search"
+- inputText: "LRMVS"
+- extendedWaitUntil:
+    visible: "Refrigerator"
+    timeout: 10000
+- hideKeyboard
+- tapOn: "Refrigerator"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_detail_status"
+    timeout: 5000
+- assertVisible: "LG.*"
+- assertNotVisible: "Couldn't.*"
+- assertNotVisible: "(?i).*no connection.*"
+- takeScreenshot: H08-offline-item
+- setAirplaneMode: disabled

@@ -1,0 +1,138 @@
+# Walkthrough H5: add eight more items across rooms (AC-H6, AC-C30). Builds on H02 (Kitchen and Living room drawn).
+# From a room page the form opens with that room already chosen; from the Items tab the room is picked in the form.
+# The kind picker is grouped by category, each heading with its icon, and searchable.
+appId: com.kurtz.homerecord.housemanual
+---
+- runFlow: H02-draw-plan.yaml
+- tapOn:
+    id: "hm_tab_house"
+- tapOn: "Kitchen"
+- scrollUntilVisible:
+    element:
+      id: "hm_room_add_item"
+- tapOn:
+    id: "hm_room_add_item"
+- extendedWaitUntil:
+    visible:
+      id: "hm_save"
+    timeout: 5000
+# AC-C30: the room is preselected when the item is added from a room
+- assertVisible:
+    id: "hm_item_room"
+- assertVisible: ".*Kitchen.*"
+# The picker shows category headings before any search
+- tapOn:
+    id: "hm_item_type"
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_type_sheet"
+    timeout: 5000
+- assertVisible: "Appliances"
+- assertVisible:
+    id: "hm_item_type_refrigerator"
+- takeScreenshot: H05-type-picker
+- tapOn:
+    id: "hm_item_type_refrigerator"
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    visible:
+      id: "hm_room_add_item"
+    timeout: 10000
+- assertVisible: "(?i).*refrigerator.*"
+# Two more in the Kitchen, each from the room page
+- tapOn:
+    id: "hm_room_add_item"
+- assertVisible: ".*Kitchen.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "range"
+      TYPE: "range"
+- scrollUntilVisible:
+    element:
+      id: "hm_room_add_item"
+- tapOn:
+    id: "hm_room_add_item"
+- assertVisible: ".*Kitchen.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "dish"
+      TYPE: "dishwasher"
+- scrollUntilVisible:
+    element: "(?i).*dishwasher.*"
+- assertVisible: "(?i).*range.*"
+- takeScreenshot: H05-kitchen-items
+# The smoke detector from the Living room page
+- tapOn:
+    id: "hm_back"
+- tapOn: "Living room"
+- scrollUntilVisible:
+    element:
+      id: "hm_room_add_item"
+- tapOn:
+    id: "hm_room_add_item"
+- assertVisible: ".*Living room.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "smoke"
+      TYPE: "smoke_detector"
+- scrollUntilVisible:
+    element: "(?i).*smoke detector.*"
+- assertVisible: "(?i).*smoke detector.*"
+# The rest from the Items tab, choosing the room in the form
+- tapOn:
+    id: "hm_tab_items"
+- tapOn:
+    id: "hm_items_fab"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Living room.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "furn"
+      TYPE: "furnace"
+- tapOn:
+    id: "hm_items_fab"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Living room.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "condenser"
+      TYPE: "ac_condenser"
+- tapOn:
+    id: "hm_items_fab"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Kitchen.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "sump"
+      TYPE: "sump_pump"
+- tapOn:
+    id: "hm_items_fab"
+- tapOn:
+    id: "hm_item_room"
+- tapOn: "Living room.*"
+- runFlow:
+    file: _add-item.yaml
+    env:
+      QUERY: "garage door op"
+      TYPE: "garage_door_opener"
+# AC-H6: the Items tab groups all eight by category with counts
+- assertVisible:
+    id: "hm_items_group_category"
+- assertVisible: "Appliances.*"
+- assertVisible: "Heating and cooling.*"
+- takeScreenshot: H05-items-by-category
+- tapOn:
+    id: "hm_items_group_room"
+- assertVisible: "Kitchen.*"
+- assertVisible: "Living room.*"
+- takeScreenshot: H05-items-by-room

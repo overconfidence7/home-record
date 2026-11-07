@@ -1,0 +1,66 @@
+# Walkthrough H10: the kitchen in 3D (AC-H8, AC-C21, AC-C22). Starts from the 3D reference seed, whose Kitchen has a
+# Finished photo on all four walls. From the room page View in 3D opens inside the kitchen; a drag orbits; Back to
+# floor shows the whole Main floor; All floors stacks every floor.
+appId: com.kurtz.homerecord.housemanual
+---
+- launchApp:
+    clearState: true
+    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
+    permissions:
+      all: allow
+      notifications: allow
+- stopApp
+- openLink: "homerecord-qa-hm://seed?scenario=3d-reference"
+- extendedWaitUntil:
+    visible:
+      id: "hm_tab_house"
+    timeout: 60000
+- tapOn:
+    id: "hm_tab_house"
+- tapOn: "Kitchen"
+- extendedWaitUntil:
+    visible:
+      id: "hm_room_view_3d"
+    timeout: 10000
+- tapOn:
+    id: "hm_room_view_3d"
+- extendedWaitUntil:
+    visible: "Kitchen in 3D"
+    timeout: 15000
+- assertVisible:
+    id: "hm_3d_scene"
+- assertVisible:
+    id: "hm_3d_stage_finished"
+    checked: true
+- takeScreenshot: H10-kitchen-3d
+# Orbit with a drag; Reset view brings the camera back
+- swipe:
+    from:
+      id: "hm_3d_scene"
+    direction: LEFT
+    duration: 800
+- tapOn:
+    id: "hm_3d_reset"
+- assertVisible: "Kitchen in 3D"
+# Back to floor: the whole floor around the kitchen
+- tapOn:
+    id: "hm_3d_back_to_floor"
+- extendedWaitUntil:
+    visible: "Main in 3D"
+    timeout: 10000
+- assertNotVisible:
+    id: "hm_3d_back_to_floor"
+- takeScreenshot: H10-floor-3d
+# All floors
+- tapOn:
+    id: "hm_3d_floor_all"
+- extendedWaitUntil:
+    visible: "All floors in 3D"
+    timeout: 10000
+- takeScreenshot: H10-all-floors-3d
+- tapOn:
+    id: "hm_back"
+- extendedWaitUntil:
+    visible:
+      id: "hm_room_view_3d"
+    timeout: 10000

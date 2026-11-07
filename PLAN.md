@@ -465,6 +465,8 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T076c2h: plan overlays a viewer opens from the House tab, 3D markers, item links or search open a read-only plan view instead of the plan editor (the room page already keeps the editor shut for a viewer) (AC-H16)
 - [x] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
 - [ ] T078: House Manual walkthrough pass: run `qa/product-walkthrough.md` House Manual section on the emulator if available, otherwise against screenshots; fix every blocked step (acceptance: AC-H19)
+  - [x] T078a: the walkthrough steps with no flow get one: H05-add-items (eight items from room pages and the Items tab, room preselected, grouped picker), H08-offline-item (airplane mode, cold start, the refrigerator's warranty with no error), H10-3d (Kitchen in 3D from the room, orbit, Reset, Back to floor, All floors on the 3D reference seed) (AC-H6, AC-C30, AC-H8)
+  - [ ] T078b: score H1–H19 from the first published suite run after dc1ea1f4 (judge table) and fix every Blocked or Clunky step it shows (AC-H19)
 - [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
 - [ ] V6: Visual review of M6 screenshots
 

@@ -1,0 +1,22 @@
+# Helper, not a walkthrough step: on an open item form ("Add item"), pick the kind by searching the grouped
+# picker and save. env: QUERY (what to type in the picker search), TYPE (the subtype id, e.g. "range").
+appId: com.kurtz.homerecord.housemanual
+---
+- tapOn:
+    id: "hm_item_type"
+- tapOn:
+    id: "hm_item_type_search"
+- inputText: ${QUERY}
+- extendedWaitUntil:
+    visible:
+      id: "hm_item_type_${TYPE}"
+    timeout: 5000
+- tapOn:
+    id: "hm_item_type_${TYPE}"
+- hideKeyboard
+- tapOn:
+    id: "hm_save"
+- extendedWaitUntil:
+    notVisible:
+      id: "hm_save"
+    timeout: 10000
