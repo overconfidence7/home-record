@@ -1563,6 +1563,15 @@ fun ItemPlaceUnplacedPreview() = Frame { com.kurtz.homerecord.housemodel.ui.Item
 @Composable
 fun ItemPlaceEmptyFloorPreview() = Frame { com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(null, emptyList()), {}) }
 
+/** Place on plan when the item or its plan could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun ItemPlaceLoadFailedPreview() = Frame {
+    com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(
+        com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState(loading = false, loadFailed = true, itemId = "i3"), {},
+    )
+}
+
 private val sampleImport = com.kurtz.homerecord.housemanual.importing.ImportUiState(
     loading = false,
     homeName = "Ortiz house",

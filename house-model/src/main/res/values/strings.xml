@@ -531,6 +531,7 @@
     <string name="item_place_remove">Remove from plan</string>
     <string name="item_place_empty_title">No rooms on %1$s yet</string>
     <string name="item_place_empty_body">Draw the rooms on this floor, then come back and tap where the item sits.</string>
+    <string name="item_place_load_failed">Couldn\'t open the plan for this item. Tap Retry to read it again.</string>
     <string name="item_place_missing_title">Item not found</string>
     <string name="item_place_missing_body">This item was deleted.</string>
     <string name="item_place_back">Go back</string>

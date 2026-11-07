@@ -147,6 +147,28 @@ class ItemPlaceViewModelTest {
         assertThat(again.settled { it.rooms.isNotEmpty() }.floorId).isEqualTo(h.basement)
     }
 
+    // AC-U4: a read that throws shows the error state with Retry instead of ending the ViewModel; Retry reads again.
+    @AcceptanceCriterion("AC-U4")
+    @Test fun aFailedReadShowsTheErrorStateAndRetryReadsAgain() = test {
+        val h = home()
+        val id = checkNotNull(items.save(h.id, ItemDraft(subtypeId = "refrigerator", roomId = "k", name = "Refrigerator")))
+        val walls = WallPhotoRepository(db)
+        var reads = 0
+        val vm = ItemPlaceViewModel(
+            homes, items, h.id, id,
+            roomWalls = { roomId -> if (reads++ == 0) kotlinx.coroutines.flow.flow { throw IllegalStateException("database disk image is malformed") } else walls.observeRoomWalls(roomId) },
+        ).also { created += it }
+        collectors += vm.viewModelScope.launch { vm.state.collect {} }
+        val failed = vm.settled { it.loadFailed }
+        assertThat(failed.rooms).isEmpty()
+        assertThat(failed.marks).isEmpty()
+
+        vm.onEvent(ItemPlaceEvent.Retry)
+        val again = vm.settled { !it.loadFailed && it.rooms.isNotEmpty() }
+        assertThat(again.itemName).isEqualTo("Refrigerator")
+        assertThat(again.floorId).isEqualTo(h.main)
+    }
+
     @AcceptanceCriterion("AC-C30")
     @Test fun aDeletedItemShowsMissing() = test {
         val h = home()

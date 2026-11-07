@@ -218,6 +218,7 @@ object ScreenCatalog {
         QaScreen("item-place-unplaced", nonRoot = true) { ItemPlaceUnplacedPreview() },
         QaScreen("item-place-on-wall", nonRoot = true) { ItemPlaceOnWallPreview() },
         QaScreen("item-place-empty-floor", nonRoot = true) { ItemPlaceEmptyFloorPreview() },
+        QaScreen("item-place-load-failed", nonRoot = true) { ItemPlaceLoadFailedPreview() },
         QaScreen("item-detail-no-warranty", nonRoot = true) { ItemDetailNoWarrantyPreview() },
         QaScreen("item-detail-lookup-failed", nonRoot = true, scrollTo = "hm_item_detail_lookup_note") { ItemDetailLookupNotePreview() },
         QaScreen("item-detail-upkeep", nonRoot = true, scrollTo = "hm_item_detail_service_edit") { ItemDetailUpkeepPreview() },

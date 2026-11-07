@@ -39,6 +39,9 @@ import com.kurtz.homerecord.housemanual.home.HomeViewModel
 import com.kurtz.homerecord.housemodel.home.HomeSummary
 import com.kurtz.homerecord.housemodel.items.ItemRow
 import com.kurtz.homerecord.housemodel.ui.FloorsEvent
+import com.kurtz.homerecord.housemodel.ui.ItemPlaceEvent
+import com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen
+import com.kurtz.homerecord.housemodel.ui.ItemPlaceUiState
 import com.kurtz.homerecord.housemodel.ui.FloorsScreen
 import com.kurtz.homerecord.housemodel.ui.FloorsUiState
 import kotlinx.coroutines.Dispatchers
@@ -169,5 +172,14 @@ class ListLoadFailedTest {
         rule.onNodeWithTag("hm_floors_retry").performClick()
         rule.onAllNodesWithTag("hm_floors_fab").assertCountEquals(0)
         assertThat(events).containsExactly(FloorsEvent.Retry)
+    }
+
+    @Test fun itemPlaceRetrySendsTheEventAndHidesDone() {
+        val events = mutableListOf<ItemPlaceEvent>()
+        show { ItemPlaceScreen(ItemPlaceUiState(loading = false, loadFailed = true, itemId = "i3"), { events += it }) }
+        rule.onNodeWithTag("hm_item_place_retry").performClick()
+        rule.onAllNodesWithTag("hm_item_place_done").assertCountEquals(0)
+        rule.onAllNodesWithTag("hm_item_place_plan").assertCountEquals(0)
+        assertThat(events).containsExactly(ItemPlaceEvent.Retry)
     }
 }

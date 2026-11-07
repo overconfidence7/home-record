@@ -721,6 +721,11 @@ fun ItemPlaceEmptyFloorScreenshot() = ItemPlaceEmptyFloorPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ItemPlaceLoadFailedScreenshot() = ItemPlaceLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun ImportPreviewScreenshot() = ImportPreviewPreview()
 
 @PreviewTest

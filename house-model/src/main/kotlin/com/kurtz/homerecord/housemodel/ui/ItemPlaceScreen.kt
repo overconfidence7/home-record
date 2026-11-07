@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kurtz.homerecord.coreui.components.EmptyState
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.shell.ScreenScaffold
@@ -65,7 +66,7 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
         subtitle = state.itemName.takeIf { it.isNotBlank() },
         onBack = { onEvent(ItemPlaceEvent.Done) },
         actions = {
-            if (!state.loading && !state.missing) {
+            if (!state.loading && !state.missing && !state.loadFailed) {
                 TextButton({ onEvent(ItemPlaceEvent.Done) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_done")) {
                     Text(stringResource(R.string.item_place_done))
                 }
@@ -74,6 +75,10 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
     ) { padding ->
         when {
             state.loading -> LoadingState(Modifier.padding(padding))
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.item_place_load_failed), { onEvent(ItemPlaceEvent.Retry) }, Modifier.padding(padding),
+                retryModifier = Modifier.testTag("${prefix}_item_place_retry"),
+            )
             state.missing -> EmptyState(
                 icon = Icons.Rounded.SearchOff,
                 headline = stringResource(R.string.item_place_missing_title),

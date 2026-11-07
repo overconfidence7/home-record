@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.ItemEntity
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.model.ItemCategory
 import com.kurtz.homerecord.core.units.UnitSystem
 import com.kurtz.homerecord.housemodel.FloorSummary
@@ -15,6 +16,7 @@ import com.kurtz.homerecord.housemodel.items.ItemRepository
 import com.kurtz.homerecord.housemodel.overlays.OverlayPoint
 import com.kurtz.homerecord.housemodel.scene.ItemSpot
 import com.kurtz.homerecord.housemodel.walls.RoomWall
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,9 +59,16 @@ class ItemPlaceViewModel(
 
     init {
         viewModelScope.launch {
-            val roomId = items.get(itemId)?.roomId
-            itemFloor.value = roomId?.let { homes.roomLocation(it)?.floorId }
-            itemFloorKnown.value = true
+            try {
+                val roomId = items.get(itemId)?.roomId
+                itemFloor.value = roomId?.let { homes.roomLocation(it)?.floorId }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // The plan read below fails the same way and shows the error state; without the item's floor the screen opens on the default one.
+            } finally {
+                itemFloorKnown.value = true
+            }
         }
     }
 
@@ -85,12 +94,17 @@ class ItemPlaceViewModel(
         if (roomId == null) flowOf(s) else roomWalls(roomId).map { walls -> s.copy(walls = walls) }
     }
 
-    val state: StateFlow<ItemPlaceUiState> = combine(withWalls, wallMode, pickedWall, homeItems, dragAt) { s, mode, wall, others, drag ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Item place")
+
+    private val loaded = load.wrap(ItemPlaceUiState(loading = false, loadFailed = true, itemId = itemId, system = system)) { withWalls }
+
+    val state: StateFlow<ItemPlaceUiState> = combine(loaded, wallMode, pickedWall, homeItems, dragAt) { s, mode, wall, others, drag ->
         val on = mode && s.canHang
         s.copy(
             wallMode = on,
             wallId = wall?.takeIf { w -> s.walls.any { it.id == w } } ?: s.hungOn?.wallId?.takeIf { w -> s.walls.any { it.id == w } } ?: s.walls.firstOrNull()?.id,
-            others = if (s.loading || s.missing) emptyList() else others,
+            others = if (s.loading || s.missing || s.loadFailed) emptyList() else others,
             dragAt = drag,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemPlaceUiState(itemId = itemId, system = system))
@@ -135,6 +149,7 @@ class ItemPlaceViewModel(
                 saved[WALL] = e.wallId
             }
             is ItemPlaceEvent.HangOnWall -> viewModelScope.launch { items.setWallSpot(itemId, e.wallId, e.x, e.y) }
+            ItemPlaceEvent.Retry -> load.retry()
             ItemPlaceEvent.Done, ItemPlaceEvent.EditPlan -> Unit
         }
     }

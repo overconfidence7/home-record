@@ -17,6 +17,8 @@ data class ItemPlaceUiState(
     val loading: Boolean = true,
     /** The item is gone (deleted elsewhere). */
     val missing: Boolean = false,
+    /** The item or its plan could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val itemId: String = "",
     val itemName: String = "",
     /** The item's category icon name, drawn on its marker (rule 26). */
@@ -99,6 +101,8 @@ sealed interface ItemPlaceEvent {
     data class HangOnWall(val wallId: String, val x: Float, val y: Float) : ItemPlaceEvent
     /** Done or the back arrow: the spot is already saved. */
     data object Done : ItemPlaceEvent
+    /** Read the item and its plan again after a failed read. */
+    data object Retry : ItemPlaceEvent
     /** The floor has no drawn rooms: open the plan editor on it. */
     data object EditPlan : ItemPlaceEvent
 }

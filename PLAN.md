@@ -493,7 +493,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] S5b: the same error state on the other Room-backed lists that have none: HM Home, Floors, Reminders, Emergency, Panels, Contacts, Documents, Item place, Sync log; FL Clients, Changes, Clock, Schedule, Tasks, Photos, Job overview, Mapping (AC-U4)
     - [x] S5b1: HM Emergency, Breaker panels, Contacts, Documents, Reminders: Reloadable, load-failed state with Retry (`hm_<screen>_retry`), Add hidden while failed, catalog entries and reference PNGs (AC-U4)
     - [x] S5b2: HM Home and the shared Floors screen (both apps): Reloadable, load-failed state with Retry (`hm_home_retry`, `<app>_floors_retry`), Floors FAB hidden while failed
-    - [ ] S5b2a: Item place (HM and FL) error state
+    - [x] S5b2a: Item place (HM and FL, shared house-model screen) error state: Reloadable over the item, plan and walls read, load-failed state with Retry (`<app>_item_place_retry`), Done hidden while failed
     - [x] S5b3: FL Clients, a job's Changes tab and Sync log: Reloadable, load-failed state with Retry (`fl_clients_retry`, `fl_changes_retry`, `fl_sync_retry`)
     - [ ] S5b4: FL Clock, Schedule, Tasks, Photos, Job overview, Mapping
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
