@@ -995,3 +995,9 @@ SPEC AC-F45 says "Clients list (from jobs)". Clients with no live job are left o
 - The phone keeps its role on its home in SharedPreferences (`home_roles`, `HomeAccess` in :core share), set when an invite is accepted, when a home is pulled down (`CloudHomeRestore.onPicked`, before its rows arrive so the tabs never flash edit controls), and from `GET /me` after every successful sync pass. A home this phone made, or one never seen on the server, is editable.
 - A viewer stays view-only offline and after signing out: the copy on the phone is the owner's home, and anything they changed would be refused on the next sync anyway. (Decision to confirm in BLOCKERS.)
 - Edit controls are left out, not disabled (AC-H16 wording); Home shows a "View only" note under the name saying to ask the owner to make them family.
+
+## 2026-11-07 — T077 HM-More rows
+- HM-More follows SPEC order: Emergency, Breaker panels, Documents, Contacts, Home report, Import handoff, Backup and restore, Account and sync, Share this house, Units, Climate zone, House Manual Pro, About.
+- Units is a phone display choice (same `PrefsUnitsStore` and `display` preferences file Field Log uses), picked in a radio dialog; House Manual now provides `LocalUnitSystem` from it, so plans, rooms and walls show metric when picked (AC-C4). It is not the synced `Home.units` column.
+- Climate zone on More writes the same home zone as the Reminders chips (`ReminderRepository.setClimateZone`, seeds the seasonal jobs); a viewer sees the zone ("…, set by the owner") but the row opens nothing.
+- HM-About (read only): version, "Kept on this phone", and how a contractor's Field Log handoff arrives.

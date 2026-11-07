@@ -38,7 +38,7 @@ class AccountSyncScreenTest {
     @AcceptanceCriterion("AC-H15")
     fun moreAccountRowOpensAccount() {
         val events = mutableListOf<MoreEvent>()
-        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen({ events += it }) } }
+        rule.setContent { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen(com.kurtz.homerecord.housemanual.more.MoreUiState(), { events += it }) } }
         rule.onNodeWithTag("hm_more_account").performScrollTo().assertIsDisplayed().performClick()
         assertThat(events).containsExactly(MoreEvent.OpenAccount)
     }
@@ -48,10 +48,11 @@ class AccountSyncScreenTest {
         rule.setContent {
             androidx.compose.runtime.CompositionLocalProvider(
                 androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(density = 2.625f, fontScale = 2f),
-            ) { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen({}) } }
+            ) { HomeRecordTheme(Brand.HouseManual, dynamicColor = false) { MoreScreen(com.kurtz.homerecord.housemanual.more.MoreUiState(), {}) } }
         }
         rule.onNodeWithTag("hm_more_account").performScrollTo().assertIsDisplayed()
         rule.onNodeWithTag("hm_more_import").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("hm_more_about").performScrollTo().assertIsDisplayed()
     }
 
     @Test

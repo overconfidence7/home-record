@@ -463,7 +463,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] T076c2f: HM-Panel for a viewer: no Map or Edit in the bar, the photo tile takes no tap (panel icon instead of Add photo), slots and tandem halves do not open the breaker editor or add a tandem, hint "Each slot shows what its breaker powers."; Share legend stays (AC-H16)
     - [x] T076c2: the rest of a viewer's House Manual (item page, Reminders, Backup and panel done in c2c–c2f): 3D and wall pages (Edit plan, draw overlays); x-share viewer leg (open a viewer link on a clean install, Home shows View only and no Add item) (AC-H16)
     - [x] T076c2h: plan overlays a viewer opens from the House tab, 3D markers, item links or search open a read-only plan view instead of the plan editor (the room page already keeps the editor shut for a viewer) (AC-H16)
-- [ ] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
+- [x] T077: HM-More: Emergency, Breaker panels, Documents, Contacts, Home report, Import, Backup and restore, Account and sync, Share this house, Units, Climate zone, Pro, About as ListItem rows (acceptance: More shell, AC-U3)
 - [ ] T078: House Manual walkthrough pass: run `qa/product-walkthrough.md` House Manual section on the emulator if available, otherwise against screenshots; fix every blocked step (acceptance: AC-H19)
 - [ ] T079: Field Log walkthrough pass: same for Field Log (acceptance: AC-F57)
 - [ ] V6: Visual review of M6 screenshots

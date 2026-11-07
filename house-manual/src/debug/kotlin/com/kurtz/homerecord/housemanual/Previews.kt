@@ -1053,7 +1053,45 @@ fun PaywallLoadingPreview() = Frame { com.kurtz.homerecord.housemanual.paywall.P
 
 @ThemePreviews
 @Composable
-fun MorePreview() = Frame { com.kurtz.homerecord.housemanual.more.MoreScreen({}) }
+fun MorePreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen(
+        com.kurtz.homerecord.housemanual.more.MoreUiState(zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.MIXED), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun MoreUnitsPreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen(
+        com.kurtz.homerecord.housemanual.more.MoreUiState(
+            zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.MIXED, dialog = com.kurtz.homerecord.housemanual.more.MoreDialog.UNITS,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun MoreZonePreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen(
+        com.kurtz.homerecord.housemanual.more.MoreUiState(
+            zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.MIXED, dialog = com.kurtz.homerecord.housemanual.more.MoreDialog.ZONE,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun MoreViewOnlyPreview() = Frame {
+    com.kurtz.homerecord.housemanual.more.MoreScreen(
+        com.kurtz.homerecord.housemanual.more.MoreUiState(
+            units = com.kurtz.homerecord.core.units.UnitSystem.METRIC, zone = com.kurtz.homerecord.housemodel.reminders.ClimateZone.COLD, canEdit = false,
+        ), {},
+    )
+}
+
+@ThemePreviews
+@Composable
+fun AboutPreview() = Frame { com.kurtz.homerecord.housemanual.more.AboutScreen(com.kurtz.homerecord.housemanual.more.AboutUiState("2.0.0", 20000), {}) }
 
 @ThemePreviews
 @Composable
