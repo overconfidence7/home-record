@@ -499,4 +499,6 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [x] S5b4b: FL Tasks tab: Reloadable over the tasks, member and room names read, load-failed state with Retry (`fl_tasks_retry`)
     - [x] S5b4: FL Photos and Job overview, HM Mapping (Mapping lives in House Manual): Reloadable, load-failed state with Retry (`fl_photos_retry`, `fl_job_retry`, `hm_mapping_retry`)
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
+    - [x] S5c1: FL-Photo's typed caption and FL-Annotate's marks and tool kept in SavedStateHandle (the two form ViewModels without one) (822f9797)
+    - [ ] S5c2: list scroll positions and open sheets across rotation and process death on every list screen (rule 33); a test per gap
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
