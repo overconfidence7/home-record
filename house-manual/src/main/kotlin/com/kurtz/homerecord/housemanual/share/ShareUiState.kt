@@ -28,7 +28,15 @@ data class ShareUiState(
     val actionFailed: Boolean = false,
     /** Asks before taking someone off the home. */
     val confirmRemove: HomePerson? = null,
+    /** This phone may sync the home (Pro here or on the home, AC-H18); off, the home never reaches the server. */
+    val syncOn: Boolean = true,
 ) {
+    /**
+     * The home is not on the server and never will be while sync is off (a free signed-in phone, T032b2e), so "still
+     * uploading" would wait forever: HM-Share offers Pro instead [judge:hm-share-free-still-uploading].
+     */
+    val needsPro: Boolean get() = phase == SharePhase.NotUploaded && !syncOn
+
     /** Only the owner invites, removes and sees the open links. */
     val isOwner: Boolean get() = people.any { it.you && it.role == HomeRole.Owner }
 }
@@ -37,6 +45,8 @@ sealed interface ShareEvent {
     data object Back : ShareEvent
     data object SignIn : ShareEvent
     data object Retry : ShareEvent
+    /** HM-Paywall (sharing reason), from the needs-Pro state. */
+    data object SeePro : ShareEvent
     data class Invite(val role: HomeRole) : ShareEvent
     data class Revoke(val inviteId: String) : ShareEvent
     data class Remove(val person: HomePerson) : ShareEvent

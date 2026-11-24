@@ -1,6 +1,7 @@
 package com.kurtz.homerecord.housemodel.ui
 
 import com.kurtz.homerecord.housemodel.overlays.Overlay
+import com.kurtz.homerecord.housemodel.plan.PlanRoom
 import com.kurtz.homerecord.housemodel.overlays.PlanOverlayPlacer
 import com.kurtz.homerecord.housemodel.blueprint.PlanMarks
 import com.kurtz.homerecord.housemodel.scene.ItemSpot
@@ -52,11 +53,14 @@ class HouseViewModel(
     itemSpots: Flow<List<ItemSpot>> = flowOf(emptyList()),
 ) : ViewModel() {
     private val _state = MutableStateFlow(
-        HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], layers = layerStore.read(homeId), system = system),
+        HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], planPending = true, layers = layerStore.read(homeId), system = system),
     )
     val state: StateFlow<HouseUiState> = _state.asStateFlow()
 
     private val floorIds = MutableStateFlow<String?>(saved[FLOOR])
+
+    /** The floor whose plan [HouseUiState.rooms] holds, once read. */
+    private var planFloorId: String? = null
 
     /** The home's overlays by id as last seen, so a tapped blueprint mark opens the overlay it draws (T055a). */
     private var latestOverlays: Map<String, Overlay> = emptyMap()
@@ -67,18 +71,23 @@ class HouseViewModel(
                 val current = _state.value.floorId
                 val chosen = floors.firstOrNull { it.id == current }
                     ?: floors.defaultFloor()
-                _state.update { it.copy(floors = floors, floorId = chosen?.id, loading = false) }
+                _state.update { it.copy(floors = floors, floorId = chosen?.id, loading = false, planPending = chosen != null && chosen.id != planFloorId) }
                 saved[FLOOR] = chosen?.id
                 floorIds.value = chosen?.id
             }
         }
         viewModelScope.launch {
-            val planWithWalls = floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id) }
-                .flatMapLatest { plan -> wallKeys(plan.placed.map { it.id }).map { walls -> plan.placed to walls } }
-            combine(planWithWalls, homeOverlays, itemSpots) { (rooms, walls), overlays, items ->
+            val planWithWalls = floorIds.flatMapLatest { id -> if (id == null) emptyFlow() else repo.observePlan(id).map { id to it } }
+                .flatMapLatest { (id, plan) -> wallKeys(plan.placed.map { it.id }).map { walls -> Triple(id, plan.placed, walls) } }
+            combine(planWithWalls, homeOverlays, itemSpots) { (id, rooms, walls), overlays, items ->
                 latestOverlays = overlays.associateBy { it.id }
-                Triple(rooms, PlanOverlayPlacer.onFloor(overlays, rooms), PlanMarks.place(rooms, overlays, walls, items))
-            }.collect { (rooms, overlays, marks) -> _state.update { it.copy(rooms = rooms, overlays = overlays, marks = marks) } }
+                PlanView(id, rooms, PlanOverlayPlacer.onFloor(overlays, rooms), PlanMarks.place(rooms, overlays, walls, items))
+            }.collect { view ->
+                planFloorId = view.floorId
+                _state.update {
+                    it.copy(rooms = view.rooms, overlays = view.overlays, marks = view.marks, planPending = view.floorId != it.floorId)
+                }
+            }
         }
     }
 
@@ -87,9 +96,11 @@ class HouseViewModel(
 
     fun onEvent(event: HouseEvent) {
         when (event) {
-            is HouseEvent.SelectFloor -> {
+            is HouseEvent.SelectFloor -> if (event.floorId != _state.value.floorId) {
                 saved[FLOOR] = event.floorId
-                _state.update { it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList(), marks = emptyList()) }
+                _state.update {
+                    it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList(), marks = emptyList(), planPending = event.floorId != planFloorId)
+                }
                 floorIds.value = event.floorId
             }
             is HouseEvent.ToggleLayer -> {
@@ -133,3 +144,11 @@ class HouseViewModel(
         const val FLOOR = "floor"
     }
 }
+
+/** One floor's blueprint as read: the floor it belongs to, its rooms, plan overlays and marks. */
+private data class PlanView(
+    val floorId: String,
+    val rooms: List<PlanRoom>,
+    val overlays: List<Overlay>,
+    val marks: List<com.kurtz.homerecord.housemodel.blueprint.PlanMark>,
+)

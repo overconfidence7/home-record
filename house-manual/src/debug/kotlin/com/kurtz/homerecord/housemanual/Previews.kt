@@ -2284,6 +2284,13 @@ fun ShareRemoveConfirmPreview() = ShareFrame(
 @Composable
 fun ShareSignedOutPreview() = ShareFrame(com.kurtz.homerecord.housemanual.share.ShareUiState(com.kurtz.homerecord.housemanual.share.SharePhase.SignedOut))
 
+/** A free signed-in phone: the home never uploads, so sharing offers Pro (judge:hm-share-free-still-uploading). */
+@ThemePreviews
+@Composable
+fun ShareNeedsProPreview() = ShareFrame(
+    com.kurtz.homerecord.housemanual.share.ShareUiState(com.kurtz.homerecord.housemanual.share.SharePhase.NotUploaded, syncOn = false),
+)
+
 @ThemePreviews
 @Composable
 fun ShareOfflinePreview() = ShareFrame(

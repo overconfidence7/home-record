@@ -723,6 +723,8 @@
     <string name="share_signed_out_title">Sign in to share this house</string>
     <string name="share_signed_out_body">Sharing goes through your account, so everyone you invite sees the same home and every change.</string>
     <string name="share_sign_in">Sign in</string>
+    <string name="share_needs_pro_title">Sharing this house is part of Pro</string>
+    <string name="share_needs_pro_body">Pro keeps this home in the cloud, so the people you invite see the same home and every change.</string>
     <string name="share_not_uploaded_title">Your home is still uploading</string>
     <string name="share_not_uploaded_body">You can share it once the first sync finishes. Try again in a minute.</string>
     <string name="share_offline">Couldn\'t reach your account. Check your connection and tap Retry.</string>

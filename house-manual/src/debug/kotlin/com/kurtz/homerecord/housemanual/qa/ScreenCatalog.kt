@@ -95,6 +95,7 @@ object ScreenCatalog {
         QaScreen("share-remove-confirm", nonRoot = true) { ShareRemoveConfirmPreview() },
         QaScreen("share-signed-out", nonRoot = true) { ShareSignedOutPreview() },
         QaScreen("share-offline", nonRoot = true) { ShareOfflinePreview() },
+        QaScreen("share-needs-pro", nonRoot = true) { ShareNeedsProPreview() },
         QaScreen("join-sign-in", nonRoot = true) { JoinSignInPreview() },
         QaScreen("join-restoring", nonRoot = true) { JoinRestoringPreview() },
         QaScreen("join-other-home", nonRoot = true) { JoinOtherHomePreview() },

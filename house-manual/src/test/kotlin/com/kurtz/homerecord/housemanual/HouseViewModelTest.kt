@@ -82,6 +82,22 @@ class HouseViewModelTest {
 
     private suspend fun HouseViewModel.untilRooms(count: Int) = withTimeout(10_000) { state.first { it.rooms.size == count } }
 
+    // judge:hm-house-tab-stale-empty: until the chosen floor's plan is read the tab is pending, never "No rooms on this
+    // floor" for a drawn floor; once read it is not pending, and an empty floor is empty
+    @Test fun aDrawnFloorIsPendingUntilItsPlanIsReadNotEmpty() = test {
+        val (homeId, floorId) = setUpHome()
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        assertThat(vm.state.value.let { it.planPending || it.rooms.isNotEmpty() }).isTrue()
+        val state = withTimeout(10_000) { vm.state.first { !it.planPending && it.floorId == floorId } }
+        assertThat(state.rooms).hasSize(2)
+        val other = state.floors.first { it.id != floorId }.id
+        vm.onEvent(HouseEvent.SelectFloor(other))
+        val empty = withTimeout(10_000) { vm.state.first { !it.planPending && it.floorId == other } }
+        assertThat(empty.rooms).isEmpty()
+        vm.onEvent(HouseEvent.SelectFloor(other))
+        assertThat(vm.state.value.planPending).isFalse()
+    }
+
     @Test fun showsTheFloorsRooms() = test {
         val (homeId, _) = setUpHome()
         val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")

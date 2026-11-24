@@ -27,7 +27,9 @@ fun ShareRoute(container: AppContainer, homeId: String, homeName: String, onBack
     val vm = viewModel<ShareViewModel>(
         key = "share:$homeId",
         factory = viewModelFactory {
-            initializer { ShareViewModel(homeId, container.homeShare, container.auth.state.map { it is AuthState.SignedIn }) }
+            initializer {
+                ShareViewModel(homeId, container.homeShare, container.auth.state.map { it is AuthState.SignedIn }, container.homeSyncAllowed(homeId))
+            }
         },
     )
     val state by vm.state.collectAsState()
@@ -49,6 +51,7 @@ fun ShareRoute(container: AppContainer, homeId: String, homeName: String, onBack
         when (event) {
             ShareEvent.Back -> onBack()
             ShareEvent.SignIn -> onSignIn()
+            ShareEvent.SeePro -> onPro()
             is ShareEvent.Invite ->
                 if (LimitGate.blocked(container.billing, LimitedFeature.Sharing, 0)) onPro() else vm.onEvent(event)
             else -> vm.onEvent(event)

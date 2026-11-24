@@ -1056,6 +1056,11 @@ fun ShareOfflineScreenshot() = ShareOfflinePreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ShareNeedsProScreenshot() = ShareNeedsProPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun JoinSignInScreenshot() = JoinSignInPreview()
 
 @PreviewTest

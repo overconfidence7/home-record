@@ -174,4 +174,34 @@ class RegressionSeedTest {
         assertThat(water.instructions).contains("red handle on the meter side")
         assertThat(sections.flatMap { it.shutoffs }.first { it.subtypeId == "gas_main" }.instructions).isNotEmpty()
     }
+
+    // judge:hm-pro-on-sync-not-resumed: the seed writes most rows past the app's change hook, so QaSeeder re-queues the
+    // whole home the way Delete cloud copy does; a seeded phone that signs in must upload its items, not an empty house
+    @Test fun seededHomeQueuedForUploadCarriesItemsContactsAndReminders() = runTest {
+        val homeId = RegressionSeed.seed(db, repo, strings)
+        val store = com.kurtz.homerecord.core.sync.RoomRowStore(db)
+        val noServer = object : com.kurtz.homerecord.core.sync.SyncApi {
+            override suspend fun push(tenant: com.kurtz.homerecord.core.sync.TenantRef, deviceId: String, ops: List<com.kurtz.homerecord.core.sync.PushOp>) =
+                com.kurtz.homerecord.core.company.ApiResult.Err(com.kurtz.homerecord.core.company.ApiFailure.Offline)
+            override suspend fun pull(tenant: com.kurtz.homerecord.core.sync.TenantRef, since: Long) =
+                com.kurtz.homerecord.core.company.ApiResult.Err(com.kurtz.homerecord.core.company.ApiFailure.Offline)
+        }
+        val engine = com.kurtz.homerecord.core.sync.SyncEngine(noServer, store, db.outboxDao(), db.syncCursorDao(), db.syncBaseDao(), "qa-phone")
+        val before = db.outboxDao().pendingFor("home", homeId, 10_000).map { it.entity }.toSet()
+        assertThat(before).doesNotContain("contact")
+
+        com.kurtz.homerecord.core.sync.HomeCloudCopy(
+            api = { com.kurtz.homerecord.core.company.ApiResult.Ok(Unit) }, engine = engine, store = store,
+            rows = { table, column, values -> store.readWhere(table, column, values) }, outbox = db.outboxDao(), signOut = {},
+        ).resetForUpload(homeId)
+
+        val queued = db.outboxDao().pendingFor("home", homeId, 10_000)
+        val entities = queued.map { it.entity }
+        assertThat(entities.toSet()).containsAtLeast("home", "floor", "room", "wall", "item", "warranty", "contact", "service_record", "maintenance_task")
+        assertThat(queued.count { it.entity == "item" }).isAtLeast(20)
+        // Parents go up before children, so the second phone's pull stores every row
+        assertThat(entities.indexOf("home")).isLessThan(entities.indexOf("floor"))
+        assertThat(entities.indexOf("room")).isLessThan(entities.indexOf("item"))
+        assertThat(entities.indexOf("item")).isLessThan(entities.indexOf("warranty"))
+    }
 }

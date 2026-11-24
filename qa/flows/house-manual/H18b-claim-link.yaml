@@ -60,7 +60,8 @@ env:
       id: "hm_tab_more"
     timeout: 10000
 # AC-H18: sharing is Pro (SPEC pricing, T032b2d). This phone signed in through the claim link (free) and is on the
-# free tier, so Invite family on Share this house opens HM-Paywall instead of making a link. Close lands on Home.
+# free tier, so its home never syncs up: Share this house says sharing is part of Pro and See Pro opens HM-Paywall
+# (judge:hm-share-free-still-uploading), instead of "still uploading" forever. Close lands on Home.
 - tapOn:
     id: "hm_tab_more"
 - scrollUntilVisible:
@@ -71,10 +72,12 @@ env:
     id: "hm_more_share"
 - extendedWaitUntil:
     visible:
-      id: "hm_share_invite_editor"
+      id: "hm_share_needs_pro"
     timeout: 30000
+- assertNotVisible: "Your home is still uploading"
+- takeScreenshot: H18b-share-needs-pro
 - tapOn:
-    id: "hm_share_invite_editor"
+    id: "hm_share_see_pro"
 - extendedWaitUntil:
     visible:
       id: "hm_paywall_reason"

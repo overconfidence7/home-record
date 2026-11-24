@@ -82,7 +82,15 @@ fun ShareScreen(state: ShareUiState, onEvent: (ShareEvent) -> Unit, zone: ZoneId
                 actionModifier = Modifier.heightIn(min = 48.dp).testTag("hm_share_sign_in"),
             )
             SharePhase.Loading -> LoadingState(modifier)
-            SharePhase.NotUploaded -> EmptyState(
+            SharePhase.NotUploaded -> if (state.needsPro) EmptyState(
+                icon = Icons.Rounded.Group,
+                headline = stringResource(R.string.share_needs_pro_title),
+                body = stringResource(R.string.share_needs_pro_body),
+                actionLabel = stringResource(R.string.account_sync_pro_button),
+                onAction = { onEvent(ShareEvent.SeePro) },
+                modifier = modifier.testTag("hm_share_needs_pro"),
+                actionModifier = Modifier.heightIn(min = 48.dp).testTag("hm_share_see_pro"),
+            ) else EmptyState(
                 icon = Icons.Rounded.CloudUpload,
                 headline = stringResource(R.string.share_not_uploaded_title),
                 body = stringResource(R.string.share_not_uploaded_body),

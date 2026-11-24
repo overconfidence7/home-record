@@ -115,7 +115,9 @@ fun HouseScreen(
     }
     val canvas: @Composable (Modifier) -> Unit = { canvasModifier ->
         Box(canvasModifier.fillMaxWidth().testTag("${LocalTagPrefix.current}_house_plan")) {
-            if (state.rooms.isEmpty()) {
+            if (state.planPending) {
+                LoadingState(Modifier.fillMaxSize())
+            } else if (state.rooms.isEmpty()) {
                 EmptyState(
                     icon = Icons.Rounded.GridView,
                     headline = stringResource(R.string.house_floor_empty_title),

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,6 +28,8 @@ class ShareViewModel(
     private val homeId: String,
     private val api: HomeShareApi,
     signedIn: Flow<Boolean>,
+    /** Whether this phone syncs the home (AC-H18); turning on retries a home that was not on the server. */
+    syncOn: Flow<Boolean> = flowOf(true),
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShareUiState())
     val state: StateFlow<ShareUiState> = _state.asStateFlow()
@@ -37,14 +40,21 @@ class ShareViewModel(
     init {
         viewModelScope.launch {
             signedIn.distinctUntilChanged().collect { isIn ->
-                if (isIn) load() else _state.value = ShareUiState(SharePhase.SignedOut)
+                if (isIn) load() else _state.value = ShareUiState(SharePhase.SignedOut, syncOn = _state.value.syncOn)
+            }
+        }
+        viewModelScope.launch {
+            syncOn.distinctUntilChanged().collect { on ->
+                val wasWaiting = _state.value.phase == SharePhase.NotUploaded && !_state.value.syncOn
+                _state.update { it.copy(syncOn = on) }
+                if (on && wasWaiting) load()
             }
         }
     }
 
     fun onEvent(event: ShareEvent) {
         when (event) {
-            ShareEvent.Back, ShareEvent.SignIn -> Unit
+            ShareEvent.Back, ShareEvent.SignIn, ShareEvent.SeePro -> Unit
             ShareEvent.Retry -> viewModelScope.launch { load() }
             is ShareEvent.Invite -> if (_state.value.creating == null && _state.value.isOwner) {
                 _state.update { it.copy(creating = event.role, actionFailed = false) }

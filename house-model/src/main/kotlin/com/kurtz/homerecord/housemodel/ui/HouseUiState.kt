@@ -23,6 +23,11 @@ data class HouseUiState(
     val floors: List<FloorSummary> = emptyList(),
     val floorId: String? = null,
     val rooms: List<PlanRoom> = emptyList(),
+    /**
+     * The chosen floor's plan has not been read yet, so [rooms] is not its answer: the canvas shows progress rather
+     * than "No rooms on this floor" for a drawn floor [judge:hm-house-tab-stale-empty].
+     */
+    val planPending: Boolean = false,
     /** The floor's plan overlays (AC-C25), drawn on the blueprint with their layers. */
     val overlays: List<Overlay> = emptyList(),
     /** The floor's wall overlays laid along their walls and its placed items (AC-C15), drawn when their layer is on. */

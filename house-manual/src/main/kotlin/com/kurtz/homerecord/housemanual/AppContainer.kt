@@ -154,6 +154,9 @@ class AppContainer(private val app: Application) {
         enabled = { tenant -> homeSyncAllowed(tenant) },
     )
 
+    /** Whether this phone syncs [homeId] (AC-H18, T032b2e); HM-Share offers Pro while it does not. */
+    fun homeSyncAllowed(homeId: String): kotlinx.coroutines.flow.Flow<Boolean> = homeSyncAllowed(TenantRef(TenantKind.Home, homeId))
+
     private fun homeSyncAllowed(tenant: TenantRef): kotlinx.coroutines.flow.Flow<Boolean> =
         if (tenant.kind != TenantKind.Home) kotlinx.coroutines.flow.flowOf(true)
         else kotlinx.coroutines.flow.combine(billing.isPro, homeAccess.observeHomePro(tenant.id)) { phonePro, homePro ->

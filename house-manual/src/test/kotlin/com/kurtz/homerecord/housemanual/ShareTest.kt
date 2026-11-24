@@ -133,6 +133,26 @@ class ShareTest {
         assertThat(vm.state.value.offline).isTrue()
     }
 
+    // judge:hm-share-free-still-uploading: a free signed-in phone never uploads the home, so Share offers Pro, and
+    // turning Pro on loads the people again instead of waiting forever
+    @Test fun aFreePhoneIsOfferedProInsteadOfWaitingForAnUploadThatNeverComes() { // AC-H18
+        val api = FakeApi(ApiResult.Err(ApiFailure.NotFound))
+        val syncOn = MutableStateFlow(false)
+        val vm = ShareViewModel("h1", api, MutableStateFlow(true), syncOn)
+        assertThat(vm.state.value.phase).isEqualTo(SharePhase.NotUploaded)
+        assertThat(vm.state.value.needsPro).isTrue()
+        api.people = ApiResult.Ok(HomePeople(listOf(owner), emptyList()))
+        syncOn.value = true
+        assertThat(vm.state.value.needsPro).isFalse()
+        assertThat(vm.state.value.phase).isEqualTo(SharePhase.Loaded)
+    }
+
+    @Test fun aSyncingPhoneStillSaysTheHomeIsUploading() { // AC-H16
+        val vm = ShareViewModel("h1", FakeApi(ApiResult.Err(ApiFailure.NotFound)), MutableStateFlow(true), MutableStateFlow(true))
+        assertThat(vm.state.value.phase).isEqualTo(SharePhase.NotUploaded)
+        assertThat(vm.state.value.needsPro).isFalse()
+    }
+
     @Test fun joiningOnAPhoneWithNoHomePullsTheSharedHome() { // AC-H16
         val auth = MutableStateFlow<AuthState>(AuthState.SignedOut)
         val api = FakeApi(ApiResult.Ok(HomePeople(emptyList(), emptyList())))
