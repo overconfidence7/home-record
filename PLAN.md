@@ -490,13 +490,13 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] S3: strings: no hardcoded user-facing text in screens; Reports' no-job row from strings.xml; voice.md pass was T080
   - [x] S4: accessibility: ScreenCatalogLabelsTest (both apps) checks every clickable node on every catalog screen has a label; 7 unnamed controls fixed (Add room, Add overlay on plan and wall, Add reminder, Add material FABs; pin-mode PDF page); 48 dp stays with the device crawler
   - [x] S5a: a list's read that throws shows an error state with Retry instead of ending the ViewModel: shared `Reloadable` in :core (catch, log, retry by re-subscribing); HM Items and FL Jobs use it, with load-failed catalog entries, previews and reference PNGs (AC-U4)
-  - [ ] S5b: the same error state on the other Room-backed lists that have none: HM Home, Floors, Reminders, Emergency, Panels, Contacts, Documents, Item place, Sync log; FL Clients, Changes, Clock, Schedule, Tasks, Photos, Job overview, Mapping (AC-U4)
+  - [x] S5b: the same error state on the other Room-backed lists that have none: HM Home, Floors, Reminders, Emergency, Panels, Contacts, Documents, Item place, Sync log; FL Clients, Changes, Clock, Schedule, Tasks, Photos, Job overview, Mapping (AC-U4)
     - [x] S5b1: HM Emergency, Breaker panels, Contacts, Documents, Reminders: Reloadable, load-failed state with Retry (`hm_<screen>_retry`), Add hidden while failed, catalog entries and reference PNGs (AC-U4)
     - [x] S5b2: HM Home and the shared Floors screen (both apps): Reloadable, load-failed state with Retry (`hm_home_retry`, `<app>_floors_retry`), Floors FAB hidden while failed
     - [x] S5b2a: Item place (HM and FL, shared house-model screen) error state: Reloadable over the item, plan and walls read, load-failed state with Retry (`<app>_item_place_retry`), Done hidden while failed
     - [x] S5b3: FL Clients, a job's Changes tab and Sync log: Reloadable, load-failed state with Retry (`fl_clients_retry`, `fl_changes_retry`, `fl_sync_retry`)
     - [x] S5b4a: FL Clock and Schedule: Reloadable over the jobs/punches and week reads, load-failed state with Retry (`fl_clock_retry`, `fl_schedule_retry`)
     - [x] S5b4b: FL Tasks tab: Reloadable over the tasks, member and room names read, load-failed state with Retry (`fl_tasks_retry`)
-    - [ ] S5b4: FL Photos, Job overview, Mapping
+    - [x] S5b4: FL Photos and Job overview, HM Mapping (Mapping lives in House Manual): Reloadable, load-failed state with Retry (`fl_photos_retry`, `fl_job_retry`, `hm_mapping_retry`)
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"

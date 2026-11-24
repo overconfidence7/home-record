@@ -17,6 +17,7 @@ fun PhotosRoute(deps: PhotosDeps, onCapture: () -> Unit, onOpen: (String) -> Uni
                 is PhotosEvent.Open -> onOpen(it.photoId)
                 is PhotosEvent.Link -> vm.onLink(it.event)
                 PhotosEvent.Capture -> onCapture()
+                PhotosEvent.Retry -> vm.retry()
             }
         },
         modifier,

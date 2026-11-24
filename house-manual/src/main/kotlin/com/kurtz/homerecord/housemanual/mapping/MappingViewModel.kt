@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemanual.mapping
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.mapping.MappingAlarm
 import com.kurtz.homerecord.core.mapping.MappingController
 import com.kurtz.homerecord.core.mapping.PowerMonitor
@@ -42,10 +43,21 @@ class MappingViewModel(
 
     private val panel: Flow<PanelState?> = repo.observe(itemId)
 
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Mapping")
+
+    private data class Reads(val name: String?, val panel: PanelState?, val choices: FeedChoices, val failed: Boolean = false)
+
+    private val reads = load.wrap(Reads(null, null, FeedChoices(), failed = true)) {
+        combine(itemName, panel.onStart { emit(null) }, choices.onStart { emit(FeedChoices()) }) { n, p, c -> Reads(n, p, c) }
+    }
+
     val state: StateFlow<MappingUiState> = combine(
-        itemName, panel.onStart { emit(null) }, choices.onStart { emit(FeedChoices()) }, controller.state,
+        reads, controller.state,
         combine(pick, confirmed) { p, c -> p to c },
-    ) { name, p, c, m, (pk, count) ->
+    ) { r, m, (pk, count) ->
+        if (r.failed) return@combine MappingUiState(loading = false, loadFailed = true)
+        val (name, p, c) = r
         MappingUiState(
             loading = p == null,
             panelName = name.orEmpty(),
@@ -67,6 +79,7 @@ class MappingViewModel(
     fun onEvent(event: MappingEvent) {
         when (event) {
             MappingEvent.Back -> Unit
+            MappingEvent.Retry -> load.retry()
             MappingEvent.Start -> controller.start()
             MappingEvent.Stop -> {
                 pick.value = Pick()

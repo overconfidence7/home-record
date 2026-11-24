@@ -146,4 +146,21 @@ class PhotosViewModelTest {
         canLink.value = false
         assertThat(model.state.filter { !it.link.allowed }.first().link.allowed).isFalse()
     }
+
+    // AC-U4: a read that throws shows the error state with Retry instead of ending the ViewModel; Retry reads again.
+    @com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-U4")
+    @Test fun `a failed read shows the error state and retry reads again`() = runBlocking {
+        db.photoDao().upsert(photo("p1", at(20, 9), roomId = "r1"))
+        var checks = 0
+        val model = scopes.track(PhotosViewModel(PhotosDeps(
+            "j1", db.photoDao(), db.jobDao(), db.roomDao(), zone,
+            missing = { if (checks++ == 0) throw IllegalStateException("database disk image is malformed") else emptySet() },
+        )))
+        val failed = model.state.filter { !it.loading }.first()
+        assertThat(failed.loadFailed).isTrue()
+        assertThat(failed.days).isEmpty()
+        model.retry()
+        val read = model.state.filter { !it.loading && !it.loadFailed }.first()
+        assertThat(read.count).isEqualTo(1)
+    }
 }

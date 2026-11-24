@@ -158,4 +158,18 @@ class MappingViewModelTest {
         assertThat(s.breakerId).isNull()
         assertThat(runBlocking { db.breakerLinkDao().listFor(breakerId) }).isEmpty()
     }
+
+    // AC-U4: a read that throws shows the error state with Retry instead of ending the ViewModel; Retry reads again.
+    @com.kurtz.homerecord.core.testing.AcceptanceCriterion("AC-U4")
+    @Test fun aFailedReadShowsTheErrorStateAndRetryReadsAgain() {
+        var reads = 0
+        val name = kotlinx.coroutines.flow.flow {
+            if (reads++ == 0) throw IllegalStateException("database disk image is malformed")
+            emit("Main panel")
+        }
+        val vm = MappingViewModel(repo, "pi", name, flowOf(FeedChoices()), power, alarm, { clock }).also { vm = it }
+        assertThat(vm.await { it.loadFailed }.loading).isFalse()
+        vm.onEvent(MappingEvent.Retry)
+        assertThat(vm.await { !it.loading && !it.loadFailed }.panelName).isEqualTo("Main panel")
+    }
 }

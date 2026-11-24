@@ -69,6 +69,7 @@ fun JobRoute(companyId: String, jobId: String, db: HomeRecordDatabase, house: Jo
             when (event) {
                 is JobOverviewEvent.OpenTab -> tab = event.tab
                 JobOverviewEvent.OpenEdit -> if (state.canEdit) onEdit()
+                JobOverviewEvent.Retry -> vm.retry()
             }
         },
         onBack,

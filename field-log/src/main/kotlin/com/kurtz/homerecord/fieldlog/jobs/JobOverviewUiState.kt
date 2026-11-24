@@ -8,6 +8,8 @@ enum class JobTab { OVERVIEW, PHOTOS, LOG, FILES, TASKS, TIME, HOUSE, CHANGES }
 data class JobOverviewUiState(
     val loading: Boolean = true,
     val notFound: Boolean = false,
+    /** The job could not be read; the Overview shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val name: String = "",
     val clientName: String? = null,
     val address: String? = null,
@@ -33,4 +35,6 @@ data class JobOverviewUiState(
 sealed interface JobOverviewEvent {
     data class OpenTab(val tab: JobTab) : JobOverviewEvent
     data object OpenEdit : JobOverviewEvent
+    /** Read the job again after a failed read. */
+    data object Retry : JobOverviewEvent
 }

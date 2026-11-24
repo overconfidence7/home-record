@@ -157,6 +157,11 @@ fun JobOverviewEmptyScreenshot() = JobOverviewEmptyPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun JobOverviewLoadFailedScreenshot() = JobOverviewLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun JobHouseEmptyScreenshot() = JobHouseEmptyPreview()
 
 @PreviewTest
@@ -371,6 +376,11 @@ fun PhotosTabLinkScreenshot() = PhotosTabLinkPreview()
 @ThemePreviews
 @Composable
 fun PhotosEmptyScreenshot() = PhotosEmptyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun PhotosLoadFailedScreenshot() = PhotosLoadFailedPreview()
 
 @PreviewTest
 @ThemePreviews

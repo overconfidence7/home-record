@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,10 @@ import java.time.format.FormatStyle
 fun JobOverviewScreen(state: JobOverviewUiState, onEvent: (JobOverviewEvent) -> Unit, modifier: Modifier = Modifier) {
     when {
         state.loading -> LoadingState(modifier)
+        state.loadFailed -> com.kurtz.homerecord.coreui.components.ErrorState(
+            stringResource(R.string.job_load_failed), { onEvent(JobOverviewEvent.Retry) }, modifier.fillMaxSize(),
+            retryModifier = Modifier.testTag("fl_job_retry"),
+        )
         state.notFound -> Text(stringResource(R.string.job_not_found), modifier.padding(24.dp).testTag("fl_job_not_found"))
         else -> Column(
             modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp).testTag("fl_job_overview"),

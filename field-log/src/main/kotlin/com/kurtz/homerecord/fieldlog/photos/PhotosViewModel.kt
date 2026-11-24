@@ -6,6 +6,7 @@ import com.kurtz.homerecord.core.data.PhotoEntity
 import com.kurtz.homerecord.core.data.PhotoDao
 import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.data.RoomDao
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.photo.AnnotationCodec
 import com.kurtz.homerecord.core.photo.GalleryCell
 import com.kurtz.homerecord.core.photo.OnPhone
@@ -64,7 +65,17 @@ class PhotosViewModel(private val d: PhotosDeps) : ViewModel() {
         ShareLinkController(viewModelScope, links, d.canLink, target)
     }
 
-    val state: StateFlow<PhotosUiState> = combine(withMissing, roomNames(), link?.state ?: flowOf(ShareLinkUi())) { (photos, notHere), names, linkUi ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Photos")
+
+    /** The photos, the ids not on this phone and the room names, or null once a read has thrown. */
+    private val rows = load.wrap<Triple<List<PhotoEntity>, Set<String>, Map<String, String>>?>(null) {
+        combine(withMissing, roomNames()) { (photos, notHere), names -> Triple(photos, notHere, names) }
+    }
+
+    val state: StateFlow<PhotosUiState> = combine(rows, link?.state ?: flowOf(ShareLinkUi())) { r, linkUi ->
+        if (r == null) return@combine PhotosUiState(loading = false, loadFailed = true)
+        val (photos, notHere, names) = r
         val days = PhotoGallery.build(photos, d.zone).map { day ->
             PhotoDayUi(
                 day.day,
@@ -82,6 +93,9 @@ class PhotosViewModel(private val d: PhotosDeps) : ViewModel() {
     fun onLink(e: ShareLinkEvent) {
         link?.onEvent(e)
     }
+
+    /** Read the gallery again after a failed read. */
+    fun retry() = load.retry()
 
     private fun roomNames() = flow {
         val homeId = d.jobs.get(d.jobId)?.homeId

@@ -137,6 +137,7 @@ object ScreenCatalog {
         QaScreen("mapping-alarm", nonRoot = true) { MappingAlarmPreview() },
         QaScreen("mapping-pick", nonRoot = true) { MappingPickPreview() },
         QaScreen("mapping-stopped", nonRoot = true) { MappingStoppedPreview() },
+        QaScreen("mapping-load-failed", nonRoot = true) { MappingLoadFailedPreview() },
         QaScreen("panel-legend-failed", nonRoot = true) { PanelLegendFailedPreview() },
         QaScreen("emergency-list", nonRoot = true) { EmergencyListPreview() },
         QaScreen("emergency-empty", nonRoot = true) { EmergencyEmptyPreview() },

@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.kurtz.homerecord.coreui.components.ErrorState
 import com.kurtz.homerecord.coreui.components.LoadingState
 import com.kurtz.homerecord.fieldlog.R
 import com.kurtz.homerecord.fieldlog.share.ShareLinkSection
@@ -56,6 +57,10 @@ fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier:
     Box(modifier.fillMaxSize()) {
         when {
             state.loading -> LoadingState(Modifier.fillMaxSize())
+            state.loadFailed -> ErrorState(
+                stringResource(R.string.photos_load_failed), { onEvent(PhotosEvent.Retry) }, Modifier.fillMaxSize(),
+                retryModifier = Modifier.testTag("fl_photos_retry"),
+            )
             state.days.isEmpty() -> com.kurtz.homerecord.coreui.components.EmptyState(
                 icon = Icons.Rounded.PhotoLibrary,
                 headline = stringResource(R.string.photos_empty_title),
@@ -67,7 +72,7 @@ fun PhotosScreen(state: PhotosUiState, onEvent: (PhotosEvent) -> Unit, modifier:
             )
             else -> PhotoGrid(state, onEvent)
         }
-        if (!state.loading) {
+        if (!state.loading && !state.loadFailed) {
             val takePhotoLabel = stringResource(R.string.photos_take)
             ExtendedFloatingActionButton(
                 onClick = { onEvent(PhotosEvent.Capture) },

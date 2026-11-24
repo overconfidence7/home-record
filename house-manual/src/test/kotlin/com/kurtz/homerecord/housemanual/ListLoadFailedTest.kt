@@ -182,4 +182,12 @@ class ListLoadFailedTest {
         rule.onAllNodesWithTag("hm_item_place_plan").assertCountEquals(0)
         assertThat(events).containsExactly(ItemPlaceEvent.Retry)
     }
+
+    @Test fun mappingRetrySendsTheEventAndHidesStart() {
+        val events = mutableListOf<com.kurtz.homerecord.housemanual.mapping.MappingEvent>()
+        show { com.kurtz.homerecord.housemanual.mapping.MappingScreen(com.kurtz.homerecord.housemanual.mapping.MappingUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("hm_mapping_retry").performClick()
+        rule.onAllNodesWithTag("hm_mapping_start").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.housemanual.mapping.MappingEvent.Retry)
+    }
 }

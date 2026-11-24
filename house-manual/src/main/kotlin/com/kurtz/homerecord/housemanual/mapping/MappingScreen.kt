@@ -53,6 +53,13 @@ fun MappingScreen(state: MappingUiState, onEvent: (MappingEvent) -> Unit) {
             LoadingState(Modifier.padding(padding).testTag("hm_mapping_loading"))
             return@ScreenScaffold
         }
+        if (state.loadFailed) {
+            com.kurtz.homerecord.coreui.components.ErrorState(
+                stringResource(R.string.mapping_load_failed), { onEvent(MappingEvent.Retry) }, Modifier.padding(padding).fillMaxSize(),
+                retryModifier = Modifier.testTag("hm_mapping_retry"),
+            )
+            return@ScreenScaffold
+        }
         Column(
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("hm_mapping_scroll"),
             verticalArrangement = Arrangement.spacedBy(16.dp),

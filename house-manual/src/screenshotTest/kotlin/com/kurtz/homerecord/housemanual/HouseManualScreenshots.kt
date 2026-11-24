@@ -921,6 +921,11 @@ fun MappingStoppedScreenshot() = MappingStoppedPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun MappingLoadFailedScreenshot() = MappingLoadFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun PanelLegendFailedScreenshot() = PanelLegendFailedPreview()
 
 @PreviewTest

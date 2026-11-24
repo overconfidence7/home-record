@@ -541,6 +541,7 @@
     <string name="panel_legend_share_title">Share the panel legend</string>
     <string name="panel_legend_failed">The legend could not be made. Check free storage and try again.</string>
     <string name="mapping_title">Map breakers</string>
+    <string name="mapping_load_failed">Couldn\'t open this panel\'s breakers. Tap Retry to read them again.</string>
     <string name="mapping_how_title">Find which breaker feeds an outlet</string>
     <string name="mapping_step_1">Plug this phone into the outlet you want to map, with the charger on.</string>
     <string name="mapping_step_2">Tap Start, then go to the panel and turn breakers off one at a time.</string>

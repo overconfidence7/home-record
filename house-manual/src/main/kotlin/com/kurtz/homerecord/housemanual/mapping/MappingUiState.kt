@@ -9,6 +9,8 @@ data class MappingBreaker(val id: String, val number: Int, val label: String, va
 /** HM-Mapping (AC-C42). [roomId]/[itemId]/[breakerId] are the pick in progress after the alarm. */
 data class MappingUiState(
     val loading: Boolean = true,
+    /** The panel or its rooms and items could not be read; the screen shows what failed and Retry (AC-U4). */
+    val loadFailed: Boolean = false,
     val panelName: String = "",
     val phase: MappingPhase = MappingPhase.IDLE,
     val plugged: Boolean = false,
@@ -36,4 +38,6 @@ sealed interface MappingEvent {
     data class PickItem(val id: String) : MappingEvent
     data object Save : MappingEvent
     data object Skip : MappingEvent
+    /** Read the panel again after a failed read. */
+    data object Retry : MappingEvent
 }

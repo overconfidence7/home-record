@@ -2022,6 +2022,11 @@ fun MappingPickPreview() = Frame {
 @Composable
 fun MappingStoppedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(mappingState(com.kurtz.homerecord.core.mapping.MappingPhase.STOPPED, confirmed = 3), {}) }
 
+/** The panel's breakers could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun MappingLoadFailedPreview() = Frame { com.kurtz.homerecord.housemanual.mapping.MappingScreen(com.kurtz.homerecord.housemanual.mapping.MappingUiState(loading = false, loadFailed = true), {}) }
+
 @ThemePreviews
 @Composable
 fun PanelLegendFailedPreview() = Frame { com.kurtz.homerecord.housemanual.panel.PanelScreen(panelState(samplePanel, sampleBreakers).copy(legendFailed = true), {}) }

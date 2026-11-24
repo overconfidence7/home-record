@@ -510,6 +510,16 @@ fun JobOverviewEmptyPreview() = Frame {
     )
 }
 
+/** The job could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun JobOverviewLoadFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.jobs.JobScreen(
+        com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, loadFailed = true),
+        com.kurtz.homerecord.fieldlog.jobs.JobTab.OVERVIEW, {}, {}, {},
+    )
+}
+
 @ThemePreviews
 @Composable
 fun JobHouseEmptyPreview() = Frame {
@@ -975,6 +985,13 @@ fun PhotosEmptyPreview() = Frame {
 @ThemePreviews
 @Composable
 fun PhotosLoadingPreview() = Frame { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(), {}) }
+
+/** The job's photos could not be read (AC-U4). */
+@ThemePreviews
+@Composable
+fun PhotosLoadFailedPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(loading = false, loadFailed = true), {})
+}
 
 private val photoDetailReady = com.kurtz.homerecord.fieldlog.photos.PhotoDetailUiState(
     loading = false, imagePath = "/none/a1.jpg", caption = "New subpanel in, breakers labeled",

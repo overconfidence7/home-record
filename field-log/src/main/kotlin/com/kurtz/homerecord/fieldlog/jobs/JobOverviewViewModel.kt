@@ -9,6 +9,7 @@ import com.kurtz.homerecord.core.data.JobDao
 import com.kurtz.homerecord.core.data.MemberDao
 import com.kurtz.homerecord.core.data.PhotoDao
 import com.kurtz.homerecord.core.data.PunchDao
+import com.kurtz.homerecord.core.data.Reloadable
 import com.kurtz.homerecord.core.data.TaskDao
 import com.kurtz.homerecord.core.model.JobHours
 import com.kurtz.homerecord.core.model.PunchPoint
@@ -48,7 +49,10 @@ class JobOverviewViewModel(
 ) : ViewModel() {
     private val job: Flow<com.kurtz.homerecord.core.data.JobEntity?> = jobs.observeFor(companyId).map { list -> list.firstOrNull { it.id == jobId } }
 
-    val state: StateFlow<JobOverviewUiState> = combine(job.flatMapLatest { j ->
+    /** A failed read shows the error state with Retry instead of ending the ViewModel (AC-U4). */
+    private val load = Reloadable("Job overview")
+
+    val state: StateFlow<JobOverviewUiState> = combine(load.wrap(JobOverviewUiState(loading = false, loadFailed = true)) { job.flatMapLatest { j ->
         if (j == null) {
             flowOf(JobOverviewUiState(loading = false, notFound = true))
         } else {
@@ -68,7 +72,10 @@ class JobOverviewViewModel(
                 JobOverviewMapper.build(j, c, cr, m, a, t, worked, n, today.toString(), g.canManageTasks(jobId), me)
             }
         }
-    }, gates) { s, g -> s.copy(canEdit = g.canEditJobs) }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState(canEdit = false))
+    } }, gates) { s, g -> s.copy(canEdit = g.canEditJobs) }.stateIn(viewModelScope, SharingStarted.Eagerly, JobOverviewUiState(canEdit = false))
+
+    /** Read the job again after a failed read. */
+    fun retry() = load.retry()
 
     private var startingHouse = false
 

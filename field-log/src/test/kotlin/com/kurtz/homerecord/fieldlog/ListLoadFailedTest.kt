@@ -151,4 +151,20 @@ class ListLoadFailedTest {
         rule.onAllNodesWithTag("fl_tasks_empty_add").assertCountEquals(0)
         assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.tasks.TasksEvent.Retry)
     }
+
+    @Test fun photosRetrySendsTheEventAndHidesCapture() {
+        val events = mutableListOf<com.kurtz.homerecord.fieldlog.photos.PhotosEvent>()
+        show { com.kurtz.homerecord.fieldlog.photos.PhotosScreen(com.kurtz.homerecord.fieldlog.photos.PhotosUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("fl_photos_retry").performClick()
+        rule.onAllNodesWithTag("fl_photos_fab").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.photos.PhotosEvent.Retry)
+    }
+
+    @Test fun jobOverviewRetrySendsTheEvent() {
+        val events = mutableListOf<com.kurtz.homerecord.fieldlog.jobs.JobOverviewEvent>()
+        show { com.kurtz.homerecord.fieldlog.jobs.JobOverviewScreen(com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState(loading = false, loadFailed = true), { events += it }) }
+        rule.onNodeWithTag("fl_job_retry").performClick()
+        rule.onAllNodesWithTag("fl_job_edit").assertCountEquals(0)
+        assertThat(events).containsExactly(com.kurtz.homerecord.fieldlog.jobs.JobOverviewEvent.Retry)
+    }
 }
