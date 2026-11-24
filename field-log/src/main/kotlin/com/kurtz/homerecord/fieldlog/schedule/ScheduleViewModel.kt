@@ -51,6 +51,9 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
     private fun clockDay(): LocalDate = Instant.ofEpochMilli(d.now()).atZone(d.zone).toLocalDate()
     private val todayFlow = MutableStateFlow(clockDay())
     private val today: LocalDate get() = todayFlow.value
+    /** The sheet open when the system killed the app, put back once the week's rows are read (rule 33). */
+    @Volatile private var restoreSheet: String? = saved.get<String>(KEY_SHEET)
+
     private val _state = MutableStateFlow(
         ScheduleUiState(
             today = today,
@@ -105,14 +108,38 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
                     return@collect
                 }
                 val (rows, ownOnly, options, changeable) = shown
+                val restore = restoreSheet
+                restoreSheet = null
                 _state.update {
-                    it.copy(loading = false, loadFailed = false, rows = rows, ownOnly = ownOnly, jobs = options, changeable = changeable, sheet = it.sheet?.takeIf { s -> s.stillValid(rows) })
+                    val sheet = it.sheet?.takeIf { s -> s.stillValid(rows) } ?: restore?.let { key -> rebuildSheet(key, rows, it.selected, options.isNotEmpty(), changeable + options.map { o -> o.id }) }
+                    it.copy(loading = false, loadFailed = false, rows = rows, ownOnly = ownOnly, jobs = options, changeable = changeable, sheet = sheet)
                 }
             }
         }
     }
 
     fun onEvent(e: ScheduleEvent) {
+        handle(e)
+        saved[KEY_SHEET] = when (val sheet = _state.value.sheet) {
+            is ScheduleSheet.PickJob -> "pick|${sheet.memberId}"
+            is ScheduleSheet.Day -> "day|${sheet.memberId}|${sheet.job.assignmentId}"
+            null -> null
+        }
+    }
+
+    private fun rebuildSheet(key: String, rows: List<com.kurtz.homerecord.core.model.ScheduleRow>, day: LocalDate, canAssign: Boolean, changeable: Set<String>): ScheduleSheet? {
+        val parts = key.split('|')
+        val row = rows.firstOrNull { it.memberId == parts.getOrNull(1) } ?: return null
+        return when (parts.first()) {
+            "pick" -> if (canAssign) ScheduleSheet.PickJob(row.memberId, row.name, day) else null
+            "day" -> row.cells.firstNotNullOfOrNull { c -> c.jobs.firstOrNull { it.assignmentId == parts.getOrNull(2) }?.let { c to it } }
+                ?.takeIf { (_, job) -> job.jobId in changeable }
+                ?.let { (cell, job) -> ScheduleSheet.Day(row.memberId, row.name, cell.date, job) }
+            else -> null
+        }
+    }
+
+    private fun handle(e: ScheduleEvent) {
         when (e) {
             ScheduleEvent.Retry -> load.retry()
             ScheduleEvent.PreviousWeek -> showWeek(_state.value.weekStart.minusWeeks(1))
@@ -178,6 +205,7 @@ class ScheduleViewModel(private val d: ScheduleDeps, private val saved: SavedSta
 
     private companion object {
         const val KEY_WEEK = "schedule_week"
+        const val KEY_SHEET = "scheduleSheet"
         const val KEY_DAY = "schedule_day"
     }
 }

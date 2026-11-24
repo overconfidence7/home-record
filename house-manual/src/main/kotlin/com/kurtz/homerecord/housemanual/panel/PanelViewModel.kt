@@ -68,7 +68,8 @@ class PanelViewModel(
     private val form = MutableStateFlow(saved.get<String>(FORM)?.let { runCatching { json.decodeFromString<SavedForm>(it) }.getOrNull() })
 
     private val facts = MutableStateFlow(saved.get<String>(FACTS)?.let { runCatching { json.decodeFromString<SavedFacts>(it) }.getOrNull() })
-    private val photo = MutableStateFlow(PhotoUi())
+    // The open photo sheet comes back after process death (rule 33)
+    private val photo = MutableStateFlow(PhotoUi(sheet = saved.get<Boolean>(PHOTO_SHEET) ?: false))
 
     private data class PhotoUi(val sheet: Boolean = false, val launch: PanelPhotoLaunch? = null, val failed: Boolean = false)
 
@@ -130,6 +131,11 @@ class PanelViewModel(
     }
 
     fun onEvent(e: PanelEvent) {
+        handle(e)
+        saved[PHOTO_SHEET] = photo.value.sheet
+    }
+
+    private fun handle(e: PanelEvent) {
         when (e) {
             PanelEvent.Back -> Unit // the route's job
             is PanelEvent.OpenSlot -> open(BreakerDraft(startSlot = e.slot))
@@ -339,6 +345,7 @@ class PanelViewModel(
         const val HIGHLIGHT_MILLIS = 2_000L
         const val FACTS = "panelFacts"
         const val PENDING_PHOTO = "pendingPanelPhoto"
+        const val PHOTO_SHEET = "panelPhotoSheet"
         val json = Json { ignoreUnknownKeys = true }
     }
 }

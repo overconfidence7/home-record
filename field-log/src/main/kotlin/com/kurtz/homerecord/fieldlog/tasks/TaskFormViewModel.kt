@@ -42,7 +42,10 @@ class TaskFormDeps(
 /** Add or edit one task (FL-Tasks, AC-F34). Save adds it at the bottom of the open list or saves over it; the typing survives process death. */
 class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
     private val json = Json { ignoreUnknownKeys = true }
-    private val _state = MutableStateFlow(TaskFormUiState(isNew = d.taskId == null))
+    // An open Assignee, Room or Photo sheet comes back after process death (rule 33)
+    private val _state = MutableStateFlow(
+        TaskFormUiState(isNew = d.taskId == null, sheet = saved.get<String>(SHEET)?.let { n -> TaskFormSheet.entries.firstOrNull { it.name == n } }),
+    )
     val state: StateFlow<TaskFormUiState> = _state.asStateFlow()
 
     init {
@@ -76,7 +79,7 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
                 val shownFile = initial.filePin?.let { d.fileName(it.fileId) }
                 _state.update {
                     it.copy(
-                        loading = false, readOnly = true, draft = initial, initial = initial, people = people, rooms = d.rooms(),
+                        loading = false, readOnly = true, sheet = null, draft = initial, initial = initial, people = people, rooms = d.rooms(),
                         photos = d.photos(), plan = plan, fileName = shownFile, isDone = existing?.done == true,
                     )
                 }
@@ -113,7 +116,10 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
             is TaskFormEvent.Photo -> { edit { it.copy(photoId = e.id) }; closeSheet() }
             is TaskFormEvent.Note -> edit { it.copy(note = e.text) }
             is TaskFormEvent.Punch -> edit { it.copy(punch = e.on) }
-            is TaskFormEvent.OpenSheet -> if (ready()) _state.update { it.copy(sheet = e.sheet) }
+            is TaskFormEvent.OpenSheet -> if (ready()) {
+                saved[SHEET] = e.sheet.name
+                _state.update { it.copy(sheet = e.sheet) }
+            }
             TaskFormEvent.CloseSheet -> closeSheet()
             TaskFormEvent.OpenPin -> if (ready() && _state.value.plan.isNotEmpty()) {
                 _state.update { st -> st.copy(pinning = true, pinFloorId = st.draft.planPin?.floorId?.takeIf { id -> st.plan.any { it.id == id } } ?: st.plan.first().id) }
@@ -134,7 +140,10 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
 
     private fun ready(): Boolean = _state.value.let { !it.loading && !it.failed && !it.working && !it.readOnly }
 
-    private fun closeSheet() = _state.update { it.copy(sheet = null) }
+    private fun closeSheet() {
+        saved[SHEET] = null
+        _state.update { it.copy(sheet = null) }
+    }
 
     private fun edit(change: (TaskFormDraft) -> TaskFormDraft) {
         if (!ready()) return
@@ -178,5 +187,6 @@ class TaskFormViewModel(private val d: TaskFormDeps, private val saved: SavedSta
 
     private companion object {
         const val DRAFT = "taskDraft"
+        const val SHEET = "taskFormSheet"
     }
 }

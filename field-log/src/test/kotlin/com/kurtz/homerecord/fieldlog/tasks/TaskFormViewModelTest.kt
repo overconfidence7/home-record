@@ -174,6 +174,17 @@ class TaskFormViewModelTest {
         assertThat(again.draft.punch).isTrue()
     }
 
+    // S5c2b (rule 33): the open Assignee sheet comes back after process death; picking someone closes it for good
+    @Test fun openSheetSurvivesProcessDeath() {
+        val saved = SavedStateHandle()
+        val first = vm(saved = saved)
+        first.current()
+        first.onEvent(TaskFormEvent.OpenSheet(TaskFormSheet.ASSIGNEE))
+        assertThat(vm(saved = saved).current().sheet).isEqualTo(TaskFormSheet.ASSIGNEE)
+        first.onEvent(TaskFormEvent.CloseSheet)
+        assertThat(vm(saved = saved).current().sheet).isNull()
+    }
+
     @Test fun crewCannotOpenTheForm() {
         assertThat(vm(manage = false).current().failed).isTrue()
     }

@@ -86,6 +86,21 @@ class ScheduleViewModelTest {
         assertThat(calls).containsExactly("move a1 2026-11-06", "remove a1").inOrder()
     }
 
+    // S5c2b (rule 33): the open "Which job?" and scheduled-day sheets come back after process death; Dismiss closes them for good
+    @Test fun openSheetsSurviveProcessDeath() {
+        val saved = SavedStateHandle()
+        val first = vm(saved)
+        first.onEvent(ScheduleEvent.SelectDay(wed.plusDays(1)))
+        first.onEvent(ScheduleEvent.Assign("m2"))
+        assertThat(vm(saved).state.value.sheet).isEqualTo(ScheduleSheet.PickJob("m2", "Luis Romero", wed.plusDays(1)))
+        first.onEvent(ScheduleEvent.OpenDay("m2", "a1"))
+        val day = vm(saved).state.value.sheet as ScheduleSheet.Day
+        assertThat(day.job.assignmentId).isEqualTo("a1")
+        assertThat(day.name).isEqualTo("Luis Romero")
+        first.onEvent(ScheduleEvent.Dismiss)
+        assertThat(vm(saved).state.value.sheet).isNull()
+    }
+
     @Test fun aDayOnAJobNowDoneCanStillComeOff() {
         // R11: the job finished early; it is no longer offered for new days but its scheduled day can be taken off.
         jobs.value = jobs.value.map { if (it.id == "j1") it.copy(status = "DONE") else it }

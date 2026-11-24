@@ -253,6 +253,18 @@ class PanelViewModelTest {
         assertThat(s.panel?.brand).isEqualTo("Square D QO")
     }
 
+    // S5c2b (rule 33): the open panel photo sheet comes back after process death
+    @Test
+    fun openPhotoSheetSurvivesProcessDeath() {
+        val saved = SavedStateHandle()
+        val vm = vm(saved = saved)
+        vm.await { !it.loading }
+        vm.onEvent(PanelEvent.OpenPhotoSheet)
+        assertThat(vm(saved = saved).await { !it.loading }.photoSheet).isTrue()
+        vm.onEvent(PanelEvent.ClosePhotoSheet)
+        assertThat(vm(saved = saved).await { !it.loading }.photoSheet).isFalse()
+    }
+
     @Test
     @AcceptanceCriterion("AC-C40")
     fun aPanelPhotoComesFromTheCameraOrThePickerAndCanBeRemoved() {
