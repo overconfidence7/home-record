@@ -501,4 +501,6 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [ ] S5c: rotation and process death: every form ViewModel keeps its input in SavedStateHandle and every list its scroll position and open sheet (rule 33); add a test per gap found
     - [x] S5c1: FL-Photo's typed caption and FL-Annotate's marks and tool kept in SavedStateHandle (the two form ViewModels without one) (822f9797)
     - [ ] S5c2: list scroll positions and open sheets across rotation and process death on every list screen (rule 33); a test per gap
+      - [x] S5c2a: scroll positions are kept by the saveable nav entry decorator (lazy list and scroll states are saveable); sheets held in a ViewModel without a saved key now keep one: Room and Behind the wall photo sheets, item form Add photo sheet, FL Company time zone sheet (10857ee7)
+      - [ ] S5c2b: the sheets held as sealed types: FL Schedule pick-job sheet, Task form sheets, Clock sheet, Timesheets sheet, Wall overlays sheet; HM Panel photo sheet
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
