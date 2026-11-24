@@ -2,7 +2,9 @@ package com.kurtz.homerecord.housemanual.qa
 
 import android.content.Context
 import android.content.res.Configuration
+import android.app.UiModeManager
 import android.content.Intent
+import android.os.Build
 import android.graphics.Bitmap
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -33,7 +35,18 @@ class ScreenCrawlerTest {
 
     private fun shell(cmd: String) = inst.uiAutomation.executeShellCommand(cmd).close()
 
+    /**
+     * `cmd uimode night yes` alone stopped reaching the app on the suite's emulator (QA auto 86d14c0b), so the app's
+     * own night mode is set too (API 31+); it applies to every activity the app starts from then on.
+     */
+    private fun appNight(on: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val ui = inst.targetContext.getSystemService(UiModeManager::class.java) ?: return
+        inst.runOnMainSync { ui.setApplicationNightMode(if (on) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_AUTO) }
+    }
+
     @After fun resetSystem() {
+        appNight(false)
         shell("cmd uimode night no")
         shell("settings put system font_scale 1.0")
     }
@@ -126,9 +139,11 @@ class ScreenCrawlerTest {
 
     @Test fun darkFontAndLandscapeVariants() {
         shell("cmd uimode night yes")
+        appNight(true)
         waitForNight()
         for (entry in ScreenCatalog.entries) openDark(entry.id).use { shoot(entry.id, "dark") }
         shell("cmd uimode night no")
+        appNight(false)
         shell("settings put system font_scale 2.0")
         for (entry in ScreenCatalog.entries) open(entry.id).use { shoot(entry.id, "font200") }
         shell("settings put system font_scale 1.0")
