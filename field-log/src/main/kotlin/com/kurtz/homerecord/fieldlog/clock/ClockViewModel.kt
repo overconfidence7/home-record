@@ -76,6 +76,8 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         ClockUiState(
             selectedJobId = saved[JOB], note = saved[NOTE] ?: "", now = d.now(),
             crewSelected = saved.get<List<String>>(CREW)?.toSet() ?: emptySet(),
+            // The far-from-job reason sheet open when the system killed the app comes back with its choice (rule 33)
+            farReason = if (saved.get<String>(PENDING) != null) saved.get<String>(FAR_REASON)?.let(::decodeFarReason) else null,
         ).gated(),
     )
     val state: StateFlow<ClockUiState> = _state.asStateFlow()
@@ -175,15 +177,16 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                 _state.update { it.copy(requestPermission = false) }
                 run("in")
             }
-            is ClockEvent.PickReason -> _state.update { it.copy(farReason = it.farReason?.copy(choice = event.choice)) }
-            is ClockEvent.OtherReason -> _state.update { it.copy(farReason = it.farReason?.copy(other = event.text)) }
+            is ClockEvent.PickReason -> { _state.update { it.copy(farReason = it.farReason?.copy(choice = event.choice)) }; keepFarReason() }
+            is ClockEvent.OtherReason -> { _state.update { it.copy(farReason = it.farReason?.copy(other = event.text)) }; keepFarReason() }
             ClockEvent.SaveReason -> {
                 val reason = _state.value.farReason?.reason ?: return
                 val kind = pending ?: return
                 _state.update { it.copy(farReason = null) }
+                keepFarReason()
                 run(kind, reason)
             }
-            ClockEvent.CancelReason -> { setPending(null); _state.update { it.copy(farReason = null) } }
+            ClockEvent.CancelReason -> { setPending(null); _state.update { it.copy(farReason = null) }; keepFarReason() }
             ClockEvent.DismissGps -> _state.update { it.copy(gpsRequired = null) }
             ClockEvent.OpenSettings -> {
                 // ClockRoute opens Settings; the punch the GPS dialog stopped runs again if location is allowed there.
@@ -213,6 +216,9 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
     private fun note() = _state.value.note.takeIf { it.isNotBlank() }
     private fun clearNote() { saved[NOTE] = ""; _state.update { it.copy(note = "") } }
     private fun setPending(kind: String?) { pending = kind; saved[PENDING] = kind }
+
+    /** The open far-from-job reason sheet and its choice, kept so the sheet comes back after process death (rule 33). */
+    private fun keepFarReason() { saved[FAR_REASON] = _state.value.farReason?.let(::encodeFarReason) }
 
     private fun run(kind: String, reason: String? = null) {
         val s = _state.value
@@ -249,6 +255,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     CrewResult.NothingSelected -> done
                 }
             }
+            keepFarReason()
         }
     }
 
@@ -270,6 +277,7 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
                     ClockResult.NotAllowed -> withStatus
                 }
             }
+            keepFarReason()
         }
     }
 
@@ -277,7 +285,17 @@ class ClockViewModel(private val d: ClockDeps, private val saved: SavedStateHand
         const val JOB = "job"
         const val NOTE = "note"
         const val PENDING = "pending"
+        const val FAR_REASON = "farReason"
         const val CREW = "crew"
         const val SETTINGS_RETRY = "settingsRetry"
     }
+}
+
+/** "distance|choice|other" for SavedStateHandle; the text for Other goes last so it may hold the separator. */
+internal fun encodeFarReason(sheet: FarReasonSheet): String = "${sheet.distanceFt}|${sheet.choice?.name.orEmpty()}|${sheet.other}"
+
+internal fun decodeFarReason(raw: String): FarReasonSheet? {
+    val parts = raw.split('|', limit = 3)
+    val ft = parts.firstOrNull()?.toIntOrNull() ?: return null
+    return FarReasonSheet(ft, FarReason.entries.firstOrNull { it.name == parts.getOrNull(1) }, parts.getOrNull(2).orEmpty())
 }

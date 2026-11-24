@@ -71,7 +71,7 @@ class ClockViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private suspend fun vm(role: CompanyRole = CompanyRole.Crew, leadJobs: Set<String> = emptySet(), approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())): ClockViewModel {
+    private suspend fun vm(role: CompanyRole = CompanyRole.Crew, leadJobs: Set<String> = emptySet(), approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList()), saved: SavedStateHandle = SavedStateHandle()): ClockViewModel {
         val punches = PunchRepository(db, { clock })
         val deps = ClockDeps(
             "c1", "m1", ClockController(punches, location), punches, db.jobDao(), location, settings,
@@ -79,7 +79,7 @@ class ClockViewModelTest {
             role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"), approvals = approvals,
             gates = kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(role, leadJobs)),
         )
-        return ClockViewModel(deps, SavedStateHandle()).also { created += it; await(it) { s -> !s.loading } }
+        return ClockViewModel(deps, saved).also { created += it; await(it) { s -> !s.loading } }
     }
 
     // Room runs on real threads here; under a full parallel build (2 Gradle workers, Robolectric) one step took
@@ -247,6 +247,22 @@ class ClockViewModelTest {
         val p = db.punchDao().listFor("c1").single()
         assertThat(p.farFromJob).isTrue()
         assertThat(p.reason).isEqualTo("supply_house")
+    }
+
+    // S5c2c (rule 33), AC-F9: the far-from-job reason sheet, with the reason picked, comes back after process death and still saves the punch
+    @Test fun farReasonSheetSurvivesProcessDeath() = runBlocking<Unit> {
+        location.fix = GeoFix(34.1, -118.0, 5f)
+        val saved = SavedStateHandle()
+        val first = vm(saved = saved)
+        first.onEvent(ClockEvent.SelectJob("j1")); first.onEvent(ClockEvent.ClockIn)
+        val asked = await(first) { it.farReason != null }.farReason
+        first.onEvent(ClockEvent.PickReason(FarReason.Other)); first.onEvent(ClockEvent.OtherReason("Dropping off a ladder"))
+        val again = vm(saved = SavedStateHandle(saved.keys().associateWith { saved.get<Any>(it) }))
+        val sheet = again.state.value.farReason
+        assertThat(sheet).isEqualTo(FarReasonSheet(checkNotNull(asked).distanceFt, FarReason.Other, "Dropping off a ladder"))
+        again.onEvent(ClockEvent.SaveReason)
+        await(again) { it.status is ClockStatus.Working }
+        assertThat(db.punchDao().listFor("c1").single().reason).isEqualTo("Dropping off a ladder")
     }
 
     // N002, AC-F9: a crew member's far-from-job check uses the company's distance from /me, not the 500 ft default
