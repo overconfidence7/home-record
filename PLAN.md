@@ -503,5 +503,6 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
     - [ ] S5c2: list scroll positions and open sheets across rotation and process death on every list screen (rule 33); a test per gap
       - [x] S5c2a: scroll positions are kept by the saveable nav entry decorator (lazy list and scroll states are saveable); sheets held in a ViewModel without a saved key now keep one: Room and Behind the wall photo sheets, item form Add photo sheet, FL Company time zone sheet (10857ee7)
       - [x] S5c2b: FL Schedule "Which job?" and scheduled-day sheets (rebuilt from the week's rows), Task form Assignee/Room/Photo sheet, HM Panel photo sheet kept in SavedStateHandle (90ac3c40)
-      - [ ] S5c2c: the rest: FL Clock week sheet and far-from-job reason sheet, Timesheets sheet, Wall overlays sheet
+      - [x] S5c2c: FL Clock's far-from-job reason sheet with its choice and Other text (the Clock "sheet" field is the week timesheet, not a modal) (2ad229c1)
+      - [ ] S5c2d: Timesheets sheet and the wall overlay form's Kind/Depth/Photo/Item sheet
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
