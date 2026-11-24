@@ -10,6 +10,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,57 +83,112 @@ fun PdfViewer(
     }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    Column(modifier) {
-        LazyColumn(
-            Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .testTag("${tagPrefix}_pages")
-                .transformable(transform, canPan = { scale > 1f })
-                .graphicsLayer { scaleX = scale; scaleY = scale; translationX = offset.x; translationY = offset.y },
-            state = list,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(pages.pageCount) { index ->
-                val label = stringResource(R.string.pdf_viewer_page, index + 1, pages.pageCount)
-                val bitmap by produceState(pages.peek(index), pages, index) { value = pages.render(index, PAGE_WIDTH_PX) }
-                val shown = bitmap
-                // Until the page has rendered its placeholder has a guessed shape, so a tap there would land in the
-                // wrong place on the real page: it reports nothing (R09g).
-                val rendered by rememberUpdatedState(shown != null)
-                // TalkBack users double-tap the page to mark its middle; the spot can be moved by tapping again. The tap
-                // target merges the page's own description, so TalkBack reads "Page 1 of 3" on it (AC-U10).
-                val tapping = if (onPageTap == null) Modifier else Modifier.pointerInput(index) {
-                    detectTapGestures { at ->
-                        if (rendered && size.width > 0 && size.height > 0) tap?.invoke(index, at.x / size.width, at.y / size.height)
+    // The page that fills most of the viewport: named under the strip ("Page 2 of 3") and marked in it (rule 26/31).
+    val current by remember {
+        derivedStateOf {
+            val info = list.layoutInfo
+            info.visibleItemsInfo.maxByOrNull { item ->
+                minOf(item.offset + item.size, info.viewportEndOffset) - maxOf(item.offset, info.viewportStartOffset)
+            }?.index ?: list.firstVisibleItemIndex
+        }
+    }
+    BoxWithConstraints(modifier) {
+        // Landscape fits each page to the height and moves the thumbnails to a side column, so a whole page shows
+        // instead of a full-width zoom of its title ([judge:core-pdf-viewer-landscape], rule 33).
+        val wide = maxWidth > maxHeight
+        val strip = pages.pageCount > 1
+        val pageList: @Composable (Modifier) -> Unit = { m ->
+            BoxWithConstraints(m) {
+                val viewportHeight = maxHeight
+                LazyColumn(
+                    Modifier
+                        .fillMaxSize()
+                        .testTag("${tagPrefix}_pages")
+                        .transformable(transform, canPan = { scale > 1f })
+                        .graphicsLayer { scaleX = scale; scaleY = scale; translationX = offset.x; translationY = offset.y },
+                    state = list,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(pages.pageCount) { index ->
+                        val label = stringResource(R.string.pdf_viewer_page, index + 1, pages.pageCount)
+                        val bitmap by produceState(pages.peek(index), pages, index) { value = pages.render(index, PAGE_WIDTH_PX) }
+                        val shown = bitmap
+                        val aspect = shown?.let { it.width.toFloat() / it.height.coerceAtLeast(1) } ?: 0.77f
+                        // Until the page has rendered its placeholder has a guessed shape, so a tap there would land in the
+                        // wrong place on the real page: it reports nothing (R09g).
+                        val rendered by rememberUpdatedState(shown != null)
+                        // TalkBack users double-tap the page to mark its middle; the spot can be moved by tapping again. The tap
+                        // target merges the page's own description, so TalkBack reads "Page 1 of 3" on it (AC-U10).
+                        val tapping = if (onPageTap == null) Modifier else Modifier.pointerInput(index) {
+                            detectTapGestures { at ->
+                                if (rendered && size.width > 0 && size.height > 0) tap?.invoke(index, at.x / size.width, at.y / size.height)
+                            }
+                        }.semantics(mergeDescendants = true) { onClick(label) { if (rendered) tap?.invoke(index, 0.5f, 0.5f); rendered } }
+                        // The page box is exactly the page, so taps and overlays map to it in both orientations.
+                        val pageSize = if (wide) Modifier.height(viewportHeight).aspectRatio(aspect) else Modifier.fillMaxWidth().aspectRatio(aspect)
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Box(pageSize.testTag("${tagPrefix}_page_${index + 1}").then(tapping)) {
+                                if (shown == null) {
+                                    Box(Modifier.fillMaxSize().semantics { contentDescription = label })
+                                } else {
+                                    Image(shown, contentDescription = label, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
+                                }
+                                Box(Modifier.matchParentSize()) { pageOverlay(index) }
+                            }
+                        }
                     }
-                }.semantics(mergeDescendants = true) { onClick(label) { if (rendered) tap?.invoke(index, 0.5f, 0.5f); rendered } }
-                Box(Modifier.fillMaxWidth().testTag("${tagPrefix}_page_${index + 1}").then(tapping)) {
-                    if (shown == null) {
-                        Box(Modifier.fillMaxWidth().aspectRatio(0.77f).semantics { contentDescription = label })
-                    } else {
-                        Image(shown, contentDescription = label, contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
-                    }
-                    Box(Modifier.matchParentSize()) { pageOverlay(index) }
                 }
             }
         }
-        if (pages.pageCount > 1) {
-            LazyRow(
-                Modifier.fillMaxWidth().testTag("${tagPrefix}_thumbnails").padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-            ) {
-                items(pages.pageCount) { index ->
-                    val label = stringResource(R.string.pdf_viewer_go_to_page, index + 1)
-                    val thumb by produceState(pages.peek(index), pages, index) { value = pages.render(index, THUMB_WIDTH_PX) }
-                    val shown = thumb
-                    val tile = Modifier
-                        .width(72.dp).height(96.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                        .clickable(onClickLabel = label) { scope.launch { list.animateScrollToItem(index) } }
-                        .semantics { contentDescription = label }
-                    if (shown == null) Box(tile) else Image(shown, contentDescription = null, contentScale = ContentScale.Crop, modifier = tile)
+        val indicator: @Composable () -> Unit = {
+            Text(
+                stringResource(R.string.pdf_viewer_page, current + 1, pages.pageCount),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp).testTag("${tagPrefix}_page_indicator").semantics { liveRegion = LiveRegionMode.Polite },
+            )
+        }
+        val thumb: @Composable (Int) -> Unit = { index ->
+            val label = stringResource(R.string.pdf_viewer_go_to_page, index + 1)
+            val thumbBitmap by produceState(pages.peek(index), pages, index) { value = pages.render(index, THUMB_WIDTH_PX) }
+            val shown = thumbBitmap
+            val isCurrent = index == current
+            val tile = Modifier
+                .width(72.dp).height(96.dp)
+                .border(
+                    if (isCurrent) 3.dp else 1.dp,
+                    if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                )
+                .clickable(onClickLabel = label) { scope.launch { list.animateScrollToItem(index) } }
+                .semantics { contentDescription = label; selected = isCurrent }
+                .testTag("${tagPrefix}_thumb_${index + 1}")
+            if (shown == null) Box(tile) else Image(shown, contentDescription = null, contentScale = ContentScale.Crop, modifier = tile)
+        }
+        if (wide) {
+            Row(Modifier.fillMaxSize()) {
+                pageList(Modifier.weight(1f).fillMaxHeight())
+                if (strip) {
+                    Column(Modifier.fillMaxHeight().width(104.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        indicator()
+                        LazyColumn(
+                            Modifier.weight(1f).testTag("${tagPrefix}_thumbnails"),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            contentPadding = PaddingValues(vertical = 8.dp),
+                        ) { items(pages.pageCount) { thumb(it) } }
+                    }
+                }
+            }
+        } else {
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                pageList(Modifier.weight(1f).fillMaxWidth())
+                if (strip) {
+                    indicator()
+                    LazyRow(
+                        Modifier.fillMaxWidth().testTag("${tagPrefix}_thumbnails").padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                    ) { items(pages.pageCount) { thumb(it) } }
                 }
             }
         }

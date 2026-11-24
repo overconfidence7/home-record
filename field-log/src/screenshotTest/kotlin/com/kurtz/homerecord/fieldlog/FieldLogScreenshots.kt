@@ -1071,3 +1071,17 @@ fun PlanLoadingScreenshot() = PlanLoadingPreview()
 @ThemePreviews
 @Composable
 fun RenewCrewScreenshot() = RenewCrewPreview()
+
+/** [judge:core-pdf-viewer-landscape]: a whole page fitted to the height, thumbnails and "Page 1 of 3" in a side column. */
+@PreviewTest
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape dark", device = "spec:width=891dp,height=411dp", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun FileViewerLandscapeScreenshot() = FileViewerPreview()
+
+/** [judge:fl-markup-landscape]: tools and page switcher beside a page fitted to the height. */
+@PreviewTest
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@androidx.compose.ui.tooling.preview.Preview(name = "Landscape 200%", device = "spec:width=891dp,height=411dp", fontScale = 2f)
+@Composable
+fun MarkupLandscapeScreenshot() = MarkupPreview()

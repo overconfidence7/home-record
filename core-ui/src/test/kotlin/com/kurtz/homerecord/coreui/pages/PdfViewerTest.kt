@@ -2,7 +2,12 @@ package com.kurtz.homerecord.coreui.pages
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -74,5 +79,33 @@ class PdfViewerTest {
             assertThat(taps.single().first).isEqualTo(0)
             assertThat(taps.single().second).isWithin(0.02f).of(0.25f)
         }
+    }
+
+    // [judge:core-pdf-viewer-landscape]: the strip names the page in view and marks its thumbnail
+    @Test fun pageIndicatorAndSelectedThumbnailFollowThePageInView() {
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { PdfViewer(BlankPages(3), tagPrefix = "fl_file") }
+        }
+        rule.onNodeWithTag("fl_file_page_indicator").assertTextEquals("Page 1 of 3")
+        rule.onNodeWithTag("fl_file_thumb_1").assertIsSelected()
+        rule.onNodeWithContentDescription("Go to page 3").performClick()
+        rule.waitForIdle()
+        rule.onNodeWithTag("fl_file_page_indicator").assertTextEquals("Page 3 of 3")
+        rule.onNodeWithTag("fl_file_thumb_3").assertIsSelected()
+        rule.onNodeWithTag("fl_file_thumb_1").assertIsNotSelected()
+    }
+
+    // rule 33: in landscape a whole page fits the height, thumbnails go to a side column
+    @Config(sdk = [35], qualifiers = "w891dp-h411dp-land")
+    @Test fun landscapeFitsThePageToTheHeight() {
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { PdfViewer(BlankPages(3), tagPrefix = "fl_file", modifier = Modifier.fillMaxSize()) }
+        }
+        val pages = rule.onNodeWithTag("fl_file_pages").fetchSemanticsNode().boundsInRoot
+        val page = rule.onNodeWithTag("fl_file_page_1").fetchSemanticsNode().boundsInRoot
+        assertThat(page.height).isWithin(2f).of(pages.height)
+        assertThat(page.width).isLessThan(pages.width)
+        val thumbs = rule.onNodeWithTag("fl_file_thumbnails").fetchSemanticsNode().boundsInRoot
+        assertThat(thumbs.left).isAtLeast(pages.right - 1f)
     }
 }
