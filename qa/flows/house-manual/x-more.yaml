@@ -25,7 +25,11 @@ appId: com.kurtz.homerecord.housemanual
     visible: "Metric"
     timeout: 5000
 - takeScreenshot: x-more-units
-# AC-H12: Climate zone → Cold; the row names it and Reminders has the zone's seasonal jobs
+# AC-H12: Climate zone → Cold; the row names it and Reminders has the zone's seasonal jobs. The row sits below the
+# fold under Units, so scroll to it first
+- scrollUntilVisible:
+    element:
+      id: "hm_more_zone"
 - tapOn:
     id: "hm_more_zone"
 - tapOn:

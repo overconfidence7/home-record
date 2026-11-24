@@ -139,10 +139,14 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_breaker_form"
     timeout: 5000
-# The chip's id node carries no text (its label is a child node); "Refrigerator" is only under Items it feeds
+# The chip's id node carries no text (its label is a child node). The Label field also reads "Refrigerator" since
+# the first edit, so scroll to the bottom of the form and tap the "Refrigerator" below "Items it feeds"
 - scrollUntilVisible:
-    element: "Refrigerator"
-- tapOn: "Refrigerator"
+    element:
+      id: "hm_breaker_delete"
+- tapOn:
+    text: "Refrigerator"
+    below: "Items it feeds"
 - tapOn:
     id: "hm_breaker_save"
 - extendedWaitUntil:

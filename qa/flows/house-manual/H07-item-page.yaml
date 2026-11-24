@@ -143,6 +143,9 @@ appId: com.kurtz.homerecord.housemanual
     visible: "Move to which room?"
     timeout: 5000
 - takeScreenshot: H07-move-to-room
+# The seeded house has more rooms than the sheet shows at once; Dining room may be below the fold
+- scrollUntilVisible:
+    element: "Dining room"
 - tapOn: "Dining room"
 - extendedWaitUntil:
     notVisible: "Move to which room?"
