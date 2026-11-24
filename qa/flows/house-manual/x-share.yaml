@@ -93,9 +93,14 @@ env:
 - takeScreenshot: x-share-joined-home
 - tapOn:
     id: "hm_tab_items"
+# The synced items arrive first; Furnace (HVAC) sits below the seven Appliances, under the fold on the device
 - extendedWaitUntil:
-    visible: "Furnace"
-    timeout: 10000
+    visible:
+      id: "hm_items_row_.*"
+    timeout: 15000
+- scrollUntilVisible:
+    element: "Furnace"
+    timeout: 20000
 # Share this house as family: the people list, no invite or remove controls
 - tapOn:
     id: "hm_tab_more"

@@ -155,6 +155,14 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 5000
 - tapOn:
     id: "hm_back"
+# Items keeps its own back stack (still on Main panel's page from the start of this flow); the second tap reselects
+# the tab, which pops it to the list (AC-U1)
+- tapOn:
+    id: "hm_tab_items"
+- extendedWaitUntil:
+    visible:
+      id: "hm_back"
+    timeout: 5000
 - tapOn:
     id: "hm_tab_items"
 - extendedWaitUntil:

@@ -86,6 +86,8 @@ appId: com.kurtz.homerecord.fieldlog
 - tapOn:
     id: fl_material_form_amount
 - inputText: "123.71"
+# Diagnostic for [auto:flow:field-log:F18-more]: what the field holds right after typing, keyboard still up
+- takeScreenshot: F18-amount-typed
 - runFlow: _hide-keyboard.yaml
 - scrollUntilVisible:
     element:
