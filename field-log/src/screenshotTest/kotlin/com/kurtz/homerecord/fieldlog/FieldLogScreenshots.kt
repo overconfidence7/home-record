@@ -1085,3 +1085,8 @@ fun FileViewerLandscapeScreenshot() = FileViewerPreview()
 @androidx.compose.ui.tooling.preview.Preview(name = "Landscape 200%", device = "spec:width=891dp,height=411dp", fontScale = 2f)
 @Composable
 fun MarkupLandscapeScreenshot() = MarkupPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShellBarScreenshot() = ShellBarPreview()

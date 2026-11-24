@@ -1173,3 +1173,8 @@ fun House3DEmptyViewOnlyScreenshot() = House3DEmptyViewOnlyPreview()
 @ThemePreviews
 @Composable
 fun PlanEditorViewOnlyScreenshot() = PlanEditorViewOnlyPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun ShellBarScreenshot() = ShellBarPreview()

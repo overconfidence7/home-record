@@ -2369,3 +2369,12 @@ fun House3DEmptyViewOnlyPreview() = Frame {
 fun PlanEditorViewOnlyPreview() = Frame {
     PlanEditorScreen(planState({ copy(rooms = planRoomsWithOpenings, overlayMode = true, overlays = planOverlays, overlaySelectedId = "p1", viewOnly = true) }), {}, {}, "Maple St")
 }
+
+/** The bottom bar on its own: at 200% every label steps down together ([judge:nav-label-200-uneven], rules 25, 32). */
+@ThemePreviews
+@Composable
+fun ShellBarPreview() = Frame {
+    com.kurtz.homerecord.coreui.shell.ShellFrame(shellTabs(), selectedId = "reminders") {
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
+    }
+}

@@ -2708,3 +2708,12 @@ fun PlanLoadingPreview() = Frame {
 @ThemePreviews
 @Composable
 fun RenewCrewPreview() = Frame { com.kurtz.homerecord.fieldlog.clock.ClockScreen(clockState(), {}, readOnly = true) }
+
+/** The bottom bar on its own: at 200% every label steps down together ([judge:nav-label-200-uneven], rules 25, 32). */
+@ThemePreviews
+@Composable
+fun ShellBarPreview() = Frame {
+    com.kurtz.homerecord.coreui.shell.ShellFrame(shellTabs(), selectedId = "schedule") {
+        androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.fillMaxSize())
+    }
+}

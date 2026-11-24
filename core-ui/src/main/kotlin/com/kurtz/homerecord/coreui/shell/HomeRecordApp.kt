@@ -7,8 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.window.core.layout.WindowSizeClass
@@ -90,11 +89,13 @@ fun HomeRecordApp(
     val stack = stacks.getValue(selected.id)
 
     val tagPrefix = LocalTagPrefix.current
+    val layoutType = shellLayoutType(fullScreen = stack.lastOrNull()?.let(fullScreen) == true)
+    val labelSize = rememberBarLabelSize(tabs.map { it.label }, rail = layoutType == NavigationSuiteType.NavigationRail)
     NavigationSuiteScaffold(
         modifier = modifier,
-        layoutType = shellLayoutType(fullScreen = stack.lastOrNull()?.let(fullScreen) == true),
+        layoutType = layoutType,
         navigationSuiteItems = {
-            shellItems(tabs, selected.id, tagPrefix = tagPrefix) { tab, isSelected ->
+            shellItems(tabs, selected.id, tagPrefix = tagPrefix, labelSize = labelSize) { tab, isSelected ->
                 if (isSelected) {
                     while (stack.size > 1) stack.removeAt(stack.lastIndex)
                 } else {
@@ -136,10 +137,12 @@ fun HomeRecordApp(
 @Composable
 fun ShellFrame(tabs: List<AppTab>, selectedId: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val tagPrefix = LocalTagPrefix.current
+    val layoutType = shellLayoutType(fullScreen = false)
+    val labelSize = rememberBarLabelSize(tabs.map { it.label }, rail = layoutType == NavigationSuiteType.NavigationRail)
     NavigationSuiteScaffold(
         modifier = modifier,
-        layoutType = shellLayoutType(fullScreen = false),
-        navigationSuiteItems = { shellItems(tabs, selectedId, tagPrefix) { _, _ -> } },
+        layoutType = layoutType,
+        navigationSuiteItems = { shellItems(tabs, selectedId, tagPrefix, labelSize) { _, _ -> } },
     ) { content() }
 }
 
@@ -155,7 +158,13 @@ private fun shellLayoutType(fullScreen: Boolean): NavigationSuiteType {
     }
 }
 
-private fun NavigationSuiteScope.shellItems(tabs: List<AppTab>, selectedId: String, tagPrefix: String, onClick: (AppTab, Boolean) -> Unit) {
+private fun NavigationSuiteScope.shellItems(
+    tabs: List<AppTab>,
+    selectedId: String,
+    tagPrefix: String,
+    labelSize: TextUnit,
+    onClick: (AppTab, Boolean) -> Unit,
+) {
     tabs.forEach { tab ->
         val isSelected = tab.id == selectedId
         item(
@@ -164,16 +173,16 @@ private fun NavigationSuiteScope.shellItems(tabs: List<AppTab>, selectedId: Stri
             icon = {
                 Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
             },
-            // One line per label: at 200% a long label ("Schedule", "Reminders") steps its size down
-            // to fit (6 sp at 200% draws as large as the 12 sp label at 100%) instead of splitting mid-word and lifting its
-            // icon off the others' baseline (rule 32); ellipsis only if even that does not fit.
+            // One line per label, all at one size: at 200% the bar steps every label down together until the longest
+            // ("Schedule", "Reminders") fits (rules 25 and 32), instead of shrinking only that one or splitting it
+            // mid-word; ellipsis only if even 6 sp does not fit.
             label = {
                 Text(
                     tab.label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false,
-                    autoSize = TextAutoSize.StepBased(minFontSize = 6.sp, maxFontSize = 12.sp),
+                    fontSize = labelSize,
                 )
             },
             modifier = Modifier.testTag("${tagPrefix}_tab_${tab.id}"),
