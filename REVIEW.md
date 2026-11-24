@@ -3450,3 +3450,80 @@ Tested: 102 device stages, 2271 unit tests, 222 backend tests, coverage 495/495 
 ## Builder note 2026-11-24 (Mark up landscape)
 
 - [x] [UI] Minor: Mark up draws text marks in titleMedium, which follows the system font scale, so at 200% "Move to north wall" runs past the page edge and the marks on screen no longer match the page proportions; text marks should be sized as a fraction of the page width (as the saved PDF should be) [builder:markup-text-font-scale] - steps: catalog `markup` at 200% font - expected: rule 32 (200% clips nothing) - actual: `MarkupLandscapeScreenshot_Landscape 200%` reference - fixed in ea6e37fb (Mark up draws text at 3.5% of the page's short side and Mark up photo at 5% of the photo's, the sizes the saved PDF and photo use, so the system font scale no longer changes them; 11 Markup/Annotate references updated, opened Landscape 200% and Annotate 200%)
+
+## QA judge 2026-11-24 (commit c199b144)
+
+Judged the suite results for c199b144 (run of 2026-11-24 05:43 UTC, 102 stages, 94 passed). `build` HEAD is now 493fd50a, 50 commits later (a48bacdf flow fixes, the 3D, Files row, Jobs row, bar-label, overlay-legend and capture fixes all landed after this sha), so those fixes are not judged here; the next suite run covers them.
+
+Verdict: House Manual: for the first time the second phone, the family invite and the viewer all open the full house (the H17b/x-share failures are the flow missing Furnace under the fold, not the app), so the record holds up on one phone and across phones. Nate would say first that every 3D view in the flows is still a black or blank box on this sha, and that the House tab opened in the dark and 200% tours shows nothing but a spinner. / Field Log: every walkthrough flow except F18 passes and the daily log, change order, handoff and schedule read like a crew's app. Nate would say first that a receipt retyped after a failed save is still saved as $1.00, so Materials totals are wrong: money that comes out wrong costs a contractor's trust.
+
+- [ ] [UI] Minor: the House tab blueprint breaks small room names in the middle of a word: "Mudroo / m" and "Powde / r room" in the 8' and 6' rooms, with the door arc drawn through "room"; the committed HouseBlueprintLandscape reference draws a larger catalog plan where every name fits, so it hides this [judge:hm-blueprint-name-midword] - steps: seed, rotate to landscape, House tab, Main - expected: rule 32 and rule 25 (names readable, wrap only between words; drop or shorten a name that cannot fit, as the blueprint already does for tiny rooms) - actual: names split mid-word - screenshot: qa-results:latest/house-manual/screenshots/tour-landscape-house.png
+- [ ] [Minor] The House tab shows only a spinner on an empty canvas, with Export PDF greyed, in the dark and 200% tours, while Floors lists "Main, 6 rooms" and the plan editor in the same tours draws the floor at once; the landscape tour draws it. The planPending spinner from d876a3b6 either holds too long or never clears when the tab is opened from a fresh start. Field Log's Team in the 200% tour is the same (spinner only) [judge:hm-house-tab-spinner] - steps: seed, open the House tab first thing (tour dark / 200%) - expected: PRODUCT.md H3 (clean blueprint), rule 10 (loading is brief; the tour should not catch a loading state on a seeded floor) - actual: spinner - screenshot: qa-results:latest/house-manual/screenshots/tour-dark-house.png
+- [ ] [Minor] Reminders labels warranty reminders decades away as "soon": "Warranty ends soon: Roof, Due May 17, 2051", "Warranty ends soon: Furnace, Due Sep 24, 2030", two of each, and they fill Upcoming (21) between the seasonal jobs a homeowner acts on [judge:hm-reminders-warranty-soon-far] - steps: H14, scroll Upcoming - expected: PRODUCT.md H14 (seeded tasks a homeowner can act on), docs/voice.md (plain, true wording); a warranty reminder appears near its date or reads "Warranty ends May 17, 2051" - actual: "soon" for 2051 - screenshot: qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png
+- [ ] [UI] Minor: the Clock tab's "Clock in your crew" card shows a disabled full-width button reading "Clock in 0 people" until someone is ticked [judge:fl-clock-crew-zero-label] - steps: Clock tab with one crew member, none ticked - expected: docs/voice.md, rule 10 (a control says what it does: "Clock in your crew" or "Pick who to clock in") - actual: "Clock in 0 people" - screenshot: qa-results:latest/field-log/screenshots/tour-dark-clock.png
+- [ ] [Minor] Suite: 49 crawler shots are flat blank frames again (31 House Manual, 18 Field Log; pixel stddev 0 below the status bar), scattered across variants, so those screens were not checked: e.g. panel-empty-light, share-people-light/dark, share-signed-out-light/dark, reminders-view-only-light, house-blueprint-font200, emergency-list-font200 (HM); capture-ready-light, reports-summaries-dark, schedule-team-font200, clock-solo-owner-font200 (FL). Different shots from the nine closed under [judge:qa-crawler-blank-shots], so the cause is a timing race, not those entries [judge:qa-crawler-blank-frames-again] - steps: crawler stage - expected: one readable shot per catalog entry per variant (Q002) - actual: empty frames - screenshot: qa-results:latest/house-manual/crawler/house-manual/panel-empty-light.png
+- [ ] [Minor] Suite: catalog entries for bottom sheets and in-job tabs draw their content from the top of the window, under the status bar ("Move to which room?" and "Panel photo" over the clock; the Log date chip and Photos "Share link" in the status bar), so rule 28 cannot be judged from the crawler. The real app is fine (H07 shows the move sheet at the bottom with insets) [judge:qa-catalog-no-insets] - steps: crawler item-move-room, item-shutoff-picker, panel-photo-sheet (HM); log-*, photos-tab, photos-tab-link (FL) - expected: catalog renders each entry as the app shows it (Q002), insets applied - actual: content under the status bar - screenshot: qa-results:latest/house-manual/crawler/house-manual/item-move-room-light.png
+
+Auto entry review:
+- [auto:flow:house-manual:H12-breaker-panel], [auto:flow:house-manual:H17b-second-phone], [auto:flow:house-manual:x-share], [auto:flow:house-manual:x-share-viewer] and [auto:flow:house-manual:x-more] are flow errors [judge: flow error]: the screens show the labeled breaker 12 Refrigerator, the synced Items list with Appliances (7) where Furnace is below the fold, and More with Climate zone below Units. The builder's a48bacdf already treats them so; agreed.
+- [auto:flow:field-log:F18-more] is the app: Materials and receipts lists "City Electric Supply $1.00" and "All jobs $1.00". Still open; the new F18-amount-typed shot will show the field on the next run.
+- [auto:screenshots:validate]: closed by the builder (HomeFull/HomeViewOnly refresh); the next suite run confirms.
+
+Seen this run and fine: the share, viewer and second-phone homes now load the seeded items and shutoffs; Share this house on a free phone shows "Sharing this house is part of Pro" with See Pro; the claim-link import lands on Maple St with Upper, Main, Basement (no duplicate Main); Home's Needs attention prints "Overdue since Nov 12, 2026"; the Schedule week strip fits seven days at 200%; every list and detail screen in the catalog has empty, loading and error states with Retry; dialogs confirm every delete.
+
+Not judged on this sha because the fix landed after it: [judge:qa-3d-blank-emulator] (H03/H09/H10/F10 3D still black or blank here; da5a7555), [judge:fl-files-row-actions] (cae78947), [judge:fl-jobs-row-trailing] (4174b5be), [judge:nav-label-200-uneven] (ebc468c7), [judge:hm-plan-overlays-no-legend], [judge:fl-house-pin-over-label].
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding, skip or draw, Home with quick actions | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | Two rooms, shape, doors, stairs to Upper | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Flows draw the blueprint and open Kitchen; tours show a spinner only (dark, 200%) and mid-word names in landscape | qa-results:latest/house-manual/screenshots/tour-dark-house.png |
+| H4 | Pass | Item form with make and model | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | Grouped type picker, items by room | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Pass | Place on plan, drag, On a wall, Move to room sheet, reminders | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-move-to-room.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Pass | Outline, thumbnail on the wall row | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Clunky | 3D views black (kitchen, all floors) or near-blank (floor) on this sha | qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png |
+| H11 | Clunky | Pipe on the wall, blueprint and search pass; the 3D pipe shot is blank | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-3d-pipe.png |
+| H12 | Pass | Panel and slot 12 Refrigerator 20 A; the flow then stops on its own navigation (flow error) | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-H12-breaker-labeled.png |
+| H13 | Pass | Emergency from Home, item and tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Clunky | Zone, due tasks and Done work; Upcoming is padded with "Warranty ends soon" for 2030 and 2051 | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF shared with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-report-share.png |
+| H16 | Pass | Wrong passphrase, preview, restored house and items | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Pass | Sign in, cloud copy, delete; second phone lists the seeded items (flow stops on Furnace below the fold) | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-step-067-assertCondition-Furnace.png |
+| H18 | Pass | File and claim-link imports, rough-in walls and overlays in Kitchen, no duplicate floor | qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-house-after-claim.png |
+| H19 | Clunky | Paywall shows "Can't load prices" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in, company, Today empty state with Add a job and Invite crew | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview with stats, House empty state | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c; crew card says "Clock in 0 people" | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Break, switch, clock out (catalog and unit tests; no flow) | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | Flags, edit with reason, Approve all | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved as Version 2 with history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture from job and Today, photos by day, link sheet | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Delay, weather, PDF, Sent and "Changed since sent" | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-changed-since-sent.png |
+| F10 | Clunky | Behind the wall, drain, installed water heater and handoff pass; 3D black on this sha | qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d-room.png |
+| F11 | Pass | Task pin on the plan and on a file | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Sign, signed read-only view, PDF and link | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Assign, conflict, Tomorrow on Today | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, $123.71 by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Photo reports and job summaries | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial line, then the lapsed plan screen | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Clunky | Every More screen opens; a retyped receipt is saved as $1.00 | qa-results:latest/field-log/screenshots/flow-F18-more-step-083-assertCondition-$123_.71.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 759 screenshots (186 flow shots including handoff, 45 tour shots, 432 light crawler shots, 96 200% crawler shots; all 1728 crawler shots scanned for blank frames), 37 walkthrough steps. New issues: 6. Product gaps: 0.
