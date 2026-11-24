@@ -57,6 +57,24 @@ class ItemPlaceScreenTest {
 
     @Test
     @AcceptanceCriterion("AC-C30")
+    @Config(qualifiers = "w891dp-h411dp-land")
+    fun inLandscapeThePlanTakesTheFullHeightWithTheControlsBeside() {
+        // judge:hm-place-plan-landscape-tiny: the plan was squeezed to a strip between the chip, hint and button rows
+        val events = mutableListOf<ItemPlaceEvent>()
+        show(state(ItemPlace("k", 84, 72)), events)
+        val plan = rule.onNodeWithTag("hm_item_place_plan").fetchSemanticsNode().boundsInRoot
+        val hint = rule.onNodeWithTag("hm_item_place_hint").fetchSemanticsNode().boundsInRoot
+        val density = rule.density.density
+        assertThat(plan.height / density).isGreaterThan(250f)
+        assertThat(plan.width / density).isGreaterThan(400f)
+        assertThat(hint.left).isAtLeast(plan.right)
+        rule.onNodeWithTag("hm_item_place_floor_f0").assertExists()
+        rule.onNodeWithTag("hm_item_place_remove").performClick()
+        assertThat(events).contains(ItemPlaceEvent.Remove)
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C30")
     fun aTapOnThePlanPlacesTheItem() {
         val events = mutableListOf<ItemPlaceEvent>()
         show(state(), events)

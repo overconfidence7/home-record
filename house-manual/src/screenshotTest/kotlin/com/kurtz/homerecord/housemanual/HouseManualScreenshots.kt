@@ -704,6 +704,11 @@ fun RoomBreakersScreenshot() = RoomBreakersPreview()
 fun ItemPlaceScreenshot() = ItemPlacePreview()
 
 @PreviewTest
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun ItemPlaceLandscapeScreenshot() = ItemPlaceLandscapePreview()
+
+@PreviewTest
 @ThemePreviews
 @Composable
 fun ItemPlaceUnplacedScreenshot() = ItemPlaceUnplacedPreview()

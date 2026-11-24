@@ -1536,6 +1536,11 @@ fun ItemPlacePreview() = Frame {
     com.kurtz.homerecord.housemodel.ui.ItemPlaceScreen(itemPlaceState(com.kurtz.homerecord.housemodel.items.ItemPlace("r1", 24, 110)), {})
 }
 
+/** Landscape: the plan takes the full height with the floors, hint and buttons beside it (judge:hm-place-plan-landscape-tiny). */
+@Preview(name = "Landscape", device = "spec:width=891dp,height=411dp")
+@Composable
+fun ItemPlaceLandscapePreview() = ItemPlacePreview()
+
 /** On a wall (AC-C30 position): the thermostat hung on the Kitchen's south wall, the wall drawn to its 14' x 8'. */
 @ThemePreviews
 @Composable

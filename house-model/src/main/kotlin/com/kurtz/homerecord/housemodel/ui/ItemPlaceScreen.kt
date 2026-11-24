@@ -4,6 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.aspectRatio
@@ -87,13 +92,14 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                 onAction = { onEvent(ItemPlaceEvent.Done) },
                 modifier = Modifier.padding(padding),
             )
-            else -> Column(modifier.fillMaxSize().padding(padding)) {
-                if (state.floors.size > 1 && !state.wallMode) {
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(state.floors, key = { it.id }) { f ->
+            else -> BoxWithConstraints(modifier.fillMaxSize().padding(padding)) {
+                // Landscape (judge:hm-place-plan-landscape-tiny): the plan takes the full height on the left and the
+                // floors, hint and buttons stack beside it, instead of the plan squeezed between rows (rules 30, 33).
+                val beside = maxWidth > maxHeight && maxWidth >= 600.dp
+                val sideWidth = minOf(320.dp, maxWidth * 0.4f)
+                val floorChips: @Composable () -> Unit = {
+                    if (state.floors.size > 1 && !state.wallMode) {
+                        val chip: @Composable (com.kurtz.homerecord.housemodel.FloorSummary) -> Unit = { f ->
                             FilterChip(
                                 selected = f.id == state.floorId,
                                 onClick = { onEvent(ItemPlaceEvent.PickFloor(f.id)) },
@@ -101,59 +107,93 @@ fun ItemPlaceScreen(state: ItemPlaceUiState, onEvent: (ItemPlaceEvent) -> Unit, 
                                 label = { Text(f.name) },
                             )
                         }
+                        if (beside) {
+                            FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { state.floors.forEach { chip(it) } }
+                        } else {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) { items(state.floors, key = { it.id }) { chip(it) } }
+                        }
                     }
                 }
-                if (state.wallMode) {
-                    WallPicker(state, onEvent, Modifier.weight(1f))
-                } else if (state.rooms.isEmpty()) {
-                    EmptyState(
-                        icon = Icons.Rounded.Map,
-                        headline = stringResource(R.string.item_place_empty_title, state.floorName.orEmpty()),
-                        body = stringResource(R.string.item_place_empty_body),
-                        actionLabel = stringResource(R.string.house_edit_plan),
-                        onAction = { onEvent(ItemPlaceEvent.EditPlan) },
-                        modifier = Modifier.weight(1f),
-                        actionModifier = Modifier.testTag("${prefix}_item_place_edit_plan"),
-                    )
-                } else {
-                    val room = state.spotRoomName
-                    Text(
-                        if (room != null) stringResource(R.string.item_place_hint_set, room)
-                        else stringResource(R.string.item_place_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("${prefix}_item_place_hint"),
-                    )
-                    BlueprintCanvas(
-                        rooms = state.rooms,
-                        modifier = Modifier.weight(1f).fillMaxWidth().testTag("${prefix}_item_place_plan"),
-                        layers = state.layers,
-                        marks = state.marks,
-                        system = state.system,
-                        onPlanTap = { x, y -> onEvent(ItemPlaceEvent.Place(x, y)) },
-                        onMarkDrag = { _, x, y, end -> onEvent(if (end) ItemPlaceEvent.Drop(x, y) else ItemPlaceEvent.Drag(x, y)) },
-                    )
+                val showPlan = !state.wallMode && state.rooms.isNotEmpty()
+                val hint: @Composable () -> Unit = {
+                    if (showPlan) {
+                        val room = state.spotRoomName
+                        Text(
+                            if (room != null) stringResource(R.string.item_place_hint_set, room)
+                            else stringResource(R.string.item_place_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag("${prefix}_item_place_hint"),
+                        )
+                    }
                 }
-                FlowRow(
-                    Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.Center,
-                ) {
+                val work: @Composable (Modifier) -> Unit = { m ->
                     if (state.wallMode) {
-                        TextButton({ onEvent(ItemPlaceEvent.WallMode(false)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_back_to_plan")) {
-                            Icon(Icons.Rounded.Map, null, Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.item_place_back_to_plan))
+                        WallPicker(state, onEvent, m)
+                    } else if (state.rooms.isEmpty()) {
+                        EmptyState(
+                            icon = Icons.Rounded.Map,
+                            headline = stringResource(R.string.item_place_empty_title, state.floorName.orEmpty()),
+                            body = stringResource(R.string.item_place_empty_body),
+                            actionLabel = stringResource(R.string.house_edit_plan),
+                            onAction = { onEvent(ItemPlaceEvent.EditPlan) },
+                            modifier = m,
+                            actionModifier = Modifier.testTag("${prefix}_item_place_edit_plan"),
+                        )
+                    } else {
+                        BlueprintCanvas(
+                            rooms = state.rooms,
+                            modifier = m.testTag("${prefix}_item_place_plan"),
+                            layers = state.layers,
+                            marks = state.marks,
+                            system = state.system,
+                            onPlanTap = { x, y -> onEvent(ItemPlaceEvent.Place(x, y)) },
+                            onMarkDrag = { _, x, y, end -> onEvent(if (end) ItemPlaceEvent.Drop(x, y) else ItemPlaceEvent.Drag(x, y)) },
+                        )
+                    }
+                }
+                val actions: @Composable (Modifier) -> Unit = { m ->
+                    FlowRow(m.navigationBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp), verticalArrangement = Arrangement.Center) {
+                        if (state.wallMode) {
+                            TextButton({ onEvent(ItemPlaceEvent.WallMode(false)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_back_to_plan")) {
+                                Icon(Icons.Rounded.Map, null, Modifier.padding(end = 8.dp))
+                                Text(stringResource(R.string.item_place_back_to_plan))
+                            }
+                        } else if (state.canHang) {
+                            TextButton({ onEvent(ItemPlaceEvent.WallMode(true)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_on_wall")) {
+                                Icon(Icons.Rounded.CropPortrait, null, Modifier.padding(end = 8.dp))
+                                Text(stringResource(R.string.item_place_on_wall))
+                            }
                         }
-                    } else if (state.canHang) {
-                        TextButton({ onEvent(ItemPlaceEvent.WallMode(true)) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_on_wall")) {
-                            Icon(Icons.Rounded.CropPortrait, null, Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.item_place_on_wall))
+                        if (state.spot != null) {
+                            TextButton({ onEvent(ItemPlaceEvent.Remove) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_remove")) {
+                                Icon(Icons.Rounded.Delete, null, Modifier.padding(end = 8.dp))
+                                Text(stringResource(R.string.item_place_remove))
+                            }
                         }
                     }
-                    if (state.spot != null) {
-                        TextButton({ onEvent(ItemPlaceEvent.Remove) }, Modifier.heightIn(min = 48.dp).testTag("${prefix}_item_place_remove")) {
-                            Icon(Icons.Rounded.Delete, null, Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.item_place_remove))
+                }
+                if (beside) {
+                    Row(Modifier.fillMaxSize()) {
+                        work(Modifier.weight(1f).fillMaxHeight())
+                        Column(
+                            Modifier.width(sideWidth).fillMaxHeight().verticalScroll(rememberScrollState()).padding(top = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            floorChips()
+                            hint()
+                            actions(Modifier.fillMaxWidth())
                         }
+                    }
+                } else {
+                    Column(Modifier.fillMaxSize()) {
+                        floorChips()
+                        hint()
+                        work(Modifier.weight(1f).fillMaxWidth())
+                        actions(Modifier.fillMaxWidth())
                     }
                 }
             }
