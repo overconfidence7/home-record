@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemanual.home
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
 import com.kurtz.homerecord.core.model.SearchKind
-import androidx.compose.foundation.isSystemInDarkTheme
 import com.kurtz.homerecord.housemodel.overlays.OverlayKind
 import com.kurtz.homerecord.housemodel.overlays.color
 import com.kurtz.homerecord.housemodel.overlays.icon
@@ -250,7 +250,7 @@ private fun kindLabel(kind: SearchKind): Int? = when (kind) {
 private fun ResultIcon(r: SearchResultRow) {
     if (r.kind == SearchKind.OVERLAY) {
         val kind = OverlayKind.fromWire(r.subkind)
-        Icon(kind.icon, contentDescription = null, tint = kind.color(isSystemInDarkTheme()))
+        Icon(kind.icon, contentDescription = null, tint = kind.color(isDarkScheme()))
     } else {
         Icon(kindIcon(r.kind), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
     }

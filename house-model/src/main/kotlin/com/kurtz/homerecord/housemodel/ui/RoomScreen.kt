@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -73,7 +74,6 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.ui.graphics.luminance
 import com.kurtz.homerecord.housemodel.overlays.Overlay
 import com.kurtz.homerecord.housemodel.overlays.color
 import com.kurtz.homerecord.housemodel.overlays.icon
@@ -364,7 +364,7 @@ private fun RoomWallRow(wall: RoomWall, stage: WallStage, system: UnitSystem, ca
 @Composable
 private fun RoomOverlaysCard(state: RoomUiState, overlays: List<Overlay>, onEvent: (RoomEvent) -> Unit) {
     val prefix = LocalTagPrefix.current
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     Card(Modifier.fillMaxWidth().testTag("${prefix}_room_overlays")) {
         Column(Modifier.padding(vertical = 8.dp)) {
             Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

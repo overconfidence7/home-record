@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import androidx.compose.foundation.Canvas
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.Image
@@ -58,7 +59,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
@@ -201,7 +201,7 @@ internal fun OverlayDeleteDialog(overlay: Overlay, onEvent: (WallOverlaysEvent) 
 private fun WallCanvas(state: WallOverlaysUiState, preview: Painter?, onEvent: (WallOverlaysEvent) -> Unit, modifier: Modifier) {
     val prefix = LocalTagPrefix.current
     val density = LocalDensity.current
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     val outline = state.picture?.outline
     val picture = state.picture
     val painter = preview ?: picture?.let { rememberAsyncImagePainter(File(it.path), placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceVariant)) }
@@ -351,7 +351,7 @@ internal fun DrawingBar(points: Int, onEvent: (WallOverlaysEvent) -> Unit, scree
 @Composable
 internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOverlaysEvent) -> Unit, screen: String = "wall", canEdit: Boolean = true) {
     val prefix = LocalTagPrefix.current
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     val kindName = stringResource(overlay.kind.nameRes)
     Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 8.dp).testTag("${prefix}_${screen}_selection")) {
         RecordListItem(
@@ -403,7 +403,7 @@ internal fun SelectionBar(overlay: Overlay, itemName: String?, onEvent: (WallOve
 @Composable
 private fun OverlayList(overlays: List<Overlay>, onEvent: (WallOverlaysEvent) -> Unit, modifier: Modifier, @androidx.annotation.StringRes emptyText: Int = R.string.wall_overlays_empty) {
     val prefix = LocalTagPrefix.current
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     LazyColumn(modifier.fillMaxWidth().testTag("${prefix}_wall_overlay_list"), contentPadding = PaddingValues(bottom = 88.dp)) {
         item(key = "header") {
             Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

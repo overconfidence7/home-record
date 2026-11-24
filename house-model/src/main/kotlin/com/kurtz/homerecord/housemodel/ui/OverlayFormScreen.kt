@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +46,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -83,7 +83,7 @@ fun OverlayFormScreen(
     houseHasItems: Boolean = items.isNotEmpty(),
 ) {
     val prefix = LocalTagPrefix.current
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     FormScaffold(
         title = stringResource(if (form.editingId == null) R.string.overlay_form_new_title else R.string.overlay_form_edit_title),
         dirty = form.dirty,

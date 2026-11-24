@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.housemodel.ui
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.kurtz.homerecord.coreui.components.windowTestTags
 import androidx.compose.foundation.Canvas
@@ -126,7 +127,6 @@ import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.ui.graphics.luminance
 
 private const val HANDLE_RADIUS_DP = 10f
 private const val HANDLE_HIT_DP = 24f
@@ -453,7 +453,7 @@ private fun PlanCanvas(
     val label = MaterialTheme.typography.labelMedium
     val summary = pluralStringResource(R.plurals.plan_canvas_description, state.rooms.size, state.rooms.size)
     val overlayIcons = rememberOverlayIcons()
-    val dark = scheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     // A point of the picked overlay being dragged: shown moved at once, saved when the finger lifts.
     var dragged by remember { mutableStateOf<Triple<String, Int, OverlayPoint>?>(null) }
     var sized by remember { mutableStateOf(false) }

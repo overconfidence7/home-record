@@ -1,7 +1,7 @@
 package com.kurtz.homerecord.housemanual.items
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.ui.graphics.luminance
 import com.kurtz.homerecord.housemodel.overlays.OverlayLink
 import com.kurtz.homerecord.housemodel.panel.FeedingBreaker
 import com.kurtz.homerecord.coreui.components.LinkChip
@@ -691,7 +691,7 @@ private fun RecallsSection(recalls: RecallUi, onEvent: (ItemDetailEvent) -> Unit
 @Composable
 internal fun ItemLinksSection(links: List<OverlayLink>, onEvent: (ItemDetailEvent) -> Unit) {
     if (links.isEmpty()) return
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val dark = isDarkScheme()
     Section(stringResource(R.string.item_detail_links), Modifier.testTag("hm_item_detail_links")) {
         links.forEach { link ->
             val o = link.overlay

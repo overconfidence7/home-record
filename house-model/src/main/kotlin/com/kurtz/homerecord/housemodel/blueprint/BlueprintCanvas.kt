@@ -1,7 +1,7 @@
 package com.kurtz.homerecord.housemodel.blueprint
 
+import com.kurtz.homerecord.coreui.theme.isDarkScheme
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
@@ -95,7 +95,7 @@ fun BlueprintCanvas(
         wall = scheme.onSurface,
         text = scheme.onSurface,
         dimension = scheme.onSurfaceVariant,
-        dark = isSystemInDarkTheme(),
+        dark = isDarkScheme(),
     )
     val currentRooms by rememberUpdatedState(rooms)
     val click by rememberUpdatedState(onRoomClick)
@@ -267,7 +267,7 @@ fun blueprintLayerLabel(layer: BlueprintLayer): String = stringResource(
 /** One chip per layer, each tinted with its own color when on (AC-C15). */
 @Composable
 fun LayerToggleRow(layers: LayerSet, onToggle: (BlueprintLayer) -> Unit, modifier: Modifier = Modifier) {
-    val dark = isSystemInDarkTheme()
+    val dark = isDarkScheme()
     LazyRow(
         modifier.testTag("${LocalTagPrefix.current}_layers"),
         contentPadding = PaddingValues(horizontal = 16.dp),
