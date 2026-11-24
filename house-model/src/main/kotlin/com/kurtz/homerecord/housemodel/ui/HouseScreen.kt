@@ -129,7 +129,7 @@ fun HouseScreen(
             } else {
                 BlueprintCanvas(
                     rooms = state.rooms,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().testTag("${LocalTagPrefix.current}_house_blueprint"),
                     layers = state.layers,
                     overlays = state.overlays,
                     marks = state.marks,

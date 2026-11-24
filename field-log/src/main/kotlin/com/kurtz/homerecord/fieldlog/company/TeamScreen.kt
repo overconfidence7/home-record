@@ -73,7 +73,7 @@ fun TeamScreen(
 
 @Composable
 private fun TeamList(state: TeamUiState, onEvent: (TeamEvent) -> Unit, onShareInvite: (String, String) -> Unit, padding: PaddingValues) {
-    LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
+    LazyColumn(Modifier.padding(padding).testTag("fl_team_list"), contentPadding = PaddingValues(bottom = 24.dp)) {
         item("invite") { InviteCard(state, onEvent, onShareInvite) }
         state.actionError?.let { failure ->
             item("error") {

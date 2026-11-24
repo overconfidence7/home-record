@@ -272,7 +272,15 @@ private fun CrewCard(state: ClockUiState, onEvent: (ClockEvent) -> Unit) {
                 onClick = { onEvent(ClockEvent.ClockInCrew) },
                 enabled = !state.gettingLocation && state.crewCount > 0 && (state.jobs.isEmpty() || state.selectedJobId != null),
                 modifier = Modifier.fillMaxWidth().heightIn(min = ButtonHeight).testTag("fl_clock_crew_in"),
-            ) { Text(if (state.gettingLocation) stringResource(R.string.clock_getting_location) else pluralStringResource(R.plurals.clock_crew_in, state.crewCount, state.crewCount)) }
+            ) {
+                Text(
+                    when {
+                        state.gettingLocation -> stringResource(R.string.clock_getting_location)
+                        state.crewCount == 0 -> stringResource(R.string.clock_crew_pick)
+                        else -> pluralStringResource(R.plurals.clock_crew_in, state.crewCount, state.crewCount)
+                    },
+                )
+            }
         }
     }
 }

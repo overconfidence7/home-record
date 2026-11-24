@@ -5,6 +5,7 @@ import com.kurtz.homerecord.core.Ids
 import com.kurtz.homerecord.core.data.HomeRecordDatabase
 import com.kurtz.homerecord.core.data.MaintenanceTaskEntity
 import com.kurtz.homerecord.core.data.Sources
+import com.kurtz.homerecord.coreui.components.displayDate
 import com.kurtz.homerecord.housemodel.R
 import java.time.LocalDate
 import java.util.UUID
@@ -146,7 +147,8 @@ class ReminderRepository(
     suspend fun syncWarrantyReminders(homeId: String, itemId: String, itemName: String, endsOn: LocalDate?) {
         val at = now()
         val day = today()
-        val title = strings(R.string.reminder_warranty_ends).format(itemName)
+        // The end date is in the title (QA judge: "Warranty ends soon" read wrong on a reminder for 2051).
+        val title = endsOn?.let { strings(R.string.reminder_warranty_ends).format(itemName, displayDate(it.toString())) }.orEmpty()
         MaintenanceRule.WARRANTY_LEAD_DAYS.forEach { lead ->
             val id = warrantyReminderId(itemId, lead)
             val row = dao.get(id)

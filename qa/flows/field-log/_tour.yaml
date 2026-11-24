@@ -50,6 +50,12 @@ appId: com.kurtz.homerecord.fieldlog
           id: "fl_tab_more"
       - takeScreenshot: tour-${output.variant}-more
       - tapOn: "Team"
+      # Team is read from the server; shoot the list, not its spinner (judge:hm-house-tab-spinner)
+      - extendedWaitUntil:
+          visible:
+            id: "fl_team_list"
+          timeout: 15000
+          optional: true
       - takeScreenshot: tour-${output.variant}-team
       - tapOn:
           id: "fl_back"

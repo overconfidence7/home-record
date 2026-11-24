@@ -668,6 +668,14 @@ fun ClockCrewPreview() = Frame {
     )
 }
 
+/** The crew card before anyone is ticked: the button asks to pick people instead of "Clock in 0 people" (judge:fl-clock-crew-zero-label). */
+@Composable
+internal fun ClockCrewNonePicked() = Frame {
+    com.kurtz.homerecord.fieldlog.clock.ClockScreen(
+        clockState().copy(jobs = clockJobs.take(1), sheet = null, canLeadCrew = true, crew = crewPicks, crewSelected = emptySet()), {},
+    )
+}
+
 /** A one-person company with no punches yet: one "Invite crew" row and one "No hours" line (judge:fl-clock-solo-owner-noise). */
 @ThemePreviews
 @Composable

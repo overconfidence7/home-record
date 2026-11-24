@@ -9,6 +9,9 @@ import androidx.compose.ui.test.hasTestTag
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.fieldlog.ClockSoloOwnerPreview
 import com.kurtz.homerecord.fieldlog.ClockCrewPreview
+import com.kurtz.homerecord.fieldlog.ClockCrewNonePicked
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,5 +57,12 @@ class ClockSoloOwnerScreenTest {
         rule.setContent { ClockCrewPreview() }
         rule.onNodeWithTag("fl_clock_list").performScrollToNode(hasTestTag("fl_clock_crew_in"))
         rule.onNodeWithText("Invite crew").assertDoesNotExist()
+    }
+
+    @Test fun withNoOneTickedTheButtonAsksToPick() { // judge:fl-clock-crew-zero-label
+        rule.setContent { ClockCrewNonePicked() }
+        rule.onNodeWithTag("fl_clock_list").performScrollToNode(hasTestTag("fl_clock_crew_in"))
+        rule.onNodeWithTag("fl_clock_crew_in", useUnmergedTree = false).assertTextEquals("Pick who to clock in").assertIsNotEnabled()
+        rule.onNodeWithText("Clock in 0 people").assertDoesNotExist()
     }
 }

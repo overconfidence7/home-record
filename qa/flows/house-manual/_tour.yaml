@@ -34,6 +34,12 @@ appId: com.kurtz.homerecord.housemanual
 - takeScreenshot: tour-${output.variant}-home
 - tapOn:
     id: "hm_tab_house"
+# The seeded floor's plan reads in the background; shoot the blueprint, not its brief spinner (judge:hm-house-tab-spinner)
+- extendedWaitUntil:
+    visible:
+      id: "hm_house_blueprint"
+    timeout: 15000
+    optional: true
 - takeScreenshot: tour-${output.variant}-house
 # At 200% text the House tab keeps Edit plan in view and moves Floors, 3D view and Export PDF into its overflow menu
 - runFlow:

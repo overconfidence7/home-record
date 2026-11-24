@@ -95,7 +95,7 @@ class ReminderRepositoryTest {
         repo.syncWarrantyReminders("h1", "i1", "Water heater", LocalDate.parse("2027-03-01"))
         var rows = repo.observe("h1").first()
         assertThat(rows.map { it.dueOn }).containsExactly(LocalDate.parse("2026-12-31"), LocalDate.parse("2027-02-22")).inOrder()
-        assertThat(rows.first().title).isEqualTo("Warranty ends soon: Water heater")
+        assertThat(rows.first().title).isEqualTo("Warranty ends Mar 1, 2027: Water heater")
         assertThat(rows.all { it.intervalMonths == null && it.itemId == "i1" }).isTrue()
 
         // The end date moves 30 days out: only the 7-day reminder is still ahead, rewritten in place.

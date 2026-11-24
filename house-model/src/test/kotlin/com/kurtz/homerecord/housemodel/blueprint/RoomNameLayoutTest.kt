@@ -66,4 +66,24 @@ class RoomNameLayoutTest {
     @Test fun aRoomTooSmallForEvenHalfSizeShowsNoName() {
         assertThat(roomNameLayout(room(10, 10, "Living room"), 1f, measurer, name, small)).isNull()
     }
+
+    @Test fun wrapsOnlyBetweenWords() { // AC-C13 [judge:hm-blueprint-name-midword]
+        assertThat(breaksBetweenWords("Powder room", listOf(7))).isTrue()
+        assertThat(breaksBetweenWords("Powder room", listOf(5))).isFalse()
+        assertThat(breaksBetweenWords("Mudroom", listOf(6))).isFalse()
+        assertThat(breaksBetweenWords("Built-in", listOf(6))).isTrue()
+    }
+
+    @Test fun aNarrowRoomNeverSplitsAWord() { // AC-C13 [judge:hm-blueprint-name-midword]
+        // Narrow and tall: "Mudroom" at the small size is wider than the room, so a soft wrap would split it.
+        val one = measurer.measure("Mudroom", small)
+        val z = 1f
+        val widthIn = (one.size.width * 0.8f / 0.9f / z).toInt()
+        roomNameLayouts(room(widthIn, 400, "Mudroom"), z, measurer, name, small).forEach { l ->
+            assertThat(l.lineCount).isEqualTo(1)
+        }
+        roomNameLayouts(room(widthIn, 400, "Powder room"), z, measurer, name, small).forEach { l ->
+            assertThat(breaksBetweenWords("Powder room", (0 until l.lineCount - 1).map { l.getLineEnd(it) })).isTrue()
+        }
+    }
 }

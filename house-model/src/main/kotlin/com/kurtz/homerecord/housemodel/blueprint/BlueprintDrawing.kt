@@ -145,8 +145,16 @@ internal fun roomNameLayouts(
             text, style, maxLines = 2, softWrap = true,
             constraints = androidx.compose.ui.unit.Constraints(maxWidth = maxW.toInt()),
         )
-        if (ok(wrapped) && !wrapped.didOverflowHeight && wrapped.lineCount > 1) yield(wrapped)
+        if (ok(wrapped) && !wrapped.didOverflowHeight && wrapped.lineCount > 1 && breaksBetweenWords(text, (0 until wrapped.lineCount - 1).map { wrapped.getLineEnd(it) })) yield(wrapped)
     }
+}
+
+/**
+ * True when every line of a wrapped name ends between words: a word too wide for the room would otherwise be split
+ * ("Mudroo / m"), so that wrap is dropped and a smaller size is tried instead (judge:hm-blueprint-name-midword, rule 25).
+ */
+internal fun breaksBetweenWords(text: String, lineEnds: List<Int>): Boolean = lineEnds.all { end ->
+    end <= 0 || end >= text.length || text[end - 1].isWhitespace() || text[end].isWhitespace() || text[end - 1] == '-'
 }
 
 /** [small] itself, then 85%, 70% and 50% of its size: at 200% font the smallest step is the label's size at 100%. */

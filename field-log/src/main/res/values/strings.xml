@@ -594,6 +594,7 @@
     <string name="clock_crew_title">Clock in your crew</string>
     <string name="clock_crew_empty">No one else is on the crew yet.</string>
     <string name="clock_crew_on_clock">On the clock</string>
+    <string name="clock_crew_pick">Pick who to clock in</string>
     <plurals name="clock_crew_in">
         <item quantity="one">Clock in %d person</item>
         <item quantity="other">Clock in %d people</item>

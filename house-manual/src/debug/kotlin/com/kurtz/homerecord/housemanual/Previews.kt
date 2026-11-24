@@ -2051,7 +2051,7 @@ private val sampleReminderRows = run {
         reminderRow("r1", "Replace furnace filter", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, "2026-10-28", item = "Basement furnace", interval = 3),
         reminderRow("r2", "Test sump pump", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DUE, "2026-11-06", item = "Sump pump", interval = 3),
         reminderRow("r3", "Check heating before winter", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2026-11-20", interval = 12, snoozed = "2026-11-20", seasonal = true),
-        reminderRow("r4", "Warranty ends soon: Dishwasher", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2026-12-14", item = "Dishwasher"),
+        reminderRow("r4", "Warranty ends Dec 21, 2026: Dishwasher", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2026-12-14", item = "Dishwasher"),
         reminderRow("r5", "Flush water heater", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.UPCOMING, "2027-03-01", item = "Water heater", interval = 12),
         reminderRow("r6", "Clean dryer vent", com.kurtz.homerecord.housemodel.reminders.ReminderBucket.DONE, "2027-11-02", item = "Dryer", interval = 12, done = "2026-11-02"),
     )
