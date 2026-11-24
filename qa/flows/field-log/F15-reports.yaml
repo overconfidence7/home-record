@@ -62,6 +62,14 @@ appId: com.kurtz.homerecord.fieldlog
     timeout: 10000
 - assertVisible: "Photo reports"
 - takeScreenshot: F15-photo-reports
+# AC-F28 date range: Whole job covers each job's photos from the first to the last
+- tapOn:
+    id: fl_reports_range_WholeJob
+- extendedWaitUntil:
+    visible: "Each job's first photo to its last"
+    timeout: 10000
+- assertNotVisible: "No photos in these dates"
+- takeScreenshot: F15-photo-reports-whole-job
 - tapOn:
     id: fl_reports_tab_Summaries
 - extendedWaitUntil:

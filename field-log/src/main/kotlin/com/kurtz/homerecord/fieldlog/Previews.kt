@@ -855,6 +855,25 @@ fun ReportsSummariesPreview() = Frame {
     )
 }
 
+/** Photo reports tab with Whole job picked (AC-F28 date range): every job's photos, first to last. */
+@ThemePreviews
+@Composable
+fun ReportsPhotosWholeJobPreview() = Frame {
+    com.kurtz.homerecord.fieldlog.reports.ReportsScreen(
+        com.kurtz.homerecord.fieldlog.reports.ReportsUiState(
+            loading = false, from = TS_MONDAY, to = TS_MONDAY.plusDays(6),
+            photoJobs = listOf(
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j2", "Ortiz kitchen remodel", 164),
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j3", "Hale basement finish", 57),
+                com.kurtz.homerecord.fieldlog.reports.PhotoReportJob("j1", "Garage subpanel", 9),
+            ),
+            tab = com.kurtz.homerecord.fieldlog.reports.ReportTab.Photos,
+            photoWholeJob = true,
+        ),
+        {}, {},
+    )
+}
+
 /** Photo reports tab (AC-F28): one job with photos, one with none, one PDF being made. */
 @ThemePreviews
 @Composable

@@ -67,6 +67,15 @@ object PhotoReportPicker {
                 !day.isBefore(from) && !day.isAfter(to)
             }
             .groupingBy { it.jobId.orEmpty() }.eachCount()
+
+    /** Each job's first and last day with a live photo, for a whole-job report (AC-F28); jobs without photos are absent. */
+    fun spanByJob(photos: List<ReportPhoto>, zone: java.time.ZoneId): Map<String, Pair<java.time.LocalDate, java.time.LocalDate>> =
+        photos.asSequence().filter { !it.deleted && it.jobId != null }
+            .groupBy { it.jobId.orEmpty() }
+            .mapValues { (_, list) ->
+                val days = list.map { java.time.Instant.ofEpochMilli(it.takenAt).atZone(zone).toLocalDate() }
+                days.min() to days.max()
+            }
 }
 
 /** What goes on a photo report PDF, already in words. */

@@ -56,11 +56,14 @@ class ReportsDeps(
 /** FL-Reports: hours by person and by job over a week range, the two CSV exports (AC-F15, AC-F46), and the job timeline of delays (AC-F32). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedStateHandle) : ViewModel() {
-    private val _state = MutableStateFlow(ReportsUiState(range = rangeOf(saved[RANGE]), tab = tabOf(saved[TAB])))
+    private val _state = MutableStateFlow(ReportsUiState(range = rangeOf(saved[RANGE]), tab = tabOf(saved[TAB]), photoWholeJob = saved[PHOTO_ALL] ?: false))
     val state: StateFlow<ReportsUiState> = _state.asStateFlow()
 
     private var settings = CompanySettings()
     private val range = MutableStateFlow(_state.value.range)
+    private val photoAll = MutableStateFlow(_state.value.photoWholeJob)
+    /** Each job's first and last photo day, for a whole-job photo report. */
+    private var photoSpans: Map<String, Pair<LocalDate, LocalDate>> = emptyMap()
     private var latest: Snapshot? = null
 
     private class Snapshot(
@@ -117,9 +120,12 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
 
     init {
         viewModelScope.launch {
-            combine(d.jobs, d.photos, range) { jobs, photos, r ->
+            combine(d.jobs, d.photos, range, photoAll) { jobs, photos, r, all ->
                 val weeks = weeksOf(r)
-                val counts = com.kurtz.homerecord.core.log.PhotoReportPicker.countByJob(photos, weeks.first(), weeks.last().plusDays(6), d.zone)
+                photoSpans = com.kurtz.homerecord.core.log.PhotoReportPicker.spanByJob(photos, d.zone)
+                val from = if (all) LocalDate.MIN else weeks.first()
+                val to = if (all) LocalDate.MAX else weeks.last().plusDays(6)
+                val counts = com.kurtz.homerecord.core.log.PhotoReportPicker.countByJob(photos, from, to, d.zone)
                 jobs.filter { it.deletedAt == null }
                     .sortedWith(compareBy<JobEntity>({ it.status != ACTIVE }, { (counts[it.id] ?: 0) == 0 }, { it.name.lowercase() }))
                     .map { PhotoReportJob(it.id, it.name, counts[it.id] ?: 0) }
@@ -131,8 +137,15 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
         when (event) {
             is ReportsEvent.SelectRange -> {
                 saved[RANGE] = event.range.name
+                saved[PHOTO_ALL] = false
                 range.value = event.range
-                _state.update { it.copy(photoNotice = null) }
+                photoAll.value = false
+                _state.update { it.copy(photoNotice = null, photoWholeJob = false) }
+            }
+            ReportsEvent.SelectWholeJob -> {
+                saved[PHOTO_ALL] = true
+                photoAll.value = true
+                _state.update { it.copy(photoNotice = null, photoWholeJob = true) }
             }
             is ReportsEvent.SelectTab -> {
                 saved[TAB] = event.tab.name
@@ -166,9 +179,12 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
         if (s.photoBusy != null || s.photoJobs.none { it.id == jobId && it.photos > 0 }) return
         _state.update { it.copy(photoBusy = jobId, photoNotice = null) }
         val weeks = weeksOf(range.value)
+        val span = if (photoAll.value) photoSpans[jobId] else null
+        val from = span?.first ?: weeks.first()
+        val to = span?.second ?: weeks.last().plusDays(6)
         viewModelScope.launch {
             val outcome = try {
-                d.sharePhotoReport(jobId, weeks.first(), weeks.last().plusDays(6))
+                d.sharePhotoReport(jobId, from, to)
             } catch (e: java.io.IOException) {
                 PhotoReportOutcome.Failed
             } catch (e: android.content.ActivityNotFoundException) {
@@ -211,6 +227,7 @@ class ReportsViewModel(private val d: ReportsDeps, private val saved: SavedState
     private companion object {
         const val RANGE = "range"
         const val TAB = "tab"
+        const val PHOTO_ALL = "photo_all"
 
         fun tabOf(name: String?): ReportTab = ReportTab.entries.firstOrNull { it.name == name } ?: ReportTab.Hours
         const val ACTIVE = "ACTIVE"

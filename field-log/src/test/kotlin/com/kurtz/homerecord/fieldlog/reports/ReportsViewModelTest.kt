@@ -182,4 +182,24 @@ class ReportsViewModelTest {
         vm.onEvent(ReportsEvent.SelectRange(ReportRange.ThisWeek))
         assertThat(vm.state.value.photoNotice).isNull()
     }
+
+    // AC-F28 date range: Whole job counts every photo and shares each job's report from its first photo day to its last
+    @Test fun photoReportsWholeJobCoversEveryPhotoAndIsRemembered() {
+        val saved = SavedStateHandle()
+        val vm = vm(saved)
+        vm.onEvent(ReportsEvent.SelectTab(ReportTab.Photos))
+        vm.onEvent(ReportsEvent.SelectWholeJob)
+        assertThat(vm.state.value.photoWholeJob).isTrue()
+        assertThat(vm.state.value.photoJobs.map { it.name to it.photos })
+            .containsExactly("Attic run" to 2, "Garage subpanel" to 1, "Bath fan" to 0).inOrder()
+        vm.onEvent(ReportsEvent.SharePhotoReport("j3"))
+        assertThat(photoAsks.last()).isEqualTo(Triple("j3", monday.plusDays(1), monday.plusDays(2)))
+        vm.onEvent(ReportsEvent.SharePhotoReport("j1"))
+        assertThat(photoAsks.last()).isEqualTo(Triple("j1", monday.minusDays(3), monday.minusDays(3)))
+
+        assertThat(vm(saved).state.value.photoWholeJob).isTrue()
+        vm.onEvent(ReportsEvent.SelectRange(ReportRange.ThisWeek))
+        assertThat(vm.state.value.photoWholeJob).isFalse()
+        assertThat(vm.state.value.photoJobs.first { it.id == "j1" }.photos).isEqualTo(0)
+    }
 }

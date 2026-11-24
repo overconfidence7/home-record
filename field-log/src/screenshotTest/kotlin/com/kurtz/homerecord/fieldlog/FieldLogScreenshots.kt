@@ -314,6 +314,11 @@ fun ReportsPhotosScreenshot() = ReportsPhotosPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun ReportsPhotosWholeJobScreenshot() = ReportsPhotosWholeJobPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureReadyScreenshot() = CaptureReadyPreview()
 
 @PreviewTest

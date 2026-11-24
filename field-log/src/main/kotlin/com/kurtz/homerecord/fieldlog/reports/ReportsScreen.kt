@@ -92,7 +92,7 @@ fun ReportsScreen(
                             delayTimeline(state, onOpenLog)
                         }
                         ReportTab.Photos -> {
-                            item(key = "range") { RangePicker(state, onEvent, Modifier.padding(horizontal = 16.dp)) }
+                            item(key = "range") { RangePicker(state, onEvent, Modifier.padding(horizontal = 16.dp), photos = true) }
                             photoReports(state, onEvent)
                         }
                         ReportTab.Summaries -> jobSummaries(state, onEvent)
@@ -137,21 +137,30 @@ private fun LazyListScope.hours(state: ReportsUiState, onEvent: (ReportsEvent) -
 }
 
 @Composable
-private fun RangePicker(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit, modifier: Modifier) {
+private fun RangePicker(state: ReportsUiState, onEvent: (ReportsEvent) -> Unit, modifier: Modifier, photos: Boolean = false) {
+    // The Photos tab also offers Whole job: a long job's report from its first photo to its last (AC-F28 "date range").
+    val wholeJob = photos && state.photoWholeJob
     val fmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
         androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ReportRange.entries.forEach { r ->
                 FilterChip(
-                    selected = state.range == r, onClick = { onEvent(ReportsEvent.SelectRange(r)) },
+                    selected = !wholeJob && state.range == r, onClick = { onEvent(ReportsEvent.SelectRange(r)) },
                     label = { Text(stringResource(rangeLabel(r))) },
                     modifier = Modifier.heightIn(min = 48.dp).testTag("fl_reports_range_${r.name}"),
                 )
             }
+            if (photos) {
+                FilterChip(
+                    selected = wholeJob, onClick = { onEvent(ReportsEvent.SelectWholeJob) },
+                    label = { Text(stringResource(R.string.rep_range_whole_job)) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("fl_reports_range_WholeJob"),
+                )
+            }
         }
         Text(
-            stringResource(R.string.rep_dates, state.from.format(fmt), state.to.format(fmt)),
+            if (wholeJob) stringResource(R.string.rep_whole_job_dates) else stringResource(R.string.rep_dates, state.from.format(fmt), state.to.format(fmt)),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -306,7 +315,7 @@ private fun LazyListScope.photoReports(state: ReportsUiState, onEvent: (ReportsE
     item(key = "photos-h") { SectionHeading(stringResource(R.string.rep_photos)) }
     item(key = "photos-hint") {
         Text(
-            stringResource(if (state.photoJobs.isEmpty()) R.string.rep_summaries_none else R.string.rep_photos_hint),
+            stringResource(if (state.photoJobs.isEmpty()) R.string.rep_summaries_none else if (state.photoWholeJob) R.string.rep_photos_hint_all else R.string.rep_photos_hint),
             Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -327,8 +336,8 @@ private fun LazyListScope.photoReports(state: ReportsUiState, onEvent: (ReportsE
             headline = job.name,
             supporting = when {
                 busy -> stringResource(R.string.rep_summary_making)
-                has -> pluralStringResource(R.plurals.rep_photos_count, job.photos, job.photos)
-                else -> stringResource(R.string.rep_photos_zero)
+                has -> pluralStringResource(if (state.photoWholeJob) R.plurals.rep_photos_count_all else R.plurals.rep_photos_count, job.photos, job.photos)
+                else -> stringResource(if (state.photoWholeJob) R.string.rep_photos_zero_all else R.string.rep_photos_zero)
             },
             leading = { Icon(Icons.Rounded.PhotoLibrary, contentDescription = null) },
             trailing = when {

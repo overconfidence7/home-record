@@ -48,6 +48,16 @@ class PhotoReportTest {
         assertThat(counts).containsExactly("j1", 5, "j2", 1)
     }
 
+    // AC-F28 date range: a whole-job report runs from the job's first live photo day to its last
+    @AcceptanceCriterion("AC-F28")
+    @Test fun spansEachJobsPhotosFirstToLast() {
+        val spans = PhotoReportPicker.spanByJob(photos, zone)
+        assertThat(spans).containsExactly(
+            "j1", LocalDate.parse("2026-10-25") to LocalDate.parse("2026-11-02"),
+            "j2", LocalDate.parse("2026-10-28") to LocalDate.parse("2026-10-28"),
+        )
+    }
+
     private fun content(n: Int) = PhotoReportContent(
         company = "Ortiz Electric", companyLine = "(610) 555-0142", title = "Photo report, Oct 26 to Nov 1, 2026",
         job = "Hale kitchen", jobLine = "Dana Hale · 14 Maple Ave", facts = listOf("$n photos"),

@@ -125,6 +125,8 @@
     <string name="rep_range_this">This week</string>
     <string name="rep_range_last">Last week</string>
     <string name="rep_range_four">Last 4 weeks</string>
+    <string name="rep_range_whole_job">Whole job</string>
+    <string name="rep_whole_job_dates">Each job\'s first photo to its last</string>
     <string name="rep_dates">%1$s to %2$s</string>
     <string name="rep_empty_title">No hours in these dates</string>
     <string name="rep_empty">Hours show here once the crew clocks in. Pick another range to see earlier weeks.</string>
@@ -162,6 +164,12 @@
         <item quantity="other">%d photos in these dates</item>
     </plurals>
     <string name="rep_photos_zero">No photos in these dates</string>
+    <plurals name="rep_photos_count_all">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <string name="rep_photos_zero_all">No photos yet</string>
+    <string name="rep_photos_hint_all">Every photo of the job, four to a page with room, phase, date and note, as a PDF.</string>
     <string name="rep_photo_make">Share photo report PDF</string>
     <string name="rep_photo_failed">Couldn\'t make the photo report. Try again.</string>
     <string name="rep_photo_none_here">The photos from these dates are still on another phone. Open the job\'s Photos to download them, then try again.</string>

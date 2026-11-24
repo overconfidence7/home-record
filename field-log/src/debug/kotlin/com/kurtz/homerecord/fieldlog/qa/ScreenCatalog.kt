@@ -130,6 +130,7 @@ object ScreenCatalog {
         QaScreen("reports-delays", nonRoot = true) { ReportsDelaysPreview() },
         QaScreen("reports-summaries", nonRoot = true) { ReportsSummariesPreview() },
         QaScreen("reports-photos", nonRoot = true) { ReportsPhotosPreview() },
+        QaScreen("reports-photos-whole-job", nonRoot = true) { ReportsPhotosWholeJobPreview() },
         QaScreen("photos-tab", nonRoot = false) { PhotosTabPreview() },
         QaScreen("photos-tab-link", nonRoot = false) { PhotosTabLinkPreview() },
         QaScreen("photos-load-failed", nonRoot = false) { PhotosLoadFailedPreview() },

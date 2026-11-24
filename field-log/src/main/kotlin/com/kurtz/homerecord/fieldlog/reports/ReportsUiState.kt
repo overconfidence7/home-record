@@ -38,6 +38,8 @@ data class ReportsUiState(
     /** The job whose photo report is being made, or null. */
     val photoBusy: String? = null,
     val photoNotice: PhotoReportOutcome? = null,
+    /** Photo reports cover each job's every photo, first to last, instead of [range] (AC-F28 "date range"). */
+    val photoWholeJob: Boolean = false,
 ) {
     val isEmpty: Boolean get() = byPerson.isEmpty() && byJob.isEmpty()
 }
@@ -53,6 +55,8 @@ sealed interface ReportsEvent {
     data class ShareJobSummary(val jobId: String) : ReportsEvent
     data class SelectTab(val tab: ReportTab) : ReportsEvent
     data class SelectRange(val range: ReportRange) : ReportsEvent
+    /** Photos tab only: each job's report covers all its photos. */
+    data object SelectWholeJob : ReportsEvent
     data object ExportShifts : ReportsEvent
     data object ExportQuickBooks : ReportsEvent
     data object DismissNotice : ReportsEvent
