@@ -3324,3 +3324,86 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
 
 Tested: 102 device stages, 2261 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 91. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-23 (commit 86d14c0b)
+
+Judged the suite results for 86d14c0b (run of 2026-11-07 23:03 UTC, 102 stages, 91 passed). That is `build` HEAD's app code: the two later commits are QA auto entries, and nothing has been committed to `build` since 2026-11-07. First judge look at the T076 sharing and viewer work, T032b2 Pro gates, T077 More, the S1–S5 ship-ready passes and the new error states.
+
+Verdict: House Manual: on one phone the house record holds up end to end: plan, items, panel, emergency, reminders, Pro report and backup all pass on device, and every list now has a real error state with Retry. Nate would say first that sharing and the second phone do not work: a free signed-in owner is told "Your home is still uploading" forever, and even with Pro the second phone and the invited family member open an empty house. / Field Log: the best run yet: every walkthrough flow except F18 passes, the daily log now shows Sent, and job summaries and photo reports share without crashing. Nate would say first that a receipt typed after a failed save still lands in Materials as $1.00, which is exactly the number a bookkeeper would catch.
+
+- [ ] [Major] After Pro turns on, a signed-in second phone stays on an empty house: H17b turns on Pro after "Cloud sync is off", then waits for Furnace and gets "No items yet"; x-share (family member joined by link) and x-share-viewer (viewer) open the same empty Items tab. Turning Pro on does not restart the sync that T032b2e switched off, and the joiners get nothing either [judge:hm-pro-on-sync-not-resumed] - steps: H17b, x-share, x-share-viewer - expected: PRODUCT.md H17 (the home appears with photos), AC-H18 ("limit gone without restart"), AC-H16 - actual: Items "No items yet" / "Nothing has been added to this home yet." on the second phone in all three flows - screenshot: qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-step-067-assertCondition-Furnace.png
+- [ ] [Product gap] Share this house on a free signed-in phone shows "Your home is still uploading. You can share it once the first sync finishes. Try again in a minute." with Retry. With sync off on the free tier (T032b2e) the first sync never finishes, so Retry can never succeed, and the paywall T032b2d promises ("Sharing this house is part of Pro.") is never reached [judge:hm-share-free-still-uploading] - steps: H18b: free phone, sign in, More → Share this house - expected: AC-H18 / T032b2d (Invite family opens HM-Paywall), rule 10 (an error says what failed and offers a way out) - actual: a waiting state that never ends - screenshot: qa-results:latest/house-manual/screenshots/flow-H18b-claim-link-step-040-assertCondition-hm_share_invite_editor.png
+- [ ] [Major] The House tab says "No rooms on this floor. Draw the rooms in the plan editor and they show up here." with Edit plan on Main, while Floors in the same tour lists "Main, 6 rooms" and the plan editor draws Kitchen, Living room, Dining room and Garage on Main. Seen in the dark and 200% tours; the landscape tour and the H02/H03 flows draw the blueprint, so the tab sometimes keeps a stale empty plan [judge:hm-house-tab-stale-empty] - steps: tour: seed, open House - expected: PRODUCT.md H3 (clean blueprint, tap a room opens it) - actual: empty state for a drawn floor - screenshot: qa-results:latest/house-manual/screenshots/tour-dark-house.png
+- [ ] [Product gap] Claiming a Field Log handoff into a home that already has floors adds a second "Main" floor: after X02 the House tab shows the chips Upper, Main, Main, Basement, with the crew's Kitchen alone on the new Main. The import preview listed "Floors 1" and offered no choice to put the rooms on the existing Main [judge:hm-import-duplicate-floor] - steps: X02: Field Log sends the handoff, House Manual (onboarded Maple St, two-story with basement) claims and imports - expected: AC-H17 (preview shows conflicts; the crew's rooms land in the homeowner's house), PRODUCT.md H18 - actual: duplicate floor named Main - screenshot: qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-house-after-claim.png
+- [ ] [Minor] Home's Needs attention prints raw ISO dates: "Reminder overdue since 2026-10-26", "Warranty ends 2026-12-07"; Reminders and Items say "Overdue since Oct 26, 2026" and "Expires Dec 2, 2026" for the same records [judge:hm-home-attention-iso-dates] - steps: Home with an overdue reminder and an expiring warranty - expected: rule 22 (formatted values), docs/voice.md, the same wording as Reminders - actual: yyyy-MM-dd - screenshot: qa-results:latest/house-manual/screenshots/tour-dark-home.png
+- [ ] [UI] Minor: at 200% the Schedule week strip runs off the right edge: Mon to Sat fit and Sunday shows only "S", so Sunday cannot be read or tapped [judge:fl-schedule-week-strip-200] - steps: Schedule tab at 200% font - expected: rule 32 (200% clips nothing) - actual: last day cut - screenshot: qa-results:latest/field-log/screenshots/tour-font200-schedule.png
+- [ ] [UI] Minor: Jobs rows mix trailing content: Active jobs with a start date show the date and no chevron, the others show a chevron and no date, so half the list does not look tappable [judge:fl-jobs-row-trailing] - steps: Jobs tab with dated and undated jobs - expected: rule 7 (one row pattern, trailing meta) - actual: two row styles in one list - screenshot: qa-results:latest/field-log/crawler/field-log/jobs-list-light.png
+- [ ] [Minor] Suite: nine crawler shots are blank grey frames with no status bar icons, so their screens were not checked this run: home-full, item-detail-view-only, items-empty-view-only, document-viewer-offline, item-place-empty-floor (House Manual), plan-trial, plan-crew, clock-loading, log-sent (Field Log). home-full rendered in earlier runs [judge:qa-crawler-blank-shots] - steps: crawler stage - expected: one readable shot per catalog entry (Q002) - actual: empty frames - screenshot: qa-results:latest/house-manual/crawler/house-manual/home-full-light.png
+
+Auto entry review:
+- [auto:flow:field-log:F18-more] is the app, not the flow: the receipt typed after the failed save is listed as "City Electric Supply $1.00" and "All jobs $1.00", the same cursor bug dfa93581 closed. F14 (amount typed once) saves $123.71, so only the retype path regressed.
+- [auto:flow:house-manual:H07-item-page] looks like a flow error [judge: flow error]: the Move to which room sheet is open and correct; Dining room is below the fold (Utility room, Laundry, Rec room, Kitchen, Living room show). Scroll the sheet before tapping.
+- [auto:flow:house-manual:x-more] looks like a flow error [judge: flow error]: More shows Units "Metric" as the last visible row; Climate zone ("Cold") is below it. Scroll to it first.
+- [auto:flow:house-manual:H12-breaker-panel]: the shot shows Edit breaker open for slot 12 with Label "Refrigerator", Amps 20 and the keyboard up, Save still grey. Check whether Save stays disabled with valid input before treating it as the flow's id.
+- [auto:flow:house-manual:H17b-second-phone], [auto:flow:house-manual:x-share], [auto:flow:house-manual:x-share-viewer] and [auto:flow:house-manual:H18b-claim-link] are the app, one cause: see [judge:hm-pro-on-sync-not-resumed] and [judge:hm-share-free-still-uploading].
+- [auto:instrumented:field-log:field-log] and [auto:instrumented:house-manual:house-manual] look like a harness error [judge: flow error]: both fail only `darkFontAndLandscapeVariants` with "dark variant opened with a light configuration (uimode night yes not applied)", while the Maestro dark tours of both apps render dark. The night mode the crawler sets does not reach the instrumentation process; fix the test setup.
+- [auto:jank:field-log:field-log] (open from b373baf9) passed this run: 8% of 107 frames.
+
+Still open and seen again: [judge:qa-3d-blank-emulator] (F10-3d-room black, F10-3d white), [judge:nav-label-200-uneven] ("Reminders" and "Schedule" smaller in the 200% tours), [judge:qa-fl-photo-catalog-no-image] (photo-detail "Couldn't open this photo"), [judge:fl-files-row-actions] (files-tab: cloud, pencil, bin on every row), [judge:fl-house-pin-over-label] (F11b "Kitc[1]hen"), [judge:hm-plan-overlays-no-legend] (plan-overlays-light).
+
+Seen this run and fine: the new error states (Items, Jobs, Emergency, Panels, Contacts, Documents, Reminders, Home, Floors, Clients, Changes, Sync, Clock, Schedule, Tasks, Place on plan) each have an icon, what failed and Retry (rule 10); viewer mode hides every edit control on Home, Items, Panel, Emergency, Contacts, Documents, Reminders, room, wall and plan; More lists every SPEC row with icons and supporting text; Account and sync names the signed-in account; the signed change order now opens as a read-only view titled with the order; F09b shows "Sent … Through the share sheet" and "Changed since sent".
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding → Home with search, Add item, Scan data plate, Emergency, Needs attention | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | H02 and H02b pass: two rooms, shape, doors, stairs | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Flows draw the blueprint and open Kitchen; the dark and 200% tours show "No rooms on this floor" for a drawn Main | qa-results:latest/house-manual/screenshots/tour-dark-house.png |
+| H4 | Pass | Item form with plate fields | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | H05 adds items from the rooms (room preselected) and from Items; grouped kind picker with icons | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Clunky | Place on plan, drag and On a wall pass; the flow stops at Move to room (flow error) | qa-results:latest/house-manual/screenshots/flow-H07-item-page-step-067-tapOnElement-Dining_room.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Pass | Outline and thumbnail | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Clunky | 3D still blank on the emulator (open); the catalog 3D views read well | qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png |
+| H11 | Clunky | Pipe on the plan, wall and search; drawn on the plain wall (open) | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-blueprint-pipe.png |
+| H12 | Clunky | Panel and labeled slots show; the flow stops in Edit breaker with Save grey | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-step-068-assertCondition-hm_breaker_form.png |
+| H13 | Pass | Emergency from Home, item and the tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Pass | Seeded tasks, zone, Done | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-home-report.png |
+| H16 | Pass | Wrong passphrase, preview, restored house and items | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Blocked | Sign in, cloud copy and delete work; the second phone stays empty after Pro | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-step-067-assertCondition-Furnace.png |
+| H18 | Clunky | File import passes with rough-in walls and overlays in Kitchen; claim-link import adds a second Main floor | qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-house-after-claim.png |
+| H19 | Clunky | Paywall with "Can't load prices" and Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Sign in → company → Today empty state with Add a job and Invite crew | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, remove | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Overview with stats, House empty state | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Break, switch, clock out (catalog and unit tests; no flow) | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | F06 passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved as Version 2 with history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture from the job and Today, photos by day | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Log, weather, delays, PDF; Sent line and "Changed since sent" | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-changed-since-sent.png |
+| F10 | Clunky | Behind the wall, overlays, installed water heater and handoff pass; 3D blank on the emulator (open) | qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d-room.png |
+| F11 | Pass | Task pin on the plan and on a file | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Sign, signed read-only view, PDF and link | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Assign, conflict, Tomorrow on Today | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, $123.71 by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Hours, photo reports and job summaries on tabs; share works | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial line, then the lapsed plan screen | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Clunky | Every More screen opens; a receipt retyped after a failed save lists as $1.00 | qa-results:latest/field-log/screenshots/flow-F18-more-step-083-assertCondition-$123_.71.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 649 screenshots (173 distinct flow shots including handoff, 45 tour shots, 431 crawler shots; 44 repeated H01/H02 setup shots and 8 suite shots not opened), 37 walkthrough steps. New issues: 8. Product gaps: 2.
