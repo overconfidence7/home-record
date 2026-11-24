@@ -371,8 +371,10 @@ for a in $PER_APP; do
       w=${size%% *}; h=${size##* }; [ -n "$w" ] && [ -n "$h" ] && [ "$w" -gt 0 ] 2>/dev/null || { w=1080; h=2400; }
       x=$((w / 2)); low=$((h * 3 / 4)); high=$((h / 4))
       adb shell dumpsys gfxinfo "$p" reset >/dev/null 2>&1
-      for i in 1 2 3 4 5 6 7 8; do adb shell input swipe "$x" "$low" "$x" "$high" 150 >/dev/null 2>&1; done
-      for i in 1 2 3 4 5 6 7 8; do adb shell input swipe "$x" "$high" "$x" "$low" 150 >/dev/null 2>&1; done
+      # 12 flings each way: 8 gave 96-138 frames across runs, so Field Log's Jobs list fell under the 100-frame
+      # floor on cc6c4af and c199b14 ([s7:jank-frames]); 24 flings keep every run well above it
+      for i in $(seq 1 12); do adb shell input swipe "$x" "$low" "$x" "$high" 150 >/dev/null 2>&1; done
+      for i in $(seq 1 12); do adb shell input swipe "$x" "$high" "$x" "$low" 150 >/dev/null 2>&1; done
       g=$(adb shell dumpsys gfxinfo "$p" 2>/dev/null | tr -d '\r'); echo "$g" > "$OUT/logs/gfxinfo-$a.txt"
       adb shell dumpsys gfxinfo "$p" framestats 2>/dev/null | tr -d '\r' > "$OUT/logs/framestats-$a.txt"
       shot "$a-jank-list"

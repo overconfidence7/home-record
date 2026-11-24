@@ -6,6 +6,8 @@
 
 (Things the builder cannot do without Nate: credentials, accounts, purchases, device-only checks.)
 
+- 2026-11-24 (S7, AC-C24): 3D at 30 fps needs a real GPU; the CI emulator uses SwiftShader (3.1 fps). On a Pixel 6a-class phone: install House Manual debug, send the debug seed (`adb shell am broadcast -a com.kurtz.homerecord.housemanual.qa.SEED -p com.kurtz.homerecord.housemanual --es scenario 3d-reference --include-stopped-packages`, the reference home: 3 floors, about 3,000 sq ft, 20 photographed walls), open House → 3D view → All floors, orbit for 20 s and read `adb logcat -s HomeRecord3D` ("first frame … ms; … fps"). Pass is 30 fps or more and first frame under 2 s; paste the line into REVIEW.md "Builder ship-ready S7".
+
 - 2026-11-06 ([judge:qa-yml-main-lag], REVIEW Minor): a qa.yml fix on `build` takes effect one scheduled run late, because GitHub reads scheduled workflows from `main` and the copy-to-main job inside qa.yml runs after the stale run has started. Both fixes the judge suggests change `main` (a push-triggered sync workflow on `build` that copies qa.yml to main, or a trampoline on main that runs `gh workflow run qa.yml --ref build`); the builder may not push main and its permission mode refused adding a workflow that does. Needed: Nate picks one and adds it to `main` (or approves the push-triggered sync workflow), or accepts the one-cycle lag.
 - (T038a) Media uploads need an R2 API token: `wrangler secret put R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (and `R2_BUCKET` if not homerecord-media). Until set, POST /media/presign returns 503 unavailable.
 
