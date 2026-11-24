@@ -253,13 +253,16 @@ fun MoneyField(
     imeAction: ImeAction = ImeAction.Next,
 ) {
     val invalid = text.isNotBlank() && Money.parseCents(text) == null
+    // Read unconditionally: a stringResource call skipped or reached by `error ?: if (invalid) …` as the error cleared
+    // shifted the field's remembered state, so the field lost focus after the first key and "123.71" saved as $1.00 (QA F18).
+    val moneyError = stringResource(R.string.money_error)
     LabeledField(
         label = label,
         value = text,
         onValueChange = onTextChange,
         modifier = modifier,
         required = required,
-        error = error ?: if (invalid) stringResource(R.string.money_error) else null,
+        error = error ?: if (invalid) moneyError else null,
         keyboardType = KeyboardType.Decimal,
         imeAction = imeAction,
         cursorAtEnd = true,

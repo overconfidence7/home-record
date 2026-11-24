@@ -3,6 +3,7 @@ package com.kurtz.homerecord.fieldlog.materials
 import android.content.Context
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -58,5 +59,33 @@ class MaterialFormTypingTest {
         rule.waitForIdle()
         assertThat(vm.state.value.draft.amount).isEqualTo("123.71")
         assertThat(vm.state.value.amountCents).isEqualTo(12_371L)
+    }
+
+    @Test fun amountKeepsFocusWhenItsErrorClearsOnTheFirstKey() { // AC-F44
+        val deps = MaterialFormDeps(
+            null, JobMaterials(db), flowOf(listOf(JobOption("j1", "Hale kitchen"))), receipts = null,
+            today = { LocalDate.of(2026, 11, 4) }, fetchReceipt = { null },
+        )
+        val vm = MaterialFormViewModel(deps, SavedStateHandle())
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                val state by vm.state.collectAsState()
+                MaterialFormScreen(state, vm::onEvent, onClose = {})
+            }
+        }
+        rule.waitUntil(10_000) { !vm.state.value.loading }
+        rule.onNodeWithTag("fl_save").performClick()
+        rule.waitForIdle()
+        val vendor = rule.onNodeWithTag("fl_material_form_vendor")
+        vendor.performClick()
+        vendor.performTextInput("City Electric Supply")
+        rule.waitForIdle()
+        val amount = rule.onNodeWithTag("fl_material_form_amount")
+        amount.performClick()
+        rule.waitForIdle()
+        amount.assertIsFocused()
+        amount.performTextInput("1")
+        rule.waitForIdle()
+        amount.assertIsFocused()
     }
 }

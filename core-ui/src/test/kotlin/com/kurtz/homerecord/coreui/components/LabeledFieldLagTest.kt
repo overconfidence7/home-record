@@ -138,4 +138,29 @@ class LabeledFieldLagTest {
         assertThat(value).isEqualTo("123.71")
         field.assertTextContains("123.71")
     }
+
+    @Test fun moneyFieldKeepsFocusBesideAButtonWhenItsErrorClears() { // AC-F44 (QA F18 root cause)
+        // With any other focusable on screen (a form's Save), MoneyField's conditional money-error lookup shifted the
+        // field's remembered state as the "Enter the amount" error cleared, so focus left after the first key.
+        var value by mutableStateOf("")
+        rule.setContent {
+            HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.TextButton(onClick = {}) { androidx.compose.material3.Text("Save") }
+                    MoneyField(
+                        "Amount", value, { value = it }, Modifier.testTag("amount"),
+                        required = true,
+                        error = if (value.isBlank()) "Enter the amount on the receipt." else null,
+                    )
+                }
+            }
+        }
+        val field = rule.onNodeWithTag("amount")
+        field.performClick()
+        rule.waitForIdle()
+        field.assertIsFocused()
+        field.performTextInput("1")
+        rule.waitForIdle()
+        field.assertIsFocused()
+    }
 }
