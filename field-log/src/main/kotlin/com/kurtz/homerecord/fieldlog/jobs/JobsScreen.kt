@@ -171,9 +171,17 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
             // they wrap rather than end in "…" (rule 32).
             headlineMaxLines = 4,
             supportingMaxLines = 4,
-            // Next day on site as trailing meta; with none, the chevron says the row opens (rule 7).
-            trailing = row.nextDay?.let { day -> { Text(shortDate(day), style = MaterialTheme.typography.labelLarge) } }
-                ?: { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) },
+            // One row pattern (rule 7): the next day on site as trailing meta when there is one, then the chevron
+            // on every row so each one reads as tappable.
+            trailing = {
+                androidx.compose.foundation.layout.Row(
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                ) {
+                    row.nextDay?.let { day -> Text(shortDate(day), style = MaterialTheme.typography.labelLarge) }
+                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+                }
+            },
             onClick = { onEvent(JobsEvent.Open(row.summary.id)) },
             modifier = Modifier.testTag("fl_jobs_row_${row.summary.id}"),
         )
