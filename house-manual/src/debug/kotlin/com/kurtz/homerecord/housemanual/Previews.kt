@@ -1748,7 +1748,7 @@ fun ItemDetailShutoffPreview() = Frame {
 /** The "Which shutoff turns this off?" sheet: the home's shutoffs, the linked one checked, and No shutoff (AC-C45). */
 @ThemePreviews
 @Composable
-fun ItemShutoffPickerPreview() = Frame {
+fun ItemShutoffPickerPreview() = SheetFrame {
     com.kurtz.homerecord.housemanual.items.ShutoffPickerContent(ItemDetailUiState(loading = false, detail = furnaceDetail(false), shutoff = furnaceShutoffs[1], shutoffChoices = furnaceShutoffs), {})
 }
 
@@ -1765,7 +1765,7 @@ private val furnaceMoveChoices = listOf(
 /** Overflow "Move to room": the home's rooms by floor, the furnace's room checked, then Exterior and Whole house. */
 @ThemePreviews
 @Composable
-fun ItemMoveRoomPreview() = Frame {
+fun ItemMoveRoomPreview() = SheetFrame {
     val detail = furnaceDetail(false).let { it.copy(item = it.item.copy(roomId = "r-util")) }
     com.kurtz.homerecord.housemanual.items.MoveRoomContent(ItemDetailUiState(loading = false, detail = detail, showMove = true, moveChoices = furnaceMoveChoices), {})
 }
@@ -1889,7 +1889,7 @@ fun PanelFactsLockedPreview() = Frame {
 
 @ThemePreviews
 @Composable
-fun PanelPhotoSheetPreview() = Frame {
+fun PanelPhotoSheetPreview() = SheetFrame {
     com.kurtz.homerecord.coreui.components.OptionsSheetContent(
         stringResource(R.string.panel_photo_sheet_title),
         listOf(

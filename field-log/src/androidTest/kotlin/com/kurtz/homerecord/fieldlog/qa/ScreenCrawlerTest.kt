@@ -68,8 +68,25 @@ class ScreenCrawlerTest {
         }
         compose.waitForIdle()
         inst.waitForIdleSync()
-        val bmp: Bitmap = inst.uiAutomation.takeScreenshot() ?: return
+        // Idle and composed can still capture the window before its first frame reaches the display: a flat frame
+        // below the status bar ([judge:qa-crawler-blank-frames-again]). Take it again until the screen has drawn (5 s).
+        var bmp: Bitmap = inst.uiAutomation.takeScreenshot() ?: return
+        var tries = 0
+        while (bmp.isFlatBelowStatusBar() && tries++ < 20) {
+            Thread.sleep(250)
+            inst.waitForIdleSync()
+            bmp = inst.uiAutomation.takeScreenshot() ?: return
+        }
         File(outDir, "$id-$variant.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 90, it) }
+    }
+
+    /** True when every sampled pixel below the top twelfth (the status bar) is one colour: a window not yet drawn. */
+    private fun Bitmap.isFlatBelowStatusBar(): Boolean {
+        val top = height / 12
+        val first = getPixel(width / 2, top)
+        val step = maxOf(1, minOf(width, height) / 64)
+        for (y in top until height step step) for (x in 0 until width step step) if (getPixel(x, y) != first) return false
+        return true
     }
 
     /** Names a failing node so the finding points at the control: tag, text, layout size and touch box in dp. */
