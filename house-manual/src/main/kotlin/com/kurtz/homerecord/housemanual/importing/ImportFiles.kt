@@ -72,7 +72,7 @@ class ImportFiles(
             }
             is BundleReadResult.Ok -> {
                 val mine = db.homeDao().observeAll().first().firstOrNull()?.id
-                val bundle = mine?.let(result.bundle::retargeted) ?: result.bundle
+                val bundle = mine?.let { result.bundle.retargeted(it, localFloors(it)) } ?: result.bundle
                 ImportRead.Ok(ReadImport(importer.preview(bundle), dir, ImportViewModel.homeName(result.bundle)))
             }
         }
@@ -118,11 +118,14 @@ class ImportFiles(
             }
             is BackupReadResult.Ok -> {
                 val mine = db.homeDao().observeAll().first().firstOrNull()?.id
-                val bundle = mine?.let(result.bundle::retargeted) ?: result.bundle
+                val bundle = mine?.let { result.bundle.retargeted(it, localFloors(it)) } ?: result.bundle
                 ImportRead.Ok(ReadImport(importer.preview(bundle), dir, ImportViewModel.homeName(result.bundle)))
             }
         }
     }
+
+    /** The floors of [homeId] on this phone, id → name, so a bundle's same-named floor joins them (judge:hm-import-duplicate-floor). */
+    private suspend fun localFloors(homeId: String): Map<String, String> = db.floorDao().listFor(homeId).associate { it.id to it.name }
 
     /** Deletes a read that will not be imported (Back, or the screen gone), so its unpacked media leave the cache. */
     fun discard(read: ReadImport) {

@@ -29,18 +29,37 @@ data class HomeBundle(
      * This bundle aimed at [target], the home already on this phone (T063d2): the bundle's own home record is left
      * out (the homeowner's home keeps its name and details) and every `homeId` that named the bundle's home names
      * [target], so the crew's floors, overlays, items and documents join the home this phone shows.
+     *
+     * [localFloors] are the target home's floors, id → name. A bundle floor named like one of them (case and spaces
+     * aside) is that floor: its record is left out and every `floorId` that named it names the home's floor, so the
+     * crew's Kitchen lands on the homeowner's Main instead of a second "Main" [judge:hm-import-duplicate-floor].
      */
-    fun retargeted(target: String): HomeBundle {
+    fun retargeted(target: String, localFloors: Map<String, String> = emptyMap()): HomeBundle {
         if (target == homeId) return this
         val from = JsonPrimitive(homeId)
         val to = JsonPrimitive(target)
+        val byName = localFloors.entries.groupBy({ floorKey(it.value) }, { it.key }).mapValues { it.value.sorted().first() }
+        val sameFloor: Map<String, String> = records["floor"].orEmpty()
+            .filter { !it.deleted && it.id.isNotEmpty() && it.id !in localFloors }
+            .mapNotNull { f ->
+                val name = (f.fields["name"] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: return@mapNotNull null
+                byName[floorKey(name)]?.let { f.id to it }
+            }.toMap()
         return copy(
             homeId = target,
-            records = records.filterKeys { it != "home" }.mapValues { (_, list) ->
-                list.map { r -> if (r.fields["homeId"] == from) BundleRecord(JsonObject(r.fields + ("homeId" to to))) else r }
+            records = records.filterKeys { it != "home" }.mapValues { (type, list) ->
+                list.filter { !(type == "floor" && it.id in sameFloor) }.map { r ->
+                    var fields = r.fields
+                    if (fields["homeId"] == from) fields = JsonObject(fields + ("homeId" to to))
+                    val floor = (fields["floorId"] as? JsonPrimitive)?.takeIf { it.isString }?.content
+                    sameFloor[floor]?.let { fields = JsonObject(fields + ("floorId" to JsonPrimitive(it))) }
+                    if (fields === r.fields) r else BundleRecord(fields)
+                }
             },
         )
     }
+
+    private fun floorKey(name: String): String = name.trim().lowercase().replace(Regex("\\s+"), " ")
 
     companion object {
         const val FORMAT_VERSION = 2

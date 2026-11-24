@@ -183,5 +183,31 @@ class HomeBundleImporterTest {
         assertThat(importer.preview(bundle.retargeted("mine")).plan.nothingToDo).isTrue()
         assertThat(bundle.retargeted("h1")).isSameInstanceAs(bundle)
     }
-}
 
+    // judge:hm-import-duplicate-floor (AC-H17): the crew's "Main floor" is the homeowner's "main  Floor"; its rooms join
+    // that floor instead of a second floor with the same name, and importing again changes nothing
+    @Test fun aSameNamedFloorJoinsTheHomesFloorInsteadOfAddingASecond() = runBlocking<Unit> {
+        seedCrew()
+        owner.homeDao().upsert(HomeEntity(id = "mine", name = "Our house", createdAt = 1, updatedAt = 1))
+        owner.floorDao().upsert(FloorEntity(id = "myMain", homeId = "mine", sortOrder = 1, name = "main  Floor", createdAt = 1, updatedAt = 1))
+        owner.floorDao().upsert(FloorEntity(id = "myBase", homeId = "mine", sortOrder = 0, name = "Basement", createdAt = 1, updatedAt = 1))
+        val (bundle, unpacked) = handoff()
+        val local = owner.floorDao().listFor("mine").associate { it.id to it.name }
+        val aimed = bundle.retargeted("mine", local)
+        assertThat(aimed.records["floor"].orEmpty()).isEmpty()
+        importer.apply(importer.preview(aimed), unpacked)
+        assertThat(owner.floorDao().get("f1")).isNull()
+        assertThat(owner.floorDao().listFor("mine").map { it.name }).containsExactly("Basement", "main  Floor")
+        assertThat(owner.roomDao().get("r1")?.floorId).isEqualTo("myMain")
+        assertThat(owner.wallDao().get("w1")?.roomId).isEqualTo("r1")
+        assertThat(importer.preview(bundle.retargeted("mine", owner.floorDao().listFor("mine").associate { it.id to it.name })).plan.nothingToDo).isTrue()
+    }
+
+    @Test fun aFloorWithANewNameStillArrivesAsItsOwnFloor() = runBlocking<Unit> { // AC-H17
+        seedCrew()
+        val (bundle, _) = handoff()
+        val aimed = bundle.retargeted("mine", mapOf("myUpper" to "Upper"))
+        assertThat(aimed.records["floor"].orEmpty().map { it.id }).containsExactly("f1")
+        assertThat(aimed.records["room"].orEmpty().single().fields["floorId"]).isEqualTo(kotlinx.serialization.json.JsonPrimitive("f1"))
+    }
+}

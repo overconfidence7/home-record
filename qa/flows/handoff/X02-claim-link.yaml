@@ -159,4 +159,11 @@ env:
 - extendedWaitUntil:
     visible: "Kitchen"
     timeout: 15000
+# judge:hm-import-duplicate-floor: the crew's "Main" joins the homeowner's Main; there is one Main chip, not two
+- assertVisible:
+    text: "Main"
+    index: 0
+- assertNotVisible:
+    text: "Main"
+    index: 1
 - takeScreenshot: X02-house-after-claim
