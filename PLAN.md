@@ -483,7 +483,7 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] T081b: docs/privacy-policy.md (both apps and the backend: what is stored, where, retention, deletion, third parties Cloudflare, Resend, RevenueCat, Google sign-in, Firebase Cloud Messaging) and docs/data-safety.md per app, matching the manifests' permissions (contact details under Needs Nate)
   - [x] T081d: delete account (Play requirement for apps with sign-in): backend `DELETE /me` removes the user, their sessions, push tokens and memberships, every home they own (as the cloud copy delete does) and, for a Field Log owner, the company's rows and media; Delete account on HM-Account and FL Account with a confirm; vitest and the privacy policy's choices section updated
   - [x] T081c: docs/store-listing.md for both apps per voice.md (title, short and full description, screenshots list from the tour)
-- [ ] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
+- [x] S1–S10: Ship-ready checklist in CLAUDE.md, one item per run, in order (acceptance: AC-U10, AC-U11 under S4 and S7)
   - [x] S1: lint warnings fixed or justified in REVIEW.md (Builder ship-ready S1)
   - [x] S1a: the 16 PluralsCandidate count strings as `<plurals>` ([s1:plurals])
   - [x] S2: every `[unit]` criterion in SPEC.md (28) and every AC-B (15) named by a JVM test or vitest file
@@ -508,4 +508,5 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
   - [x] S7: performance from the suite on c199b144 (cold start 743/872 ms, StrictMode 0, HM jank pass); FL jank stage made measurable (24 flings, [s7:jank-frames]); AC-C24 30 fps needs a real phone (Needs Nate)
   - [x] S8: release build: assembleRelease with R8 green for both apps, keep rules checked against the AARs, release manifests free of debug components, both launch in the suite's release stage; upload key under Needs Nate
   - [x] S9: icons and identity: adaptive icons in both apps, own monochrome layer (door and check cut out) for themed icons, names and versioning checked
+  - [x] S10: store readiness: data safety checked against the merged release manifests (library permissions explained, in-app deletion), privacy policy and store listing limits checked; legal name, contact and policy URL stay with Nate
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
