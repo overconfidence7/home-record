@@ -73,6 +73,11 @@ appId: com.kurtz.homerecord.housemanual
       - assertVisible:
           id: "hm_3d_stage_finished"
           checked: true
+      # Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+      - extendedWaitUntil:
+          visible:
+            id: "hm_3d_scene_drawn"
+          timeout: 30000
       - takeScreenshot: H09-wall-in-3d
       - tapOn:
           id: "hm_back"

@@ -58,4 +58,9 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_3d_reset"
 - assertVisible:
     id: "hm_3d_scene"
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: 3d-perf-all-floors

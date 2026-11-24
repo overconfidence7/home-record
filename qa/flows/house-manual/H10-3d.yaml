@@ -32,6 +32,11 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_3d_stage_finished"
     checked: true
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H10-kitchen-3d
 # Orbit with a drag; Reset view brings the camera back
 - swipe:
@@ -50,6 +55,11 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 10000
 - assertNotVisible:
     id: "hm_3d_back_to_floor"
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H10-floor-3d
 # All floors
 - tapOn:
@@ -57,6 +67,11 @@ appId: com.kurtz.homerecord.housemanual
 - extendedWaitUntil:
     visible: "All floors in 3D"
     timeout: 10000
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H10-all-floors-3d
 - tapOn:
     id: "hm_back"

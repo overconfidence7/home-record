@@ -54,6 +54,11 @@ appId: com.kurtz.homerecord.housemanual
     from:
       id: "hm_3d_scene"
     direction: LEFT
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H03-3d-room
 - tapOn:
     id: "hm_3d_back_to_floor"
@@ -95,6 +100,11 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible: "Main in 3D"
 - tapOn:
     id: "hm_3d_reset"
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H03-3d
 # AC-C21: All floors stacks every floor, pulled apart; picking a floor again shows it over the faded floors below
 - tapOn:
@@ -104,6 +114,11 @@ appId: com.kurtz.homerecord.housemanual
     timeout: 15000
 - assertVisible:
     id: "hm_3d_scene"
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H03-3d-all-floors
 - tapOn: "Main"
 - extendedWaitUntil:

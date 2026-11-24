@@ -92,6 +92,11 @@ appId: com.kurtz.homerecord.fieldlog
     id: "fl_3d_walls"
 - tapOn:
     id: "fl_3d_reset"
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "fl_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: F10-3d
 - tapOn:
     id: "fl_back"
@@ -113,6 +118,11 @@ appId: com.kurtz.homerecord.fieldlog
 - assertVisible:
     id: "fl_3d_stage_rough_in"
     checked: true
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "fl_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: F10-3d-room
 - tapOn:
     id: "fl_3d_back_to_floor"

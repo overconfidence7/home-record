@@ -1,14 +1,54 @@
 # Walkthrough H11: draw a cold-water pipe on a kitchen wall with a note, switch the wall's stage and see it stay
-# (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9). Builds on H02 (Kitchen drawn). Runs on the plain wall when no photo is
-# in, so it does not depend on the photo picker; Home search finds the overlay and opens its wall (T052c1); the plan editor's
+# (AC-C25, AC-C26, AC-C27, AC-C28, AC-H9). Builds on H02 (Kitchen drawn). The north wall first gets the Finished photo
+# from qa/fixtures/wall-kitchen.jpg through the gallery, as in H09, so the pipe is drawn on the wall photo; when the system
+# picker does not offer the fixture the flow still runs on the plain wall ([judge:qa-h11-plain-wall]). Home search finds the overlay and opens its wall (T052c1); the plan editor's
 # Overlays mode draws a gas line on the floor plan, picks it and deletes it (T052c2); the 3D half (T053b) and the blueprint Plumbing layer (T053c) show the pipe.
 # Stage buttons are radio buttons to accessibility, so the chosen stage is asserted as `checked`.
 appId: com.kurtz.homerecord.housemanual
 ---
+- addMedia:
+    - "../../fixtures/wall-kitchen.jpg"
 - runFlow: H02-draw-plan.yaml
 - tapOn:
     id: "hm_tab_house"
 - tapOn: "Kitchen"
+- scrollUntilVisible:
+    element: "North wall"
+# The walkthrough draws on the wall photo: the north wall (first in compass order) gets its Finished photo from the gallery
+- tapOn:
+    text: "Photograph"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "hm_sheet_wall_choose"
+    timeout: 10000
+- tapOn:
+    id: "hm_sheet_wall_choose"
+- runFlow:
+    when:
+      visible: "Photo taken on.*"
+    commands:
+      - tapOn:
+          text: "Photo taken on.*"
+          index: 0
+- runFlow:
+    when:
+      visible:
+        id: "hm_wall_outline_use"
+    commands:
+      - tapOn:
+          id: "hm_wall_outline_use"
+      - extendedWaitUntil:
+          visible: ".*Photos: Finished"
+          timeout: 15000
+      - evalScript: ${output.wallPhoto = true}
+# Still in the system picker (no fixture offered): leave it and carry on with the plain wall
+- runFlow:
+    when:
+      notVisible:
+        id: "hm_back"
+    commands:
+      - back
 - scrollUntilVisible:
     element: "North wall"
 # AC-C28: a wall row opens the wall to draw on
@@ -21,6 +61,13 @@ appId: com.kurtz.homerecord.housemanual
     id: "hm_wall_picture"
 - assertVisible:
     id: "hm_wall_overlays_empty"
+# With the photo in, the wall shows it rather than the plain-wall note
+- runFlow:
+    when:
+      true: ${output.wallPhoto === true}
+    commands:
+      - assertNotVisible:
+          id: "hm_wall_no_photo"
 - takeScreenshot: H11-wall-empty
 # AC-C25: Add overlay, then taps along the pipe make a run
 - tapOn:
@@ -126,6 +173,11 @@ appId: com.kurtz.homerecord.housemanual
 - extendedWaitUntil:
     visible: ".*Tap a pipe, wire or item to open it.*"
     timeout: 10000
+# Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_scene_drawn"
+    timeout: 30000
 - takeScreenshot: H11-3d-pipe
 - tapOn:
     id: "hm_layer_plumbing"

@@ -3,7 +3,10 @@ package com.kurtz.homerecord.housemodel.scene
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
@@ -12,6 +15,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.google.android.filament.Engine
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.RenderableManager
@@ -129,54 +134,75 @@ fun FloorSceneView(
         createDefaultCameraManipulator(eyePosition = eye, targetPosition = target)
     }
 
-    SceneView(
-        modifier = modifier,
-        engine = engine,
-        materialLoader = materialLoader,
-        cameraManipulator = manipulator,
-        autoCenterContent = false,
-        // A tap on a marker opens it (AC-C23); a tap on a room's walls or floor stands the camera inside it; other taps
-        // inside a room do nothing.
-        onGestureListener = rememberOnGestureListener(
-            onSingleTapConfirmed = { _, node ->
-                val name = node?.name
-                val marker = name?.let(markerByName::get)
-                when {
-                    marker != null -> onMarkerTap(marker)
-                    name != null && room == null && !name.startsWith(MARKER_PREFIX) -> onRoomTap(name)
+    // `<app>_3d_scene_drawn` appears once this scene (these batches, every picture loaded) has drawn a few frames, so a
+    // flow on a slow software-rendered emulator screenshots the house, not the blank surface ([judge:qa-3d-blank-emulator]).
+    // Held once (SceneView may keep its first onFrame) and reset when the scene's batches change.
+    val sceneFrames = remember { intArrayOf(0) }
+    var drawn by remember { mutableStateOf(false) }
+    DisposableEffect(geometries) {
+        sceneFrames[0] = 0
+        drawn = false
+        onDispose { }
+    }
+    val loadedPictures by rememberUpdatedState(pictures)
+    val prefix = LocalTagPrefix.current
+    Box(modifier) {
+        SceneView(
+            modifier = Modifier.matchParentSize(),
+            engine = engine,
+            materialLoader = materialLoader,
+            cameraManipulator = manipulator,
+            autoCenterContent = false,
+            // A tap on a marker opens it (AC-C23); a tap on a room's walls or floor stands the camera inside it; other taps
+            // inside a room do nothing.
+            onGestureListener = rememberOnGestureListener(
+                onSingleTapConfirmed = { _, node ->
+                    val name = node?.name
+                    val marker = name?.let(markerByName::get)
+                    when {
+                        marker != null -> onMarkerTap(marker)
+                        name != null && room == null && !name.startsWith(MARKER_PREFIX) -> onRoomTap(name)
+                    }
+                },
+            ),
+            // Timed once the scene is on screen: the first frame counted is the first with the house in it.
+            onFrame = { nanos ->
+                if (draws > 0) {
+                    stats.onFrame(nanos)
+                    if (!drawn && loadedPictures.all(resources::hasTexture) && ++sceneFrames[0] >= DRAWN_AFTER_FRAMES) drawn = true
                 }
             },
-        ),
-        // Timed once the scene is on screen: the first frame counted is the first with the house in it.
-        onFrame = { nanos -> if (draws > 0) stats.onFrame(nanos) },
-    ) {
-        geometries.forEach { (batch, geometry) ->
-            val material = when (val m = batch.material) {
-                is DrawMaterial.Picture -> resources.textured(m.path) ?: resources.tint(m.fallback)
-                is DrawMaterial.Tint -> resources.tint(m.index)
-                DrawMaterial.Floor -> resources.floor
-                DrawMaterial.Glass -> resources.glass
-                DrawMaterial.Ghost -> resources.ghost
+        ) {
+            geometries.forEach { (batch, geometry) ->
+                val material = when (val m = batch.material) {
+                    is DrawMaterial.Picture -> resources.textured(m.path) ?: resources.tint(m.fallback)
+                    is DrawMaterial.Tint -> resources.tint(m.index)
+                    DrawMaterial.Floor -> resources.floor
+                    DrawMaterial.Glass -> resources.glass
+                    DrawMaterial.Ghost -> resources.ghost
+                }
+                MeshNode(
+                    primitiveType = RenderableManager.PrimitiveType.TRIANGLES,
+                    vertexBuffer = geometry.vertexBuffer,
+                    indexBuffer = geometry.indexBuffer,
+                    boundingBox = geometry.boundingBox,
+                    materialInstance = material,
+                    apply = { name = batch.roomId },
+                )
             }
-            MeshNode(
-                primitiveType = RenderableManager.PrimitiveType.TRIANGLES,
-                vertexBuffer = geometry.vertexBuffer,
-                indexBuffer = geometry.indexBuffer,
-                boundingBox = geometry.boundingBox,
-                materialInstance = material,
-                apply = { name = batch.roomId },
-            )
+            markerGeometries.forEachIndexed { i, (marker, geometry) ->
+                MeshNode(
+                    primitiveType = RenderableManager.PrimitiveType.TRIANGLES,
+                    vertexBuffer = geometry.vertexBuffer,
+                    indexBuffer = geometry.indexBuffer,
+                    boundingBox = geometry.boundingBox,
+                    materialInstance = resources.marker(MarkerColors.of(marker)),
+                    apply = { name = "$MARKER_PREFIX$i" },
+                )
+            }
         }
-        markerGeometries.forEachIndexed { i, (marker, geometry) ->
-            MeshNode(
-                primitiveType = RenderableManager.PrimitiveType.TRIANGLES,
-                vertexBuffer = geometry.vertexBuffer,
-                indexBuffer = geometry.indexBuffer,
-                boundingBox = geometry.boundingBox,
-                materialInstance = resources.marker(MarkerColors.of(marker)),
-                apply = { name = "$MARKER_PREFIX$i" },
-            )
-        }
+        // No pointer input: touches still reach the scene below.
+        if (drawn) Box(Modifier.matchParentSize().testTag("${prefix}_3d_scene_drawn"))
     }
 }
 
@@ -318,5 +344,7 @@ private const val MARKER_PREFIX = "marker:"
 /** Logcat tag of the AC-C24 measurement line: `adb logcat -s HomeRecord3D`. */
 const val PERF_TAG = "HomeRecord3D"
 private const val PERF_LOG_MS = 2_000L
+/** Frames with every picture loaded before the scene counts as drawn for `<app>_3d_scene_drawn`. */
+private const val DRAWN_AFTER_FRAMES = 3
 private const val MIN_RADIUS_M = 2f
 private const val DISTANCE_PER_RADIUS = 2.2f
