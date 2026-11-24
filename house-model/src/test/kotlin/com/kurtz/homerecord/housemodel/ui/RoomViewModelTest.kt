@@ -182,6 +182,20 @@ class RoomViewModelTest {
         assertThat(restored.state.value.wallStage).isEqualTo(WallStage.INSULATION)
     }
 
+    // S5c2 (rule 33): the Photograph sheet open on a wall comes back after process death, and stays closed once closed
+    @Test fun openPhotoSheetSurvivesProcessDeath() = test {
+        mainFloor()
+        val media = FakeWallMedia()
+        val saved = SavedStateHandle()
+        val model = wallsVm("k", WallStage.FINISHED, saved, media)
+        val wall = withTimeout(10_000) { model.state.first { it.walls.size == 4 } }.walls.first()
+        model.onPhotoEvent(RoomEvent.PhotographWall(wall.id))
+        val revived = wallsVm("k", WallStage.FINISHED, SavedStateHandle(saved.keys().associateWith { saved.get<Any>(it) }), media)
+        assertThat(revived.state.value.photoSheetFor).isEqualTo(wall.id)
+        model.onPhotoEvent(RoomEvent.ClosePhotoSheet)
+        assertThat(wallsVm("k", WallStage.FINISHED, saved, media).state.value.photoSheetFor).isNull()
+    }
+
     @AcceptanceCriterion("AC-C18")
     @Test fun photographThisWallTakesAPhotoAndOpensTheOutlineAtTheChosenStage() = test {
         mainFloor()

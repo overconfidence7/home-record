@@ -27,7 +27,8 @@ class CompanyViewModel(
     private val saved: SavedStateHandle = SavedStateHandle(),
     private val onSaved: (String) -> Unit = {},
 ) : ViewModel() {
-    private val _state = MutableStateFlow(CompanyUiState())
+    // An open time zone sheet comes back after process death (rule 33); the screen shows it once the profile is in
+    private val _state = MutableStateFlow(CompanyUiState(timeZoneSheet = saved.get<Boolean>(TIME_ZONE_SHEET) ?: false))
     val state: StateFlow<CompanyUiState> = _state.asStateFlow()
 
     init {
@@ -46,9 +47,18 @@ class CompanyViewModel(
             is CompanyEvent.RequireGps -> edit { copy(requireGps = event.on) }
             is CompanyEvent.PunchDistance -> edit { copy(punchDistanceText = event.value.filter(Char::isDigit).take(5)) }
             is CompanyEvent.PhotoOnPunch -> edit { copy(photoOnPunch = event.on) }
-            CompanyEvent.OpenTimeZones -> _state.update { it.copy(timeZoneSheet = true) }
-            CompanyEvent.CloseTimeZones -> _state.update { it.copy(timeZoneSheet = false) }
-            is CompanyEvent.TimeZone -> edit { copy(timeZone = event.id, timeZoneSheet = false) }
+            CompanyEvent.OpenTimeZones -> {
+                saved[TIME_ZONE_SHEET] = true
+                _state.update { it.copy(timeZoneSheet = true) }
+            }
+            CompanyEvent.CloseTimeZones -> {
+                saved[TIME_ZONE_SHEET] = false
+                _state.update { it.copy(timeZoneSheet = false) }
+            }
+            is CompanyEvent.TimeZone -> {
+                saved[TIME_ZONE_SHEET] = false
+                edit { copy(timeZone = event.id, timeZoneSheet = false) }
+            }
             CompanyEvent.Save -> save()
             CompanyEvent.Retry -> load()
         }
@@ -145,6 +155,7 @@ class CompanyViewModel(
 
     private companion object {
         const val DRAFT = "companyDraft"
+        const val TIME_ZONE_SHEET = "companyTimeZoneSheet"
         val json = Json { ignoreUnknownKeys = true }
     }
 }

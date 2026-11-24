@@ -48,6 +48,8 @@ class RoomViewModel(
             canAddItem = itemRows != null && canAddItem,
             canView3D = canView3D,
             canPhotograph = media != null && walls != null,
+            // An open Photograph sheet comes back after process death (rule 33)
+            photoSheetFor = savedState.get<String>(KEY_PHOTO_SHEET)?.takeIf { media != null && walls != null },
             wallStage = WallStage.entries.firstOrNull { it.name == savedState.get<String>(KEY_STAGE) } ?: defaultStage,
             canOpenWalls = overlays != null && walls != null,
             overlays = if (overlays != null) emptyList() else null,
@@ -139,6 +141,7 @@ class RoomViewModel(
             RoomEvent.OutlineOpened -> _state.update { it.copy(outlineRequest = null) }
             else -> Unit
         }
+        savedState[KEY_PHOTO_SHEET] = _state.value.photoSheetFor
     }
 
     private fun keepPending(wallId: String?, path: String?) {
@@ -155,5 +158,6 @@ class RoomViewModel(
         const val KEY_PENDING_WALL = "pendingWall"
         const val KEY_PENDING_PATH = "pendingPath"
         const val KEY_PENDING_STAGE = "pendingStage"
+        const val KEY_PHOTO_SHEET = "photoSheetFor"
     }
 }

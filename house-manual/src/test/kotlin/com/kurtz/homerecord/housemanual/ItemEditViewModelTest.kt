@@ -155,6 +155,19 @@ class ItemEditViewModelTest {
         assertThat(revived.state.value.draft.subtypeId).isEqualTo("dishwasher")
     }
 
+    // S5c2 (rule 33): the open Add photo sheet comes back after process death
+    @Test fun openPhotoSheetSurvivesProcessDeath() = runTest {
+        home()
+        val handle = SavedStateHandle()
+        val vm = made(items, homes, homeId, null, handle)
+        vm.state.first { !it.loading }
+        vm.onEvent(ItemEditEvent.OpenPhotoSheet(com.kurtz.homerecord.housemodel.items.PhotoKind.DATA_PLATE))
+        val revived = made(items, homes, homeId, null, SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        assertThat(revived.state.first { !it.loading }.photoSheetFor).isEqualTo(com.kurtz.homerecord.housemodel.items.PhotoKind.DATA_PLATE)
+        vm.onEvent(ItemEditEvent.ClosePhotoSheet)
+        assertThat(made(items, homes, homeId, null, handle).state.value.photoSheetFor).isNull()
+    }
+
     @AcceptanceCriterion("AC-C30")
     @Test fun editingAnItemLoadsItsDraftAndMissingItemsAreReported() = runTest {
         home()

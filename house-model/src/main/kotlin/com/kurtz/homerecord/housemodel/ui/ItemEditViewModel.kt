@@ -47,7 +47,10 @@ class ItemEditViewModel(
     )
 
     private val _state = MutableStateFlow(
-        ItemEditUiState(draft = restore() ?: original, decodedRule = saved.get<String>(DECODED)),
+        ItemEditUiState(
+            draft = restore() ?: original, decodedRule = saved.get<String>(DECODED),
+            photoSheetFor = saved.get<String>(PHOTO_SHEET)?.let { k -> PhotoKind.entries.firstOrNull { it.name == k } },
+        ),
     )
     val state: StateFlow<ItemEditUiState> = _state.asStateFlow()
 
@@ -68,6 +71,12 @@ class ItemEditViewModel(
     }
 
     fun onEvent(event: ItemEditEvent) {
+        handle(event)
+        // The open Add photo sheet comes back after process death (rule 33)
+        saved[PHOTO_SHEET] = _state.value.photoSheetFor?.name
+    }
+
+    private fun handle(event: ItemEditEvent) {
         when (event) {
             is ItemEditEvent.Change -> change(event.draft)
             is ItemEditEvent.PickSubtype -> {
@@ -259,6 +268,7 @@ class ItemEditViewModel(
         const val DECODED = "decoded"
         const val PENDING_KIND = "pendingKind"
         const val PENDING_PATH = "pendingPath"
+        const val PHOTO_SHEET = "photoSheet"
 
         fun encodePhoto(p: DraftPhoto) = "${p.id.orEmpty()}|${p.kind.name}|${p.path}"
 

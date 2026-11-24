@@ -30,7 +30,9 @@ class BehindWallViewModel(
     /** Opens straight on this room's walls; Back then leaves the screen instead of going to the rooms. */
     private val startRoomId: String? = null,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(BehindWallUiState(title = title, roomId = savedState.get<String>(KEY_ROOM) ?: startRoomId))
+    private val _state = MutableStateFlow(
+        BehindWallUiState(title = title, roomId = savedState.get<String>(KEY_ROOM) ?: startRoomId, photoSheetFor = savedState.get<String>(KEY_SHEET)),
+    )
     val state: StateFlow<BehindWallUiState> = _state.asStateFlow()
 
     init {
@@ -50,11 +52,18 @@ class BehindWallViewModel(
         val s = _state.value
         if (s.roomId == null || s.roomId == startRoomId) return false
         savedState[KEY_ROOM] = null
+        savedState[KEY_SHEET] = null
         _state.update { it.copy(roomId = null, photoSheetFor = null, photoImportFailed = false) }
         return true
     }
 
     fun onEvent(event: BehindWallEvent) {
+        handle(event)
+        // The open photo sheet comes back after process death (rule 33)
+        savedState[KEY_SHEET] = _state.value.photoSheetFor
+    }
+
+    private fun handle(event: BehindWallEvent) {
         when (event) {
             is BehindWallEvent.OpenRoom -> {
                 savedState[KEY_ROOM] = event.roomId
@@ -130,5 +139,6 @@ class BehindWallViewModel(
         const val KEY_PENDING_WALL = "pendingWall"
         const val KEY_PENDING_PATH = "pendingPath"
         const val KEY_PENDING_STAGE = "pendingStage"
+        const val KEY_SHEET = "behindWallPhotoSheet"
     }
 }

@@ -48,6 +48,16 @@ class CompanyViewModelTest {
         assertThat(s.dirty).isTrue()
     }
 
+    // S5c2 (rule 33): the open time zone sheet comes back after process death; picking a zone closes it for good
+    @Test fun openTimeZoneSheetSurvivesProcessDeath() {
+        val handle = androidx.lifecycle.SavedStateHandle()
+        CompanyViewModel(api, "c1", handle).onEvent(CompanyEvent.OpenTimeZones)
+        val restored = CompanyViewModel(api, "c1", androidx.lifecycle.SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }))
+        assertThat(restored.state.value.timeZoneSheet).isTrue()
+        CompanyViewModel(api, "c1", handle).onEvent(CompanyEvent.TimeZone("America/Chicago"))
+        assertThat(CompanyViewModel(api, "c1", handle).state.value.timeZoneSheet).isFalse()
+    }
+
     @Test fun loadFailureCanRetry() {
         api.profile = ApiResult.Err(ApiFailure.Offline)
         val vm = vm()

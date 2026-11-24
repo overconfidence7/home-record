@@ -102,6 +102,20 @@ class BehindWallViewModelTest {
         assertThat(vm.state.value.room?.walls?.first { it.id == "ke" }?.nextBehindWallStage).isEqualTo(WallStage.ROUGH_IN)
     }
 
+    // S5c2 (rule 33): the wall's open photo sheet comes back after process death
+    @Test
+    fun openPhotoSheetSurvivesProcessDeath() {
+        val saved = SavedStateHandle()
+        val first = vm(saved = saved)
+        first.onEvent(BehindWallEvent.OpenRoom("k"))
+        first.onEvent(BehindWallEvent.PickWall("kn"))
+        val again = vm(saved = SavedStateHandle(saved.keys().associateWith { saved.get<Any>(it) }))
+        assertThat(again.state.value.roomId).isEqualTo("k")
+        assertThat(again.state.value.photoSheetFor).isEqualTo("kn")
+        first.onEvent(BehindWallEvent.CloseSheet)
+        assertThat(vm(saved = saved).state.value.photoSheetFor).isNull()
+    }
+
     @Test
     @AcceptanceCriterion("AC-F49")
     fun aCameraResultAfterProcessDeathLandsOnTheSameWallAndStage() {
