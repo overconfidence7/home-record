@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,47 +89,17 @@ fun HomeRecordApp(
     val selected = tabs.firstOrNull { it.id == selectedId } ?: tabs.first()
     val stack = stacks.getValue(selected.id)
 
-    // The default suite type keeps a bottom bar in phone landscape (compact height); the UI
-    // standard wants a rail on any width >= 600 dp.
-    val wideEnough = currentWindowAdaptiveInfo().windowSizeClass
-        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val tagPrefix = LocalTagPrefix.current
     NavigationSuiteScaffold(
         modifier = modifier,
-        layoutType = when {
-            stack.lastOrNull()?.let(fullScreen) == true -> NavigationSuiteType.None
-            wideEnough -> NavigationSuiteType.NavigationRail
-            else -> NavigationSuiteType.NavigationBar
-        },
+        layoutType = shellLayoutType(fullScreen = stack.lastOrNull()?.let(fullScreen) == true),
         navigationSuiteItems = {
-            tabs.forEach { tab ->
-                val isSelected = tab.id == selected.id
-                item(
-                    selected = isSelected,
-                    onClick = {
-                        if (isSelected) {
-                            while (stack.size > 1) stack.removeAt(stack.lastIndex)
-                        } else {
-                            selectedId = tab.id
-                        }
-                    },
-                    icon = {
-                        Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
-                    },
-                    // One line per label: at 200% a long label ("Schedule", "Reminders") steps its size down
-                    // to fit (6 sp at 200% draws as large as the 12 sp label at 100%) instead of splitting mid-word and lifting its
-                    // icon off the others' baseline (rule 32); ellipsis only if even that does not fit.
-                    label = {
-                        Text(
-                            tab.label,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            softWrap = false,
-                            autoSize = TextAutoSize.StepBased(minFontSize = 6.sp, maxFontSize = 12.sp),
-                        )
-                    },
-                    modifier = Modifier.testTag("${tagPrefix}_tab_${tab.id}"),
-                )
+            shellItems(tabs, selected.id, tagPrefix = tagPrefix) { tab, isSelected ->
+                if (isSelected) {
+                    while (stack.size > 1) stack.removeAt(stack.lastIndex)
+                } else {
+                    selectedId = tab.id
+                }
             }
         },
     ) {
@@ -155,5 +126,57 @@ fun HomeRecordApp(
                 )
             }
         }
+    }
+}
+
+/**
+ * The shell's bar alone around one screen, with [selectedId] marked: the debug screen catalog hosts root screens
+ * in it so crawler shots show them as the app does, bar and insets included ([judge:qa-crawler-no-root-bar]).
+ */
+@Composable
+fun ShellFrame(tabs: List<AppTab>, selectedId: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val tagPrefix = LocalTagPrefix.current
+    NavigationSuiteScaffold(
+        modifier = modifier,
+        layoutType = shellLayoutType(fullScreen = false),
+        navigationSuiteItems = { shellItems(tabs, selectedId, tagPrefix) { _, _ -> } },
+    ) { content() }
+}
+
+/** The default suite type keeps a bottom bar in phone landscape (compact height); the UI standard wants a rail on any width >= 600 dp. */
+@Composable
+private fun shellLayoutType(fullScreen: Boolean): NavigationSuiteType {
+    val wideEnough = currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    return when {
+        fullScreen -> NavigationSuiteType.None
+        wideEnough -> NavigationSuiteType.NavigationRail
+        else -> NavigationSuiteType.NavigationBar
+    }
+}
+
+private fun NavigationSuiteScope.shellItems(tabs: List<AppTab>, selectedId: String, tagPrefix: String, onClick: (AppTab, Boolean) -> Unit) {
+    tabs.forEach { tab ->
+        val isSelected = tab.id == selectedId
+        item(
+            selected = isSelected,
+            onClick = { onClick(tab, isSelected) },
+            icon = {
+                Icon(if (isSelected) tab.selectedIcon else tab.icon, contentDescription = null)
+            },
+            // One line per label: at 200% a long label ("Schedule", "Reminders") steps its size down
+            // to fit (6 sp at 200% draws as large as the 12 sp label at 100%) instead of splitting mid-word and lifting its
+            // icon off the others' baseline (rule 32); ellipsis only if even that does not fit.
+            label = {
+                Text(
+                    tab.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 6.sp, maxFontSize = 12.sp),
+                )
+            },
+            modifier = Modifier.testTag("${tagPrefix}_tab_${tab.id}"),
+        )
     }
 }

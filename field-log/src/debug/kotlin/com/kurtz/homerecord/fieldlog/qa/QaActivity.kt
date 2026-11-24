@@ -17,6 +17,12 @@ import coil3.intercept.Interceptor
 import coil3.request.ImageResult
 import coil3.request.SuccessResult
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
+import com.kurtz.homerecord.coreui.shell.ShellFrame
+import androidx.compose.runtime.Composable
+import com.kurtz.homerecord.fieldlog.jobs.JobOverviewUiState
+import com.kurtz.homerecord.fieldlog.jobs.JobScreen
+import com.kurtz.homerecord.fieldlog.jobs.JobTab
+import com.kurtz.homerecord.fieldlog.shellTabs
 import com.kurtz.homerecord.fieldlog.PreviewPhotos
 
 /**
@@ -37,10 +43,34 @@ class QaActivity : ComponentActivity() {
         val entry = ScreenCatalog.find(intent.getStringExtra("screen"))
         setContent {
             CompositionLocalProvider(LocalTagPrefix provides "fl") {
-                Box(Modifier.semantics { testTagsAsResourceId = true }) { entry?.content?.invoke() }
+                Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                    val tab = entry?.tab
+                    val jobTab = entry?.jobTab
+                    when {
+                        entry == null -> Unit
+                        tab != null -> ShellFrame(shellTabs(), tab) { entry.content() }
+                        jobTab != null -> CatalogJobFrame(jobTab) { entry.content() }
+                        else -> entry.content()
+                    }
+                }
             }
         }
     }
+}
+
+/** FL-Job around one of its tabs, with the catalog's fake job, for the crawler (rule 28 under the job's bar). */
+@Composable
+internal fun CatalogJobFrame(selected: JobTab, content: @Composable () -> Unit) {
+    JobScreen(
+        state = JobOverviewUiState(loading = false, name = "Hale kitchen", clientName = "Dana Hale"),
+        selected = selected,
+        onSelect = {},
+        onEvent = {},
+        onBack = {},
+        photosContent = content,
+        filesContent = content,
+        logContent = content,
+    )
 }
 
 /** Answers the previews' fake photo paths with [PreviewPhotos]; every other request goes on to the real loader. */

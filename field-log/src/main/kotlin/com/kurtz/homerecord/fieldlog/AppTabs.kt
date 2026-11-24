@@ -63,6 +63,10 @@ private val tabDefs = listOf(
         tab("more", R.string.tab_more, Icons.Outlined.MoreHoriz, Icons.Rounded.MoreHoriz),
 )
 
+/** The bottom tabs; the app and the debug catalog host (crawler shots of root screens) share them. */
+@Composable
+internal fun shellTabs(): List<AppTab> = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
+
 /** Signed out, then no company, then the tabs: the three states of FL-Welcome and the app proper (AC-F1, AC-F4). */
 @Composable
 fun FieldLogApp(container: AppContainer) {
@@ -127,7 +131,7 @@ fun FieldLogApp(container: AppContainer) {
 @Composable
 private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership) {
     val scope = rememberCoroutineScope()
-    val tabs = tabDefs.map { AppTab(it.id, stringResource(it.label), it.icon, it.selected, PlaceholderKey(it.id)) }
+    val tabs = shellTabs()
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     PushOpener(container, membership)
     NotificationPermissionAsk(container)

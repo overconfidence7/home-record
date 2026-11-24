@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
+import com.kurtz.homerecord.coreui.shell.ShellFrame
+import com.kurtz.homerecord.housemanual.shellTabs
 
 /**
  * Debug-only host for the screen catalog. Start it with action `com.kurtz.homerecord.housemanual.qa.OPEN_SCREEN`,
@@ -25,7 +27,10 @@ class QaActivity : ComponentActivity() {
         val entry = ScreenCatalog.find(intent.getStringExtra("screen"))
         setContent {
             CompositionLocalProvider(LocalTagPrefix provides "hm") {
-                Box(Modifier.semantics { testTagsAsResourceId = true }) { entry?.content?.invoke() }
+                Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                    val tab = entry?.tab
+                    if (entry != null && tab != null) ShellFrame(shellTabs(), tab) { entry.content() } else entry?.content?.invoke()
+                }
             }
         }
     }

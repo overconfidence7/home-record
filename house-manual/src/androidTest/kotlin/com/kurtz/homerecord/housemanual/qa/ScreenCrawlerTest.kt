@@ -91,6 +91,7 @@ class ScreenCrawlerTest {
             open(entry.id).use {
                 compose.waitForIdle()
                 if (entry.nonRoot) assertTrue("${entry.id}: no back arrow (hm_back) or close (hm_close)", compose.onAllNodesWithTag("hm_back").fetchSemanticsNodes().isNotEmpty() || compose.onAllNodesWithTag("hm_close").fetchSemanticsNodes().isNotEmpty())
+                entry.tab?.let { tab -> assertTrue("${entry.id}: root screen without the app's bar (hm_tab_$tab)", compose.onAllNodesWithTag("hm_tab_$tab").fetchSemanticsNodes().isNotEmpty()) }
                 val min = 48 * inst.targetContext.resources.displayMetrics.density - 1
                 // A node cut by its scroll viewport reports a shrunken touch box; judge it by its full layout size.
                 val tooSmall = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes().filter { n ->

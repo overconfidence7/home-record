@@ -8,7 +8,15 @@ import com.kurtz.homerecord.housemanual.*
  * One crawler screen. [scrollTo] names the testTag of what the entry exists to show when it sits below the fold;
  * the crawler scrolls to it before each shot ([judge:qa-crawler-no-scroll]).
  */
-data class QaScreen(val id: String, val nonRoot: Boolean, val scrollTo: String? = null, val content: @Composable () -> Unit)
+data class QaScreen(val id: String, val nonRoot: Boolean, val scrollTo: String? = null, val tab: String? = rootTab(id, nonRoot), val content: @Composable () -> Unit)
+/**
+ * The bottom tab a root entry sits on, read from its id (`home-full` is on Home): QaActivity hosts it inside the
+ * app's bar with that tab selected and the crawler checks the bar is there ([judge:qa-crawler-no-root-bar]).
+ * Onboarding, sheets over other screens and plan prompts have none.
+ */
+fun rootTab(id: String, nonRoot: Boolean): String? =
+    if (nonRoot) null else listOf("home", "house", "items", "reminders", "more").firstOrNull { id == it || id.startsWith("$it-") }
+
 
 object ScreenCatalog {
     val entries: List<QaScreen> = listOf(

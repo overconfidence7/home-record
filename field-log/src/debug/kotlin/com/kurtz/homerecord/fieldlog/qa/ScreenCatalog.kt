@@ -2,9 +2,30 @@ package com.kurtz.homerecord.fieldlog.qa
 
 import androidx.compose.runtime.Composable
 import com.kurtz.homerecord.fieldlog.*
+import com.kurtz.homerecord.fieldlog.jobs.JobTab
 
 /** One screen with realistic fake state; shared by the OPEN_SCREEN intent and the crawler (SPEC AC-U12). */
-data class QaScreen(val id: String, val nonRoot: Boolean, val content: @Composable () -> Unit)
+data class QaScreen(val id: String, val nonRoot: Boolean, val tab: String? = rootTab(id, nonRoot), val jobTab: JobTab? = jobTabFor(id, nonRoot), val content: @Composable () -> Unit)
+/**
+ * The bottom tab a root entry sits on, read from its id (`home-full` is on Home): QaActivity hosts it inside the
+ * app's bar with that tab selected and the crawler checks the bar is there ([judge:qa-crawler-no-root-bar]).
+ * Onboarding, sheets over other screens and plan prompts have none.
+ */
+/**
+ * The job tab a Photos, Files or Daily log entry belongs to: QaActivity draws it inside FL-Job (name, client, back,
+ * the tab row) as the app does, so crawler shots keep it under the job's bar ([judge:qa-crawler-job-tab-insets]).
+ */
+fun jobTabFor(id: String, nonRoot: Boolean): JobTab? = when {
+    nonRoot -> null
+    id.startsWith("photos-") -> JobTab.PHOTOS
+    id.startsWith("files-") -> JobTab.FILES
+    id.startsWith("log-") -> JobTab.LOG
+    else -> null
+}
+
+fun rootTab(id: String, nonRoot: Boolean): String? =
+    if (nonRoot) null else listOf("today", "jobs", "clock", "schedule", "more").firstOrNull { id == it || id.startsWith("$it-") }
+
 
 object ScreenCatalog {
     val entries: List<QaScreen> = listOf(

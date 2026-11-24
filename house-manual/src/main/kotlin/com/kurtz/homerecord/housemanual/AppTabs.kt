@@ -69,6 +69,12 @@ private val tabDefs = listOf(
         tab("more", R.string.tab_more, Icons.Outlined.MoreHoriz, Icons.Rounded.MoreHoriz),
 )
 
+/** The bottom tabs with their roots; the app and the debug catalog host (crawler shots of root screens) share them. */
+@Composable
+internal fun shellTabs(): List<AppTab> = tabDefs.map {
+    AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; "reminders" -> RemindersKey; else -> PlaceholderKey(it.id) })
+}
+
 /** No home yet shows onboarding; once one exists the tabs take over (AC-C1, AC-H1). */
 @Composable
 fun HouseManualApp(container: AppContainer, incoming: android.net.Uri? = null, onIncomingHandled: () -> Unit = {}) {
@@ -146,9 +152,7 @@ private fun HouseManualTabs(
     val pickHandoff = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
     ) { uri -> if (uri != null) onImport(uri) }
-    val tabs = tabDefs.map {
-        AppTab(it.id, stringResource(it.label), it.icon, it.selected, when (it.id) { "home" -> HomeKey; "house" -> HouseKey; "items" -> ItemsKey; "reminders" -> RemindersKey; else -> PlaceholderKey(it.id) })
-    }
+    val tabs = shellTabs()
     val titles = tabDefs.associate { it.id to stringResource(it.label) }
     val scope = rememberCoroutineScope()
     // A viewer on a shared home sees every screen with its add and edit controls left out (AC-H16).
