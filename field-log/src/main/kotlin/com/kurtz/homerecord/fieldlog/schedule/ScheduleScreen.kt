@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
@@ -67,6 +64,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 private val dayName = DateTimeFormatter.ofPattern("EEE")
+/** One-letter day names for large text, so all seven days fit the strip (judge:fl-schedule-week-strip-200, rule 32). */
+private val dayNarrow = DateTimeFormatter.ofPattern("EEEEE")
 private val dayShort = DateTimeFormatter.ofPattern("EEE, MMM d")
 private val dayLong = DateTimeFormatter.ofPattern("EEEE, MMM d")
 private val monthDay = DateTimeFormatter.ofPattern("MMM d")
@@ -142,10 +141,10 @@ private fun androidx.compose.foundation.layout.ColumnScope.WeekBar(state: Schedu
 
 @Composable
 private fun DayStrip(state: ScheduleUiState, onEvent: (ScheduleEvent) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+    // Seven equal cells across the width, never scrolled: at 200% a scrolled strip hid Sunday off the edge
+    // (judge:fl-schedule-week-strip-200). 8 dp sides and no gaps keep each cell at least 48 dp on a 360 dp phone.
+    val large = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
         state.days.forEach { day ->
             val selected = day == state.selected
             val busy = state.busy(day)
@@ -159,13 +158,13 @@ private fun DayStrip(state: ScheduleUiState, onEvent: (ScheduleEvent) -> Unit) {
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-                modifier = Modifier.widthIn(min = 48.dp).heightIn(min = 64.dp)
+                modifier = Modifier.weight(1f).heightIn(min = 64.dp)
                     .selectable(selected = selected, role = Role.Tab, onClick = { onEvent(ScheduleEvent.SelectDay(day)) })
                     .semantics(mergeDescendants = true) { contentDescription = label; this.selected = selected }
                     .testTag("fl_schedule_day_$day"),
             ) {
-                Column(Modifier.padding(horizontal = 8.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(day.format(dayName), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Column(Modifier.padding(horizontal = 2.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(day.format(if (large) dayNarrow else dayName), style = MaterialTheme.typography.labelMedium, maxLines = 1)
                     Text(
                         day.dayOfMonth.toString(),
                         style = MaterialTheme.typography.titleMedium,
