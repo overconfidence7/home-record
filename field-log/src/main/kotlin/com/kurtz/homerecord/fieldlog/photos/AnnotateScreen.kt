@@ -4,6 +4,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.rounded.BrokenImage
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -50,7 +56,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.kurtz.homerecord.core.photo.Annotation
 import com.kurtz.homerecord.core.photo.AnnotationTool
 import com.kurtz.homerecord.core.photo.NormPoint
@@ -163,8 +169,27 @@ private fun PhotoCanvas(state: AnnotateUiState, onEvent: (AnnotateEvent) -> Unit
     val measurer = rememberTextMeasurer()
     var live by remember { mutableStateOf<List<NormPoint>>(emptyList()) }
     val liveMark = remember(live, state.tool, state.aspect) { liveMark(state.tool, live, state.aspect) }
-    Box(Modifier.fillMaxWidth().aspectRatio(state.aspect).testTag("fl_annotate_canvas")) {
-        AsyncImage(File(state.imagePath), null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds)
+    Box(
+        Modifier.fillMaxWidth().aspectRatio(state.aspect).background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .testTag("fl_annotate_canvas"),
+    ) {
+        // Placeholder while the photo loads and a broken-image fallback, as on the Photo page (rule 27): marks on a
+        // blank page cannot be placed against anything ([judge:fl-annotate-no-photo]).
+        SubcomposeAsyncImage(
+            model = File(state.imagePath), contentDescription = null, contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+            loading = { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
+            error = {
+                Column(
+                    Modifier.fillMaxSize().padding(16.dp).testTag("fl_annotate_image_error"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(Icons.Rounded.BrokenImage, contentDescription = null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.photo_unreadable), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+                }
+            },
+        )
         Canvas(
             Modifier.fillMaxSize().pointerInput(state.tool) {
                 fun norm(o: Offset) = NormPoint((o.x / size.width).coerceIn(0f, 1f), (o.y / size.height).coerceIn(0f, 1f))

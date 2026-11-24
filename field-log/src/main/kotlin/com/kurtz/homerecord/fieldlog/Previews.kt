@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.kurtz.homerecord.core.company.ApiFailure
 import com.kurtz.homerecord.core.company.CompanyRole
@@ -55,8 +56,18 @@ import com.kurtz.homerecord.fieldlog.today.TodayUiState
 @Preview(name = "200% font", fontScale = 2f, showBackground = true)
 annotation class ThemePreviews
 
+/** The Field Log theme plus [PreviewPhotos] for Coil, so photo screens show a photo in previews and screenshot tests. */
+@OptIn(coil3.annotation.ExperimentalCoilApi::class)
 @Composable
-private fun Frame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { Surface { content() } }
+private fun PreviewTheme(content: @Composable () -> Unit) {
+    val photos = remember { coil3.compose.AsyncImagePreviewHandler { request -> PreviewPhotos.draw(request.data) } }
+    androidx.compose.runtime.CompositionLocalProvider(coil3.compose.LocalAsyncImagePreviewHandler provides photos) {
+        HomeRecordTheme(Brand.FieldLog, dynamicColor = false) { content() }
+    }
+}
+
+@Composable
+private fun Frame(content: @Composable () -> Unit) = PreviewTheme { Surface { content() } }
 
 /**
  * A sheet's content as the app shows it: scrim above, the sheet's container, top corners and drag handle at the bottom,
@@ -64,7 +75,7 @@ private fun Frame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.Field
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetFrame(content: @Composable () -> Unit) = HomeRecordTheme(Brand.FieldLog, dynamicColor = false) {
+private fun SheetFrame(content: @Composable () -> Unit) = PreviewTheme {
     androidx.compose.foundation.layout.Box(
         androidx.compose.ui.Modifier.fillMaxSize()
             .background(androidx.compose.material3.MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f))

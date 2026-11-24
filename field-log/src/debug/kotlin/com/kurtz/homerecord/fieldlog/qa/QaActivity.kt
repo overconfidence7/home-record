@@ -10,7 +10,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.decode.DataSource
+import coil3.intercept.Interceptor
+import coil3.request.ImageResult
+import coil3.request.SuccessResult
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
+import com.kurtz.homerecord.fieldlog.PreviewPhotos
 
 /**
  * Debug-only host for the screen catalog. Start it with action `com.kurtz.homerecord.fieldlog.qa.OPEN_SCREEN`,
@@ -22,11 +29,24 @@ class QaActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (intent.getBooleanExtra("landscape", false)) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        // Catalog entries reuse the previews' fake photo paths; draw PreviewPhotos for them instead of the broken-image
+        // fallback, so the crawler sees photo screens with a photo (QA rule 3). Real media paths load as usual.
+        SingletonImageLoader.setUnsafe(
+            ImageLoader.Builder(this).components { add(PreviewPhotoInterceptor) }.build(),
+        )
         val entry = ScreenCatalog.find(intent.getStringExtra("screen"))
         setContent {
             CompositionLocalProvider(LocalTagPrefix provides "fl") {
                 Box(Modifier.semantics { testTagsAsResourceId = true }) { entry?.content?.invoke() }
             }
         }
+    }
+}
+
+/** Answers the previews' fake photo paths with [PreviewPhotos]; every other request goes on to the real loader. */
+private object PreviewPhotoInterceptor : Interceptor {
+    override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
+        val image = PreviewPhotos.image(chain.request.data) ?: return chain.proceed()
+        return SuccessResult(image, chain.request, DataSource.MEMORY)
     }
 }
