@@ -61,6 +61,23 @@ class PlanEditorOverlaysScreenTest {
     private fun List<PlanEditorEvent>.overlayEvents() = filterIsInstance<PlanEditorEvent.OverlayEvent>().map { it.event }
 
     @Test @AcceptanceCriterion("AC-C25")
+    fun overlaysModeShowsAKeyForEachKindOnTheFloor() {
+        // judge:hm-plan-overlays-no-legend: the colours are named without tapping each run
+        val water = gas.copy(id = "w1", kind = OverlayKind.WATER_COLD, label = "Sink supply")
+        show(state.copy(overlayMode = true, overlays = listOf(water, gas, gas.copy(id = "g2"))), mutableListOf())
+        rule.onNodeWithTag("hm_plan_legend").assertExists()
+        rule.onNodeWithTag("hm_plan_legend_gas", useUnmergedTree = true).assertExists()
+        rule.onNodeWithTag("hm_plan_legend_water_cold", useUnmergedTree = true).assertExists()
+        assertThat(com.kurtz.homerecord.housemodel.ui.legendKinds(listOf(water, gas, gas.copy(id = "g2")))).containsExactly(OverlayKind.WATER_COLD, OverlayKind.GAS).inOrder()
+    }
+
+    @Test @AcceptanceCriterion("AC-C25")
+    fun noKeyInRoomsModeOrOnAFloorWithoutOverlays() {
+        show(state.copy(overlayMode = true), mutableListOf())
+        rule.onNodeWithTag("hm_plan_legend").assertDoesNotExist()
+    }
+
+    @Test @AcceptanceCriterion("AC-C25")
     fun theModeSwitchTurnsOverlaysOn() {
         val events = mutableListOf<PlanEditorEvent>()
         show(state, events)

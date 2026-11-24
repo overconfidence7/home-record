@@ -297,6 +297,9 @@ private fun PlanArea(
             // In Overlays mode the rooms stay named for TalkBack (where am I drawing?) but only overlays pick.
             PlanRoomNodes(state, onEvent, pickable = !state.overlayMode)
             if (state.overlayMode) PlanOverlayNodes(state, onEvent)
+            // Which colour is which (judge:hm-plan-overlays-no-legend): along the plan's foot, so the plan keeps its height.
+            // Only while nothing is picked or drawn: then the panel names the overlay and the plan needs every row.
+            if (state.overlayMode && state.drawing == null && state.selectedOverlay == null) OverlayLegend(state.overlays, Modifier.align(Alignment.BottomStart))
             if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
                 Text(
                     stringResource(R.string.plan_empty_hint),
