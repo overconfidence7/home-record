@@ -506,4 +506,5 @@ The automated suite (`qa/README.md`, `.github/workflows/qa.yml`) runs four times
       - [x] S5c2c: FL Clock's far-from-job reason sheet with its choice and Other text (the Clock "sheet" field is the week timesheet, not a modal) (2ad229c1)
       - [x] S5c2d: Timesheets sheet and the wall overlay form's Kind/Depth/Photo/Item sheet (the punch edit form and the overlay form's sheet were already saved; the "Approve all?" confirm now is too; tests for both)
   - [x] S7: performance from the suite on c199b144 (cold start 743/872 ms, StrictMode 0, HM jank pass); FL jank stage made measurable (24 flings, [s7:jank-frames]); AC-C24 30 fps needs a real phone (Needs Nate)
+  - [x] S8: release build: assembleRelease with R8 green for both apps, keep rules checked against the AARs, release manifests free of debug components, both launch in the suite's release stage; upload key under Needs Nate
 - [ ] T082: Release builds for both apps, DONE file per CLAUDE.md "Definition of done"
