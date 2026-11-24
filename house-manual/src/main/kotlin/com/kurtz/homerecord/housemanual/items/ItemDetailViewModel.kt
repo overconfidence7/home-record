@@ -125,9 +125,13 @@ class ItemDetailViewModel(
     private val content = combine(detail, confirmDelete, lookupState, upkeepContactsDocs, forms) { d, c, l, ucd, f ->
         val (uc, docs, r) = ucd
         val (u, contacts) = uc
+        // An edit form whose record is gone (just deleted, or deleted elsewhere) is not shown: the list and the forms
+        // reach this combine on different threads, so the delete can land before the closed form does.
+        val consumableForm = f.consumable?.takeIf { draft -> draft.id == null || u.first.any { it.id == draft.id } }
+        val serviceForm = f.service?.takeIf { draft -> draft.id == null || u.second.any { it.id == draft.id } }
         ItemDetailUiState(
             loading = false, detail = d, confirmDelete = c && d != null, lookupBusy = l.busy, lookupNote = l.note, review = l.review,
-            consumables = u.first, service = u.second, consumableForm = f.consumable, serviceForm = f.service, formDirty = f.dirty, formCanSave = f.canSave, showFormErrors = f.showErrors, contacts = contacts,
+            consumables = u.first, service = u.second, consumableForm = consumableForm, serviceForm = serviceForm, formDirty = f.dirty, formCanSave = f.canSave, showFormErrors = f.showErrors, contacts = contacts,
             documents = docs.first, attachable = docs.second, showAttach = docs.third.showAttach, documentNotice = docs.third.notice, recalls = r,
         )
     }

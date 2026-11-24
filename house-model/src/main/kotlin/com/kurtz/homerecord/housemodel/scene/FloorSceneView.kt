@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.kurtz.homerecord.coreui.shell.LocalTagPrefix
 import com.google.android.filament.Engine
+import io.github.sceneview.FrameRatePolicy
 import com.google.android.filament.MaterialInstance
 import com.google.android.filament.RenderableManager
 import com.google.android.filament.Texture
@@ -97,9 +98,14 @@ fun FloorSceneView(
     val texturePx = remember(scene) { TextureBudget.maxSidePx(scene.pictures.values.flatMap { it.values }.distinct().size) }
     val pictures = remember(batches) { batches.mapNotNull { (it.material as? DrawMaterial.Picture)?.path }.distinct() }
     // Decoded pictures are handed to Filament and not kept: the GPU copy is the only one held while the screen is open.
+    val unreadable = remember { java.util.Collections.synchronizedSet(mutableSetOf<String>()) }
     LaunchedEffect(pictures, texturePx) {
         pictures.filterNot(resources::hasTexture).forEach { path ->
-            val bitmap = withContext(Dispatchers.IO) { decode(path, texturePx) } ?: return@forEach
+            val bitmap = withContext(Dispatchers.IO) { decode(path, texturePx) }
+            if (bitmap == null) {
+                unreadable += path // keeps its tint; the scene does not wait for it
+                return@forEach
+            }
             resources.addTexture(path, bitmap)
         }
     }
@@ -162,6 +168,10 @@ fun FloorSceneView(
             modifier = Modifier.matchParentSize(),
             engine = engine,
             cameraNode = cameraNode,
+            // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
+            // it never reached the screen and the drawn tag never came ([auto:flow:house-manual:H10-3d]). Frames run
+            // continuously until this scene has drawn with every picture, then on demand (gestures, camera moves).
+            frameRatePolicy = if (drawn) FrameRatePolicy.OnDemand() else FrameRatePolicy.Continuous(),
             materialLoader = materialLoader,
             cameraManipulator = manipulator,
             autoCenterContent = false,
@@ -181,7 +191,7 @@ fun FloorSceneView(
             onFrame = { nanos ->
                 if (draws > 0) {
                     stats.onFrame(nanos)
-                    if (!drawn && loadedPictures.all(resources::hasTexture) && ++sceneFrames[0] >= DRAWN_AFTER_FRAMES) drawn = true
+                    if (!drawn && loadedPictures.all { resources.hasTexture(it) || it in unreadable } && ++sceneFrames[0] >= DRAWN_AFTER_FRAMES) drawn = true
                 }
                 val clip = cameraNode.projectionTransform * cameraNode.viewTransform
                 val next = RoomLabels.place(labelRooms, viewSize.width, viewSize.height) { x, y, z ->
