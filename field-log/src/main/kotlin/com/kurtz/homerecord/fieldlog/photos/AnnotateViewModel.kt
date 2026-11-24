@@ -1,10 +1,13 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.PhotoDao
 import com.kurtz.homerecord.core.photo.Annotation
+import com.kurtz.homerecord.core.photo.AnnotationCodec
 import com.kurtz.homerecord.core.photo.AnnotationEditor
+import com.kurtz.homerecord.core.photo.AnnotationTool
 import com.kurtz.homerecord.core.photo.MarkSketch
 import com.kurtz.homerecord.core.photo.PhotoAnnotator
 import com.kurtz.homerecord.core.photo.SketchResult
@@ -22,11 +25,20 @@ class AnnotateDeps(
     val aspectOf: suspend (path: String) -> Float?,
 )
 
-/** FL-Annotate: draws arrows, circles, rectangles, freehand, text and measure labels, with undo, then saves a copy (AC-F26). */
-class AnnotateViewModel(private val d: AnnotateDeps) : ViewModel() {
-    private val _state = MutableStateFlow(AnnotateUiState())
+/**
+ * FL-Annotate: draws arrows, circles, rectangles, freehand, text and measure labels, with undo, then saves a copy (AC-F26).
+ * The marks drawn so far and the chosen tool live in [saved], so a crew member who leaves for another app and comes back
+ * after the system killed Field Log finds the markup where they left it (S5c, rule 33).
+ */
+class AnnotateViewModel(private val d: AnnotateDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
+    private var editor = AnnotationEditor(saved.get<String>(KEY_MARKS)?.let(AnnotationCodec::decode).orEmpty())
+    private val _state = MutableStateFlow(
+        AnnotateUiState(
+            marks = editor.marks,
+            tool = saved.get<String>(KEY_TOOL)?.let { name -> AnnotationTool.entries.firstOrNull { it.name == name } } ?: AnnotationTool.Arrow,
+        ),
+    )
     val state: StateFlow<AnnotateUiState> = _state.asStateFlow()
-    private var editor = AnnotationEditor()
 
     init {
         viewModelScope.launch {
@@ -42,7 +54,10 @@ class AnnotateViewModel(private val d: AnnotateDeps) : ViewModel() {
 
     fun onEvent(event: AnnotateEvent) {
         when (event) {
-            is AnnotateEvent.Tool -> _state.update { it.copy(tool = event.tool) }
+            is AnnotateEvent.Tool -> {
+                saved[KEY_TOOL] = event.tool.name
+                _state.update { it.copy(tool = event.tool) }
+            }
             is AnnotateEvent.Gesture -> when (val r = MarkSketch.finish(_state.value.tool, event.points, _state.value.aspect)) {
                 is SketchResult.Mark -> add(r.mark)
                 is SketchResult.AskText -> _state.update { it.copy(pending = PendingMark.Text(r.at), pendingText = "") }
@@ -62,6 +77,7 @@ class AnnotateViewModel(private val d: AnnotateDeps) : ViewModel() {
             AnnotateEvent.CancelPending -> _state.update { it.copy(pending = null, pendingText = "") }
             AnnotateEvent.Undo -> {
                 editor = editor.undo()
+                saved[KEY_MARKS] = AnnotationCodec.encode(editor.marks)
                 _state.update { it.copy(marks = editor.marks) }
             }
             AnnotateEvent.Save -> save()
@@ -70,6 +86,7 @@ class AnnotateViewModel(private val d: AnnotateDeps) : ViewModel() {
 
     private fun add(mark: Annotation) {
         editor = editor.add(mark)
+        saved[KEY_MARKS] = AnnotationCodec.encode(editor.marks)
         _state.update { it.copy(marks = editor.marks, failed = false) }
     }
 
@@ -82,3 +99,6 @@ class AnnotateViewModel(private val d: AnnotateDeps) : ViewModel() {
         }
     }
 }
+
+private const val KEY_MARKS = "annotate_marks"
+private const val KEY_TOOL = "annotate_tool"

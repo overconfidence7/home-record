@@ -55,10 +55,28 @@ class PhotoDetailViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(id: String = "p1", gates: com.kurtz.homerecord.core.company.RoleGates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner)) =
+    private fun vm(
+        id: String = "p1",
+        gates: com.kurtz.homerecord.core.company.RoleGates = com.kurtz.homerecord.core.company.RoleGates(com.kurtz.homerecord.core.company.CompanyRole.Owner),
+        saved: androidx.lifecycle.SavedStateHandle = androidx.lifecycle.SavedStateHandle(),
+    ) =
         scopes.track(PhotoDetailViewModel(
             PhotoDetailDeps(id, db.photoDao(), db.jobDao(), db.roomDao(), PhotoEdits(db, { 100 }) { e, i -> changes.add("$e:$i") }, kotlinx.coroutines.flow.flowOf(gates)),
+            saved,
         ))
+
+    // S5c (rule 33): a caption typed but not saved comes back after the system kills the app; saving it clears the draft
+    @Test fun `unsaved caption survives process death`() = runBlocking<Unit> {
+        val saved = androidx.lifecycle.SavedStateHandle()
+        val first = vm(saved = saved)
+        loaded(first)
+        first.onEvent(PhotoDetailEvent.Caption("Panel before drywall"))
+        val again = vm(saved = saved)
+        assertThat(loaded(again).caption).isEqualTo("Panel before drywall")
+        again.onEvent(PhotoDetailEvent.SaveCaption)
+        assertThat(row { it?.caption == "Panel before drywall" }?.caption).isEqualTo("Panel before drywall")
+        kotlinx.coroutines.withTimeout(5_000) { while (saved.contains("photo_caption_draft")) kotlinx.coroutines.delay(20) }
+    }
 
     private suspend fun loaded(v: PhotoDetailViewModel) = v.state.filter { !it.loading }.first()
 

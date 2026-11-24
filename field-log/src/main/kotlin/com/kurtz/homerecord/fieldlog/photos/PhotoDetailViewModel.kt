@@ -1,5 +1,6 @@
 package com.kurtz.homerecord.fieldlog.photos
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kurtz.homerecord.core.data.JobDao
@@ -35,8 +36,11 @@ class PhotoDetailDeps(
     val memberName: suspend (String) -> String? = { null },
 )
 
-/** FL-Photo: caption, room and phase tags, the Before mark (its own tag, cr:fl-before-phase) and delete for one job photo (AC-F25). */
-class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
+/**
+ * FL-Photo: caption, room and phase tags, the Before mark (its own tag, cr:fl-before-phase) and delete for one job photo (AC-F25).
+ * A caption typed but not yet saved lives in [saved], so it outlasts the system killing Field Log (S5c, rule 33).
+ */
+class PhotoDetailViewModel(private val d: PhotoDetailDeps, private val saved: SavedStateHandle = SavedStateHandle()) : ViewModel() {
     private val _state = MutableStateFlow(PhotoDetailUiState())
     val state: StateFlow<PhotoDetailUiState> = _state.asStateFlow()
 
@@ -67,7 +71,7 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
         val phases = job?.let { runCatching { Json.decodeFromString(ListSerializer(String.serializer()), it.phasesJson) }.getOrNull() }.orEmpty()
         _state.update {
             PhotoDetailUiState(
-                loading = false, imagePath = if (onPhone) p.path else "", image = if (onPhone) PhotoImage.Ready else PhotoImage.Downloading, caption = p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
+                loading = false, imagePath = if (onPhone) p.path else "", image = if (onPhone) PhotoImage.Ready else PhotoImage.Downloading, caption = saved.get<String>(KEY_CAPTION) ?: p.caption.orEmpty(), rooms = rooms, roomId = p.roomId,
                 phases = phases, phase = p.stage, takenAt = p.takenAt, takenBy = takenBy, annotated = AnnotationCodec.decode(p.annotationsJson).isNotEmpty(),
                 isBefore = p.pairRole == PhotoEdits.BEFORE, canDelete = gates?.canDeletePhoto(p.jobId, p.authorMemberId) ?: false,
             )
@@ -94,8 +98,15 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
 
     fun onEvent(event: PhotoDetailEvent) {
         when (event) {
-            is PhotoDetailEvent.Caption -> _state.update { it.copy(caption = event.text) }
-            PhotoDetailEvent.SaveCaption -> viewModelScope.launch { val text = _state.value.caption; writes.withLock { d.edits.setCaption(d.photoId, text) } }
+            is PhotoDetailEvent.Caption -> {
+                saved[KEY_CAPTION] = event.text
+                _state.update { it.copy(caption = event.text) }
+            }
+            PhotoDetailEvent.SaveCaption -> viewModelScope.launch {
+                val text = _state.value.caption
+                writes.withLock { d.edits.setCaption(d.photoId, text) }
+                if (saved.get<String>(KEY_CAPTION) == text) saved.remove<String>(KEY_CAPTION)
+            }
             is PhotoDetailEvent.Room -> {
                 _state.update { it.copy(roomId = event.id) }
                 saveTags()
@@ -125,3 +136,5 @@ class PhotoDetailViewModel(private val d: PhotoDetailDeps) : ViewModel() {
         viewModelScope.launch { writes.withLock { d.edits.setTags(d.photoId, s.roomId, s.phase) } }
     }
 }
+
+private const val KEY_CAPTION = "photo_caption_draft"

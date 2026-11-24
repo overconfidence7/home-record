@@ -51,13 +51,30 @@ class AnnotateViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun vm(id: String = "p1") = scopes.track(AnnotateViewModel(
+    private fun vm(id: String = "p1", saved: androidx.lifecycle.SavedStateHandle = androidx.lifecycle.SavedStateHandle()) = scopes.track(AnnotateViewModel(
         AnnotateDeps(
             id, db.photoDao(),
             PhotoAnnotator(db, { _, _, _ -> renderOk }, { _, _, _, _, _, _ -> }, { null }),
             aspectOf = { 2f },
         ),
+        saved,
     ))
+
+    // S5c (rule 33): the marks drawn and the chosen tool come back after the system kills the app; undo still works on them
+    @Test fun `marks and tool survive process death`() = runBlocking {
+        val saved = androidx.lifecycle.SavedStateHandle()
+        val first = vm(saved = saved)
+        first.state.first { !it.loading }
+        first.draw(AnnotationTool.Arrow, p(.1f, .1f), p(.4f, .4f))
+        first.draw(AnnotationTool.Rectangle, p(.5f, .5f), p(.8f, .8f))
+        val again = vm(saved = saved)
+        val s = again.state.first { !it.loading }
+        assertThat(s.marks).isEqualTo(first.state.value.marks)
+        assertThat(s.tool).isEqualTo(AnnotationTool.Rectangle)
+        assertThat(s.imagePath).isEqualTo("/m/p1.jpg")
+        again.onEvent(AnnotateEvent.Undo)
+        assertThat(vm(saved = saved).state.value.marks).hasSize(1)
+    }
 
     private fun p(x: Float, y: Float) = NormPoint(x, y)
     private fun AnnotateViewModel.draw(tool: AnnotationTool, vararg pts: NormPoint) {
