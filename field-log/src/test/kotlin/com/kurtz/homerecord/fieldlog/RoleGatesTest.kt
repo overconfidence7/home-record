@@ -154,6 +154,7 @@ class RoleGatesTest {
         val row = FileRow("f1", "Panel schedule.pdf", "", "application/pdf", 640_000, offline = false)
         show { FilesScreen(FilesUiState(loading = false, files = listOf(row), canManage = false), {}) }
         rule.onNodeWithTag("fl_files_row_f1").assertIsDisplayed()
+        rule.onNodeWithTag("fl_files_more_f1").performClick()
         rule.onNodeWithTag("fl_files_offline_f1").assertIsDisplayed()
         rule.onNodeWithTag("fl_files_fab").assertDoesNotExist()
         rule.onNodeWithTag("fl_files_add").assertDoesNotExist()

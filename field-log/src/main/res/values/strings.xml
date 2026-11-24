@@ -422,6 +422,7 @@
     <string name="files_cancel">Cancel</string>
     <string name="files_ok">OK</string>
     <string name="files_rename">Rename</string>
+    <string name="files_actions">More for %1$s</string>
     <string name="files_delete">Delete</string>
     <string name="files_top">All files</string>
     <string name="files_offline">Offline</string>
