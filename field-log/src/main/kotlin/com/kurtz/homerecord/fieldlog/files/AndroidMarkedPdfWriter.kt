@@ -71,7 +71,7 @@ object AndroidMarkedPdfWriter : MarkedPdfWriter {
         val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = PdfMarkColors.INK; style = Paint.Style.STROKE; strokeWidth = stroke; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
         }
-        val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = PdfMarkColors.INK; style = Paint.Style.FILL; textSize = minOf(w, h) * 0.035f }
+        val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = PdfMarkColors.INK; style = Paint.Style.FILL; textSize = minOf(w, h) * PdfTextScale }
         val highlight = Paint().apply { color = PdfMarkColors.HIGHLIGHT; style = Paint.Style.FILL }
         fun x(p: NormPoint) = p.x * w
         fun y(p: NormPoint) = p.y * h

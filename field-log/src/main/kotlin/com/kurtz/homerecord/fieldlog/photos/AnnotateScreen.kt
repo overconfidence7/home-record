@@ -220,10 +220,16 @@ private fun liveMark(tool: AnnotationTool, points: List<NormPoint>, aspect: Floa
     }
 }
 
+/** Text height as a fraction of the photo's short side; [BitmapAnnotationRenderer.draw] uses the same. */
+internal const val PhotoTextScale = 0.05f
+
 /** Draws the same shapes as [BitmapAnnotationRenderer], scaled to the canvas. */
-fun DrawScope.drawMarks(marks: List<Annotation>, color: Color, measurer: TextMeasurer, textStyle: TextStyle) {
+fun DrawScope.drawMarks(marks: List<Annotation>, color: Color, measurer: TextMeasurer, baseStyle: TextStyle) {
     val w = size.width
     val h = size.height
+    // Text as the saved photo draws it (5% of the short side), not by the system font scale, so at 200% a note keeps
+    // the photo's proportions and the editor matches the saved image [builder:markup-text-font-scale].
+    val textStyle = baseStyle.copy(fontSize = (minOf(w, h) * PhotoTextScale).toSp())
     val stroke = Stroke((minOf(w, h) * 0.008f).coerceAtLeast(3f), cap = StrokeCap.Round)
     fun o(p: NormPoint) = Offset(p.x * w, p.y * h)
     marks.forEach { m ->

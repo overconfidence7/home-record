@@ -83,7 +83,7 @@ object BitmapAnnotationRenderer : AnnotatedImageRenderer {
     fun draw(canvas: Canvas, w: Float, h: Float, marks: List<Annotation>) {
         val stroke = (minOf(w, h) * 0.008f).coerceAtLeast(3f)
         val line = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = MARK_COLOR; style = Paint.Style.STROKE; strokeWidth = stroke; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
-        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = MARK_COLOR; style = Paint.Style.FILL; textSize = minOf(w, h) * 0.05f; setShadowLayer(stroke, 0f, 0f, 0xFF000000.toInt()) }
+        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = MARK_COLOR; style = Paint.Style.FILL; textSize = minOf(w, h) * PhotoTextScale; setShadowLayer(stroke, 0f, 0f, 0xFF000000.toInt()) }
         fun x(p: NormPoint) = p.x * w
         fun y(p: NormPoint) = p.y * h
         marks.forEach { m ->

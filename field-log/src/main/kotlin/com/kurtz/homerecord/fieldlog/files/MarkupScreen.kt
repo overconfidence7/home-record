@@ -266,6 +266,9 @@ private fun PageCanvas(pages: PageSource, state: MarkupUiState, onEvent: (Markup
     }
 }
 
+/** Text height as a fraction of the page's short side; [AndroidMarkedPdfWriter.draw] uses the same. */
+internal const val PdfTextScale = 0.035f
+
 /** Draws the same shapes as [AndroidMarkedPdfWriter.draw], scaled to the canvas. */
 private fun DrawScope.drawPdfMarks(marks: List<PdfMark>, ink: Color, highlight: Color, measurer: TextMeasurer, textStyle: TextStyle) {
     val w = size.width
@@ -290,7 +293,9 @@ private fun DrawScope.drawPdfMarks(marks: List<PdfMark>, ink: Color, highlight: 
             is PdfMark.Rect -> drawRect(ink, o(m.topLeft), Size(o(m.bottomRight).x - o(m.topLeft).x, o(m.bottomRight).y - o(m.topLeft).y), style = Stroke(stroke))
             is PdfMark.Highlight -> drawRect(highlight, o(m.topLeft), Size(o(m.bottomRight).x - o(m.topLeft).x, o(m.bottomRight).y - o(m.topLeft).y))
             is PdfMark.Text -> {
-                val laid = measurer.measure(m.text, textStyle)
+                // Sized as the writer sizes it (3.5% of the page's short side), not by the system font scale, so at 200%
+                // a note keeps the page's proportions and the editor matches the saved PDF [builder:markup-text-font-scale].
+                val laid = measurer.measure(m.text, textStyle.copy(fontSize = (minOf(w, h) * PdfTextScale).toSp()))
                 // The writer draws text on its baseline at the tap; lift the layout so the screen matches.
                 drawText(laid, topLeft = Offset(o(m.at).x, o(m.at).y - laid.firstBaseline))
             }
