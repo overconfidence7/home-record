@@ -60,6 +60,12 @@ appId: com.kurtz.homerecord.housemanual
     visible:
       id: "hm_3d_scene_drawn"
     timeout: 30000
+# Every room on the floor carries its name over its box ([judge:hm-3d-rooms-unlabeled])
+- extendedWaitUntil:
+    visible:
+      id: "hm_3d_label_.*"
+    timeout: 10000
+- assertVisible: "Kitchen"
 - takeScreenshot: H10-floor-3d
 # All floors
 - tapOn:
