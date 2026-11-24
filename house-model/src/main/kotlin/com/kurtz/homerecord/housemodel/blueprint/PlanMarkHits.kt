@@ -101,6 +101,13 @@ object LabelPlacer {
     }
 
     /**
+     * The box a task pin covers ([judge:fl-house-pin-over-label]): its round head of [headRadius] lifted [lift] above
+     * the tip, and the point down to the tip, so a room name keeps clear of pins as it does of marks.
+     */
+    fun aroundPin(tipX: Float, tipY: Float, lift: Float, headRadius: Float): LabelBox =
+        LabelBox(tipX - headRadius, tipY - lift - headRadius, tipX + headRadius, tipY)
+
+    /**
      * The name's center, or null when no spot keeps it off the [hard] obstacles (the name is then left out, as when it
      * does not fit the room).
      */

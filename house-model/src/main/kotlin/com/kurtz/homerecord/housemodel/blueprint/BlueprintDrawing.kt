@@ -25,6 +25,9 @@ private const val STAIR_TREAD_IN = 10
 /** How far above its tip a task pin's head sits, in dp. */
 const val PIN_LIFT_DP = 20f
 
+/** Radius of a task pin's head with its outline, in dp; room names keep this far clear of the head. */
+const val PIN_HEAD_RADIUS_DP = 14f
+
 data class PinColors(val fill: Color, val onFill: Color, val outline: Color)
 
 /** A map pin: a round numbered head above a point at the task's spot, outlined so it reads on any room fill (AC-F35). */

@@ -102,4 +102,16 @@ class PlanMarkHitsTest {
         assertThat(LabelPlacer.place(200f, 150f, 210f, 160f, room, emptyList(), emptyList(), 4f, l, requireShape = true)).isNull()
         assertThat(LabelPlacer.place(200f, 150f, 210f, 160f, room, emptyList(), emptyList(), 4f, l)).isNotNull()
     }
+
+    // judge:fl-house-pin-over-label (AC-F35): a task pin dropped in the middle of a room no longer covers its name.
+    @Test
+    @AcceptanceCriterion("AC-F35")
+    fun `a name steps clear of a task pin in the middle of the room`() {
+        val pin = LabelPlacer.aroundPin(200f, 160f, 40f, 28f)
+        assertThat(pin).isEqualTo(LabelBox(172f, 92f, 228f, 160f))
+        val at = checkNotNull(LabelPlacer.place(200f, 150f, 120f, 30f, room, emptyList(), listOf(pin), 4f))
+        val placed = LabelBox(at.first - 60f, at.second - 15f, at.first + 60f, at.second + 15f)
+        assertThat(placed.overlaps(pin)).isFalse()
+        assertThat(placed.inside(room)).isTrue()
+    }
 }

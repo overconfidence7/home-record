@@ -179,7 +179,7 @@ fun BlueprintCanvas(
         val obstacles = (tappable + faintMarks).flatMap { m ->
             val half = (if (m.isItem) PLAN_ITEM_RADIUS_DP + 2f else if (m.isRun) 4f else PLAN_SPOT_RADIUS_DP + 2f) * density
             LabelPlacer.alongRun(PlanMarkHitTester.placed(m, view, insetPx), half)
-        }
+        } + pins.map { LabelPlacer.aroundPin(view.x(it.xIn), view.y(it.yIn), liftPx, PIN_HEAD_RADIUS_DP * density) }
         drawBlueprint(rooms, view, density, measurer, nameStyle, dimStyle, colors, system, obstacles)
         val toScreen = { p: com.kurtz.homerecord.housemodel.overlays.OverlayPoint -> Offset(p.x * view.scale + view.originX, p.y * view.scale + view.originY) }
         drawPlanMarks(shownMarks, toScreen, density, colors.dark, scheme.surface, overlayIcons, itemIcons, items = false)

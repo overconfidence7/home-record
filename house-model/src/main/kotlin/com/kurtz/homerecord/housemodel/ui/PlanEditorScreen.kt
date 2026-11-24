@@ -74,6 +74,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.kurtz.homerecord.housemodel.blueprint.drawOpening
 import com.kurtz.homerecord.housemodel.blueprint.drawStair
 import com.kurtz.homerecord.housemodel.blueprint.LabelBox
+import com.kurtz.homerecord.housemodel.blueprint.PLAN_SPOT_RADIUS_DP
 import com.kurtz.homerecord.housemodel.blueprint.LabelPlacer
 import com.kurtz.homerecord.housemodel.blueprint.labelAnchor
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -560,10 +561,14 @@ private fun PlanCanvas(
                 }
             },
     ) {
-        drawPlan(state, measurer, density, scheme.outlineVariant, scheme.surfaceContainerHigh, scheme.primaryContainer, scheme.onPrimaryContainer,
-            scheme.primary, scheme.errorContainer, scheme.error, scheme.onSurface, label)
         val z = state.zoom * density
         val toScreen = { p: OverlayPoint -> Offset(p.x * z + state.panX * density, p.y * z + state.panY * density) }
+        val marks = state.overlays.flatMap { o ->
+            val half = (if (o.points.size >= 2) 4f else PLAN_SPOT_RADIUS_DP + 2f) * density
+            LabelPlacer.alongRun(o.points.map(toScreen).map { it.x to it.y }, half)
+        }
+        drawPlan(state, measurer, density, scheme.outlineVariant, scheme.surfaceContainerHigh, scheme.primaryContainer, scheme.onPrimaryContainer,
+            scheme.primary, scheme.errorContainer, scheme.error, scheme.onSurface, label, marks)
         val shown = dragged?.let { (id, index, to) ->
             state.overlays.map { o -> if (o.id == id && index in o.points.indices) o.copy(points = o.points.toMutableList().also { it[index] = to }) else o }
         } ?: state.overlays
@@ -714,6 +719,8 @@ private fun DrawScope.drawPlan(
     flaggedLine: Color,
     textColor: Color,
     labelStyle: androidx.compose.ui.text.TextStyle,
+    /** The overlays drawn over the plan, in canvas pixels; room names keep clear of them where there is room ([v4:editor-marks-over-names]). */
+    marks: List<LabelBox> = emptyList(),
 ) {
     val z = s.zoom * density
     val ox = s.panX * density
@@ -754,7 +761,7 @@ private fun DrawScope.drawPlan(
             LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
-        val (cx, cy) = LabelPlacer.place(ax * z + ox, ay * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairBoxes, emptyList(), 4f * density)
+        val (cx, cy) = LabelPlacer.place(ax * z + ox, ay * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairBoxes, marks, 4f * density)
             ?: (ax * z + ox to ay * z + oy)
         if (layout.size.width < (room.maxX - room.minX) * z) {
             drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
