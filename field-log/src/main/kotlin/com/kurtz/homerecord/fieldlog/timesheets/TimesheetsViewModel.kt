@@ -51,7 +51,7 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
     private var weekStart: LocalDate = saved.get<String>(WEEK)?.let(LocalDate::parse)
         ?: d.startWeek?.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) ?: thisWeek
     private val _state = MutableStateFlow(
-        TimesheetsUiState(weekStart = weekStart, isCurrentWeek = weekStart == thisWeek, expandedId = saved[OPEN]),
+        TimesheetsUiState(weekStart = weekStart, isCurrentWeek = weekStart == thisWeek, expandedId = saved[OPEN], confirmApproveAll = saved[CONFIRM_ALL] ?: false),
     )
     val state: StateFlow<TimesheetsUiState> = _state.asStateFlow()
 
@@ -91,11 +91,11 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
                 _state.update { it.copy(expandedId = next) }
             }
             is TimesheetsEvent.Approve -> viewModelScope.launch { d.approvals.approve(event.memberId, weekStart.toString(), d.callerId) }
-            TimesheetsEvent.AskApproveAll -> _state.update { it.copy(confirmApproveAll = true) }
-            TimesheetsEvent.CancelApproveAll -> _state.update { it.copy(confirmApproveAll = false) }
+            TimesheetsEvent.AskApproveAll -> setConfirmAll(true)
+            TimesheetsEvent.CancelApproveAll -> setConfirmAll(false)
             TimesheetsEvent.ApproveAll -> {
                 val ids = _state.value.people.filter { !it.approved && it.punches.isNotEmpty() }.map { it.memberId }
-                _state.update { it.copy(confirmApproveAll = false) }
+                setConfirmAll(false)
                 viewModelScope.launch { d.approvals.approveAll(ids, weekStart.toString(), d.callerId) }
             }
             is TimesheetsEvent.EditPunch -> openEdit(event.punchId)
@@ -107,12 +107,19 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
         }
     }
 
+    /** The "Approve all?" confirm, kept in [saved] so it is open again after process death (rule 33). */
+    private fun setConfirmAll(open: Boolean) {
+        saved[CONFIRM_ALL] = open
+        _state.update { it.copy(confirmApproveAll = open) }
+    }
+
     private fun moveTo(start: LocalDate) {
         weekStart = start
         saved[WEEK] = start.toString()
         saved[OPEN] = null
         week.value = start
         _state.update { it.copy(expandedId = null) }
+        setConfirmAll(false)
         closeEdit()
     }
 
@@ -187,5 +194,6 @@ class TimesheetsViewModel(private val d: TimesheetsDeps, private val saved: Save
         const val EDIT_TIME = "edit_time"
         const val EDIT_JOB = "edit_job"
         const val EDIT_REASON = "edit_reason"
+        const val CONFIRM_ALL = "confirm_all"
     }
 }

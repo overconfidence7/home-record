@@ -206,6 +206,19 @@ class TimesheetsViewModelTest {
         assertThat(s.approvable).isEqualTo(0)
     }
 
+    // S5c2d (rule 33): the "Approve all?" confirm comes back after process death, and stays shut once cancelled
+    @Test fun approveAllConfirmSurvivesProcessDeath() = runBlocking<Unit> {
+        shift("m1", 0, 8, 16)
+        val saved = SavedStateHandle()
+        vm(saved).onEvent(TimesheetsEvent.AskApproveAll)
+        val restored = SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) })
+        val again = vm(restored)
+        assertThat(again.state.value.confirmApproveAll).isTrue()
+        again.onEvent(TimesheetsEvent.CancelApproveAll)
+        val closed = SavedStateHandle(restored.keys().associateWith { restored.get<Any?>(it) })
+        assertThat(vm(closed).state.value.confirmApproveAll).isFalse()
+    }
+
     @Test fun expandedPersonSurvivesProcessDeath() = runBlocking<Unit> {
         shift("m1", 0, 8, 16)
         val handle = SavedStateHandle()

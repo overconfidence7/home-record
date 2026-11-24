@@ -242,6 +242,9 @@ class PlanOverlaysViewModelTest {
         assertThat(third.state.value.overlayForm?.kind).isEqualTo(OverlayKind.ELECTRICAL_WIRE)
         assertThat(third.state.value.overlayForm?.label).isEqualTo("Kitchen circuit")
         assertThat(third.state.value.overlayForm?.points).hasSize(2)
+        // S5c2d (rule 33): the form's open Depth sheet comes back too
+        third.overlay(WallOverlaysEvent.OpenSheet(OverlayFormSheet.DEPTH))
+        assertThat(vm(saved).state.value.overlayForm?.sheet).isEqualTo(OverlayFormSheet.DEPTH)
     }
 
     // R10: a run being drawn on one floor is dropped when another floor is picked, never filed under its rooms.
