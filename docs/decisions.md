@@ -1032,3 +1032,6 @@ Both apps share one version in `version.properties` at the repo root (`versionNa
 
 ## 2026-11-07: list load failures (S5a)
 A list's Room flow is wrapped in `Reloadable` (:core data): an exception becomes a `loadFailed` UiState with Retry (AC-U4) rather than an uncaught exception in viewModelScope. Retry re-subscribes the upstream through `flatMapLatest` on an attempt counter. The cause is logged through java.util.logging (reaches logcat on Android, works in plain JVM tests without mocking android.util.Log). Rolled out list by list (S5a Items and Jobs, S5b the rest).
+
+## 2026-11-24: text fields own their typing (QA F18)
+`LabeledField` (every form text field in both apps) keeps the typed `TextFieldValue` as the source of truth and treats the hoisted `value` as an echo: values the field sent itself are acknowledged as they arrive, any other value (restored draft, "Use $… from the receipt", a reset) replaces the text. Showing the hoisted value directly lost keys whenever the ViewModel's state reached the field late, which a slow emulator does under Maestro's fast `inputText` ("123.71" saved as $1.00). Fields that filter input (digits only, length caps) pass `filter`, so a dropped key never shows.

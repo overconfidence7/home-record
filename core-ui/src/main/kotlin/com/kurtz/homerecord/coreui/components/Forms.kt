@@ -148,17 +148,38 @@ fun LabeledField(
     singleLine: Boolean = true,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     cursorAtEnd: Boolean = false,
+    /** Applied to every edit before it is shown or sent (digits only, a length cap); a key it drops does nothing. */
+    filter: (String) -> String = { it },
 ) {
-    // The field keeps its own cursor. After a failed save, the amount's state was rebuilt mid-typing with the cursor
-    // at the start, so "123.71" landed as "23.711" (QA F18). [cursorAtEnd] (money) starts the cursor after the text;
-    // other fields start at the beginning, as Material's String field, so a long prefilled value shows its start.
+    // The field owns what is typed. On a slow phone the hoisted [value] (a ViewModel's state) arrives several keys
+    // late; showing that stale value made each key land on old text, so "123.71" saved as $1.00 or "23.711" (QA F18).
+    // Values this field sent itself are only acknowledged as they arrive; any other value (restored draft, "Use
+    // total", a reset) replaces the text with the cursor after it. [cursorAtEnd] (money) starts the cursor after the
+    // text; other fields start at the beginning, as Material's String field, so a long prefilled value shows its start.
     var field by remember { mutableStateOf(TextFieldValue(value, if (cursorAtEnd) TextRange(value.length) else TextRange.Zero)) }
-    val shown = if (field.text == value) field else TextFieldValue(value, TextRange(value.length))
+    val pending = remember { ArrayDeque<String>() }
+    var seen by remember { mutableStateOf(value) }
+    if (value != seen) {
+        seen = value
+        val at = pending.indexOf(value)
+        if (at >= 0) {
+            repeat(at + 1) { pending.removeFirst() }
+        } else {
+            pending.clear()
+            if (value != field.text) field = TextFieldValue(value, TextRange(value.length))
+        }
+    }
     OutlinedTextField(
-        value = shown,
-        onValueChange = {
-            field = it
-            if (it.text != value) onValueChange(it.text)
+        value = field,
+        onValueChange = { edit ->
+            val text = filter(edit.text)
+            val next = if (text == edit.text) edit else TextFieldValue(text, TextRange(text.length))
+            val changed = next.text != field.text
+            field = next
+            if (changed) {
+                pending.addLast(next.text)
+                onValueChange(next.text)
+            }
         },
         modifier = modifier.fillMaxWidth(),
         label = { Text(if (required) stringResource(R.string.required_label, label) else label) },

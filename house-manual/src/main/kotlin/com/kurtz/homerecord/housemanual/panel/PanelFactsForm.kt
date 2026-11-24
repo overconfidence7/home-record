@@ -53,6 +53,7 @@ fun PanelFactsContent(facts: PanelFactsState, onEvent: (PanelEvent) -> Unit, mod
         LabeledField(
             label = stringResource(R.string.panel_facts_slots), value = d.slotCount,
             onValueChange = { change(d.copy(slotCount = it.filter(Char::isDigit).take(2))) },
+            filter = { it.filter(Char::isDigit).take(2) },
             keyboardType = KeyboardType.Number, required = true,
             helper = stringResource(R.string.panel_facts_slots_helper), error = slotsError,
             modifier = Modifier.testTag("hm_panel_facts_slots"),
@@ -74,6 +75,7 @@ fun PanelFactsContent(facts: PanelFactsState, onEvent: (PanelEvent) -> Unit, mod
         LabeledField(
             label = stringResource(R.string.panel_facts_main), value = d.mainAmps,
             onValueChange = { change(d.copy(mainAmps = it.filter(Char::isDigit).take(4))) },
+            filter = { it.filter(Char::isDigit).take(4) },
             keyboardType = KeyboardType.Number,
             error = if (PanelField.MAIN_AMPS in errors) stringResource(R.string.panel_facts_main_error) else null,
             modifier = Modifier.testTag("hm_panel_facts_main"),
@@ -81,6 +83,7 @@ fun PanelFactsContent(facts: PanelFactsState, onEvent: (PanelEvent) -> Unit, mod
         LabeledField(
             label = stringResource(R.string.panel_facts_brand), value = d.brand,
             onValueChange = { change(d.copy(brand = it.take(60))) },
+            filter = { it.take(60) },
             modifier = Modifier.testTag("hm_panel_facts_brand"),
         )
     }

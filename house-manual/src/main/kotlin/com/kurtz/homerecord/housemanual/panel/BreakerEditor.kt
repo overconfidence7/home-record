@@ -74,12 +74,14 @@ fun BreakerEditorContent(editor: BreakerEditorState, onEvent: (PanelEvent) -> Un
         LabeledField(
             label = stringResource(R.string.breaker_label), value = d.label,
             onValueChange = { change(d.copy(label = it.take(60))) },
+            filter = { it.take(60) },
             helper = stringResource(R.string.breaker_label_helper),
             modifier = Modifier.testTag("hm_breaker_label"),
         )
         LabeledField(
             label = stringResource(R.string.breaker_amps), value = d.amps,
             onValueChange = { change(d.copy(amps = it.filter(Char::isDigit).take(3))) },
+            filter = { it.filter(Char::isDigit).take(3) },
             keyboardType = KeyboardType.Number,
             error = if (editor.ampsError) stringResource(R.string.breaker_amps_error) else null,
             modifier = Modifier.testTag("hm_breaker_amps"),

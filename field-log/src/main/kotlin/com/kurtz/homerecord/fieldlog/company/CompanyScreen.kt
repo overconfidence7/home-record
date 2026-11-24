@@ -83,6 +83,7 @@ fun CompanyScreen(state: CompanyUiState, onEvent: (CompanyEvent) -> Unit, onClos
                 label = stringResource(R.string.company_distance),
                 value = state.punchDistanceText,
                 onValueChange = { onEvent(CompanyEvent.PunchDistance(it)) },
+                filter = { it.filter(Char::isDigit).take(5) },
                 modifier = Modifier.testTag("fl_company_distance"),
                 helper = stringResource(R.string.company_distance_helper),
                 error = if (state.distanceInvalid) {

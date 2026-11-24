@@ -218,6 +218,7 @@ fun ConsumableFormContent(draft: ConsumableDraft, showErrors: Boolean, onEvent: 
         LabeledField(
             label = stringResource(R.string.item_detail_consumable_quantity), value = draft.quantity,
             onValueChange = { onEvent(ItemDetailEvent.ChangeConsumable(draft.copy(quantity = it.filter(Char::isDigit).take(3)))) },
+            filter = { it.filter(Char::isDigit).take(3) },
             keyboardType = KeyboardType.Number, required = true,
             error = if (ConsumableField.QUANTITY in errors) stringResource(R.string.item_detail_consumable_quantity_error) else null,
             modifier = Modifier.testTag("hm_item_detail_consumable_quantity"),
