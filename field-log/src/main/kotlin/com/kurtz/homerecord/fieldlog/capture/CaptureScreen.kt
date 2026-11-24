@@ -24,6 +24,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Cameraswitch
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Surface
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.material.icons.rounded.FlashAuto
 import androidx.compose.material.icons.rounded.FlashOff
 import androidx.compose.material.icons.rounded.FlashOn
@@ -197,7 +201,7 @@ private fun Controls(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
         }
     }
     state.message?.let {
-        Text(stringResource(messageText(it)), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("fl_capture_message"))
+        MessageBanner(it, onEvent)
     }
     NoteVoiceRow(state, onEvent)
 }
@@ -209,14 +213,7 @@ private fun ShutterRow(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
             Icon(Icons.Rounded.PhotoLibrary, stringResource(R.string.cap_gallery))
         }
         Shutter(enabled = state.canShoot, starting = !state.cameraReady) { onEvent(CaptureEvent.Shutter) }
-        Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
-            if (state.savedCount > 0) {
-                Text(
-                    state.savedCount.toString(), style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.testTag("fl_capture_count"),
-                )
-            }
-        }
+        LastShotThumb(state, onEvent)
     }
 }
 
@@ -257,8 +254,77 @@ private fun Shutter(enabled: Boolean, starting: Boolean, onClick: () -> Unit) {
     }
 }
 
+/**
+ * The newest photo as a 56 dp thumbnail with the count on it; a tap opens that photo (judge:fl-capture-nav-bar).
+ * The slot keeps its size when empty so the shutter stays centred.
+ */
+@Composable
+private fun LastShotThumb(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit) {
+    val last = state.lastShot
+    if (last == null || state.savedCount == 0) {
+        Box(Modifier.size(56.dp))
+        return
+    }
+    val label = pluralStringResource(R.plurals.cap_last_photo, state.savedCount, state.savedCount)
+    Box(
+        Modifier.size(56.dp).clip(RoundedCornerShape(12.dp))
+            .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+            .clickable(onClickLabel = label) { onEvent(CaptureEvent.OpenLast) }
+            .semantics(mergeDescendants = true) { contentDescription = label }
+            .testTag("fl_capture_last"),
+    ) {
+        coil3.compose.AsyncImage(
+            model = java.io.File(last.path), contentDescription = null,
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop, modifier = Modifier.fillMaxSize(),
+        )
+        Text(
+            state.savedCount.toString(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .padding(horizontal = 6.dp, vertical = 1.dp)
+                .testTag("fl_capture_count"),
+        )
+    }
+}
+
+/**
+ * A message from the last shot, import or note in a contained banner (not bare text near the camera image):
+ * failures on the error container with Try again where it can help, confirmations on the secondary container;
+ * every banner can be dismissed (rule 10, rule 34).
+ */
+@Composable
+private fun MessageBanner(m: CaptureMessage, onEvent: (CaptureEvent) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val onBanner = if (m.isError) scheme.onErrorContainer else scheme.onSecondaryContainer
+    Surface(
+        color = if (m.isError) scheme.errorContainer else scheme.secondaryContainer,
+        contentColor = onBanner,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().testTag("fl_capture_banner"),
+    ) {
+        Row(Modifier.padding(start = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(messageText(m)), style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = 12.dp).testTag("fl_capture_message"),
+            )
+            if (m.canRetry) {
+                TextButton(onClick = { onEvent(CaptureEvent.Retry) }, modifier = Modifier.heightIn(min = 56.dp).testTag("fl_capture_retry")) {
+                    Text(stringResource(R.string.cap_retry), color = onBanner)
+                }
+            }
+            IconButton(onClick = { onEvent(CaptureEvent.DismissMessage) }, modifier = Modifier.size(56.dp).testTag("fl_capture_dismiss")) {
+                Icon(Icons.Rounded.Close, stringResource(R.string.cap_dismiss))
+            }
+        }
+    }
+}
+
 private fun messageText(m: CaptureMessage): Int = when (m) {
+    CaptureMessage.ShotFailed -> R.string.cap_shot_failed
     CaptureMessage.SaveFailed -> R.string.cap_save_failed
+    CaptureMessage.ImportFailed -> R.string.cap_import_failed
     CaptureMessage.CameraFailed -> R.string.cap_camera_failed
     CaptureMessage.JobGone -> R.string.cap_job_gone
     CaptureMessage.NoCamera -> R.string.cap_no_camera
@@ -324,7 +390,7 @@ private fun NoCamera(state: CaptureUiState, onEvent: (CaptureEvent) -> Unit, mod
             Text(stringResource(R.string.cap_from_gallery))
         }
         state.message?.let {
-            Text(stringResource(messageText(it)), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("fl_capture_message"))
+            MessageBanner(it, onEvent)
         }
         NoteVoiceRow(state, onEvent)
     }

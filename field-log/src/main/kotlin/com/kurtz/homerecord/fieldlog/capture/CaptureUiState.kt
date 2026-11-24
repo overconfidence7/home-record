@@ -11,8 +11,28 @@ data class CaptureRoom(val id: String, val name: String)
 /** The Before shot drawn at 30% over the preview so the After lines up (AC-F25); [path] is "" while it downloads. */
 data class GhostShot(val photoId: String, val path: String)
 
-/** What a shot or import told the person; shown as one line over the shutter row. */
-enum class CaptureMessage { SaveFailed, CameraFailed, JobGone, NoCamera, NoteSaved, MemoSaved, MemoFailed, MicDenied }
+/**
+ * What a shot or import told the person; shown in a banner above the shutter row. A failure names what failed
+ * (the camera, the phone's storage, the gallery) and offers Try again where trying again can help (rule 10).
+ */
+enum class CaptureMessage(val isError: Boolean, val canRetry: Boolean) {
+    ShotFailed(true, true),
+    SaveFailed(true, true),
+    ImportFailed(true, true),
+    CameraFailed(true, true),
+    JobGone(true, false),
+    NoCamera(true, false),
+    NoteSaved(false, false),
+    MemoSaved(false, false),
+    MemoFailed(true, false),
+    MicDenied(true, false),
+}
+
+/** Why a shot or a gallery import failed, so the banner can say which (judge:fl-capture-save-error). */
+enum class CaptureFailure { Camera, Storage, Import }
+
+/** The newest photo saved on this screen: its thumbnail sits beside the shutter and opens it. */
+data class LastShot(val photoId: String, val path: String)
 
 data class CaptureUiState(
     val loading: Boolean = true,
@@ -27,6 +47,9 @@ data class CaptureUiState(
     val access: CameraAccess = CameraAccess.Unknown,
     val saving: Boolean = false,
     val savedCount: Int = 0,
+    val lastShot: LastShot? = null,
+    /** Bumped by Try again after the camera failed to start, so the route binds it again. */
+    val cameraAttempt: Int = 0,
     val message: CaptureMessage? = null,
     val noteOpen: Boolean = false,
     val noteText: String = "",
@@ -63,7 +86,7 @@ sealed interface CaptureEvent {
     /** Shutter button or volume key. The route takes the picture and answers with [Captured] or [CaptureFailed]. */
     data object Shutter : CaptureEvent
     data class Captured(val path: String) : CaptureEvent
-    data object CaptureFailed : CaptureEvent
+    data class CaptureFailed(val cause: CaptureFailure) : CaptureEvent
     data class Imported(val paths: List<String>) : CaptureEvent
     data object ToggleGhost : CaptureEvent
     data object OpenNote : CaptureEvent
@@ -80,4 +103,10 @@ sealed interface CaptureEvent {
     data object Back : CaptureEvent
     data object PickGallery : CaptureEvent
     data object DismissMessage : CaptureEvent
+
+    /** Try again on a failure banner: take the shot again, bind the camera again, or reopen the gallery. */
+    data object Retry : CaptureEvent
+
+    /** The last-photo thumbnail: the route opens that photo. */
+    data object OpenLast : CaptureEvent
 }

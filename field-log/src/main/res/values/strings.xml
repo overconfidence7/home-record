@@ -627,8 +627,16 @@
     <string name="cap_gallery">Add from gallery</string>
     <string name="cap_shutter">Take photo</string>
     <string name="cap_shutter_starting">Starting the camera</string>
-    <string name="cap_camera_failed">Couldn\'t start the camera. Go back and open it again, or add photos from the gallery.</string>
-    <string name="cap_save_failed">Couldn\'t save the photo. Check free space and try again.</string>
+    <string name="cap_camera_failed">Couldn\'t start the camera. You can still add photos from the gallery.</string>
+    <string name="cap_shot_failed">The camera couldn\'t take that photo.</string>
+    <string name="cap_save_failed">Couldn\'t write the photo to the phone\'s storage. Check free space and try again.</string>
+    <string name="cap_import_failed">Couldn\'t add those photos from the gallery.</string>
+    <string name="cap_retry">Try again</string>
+    <string name="cap_dismiss">Dismiss</string>
+    <plurals name="cap_last_photo">
+        <item quantity="one">Last photo, %1$d taken here. Opens the photo.</item>
+        <item quantity="other">Last photo, %1$d taken here. Opens the photo.</item>
+    </plurals>
     <string name="cap_job_gone">This job is gone, so the photo wasn\'t saved.</string>
     <string name="cap_no_camera_title">No camera on this phone</string>
     <string name="cap_denied_title">Camera is off for Field Log</string>

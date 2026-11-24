@@ -108,4 +108,36 @@ class CaptureLayoutTest {
         state = state.copy(noteOpen = true)
         rule.onNodeWithTag("fl_capture_note_text").assert(androidx.compose.ui.test.hasText("Note"))
     }
+
+    // judge:fl-capture-nav-bar: the last photo is a 56 dp thumbnail with the count; a tap opens it
+    @Test fun lastPhotoThumbnailShowsCountAndOpensIt() {
+        val events = mutableListOf<CaptureEvent>()
+        val state = CaptureUiState(
+            loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted, cameraReady = true,
+            savedCount = 3, lastShot = LastShot("p3", "/none/p3.jpg"),
+        )
+        rule.setContent { CaptureScreen(state, { events += it }, camera = { Box(it) }) }
+        rule.onNodeWithTag("fl_capture_count", useUnmergedTree = true).assert(androidx.compose.ui.test.hasText("3"))
+        rule.onNodeWithTag("fl_capture_last").assertHeightIsAtLeast(56.dp)
+            .assert(androidx.compose.ui.test.hasContentDescription("Last photo, 3 taken here. Opens the photo."))
+            .performClick()
+        assertThat(events).containsExactly(CaptureEvent.OpenLast)
+    }
+
+    // judge:fl-capture-save-error (rule 10): a failure sits in a banner with Try again and Dismiss
+    @Test fun failureBannerOffersTryAgainAndDismiss() {
+        val events = mutableListOf<CaptureEvent>()
+        var state by mutableStateOf(
+            CaptureUiState(loading = false, jobName = "Ortiz kitchen rewire", access = CameraAccess.Granted, cameraReady = true, message = CaptureMessage.ShotFailed),
+        )
+        rule.setContent { CaptureScreen(state, { events += it }, camera = { Box(it) }) }
+        rule.onNodeWithTag("fl_capture_message", useUnmergedTree = true).assert(androidx.compose.ui.test.hasText("The camera couldn't take that photo."))
+        rule.onNodeWithTag("fl_capture_retry").assertHeightIsAtLeast(56.dp).performClick()
+        rule.onNodeWithTag("fl_capture_dismiss").assertHeightIsAtLeast(56.dp).performClick()
+        assertThat(events).containsExactly(CaptureEvent.Retry, CaptureEvent.DismissMessage).inOrder()
+        // A confirmation has no Try again
+        state = state.copy(message = CaptureMessage.NoteSaved)
+        rule.onNodeWithTag("fl_capture_retry").assertDoesNotExist()
+        rule.onNodeWithTag("fl_capture_banner").assertExists()
+    }
 }

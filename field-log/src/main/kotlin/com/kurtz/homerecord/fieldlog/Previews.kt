@@ -891,7 +891,7 @@ private val captureRooms = listOf(
 private val captureReady = com.kurtz.homerecord.fieldlog.capture.CaptureUiState(
     loading = false, jobName = "Ortiz kitchen rewire", rooms = captureRooms, phases = listOf("Rough-in", "Inspection", "Finish"),
     roomId = "r1", phase = "Rough-in", canFlip = true, access = com.kurtz.homerecord.fieldlog.capture.CameraAccess.Granted, savedCount = 3,
-    cameraReady = true,
+    lastShot = com.kurtz.homerecord.fieldlog.capture.LastShot("p3", "/none/p3.jpg"), cameraReady = true,
 )
 
 @Composable
@@ -946,6 +946,16 @@ fun CaptureGhostDownloadingPreview() = CaptureFrame(captureReady.copy(ghost = co
 @ThemePreviews
 @Composable
 fun CaptureRecordingPreview() = CaptureFrame(captureReady.copy(recording = true, recordedSeconds = 74))
+
+/** The camera answered the shutter with an error: the banner names it and offers Try again. */
+@ThemePreviews
+@Composable
+fun CaptureShotFailedPreview() = CaptureFrame(captureReady.copy(message = com.kurtz.homerecord.fieldlog.capture.CaptureMessage.ShotFailed))
+
+/** A confirmation (note saved) uses the same banner on the secondary container, with no Try again. */
+@ThemePreviews
+@Composable
+fun CaptureNoteSavedPreview() = CaptureFrame(captureReady.copy(message = com.kurtz.homerecord.fieldlog.capture.CaptureMessage.NoteSaved))
 
 @ThemePreviews
 @Composable

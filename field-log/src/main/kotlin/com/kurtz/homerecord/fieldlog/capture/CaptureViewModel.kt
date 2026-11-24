@@ -138,7 +138,20 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
             is CaptureEvent.Captured -> save(listOf(event.path), pairWithGhost = true)
             CaptureEvent.ToggleGhost -> _state.update { it.copy(ghostOn = !it.ghostOn) }
             is CaptureEvent.Imported -> save(event.paths)
-            CaptureEvent.CaptureFailed -> _state.update { it.copy(message = CaptureMessage.SaveFailed) }
+            is CaptureEvent.CaptureFailed -> _state.update {
+                it.copy(
+                    message = when (event.cause) {
+                        CaptureFailure.Camera -> CaptureMessage.ShotFailed
+                        CaptureFailure.Storage -> CaptureMessage.SaveFailed
+                        CaptureFailure.Import -> CaptureMessage.ImportFailed
+                    },
+                )
+            }
+            CaptureEvent.Retry -> _state.update {
+                if (it.message == CaptureMessage.CameraFailed) it.copy(message = null, cameraAttempt = it.cameraAttempt + 1)
+                else it.copy(message = null)
+            }
+            CaptureEvent.OpenLast -> Unit
             CaptureEvent.CameraStarting -> _state.update { it.copy(cameraReady = false) }
             CaptureEvent.CameraReady -> _state.update {
                 it.copy(cameraReady = true, message = it.message?.takeIf { m -> m != CaptureMessage.CameraFailed })
@@ -228,10 +241,12 @@ class CaptureViewModel(private val d: CaptureDeps, private val saved: SavedState
         _state.update { it.copy(saving = true, ghostOn = it.ghostOn && beforeOf == null) }
         // The rows go in first with no fix and the fix is added after, so Back right after the shutter keeps the photo.
         d.appScope.launch {
-            val ids = paths.mapNotNull { path -> d.photos.save(path, tags, fix = null, beforeOf = beforeOf) }
+            val saved = paths.mapNotNull { path -> d.photos.save(path, tags, fix = null, beforeOf = beforeOf)?.let { LastShot(it, path) } }
+            val ids = saved.map { it.photoId }
             _state.update {
                 it.copy(
                     saving = false, savedCount = it.savedCount + ids.size,
+                    lastShot = saved.lastOrNull() ?: it.lastShot,
                     message = if (ids.size < paths.size) CaptureMessage.JobGone else null,
                 )
             }

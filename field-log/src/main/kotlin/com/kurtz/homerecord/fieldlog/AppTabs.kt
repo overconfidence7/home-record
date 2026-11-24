@@ -329,7 +329,10 @@ private fun FieldLogTabs(container: AppContainer, membership: CompanyMembership)
             com.kurtz.homerecord.fieldlog.photos.AnnotateRoute(container.annotateDeps(key.photoId), onBack = nav::pop)
         }
         entry<CaptureKey> { key ->
-            com.kurtz.homerecord.fieldlog.capture.CaptureRoute(key.jobId, { ctx -> container.captureDeps(ctx, key.jobId) }, onBack = nav::pop)
+            com.kurtz.homerecord.fieldlog.capture.CaptureRoute(
+                key.jobId, { ctx -> container.captureDeps(ctx, key.jobId) }, onBack = nav::pop,
+                onOpenPhoto = { nav.push(PhotoKey(it)) },
+            )
         }
         entry<JobPlanKey> { key ->
             com.kurtz.homerecord.housemodel.ui.PlanEditorRoute(

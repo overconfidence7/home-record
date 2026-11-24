@@ -190,6 +190,41 @@ class CaptureViewModelTest {
         assertThat(withTimeout(10_000) { vm.state.first { it.savedCount >= 1 } }.savedCount).isEqualTo(1)
     }
 
+    // AC-F24, judge:fl-capture-nav-bar: the thumbnail beside the shutter is the newest saved photo
+    @Test fun lastShotIsTheNewestSavedPhoto() = runBlocking<Unit> {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.Imported(listOf("/media/1.jpg", "/media/2.jpg")))
+        val state = withTimeout(10_000) { vm.state.first { it.savedCount >= 2 } }
+        val row = photosAfter(2).single { it.path == "/media/2.jpg" }
+        assertThat(state.lastShot).isEqualTo(LastShot(row.id, "/media/2.jpg"))
+    }
+
+    // judge:fl-capture-save-error: the banner names what failed
+    @Test fun captureFailureNamesCameraStorageOrGallery() {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.CaptureFailed(CaptureFailure.Camera))
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.ShotFailed)
+        vm.onEvent(CaptureEvent.CaptureFailed(CaptureFailure.Storage))
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.SaveFailed)
+        vm.onEvent(CaptureEvent.CaptureFailed(CaptureFailure.Import))
+        assertThat(vm.state.value.message).isEqualTo(CaptureMessage.ImportFailed)
+        assertThat(CaptureMessage.entries.filter { it.isError && it.canRetry })
+            .containsExactly(CaptureMessage.ShotFailed, CaptureMessage.SaveFailed, CaptureMessage.ImportFailed, CaptureMessage.CameraFailed)
+    }
+
+    // judge:fl-capture-save-error: Try again after the camera failed to start binds it again
+    @Test fun retryAfterCameraFailedAsksForAnotherBind() {
+        val vm = vm().also { it.loaded() }
+        vm.onEvent(CaptureEvent.CameraFailed)
+        vm.onEvent(CaptureEvent.Retry)
+        assertThat(vm.state.value.message).isNull()
+        assertThat(vm.state.value.cameraAttempt).isEqualTo(1)
+        vm.onEvent(CaptureEvent.CaptureFailed(CaptureFailure.Camera))
+        vm.onEvent(CaptureEvent.Retry)
+        assertThat(vm.state.value.message).isNull()
+        assertThat(vm.state.value.cameraAttempt).isEqualTo(1)
+    }
+
     // AC-F24
     @Test fun withoutLocationPermissionPhotoIsStillSaved() = runBlocking<Unit> {
         location.granted = false

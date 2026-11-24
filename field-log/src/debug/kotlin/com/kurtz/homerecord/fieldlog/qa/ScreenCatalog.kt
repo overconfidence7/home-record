@@ -90,6 +90,8 @@ object ScreenCatalog {
         QaScreen("capture-ghost-downloading", nonRoot = true) { CaptureGhostDownloadingPreview() },
         QaScreen("capture-recording", nonRoot = true) { CaptureRecordingPreview() },
         QaScreen("capture-note", nonRoot = true) { CaptureNotePreview() },
+        QaScreen("capture-shot-failed", nonRoot = true) { CaptureShotFailedPreview() },
+        QaScreen("capture-note-saved", nonRoot = true) { CaptureNoteSavedPreview() },
         QaScreen("capture-denied", nonRoot = true) { CaptureDeniedPreview() },
         QaScreen("capture-no-camera", nonRoot = true) { CaptureNoCameraPreview() },
         QaScreen("capture-loading", nonRoot = true) { CaptureLoadingPreview() },

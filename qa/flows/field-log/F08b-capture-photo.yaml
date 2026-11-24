@@ -53,6 +53,18 @@ appId: com.kurtz.homerecord.fieldlog
       text: "1"
     timeout: 15000
 - takeScreenshot: F08b-capture-one-photo
+# judge:fl-capture-nav-bar: the count sits on the last photo's thumbnail, which opens that photo; Back returns to the camera
+- tapOn:
+    id: fl_capture_last
+- extendedWaitUntil:
+    visible:
+      id: fl_photo_annotate
+    timeout: 10000
+- back
+- extendedWaitUntil:
+    visible:
+      id: fl_capture_shutter
+    timeout: 10000
 # AC-F24: back on the job, Photos lists the new photo instead of the empty state
 - back
 - extendedWaitUntil:

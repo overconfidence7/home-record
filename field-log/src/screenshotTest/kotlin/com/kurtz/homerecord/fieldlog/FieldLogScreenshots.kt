@@ -345,6 +345,16 @@ fun CaptureRecordingScreenshot() = CaptureRecordingPreview()
 @PreviewTest
 @ThemePreviews
 @Composable
+fun CaptureShotFailedScreenshot() = CaptureShotFailedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
+fun CaptureNoteSavedScreenshot() = CaptureNoteSavedPreview()
+
+@PreviewTest
+@ThemePreviews
+@Composable
 fun CaptureNoteScreenshot() = CaptureNotePreview()
 
 @PreviewTest

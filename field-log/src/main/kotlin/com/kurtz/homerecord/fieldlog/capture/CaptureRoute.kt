@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Unit) {
+fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Unit, onOpenPhoto: (String) -> Unit) {
     val context = LocalContext.current
     val vm = viewModel<CaptureViewModel>(
         key = jobId,
@@ -58,7 +58,7 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) scope.launch {
             val paths = withContext(Dispatchers.IO) { uris.mapNotNull { copyIn(context, it) } }
-            if (paths.isEmpty()) vm.onEvent(CaptureEvent.CaptureFailed) else vm.onEvent(CaptureEvent.Imported(paths))
+            if (paths.isEmpty()) vm.onEvent(CaptureEvent.CaptureFailed(CaptureFailure.Import)) else vm.onEvent(CaptureEvent.Imported(paths))
         }
     }
     val pick = { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
@@ -78,13 +78,23 @@ fun CaptureRoute(jobId: String, deps: (Context) -> CaptureDeps, onBack: () -> Un
             CaptureEvent.OpenSettings -> Intents.openAppSettings(context)
             CaptureEvent.Back -> onBack()
             CaptureEvent.PickGallery -> pick()
+            CaptureEvent.OpenLast -> state.lastShot?.let { onOpenPhoto(it.photoId) }
+            CaptureEvent.Retry -> {
+                val failed = state.message
+                vm.onEvent(event)
+                when (failed) {
+                    CaptureMessage.ShotFailed, CaptureMessage.SaveFailed -> if (vm.state.value.canShoot) takePicture(context, imageCapture, vm)
+                    CaptureMessage.ImportFailed -> pick()
+                    else -> Unit
+                }
+            }
             else -> vm.onEvent(event)
         }
     }
     CaptureScreen(state, onEvent) { modifier ->
         val owner = LocalLifecycleOwner.current
         val previewView = remember { PreviewView(context) }
-        LaunchedEffect(state.access, state.lens) {
+        LaunchedEffect(state.access, state.lens, state.cameraAttempt) {
             vm.onEvent(CaptureEvent.CameraStarting)
             if (state.access != CameraAccess.Granted) return@LaunchedEffect
             val provider = ProcessCameraProvider.awaitInstance(context)
@@ -117,7 +127,9 @@ private fun takePicture(context: Context, imageCapture: ImageCapture, vm: Captur
             override fun onImageSaved(output: ImageCapture.OutputFileResults) = vm.onEvent(CaptureEvent.Captured(file.absolutePath))
             override fun onError(exception: ImageCaptureException) {
                 Log.w(TAG, "Couldn't take the photo (ImageCapture error ${exception.imageCaptureError})", exception)
-                vm.onEvent(CaptureEvent.CaptureFailed)
+                // A write that failed is the phone's storage; anything else (capture, camera closed) is the camera.
+                val cause = if (exception.imageCaptureError == ImageCapture.ERROR_FILE_IO) CaptureFailure.Storage else CaptureFailure.Camera
+                vm.onEvent(CaptureEvent.CaptureFailed(cause))
             }
         },
     )
@@ -131,4 +143,4 @@ private fun copyIn(context: Context, uri: Uri): String? = runCatching {
     val file = File(mediaDir(context), "${UUID.randomUUID()}.jpg")
     context.contentResolver.openInputStream(uri)?.use { input -> file.outputStream().use { input.copyTo(it) } } ?: return null
     file.absolutePath
-}.getOrNull()
+}.onFailure { Log.w(TAG, "Couldn't copy a gallery photo in", it) }.getOrNull()
