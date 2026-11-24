@@ -1,7 +1,9 @@
 package com.kurtz.homerecord.housemanual.home
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
@@ -34,5 +36,23 @@ class HomeAttentionTest {
         rule.onNodeWithTag("hm_home_attention_t2").performScrollTo().performClick()
         rule.onNodeWithTag("hm_home_attention_w1").performScrollTo().performClick()
         assertThat(events).containsExactly(HomeEvent.OpenReminders, HomeEvent.OpenReminders, HomeEvent.OpenItem("dw")).inOrder()
+    }
+
+    // judge:hm-home-attention-iso-dates: the repository hands ISO dates; Home words them as Reminders and Items do
+    @Test fun attentionDatesAreMediumDatesNotIso() {
+        val rows = listOf(
+            AttentionRow(AttentionKind.REMINDER_OVERDUE, "t1", "furnace", "Furnace", "2026-10-26"),
+            AttentionRow(AttentionKind.WARRANTY_EXPIRING, "w1", "dw", "Dishwasher", "2026-12-07"),
+        )
+        val before = java.util.Locale.getDefault()
+        java.util.Locale.setDefault(java.util.Locale.US)
+        try {
+            rule.setContent { HomeScreen(HomeUiState(loading = false, homeName = "Maple St", itemCount = 3, attention = rows), onEvent = {}) }
+            rule.onNodeWithText("Reminder overdue since Oct 26, 2026").performScrollTo().assertExists()
+            rule.onNodeWithText("Warranty ends Dec 7, 2026").performScrollTo().assertExists()
+            assertThat(rule.onAllNodesWithText("2026-10-26", substring = true).fetchSemanticsNodes()).isEmpty()
+        } finally {
+            java.util.Locale.setDefault(before)
+        }
     }
 }

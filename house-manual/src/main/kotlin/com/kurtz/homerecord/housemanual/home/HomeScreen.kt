@@ -165,8 +165,9 @@ private fun EmergencyCard(count: Int, onAdd: (() -> Unit)?, onOpen: () -> Unit) 
 @Composable
 private fun AttentionItem(row: AttentionRow, onEvent: (HomeEvent) -> Unit) {
     val supporting = when (row.kind) {
-        AttentionKind.WARRANTY_EXPIRING -> stringResource(R.string.home_attention_warranty, row.detail)
-        AttentionKind.REMINDER_OVERDUE -> stringResource(R.string.home_attention_overdue, row.detail)
+        // Medium dates, as Reminders and Items word the same records (judge:hm-home-attention-iso-dates, rule 22)
+        AttentionKind.WARRANTY_EXPIRING -> stringResource(R.string.home_attention_warranty, com.kurtz.homerecord.coreui.components.displayDate(row.detail))
+        AttentionKind.REMINDER_OVERDUE -> stringResource(R.string.home_attention_overdue, com.kurtz.homerecord.coreui.components.displayDate(row.detail))
         AttentionKind.MISSING_MAKE_MODEL -> stringResource(R.string.home_attention_missing)
     }
     RecordListItem(

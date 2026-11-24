@@ -48,7 +48,7 @@ fun WarrantyStatusLine(status: WarrantyStatus, modifier: Modifier = Modifier) {
  * Medium date in the current locale. The formatter is built once per locale rather than once per row: long lists
  * (Items, 200 rows) compose a warranty line for every row that scrolls in (AC-U11).
  */
-internal fun displayDate(iso: String, locale: Locale = Locale.getDefault()): String {
+fun displayDate(iso: String, locale: Locale = Locale.getDefault()): String {
     val f = cachedFormatter.let { if (it?.first == locale) it.second else null }
         ?: DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).also { cachedFormatter = locale to it }
     return runCatching { LocalDate.parse(iso).format(f) }.getOrDefault(iso)
