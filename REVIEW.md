@@ -3621,3 +3621,17 @@ Not built yet: none.
 Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
 
 Judged: 95 screenshots (45 tour shots, 34 flow and failure shots, 8 crawler shots, 4 orbit video frames, 4 handoff and import shots; all 1752 crawler shots scanned for blank frames), 37 walkthrough steps. New issues: 6. Product gaps: 0.
+
+## QA auto 2026-11-25 (commit 5cb6009c)
+
+Automated suite run at 2026-11-25 03:44 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F09b-log-send fails on field-log (regression of a fixed item) [auto:flow:field-log:F09b-log-send] - steps: automated, see qa-results branch latest/ for commit 5cb6009c - expected: walkthrough step F09b passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F09b-log-send.log - screenshot: qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-link-sheet.png
+- [ ] [Major] field-log scroll jank (regression of a fixed item) [auto:jank:field-log:field-log] - steps: automated, see qa-results branch latest/ for commit 5cb6009c - expected: under 10% janky frames (AC-U11) - actual: 15% of 120 frames ran the UI thread past the frame budget (AC-U11; software renderer, overall 90% janky of 151; 200-row list, benchmark build)
+- [ ] [Major] Flow H10-3d fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H10-3d] - steps: automated, see qa-results branch latest/ for commit 5cb6009c - expected: walkthrough step H10 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H10-3d.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Fail, field-log F10 Pass, field-log F10b Pass, field-log F10c Pass, field-log F10d Pass, field-log F10e Pass, field-log F11 Pass, field-log F11b Pass, field-log F11c Pass, field-log F12 Pass, field-log F13 Pass, field-log F14 Pass, field-log F15 Pass, field-log F16 Pass, field-log F17 Pass, field-log F18 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Pass, house-manual H04 Pass, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H08 Pass, house-manual H09 Pass, house-manual H10 Fail, house-manual H11 Pass, house-manual H12 Pass, house-manual H13 Pass, house-manual H14 Pass, house-manual H15 Pass, house-manual H16 Pass, house-manual H17 Pass, house-manual H17b Pass, house-manual H18 Pass, house-manual H18b Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
+
+Tested: 102 device stages, 2328 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 98. New issues: 3. Critical: 0. Product gaps: n/a (judge entry follows).
