@@ -31,6 +31,9 @@ import com.kurtz.homerecord.housemodel.blueprint.RoomPalette
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import dev.romainguy.kotlin.math.Float2
 import io.github.sceneview.SceneView
+import io.github.sceneview.SurfaceType
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
 import dev.romainguy.kotlin.math.Float3
 import dev.romainguy.kotlin.math.Mat4
 import dev.romainguy.kotlin.math.lookAt
@@ -148,13 +151,19 @@ fun FloorSceneView(
     // `<app>_3d_scene_drawn` appears once this scene (these batches, every picture loaded) has drawn a few frames, so a
     // flow on a slow software-rendered emulator screenshots the house, not the blank surface ([judge:qa-3d-blank-emulator]).
     // Held once (SceneView may keep its first onFrame) and reset when the scene's batches change.
+    // It also needs the pixels: a PixelCopy of the view must show walls or floors standing out from the background
+    // ([SceneFrameCheck]), so a frame Filament drew that never reached the screen keeps the tag off
+    // ([judge:qa-3d-drawn-tag-blank]); a blank check waits [DRAWN_RETRY_FRAMES] and looks again.
     val sceneFrames = remember { intArrayOf(0) }
+    val checking = remember { booleanArrayOf(false) }
     var drawn by remember { mutableStateOf(false) }
     DisposableEffect(geometries) {
         sceneFrames[0] = 0
         drawn = false
         onDispose { }
     }
+    val window = androidx.compose.ui.platform.LocalView.current.context.findWindow()
+    val sceneRect = remember { android.graphics.Rect() }
     val loadedPictures by rememberUpdatedState(pictures)
     val prefix = LocalTagPrefix.current
     // Room names over the boxes, as the blueprint labels its rooms ([judge:hm-3d-rooms-unlabeled]); not while standing
@@ -163,9 +172,24 @@ fun FloorSceneView(
     var viewSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
-    Box(modifier.onSizeChanged { viewSize = it }) {
+    Box(
+        modifier
+            .onSizeChanged { viewSize = it }
+            .onGloballyPositioned { c ->
+                val b = c.boundsInWindow()
+                sceneRect.set(b.left.toInt(), b.top.toInt(), b.right.toInt(), b.bottom.toInt())
+            }
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         SceneView(
             modifier = Modifier.matchParentSize(),
+            // A TextureView draws the scene inline with the screen. The default SurfaceView sits behind the window and
+            // shows through a hole Compose leaves for it; once a layer above it (a screen transition, the shared room
+            // bounds) composites offscreen the hole is painted over, and the device showed a white or grey box with a
+            // faint slab where the walls should be ([judge:hm-3d-live-no-walls], [judge:fl-3d-live-no-walls]).
+            surfaceType = SurfaceType.TextureSurface,
+            // See-through, so the house sits on the screen's own surface colour in light and dark, not on black.
+            isOpaque = false,
             engine = engine,
             cameraNode = cameraNode,
             // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
@@ -191,7 +215,15 @@ fun FloorSceneView(
             onFrame = { nanos ->
                 if (draws > 0) {
                     stats.onFrame(nanos)
-                    if (!drawn && loadedPictures.all { resources.hasTexture(it) || it in unreadable } && ++sceneFrames[0] >= DRAWN_AFTER_FRAMES) drawn = true
+                    if (!drawn && !checking[0] && loadedPictures.all { resources.hasTexture(it) || it in unreadable } &&
+                        ++sceneFrames[0] >= DRAWN_AFTER_FRAMES
+                    ) {
+                        checking[0] = true
+                        checkOnScreen(window, sceneRect) { onScreen ->
+                            checking[0] = false
+                            if (onScreen) drawn = true else sceneFrames[0] = -DRAWN_RETRY_FRAMES
+                        }
+                    }
                 }
                 val clip = cameraNode.projectionTransform * cameraNode.viewTransform
                 val next = RoomLabels.place(labelRooms, viewSize.width, viewSize.height) { x, y, z ->
@@ -396,5 +428,47 @@ const val PERF_TAG = "HomeRecord3D"
 private const val PERF_LOG_MS = 2_000L
 /** Frames with every picture loaded before the scene counts as drawn for `<app>_3d_scene_drawn`. */
 private const val DRAWN_AFTER_FRAMES = 3
+/** Frames to wait after a blank [SceneFrameCheck] before copying the view again. */
+private const val DRAWN_RETRY_FRAMES = 15
+/** The copy checked for the drawn tag is this many times smaller than the view on each side. */
+private const val CHECK_DOWNSCALE = 8
+
+/**
+ * Copies what the window shows inside [rect] (scene, labels and all) and reports whether [SceneFrameCheck] finds the
+ * house on it; logs the share under [PERF_TAG] for QA. Without a window (previews, tests) the scene counts as shown.
+ */
+private fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect, onResult: (Boolean) -> Unit) {
+    if (window == null) return onResult(true)
+    if (rect.width() <= 0 || rect.height() <= 0) return onResult(false)
+    val bitmap = Bitmap.createBitmap(
+        max(1, rect.width() / CHECK_DOWNSCALE), max(1, rect.height() / CHECK_DOWNSCALE), Bitmap.Config.ARGB_8888,
+    )
+    val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    try {
+        android.view.PixelCopy.request(window, android.graphics.Rect(rect), bitmap, { code ->
+            val ok = code == android.view.PixelCopy.SUCCESS
+            val result = if (ok) {
+                val pixels = IntArray(bitmap.width * bitmap.height)
+                bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+                SceneFrameCheck.check(pixels)
+            } else {
+                SceneFrameCheck.Result(false, 0f)
+            }
+            bitmap.recycle()
+            Log.i(PERF_TAG, "on screen: ${result.drawn}; ${(result.share * 100).toInt()}% of the view stands out (copy $code)")
+            onResult(result.drawn)
+        }, handler)
+    } catch (e: IllegalArgumentException) {
+        // The window has no surface yet (opening or closing): try again on a later frame.
+        bitmap.recycle()
+        onResult(false)
+    }
+}
+
+private tailrec fun android.content.Context.findWindow(): android.view.Window? = when (this) {
+    is android.app.Activity -> window
+    is android.content.ContextWrapper -> baseContext.findWindow()
+    else -> null
+}
 private const val MIN_RADIUS_M = 2f
 private const val DISTANCE_PER_RADIUS = 2.2f
