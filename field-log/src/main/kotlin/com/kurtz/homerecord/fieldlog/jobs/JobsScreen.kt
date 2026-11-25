@@ -173,20 +173,26 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
             supportingMaxLines = 4,
             // One row pattern (rule 7): the next day on site as trailing meta when there is one, then the chevron
             // on every row so each one reads as tappable.
-            trailing = {
-                androidx.compose.foundation.layout.Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
-                ) {
-                    row.nextDay?.let { day -> Text(shortDate(day), style = MaterialTheme.typography.labelLarge) }
-                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+            // A row with no next day composes the chevron alone, without the Row and date (AC-U11: rows composed while
+            // flinging the 200-row list ran the UI thread past the frame budget, [auto:jank:field-log:field-log]).
+            trailing = row.nextDay?.let { day ->
+                {
+                    androidx.compose.foundation.layout.Row(
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(shortDate(day), style = MaterialTheme.typography.labelLarge)
+                        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+                    }
                 }
-            },
+            } ?: chevron,
             onClick = { onEvent(JobsEvent.Open(row.summary.id)) },
             modifier = Modifier.testTag("fl_jobs_row_${row.summary.id}"),
         )
     }
 }
+
+private val chevron: @Composable () -> Unit = { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null) }
 
 @Composable
 private fun shortDate(iso: String): String = remember(iso) {

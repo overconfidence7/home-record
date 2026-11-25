@@ -236,12 +236,14 @@ fun FloorSceneView(
                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
+                // The label keeps its measured size (a 0x0 node is left out of the accessibility tree, so Maestro and
+                // TalkBack never saw the names: [auto:flow:house-manual:H10-3d]); the tag sits on the placed content.
                 modifier = Modifier
-                    .testTag("${prefix}_3d_label_${label.id}")
                     .layout { measurable, constraints ->
                         val p = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
-                        layout(0, 0) { p.place(label.x.toInt() - p.width / 2, label.y.toInt() - p.height / 2) }
+                        layout(p.width, p.height) { p.place(label.x.toInt() - p.width / 2, label.y.toInt() - p.height / 2) }
                     }
+                    .testTag("${prefix}_3d_label_${label.id}")
                     .background(
                         androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.85f),
                         androidx.compose.foundation.shape.RoundedCornerShape(4.dp),

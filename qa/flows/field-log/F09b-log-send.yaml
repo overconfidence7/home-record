@@ -122,11 +122,17 @@ appId: com.kurtz.homerecord.fieldlog
     notVisible:
       id: fl_log_link_on
     timeout: 10000
-# R09d (AC-F33): an edit after the send says the client's copy is out of date
+# R09d (AC-F33): an edit after the send says the client's copy is out of date. Centre the pencil: the scroll stopped
+# with it half under the Preview/Send bar and the tap landed on the bar ([auto:flow:field-log:F09b-log-send], 5cb6009c).
 - scrollUntilVisible:
     element:
       id: fl_log_visitors_edit
     direction: DOWN
+    centerElement: true
+- extendedWaitUntil:
+    visible:
+      id: fl_log_visitors_edit
+    timeout: 5000
 - tapOn:
     id: fl_log_visitors_edit
 - tapOn:
