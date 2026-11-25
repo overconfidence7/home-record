@@ -169,6 +169,10 @@ fun FloorSceneView(
     // Room names over the boxes, as the blueprint labels its rooms ([judge:hm-3d-rooms-unlabeled]); not while standing
     // inside a room. Re-placed each frame from the camera, published only when a label moves by a pixel or more.
     val cameraNode = io.github.sceneview.rememberCameraNode(engine)
+    // Our own Filament view so FXAA can be turned off: SceneView sets FXAA on every render quality, and with the
+    // see-through blend mode Filament compiles a translucent FXAA program the emulator's GL cannot build; Filament then
+    // aborts and the app closes on opening 3D ([auto:flow:house-manual:H10-3d] on a0ab29b0).
+    val filamentView = io.github.sceneview.rememberView(engine)
     var viewSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
@@ -191,6 +195,7 @@ fun FloorSceneView(
             // See-through, so the house sits on the screen's own surface colour in light and dark, not on black.
             isOpaque = false,
             engine = engine,
+            view = filamentView,
             cameraNode = cameraNode,
             // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
             // it never reached the screen and the drawn tag never came ([auto:flow:house-manual:H10-3d]). Frames run
@@ -213,6 +218,7 @@ fun FloorSceneView(
             ),
             // Timed once the scene is on screen: the first frame counted is the first with the house in it.
             onFrame = { nanos ->
+                SceneAntiAliasing.keepOff(filamentView)
                 if (draws > 0) {
                     stats.onFrame(nanos)
                     if (!drawn && !checking[0] && loadedPictures.all { resources.hasTexture(it) || it in unreadable } &&
@@ -261,6 +267,8 @@ fun FloorSceneView(
                 )
             }
         }
+        // After SceneView's own effects (they run in composition order), which set FXAA when the view is first used.
+        LaunchedEffect(filamentView) { SceneAntiAliasing.keepOff(filamentView) }
         // No pointer input on the labels either: a tap on a name still reaches the room below.
         labels.forEach { label ->
             androidx.compose.material3.Text(
@@ -462,6 +470,19 @@ private fun checkOnScreen(window: android.view.Window?, rect: android.graphics.R
         // The window has no surface yet (opening or closing): try again on a later frame.
         bitmap.recycle()
         onResult(false)
+    }
+}
+
+/**
+ * Keeps Filament's FXAA off for the see-through scene. SceneView turns it on for every render quality; with
+ * [com.google.android.filament.View.BlendMode.TRANSLUCENT] its program fails to compile on the emulator's GL and
+ * Filament aborts the process. Checked before each frame, so a later SceneView effect cannot bring it back.
+ */
+internal object SceneAntiAliasing {
+    fun keepOff(view: com.google.android.filament.View) {
+        if (view.antiAliasing != com.google.android.filament.View.AntiAliasing.NONE) {
+            view.antiAliasing = com.google.android.filament.View.AntiAliasing.NONE
+        }
     }
 }
 
