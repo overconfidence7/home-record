@@ -3635,3 +3635,79 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
 
 Tested: 102 device stages, 2328 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 98. New issues: 3. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-25 (commit 5cb6009c)
+
+Judged the suite results for 5cb6009c (run of 2026-11-25 03:43 UTC, 102 stages, 98 passed). `build` HEAD is now 7fc63d6d; 6a6126d9 (the previous judge's six Minors) and bee86c08 (this auto entry's three items) landed after this sha, so none of those are judged as fixed here; the next suite run covers them.
+
+Verdict: House Manual: the plan, items, panel, emergency, reminders, backup, second phone and both imports hold up on a device. Nate would say first that the 3D view, a non-negotiable in PRODUCT.md, still shows nothing on a real house: H03, H09, H10 and H11 now pass their flows, yet every room view is an empty white or grey box and the floor view is a near-white slab with name tags and no walls, while the builder's catalog shots of the same screen draw solid walls and windows. / Field Log: clock, timesheets, files, capture, log, change orders, schedule, materials and the handoff all read like a working jobsite app. Nate would say first that the job's 3D view is a faint pink floor with a "Kitchen" tag and no walls, and the room view is blank white, so the one screen a contractor would show a client to sell the handoff still has nothing in it.
+
+- [ ] [Product gap] House Manual 3D draws no walls on a real house: on the seeded and flow-drawn houses "Kitchen in 3D" is an empty white (H09, H10, H11) or solid grey (H03 3d-room) area under the chips, and "Main in 3D" / "All floors in 3D" show only a near-white tilted floor slab (camera so close the slab overflows the frame) with room name tags and no walls, windows, photos or overlays. The crawler's catalog `house-3d-light` and `house-3d-room-light` draw the same screens with extruded walls, trim and windows, so the catalog hides the live failure. 5cb6009c made the drawn tag arrive (H03 and H09 now pass) but the picture did not change; whether it is the live scene build (real plan geometry, materials or wall meshes) or Filament on SwiftShader, the walls never reach the screen [judge:hm-3d-live-no-walls] - steps: H09 or H10, Kitchen > View in 3D; House > 3D view - expected: PRODUCT.md non-negotiable ("The 3D view is real ... extruded from the plan, textured with the user's photos"), walkthrough H10 ("Textured wall visible, other walls flat") - actual: blank room view, wall-less floor slab - screenshot: qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png (also flow-H03-blueprint-room-H03-3d.png, flow-H03-blueprint-room-H03-3d-room.png, flow-H10-3d-H10-kitchen-3d.png; compare crawler/house-manual/house-3d-room-light.png)
+- [ ] [Product gap] Field Log job 3D has the same failure: "Main in 3D" for Hale kitchen is a faint pink slab with a "Kitchen" tag, and "Kitchen in 3D" is blank white, while the catalog `job-house-3d-light` draws walls [judge:fl-3d-live-no-walls] - steps: F10, job > House > 3D view, tap Kitchen - expected: walkthrough F10, PRODUCT.md 3D non-negotiable - actual: no walls in either view - screenshot: qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png (also flow-F10-house-3d-F10-3d-room.png)
+- [ ] [Minor] Suite honesty: the `_3d_scene_drawn` tag is set while the scene shows nothing, so H03 and H09 flows (and F10) pass on an empty white or grey 3D view; the assertion no longer tells a drawn house from a blank one. The tag should only be set once wall geometry is on screen (or the flow should also check a wall-count or pixel signal) [judge:qa-3d-drawn-tag-blank] - steps: H03 step `assertCondition hm_3d_scene_drawn` then the H03-3d-room shot - expected: CLAUDE.md QA rule 7 (tests stay honest), walkthrough H10 - actual: flow pass, blank frame - screenshot: qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d-room.png
+- [ ] [UI] Minor: the sign-in screen explains itself twice: an intro paragraph ("Sign in with the account you use on your other phone…" / "Sign in to add this home record…"), then a "Sign in" heading that repeats the screen title, then a second paragraph ("An account backs up your records and keeps your other devices in step…") [judge:hm-sign-in-double-intro] - steps: H17b second phone > Sign in; H18b claim link while signed out - expected: docs/voice.md (say it once, plainly), rule 2 (one title) - actual: two intros and two "Sign in" titles - screenshot: qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-H17b-sign-in-to-get-home.png
+- [ ] [Minor] "Handoff imported" always says "The crew's rooms, wall photos and overlays are in your home now. Open a room to see what's behind the walls." even when the handoff held one room and nothing else (X02 preview: Rooms 1, no photos, no overlays) [judge:hm-import-done-generic] - steps: X02 claim link, Import - expected: docs/voice.md (true), H18 (summary of what was added) - actual: claims photos and overlays that were not imported - screenshot: qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-import-done.png
+
+Auto entry review:
+- [auto:flow:field-log:F09b-log-send] [judge: flow error]: the step-083 shot shows the Visitors header and pencil half under the Preview PDF / Send again bar after the scroll; the app lays out correctly, the flow tapped the bar. The builder's bee86c08 flow change matches.
+- [auto:flow:house-manual:H10-3d]: app issue, not the flow. The failure shot shows the room names on screen ("Kitchen", "Living room", "Garage", "Mudroom", "Powder room", "Dining room") but the assertion on `hm_3d_label_.*` failed, which fits bee86c08's cause (labels laid out 0x0). Note that fixing the tag will not fix [judge:hm-3d-live-no-walls].
+- [auto:jank:field-log:field-log]: real but marginal (15% vs 9% last run, software renderer); no picture-level judgment.
+
+Not judged on this sha because the fix landed after it: [judge:hm-house-tab-spinner-returns], [judge:hm-plan-editor-names-font200] (tour-font200-plan-editor still names only Kitchen and Garage here), [judge:hm-plan-overlays-landscape-key], [judge:hm-3d-room-wall-count] (room view still reads "12 of 24 walls" and "Floors below are shown faded" here), [judge:hm-reminders-warranty-duplicates] (H14 still lists each warranty twice here), [judge:qa-3d-orbit-video-misses-scene].
+
+Seen this run and fine: Home, Items, Reminders, More, Floors and plan editor in dark, 200% and landscape (nav rail in landscape, rows grow at 200%); Field Log Today, Jobs, Clock, Schedule, Team, Company and More in all three variants; H12 panel with slot 12 Refrigerator 20 A and breaker search; H13 Emergency with water and gas steps; H17 account and sync with cloud-copy and account deletes; H18 kitchen shows Range circuit and Sink drain after import; F10 North wall rough-in photo with Sink drain line; F10e handoff sent to the homeowner's email with the 30-day link; F11b/F11c pins on plan and PDF; X02 claim lands on Maple St with the Kitchen plan.
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding, Home with Add item, Scan data plate, Emergency | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | Two rooms, shape, doors, stairs; editor drops names at 200% (fixed after this sha) | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Blueprint, room page, layers and floors work; flow passes but both 3D views are empty (white, then solid grey) | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d-room.png |
+| H4 | Pass | Item form with make and model | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | Grouped type picker, items by category and room | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Pass | Place on plan, On a wall, Move to room | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-place-on-plan.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Blocked | Outline and wall thumbnail work; flow passes but "Kitchen in 3D" is a white box, the photographed wall is not visible | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png |
+| H10 | Blocked | Room view blank white; floor view a pale slab with names, no walls; flow fails on the label tag | qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png |
+| H11 | Clunky | Pipe on the wall photo, blueprint Plumbing layer, search and room overlays work; 3D with Plumbing on is blank | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-3d-pipe.png |
+| H12 | Pass | Panel, slot 12 Refrigerator, search highlights it | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-H12-breaker-labeled.png |
+| H13 | Pass | Emergency from Home, item and tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Clunky | Done and Snooze work; each warranty listed twice (fixed after this sha) | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF shared with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-report-share.png |
+| H16 | Pass | Wrong passphrase caught, house and items restored | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Pass | Sign in, second phone, edit arrives; sign-in screen explains itself twice | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-H17b-edit-arrived.png |
+| H18 | Pass | File and claim-link imports; Kitchen shows Range circuit and Sink drain; done text overclaims | qa-results:latest/house-manual/screenshots/flow-H18-import-handoff-H18-kitchen-after-import.png |
+| H19 | Clunky | Paywall shows "Can't load prices" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, sign in, code, Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, removal | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Job overview | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c; "Pick who to clock in" in every variant | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Break, switch, clock out (catalog and unit tests; no flow) | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | Timesheets flow passes (not re-opened this run) | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved with version history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture, link sheet, photos by day, Today recent photos | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Sent, Share link, Send again; F09b failure is a flow error | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png |
+| F10 | Clunky | Behind the wall, rough-in photo, drain overlay, installed item and handoff work; both 3D views have no walls | qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png |
+| F11 | Pass | Task pin on the plan and on a PDF | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Signed read-only view | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Tomorrow on Today | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, materials by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Job summaries and photo reports | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial and lapsed plan screens | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Pass | Every More screen opens; retyped receipt amount kept | qa-results:latest/field-log/screenshots/flow-F18-more-F18-amount-typed.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 137 screenshots (45 tour shots, 82 flow and failure shots including 4 handoff, 4 crawler 3D shots, 6 opened singly; the remaining flow shots are repeats of H01/H02 setup and the other crawler shots were not reopened this run), 37 walkthrough steps. New issues: 5. Product gaps: 2.
