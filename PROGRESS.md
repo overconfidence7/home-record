@@ -612,3 +612,4 @@ One line per builder run, newest at the bottom: date and time (Eastern), task, w
 2026-11-24 16:10 ET — waiting for QA on 968ba454 (no QA run since 75266ce2 at 18:21 UTC; no new REVIEW.md findings; no code changed since 968ba454; open Minors remain Needs Nate or not reproducible here).
 2026-11-24 17:10 ET — waiting for QA on 968ba454 (no QA suite run since run 107 on 75266ce2 finished 18:21 UTC; no new REVIEW.md findings; no code changed since 968ba454; no Decisions to confirm open).
 2026-11-24 18:10 ET — waiting for QA on 968ba454 (last QA suite run 107 on 75266ce2 finished 18:21 UTC; next scheduled run not yet started; no new REVIEW.md findings; no code changed since 968ba454).
+2026-11-24 19:12 ET — waiting for QA on 968ba454 (last QA suite run 107 on 75266ce2 finished 18:21 UTC; runs fire about every 12 h, next expected ~03:30 UTC; no new REVIEW.md findings; no code changed since 968ba454).
