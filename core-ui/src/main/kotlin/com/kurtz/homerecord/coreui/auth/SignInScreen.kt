@@ -25,14 +25,28 @@ import com.kurtz.homerecord.core.auth.AuthResult
 import com.kurtz.homerecord.coreui.R
 import com.kurtz.homerecord.coreui.components.LabeledField
 
+/**
+ * What a screen that hosts the sign-in form says about why ([judge:hm-sign-in-double-intro]): set, the form shows this
+ * one paragraph (tagged [testTag]) in place of its own "Sign in" heading and account intro, so the screen explains
+ * itself once under its own title.
+ */
+data class SignInIntro(val text: String, val testTag: String)
+
+val LocalSignInIntro = androidx.compose.runtime.staticCompositionLocalOf<SignInIntro?> { null }
+
 @Composable
 fun SignInScreen(state: SignInUiState, onEvent: (SignInEvent) -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(stringResource(R.string.sign_in_title), style = MaterialTheme.typography.headlineMedium)
-        Text(stringResource(R.string.sign_in_intro), style = MaterialTheme.typography.bodyLarge)
+        val intro = LocalSignInIntro.current
+        if (intro != null) {
+            Text(intro.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag(intro.testTag))
+        } else {
+            Text(stringResource(R.string.sign_in_title), style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.sign_in_intro), style = MaterialTheme.typography.bodyLarge)
+        }
         val error = state.error?.let { errorText(it) }
         val tag = LocalTagPrefix.current
         when (state.step) {

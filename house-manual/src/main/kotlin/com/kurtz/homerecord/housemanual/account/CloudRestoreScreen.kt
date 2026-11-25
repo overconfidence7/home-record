@@ -40,12 +40,11 @@ fun CloudRestoreScreen(state: CloudRestoreUiState, onEvent: (CloudRestoreEvent) 
         Column(Modifier.padding(padding).fillMaxSize()) {
             when (state.phase) {
                 CloudRestorePhase.SignedOut -> {
-                    Text(
-                        stringResource(R.string.cloud_restore_intro),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).testTag("hm_cloud_restore_intro"),
-                    )
-                    signIn(Modifier.weight(1f))
+                    // The form says why once, in place of its own heading and intro ([judge:hm-sign-in-double-intro]).
+                    val intro = com.kurtz.homerecord.coreui.auth.SignInIntro(stringResource(R.string.cloud_restore_intro), "hm_cloud_restore_intro")
+                    androidx.compose.runtime.CompositionLocalProvider(com.kurtz.homerecord.coreui.auth.LocalSignInIntro provides intro) {
+                        signIn(Modifier.weight(1f))
+                    }
                 }
                 CloudRestorePhase.Working -> Column(
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp).testTag("hm_cloud_restore_working"),

@@ -62,7 +62,7 @@ fun ImportScreen(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
             state.done -> EmptyState(
                 icon = Icons.Rounded.TaskAlt,
                 headline = stringResource(if (state.restore) R.string.restore_done_title else R.string.import_done_title),
-                body = stringResource(if (state.restore) R.string.restore_done_body else R.string.import_done_body),
+                body = stringResource(if (state.restore) R.string.restore_done_body else doneBody(state.doneSummary)),
                 actionLabel = stringResource(R.string.import_done_action),
                 onAction = { onEvent(ImportEvent.Finish) },
                 modifier = fill.testTag("hm_import_done"),
@@ -80,6 +80,14 @@ fun ImportScreen(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
             else -> ImportContent(state, onEvent, fill)
         }
     }
+}
+
+internal fun doneBody(summary: ImportDoneSummary): Int = when (summary) {
+    ImportDoneSummary.RoomsPhotosOverlays -> R.string.import_done_body
+    ImportDoneSummary.RoomsPhotos -> R.string.import_done_body_photos
+    ImportDoneSummary.RoomsOverlays -> R.string.import_done_body_overlays
+    ImportDoneSummary.Plan -> R.string.import_done_body_plan
+    ImportDoneSummary.Records -> R.string.import_done_body_records
 }
 
 internal fun errorText(error: ImportError): Int = when (error) {

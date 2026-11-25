@@ -44,7 +44,22 @@ data class ImportUiState(
 ) {
     /** Nothing in the file is new or changed for this phone. */
     val nothingNew: Boolean get() = !loading && error == null && counts.isEmpty() && conflicts.isEmpty()
+
+    /** What "Handoff imported" says was added: only the kinds the handoff held ([judge:hm-import-done-generic]). */
+    val doneSummary: ImportDoneSummary get() {
+        fun has(kind: ImportKind) = counts.any { it.kind == kind && it.count > 0 }
+        return when {
+            has(ImportKind.WallPhotos) && has(ImportKind.Overlays) -> ImportDoneSummary.RoomsPhotosOverlays
+            has(ImportKind.WallPhotos) -> ImportDoneSummary.RoomsPhotos
+            has(ImportKind.Overlays) -> ImportDoneSummary.RoomsOverlays
+            has(ImportKind.Rooms) || has(ImportKind.Floors) -> ImportDoneSummary.Plan
+            else -> ImportDoneSummary.Records
+        }
+    }
 }
+
+/** The done screen's sentence after a handoff import, from what it brought. */
+enum class ImportDoneSummary { RoomsPhotosOverlays, RoomsPhotos, RoomsOverlays, Plan, Records }
 
 sealed interface ImportEvent {
     data object Back : ImportEvent

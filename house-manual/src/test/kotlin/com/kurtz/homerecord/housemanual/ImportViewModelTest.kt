@@ -10,6 +10,9 @@ import com.kurtz.homerecord.core.bundle.ImportPreview
 import com.kurtz.homerecord.core.testing.AcceptanceCriterion
 import com.kurtz.homerecord.housemanual.importing.ImportError
 import com.kurtz.homerecord.housemanual.importing.ImportEvent
+import com.kurtz.homerecord.housemanual.importing.ImportCount
+import com.kurtz.homerecord.housemanual.importing.ImportDoneSummary
+import com.kurtz.homerecord.housemanual.importing.ImportUiState
 import com.kurtz.homerecord.housemanual.importing.ImportKind
 import com.kurtz.homerecord.housemanual.importing.ImportRead
 import com.kurtz.homerecord.housemanual.importing.ImportViewModel
@@ -133,5 +136,17 @@ class ImportViewModelTest {
         assertThat(old.exists()).isFalse()
         assertThat(fresh.exists()).isTrue()
         imports.deleteRecursively()
+    }
+
+    @AcceptanceCriterion("AC-H17")
+    @Test fun doneSummaryNamesOnlyTheKindsImported() { // [judge:hm-import-done-generic]
+        fun summary(vararg kinds: ImportKind) = ImportUiState(loading = false, done = true, counts = kinds.map { ImportCount(it, 2) }).doneSummary
+        assertThat(summary(ImportKind.Rooms, ImportKind.WallPhotos, ImportKind.Overlays)).isEqualTo(ImportDoneSummary.RoomsPhotosOverlays)
+        assertThat(summary(ImportKind.Rooms, ImportKind.WallPhotos)).isEqualTo(ImportDoneSummary.RoomsPhotos)
+        assertThat(summary(ImportKind.Rooms, ImportKind.Overlays)).isEqualTo(ImportDoneSummary.RoomsOverlays)
+        assertThat(summary(ImportKind.Rooms)).isEqualTo(ImportDoneSummary.Plan)
+        assertThat(summary(ImportKind.Floors)).isEqualTo(ImportDoneSummary.Plan)
+        assertThat(summary(ImportKind.Items, ImportKind.Documents)).isEqualTo(ImportDoneSummary.Records)
+        assertThat(summary()).isEqualTo(ImportDoneSummary.Records)
     }
 }

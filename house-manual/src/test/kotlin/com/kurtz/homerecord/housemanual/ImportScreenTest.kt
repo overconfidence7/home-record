@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
@@ -68,5 +69,15 @@ class ImportScreenTest {
         }
         rule.onNodeWithTag("hm_import_finish").performClick()
         assertThat(events).containsExactly(ImportEvent.Finish)
+    }
+
+    @Test fun doneSaysOnlyWhatTheHandoffHeld() { // AC-H17 [judge:hm-import-done-generic]
+        rule.setContent {
+            HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
+                ImportScreen(ImportUiState(loading = false, done = true, counts = listOf(ImportCount(ImportKind.Rooms, 1)))) {}
+            }
+        }
+        rule.onNodeWithText("The crew's plan is in your home now. Open a room to see it.").assertIsDisplayed()
+        rule.onNodeWithText("wall photos", substring = true).assertDoesNotExist()
     }
 }

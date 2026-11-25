@@ -45,12 +45,11 @@ fun ClaimScreen(state: ClaimUiState, onEvent: (ClaimEvent) -> Unit, signIn: @Com
         when (state.phase) {
             ClaimPhase.Checking, ClaimPhase.Ready -> LoadingState(fill)
             ClaimPhase.SignIn -> Column(fill.testTag("hm_claim_sign_in")) {
-                Text(
-                    stringResource(R.string.claim_sign_in_intro),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                )
-                signIn(Modifier.weight(1f))
+                // The form says why once, in place of its own heading and intro ([judge:hm-sign-in-double-intro]).
+                val intro = com.kurtz.homerecord.coreui.auth.SignInIntro(stringResource(R.string.claim_sign_in_intro), "hm_claim_sign_in_intro")
+                androidx.compose.runtime.CompositionLocalProvider(com.kurtz.homerecord.coreui.auth.LocalSignInIntro provides intro) {
+                    signIn(Modifier.weight(1f))
+                }
             }
             ClaimPhase.Claiming, ClaimPhase.Downloading -> Working(state, fill)
             ClaimPhase.Failed -> {

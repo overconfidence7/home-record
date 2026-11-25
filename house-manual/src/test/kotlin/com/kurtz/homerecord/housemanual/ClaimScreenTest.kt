@@ -1,11 +1,12 @@
 package com.kurtz.homerecord.housemanual
 
-import androidx.compose.material3.Text
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.kurtz.homerecord.core.bundle.HandoffClaimFailure
@@ -32,7 +33,9 @@ class ClaimScreenTest {
 
     private fun show(state: ClaimUiState, events: MutableList<ClaimEvent> = mutableListOf()) = rule.setContent {
         HomeRecordTheme(Brand.HouseManual, dynamicColor = false) {
-            ClaimScreen(state, { events += it }) { m -> Text("sign-in form", m.testTag("form")) }
+            ClaimScreen(state, { events += it }) { m ->
+                com.kurtz.homerecord.coreui.auth.SignInScreen(com.kurtz.homerecord.coreui.auth.SignInUiState(), {}, m.testTag("form"))
+            }
         }
     }
 
@@ -41,6 +44,13 @@ class ClaimScreenTest {
         rule.onNodeWithTag("hm_claim_sign_in").assertIsDisplayed()
         rule.onNodeWithTag("form").assertIsDisplayed()
         rule.onNodeWithText("The link works for one account", substring = true).assertIsDisplayed()
+    }
+
+    @Test fun signInExplainsItselfOnce() { // AC-H17 [judge:hm-sign-in-double-intro]
+        show(ClaimUiState(phase = ClaimPhase.SignIn))
+        rule.onNodeWithTag("hm_claim_sign_in_intro").assertIsDisplayed()
+        rule.onNodeWithText("backs up your records", substring = true).assertDoesNotExist()
+        rule.onAllNodesWithText("Sign in").assertCountEquals(0)
     }
 
     @Test fun downloadingNamesTheContractor() { // AC-H17

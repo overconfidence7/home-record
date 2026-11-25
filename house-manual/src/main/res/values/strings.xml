@@ -393,6 +393,10 @@
     <string name="import_failed">Couldn\'t import the file. Check free space and tap Retry.</string>
     <string name="import_done_title">Handoff imported</string>
     <string name="import_done_body">The crew\'s rooms, wall photos and overlays are in your home now. Open a room to see what\'s behind the walls.</string>
+    <string name="import_done_body_photos">The crew\'s rooms and wall photos are in your home now. Open a room to see its walls.</string>
+    <string name="import_done_body_overlays">The crew\'s rooms and overlays are in your home now. Open a room to see what\'s behind the walls.</string>
+    <string name="import_done_body_plan">The crew\'s plan is in your home now. Open a room to see it.</string>
+    <string name="import_done_body_records">What the crew sent is in your home now.</string>
     <string name="import_done_action">Show my home</string>
     <string name="import_close">Close</string>
     <string name="import_error_title">Can\'t import this file</string>
