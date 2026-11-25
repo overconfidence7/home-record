@@ -76,6 +76,7 @@ import com.kurtz.homerecord.housemodel.blueprint.drawStair
 import com.kurtz.homerecord.housemodel.blueprint.LabelBox
 import com.kurtz.homerecord.housemodel.blueprint.PLAN_SPOT_RADIUS_DP
 import com.kurtz.homerecord.housemodel.blueprint.LabelPlacer
+import com.kurtz.homerecord.housemodel.blueprint.roomNameLayouts
 import com.kurtz.homerecord.housemodel.blueprint.labelAnchor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -98,7 +99,6 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 import com.kurtz.homerecord.core.units.LengthParser
@@ -279,12 +279,21 @@ private fun PlanArea(
             if (state.canEditOverlays && !state.viewOnly) ModeSwitch(state.overlayMode, onEvent)
             if (state.unplaced.isNotEmpty() && !state.overlayMode) UnplacedRow(state, onEvent, canvasWidthDp, canvasHeightDp)
         }
+        // The overlay key's height (largest seen), kept clear at the canvas foot while in Overlays mode so the fit frames
+        // the floor above it instead of under it ([judge:hm-plan-overlays-landscape-key]). Kept when the key hides for a
+        // picked overlay, so picking one does not refit the plan.
+        var legendDp by remember { mutableStateOf(0f) }
+        val density = LocalDensity.current.density
+        // Before the key is measured (first frame, previews) reserve one text line plus padding at the current font scale.
+        val fontScale = LocalDensity.current.fontScale
+        val showsKey = state.overlayMode && legendKinds(state.overlays).isNotEmpty()
+        val reserveDp = if (!showsKey) 0f else if (legendDp > 0f) legendDp else 20f * fontScale + 16f
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             // Until the view model has a view, draw the plan fitted to this canvas (first frame, previews, catalog).
             val state = if (state.viewSet) {
                 state
             } else {
-                PlanViewport.fit(state.rooms, maxWidth.value, maxHeight.value)?.let { state.copy(zoom = it.zoom, panX = it.panX, panY = it.panY) } ?: state
+                PlanViewport.fit(state.rooms, maxWidth.value, (maxHeight.value - reserveDp).coerceAtLeast(maxHeight.value / 2))?.let { state.copy(zoom = it.zoom, panX = it.panX, panY = it.panY) } ?: state
             }
             PlanCanvas(
                 state = state,
@@ -293,13 +302,17 @@ private fun PlanArea(
                 canvasWidthDp = canvasWidthDp,
                 canvasHeightDp = canvasHeightDp,
                 onSized = onSized,
+                bottomReserveDp = reserveDp,
             )
             // In Overlays mode the rooms stay named for TalkBack (where am I drawing?) but only overlays pick.
             PlanRoomNodes(state, onEvent, pickable = !state.overlayMode)
             if (state.overlayMode) PlanOverlayNodes(state, onEvent)
             // Which colour is which (judge:hm-plan-overlays-no-legend): along the plan's foot, so the plan keeps its height.
             // Only while nothing is picked or drawn: then the panel names the overlay and the plan needs every row.
-            if (state.overlayMode && state.drawing == null && state.selectedOverlay == null) OverlayLegend(state.overlays, Modifier.align(Alignment.BottomStart))
+            if (state.overlayMode && state.drawing == null && state.selectedOverlay == null) OverlayLegend(
+                state.overlays,
+                Modifier.align(Alignment.BottomStart).onSizeChanged { val h = it.height / density; if (h > legendDp) legendDp = h },
+            )
             if (state.rooms.isEmpty() && state.unplaced.isEmpty()) {
                 Text(
                     stringResource(R.string.plan_empty_hint),
@@ -448,6 +461,8 @@ private fun PlanCanvas(
     canvasWidthDp: Float,
     canvasHeightDp: Float,
     onSized: (Float, Float) -> Unit,
+    /** Height at the canvas foot covered by the overlay key; the fit frames the rooms above it. */
+    bottomReserveDp: Float = 0f,
 ) {
     val density = LocalDensity.current.density
     val current by rememberUpdatedState(state)
@@ -462,9 +477,10 @@ private fun PlanCanvas(
     var dragged by remember { mutableStateOf<Triple<String, Int, OverlayPoint>?>(null) }
     var sized by remember { mutableStateOf(false) }
     val landscape = canvasWidthDp > canvasHeightDp
-    LaunchedEffect(state.floorId, sized, landscape) {
-        // Open, floor change and rotation: fit the rooms once the canvas size is known.
-        if (sized && state.rooms.isNotEmpty()) onEvent(PlanEditorEvent.Fit(canvasWidthDp, canvasHeightDp))
+    LaunchedEffect(state.floorId, sized, landscape, bottomReserveDp) {
+        // Open, floor change, rotation and the overlay key appearing: fit the rooms once the canvas size is known.
+        val height = (canvasHeightDp - bottomReserveDp).coerceAtLeast(canvasHeightDp / 2)
+        if (sized && state.rooms.isNotEmpty()) onEvent(PlanEditorEvent.Fit(canvasWidthDp, height))
     }
     LaunchedEffect(state.selectedId, state.editShape, sized, canvasWidthDp, canvasHeightDp) {
         // Selecting a room brings up the panel and shrinks the canvas; keep the whole room (all its corners) in view.
@@ -755,19 +771,23 @@ private fun DrawScope.drawPlan(
         val selected = room.id == s.selectedId
         drawPath(path, if (flagged) flaggedFill else if (selected) selectedFill else roomFill)
         drawPath(path, if (flagged) flaggedLine else if (selected) primary else textColor.copy(alpha = 0.6f), style = Stroke(width = (if (selected) 3f else 1.5f) * density))
-        val name = room.name.ifBlank { "·" }
-        val layout = measurer.measure(name, labelStyle.copy(color = if (selected) roomText else textColor, fontSize = (labelStyle.fontSize.value).sp))
-        // Placed like the blueprint's name (LabelPlacer), so stair treads never cross it ([judge:hm-plan-name-over-stairs]);
-        // with no clear spot the editor still shows the name at the room's anchor, since it is the room being edited.
+        // Sized like the blueprint's name (roomNameLayouts: largest size that fits, wrapped between words, then shrunk), so
+        // at 200% font the editor keeps every name the House tab shows ([judge:hm-plan-editor-names-font200]); placed
+        // like it too (LabelPlacer), so stair treads never cross it ([judge:hm-plan-name-over-stairs]). With no clear spot
+        // the editor still shows the name at the room's anchor, since it is the room being edited.
+        val nameStyle = labelStyle.copy(color = if (selected) roomText else textColor)
+        val layouts = roomNameLayouts(room, z, measurer, nameStyle, nameStyle).toList()
         val (ax, ay) = labelAnchor(room)
         val stairBoxes = room.stairs.filter { it.points.isNotEmpty() }.map { st ->
             LabelBox(st.points.minOf { it.x } * z + ox, st.points.minOf { it.y } * z + oy, st.points.maxOf { it.x } * z + ox, st.points.maxOf { it.y } * z + oy)
         }
         val roomBox = LabelBox(room.minX * z + ox, room.minY * z + oy, room.maxX * z + ox, room.maxY * z + oy)
-        val (cx, cy) = LabelPlacer.place(ax * z + ox, ay * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairBoxes, marks, 4f * density)
-            ?: (ax * z + ox to ay * z + oy)
-        if (layout.size.width < (room.maxX - room.minX) * z) {
-            drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, cy - layout.size.height / 2f))
+        val placed = layouts.firstNotNullOfOrNull { layout ->
+            LabelPlacer.place(ax * z + ox, ay * z + oy, layout.size.width.toFloat(), layout.size.height.toFloat(), roomBox, stairBoxes, marks, 4f * density)
+                ?.let { layout to it }
+        } ?: layouts.firstOrNull()?.let { it to (ax * z + ox to ay * z + oy) }
+        placed?.let { (layout, at) ->
+            drawText(layout, topLeft = Offset(at.first - layout.size.width / 2f, at.second - layout.size.height / 2f))
         }
         room.stairs.forEach { st -> drawStair(st, z, ox, oy, density, textColor) }
         room.openings.forEach { o ->

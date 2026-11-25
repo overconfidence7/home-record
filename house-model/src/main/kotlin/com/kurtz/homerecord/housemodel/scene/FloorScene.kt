@@ -51,6 +51,10 @@ data class FloorScene(
     /** Inside wall faces of the solid floors, one per room edge. */
     val wallCount: Int get() = mesh.parts.count { it.key is MeshPartKey.WallFace && it.key.roomId !in ghostRooms }
 
+    /** Inside wall faces of [roomId] alone, or of the whole solid floor when null (a room's 3D view counts its own). */
+    fun wallCountIn(roomId: String?): Int =
+        if (roomId == null) wallCount else mesh.parts.count { it.key is MeshPartKey.WallFace && it.key.roomId == roomId && roomId !in ghostRooms }
+
     fun isGhost(key: MeshPartKey): Boolean = key.roomId in ghostRooms
 
     /** The height the camera looks at: the chosen floor's floor, or the middle of the stack for All floors. */

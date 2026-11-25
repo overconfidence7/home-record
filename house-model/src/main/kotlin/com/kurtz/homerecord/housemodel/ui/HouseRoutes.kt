@@ -59,6 +59,8 @@ fun HouseRoute(
 ) {
     val context = LocalContext.current.applicationContext
     val vm = viewModel<HouseViewModel>(
+        // One per home: a home swapped under the tab (restore, claim) gets its own plan, not the old home's.
+        key = "house-$homeId",
         factory = viewModelFactory {
             initializer {
                 HouseViewModel(

@@ -8,30 +8,13 @@
 # software-rendered emulator measures the CPU path only, so note the renderer with the result.
 appId: com.kurtz.homerecord.housemanual
 ---
-- launchApp:
-    clearState: true
-    # The clear wipes the suite's grants; ask for notifications by name (T072c asks once reminders exist)
-    permissions:
-      all: allow
-      notifications: allow
-- stopApp
-- openLink: "homerecord-qa-hm://seed?scenario=3d-reference"
-- extendedWaitUntil:
-    visible:
-      id: "hm_tab_house"
-    timeout: 60000
-- tapOn:
-    id: "hm_tab_house"
-- scrollUntilVisible:
-    element:
-      id: "hm_house_3d"
-- tapOn:
-    id: "hm_house_3d"
-# AC-C24: the reference home opens in 3D with its photographed walls, then every floor at once
-- extendedWaitUntil:
-    visible:
-      id: "hm_3d_reset"
-    timeout: 15000
+# Run on its own it seeds and opens the 3D view first; the device suite has already done that (unrecorded) with
+# _3d-perf-open.yaml, so the recording starts on the scene.
+- runFlow:
+    when:
+      notVisible:
+        id: "hm_3d_reset"
+    file: _3d-perf-open.yaml
 - assertVisible:
     id: "hm_3d_scene"
 - assertVisible: "Finished photos on 12 of 24 walls"

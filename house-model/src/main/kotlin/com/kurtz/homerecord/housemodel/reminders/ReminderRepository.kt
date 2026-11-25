@@ -147,9 +147,11 @@ class ReminderRepository(
     suspend fun syncWarrantyReminders(homeId: String, itemId: String, itemName: String, endsOn: LocalDate?) {
         val at = now()
         val day = today()
-        // The end date is in the title (QA judge: "Warranty ends soon" read wrong on a reminder for 2051).
-        val title = endsOn?.let { strings(R.string.reminder_warranty_ends).format(itemName, displayDate(it.toString())) }.orEmpty()
         MaintenanceRule.WARRANTY_LEAD_DAYS.forEach { lead ->
+            // The end date is in the title (QA judge: "Warranty ends soon" read wrong on a reminder for 2051), and the
+            // lead time too, so the 60- and 7-day pair no longer read as duplicates (QA judge 2026-11-24).
+            val words = if (lead >= 30) R.string.reminder_warranty_ends_months else R.string.reminder_warranty_ends_week
+            val title = endsOn?.let { strings(words).format(itemName, displayDate(it.toString())) }.orEmpty()
             val id = warrantyReminderId(itemId, lead)
             val row = dao.get(id)
             val target = endsOn?.takeIf { !it.isBefore(day) }?.minusDays(lead.toLong())

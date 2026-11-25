@@ -276,6 +276,9 @@ fi
 if [ "$APP" = house-manual ] && [ -z "$MISSING" ] && [ -f "$FLOWDIR/_3d-perf.yaml" ]; then
   mkdir -p "$OUT/3d"
   adb shell rm -f /sdcard/qa-3d.mp4 >/dev/null 2>&1 || true
+  # Seed and open the 3D view before recording ([judge:qa-3d-orbit-video-misses-scene]: the 20 s video used to end
+  # on the seed screen); _3d-perf then skips its own setup because the view is already open.
+  if [ -f "$FLOWDIR/_3d-perf-open.yaml" ]; then run_flow "$FLOWDIR/_3d-perf-open.yaml" "3d-perf-open" || true; fi
   adb shell screenrecord --time-limit 20 --bit-rate 2000000 /sdcard/qa-3d.mp4 >/dev/null 2>&1 &
   REC_PID=$!
   if run_flow "$FLOWDIR/_3d-perf.yaml" "3d-perf"; then FLOW3D=ok; else FLOW3D="flow failed (maestro/3d-perf.log)"; fi

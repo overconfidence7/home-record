@@ -252,6 +252,27 @@ class House3DViewModelTest {
         assertThat(restored.openedOnRoom).isFalse()
     }
 
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun aRoomViewCountsOnlyThatRoomsWalls() = test {
+        val (homeId, floors) = home()
+        val north = db.wallDao().listFor("k").single { it.edgeIndex == 0 }
+        wallPhotos.save(north.id, WallStage.FINISHED, "/m/north.jpg", "/m/north-wall.jpg", outline)
+        val model = vm(homeId, floorId = floors.getValue("Main"), roomId = "k")
+        val kitchen = withTimeout(10_000) { model.state.first { it.room != null && it.photographedWalls == 1 } }
+        // "1 of 4 walls" for the four-wall kitchen, not the floor's 8.
+        assertThat(kitchen.wallTotal).isEqualTo(4)
+        assertThat(kitchen.scene!!.wallCount).isEqualTo(8)
+
+        model.onEvent(House3DEvent.ViewRoom("l"))
+        assertThat(model.state.value.photographedWalls).isEqualTo(0)
+        assertThat(model.state.value.wallTotal).isEqualTo(4)
+
+        model.onEvent(House3DEvent.BackToFloor)
+        assertThat(model.state.value.photographedWalls).isEqualTo(1)
+        assertThat(model.state.value.wallTotal).isEqualTo(8)
+    }
+
     private class MemoryLayers : com.kurtz.homerecord.housemodel.blueprint.LayerStore {
         val stored = mutableMapOf<String, com.kurtz.homerecord.housemodel.blueprint.LayerSet>()
         override fun read(homeId: String) = stored[homeId] ?: com.kurtz.homerecord.housemodel.blueprint.LayerSet()

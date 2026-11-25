@@ -141,11 +141,11 @@ fun House3DScreen(
             LayerToggleRow(state.layers, { onEvent(House3DEvent.ToggleLayer(it)) })
             if (scene != null && !scene.isEmpty) {
                 Text(
-                    pluralStringResource(R.plurals.house3d_walls_photographed, scene.wallCount, state.photographedWalls, scene.wallCount, stringResource(state.stage.labelRes)),
+                    pluralStringResource(R.plurals.house3d_walls_photographed, state.wallTotal, state.photographedWalls, state.wallTotal, stringResource(state.stage.labelRes)),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp).testTag("${prefix}_3d_walls"),
                 )
-                if (scene.ghostRooms.isNotEmpty()) {
+                if (scene.ghostRooms.isNotEmpty() && room == null) {
                     Text(
                         stringResource(R.string.house3d_ghost_hint),
                         style = MaterialTheme.typography.bodySmall,

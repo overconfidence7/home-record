@@ -210,7 +210,7 @@ fun ReminderRowItem(
             else stringResource(R.string.reminders_due_on, due.format(formatter))
     }
     val repeat = row.intervalMonths?.let { repeatLabel(it) }
-    val supporting = listOfNotNull(row.itemName?.takeIf { showItemName }, listOfNotNull(whenText, repeat).joinToString(stringResource(R.string.list_separator))).joinToString("\n")
+    val supporting = listOfNotNull(row.itemName?.takeIf { showItemName && !row.title.contains(it) }, listOfNotNull(whenText, repeat).joinToString(stringResource(R.string.list_separator))).joinToString("\n")
     val icon = when {
         row.bucket == ReminderBucket.DONE -> Icons.Rounded.TaskAlt
         row.bucket == ReminderBucket.DUE -> Icons.Rounded.NotificationsActive

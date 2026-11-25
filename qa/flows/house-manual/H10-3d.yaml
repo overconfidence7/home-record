@@ -32,6 +32,10 @@ appId: com.kurtz.homerecord.housemanual
 - assertVisible:
     id: "hm_3d_stage_finished"
     checked: true
+# The room view counts the kitchen's own four walls, not the floor's ([judge:hm-3d-room-wall-count])
+- assertVisible: "Finished photos on 4 of 4 walls"
+- assertNotVisible:
+    id: "hm_3d_ghost_hint"
 # Wait for the scene to have drawn with its pictures before the shot ([judge:qa-3d-blank-emulator])
 - extendedWaitUntil:
     visible:

@@ -41,8 +41,13 @@ data class House3DUiState(
 
     val floor: FloorSummary? get() = floors.firstOrNull { it.id == floorId }
 
-    /** Walls with a photo at the chosen stage, out of all walls on the floor. */
-    val photographedWalls: Int get() = scene?.picturesAt(stage)?.size ?: 0
+    /** Walls with a photo at the chosen stage: in the room the camera stands in, otherwise on the whole floor. */
+    val photographedWalls: Int get() = scene?.picturesAt(stage)?.keys?.count { standingIn == null || it.roomId == standingIn } ?: 0
+
+    /** The walls [photographedWalls] counts out of: the room's own while standing in one, otherwise the floor's. */
+    val wallTotal: Int get() = scene?.wallCountIn(standingIn) ?: 0
+
+    private val standingIn: String? get() = roomId?.takeIf { room != null }
 }
 
 sealed interface House3DEvent {

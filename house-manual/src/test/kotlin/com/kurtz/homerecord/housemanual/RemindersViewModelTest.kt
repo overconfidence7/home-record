@@ -144,7 +144,7 @@ class RemindersViewModelTest {
         runBlocking { db.warrantyDao().upsert(WarrantyEntity(id = "w1", itemId = "i1", endsOn = "2027-03-01", createdAt = 1, updatedAt = 1)) }
         val state = vm().await { it.rows.size == 2 }
         assertThat(state.rows.map { it.dueOn }).containsExactly(LocalDate.parse("2026-12-31"), LocalDate.parse("2027-02-22"))
-        assertThat(state.rows.first().title).isEqualTo("Warranty ends Mar 1, 2027: Basement furnace")
+        assertThat(state.rows.first().title).isEqualTo("Basement furnace warranty ends in 2 months, on Mar 1, 2027")
     }
 
     // T076c2d: a viewer cannot edit (AC-H16), so opening the tab must not write warranty reminders on a viewer's phone.

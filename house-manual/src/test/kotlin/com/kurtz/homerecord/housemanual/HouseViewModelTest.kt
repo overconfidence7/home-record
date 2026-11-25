@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import kotlinx.coroutines.launch
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -96,6 +97,21 @@ class HouseViewModelTest {
         assertThat(empty.rooms).isEmpty()
         vm.onEvent(HouseEvent.SelectFloor(other))
         assertThat(vm.state.value.planPending).isFalse()
+    }
+
+    // judge:hm-house-tab-spinner-returns (rule 10): once a plan is on screen, a floor list that re-emits with another
+    // floor chosen (here the shown floor is deleted) keeps the loaded plan up until the new one is read, never the spinner.
+    @Test fun aLoadedPlanNeverReturnsToTheSpinnerWhenTheFloorsChange() = test {
+        val (homeId, floorId) = setUpHome()
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        vm.untilRooms(2)
+        val seen = mutableListOf<Boolean>()
+        val watch = launch(kotlinx.coroutines.Dispatchers.Main.immediate) { vm.state.collect { seen += it.planPending } }
+        repo.deleteFloor(floorId)
+        val moved = withTimeout(10_000) { vm.state.first { it.floorId != floorId && it.floorId != null && it.rooms.isEmpty() } }
+        watch.cancel()
+        assertThat(moved.planPending).isFalse()
+        assertThat(seen).doesNotContain(true)
     }
 
     @Test fun showsTheFloorsRooms() = test {
