@@ -3890,3 +3890,18 @@ Not built yet: none.
 Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
 
 Judged: 210 screenshots (45 tour shots, 152 named flow shots, 6 failure shots, 4 handoff shots, 3 crawler 3D shots, plus the six tombstones; the H01/H02 setup repeats inside other flows and the other crawler shots were not reopened), 37 walkthrough steps. New issues: 1. Product gaps: 0.
+
+## QA auto 2026-11-26 (commit c2b1b764)
+
+Automated suite run at 2026-11-26 17:44 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F10-house-3d fails on field-log (regression of a fixed item) [auto:flow:field-log:F10-house-3d] - steps: automated, see qa-results branch latest/ for commit c2b1b764 - expected: walkthrough step F10 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F10-house-3d.log - screenshot: qa-results:latest/field-log/screenshots/flow-F10-house-3d-step-065-assertCondition-fl_3d_scene_drawn.png
+- [ ] [Major] Flow H03-blueprint-room fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H03-blueprint-room] - steps: automated, see qa-results branch latest/ for commit c2b1b764 - expected: walkthrough step H03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H03-blueprint-room.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H01-home-after-onboarding.png
+- [ ] [Major] Flow H10-3d fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H10-3d] - steps: automated, see qa-results branch latest/ for commit c2b1b764 - expected: walkthrough step H10 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H10-3d.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-floor-3d.png
+- [ ] [Major] 3d:house-manual failed on house-manual (regression of a fixed item) [auto:3d:house-manual:house-manual] - steps: automated, see qa-results branch latest/ for commit c2b1b764 - expected: stage passes - actual: flow failed (maestro/3d-perf.log); 3d/orbit.mp4 recorded; first frame 30535 ms; 3.1 fps
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F10 Fail, field-log F10b Pass, field-log F10c Pass, field-log F10d Pass, field-log F10e Pass, field-log F11 Pass, field-log F11b Pass, field-log F11c Pass, field-log F12 Pass, field-log F13 Pass, field-log F14 Pass, field-log F15 Pass, field-log F16 Pass, field-log F17 Pass, field-log F18 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Fail, house-manual H04 Pass, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H08 Pass, house-manual H09 Pass, house-manual H10 Fail, house-manual H11 Pass, house-manual H12 Pass, house-manual H13 Pass, house-manual H14 Pass, house-manual H15 Pass, house-manual H16 Pass, house-manual H17 Pass, house-manual H17b Pass, house-manual H18 Pass, house-manual H18b Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
+
+Tested: 102 device stages, 2346 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 97. New issues: 4. Critical: 0. Product gaps: n/a (judge entry follows).
