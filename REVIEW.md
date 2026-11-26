@@ -3885,4 +3885,4 @@ Not built yet: none.
 
 Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
 
-Judged: 230 screenshots (45 tour shots, 167 flow and failure shots including 4 handoff, 18 crawler 3D shots and catalog checks, plus the six tombstones; the H01/H02 setup repeats inside other flows and the other crawler shots were not reopened), 37 walkthrough steps. New issues: 1. Product gaps: 0.
+Judged: 210 screenshots (45 tour shots, 152 named flow shots, 6 failure shots, 4 handoff shots, 3 crawler 3D shots, plus the six tombstones; the H01/H02 setup repeats inside other flows and the other crawler shots were not reopened), 37 walkthrough steps. New issues: 1. Product gaps: 0.
