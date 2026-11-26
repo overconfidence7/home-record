@@ -31,6 +31,7 @@ import com.google.android.filament.Texture
 import com.kurtz.homerecord.housemodel.blueprint.RoomPalette
 import com.kurtz.homerecord.housemodel.walls.WallStage
 import dev.romainguy.kotlin.math.Float2
+import io.github.sceneview.RenderQuality
 import io.github.sceneview.SceneView
 import io.github.sceneview.SurfaceType
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -200,6 +201,11 @@ fun FloorSceneView(
             isOpaque = true,
             engine = engine,
             view = filamentView,
+            // No bloom, SSAO, MSAA or HDR buffer (FXAA stays, the opaque program the emulator builds). With SceneView's
+            // default quality the emulator's GL drew the house as a washed-out pink haze over the surface colour, so the
+            // drawn check found only 4-5% of the view standing out, at 3-4 fps ([auto:3d:house-manual:house-manual],
+            // [auto:flow:house-manual:H10-3d] on c2b1b764). Flat-tinted boxes gain nothing from those passes.
+            renderQuality = RenderQuality.Performance,
             renderer = renderer,
             cameraNode = cameraNode,
             // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
