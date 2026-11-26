@@ -224,7 +224,7 @@ private fun PageSwitcher(state: MarkupUiState, onEvent: (MarkupEvent) -> Unit) {
 }
 
 @Composable
-private fun PageCanvas(pages: PageSource, state: MarkupUiState, onEvent: (MarkupEvent) -> Unit, sizing: Modifier) {
+private fun PageCanvas(pages: PageSource, state: MarkupUiState, onEvent: (MarkupEvent) -> Unit, modifier: Modifier) {
     val ink = Color(PdfMarkColors.INK)
     val highlight = Color(PdfMarkColors.HIGHLIGHT)
     val textStyle = MaterialTheme.typography.titleMedium.copy(color = ink)
@@ -238,7 +238,7 @@ private fun PageCanvas(pages: PageSource, state: MarkupUiState, onEvent: (Markup
     }
     val label = stringResource(R.string.markup_page_of, state.page + 1, state.pageCount)
     Box(
-        sizing.aspectRatio(aspect, matchHeightConstraintsFirst = true)
+        modifier.aspectRatio(aspect, matchHeightConstraintsFirst = true)
             .background(Color.White)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant)
             .testTag("fl_markup_canvas")

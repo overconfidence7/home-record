@@ -282,7 +282,7 @@ private fun PlanArea(
         // The overlay key's height (largest seen), kept clear at the canvas foot while in Overlays mode so the fit frames
         // the floor above it instead of under it ([judge:hm-plan-overlays-landscape-key]). Kept when the key hides for a
         // picked overlay, so picking one does not refit the plan.
-        var legendDp by remember { mutableStateOf(0f) }
+        var legendDp by remember { mutableFloatStateOf(0f) }
         val density = LocalDensity.current.density
         // Before the key is measured (first frame, previews) reserve one text line plus padding at the current font scale.
         val fontScale = LocalDensity.current.fontScale

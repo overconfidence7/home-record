@@ -3278,6 +3278,10 @@ Justified, kept:
 - ComposableNaming (4): lower-case private helpers in tests and the debug preview file that wrap a screen call; not app code.
 - [x] [Minor] PluralsCandidate (16): count strings such as "%d rooms", "%d walls", "%d months", "%d characters" print "1 rooms" when the count is one; move them to `<plurals>` and `pluralStringResource` [s1:plurals] (PLAN S1a) - fixed in S1a: 13 count strings are `<plurals>` (floor rooms, floor delete body, legend slots, 3D walls photographed and scene description, behind-wall progress, report rooms and items, items no-match body, both warranty months, reminder repeat, passphrase helper and error); the 3 lint still flags (log_drop_photo "photo %1$d out", panel_two_pole_description and breaker_where_two "Slots %1$d and %2$d") number a photo or a slot, not a count, and stay strings
 
+S1 recheck (2026-11-26, after e4f33e3f): 149 warnings, 0 errors. Fixed: AutoboxingStateCreation (plan editor overlay-key height is mutableFloatStateOf) and ModifierParameter (FL markup PageCanvas takes `modifier`). Justified, kept, besides the kinds above:
+- PluralsCandidate (3): HM panel_two_pole_description and breaker_where_two ("Slots %1$d and %2$d") and FL log_drop_photo ("Leave photo %1$d out of the log") put an ordinal slot or photo number before a word, not a count; no plural form applies.
+- ConfigurationScreenWidthHeight (1): BarLabelSize reads LocalWindowInfo.containerSize and falls back to Configuration.screenWidthDp only while that is 0 (first frame, tests).
+
 ## Builder ship-ready S3: strings (2026-11-07)
 
 Searched every main source set for literal text in `Text(`, `title =`, `label =`, `contentDescription =` and any capitalised multi-word literal outside previews, the catalog and debug code. One screen gap fixed: FL-Reports drew the time worked with no job under `HoursReport`'s literal "No job" from :core; the row now reads `ts_punch_no_job` (ListRowsLayoutTest.reportsTimeWithNoJobUsesTheStringResource). Kept, with reasons:
