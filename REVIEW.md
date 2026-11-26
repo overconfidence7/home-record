@@ -3728,3 +3728,74 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
 
 Tested: 102 device stages, 2339 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 95. New issues: 6. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-25 (commit a0ab29b0)
+
+Judged the suite results for a0ab29b0 (run of 2026-11-25 17:59 UTC, 102 stages, 95 passed). `build` HEAD is now bfb403c3; the auto entry's six Majors were fixed after this sha in 51342ee8 (FXAA off for the 3D view), which no suite run has exercised yet, so the 3D view is judged here as it ran on a0ab29b0. This sha does include 6a6126d9, bee86c08, 232458e1 and a0ab29b0, so the earlier judge items are checked against it below.
+
+Verdict: House Manual: everything a homeowner keeps (plan, items, panel, emergency, reminders, report, backup, second phone, both imports) works and reads cleanly, and both Minors from the last judge are fixed on screen. Nate would say first that opening any 3D view now closes the app outright (Filament aborts on its FXAA shader), which is worse than last run's blank box; the 3D non-negotiable has still never been seen working on a real house. / Field Log: clock, timesheets, files, capture, daily log, behind-the-wall, installed item and the handoff read like a working jobsite app. Nate would say first that the job's 3D view, the screen a contractor would show the client to sell the handoff, now drops him to the home screen.
+
+- [ ] [Minor] Suite honesty: the logcat stage reports "0 crashes" and `logs/crashes*.txt` are empty for both apps although the app died with a native SIGABRT (Filament `OpenGL program fxaa failed to link or compile`, FEngine::loop) in H03, H09, H10, H11, 3d-perf and F10; the tombstones are only in Maestro's `crash-report.txt` and `logcat.txt` (`F/libc … Fatal signal 6`, `F/DEBUG`). The crash count should include native crashes (`Fatal signal`, `*** *** ***` tombstone, `F/DEBUG` for the app's pid) so a crash is named as a crash, not only as a missing tag [judge:qa-native-crash-not-counted] - steps: summary.md stage `logcat:com.kurtz.homerecord.housemanual` vs `house-manual/maestro/out-H10-3d/*/H10-3d/logs/crash-report.txt` - expected: CLAUDE.md QA rule 7 (tests stay honest), S7 (no crashes) - actual: "0 crashes, 0 ANRs" on a run where the app aborted six times - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-step-016-assertCondition-hm_3d_scene_drawn.png
+
+Auto entry review:
+- All six auto items are one real app crash, not a flow error: every failure shot is the launcher (H03, H09, H10, H11, 3d-perf) or the Files app (F10), and each crash-report.txt holds the same Filament FXAA abort. 51342ee8 matches the cause; not seen on a device yet.
+- [judge:hm-3d-live-no-walls], [judge:fl-3d-live-no-walls] and [judge:qa-3d-drawn-tag-blank] (fixed in 232458e1) cannot be confirmed: 232458e1 is what introduced the FXAA abort, so no live 3D frame exists on this sha. The next judge must check that the room and floor views show walls, not only that the app stays open.
+
+Fixes checked on this sha: [judge:hm-sign-in-double-intro] fixed (H17b and H18b sign-in show one paragraph and no second "Sign in"); [judge:hm-import-done-generic] fixed (X02 reads "The crew's plan is in your home now. Open a room to see it."; H18 with photos and overlays keeps the full sentence); [judge:hm-reminders-warranty-duplicates] fixed (each warranty now has a "in 2 months" and a "in a week" reminder with different headlines, not two identical rows); [judge:hm-plan-editor-names-font200] fixed (200% editor names Kitchen, Living room, Dining room and Garage; Mudroom and Powder room are too small to name at 200%, acceptable); [judge:hm-plan-overlays-landscape-key] and [judge:hm-house-tab-spinner-returns] fine in the tour; [judge:hm-3d-room-wall-count] seen only in the catalog ("Finished photos on 1 of 4 walls"), live view crashed; [judge:qa-3d-orbit-video-misses-scene] not judgeable (orbit.mp4 recorded one frame before the abort).
+
+Seen this run and fine: Home, House, Items, Reminders, More, Floors and plan editor in dark, 200% and landscape (nav rail in landscape); Field Log Today, Jobs, Clock, Schedule, Team, Company and More in all three variants; H02b shape, doors and stairs; H03 room page with stage chips; H09 outline with four handles and the wall thumbnail; H11 pipe drawn on the wall, stage switch keeps it, room overlays list; H12 slot 12 Refrigerator 20 A and the fridge's Breaker 12 chip; H13 Emergency mains first in large type; H14 Done and zone; H15 report contents; H17 cloud copy and account deletes; H18 kitchen shows Range circuit and Sink drain; F09b Sent with Share link; F10b behind-the-wall progress ("Next photo: Finished, after drywall"); F10c installed water heater; F10e sent with the 30-day link; F11b pin on the job plan.
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding, Home with Add item, Scan data plate, Emergency | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-home-after-onboarding.png |
+| H2 | Pass | Two rooms, shape, doors, stairs; 200% editor now names the rooms | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Blueprint and room page work; the flow's 3D check closes the app | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-room-walls.png |
+| H4 | Pass | Item form with make and model | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | Grouped type picker, items by category and room | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Pass | Place on plan, On a wall, Move to room | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-place-on-plan.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Clunky | Outline and wall thumbnail work; "View in 3D" closes the app | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-thumbnail.png |
+| H10 | Blocked | App aborts on the first 3D frame (Filament FXAA) | qa-results:latest/house-manual/screenshots/flow-H10-3d-step-016-assertCondition-hm_3d_scene_drawn.png |
+| H11 | Blocked | Pipe on the wall photo and room overlays work; 3D with the pipe closes the app | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-step-147-assertCondition-Tap_a_pipe,_wire_or_item.png |
+| H12 | Pass | Panel, slot 12 Refrigerator, fridge shows Breaker 12 | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-H12-breaker-labeled.png |
+| H13 | Pass | Emergency from Home, item and tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Pass | Done and Snooze work; warranty reminders no longer duplicate | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF shared with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-report-share.png |
+| H16 | Pass | Wrong passphrase caught, house and items restored | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Pass | Sign in, second phone, edit arrives; sign-in explains itself once | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-H17b-sign-in-to-get-home.png |
+| H18 | Pass | File and claim-link imports; done text matches what came | qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-import-done.png |
+| H19 | Clunky | Paywall shows "Can't load prices" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, sign in, code, Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, removal | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Job overview | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c; crew clock-in card in every variant | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Catalog and unit tests; no flow | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | Timesheets flow passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved with version history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture, link sheet, photos by day | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Sent, Share link, Send again | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png |
+| F10 | Clunky | Behind the wall, installed item and handoff work; job 3D closes the app | qa-results:latest/field-log/screenshots/flow-F10-house-3d-step-065-assertCondition-fl_3d_scene_drawn.png |
+| F11 | Pass | Task pin on the plan and on a PDF | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Signed read-only view | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Tomorrow on Today | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, materials by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Job summaries and photo reports | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial and lapsed plan screens | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Pass | Every More screen opens | qa-results:latest/field-log/screenshots/flow-F18-more-F18-amount-typed.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 117 screenshots (45 tour shots, 64 flow and failure shots including 4 handoff, 4 crawler 3D shots, 3 opened singly, plus the six tombstones; the H01/H02 setup repeats inside other flows and the other crawler shots were not reopened), 37 walkthrough steps. New issues: 1. Product gaps: 0.
