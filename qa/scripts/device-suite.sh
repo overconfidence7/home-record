@@ -23,7 +23,7 @@
 #                renderer (SwiftShader) it gates on UI-thread time per frame from framestats instead
 #   release      release APK installs and launches (signed with a throwaway key if unsigned); then its
 #                baseline profile is compiled as a Play install would and cold start is measured on it
-#   logcat       FATAL EXCEPTION / ANR / StrictMode scan for the package
+#   logcat       FATAL EXCEPTION / native Fatal signal / ANR / StrictMode scan for the package
 # handoff runs install, permissions, fixtures, seed, flows and logcat only.
 set -uo pipefail
 
@@ -478,13 +478,24 @@ for a in $APPS; do
   awk -v pkg="$p" '/FATAL EXCEPTION/ { hold = $0; n = NR; next } n && NR == n + 1 { if (index($0, "Process: " pkg ",")) { print hold; print; keep = 12 } n = 0; next } keep > 0 { print; keep-- }' \
     "$OUT/logs/logcat.txt" > "$OUT/logs/crashes-$p.txt" 2>/dev/null || true
   crashes=$(grep -c "FATAL EXCEPTION" "$OUT/logs/crashes-$p.txt" || true)
+  # [judge:qa-native-crash-not-counted]: a native abort (Filament SIGABRT) writes no FATAL EXCEPTION, only
+  # "F/libc( pid): Fatal signal 6 …" from the app's own pid and a crash_dump tombstone ("F/DEBUG …: pid: n, …
+  # >>> <pkg> <<<" then the backtrace). Count the Fatal signal lines from this package's pids; when libc's line is
+  # missing, count the tombstone headers instead. Both go into crashes-$p.txt with 24 lines of tombstone.
+  awk -v pids=" $pids " -v pkg="$p" "$PID_AWK"' /Fatal signal [0-9]+/ { q = pidof_line($0); if (q != "" && index(pids, " " q " ")) print "NATIVE CRASH: " $0; next } index($0, ">>> " pkg " <<<") { print "NATIVE TOMBSTONE: " $0; keep = 24; next } keep > 0 && /DEBUG/ { print; keep-- }' \
+    "$OUT/logs/logcat.txt" > "$OUT/logs/native-$p.txt" 2>/dev/null || true
+  native=$(grep -c "^NATIVE CRASH: " "$OUT/logs/native-$p.txt" || true)
+  [ "$native" = "0" ] && native=$(grep -c "^NATIVE TOMBSTONE: " "$OUT/logs/native-$p.txt" || true)
+  cat "$OUT/logs/native-$p.txt" >> "$OUT/logs/crashes-$p.txt" 2>/dev/null || true
+  rm -f "$OUT/logs/native-$p.txt"
+  crashes=$((crashes + native))
   anrs=$(grep -c "ANR in $p" "$OUT/logs/logcat.txt" || true)
   awk -v pids=" $pids " "$PID_AWK"' /StrictMode policy violation/ { q = pidof_line($0); if (q != "" && index(pids, " " q " ")) print }' \
     "$OUT/logs/logcat.txt" > "$OUT/logs/strictmode-$p.txt" 2>/dev/null || true
   strict=$(wc -l < "$OUT/logs/strictmode-$p.txt" | tr -d ' ')
   cat "$OUT/logs/crashes-$p.txt" >> "$OUT/logs/crashes.txt" 2>/dev/null || true
   cat "$OUT/logs/strictmode-$p.txt" >> "$OUT/logs/strictmode.txt" 2>/dev/null || true
-  details="$crashes crashes, $anrs ANRs, $strict StrictMode violations"
+  details="$crashes crashes ($native native), $anrs ANRs, $strict StrictMode violations"
   if [ "$crashes" != "0" ] || [ "$anrs" != "0" ]; then record "logcat:$p" fail "$details"; elif [ "$strict" != "0" ]; then record "logcat:$p" warn "$details"; else record "logcat:$p" pass "$details"; fi
 done
 
