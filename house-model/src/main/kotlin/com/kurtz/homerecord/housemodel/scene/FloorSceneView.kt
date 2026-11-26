@@ -2,6 +2,7 @@ package com.kurtz.homerecord.housemodel.scene
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.toArgb
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -169,10 +170,14 @@ fun FloorSceneView(
     // Room names over the boxes, as the blueprint labels its rooms ([judge:hm-3d-rooms-unlabeled]); not while standing
     // inside a room. Re-placed each frame from the camera, published only when a label moves by a pixel or more.
     val cameraNode = io.github.sceneview.rememberCameraNode(engine)
-    // Our own Filament view so FXAA can be turned off: SceneView sets FXAA on every render quality, and with the
-    // see-through blend mode Filament compiles a translucent FXAA program the emulator's GL cannot build; Filament then
-    // aborts and the app closes on opening 3D ([auto:flow:house-manual:H10-3d] on a0ab29b0).
+    // Our own Filament view and renderer. The scene is opaque: a see-through (TRANSLUCENT) view makes Filament build
+    // translucent post-processing programs (FXAA, then "blitLow" with FXAA off) that the emulator's GL cannot compile,
+    // and Filament aborted the app on the first 3D frame ([auto:flow:house-manual:H10-3d] on a0ab29b0 and 51342ee8).
+    // The opaque programs are the ones the SurfaceView build drew with for weeks. Instead of showing the screen through,
+    // the renderer clears to the screen's surface colour ([SceneClearColor]), so light and dark still match.
     val filamentView = io.github.sceneview.rememberView(engine)
+    val renderer = io.github.sceneview.rememberRenderer(engine)
+    val surfaceArgb = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow.toArgb()
     var viewSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
@@ -192,10 +197,10 @@ fun FloorSceneView(
             // bounds) composites offscreen the hole is painted over, and the device showed a white or grey box with a
             // faint slab where the walls should be ([judge:hm-3d-live-no-walls], [judge:fl-3d-live-no-walls]).
             surfaceType = SurfaceType.TextureSurface,
-            // See-through, so the house sits on the screen's own surface colour in light and dark, not on black.
-            isOpaque = false,
+            isOpaque = true,
             engine = engine,
             view = filamentView,
+            renderer = renderer,
             cameraNode = cameraNode,
             // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
             // it never reached the screen and the drawn tag never came ([auto:flow:house-manual:H10-3d]). Frames run
@@ -218,7 +223,6 @@ fun FloorSceneView(
             ),
             // Timed once the scene is on screen: the first frame counted is the first with the house in it.
             onFrame = { nanos ->
-                SceneAntiAliasing.keepOff(filamentView)
                 if (draws > 0) {
                     stats.onFrame(nanos)
                     if (!drawn && !checking[0] && loadedPictures.all { resources.hasTexture(it) || it in unreadable } &&
@@ -267,8 +271,13 @@ fun FloorSceneView(
                 )
             }
         }
-        // After SceneView's own effects (they run in composition order), which set FXAA when the view is first used.
-        LaunchedEffect(filamentView) { SceneAntiAliasing.keepOff(filamentView) }
+        // After SceneView's own effects (they run in composition order), which clear an opaque view to black.
+        LaunchedEffect(renderer, surfaceArgb) {
+            renderer.clearOptions = com.google.android.filament.Renderer.ClearOptions().apply {
+                clear = true
+                clearColor = SceneClearColor.linear(surfaceArgb)
+            }
+        }
         // No pointer input on the labels either: a tap on a name still reaches the room below.
         labels.forEach { label ->
             androidx.compose.material3.Text(
@@ -470,19 +479,6 @@ private fun checkOnScreen(window: android.view.Window?, rect: android.graphics.R
         // The window has no surface yet (opening or closing): try again on a later frame.
         bitmap.recycle()
         onResult(false)
-    }
-}
-
-/**
- * Keeps Filament's FXAA off for the see-through scene. SceneView turns it on for every render quality; with
- * [com.google.android.filament.View.BlendMode.TRANSLUCENT] its program fails to compile on the emulator's GL and
- * Filament aborts the process. Checked before each frame, so a later SceneView effect cannot bring it back.
- */
-internal object SceneAntiAliasing {
-    fun keepOff(view: com.google.android.filament.View) {
-        if (view.antiAliasing != com.google.android.filament.View.AntiAliasing.NONE) {
-            view.antiAliasing = com.google.android.filament.View.AntiAliasing.NONE
-        }
     }
 }
 
