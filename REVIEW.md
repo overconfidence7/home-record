@@ -3282,6 +3282,8 @@ S1 recheck (2026-11-26, after e4f33e3f): 149 warnings, 0 errors. Fixed: Autoboxi
 - PluralsCandidate (3): HM panel_two_pole_description and breaker_where_two ("Slots %1$d and %2$d") and FL log_drop_photo ("Leave photo %1$d out of the log") put an ordinal slot or photo number before a word, not a count; no plural form applies.
 - ConfigurationScreenWidthHeight (1): BarLabelSize reads LocalWindowInfo.containerSize and falls back to Configuration.screenWidthDp only while that is 0 (first frame, tests).
 
+S1 recheck (2026-11-26, after 555d27cc): 151 warnings, 0 errors. The 2 new ones are GradleDependency/NewerVersionAvailable for upstream releases published since (AGP 9.5.3, sceneview 4.76.0, Compose BOM 2026.11.01 and others); same justification as above. 555d27cc's FloorSceneView change adds no warning beyond its existing UseKtx createBitmap.
+
 ## Builder ship-ready S3: strings (2026-11-07)
 
 Searched every main source set for literal text in `Text(`, `title =`, `label =`, `contentDescription =` and any capitalised multi-word literal outside previews, the catalog and debug code. One screen gap fixed: FL-Reports drew the time worked with no job under `HoursReport`'s literal "No job" from :core; the row now reads `ts_punch_no_job` (ListRowsLayoutTest.reportsTimeWithNoJobUsesTheStringResource). Kept, with reasons:
