@@ -13,6 +13,9 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.navigation3.runtime.NavEntryDecorator
 import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -26,6 +29,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.lifecycle.viewmodel.navigation3.ViewModelStoreNavEntryDecoratorDefaults
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -86,6 +90,16 @@ fun HomeRecordApp(
         }
     }
     val selected = tabs.firstOrNull { it.id == selectedId } ?: tabs.first()
+    val currentTabId = rememberUpdatedState(selected.id)
+    val clearOnPop = ViewModelStoreNavEntryDecoratorDefaults.removeViewModelStoreOnPop()
+    // Each tab keeps its screens' saved state and ViewModels while another tab shows; a screen is cleared only when it
+    // leaves its own tab's stack (a tab's display leaving composition on a switch is not a pop).
+    val decorators = tabs.associate { tab ->
+        tab.id to listOf<NavEntryDecorator<NavKey>>(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(removeViewModelStoreOnPop = { currentTabId.value == tab.id && clearOnPop() }),
+        )
+    }
     val stack = stacks.getValue(selected.id)
 
     val tagPrefix = LocalTagPrefix.current
@@ -107,15 +121,15 @@ fun HomeRecordApp(
         // One shared-transition scope over the tab's stack, so a screen can grow out of the element that opened it
         // (room page "View in 3D" into the room view, AC-C22); see sharedScreenBounds.
         SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            // One NavDisplay per tab, each with its own decorators held here: one display fed each tab's stack in turn
+            // took a tab switch for a pop of every screen on the old tab and cleared their ViewModels, so going back to
+            // a tab restarted its loading ([judge:hm-house-tab-spinner-flaky], rule 10).
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) { key(selected.id) {
                 NavDisplay(
                     backStack = stack,
                     sharedTransitionScope = this,
                     // Scopes each screen's ViewModel to its back stack entry, so it is cleared on pop.
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
+                    entryDecorators = decorators.getValue(selected.id),
                     onBack = { if (stack.size > 1) stack.removeAt(stack.lastIndex) },
                     entryProvider = entryProvider {
                         entries(object : ShellNav {
@@ -125,7 +139,7 @@ fun HomeRecordApp(
                         })
                     },
                 )
-            }
+            } }
         }
     }
 }
