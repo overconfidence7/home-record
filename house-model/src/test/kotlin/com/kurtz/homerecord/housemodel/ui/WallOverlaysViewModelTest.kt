@@ -28,9 +28,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Before
@@ -53,12 +53,20 @@ class WallOverlaysViewModelTest {
     private val created = mutableListOf<WallOverlaysViewModel>()
     private lateinit var northWall: String
 
+    // The body and the ViewModel share one main thread (see TestMainThread): with an Unconfined Main,
+    // draggingAPointMovesItAndDeleteRemovesTheOverlay timed out once in a full build waiting for the saved pipe.
+    private val main = TestMainThread()
+
     private fun test(block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit) {
-        runBlocking { block() }
+        runBlocking { withContext(main) { block() } }
     }
 
-    @Before fun setUp() = test {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+    @Before fun setUp() {
+        Dispatchers.setMain(main)
+        setUpData()
+    }
+
+    private fun setUpData() = test {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, HomeRecordDatabase::class.java).allowMainThreadQueries().build()
         homes = HomeRepository(db, context.resources::getString)
@@ -74,6 +82,7 @@ class WallOverlaysViewModelTest {
         runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
+        main.close()
     }
 
     private val media = FakeWallMedia()
