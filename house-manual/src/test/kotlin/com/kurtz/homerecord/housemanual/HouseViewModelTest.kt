@@ -72,7 +72,8 @@ class HouseViewModelTest {
     private fun house(
         repo: HomeRepository, homeId: String, store: LayerStore, handle: SavedStateHandle, name: String, type: String,
         exporter: com.kurtz.homerecord.housemodel.ui.BlueprintExporter = com.kurtz.homerecord.housemodel.ui.BlueprintExporter { _, _ -> null },
-    ) = HouseViewModel(repo, homeId, store, handle, name, type, exporter = exporter).also { created += it }
+        memory: com.kurtz.homerecord.housemodel.ui.HousePlanMemory = com.kurtz.homerecord.housemodel.ui.HousePlanMemory(),
+    ) = HouseViewModel(repo, homeId, store, handle, name, type, exporter = exporter, planMemory = memory).also { created += it }
 
     private suspend fun setUpHome(): Pair<String, String> {
         val homeId = repo.createHome(NewHome("Maple St", null, HouseType.COLONIAL, Foundation.BASEMENT, false))
@@ -112,6 +113,57 @@ class HouseViewModelTest {
         watch.cancel()
         assertThat(moved.planPending).isFalse()
         assertThat(seen).doesNotContain(true)
+    }
+
+    // judge:hm-house-tab-spinner-recurs (rule 10): after the plan is on screen, late second emissions (the plan rows
+    // rewritten, as a sync or seed does, and the floor list re-emitting with a floor added) never bring back the spinner.
+    @Test fun aLateSecondEmissionNeverBringsBackTheSpinner() = test {
+        val (homeId, floorId) = setUpHome()
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        vm.untilRooms(2)
+        val seen = mutableListOf<Boolean>()
+        val watch = launch(kotlinx.coroutines.Dispatchers.Main.immediate) { vm.state.collect { seen += it.planPending } }
+        repo.savePlan(floorId, listOf(PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 144, 120), PlanRoom.rectangle("l", "Family room", "LIVING_ROOM", 144, 0, 180, 120)))
+        repo.addFloor(homeId, "Attic")
+        withTimeout(10_000) { vm.state.first { s -> s.rooms.any { it.name == "Family room" } && s.floors.any { it.name == "Attic" } } }
+        repo.savePlan(floorId, listOf(PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 144, 120)))
+        withTimeout(10_000) { vm.state.first { it.rooms.size == 1 } }
+        watch.cancel()
+        assertThat(vm.state.value.floorId).isEqualTo(floorId)
+        assertThat(seen).doesNotContain(true)
+    }
+
+    // judge:hm-house-tab-spinner-recurs (rule 10): a House tab ViewModel built again in the same process (its entry's
+    // store cleared on a tab switch or a home re-read) opens on the plan already drawn, never on the spinner.
+    @Test fun aRebuiltHouseTabOpensOnThePlanAlreadyDrawn() = test {
+        val (homeId, floorId) = setUpHome()
+        val memory = com.kurtz.homerecord.housemodel.ui.HousePlanMemory()
+        val first = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial", memory = memory)
+        first.untilRooms(2)
+        val again = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial", memory = memory)
+        assertThat(again.state.value.planPending).isFalse()
+        assertThat(again.state.value.floorId).isEqualTo(floorId)
+        assertThat(again.state.value.rooms.map { it.name }).containsExactly("Kitchen", "Living")
+        val seen = mutableListOf<Boolean>()
+        val watch = launch(kotlinx.coroutines.Dispatchers.Main.immediate) { again.state.collect { seen += it.planPending } }
+        withTimeout(10_000) { again.state.first { it.floors.isNotEmpty() && !it.loading } }
+        repo.savePlan(floorId, listOf(PlanRoom.rectangle("k", "Kitchen", "KITCHEN", 0, 0, 144, 120)))
+        withTimeout(10_000) { again.state.first { it.rooms.size == 1 } }
+        watch.cancel()
+        assertThat(seen).doesNotContain(true)
+    }
+
+    // judge:hm-house-tab-spinner-recurs: going back to a floor already drawn shows it at once, not the spinner
+    @Test fun aFloorAlreadyDrawnShowsAtOnceWhenPickedAgain() = test {
+        val (homeId, floorId) = setUpHome()
+        val vm = house(repo, homeId, store, SavedStateHandle(), "Maple St", "Colonial")
+        vm.untilRooms(2)
+        val other = vm.state.value.floors.first { it.id != floorId }.id
+        vm.onEvent(HouseEvent.SelectFloor(other))
+        withTimeout(10_000) { vm.state.first { !it.planPending && it.floorId == other } }
+        vm.onEvent(HouseEvent.SelectFloor(floorId))
+        assertThat(vm.state.value.planPending).isFalse()
+        assertThat(vm.state.value.rooms.map { it.name }).containsExactly("Kitchen", "Living")
     }
 
     @Test fun showsTheFloorsRooms() = test {

@@ -68,7 +68,11 @@ fun HouseRoute(
                     homeOverlays = overlays?.observeForHome(homeId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
                     wallKeys = { ids -> overlays?.observeWallKeys(ids) ?: kotlinx.coroutines.flow.flowOf(emptyMap()) },
                     itemSpots = overlays?.observeItemSpots(homeId) ?: kotlinx.coroutines.flow.flowOf(emptyList()),
-                )
+                    planMemory = HousePlanMemory.Process,
+                ).also {
+                    // Each build is logged so a House tab that shows its spinner again can be told apart from a slow read.
+                    android.util.Log.i("HouseTab", "House tab ViewModel built (plan already drawn: ${it.state.value.rooms.isNotEmpty()})")
+                }
             }
         },
     )

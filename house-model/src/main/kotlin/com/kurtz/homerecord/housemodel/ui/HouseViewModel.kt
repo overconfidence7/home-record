@@ -51,16 +51,25 @@ class HouseViewModel(
     private val wallKeys: (roomIds: List<String>) -> Flow<Map<String, WallKey>> = { flowOf(emptyMap()) },
     /** The home's items with a spot on the plan, drawn on the Items layer (AC-C15). */
     itemSpots: Flow<List<ItemSpot>> = flowOf(emptyList()),
+    /** The plans already drawn in this process, so a rebuilt ViewModel opens on its plan, not the spinner. */
+    private val planMemory: HousePlanMemory = HousePlanMemory(),
 ) : ViewModel() {
+    /** The plan this home's House tab last drew, if any: shown at once while the fresh read runs. */
+    private val shown: ShownPlan? = planMemory.recall(homeId, saved[FLOOR])
+
     private val _state = MutableStateFlow(
-        HouseUiState(homeName = homeName, summary = summary, floorId = saved[FLOOR], planPending = true, layers = layerStore.read(homeId), system = system),
+        HouseUiState(
+            homeName = homeName, summary = summary, floorId = shown?.floorId ?: saved[FLOOR], planPending = shown == null,
+            rooms = shown?.rooms.orEmpty(), overlays = shown?.overlays.orEmpty(), marks = shown?.marks.orEmpty(),
+            layers = layerStore.read(homeId), system = system,
+        ),
     )
     val state: StateFlow<HouseUiState> = _state.asStateFlow()
 
-    private val floorIds = MutableStateFlow<String?>(saved[FLOOR])
+    private val floorIds = MutableStateFlow<String?>(shown?.floorId ?: saved[FLOOR])
 
-    /** The floor whose plan [HouseUiState.rooms] holds, once read. */
-    private var planFloorId: String? = null
+    /** The floor whose plan [HouseUiState.rooms] holds, once read (or recalled from [planMemory]). */
+    private var planFloorId: String? = shown?.floorId
 
     /** The home's overlays by id as last seen, so a tapped blueprint mark opens the overlay it draws (T055a). */
     private var latestOverlays: Map<String, Overlay> = emptyMap()
@@ -92,6 +101,7 @@ class HouseViewModel(
                 // floor's read follows, and the plan on screen stays until then ([judge:hm-house-tab-spinner-returns]).
                 if (view.floorId != _state.value.floorId) return@collect
                 planFloorId = view.floorId
+                planMemory.remember(homeId, ShownPlan(view.floorId, view.rooms, view.overlays, view.marks))
                 _state.update { it.copy(rooms = view.rooms, overlays = view.overlays, marks = view.marks, planPending = false) }
             }
         }
@@ -104,8 +114,14 @@ class HouseViewModel(
         when (event) {
             is HouseEvent.SelectFloor -> if (event.floorId != _state.value.floorId) {
                 saved[FLOOR] = event.floorId
+                // A floor already drawn this session shows its plan at once; its fresh read follows.
+                val known = planMemory.recall(homeId, event.floorId)
+                if (known != null) planFloorId = known.floorId
                 _state.update {
-                    it.copy(floorId = event.floorId, rooms = emptyList(), overlays = emptyList(), marks = emptyList(), planPending = event.floorId != planFloorId)
+                    it.copy(
+                        floorId = event.floorId, rooms = known?.rooms.orEmpty(), overlays = known?.overlays.orEmpty(),
+                        marks = known?.marks.orEmpty(), planPending = known == null && event.floorId != planFloorId,
+                    )
                 }
                 floorIds.value = event.floorId
             }
