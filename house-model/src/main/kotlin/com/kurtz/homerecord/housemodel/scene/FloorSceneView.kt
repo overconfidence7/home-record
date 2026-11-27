@@ -216,11 +216,9 @@ fun FloorSceneView(
             isOpaque = true,
             engine = engine,
             view = filamentView,
-            // No bloom, SSAO, MSAA or HDR buffer (FXAA stays, the opaque program the emulator builds). With SceneView's
-            // default quality the emulator's GL drew the house as a washed-out pink haze over the surface colour, so the
-            // drawn check found only 4-5% of the view standing out, at 3-4 fps ([auto:3d:house-manual:house-manual],
-            // [auto:flow:house-manual:H10-3d] on c2b1b764). Flat-tinted boxes gain nothing from those passes.
-            renderQuality = RenderQuality.Performance,
+            // SceneView's Default quality (no dynamic resolution, medium HDR buffer): its colour-grading program is the one the
+            // emulator's GL has always built. [PlainPostProcessing] below then turns its extra passes off.
+            renderQuality = RenderQuality.Default,
             renderer = renderer,
             cameraNode = cameraNode,
             // SceneView draws on demand by default, so a still scene drew one frame and stopped: pictures decoded after
@@ -292,6 +290,8 @@ fun FloorSceneView(
                 )
             }
         }
+        // After SceneView's own effects (they run in composition order), which apply its render quality.
+        LaunchedEffect(filamentView) { PlainPostProcessing.apply(filamentView) }
         // After SceneView's own effects (they run in composition order), which clear an opaque view to black.
         LaunchedEffect(renderer, surfaceArgb) {
             renderer.clearOptions = com.google.android.filament.Renderer.ClearOptions().apply {
@@ -515,3 +515,22 @@ private tailrec fun android.content.Context.findWindow(): android.view.Window? =
 }
 private const val MIN_RADIUS_M = 2f
 private const val DISTANCE_PER_RADIUS = 2.2f
+
+/**
+ * Post-processing for flat-tinted boxes: colour grading only. Bloom and SSAO drew the house as a washed-out pink haze on
+ * the emulator's GL, so the drawn check found only 4-5% of the view standing out ([auto:3d:house-manual:house-manual] on
+ * c2b1b764). FXAA is off because its fragment shader does not compile there ("'color' : field selection requires
+ * structure"), and Filament aborts the app on a program that fails to build: 7 native crashes on 555d27cc, which ran
+ * SceneView's Performance quality ([auto:logcat:house-manual:com.kurtz.homerecord.housemanual]). Dynamic resolution stays
+ * off (Default quality), so no upscale or blit program is needed either; colour grading writes straight to the surface.
+ */
+internal object PlainPostProcessing {
+    fun apply(view: com.google.android.filament.View) {
+        view.antiAliasing = com.google.android.filament.View.AntiAliasing.NONE
+        view.multiSampleAntiAliasingOptions = view.multiSampleAntiAliasingOptions.apply { enabled = false }
+        view.ambientOcclusionOptions = view.ambientOcclusionOptions.apply { enabled = false }
+        view.bloomOptions = view.bloomOptions.apply { enabled = false }
+        view.dynamicResolutionOptions = view.dynamicResolutionOptions.apply { enabled = false }
+        view.setShadowingEnabled(false)
+    }
+}
