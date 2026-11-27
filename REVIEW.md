@@ -3995,3 +3995,72 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
 
 Tested: 102 device stages, 2346 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 93. New issues: 8. Critical: 2. Product gaps: n/a (judge entry follows).
+
+## QA judge 2026-11-27 (commit 555d27cc)
+
+Judged the suite results for 555d27cc (run of 2026-11-27 03:07 UTC, 102 stages, 93 passed). `build` HEAD is 9cfa8d9a; app code changed after this sha in d6ae5aa7 (room-view drawn check) and 31594529 (3D back to Default quality without FXAA), neither of which any suite run has exercised yet.
+
+Verdict: House Manual: every screen outside 3D still reads as a clean homeowner's record, but 3D is worse than last run: SceneView's Performance quality aborts Filament ("OpenGL program fxaa failed to link or compile") and the app closes to the launcher in H03, H09, H10, H11 and 3d-perf. Nate would say first that tapping 3D view closes the app, and the room view he saw before the crash ("Kitchen in 3D", 4 of 4 walls photographed) was still plain white. / Field Log: clock, files, capture, daily log, behind-the-wall, installed item, change orders, materials and handoff all work like a jobsite app should. Nate would say first that the job's 3D view, the screen that sells the handoff, now closes the app.
+
+- [ ] [Minor] The House tab is back to only a spinner in the dark and 200% tours (Floors and Items lists rendered, Export PDF greyed, chips and Floors button drawn, no plan), while the landscape tour draws the blueprint and the plan editor in the same tours draws the floor. This is the fourth time the symptom has returned ([judge:hm-house-tab-spinner], [judge:hm-house-tab-spinner-returns], [judge:hm-house-tab-spinner-flaky] all closed); this sha changed only the 3D view, so the plan-loading state is still timing-dependent and the tour's wait for `hm_house_blueprint` cannot catch it. Fix the cause (planPending must never go back to true once rooms for the floor have been emitted) and add a JVM test that replays a late second emission [judge:hm-house-tab-spinner-recurs] - steps: seed, dark theme or font scale 2.0, open the House tab (tour dark / font200) - expected: PRODUCT.md H3 (clean blueprint of the house), ui-standards rule 10 (loading is brief) - actual: centred spinner on an empty area between the floor chips and the overlay chips; landscape shot shows the full plan - screenshot: qa-results:latest/house-manual/screenshots/tour-dark-house.png (also tour-font200-house.png)
+
+Auto entry review:
+- All eight auto items are real app failures, not flow errors. Every 3D failure shot (H03 step-100, H09 step-107, H10 step-019, 3d-perf step-022, F10 step-065) shows another app (Google Messages welcome, Files "Downloads") in front: the app died. crashes.txt has the same abort on FEngine::loop in both apps: "PostconditionPanic ... OpenGL program fxaa failed to link or compile". 31594529 matches that cause; not yet seen on a device.
+- Before the crash, H09-wall-in-3d and H10-kitchen-3d show "Kitchen in 3D" as a plain white area under "Finished photos on 1 of 4 walls" / "4 of 4 walls". That is [judge:hm-3d-room-blank], whose fix (d6ae5aa7) is not in this sha; the next run must check it.
+
+Seen this run and unchanged from c2b1b764 (fine): Home, Floors, Items, Reminders, More and plan editor in dark, 200% and landscape; House in landscape; Field Log Today, Jobs, Clock (crew clock-in card, "Pick who to clock in"), Schedule, Team, Company and More in all three variants; H01-H02b; H03 room page and walls; H04-H08 (Place on plan, On a wall, Move to room); H09 outline, photo sheet, thumbnail; H11 overlay form, wall drawing, pipe on the wall photo, room overlays; H12 slot 12 Refrigerator 20 A, fridge Breaker 12, breaker search; H13; H14 Done and zone, warranty reminders not duplicated; H15 paywall then PDF; H16 wrong passphrase and restore; H17/H17b; H18 preview, done, kitchen's Range circuit and Sink drain; H18b; X02 claim link; share, viewer, contacts, documents; F01-F18 flow shots including F07c version history, F09b sent / changed since sent / empty-log warning, F10b next-photo hints, F10e sent with the 30-day link, F11b/F11c pins, F12 signed change order, F13 two-jobs warning, F14 $123.71, F16 saved here then synced, F17 lapsed and trial.
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding, Home with Add item, Scan data plate, Emergency | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-onboarding-filled.png |
+| H2 | Pass | Two rooms, shape, doors, stairs | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Blueprint and room page work; 3D closes the app (FXAA abort); House tab spinner in dark/200% tours | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-step-100-assertCondition-Main_in_3D.png |
+| H4 | Pass | Item form with make and model | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | Grouped type picker, items by category and room | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Pass | Place on plan, On a wall, Move to room | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-place-on-plan.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Blocked | Outline and thumbnail work; room 3D blank white, then the app closes | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-step-107-assertCondition-Photos_Finished.png |
+| H10 | Blocked | "Kitchen in 3D" white with 4 of 4 walls photographed, then the app closes | qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png |
+| H11 | Blocked | Pipe on the wall photo and room overlays work; 3D closes the app | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-step-147-assertCondition-Tap_a_pipe,_wire_or_item.png |
+| H12 | Pass | Panel, slot 12 Refrigerator, fridge shows Breaker 12 | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-H12-breaker-labeled.png |
+| H13 | Pass | Emergency from Home, item and tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Pass | Done, Snooze, zone; no duplicate warranty rows | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF shared with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-report-share.png |
+| H16 | Pass | Wrong passphrase caught, house and items restored | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Pass | Sign in, second phone, edit arrives | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-H17b-edit-arrived.png |
+| H18 | Pass | File and claim-link imports; done text matches what came | qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-import-done.png |
+| H19 | Clunky | Paywall shows "Can't load prices" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, sign in, code, Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, removal | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Job overview | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c; crew clock-in card in every variant | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Catalog and unit tests; no flow | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | Timesheets flow passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved with version history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture, link sheet, photos by day | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Sent, Share link, Send again, empty-log warning | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png |
+| F10 | Clunky | Behind the wall, installed item and handoff work; job 3D closes the app (FXAA abort) | qa-results:latest/field-log/screenshots/flow-F10-house-3d-step-065-assertCondition-fl_3d_scene_drawn.png |
+| F11 | Pass | Task pin on the plan and on a PDF | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Signed read-only view | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Tomorrow on Today, two-jobs warning | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, materials by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Job summaries and photo reports | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial and lapsed plan screens | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Pass | Every More screen opens; $123.71 typed and kept | qa-results:latest/field-log/screenshots/flow-F18-more-F18-amount-typed.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 244 screenshots (45 tour shots, 122 House Manual flow shots, 66 Field Log flow shots, 4 handoff shots, 7 3D failure shots; the crawler folders were not reopened), 37 walkthrough steps. New issues: 1. Product gaps: 0.
