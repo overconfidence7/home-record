@@ -21,11 +21,11 @@ import com.kurtz.homerecord.core.punch.PunchRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
@@ -54,8 +54,14 @@ class ClockViewModelTest {
     private val settings = kotlinx.coroutines.flow.MutableStateFlow(CompanySettings())
     private var clock = 5_000_000L
 
+    // One thread plays the main thread, as on a device: the ViewModel's coroutines, its SavedStateHandle and its
+    // plain fields are only touched there. An Unconfined Main let them resume on Room's threads while the test
+    // thread sent the next event, and crewFarFromJobAsksOnceThenPunchesAll timed out once in a full build.
+    private val mainThread = java.util.concurrent.Executors.newSingleThreadExecutor { r -> Thread(r, "test-main") }
+    private val main = mainThread.asCoroutineDispatcher()
+
     @Before fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+        Dispatchers.setMain(main)
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), HomeRecordDatabase::class.java)
             .allowMainThreadQueries().build()
         runBlocking {
@@ -69,6 +75,7 @@ class ClockViewModelTest {
         runBlocking { created.forEach { it.viewModelScope.coroutineContext[Job]?.cancelAndJoin() } }
         db.close()
         Dispatchers.resetMain()
+        main.close()
     }
 
     private suspend fun vm(role: CompanyRole = CompanyRole.Crew, leadJobs: Set<String> = emptySet(), approvals: kotlinx.coroutines.flow.Flow<List<com.kurtz.homerecord.core.data.TimesheetApprovalEntity>> = kotlinx.coroutines.flow.flowOf(emptyList()), saved: SavedStateHandle = SavedStateHandle()): ClockViewModel {
@@ -79,7 +86,7 @@ class ClockViewModelTest {
             role = role, crewClock = CrewClock(punches, ClockController(punches, location), location), members = db.memberDao().observeFor("c1"), approvals = approvals,
             gates = kotlinx.coroutines.flow.flowOf(com.kurtz.homerecord.core.company.RoleGates(role, leadJobs)),
         )
-        return ClockViewModel(deps, saved).also { created += it; await(it) { s -> !s.loading } }
+        return withContext(Dispatchers.Main) { ClockViewModel(deps, saved) }.also { created += it; await(it) { s -> !s.loading } }
     }
 
     // Room runs on real threads here; under a full parallel build (2 Gradle workers, Robolectric) one step took
@@ -88,6 +95,12 @@ class ClockViewModelTest {
 
     private suspend fun await(vm: ClockViewModel, test: (ClockUiState) -> Boolean): ClockUiState =
         withContext(Dispatchers.Default) { withTimeout(AWAIT_MS) { vm.state.first(test) } }
+
+    /** Sends [event] on the main thread, then lets the main queue run what it started up to its first suspension. */
+    private suspend fun ClockViewModel.send(event: ClockEvent) {
+        withContext(Dispatchers.Main) { onEvent(event) }
+        withContext(Dispatchers.Main) { }
+    }
 
     private suspend fun kinds() = db.punchDao().listFor("c1").sortedBy { it.at }.map { it.kind }
 
@@ -102,7 +115,7 @@ class ClockViewModelTest {
     // AC-F14: an owner's edit to my punch shows on My timesheet with who, when, before and after, and why
     @Test fun ownerEditOfMyPunchShowsWhoWhenAndWhy() = runBlocking<Unit> {
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         await(vm) { it.status is ClockStatus.Working }
         val punch = db.punchDao().listFor("c1").single()
         clock += 60_000
@@ -129,10 +142,10 @@ class ClockViewModelTest {
     @Test fun listsActiveJobsAndClockInNeedsOne() = runBlocking<Unit> {
         val vm = vm()
         assertThat(vm.state.value.jobs.map { it.id }).containsExactly("j1", "j2")
-        vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.ClockIn)
         assertThat(kinds()).isEmpty()
-        vm.onEvent(ClockEvent.SelectJob("j1"))
-        vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1"))
+        vm.send(ClockEvent.ClockIn)
         await(vm) { it.status is ClockStatus.Working }
         assertThat(kinds()).containsExactly(PunchKind.IN)
     }
@@ -140,24 +153,24 @@ class ClockViewModelTest {
     // AC-F17: the widget opens FL-Clock with the last job preselected
     @Test fun preselectsTheLastJobWorked() = runBlocking<Unit> {
         val first = vm()
-        first.onEvent(ClockEvent.SelectJob("j2")); first.onEvent(ClockEvent.ClockIn)
+        first.send(ClockEvent.SelectJob("j2")); first.send(ClockEvent.ClockIn)
         await(first) { it.status is ClockStatus.Working }
-        clock += 1000; first.onEvent(ClockEvent.ClockOut)
+        clock += 1000; first.send(ClockEvent.ClockOut)
         await(first) { it.status is ClockStatus.Out }
         assertThat(vm().state.value.selectedJobId).isEqualTo("j2")
     }
 
     @Test fun breakSwitchAndClockOut() = runBlocking<Unit> {
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         await(vm) { it.status is ClockStatus.Working }
-        clock += 1000; vm.onEvent(ClockEvent.StartBreak)
+        clock += 1000; vm.send(ClockEvent.StartBreak)
         await(vm) { it.status is ClockStatus.OnBreak }
-        clock += 1000; vm.onEvent(ClockEvent.EndBreak)
+        clock += 1000; vm.send(ClockEvent.EndBreak)
         await(vm) { it.status is ClockStatus.Working }
-        clock += 1000; vm.onEvent(ClockEvent.SelectJob("j2")); vm.onEvent(ClockEvent.SwitchJob)
+        clock += 1000; vm.send(ClockEvent.SelectJob("j2")); vm.send(ClockEvent.SwitchJob)
         await(vm) { (it.status as? ClockStatus.Working)?.jobId == "j2" }
-        clock += 1000; vm.onEvent(ClockEvent.ClockOut)
+        clock += 1000; vm.send(ClockEvent.ClockOut)
         await(vm) { it.status is ClockStatus.Out }
         assertThat(kinds()).containsExactly(PunchKind.IN, PunchKind.BREAK_START, PunchKind.BREAK_END, PunchKind.SWITCH, PunchKind.OUT).inOrder()
     }
@@ -165,18 +178,18 @@ class ClockViewModelTest {
     @Test fun explainsLocationOnFirstClockInOnly() = runBlocking<Unit> {
         location.permitted = false
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         assertThat(vm.state.value.explainLocation).isTrue()
         assertThat(kinds()).isEmpty()
-        vm.onEvent(ClockEvent.ExplainContinue)
+        vm.send(ClockEvent.ExplainContinue)
         assertThat(vm.state.value.requestPermission).isTrue()
-        vm.onEvent(ClockEvent.PermissionResult(granted = false))
+        vm.send(ClockEvent.PermissionResult(granted = false))
         val s = await(vm) { it.status is ClockStatus.Working && it.savedWithoutLocation }
         assertThat(s.savedWithoutLocation).isTrue()
         assertThat(db.punchDao().listFor("c1").single().note).contains("No location")
-        vm.onEvent(ClockEvent.ClockOut)
+        vm.send(ClockEvent.ClockOut)
         await(vm) { it.status is ClockStatus.Out }
-        vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.ClockIn)
         assertThat(vm.state.value.explainLocation).isFalse()
     }
 
@@ -184,10 +197,10 @@ class ClockViewModelTest {
         settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         assertThat(await(vm) { it.gpsRequired != null }.gpsRequired).isTrue()
         assertThat(kinds()).isEmpty()
-        vm.onEvent(ClockEvent.DismissGps)
+        vm.send(ClockEvent.DismissGps)
         assertThat(vm.state.value.gpsRequired).isNull()
     }
 
@@ -196,7 +209,7 @@ class ClockViewModelTest {
         location.permitted = false; asked = true
         val vm = vm()
         settings.value = CompanySettings(requireGps = true)
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         assertThat(await(vm) { it.gpsRequired != null }.gpsRequired).isTrue()
         assertThat(kinds()).isEmpty()
     }
@@ -206,17 +219,17 @@ class ClockViewModelTest {
         settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         await(vm) { it.gpsRequired == true }
-        vm.onEvent(ClockEvent.OpenSettings)
+        vm.send(ClockEvent.OpenSettings)
         assertThat(vm.state.value.gpsRequired).isNull()
         location.permitted = true
-        vm.onEvent(ClockEvent.Resumed)
+        vm.send(ClockEvent.Resumed)
         await(vm) { it.status is ClockStatus.Working }
         assertThat(kinds()).containsExactly(PunchKind.IN)
-        vm.onEvent(ClockEvent.ClockOut)
+        vm.send(ClockEvent.ClockOut)
         await(vm) { it.status is ClockStatus.Out }
-        vm.onEvent(ClockEvent.Resumed) // a later return from anywhere punches nothing
+        vm.send(ClockEvent.Resumed) // a later return from anywhere punches nothing
         assertThat(kinds()).containsExactly(PunchKind.IN, PunchKind.OUT).inOrder()
     }
 
@@ -225,12 +238,12 @@ class ClockViewModelTest {
         settings.value = CompanySettings(requireGps = true)
         location.permitted = false; asked = true
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         await(vm) { it.gpsRequired == true }
-        vm.onEvent(ClockEvent.OpenSettings)
-        vm.onEvent(ClockEvent.Resumed)
+        vm.send(ClockEvent.OpenSettings)
+        vm.send(ClockEvent.Resumed)
         location.permitted = true
-        vm.onEvent(ClockEvent.Resumed)
+        vm.send(ClockEvent.Resumed)
         assertThat(kinds()).isEmpty()
         assertThat(vm.state.value.status).isEqualTo(ClockStatus.Out)
     }
@@ -238,11 +251,11 @@ class ClockViewModelTest {
     @Test fun farFromJobAsksForAReasonThenSaves() = runBlocking<Unit> {
         location.fix = GeoFix(34.1, -118.0, 5f) // about 7 miles away
         val vm = vm()
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockIn)
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockIn)
         val sheet = await(vm) { it.farReason != null }.farReason
         assertThat(sheet?.canSave).isFalse()
-        vm.onEvent(ClockEvent.PickReason(FarReason.SupplyHouse))
-        vm.onEvent(ClockEvent.SaveReason)
+        vm.send(ClockEvent.PickReason(FarReason.SupplyHouse))
+        vm.send(ClockEvent.SaveReason)
         await(vm) { it.status is ClockStatus.Working }
         val p = db.punchDao().listFor("c1").single()
         assertThat(p.farFromJob).isTrue()
@@ -254,13 +267,13 @@ class ClockViewModelTest {
         location.fix = GeoFix(34.1, -118.0, 5f)
         val saved = SavedStateHandle()
         val first = vm(saved = saved)
-        first.onEvent(ClockEvent.SelectJob("j1")); first.onEvent(ClockEvent.ClockIn)
+        first.send(ClockEvent.SelectJob("j1")); first.send(ClockEvent.ClockIn)
         val asked = await(first) { it.farReason != null }.farReason
-        first.onEvent(ClockEvent.PickReason(FarReason.Other)); first.onEvent(ClockEvent.OtherReason("Dropping off a ladder"))
+        first.send(ClockEvent.PickReason(FarReason.Other)); first.send(ClockEvent.OtherReason("Dropping off a ladder"))
         val again = vm(saved = SavedStateHandle(saved.keys().associateWith { saved.get<Any>(it) }))
         val sheet = again.state.value.farReason
         assertThat(sheet).isEqualTo(FarReasonSheet(checkNotNull(asked).distanceFt, FarReason.Other, "Dropping off a ladder"))
-        again.onEvent(ClockEvent.SaveReason)
+        again.send(ClockEvent.SaveReason)
         await(again) { it.status is ClockStatus.Working }
         assertThat(db.punchDao().listFor("c1").single().reason).isEqualTo("Dropping off a ladder")
     }
@@ -269,14 +282,14 @@ class ClockViewModelTest {
     @Test fun crewFarFromJobUsesTheCompanyDistance() = runBlocking<Unit> {
         location.fix = GeoFix(34.0011, -118.0, 5f) // about 400 ft north of the job
         val near = vm(CompanyRole.Crew)
-        near.onEvent(ClockEvent.SelectJob("j1")); near.onEvent(ClockEvent.ClockIn)
+        near.send(ClockEvent.SelectJob("j1")); near.send(ClockEvent.ClockIn)
         assertThat(await(near) { it.status is ClockStatus.Working }.farReason).isNull()
-        clock += 1000; near.onEvent(ClockEvent.ClockOut)
+        clock += 1000; near.send(ClockEvent.ClockOut)
         await(near) { it.status is ClockStatus.Out }
 
         settings.value = CompanySettings(punchDistanceFt = 300)
         val far = vm(CompanyRole.Crew)
-        far.onEvent(ClockEvent.SelectJob("j1")); far.onEvent(ClockEvent.ClockIn)
+        far.send(ClockEvent.SelectJob("j1")); far.send(ClockEvent.ClockIn)
         assertThat(await(far) { it.farReason != null }.farReason).isNotNull()
     }
 
@@ -301,12 +314,12 @@ class ClockViewModelTest {
     @Test fun leadClocksInSelectedCrewOnTheSelectedJob() = runBlocking<Unit> {
         addMember("m1", "Lead"); addMember("m2", "Maria"); addMember("m3", "Dev")
         val vm = vm(CompanyRole.Lead, leadJobs = setOf("j1"))
-        vm.onEvent(ClockEvent.SelectJob("j1"))
+        vm.send(ClockEvent.SelectJob("j1"))
         val s0 = await(vm) { it.crew.size == 2 }
         assertThat(s0.canLeadCrew).isTrue()
         assertThat(s0.crew.map { it.id }).containsExactly("m2", "m3")
-        vm.onEvent(ClockEvent.ToggleCrew("m2")); vm.onEvent(ClockEvent.ToggleCrew("m3"))
-        vm.onEvent(ClockEvent.ClockInCrew)
+        vm.send(ClockEvent.ToggleCrew("m2")); vm.send(ClockEvent.ToggleCrew("m3"))
+        vm.send(ClockEvent.ClockInCrew)
         val s1 = await(vm) { it.crewNotice != null }
         assertThat(s1.crewNotice?.punched).isEqualTo(2)
         assertThat(s1.crewSelected).isEmpty()
@@ -315,7 +328,7 @@ class ClockViewModelTest {
         assertThat(rows.map { it.clockedInBy }.toSet()).containsExactly("m1")
         assertThat(rows.map { it.jobId }.toSet()).containsExactly("j1")
         await(vm) { s -> s.crew.all { it.onClock } }
-        vm.onEvent(ClockEvent.ToggleCrew("m2"))
+        vm.send(ClockEvent.ToggleCrew("m2"))
         assertThat(vm.state.value.crewSelected).isEmpty()
     }
 
@@ -324,12 +337,12 @@ class ClockViewModelTest {
         addMember("m1", "Lead"); addMember("m2", "Maria")
         val vm = vm(CompanyRole.Lead, leadJobs = setOf("j1"))
         await(vm) { it.crew.size == 1 }
-        vm.onEvent(ClockEvent.SelectJob("j2"))
+        vm.send(ClockEvent.SelectJob("j2"))
         assertThat(vm.state.value.canLeadCrew).isFalse()
-        vm.onEvent(ClockEvent.ToggleCrew("m2"))
-        vm.onEvent(ClockEvent.ClockInCrew)
+        vm.send(ClockEvent.ToggleCrew("m2"))
+        vm.send(ClockEvent.ClockInCrew)
         assertThat(db.punchDao().listFor("c1")).isEmpty()
-        vm.onEvent(ClockEvent.SelectJob("j1"))
+        vm.send(ClockEvent.SelectJob("j1"))
         assertThat(vm.state.value.canLeadCrew).isTrue()
     }
 
@@ -343,11 +356,11 @@ class ClockViewModelTest {
         location.fix = GeoFix(34.5, -118.0, 5f)
         val vm = vm(CompanyRole.Owner)
         await(vm) { it.crew.size == 2 }
-        vm.onEvent(ClockEvent.ToggleCrew("m2")); vm.onEvent(ClockEvent.ToggleCrew("m3"))
-        vm.onEvent(ClockEvent.SelectJob("j1")); vm.onEvent(ClockEvent.ClockInCrew)
+        vm.send(ClockEvent.ToggleCrew("m2")); vm.send(ClockEvent.ToggleCrew("m3"))
+        vm.send(ClockEvent.SelectJob("j1")); vm.send(ClockEvent.ClockInCrew)
         await(vm) { it.farReason != null }
         assertThat(db.punchDao().listFor("c1")).isEmpty()
-        vm.onEvent(ClockEvent.PickReason(FarReason.SupplyHouse)); vm.onEvent(ClockEvent.SaveReason)
+        vm.send(ClockEvent.PickReason(FarReason.SupplyHouse)); vm.send(ClockEvent.SaveReason)
         await(vm) { it.crewNotice != null }
         assertThat(db.punchDao().listFor("c1").map { it.reason }).containsExactly("supply_house", "supply_house")
     }
