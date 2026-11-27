@@ -216,8 +216,8 @@ fun FloorSceneView(
             isOpaque = true,
             engine = engine,
             view = filamentView,
-            // SceneView's Default quality (no dynamic resolution, medium HDR buffer): its colour-grading program is the one the
-            // emulator's GL has always built. [PlainPostProcessing] below then turns its extra passes off.
+            // SceneView's Default quality (no dynamic resolution); [PlainPostProcessing] below then turns post-processing
+            // off altogether, so no grading, FXAA or blit program runs on the emulator's GL.
             renderQuality = RenderQuality.Default,
             renderer = renderer,
             cameraNode = cameraNode,
@@ -242,6 +242,8 @@ fun FloorSceneView(
             ),
             // Timed once the scene is on screen: the first frame counted is the first with the house in it.
             onFrame = { nanos ->
+                // SceneView may apply its render quality again (a recomposition, a new view); keep the plain path.
+                if (filamentView.isPostProcessingEnabled) PlainPostProcessing.apply(filamentView)
                 if (draws > 0) {
                     stats.onFrame(nanos)
                     if (!drawn && !checking[0] && loadedPictures.all { resources.hasTexture(it) || it in unreadable } &&
@@ -296,7 +298,7 @@ fun FloorSceneView(
         LaunchedEffect(renderer, surfaceArgb) {
             renderer.clearOptions = com.google.android.filament.Renderer.ClearOptions().apply {
                 clear = true
-                clearColor = SceneClearColor.linear(surfaceArgb)
+                clearColor = SceneClearColor.forDirectOutput(surfaceArgb)
             }
         }
         // No pointer input on the labels either: a tap on a name still reaches the room below.
@@ -517,15 +519,19 @@ private const val MIN_RADIUS_M = 2f
 private const val DISTANCE_PER_RADIUS = 2.2f
 
 /**
- * Post-processing for flat-tinted boxes: colour grading only. Bloom and SSAO drew the house as a washed-out pink haze on
- * the emulator's GL, so the drawn check found only 4-5% of the view standing out ([auto:3d:house-manual:house-manual] on
- * c2b1b764). FXAA is off because its fragment shader does not compile there ("'color' : field selection requires
- * structure"), and Filament aborts the app on a program that fails to build: 7 native crashes on 555d27cc, which ran
- * SceneView's Performance quality ([auto:logcat:house-manual:com.kurtz.homerecord.housemanual]). Dynamic resolution stays
- * off (Default quality), so no upscale or blit program is needed either; colour grading writes straight to the surface.
+ * No post-processing for flat-tinted boxes. Bloom and SSAO drew the house as a washed-out pink haze on the emulator's GL
+ * (4-5% of the view standing out, [auto:3d:house-manual:house-manual] on c2b1b764); FXAA does not compile there and
+ * Filament aborts on a program that fails to build (555d27cc). With all three off the haze stayed (884bf2f4): the
+ * suite's F10 shot reads the clear colour (surfaceContainerLow) back as FEFEFE and the floor as FFF7FE, brighter than
+ * anything the scene or the screen holds, so the last pass left, colour grading, is what lifts every pixel to white
+ * on that GL. Post-processing is now off altogether: Filament writes the lit colours and the clear straight to the
+ * surface, with no tone mapping, no grading LUT and no extra programs. The clear colour is given as stored
+ * ([SceneClearColor.forDirectOutput]) to match the screen; lit walls come out a little deeper, which reads fine on the
+ * light and dark surfaces and gives the drawn check ([SceneFrameCheck]) a clear step.
  */
 internal object PlainPostProcessing {
     fun apply(view: com.google.android.filament.View) {
+        view.isPostProcessingEnabled = false
         view.antiAliasing = com.google.android.filament.View.AntiAliasing.NONE
         view.multiSampleAntiAliasingOptions = view.multiSampleAntiAliasingOptions.apply { enabled = false }
         view.ambientOcclusionOptions = view.ambientOcclusionOptions.apply { enabled = false }

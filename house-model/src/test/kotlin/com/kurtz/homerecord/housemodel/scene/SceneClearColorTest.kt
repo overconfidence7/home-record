@@ -23,4 +23,16 @@ class SceneClearColorTest {
         val c = SceneClearColor.linear(0x00FF0000)
         assertArrayEquals(doubleArrayOf(1.0, 0.0, 0.0, 1.0), c, 1e-6)
     }
+
+    // [auto:3d:house-manual:house-manual]: with post-processing off nothing encodes the clear, so it is given as stored.
+    @Test
+    fun directOutputKeepsTheStoredSurfaceColour() {
+        val c = SceneClearColor.forDirectOutput(0xFFF4F3FA.toInt())
+        assertArrayEquals(doubleArrayOf(0xF4 / 255.0, 0xF3 / 255.0, 0xFA / 255.0, 1.0), c, 1e-9)
+    }
+
+    @Test
+    fun directOutputIsAlwaysOpaque() {
+        assertArrayEquals(doubleArrayOf(0.0, 0.0, 0.0, 1.0), SceneClearColor.forDirectOutput(0x00000000), 1e-9)
+    }
 }

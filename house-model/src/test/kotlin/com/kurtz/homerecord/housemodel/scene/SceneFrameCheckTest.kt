@@ -55,4 +55,16 @@ class SceneFrameCheckTest {
         assertThat(SceneFrameCheck.dominant(gradient) shr 4 and 0x0F0F0F).isEqualTo(0x0F0F0F)
         assertThat(SceneFrameCheck.check(gradient).drawn).isFalse()
     }
+
+    // [auto:3d:house-manual:house-manual]: with post-processing off, lit walls reach the surface unencoded (a cream wall
+    // lit to about 0.8 of its linear colour is about B79D70); the light surface stays as stored. A floor of such walls
+    // and floor on the surface clears the threshold; the washed-out FFF7FE slab on FEFEFE from 884bf2f4 does not.
+    @AcceptanceCriterion("AC-C20")
+    @Test fun unencodedLitWallsOnTheLightSurfaceAreDrawn() {
+        val surface = 0xFFF4F3FA.toInt()
+        val litCream = 0xFFB79D70.toInt()
+        val litFloor = 0xFF7A736A.toInt()
+        assertThat(SceneFrameCheck.check(frame(surface to 700, litCream to 150, litFloor to 150)).drawn).isTrue()
+        assertThat(SceneFrameCheck.check(frame(0xFFFEFEFE.toInt() to 300, 0xFFFFF7FE.toInt() to 700)).drawn).isFalse()
+    }
 }
