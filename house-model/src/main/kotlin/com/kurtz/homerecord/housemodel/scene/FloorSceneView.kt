@@ -159,13 +159,29 @@ fun FloorSceneView(
     val sceneFrames = remember { intArrayOf(0) }
     val checking = remember { booleanArrayOf(false) }
     var drawn by remember { mutableStateOf(false) }
-    DisposableEffect(geometries) {
+    val window = androidx.compose.ui.platform.LocalView.current.context.findWindow()
+    val sceneRect = remember { android.graphics.Rect() }
+    var viewSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
+    // A new camera (standing in a room, a reset) or a new view size needs its own drawn frames: the floor view's tag
+    // must not carry over to the room view ([judge:hm-3d-room-blank]).
+    DisposableEffect(geometries, room?.id, resetCount, viewSize) {
         sceneFrames[0] = 0
         drawn = false
         onDispose { }
     }
-    val window = androidx.compose.ui.platform.LocalView.current.context.findWindow()
-    val sceneRect = remember { android.graphics.Rect() }
+    // Once drawn the scene draws on demand, so a surface that loses its picture afterwards (a resize, a shared-bounds
+    // transition ending) would stay blank under the tag ([judge:hm-3d-room-blank]: a white room view passed H09/H11).
+    // While the tag is shown the pixels are checked again every [RECHECK_MS]; a blank view drops the tag and goes
+    // back to drawing continuously until the house is on screen again.
+    LaunchedEffect(drawn) {
+        while (drawn) {
+            delay(RECHECK_MS)
+            if (!checkOnScreen(window, sceneRect)) {
+                sceneFrames[0] = 0
+                drawn = false
+            }
+        }
+    }
     val loadedPictures by rememberUpdatedState(pictures)
     val prefix = LocalTagPrefix.current
     // Room names over the boxes, as the blueprint labels its rooms ([judge:hm-3d-rooms-unlabeled]); not while standing
@@ -179,7 +195,6 @@ fun FloorSceneView(
     val filamentView = io.github.sceneview.rememberView(engine)
     val renderer = io.github.sceneview.rememberRenderer(engine)
     val surfaceArgb = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow.toArgb()
-    var viewSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
     Box(
@@ -455,11 +470,16 @@ private const val DRAWN_AFTER_FRAMES = 3
 private const val DRAWN_RETRY_FRAMES = 15
 /** The copy checked for the drawn tag is this many times smaller than the view on each side. */
 private const val CHECK_DOWNSCALE = 8
+/** How often a drawn scene's pixels are checked again, so a view that goes blank loses `<app>_3d_scene_drawn`. */
+private const val RECHECK_MS = 3_000L
 
 /**
  * Copies what the window shows inside [rect] (scene, labels and all) and reports whether [SceneFrameCheck] finds the
  * house on it; logs the share under [PERF_TAG] for QA. Without a window (previews, tests) the scene counts as shown.
  */
+private suspend fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect): Boolean =
+    kotlinx.coroutines.suspendCancellableCoroutine { cont -> checkOnScreen(window, rect) { if (cont.isActive) cont.resumeWith(Result.success(it)) } }
+
 private fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect, onResult: (Boolean) -> Unit) {
     if (window == null) return onResult(true)
     if (rect.width() <= 0 || rect.height() <= 0) return onResult(false)
