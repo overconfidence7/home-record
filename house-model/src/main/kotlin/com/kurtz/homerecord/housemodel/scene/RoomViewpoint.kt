@@ -28,18 +28,27 @@ data class SceneRoom(
 data class Viewpoint(val eye: ScenePoint, val target: ScenePoint) {
     /** Heading in radians, 0 looking toward -z (north on the plan), growing clockwise seen from above (toward +x). */
     val yaw: Float get() = atan2(target.x - eye.x, -(target.z - eye.z))
+
+    /** Up or down in radians, negative looking down. */
+    val pitch: Float get() = atan2(target.y - eye.y, hypot(target.x - eye.x, target.z - eye.z))
 }
 
 /**
- * The room view's opening camera (AC-C22): inside the room at eye height (5 ft 6 in above its floor) looking straight
- * at the middle of its longest wall. The camera stands back from that wall along the wall's inward normal, near the
- * opposite side of the room (a little in front of it, [BACK_OFF_M]) so the whole wall is in view; the spot is always
- * inside the room, even in an L-shaped one, because it lies on the first stretch of that normal before it leaves the
- * footprint. A room too small to step back in puts the camera halfway across. Pure: tested on the JVM.
+ * The room view's opening camera (AC-C22): inside the room at eye height (5 ft 6 in) above its floor looking at the
+ * longest wall, at a point [TARGET_ALONG] of the way along it from the corner the camera steps toward, tilted [PITCH_DOWN_DEG] down so the floor shows. The camera stands back from that wall along
+ * the wall's inward normal, near the opposite side of the room (a little in front of it, [BACK_OFF_M]), then steps
+ * sideways toward one end of the room until it is [SIDE_CLEAR_M] from the side wall, so the view takes in the longest
+ * wall, the corner and the side wall next to it and the floor rather than one flat wall face edge to edge
+ * ([judge:3d-default-framing]). Every spot is checked to be inside the room, even in an L-shaped one: the step back lies
+ * on the first stretch of that normal before it leaves the footprint, and a sideways step that would leave it is halved
+ * until it does not. A room too small to step back in puts the camera halfway across. Pure: tested on the JVM.
  */
 object RoomViewpoint {
     const val EYE_HEIGHT_IN = 66
     const val BACK_OFF_M = 0.45f
+    const val SIDE_CLEAR_M = 0.6f
+    const val PITCH_DOWN_DEG = 12f
+    const val TARGET_ALONG = 0.3f
     private const val M_PER_IN = 0.0254f
 
     fun inside(room: SceneRoom): Viewpoint? {
@@ -60,8 +69,47 @@ object RoomViewpoint {
         if (!ccw) { nx = -nx; nz = -nz }
         val across = distanceToExit(pts, mx, mz, nx, nz, skip = longest)
         val back = if (across == null) 0f else if (across > 2 * BACK_OFF_M) across - BACK_OFF_M else across / 2
-        val eye = ScenePoint(mx + nx * back, eyeY, mz + nz * back)
-        return Viewpoint(eye, ScenePoint(mx, eyeY, mz))
+        val baseX = mx + nx * back
+        val baseZ = mz + nz * back
+        // Sideways toward the wall's first corner, stopping short of the side wall; halved while it would leave the room.
+        val sx = (ax - mx) / (len / 2)
+        val sz = (az - mz) / (len / 2)
+        var slide = (len / 2 - SIDE_CLEAR_M).coerceAtLeast(0f)
+        var eyeX = baseX
+        var eyeZ = baseZ
+        repeat(6) {
+            if (slide <= 0f) return@repeat
+            val x = baseX + sx * slide
+            val z = baseZ + sz * slide
+            if (insideClear(pts, x, z, LookAround.WALL_MARGIN_M)) {
+                eyeX = x
+                eyeZ = z
+                return@repeat
+            }
+            slide /= 2
+        }
+        // Aim [TARGET_ALONG] of the way along the wall from that corner, so the corner is in the frame too.
+        val tx = ax + (bx - ax) * TARGET_ALONG
+        val tz = az + (bz - az) * TARGET_ALONG
+        val reach = hypot(tx - eyeX, tz - eyeZ)
+        val drop = reach * kotlin.math.tan(PITCH_DOWN_DEG * PI.toFloat() / 180f)
+        return Viewpoint(ScenePoint(eyeX, eyeY, eyeZ), ScenePoint(tx, eyeY - drop, tz))
+    }
+
+    /** True when (x, z) is inside the outline and at least [clear] from every edge. */
+    private fun insideClear(pts: List<Pair<Float, Float>>, x: Float, z: Float, clear: Float): Boolean {
+        var inside = false
+        for (i in pts.indices) {
+            val (ax, az) = pts[i]
+            val (bx, bz) = pts[(i + 1) % pts.size]
+            if ((az > z) != (bz > z) && x < (bx - ax) * (z - az) / (bz - az) + ax) inside = !inside
+            val ex = bx - ax
+            val ez = bz - az
+            val len2 = ex * ex + ez * ez
+            val t = if (len2 <= 0f) 0f else (((x - ax) * ex + (z - az) * ez) / len2).coerceIn(0f, 1f)
+            if (hypot(x - (ax + ex * t), z - (az + ez * t)) < clear - 1e-4f) return false
+        }
+        return inside
     }
 
     private fun edgeLength(pts: List<Pair<Float, Float>>, i: Int): Float {
@@ -113,7 +161,7 @@ class LookAround(
 ) {
     var yaw: Float = start.yaw
         private set
-    var pitch: Float = 0f
+    var pitch: Float = start.pitch
         private set
     var eye: ScenePoint = start.eye
         private set
@@ -157,7 +205,7 @@ class LookAround(
 
     fun reset() {
         yaw = start.yaw
-        pitch = 0f
+        pitch = start.pitch
         eye = start.eye
     }
 

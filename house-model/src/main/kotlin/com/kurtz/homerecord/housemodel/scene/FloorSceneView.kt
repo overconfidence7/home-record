@@ -136,10 +136,12 @@ fun FloorSceneView(
     val bounds = scene.focus
     val lookAtY = scene.lookAtY
     val viewpoint = remember(room) { room?.let(RoomViewpoint::inside) }
-    val manipulator = remember(bounds, lookAtY, resetCount, room, viewpoint) {
+    // The floor view fits the whole floor in the view whatever its shape ([SceneFraming]); set once the view is measured.
+    var aspect by remember { mutableStateOf(0f) }
+    val manipulator = remember(bounds, lookAtY, resetCount, room, viewpoint, aspect) {
         if (room != null && viewpoint != null) return@remember LookAroundManipulator(LookAround(viewpoint, room))
         val target = Position(bounds.centerX, lookAtY, bounds.centerZ)
-        val distance = max(bounds.radius, MIN_RADIUS_M) * DISTANCE_PER_RADIUS
+        val distance = SceneFraming.fitDistance(bounds.radius, aspect, minRadius = MIN_RADIUS_M)
         val yaw = Math.toRadians(SceneProjection.START_YAW_DEG.toDouble())
         val pitch = Math.toRadians(SceneProjection.START_PITCH_DEG.toDouble())
         val eye = Position(
@@ -195,6 +197,9 @@ fun FloorSceneView(
     // Room names over the boxes, as the blueprint labels its rooms ([judge:hm-3d-rooms-unlabeled]); not while standing
     // inside a room. Re-placed each frame from the camera, published only when a label moves by a pixel or more.
     val cameraNode = io.github.sceneview.rememberCameraNode(engine)
+    // A wider lens standing in a room, so the corner and the floor are in view ([SceneFraming]).
+    val focalMm = if (room != null && viewpoint != null) SceneFraming.ROOM_FOCAL_MM else SceneFraming.FLOOR_FOCAL_MM
+    LaunchedEffect(cameraNode, focalMm) { cameraNode.focalLength = focalMm }
     // Our own Filament view and renderer. The scene is opaque: a see-through (TRANSLUCENT) view makes Filament build
     // translucent post-processing programs (FXAA, then "blitLow" with FXAA off) that the emulator's GL cannot compile,
     // and Filament aborted the app on the first 3D frame ([auto:flow:house-manual:H10-3d] on a0ab29b0 and 51342ee8).
@@ -206,7 +211,10 @@ fun FloorSceneView(
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
     Box(
         modifier
-            .onSizeChanged { viewSize = it }
+            .onSizeChanged {
+                viewSize = it
+                if (it.width > 0 && it.height > 0) aspect = it.width.toFloat() / it.height
+            }
             .onGloballyPositioned { c ->
                 val b = c.boundsInWindow()
                 sceneRect.set(b.left.toInt(), b.top.toInt(), b.right.toInt(), b.bottom.toInt())
@@ -557,7 +565,6 @@ private tailrec fun android.content.Context.findWindow(): android.view.Window? =
     else -> null
 }
 private const val MIN_RADIUS_M = 2f
-private const val DISTANCE_PER_RADIUS = 2.2f
 
 /**
  * No post-processing for flat-tinted boxes. Bloom and SSAO drew the house as a washed-out pink haze on the emulator's GL

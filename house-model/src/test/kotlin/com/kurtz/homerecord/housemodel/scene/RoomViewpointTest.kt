@@ -28,23 +28,33 @@ class RoomViewpointTest {
 
     @Test
     @AcceptanceCriterion("AC-C22")
-    fun standsAtEyeHeightAcrossFromTheLongestWallLookingStraightAtIt() {
+    fun standsAtEyeHeightNearACornerLookingAtTheLongestWallWithTheCornerAndFloorInView() {
         val scene = FloorScene.build(listOf(kitchen), 96, emptyMap())
         val room = scene.rooms.getValue("k")
         val view = checkNotNull(RoomViewpoint.inside(room))
         assertThat(view.eye.y).isWithin(0.001f).of(66 * m)
-        assertThat(view.target.y).isWithin(0.001f).of(66 * m)
-        // The 14' north wall (edge 0, z smallest) is the first longest wall; the camera looks at its middle.
+        // The 14' north wall (edge 0, z smallest) is the first longest wall; the camera looks at it, 30% along from
+        // its west end, tilted down 12 degrees ([judge:3d-default-framing]).
         val minZ = room.footprint.minOf { it.second }
         val minX = room.footprint.minOf { it.first }
         assertThat(view.target.z).isWithin(0.001f).of(minZ)
-        assertThat(view.target.x).isWithin(0.001f).of(minX + 84 * m)
-        // Straight back from it, 18" short of the opposite wall, still inside the room.
-        assertThat(view.eye.x).isWithin(0.001f).of(view.target.x)
-        assertThat(view.eye.z - view.target.z).isWithin(0.001f).of(144 * m - RoomViewpoint.BACK_OFF_M)
+        assertThat(view.target.x).isWithin(0.001f).of(minX + 168 * m * RoomViewpoint.TARGET_ALONG)
+        assertThat(Math.toDegrees(view.pitch.toDouble())).isWithin(0.01).of(-RoomViewpoint.PITCH_DOWN_DEG.toDouble())
+        // 18" short of the opposite wall and 0.6 m from the west wall, inside the room.
+        assertThat(view.eye.z - minZ).isWithin(0.001f).of(144 * m - RoomViewpoint.BACK_OFF_M)
+        assertThat(view.eye.x - minX).isWithin(0.001f).of(RoomViewpoint.SIDE_CLEAR_M)
         assertThat(inside(room, view.eye.x, view.eye.z)).isTrue()
-        // Facing north is a heading of 0.
-        assertThat(view.yaw).isWithin(0.001f).of(0f)
+        // Facing a little east of north.
+        assertThat(view.yaw).isGreaterThan(0f)
+        assertThat(view.yaw).isLessThan((PI / 4).toFloat())
+        // On a phone view (0.9 wide for 1 tall) with the room lens, the north-west corner is inside the frame, and the
+        // floor at the foot of the north wall is above the bottom edge.
+        val halfH = SceneFraming.halfHorizontalFov(SceneFraming.ROOM_FOCAL_MM, 0.9f)
+        val cornerYaw = kotlin.math.atan2(minX - view.eye.x, -(minZ - view.eye.z))
+        assertThat(abs(cornerYaw - view.yaw).toDouble()).isLessThan(halfH)
+        val halfV = SceneFraming.halfVerticalFov(SceneFraming.ROOM_FOCAL_MM)
+        val wallFootDown = kotlin.math.atan2(view.eye.y, hypot(view.target.x - view.eye.x, view.target.z - view.eye.z))
+        assertThat(wallFootDown.toDouble()).isLessThan(halfV - view.pitch)
     }
 
     @Test
@@ -96,7 +106,7 @@ class RoomViewpointTest {
     @AcceptanceCriterion("AC-C22")
     fun dragLooksAroundWithThePictureFollowingTheFingerAndStopsShortOfStraightUp() {
         val room = FloorScene.build(listOf(kitchen), 96, emptyMap()).rooms.getValue("k")
-        val look = LookAround(checkNotNull(RoomViewpoint.inside(room)), room, degreesPerPx = 0.1f)
+        val look = LookAround(levelNorth(room), room, degreesPerPx = 0.1f)
         val start = look.eye
         // Dragging left by 900 px turns the camera 90° to the right: from north to east (+x).
         look.drag(-900f, 0f)
@@ -116,7 +126,7 @@ class RoomViewpointTest {
     @AcceptanceCriterion("AC-C22")
     fun pinchStepsCloserButNeverThroughTheWall() {
         val room = FloorScene.build(listOf(kitchen), 96, emptyMap()).rooms.getValue("k")
-        val view = checkNotNull(RoomViewpoint.inside(room))
+        val view = levelNorth(room)
         val look = LookAround(view, room)
         val wallZ = room.footprint.minOf { it.second }
         // Spreading the fingers to twice their distance steps 1.5 m toward the north wall.
@@ -137,5 +147,28 @@ class RoomViewpointTest {
         assertThat(look.eye).isEqualTo(before)
         look.reset()
         assertThat(look.eye).isEqualTo(view.eye)
+    }
+    /** Standing 18" in front of the south wall in the middle of the room, level, facing north. */
+    private fun levelNorth(room: SceneRoom): Viewpoint {
+        val minX = room.footprint.minOf { it.first }
+        val maxX = room.footprint.maxOf { it.first }
+        val minZ = room.footprint.minOf { it.second }
+        val maxZ = room.footprint.maxOf { it.second }
+        val x = (minX + maxX) / 2
+        return Viewpoint(ScenePoint(x, 66 * m, maxZ - RoomViewpoint.BACK_OFF_M), ScenePoint(x, 66 * m, minZ))
+    }
+
+    @Test
+    @AcceptanceCriterion("AC-C22")
+    fun resetGoesBackToTheTiltedOpeningView() {
+        val room = FloorScene.build(listOf(kitchen), 96, emptyMap()).rooms.getValue("k")
+        val view = checkNotNull(RoomViewpoint.inside(room))
+        val look = LookAround(view, room)
+        assertThat(look.pitch).isWithin(0.0001f).of(view.pitch)
+        look.drag(300f, -200f)
+        look.reset()
+        assertThat(look.pitch).isWithin(0.0001f).of(view.pitch)
+        assertThat(look.yaw).isWithin(0.0001f).of(view.yaw)
+        assertThat(look.target.y).isLessThan(look.eye.y)
     }
 }
