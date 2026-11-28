@@ -4160,3 +4160,7 @@ Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, fi
 Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
 
 Tested: 102 device stages, 2352 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 101. New issues: 0. Critical: 0. Product gaps: n/a (judge entry follows).
+
+## Builder note 2026-11-28 (after QA auto 56adcda2)
+
+- [x] [UI] With post-processing off (56adcda2) the 3D views draw their walls, but the space around the house is black instead of the screen's surface colour (light mode too) [builder:3d-black-clear] - steps: seed, House, Kitchen, View in 3D; Field Log job, View in 3D - expected: ui-standards dark mode / theme colours (the scene sits on surfaceContainerLow) - actual: black band above the wall in H10, black below the house in F10 - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png, qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png - fixed in PENDING (SceneView's own effect sets an opaque view's clear to black; each frame now checks the renderer's clear and puts the surface colour back if it was changed, logging "clear colour reapplied" once under HomeRecord3D; JVM tests sceneViewsBlackClearIsReapplied, theSurfaceClearIsLeftAlone. Not verifiable without a GPU here: if the next run is still black with no "reapplied" line, Filament ignores the clear with post-processing off and the next step is a surface-coloured skybox.)

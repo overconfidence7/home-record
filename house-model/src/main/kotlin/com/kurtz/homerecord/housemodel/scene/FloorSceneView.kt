@@ -163,6 +163,7 @@ fun FloorSceneView(
     val gate = remember { SceneDrawnGate() }
     val sceneFrames = remember { intArrayOf(0) }
     val checking = remember { booleanArrayOf(false) }
+    val clearLogged = remember { booleanArrayOf(false) }
     var drawn by remember { mutableStateOf(false) }
     val window = androidx.compose.ui.platform.LocalView.current.context.findWindow()
     val sceneRect = remember { android.graphics.Rect() }
@@ -250,6 +251,19 @@ fun FloorSceneView(
             onFrame = { nanos ->
                 // SceneView may apply its render quality again (a recomposition, a new view); keep the plain path.
                 if (filamentView.isPostProcessingEnabled) PlainPostProcessing.apply(filamentView)
+                // SceneView's effect clears an opaque view to black and may run after ours: keep the surface colour.
+                val wantClear = SceneClearColor.forDirectOutput(surfaceNow)
+                val clearNow = renderer.clearOptions
+                if (SceneClearColor.needsReapply(clearNow.clear, clearNow.clearColor, wantClear)) {
+                    if (!clearLogged[0]) {
+                        clearLogged[0] = true
+                        Log.i(PERF_TAG, "clear colour reapplied (was clear=${clearNow.clear} ${clearNow.clearColor?.joinToString()})")
+                    }
+                    renderer.clearOptions = com.google.android.filament.Renderer.ClearOptions().apply {
+                        clear = true
+                        clearColor = wantClear
+                    }
+                }
                 if (draws > 0) {
                     stats.onFrame(nanos)
                     if (!drawn && !checking[0] && loadedPictures.all { resources.hasTexture(it) || it in unreadable } &&

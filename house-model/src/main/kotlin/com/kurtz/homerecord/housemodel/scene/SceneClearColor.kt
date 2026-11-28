@@ -18,6 +18,14 @@ object SceneClearColor {
         1.0,
     )
 
+    /**
+     * True when the renderer's clear no longer paints [wanted]: SceneView's own effect sets an opaque view's clear to
+     * black, and with post-processing off the 56adcda2 suite run showed black around the house instead of the surface.
+     */
+    fun needsReapply(clear: Boolean, current: DoubleArray?, wanted: DoubleArray): Boolean =
+        !clear || current == null || current.size != wanted.size ||
+            current.indices.any { kotlin.math.abs(current[it] - wanted[it]) > 1e-3 }
+
     fun linear(argb: Int): DoubleArray = doubleArrayOf(
         toLinear((argb shr 16) and 0xFF),
         toLinear((argb shr 8) and 0xFF),

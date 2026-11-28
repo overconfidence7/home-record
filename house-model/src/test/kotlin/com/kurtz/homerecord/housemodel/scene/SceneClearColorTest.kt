@@ -35,4 +35,22 @@ class SceneClearColorTest {
     fun directOutputIsAlwaysOpaque() {
         assertArrayEquals(doubleArrayOf(0.0, 0.0, 0.0, 1.0), SceneClearColor.forDirectOutput(0x00000000), 1e-9)
     }
+
+    // AC-C20: SceneView's effect sets an opaque view's clear to black; the 56adcda2 run showed black around the house.
+    @Test
+    fun sceneViewsBlackClearIsReapplied() {
+        val want = SceneClearColor.forDirectOutput(0xFFF4F3FA.toInt())
+        org.junit.Assert.assertTrue(SceneClearColor.needsReapply(true, doubleArrayOf(0.0, 0.0, 0.0, 1.0), want))
+        org.junit.Assert.assertTrue(SceneClearColor.needsReapply(false, want.copyOf(), want))
+        org.junit.Assert.assertTrue(SceneClearColor.needsReapply(true, null, want))
+    }
+
+    @Test
+    fun theSurfaceClearIsLeftAlone() {
+        val want = SceneClearColor.forDirectOutput(0xFF1D1B20.toInt())
+        org.junit.Assert.assertFalse(SceneClearColor.needsReapply(true, want.copyOf(), want))
+        // Filament hands the colour back as floats.
+        val roundTrip = want.map { it.toFloat().toDouble() }.toDoubleArray()
+        org.junit.Assert.assertFalse(SceneClearColor.needsReapply(true, roundTrip, want))
+    }
 }
