@@ -4164,3 +4164,74 @@ Tested: 102 device stages, 2352 unit tests, 222 backend tests, coverage 495/495 
 ## Builder note 2026-11-28 (after QA auto 56adcda2)
 
 - [x] [UI] With post-processing off (56adcda2) the 3D views draw their walls, but the space around the house is black instead of the screen's surface colour (light mode too) [builder:3d-black-clear] - steps: seed, House, Kitchen, View in 3D; Field Log job, View in 3D - expected: ui-standards dark mode / theme colours (the scene sits on surfaceContainerLow) - actual: black band above the wall in H10, black below the house in F10 - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-kitchen-3d.png, qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png - fixed in 1f04d878 (SceneView's own effect sets an opaque view's clear to black; each frame now checks the renderer's clear and puts the surface colour back if it was changed, logging "clear colour reapplied" once under HomeRecord3D; JVM tests sceneViewsBlackClearIsReapplied, theSurfaceClearIsLeftAlone. Not verifiable without a GPU here: if the next run is still black with no "reapplied" line, Filament ignores the clear with post-processing off and the next step is a surface-coloured skybox.)
+
+## QA judge 2026-11-28 (commit 56adcda2)
+
+Judged the suite results for 56adcda2 (run of 2026-11-28 02:41 UTC, 102 stages, 101 passed, 1 skipped: handoff has no tour). `build` HEAD is 5df51999; app code changed after this sha only in 1f04d878 (3D clear colour), which no suite run has exercised yet.
+
+Verdict: House Manual: 3D finally draws: the floor and all-floors views show the extruded house with coloured rooms, windows and labels, and the room view shows the wall photo. Nate would say first that the photo on the wall is mirrored ("KITCHEN NORTH WALL" reads backwards in H09 and H11), and the room view opens nose-to-wall on one flat surface with a black band above it, so "walk around the room" still doesn't feel like standing in a room. / Field Log: every jobsite screen works and reads like a crew's app, and the job's 3D now draws. Nate would say first that the job's 3D opens so close that the one-room Hale kitchen is a brown slab running off the screen, and "Kitchen in 3D" is a flat brown rectangle under black, so the handoff's selling point still can't be shown to a client.
+
+- [ ] [Major] The wall photo is painted mirrored in the room 3D view: the fixture's "KITCHEN NORTH WALL" reads right to left, and the Plumbing overlay is drawn over the mirrored photo, so a pipe on the left of the real wall would show on the right [judge:hm-3d-wall-photo-mirrored] - steps: seed, House, Kitchen, North wall photographed with qa/fixtures/wall-kitchen.jpg, View in 3D (H09); same with Plumbing on (H11) - expected: PRODUCT.md demo step 6 (the app paints that photo onto the wall; seen from inside the room, the left edge of the photo is the left end of the wall) and step 7 (overlay shows where it runs in 3D); a JVM test of the wall UV mapping that checks photo-left lands on wall-left seen from inside, with the overlay positions using the same mapping - actual: text mirrored; pipe line crosses the mirrored text - screenshot: qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png (also flow-H11-overlay-pipe-H11-3d-pipe.png)
+- [ ] [Product gap] The 3D views open framed too close to read as a house or a room: the floor view of a one- or two-room plan runs off every edge (F10 Hale kitchen is one brown slab with "Kitchen" in the middle; H03 Maple St shows two cropped boxes), and the room view starts facing a single wall that fills the frame, with no floor, corner or ceiling line, so in F10 and H03 the whole view is one flat brown rectangle [judge:3d-default-framing] - steps: Field Log seed, Jobs, Hale kitchen, View in 3D, then tap Kitchen (F10); House Manual H03 3D and 3D room - expected: PRODUCT.md "The 3D view is real, not a gimmick ... tap a room to enter it"; the default camera fits the whole floor with a margin, and the room view starts from a corner or the middle at eye height looking so that two walls and the floor are visible - actual: floor view cropped on all sides; room view one wall face edge to edge - screenshot: qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png (also flow-F10-house-3d-F10-3d-room.png, qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d.png, flow-H03-blueprint-room-H03-3d-room.png)
+- [ ] [Minor] All-floors 3D room labels pile on top of each other: "Bedroom 2" over "Kitchen", "Bedroom 3" over "Living room", "Mudroom" over "Laundry", "Dining room" over "Utility room" [judge:hm-3d-labels-overlap] - steps: seed, House, 3D view, All floors (H10, 3d-perf) - expected: PRODUCT.md demo step 3/6 (rooms readable); labels of floors below the selected one hidden or faded, or overlapping labels dropped like the 2D blueprint's fit rule - actual: pairs of labels overprinted and unreadable - screenshot: qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-all-floors-3d.png
+
+Auto entry review:
+- No auto findings for this sha. The builder's own [builder:3d-black-clear] (black around the house) is visible in every 3D shot here and is already filed and fixed after this sha in 1f04d878; not refiled. Next run: check the clear colour and these three items together.
+- HomeRecord3D log: "on screen: true; 49-58% of the view stands out" on floor and room views, first frame 1343 ms (floor) and 752 ms (room); the 3d-perf 22827 ms first frame is again the perf flow's all-floors load on SwiftShader at 8.4 fps, not a hang.
+
+Seen this run and unchanged from 884bf2f4 (fine; only 3D code changed between the two shas): Home, Floors, House, Items, Reminders, More and plan editor in dark, 200% and landscape; Field Log Today, Jobs, Clock with crew card, Schedule, Team, Company, More, launch in all three variants; H09 thumbnail, H11 room overlays, H18 kitchen after import, X02 handoff sent, preview, import done and house after claim, share-viewer wall, F10 wall overlays.
+
+### House Manual walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| H1 | Pass | Onboarding, Home with Add item, Scan data plate, Emergency | qa-results:latest/house-manual/screenshots/flow-H01-onboarding-H01-onboarding-filled.png |
+| H2 | Pass | Two rooms, shape, doors, stairs | qa-results:latest/house-manual/screenshots/flow-H02b-shape-doors-stairs-H02b-stairs.png |
+| H3 | Clunky | Blueprint and room page fine; floor 3D draws but cropped on all sides, room 3D one flat wall | qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H03-3d.png |
+| H4 | Pass | Item form with make and model | qa-results:latest/house-manual/screenshots/flow-H04-add-item-H04-item-form.png |
+| H5 | Pass | Grouped type picker, items by category and room | qa-results:latest/house-manual/screenshots/flow-H05-add-items-H05-type-picker.png |
+| H6 | Pass | By category, by room, Expired filter | qa-results:latest/house-manual/screenshots/flow-H06-items-H06-items-expired.png |
+| H7 | Pass | Place on plan, On a wall, Move to room | qa-results:latest/house-manual/screenshots/flow-H07-item-page-H07-place-on-plan.png |
+| H8 | Pass | Warranty shown offline | qa-results:latest/house-manual/screenshots/flow-H08-offline-item-H08-offline-item.png |
+| H9 | Clunky | Photo now painted on the wall in 3D, but mirrored | qa-results:latest/house-manual/screenshots/flow-H09-wall-photo-H09-wall-in-3d.png |
+| H10 | Clunky | Floor and all-floors views draw the house; labels overlap on all floors; black surround (fixed after sha) | qa-results:latest/house-manual/screenshots/flow-H10-3d-H10-floor-3d.png |
+| H11 | Clunky | Pipe shows in 2D, search and 3D; in 3D it sits on the mirrored photo | qa-results:latest/house-manual/screenshots/flow-H11-overlay-pipe-H11-3d-pipe.png |
+| H12 | Pass | Panel, slot 12 Refrigerator, fridge shows Breaker 12 | qa-results:latest/house-manual/screenshots/flow-H12-breaker-panel-H12-breaker-labeled.png |
+| H13 | Pass | Emergency from Home, item and tile | qa-results:latest/house-manual/screenshots/flow-H13-emergency-H13-emergency.png |
+| H14 | Pass | Done, Snooze, zone | qa-results:latest/house-manual/screenshots/flow-H14-reminders-H14-reminders-done.png |
+| H15 | Pass | Paywall on free, PDF shared with Pro | qa-results:latest/house-manual/screenshots/flow-H15-home-report-H15-report-share.png |
+| H16 | Pass | Wrong passphrase caught, house and items restored | qa-results:latest/house-manual/screenshots/flow-H16-backup-restore-H16-restored-items.png |
+| H17 | Pass | Sign in, second phone, edit arrives | qa-results:latest/house-manual/screenshots/flow-H17b-second-phone-H17b-edit-arrived.png |
+| H18 | Pass | File and claim-link imports | qa-results:latest/handoff/screenshots/flow-X02-claim-link-X02-import-done.png |
+| H19 | Clunky | Paywall shows "Can't load prices" with Retry (no RevenueCat key on the runner) | qa-results:latest/house-manual/screenshots/flow-H19-paywall-H19-paywall.png |
+
+Not built yet: none.
+
+### Field Log walkthrough
+
+| Step | Score | Note | Screenshot |
+| --- | --- | --- | --- |
+| F1 | Pass | Welcome, sign in, code, Today | qa-results:latest/field-log/screenshots/flow-F01-welcome-F01-today-empty.png |
+| F2 | Pass | Invite, join, Lead, removal | qa-results:latest/field-log/screenshots/flow-F02-invite-join-F02-team-lead.png |
+| F3 | Pass | Job overview | qa-results:latest/field-log/screenshots/flow-F03-jobs-F03-job-overview.png |
+| F4 | Pass | F04, F04b, F04c; crew clock-in card in every variant | qa-results:latest/field-log/screenshots/tour-dark-clock.png |
+| F5 | Pass | Catalog and unit tests; no flow | qa-results:latest/field-log/crawler/field-log/clock-working-light.png |
+| F6 | Pass | Timesheets flow passes | qa-results:latest/field-log/crawler/field-log/timesheets-week-light.png |
+| F7 | Pass | Markup saved with version history | qa-results:latest/field-log/screenshots/flow-F07c-markup-F07c-version-history.png |
+| F8 | Pass | Capture, share link, photos by day | qa-results:latest/field-log/screenshots/flow-F08b-capture-photo-F08b-photos-today.png |
+| F9 | Pass | Sent, Share link, Send again, empty-log warning | qa-results:latest/field-log/screenshots/flow-F09b-log-send-F09b-log-sent.png |
+| F10 | Clunky | Behind the wall, overlays, installed item and handoff work; job 3D draws but zoomed into one slab, room view one flat brown wall | qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png |
+| F11 | Pass | Task pin on the plan and on a PDF | qa-results:latest/field-log/screenshots/flow-F11b-task-pin-F11b-house-pin.png |
+| F12 | Pass | Signed read-only view | qa-results:latest/field-log/screenshots/flow-F12-change-order-F12-change-order-signed.png |
+| F13 | Pass | Tomorrow on Today, two-jobs warning | qa-results:latest/field-log/screenshots/flow-F13-schedule-F13-today-tomorrow.png |
+| F14 | Pass | Receipt scanned, materials by job | qa-results:latest/field-log/screenshots/flow-F14-materials-F14-materials-list.png |
+| F15 | Pass | Job summaries and photo reports | qa-results:latest/field-log/screenshots/flow-F15-reports-F15-job-summaries.png |
+| F16 | Pass | Saved here, then synced | qa-results:latest/field-log/screenshots/flow-F16-offline-F16-offline-synced.png |
+| F17 | Pass | Trial and lapsed plan screens | qa-results:latest/field-log/screenshots/flow-F17-trial-expiry-F17-plan-lapsed.png |
+| F18 | Pass | Every More screen opens; $123.71 typed and kept | qa-results:latest/field-log/screenshots/flow-F18-more-F18-amount-typed.png |
+
+Not built yet: none.
+
+Coverage note: the auto entry reports coverage 495/495 ACs; no ticked task is without tests or flows.
+
+Judged: 74 screenshots (45 tour shots, 23 3D and handoff flow shots opened directly or in contact sheets, plus the wall fixture; non-3D flow shots unchanged since 884bf2f4 were not reopened), 37 walkthrough steps. New issues: 3. Product gaps: 1.
