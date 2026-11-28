@@ -453,10 +453,12 @@ private class SceneResources(private val engine: Engine, private val loader: Mat
 
 private fun MeshPart.toGeometry(engine: Engine): Geometry {
     val vertices = List(vertexCount) { i ->
+        // Wall space keeps v from the top; SceneView's materials flip v when sampling (TextureUv).
+        val (u, v) = TextureUv.forFilament(uvs[i * 2], uvs[i * 2 + 1])
         Geometry.Vertex(
             position = Position(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]),
             normal = Direction(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]),
-            uvCoordinate = Float2(uvs[i * 2], uvs[i * 2 + 1]),
+            uvCoordinate = Float2(u, v),
         )
     }
     return Geometry.Builder().vertices(vertices).indices(indices.toList()).build(engine)
