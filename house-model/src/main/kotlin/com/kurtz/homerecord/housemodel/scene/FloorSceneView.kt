@@ -156,6 +156,11 @@ fun FloorSceneView(
     // It also needs the pixels: a PixelCopy of the view must show walls or floors standing out from the background
     // ([SceneFrameCheck]), so a frame Filament drew that never reached the screen keeps the tag off
     // ([judge:qa-3d-drawn-tag-blank]); a blank check waits [DRAWN_RETRY_FRAMES] and looks again.
+    // Two good checks in a row ([SceneDrawnGate]), each also measured against the surface the scene clears to, so a white
+    // or surface-coloured room view never gets the tag ([judge:hm-3d-room-blank-recurs]).
+    val surfaceArgb = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow.toArgb()
+    val surfaceNow by rememberUpdatedState(surfaceArgb)
+    val gate = remember { SceneDrawnGate() }
     val sceneFrames = remember { intArrayOf(0) }
     val checking = remember { booleanArrayOf(false) }
     var drawn by remember { mutableStateOf(false) }
@@ -166,6 +171,7 @@ fun FloorSceneView(
     // must not carry over to the room view ([judge:hm-3d-room-blank]).
     DisposableEffect(geometries, room?.id, resetCount, viewSize) {
         sceneFrames[0] = 0
+        gate.reset()
         drawn = false
         onDispose { }
     }
@@ -176,8 +182,9 @@ fun FloorSceneView(
     LaunchedEffect(drawn) {
         while (drawn) {
             delay(RECHECK_MS)
-            if (!checkOnScreen(window, sceneRect)) {
+            if (!checkOnScreen(window, sceneRect, surfaceNow)) {
                 sceneFrames[0] = 0
+                gate.reset()
                 drawn = false
             }
         }
@@ -194,7 +201,6 @@ fun FloorSceneView(
     // the renderer clears to the screen's surface colour ([SceneClearColor]), so light and dark still match.
     val filamentView = io.github.sceneview.rememberView(engine)
     val renderer = io.github.sceneview.rememberRenderer(engine)
-    val surfaceArgb = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLow.toArgb()
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
     Box(
@@ -250,9 +256,13 @@ fun FloorSceneView(
                         ++sceneFrames[0] >= DRAWN_AFTER_FRAMES
                     ) {
                         checking[0] = true
-                        checkOnScreen(window, sceneRect) { onScreen ->
+                        checkOnScreen(window, sceneRect, surfaceNow) { onScreen ->
                             checking[0] = false
-                            if (onScreen) drawn = true else sceneFrames[0] = -DRAWN_RETRY_FRAMES
+                            if (gate.onCheck(onScreen)) {
+                                drawn = true
+                            } else {
+                                sceneFrames[0] = if (onScreen) -CONFIRM_FRAMES else -DRAWN_RETRY_FRAMES
+                            }
                         }
                     }
                 }
@@ -470,8 +480,12 @@ private const val PERF_LOG_MS = 2_000L
 private const val DRAWN_AFTER_FRAMES = 3
 /** Frames to wait after a blank [SceneFrameCheck] before copying the view again. */
 private const val DRAWN_RETRY_FRAMES = 15
+/** Frames to wait after a good [SceneFrameCheck] before the confirming copy ([SceneDrawnGate]). */
+private const val CONFIRM_FRAMES = 10
 /** The copy checked for the drawn tag is this many times smaller than the view on each side. */
 private const val CHECK_DOWNSCALE = 8
+/** Share of the view's width and height left out on each side of the drawn check, clear of overlaid controls. */
+private const val CHECK_INSET = 0.2f
 /** How often a drawn scene's pixels are checked again, so a view that goes blank loses `<app>_3d_scene_drawn`. */
 private const val RECHECK_MS = 3_000L
 
@@ -479,23 +493,34 @@ private const val RECHECK_MS = 3_000L
  * Copies what the window shows inside [rect] (scene, labels and all) and reports whether [SceneFrameCheck] finds the
  * house on it; logs the share under [PERF_TAG] for QA. Without a window (previews, tests) the scene counts as shown.
  */
-private suspend fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect): Boolean =
-    kotlinx.coroutines.suspendCancellableCoroutine { cont -> checkOnScreen(window, rect) { if (cont.isActive) cont.resumeWith(Result.success(it)) } }
+private suspend fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect, surface: Int): Boolean =
+    kotlinx.coroutines.suspendCancellableCoroutine { cont -> checkOnScreen(window, rect, surface) { if (cont.isActive) cont.resumeWith(Result.success(it)) } }
 
-private fun checkOnScreen(window: android.view.Window?, rect: android.graphics.Rect, onResult: (Boolean) -> Unit) {
+private fun checkOnScreen(
+    window: android.view.Window?,
+    rect: android.graphics.Rect,
+    surface: Int,
+    onResult: (Boolean) -> Unit,
+) {
     if (window == null) return onResult(true)
     if (rect.width() <= 0 || rect.height() <= 0) return onResult(false)
+    // Only the middle of the scene: the buttons laid over its bottom edge (Back to floor, Reset view) stood out from a
+    // white room view on their own and let it pass ([judge:hm-3d-room-blank-recurs]).
+    val dx = (rect.width() * CHECK_INSET).toInt()
+    val dy = (rect.height() * CHECK_INSET).toInt()
+    val middle = android.graphics.Rect(rect.left + dx, rect.top + dy, rect.right - dx, rect.bottom - dy)
+    if (middle.width() <= 0 || middle.height() <= 0) return onResult(false)
     val bitmap = Bitmap.createBitmap(
-        max(1, rect.width() / CHECK_DOWNSCALE), max(1, rect.height() / CHECK_DOWNSCALE), Bitmap.Config.ARGB_8888,
+        max(1, middle.width() / CHECK_DOWNSCALE), max(1, middle.height() / CHECK_DOWNSCALE), Bitmap.Config.ARGB_8888,
     )
     val handler = android.os.Handler(android.os.Looper.getMainLooper())
     try {
-        android.view.PixelCopy.request(window, android.graphics.Rect(rect), bitmap, { code ->
+        android.view.PixelCopy.request(window, middle, bitmap, { code ->
             val ok = code == android.view.PixelCopy.SUCCESS
             val result = if (ok) {
                 val pixels = IntArray(bitmap.width * bitmap.height)
                 bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-                SceneFrameCheck.check(pixels)
+                SceneFrameCheck.check(pixels, surface)
             } else {
                 SceneFrameCheck.Result(false, 0f)
             }

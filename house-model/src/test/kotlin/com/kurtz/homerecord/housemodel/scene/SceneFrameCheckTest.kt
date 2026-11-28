@@ -67,4 +67,26 @@ class SceneFrameCheckTest {
         assertThat(SceneFrameCheck.check(frame(surface to 700, litCream to 150, litFloor to 150)).drawn).isTrue()
         assertThat(SceneFrameCheck.check(frame(0xFFFEFEFE.toInt() to 300, 0xFFFFF7FE.toInt() to 700)).drawn).isFalse()
     }
+
+    // [judge:hm-3d-room-blank-recurs]: a room view that came out white or the surface colour is blank, measured against
+    // the surface the scene clears to, even when the hint text or a lighter wash makes another colour the most common.
+    @AcceptanceCriterion("AC-C20")
+    @Test fun anAllWhiteOrAllSurfaceRoomViewIsNotDrawn() {
+        val lightSurface = 0xFFF4F3FA.toInt()
+        val darkSurface = 0xFF1D1B20.toInt()
+        assertThat(SceneFrameCheck.check(frame(white to 1000), lightSurface).drawn).isFalse()
+        assertThat(SceneFrameCheck.check(frame(lightSurface to 1000), lightSurface).drawn).isFalse()
+        assertThat(SceneFrameCheck.check(frame(darkSurface to 1000), darkSurface).drawn).isFalse()
+        // A white wash covering most of the view, with the surface showing around it: something "stands out" from the
+        // wash, but nothing stands out from the surface.
+        assertThat(SceneFrameCheck.check(frame(white to 800, lightSurface to 200), lightSurface).drawn).isFalse()
+    }
+
+    @AcceptanceCriterion("AC-C20")
+    @Test fun aRoomViewFilledWithWallsIsDrawnOnEitherSurface() {
+        val litCream = 0xFFB79D70.toInt()
+        val litFloor = 0xFF7A736A.toInt()
+        assertThat(SceneFrameCheck.check(frame(litCream to 700, litFloor to 300), 0xFFF4F3FA.toInt()).drawn).isTrue()
+        assertThat(SceneFrameCheck.check(frame(litCream to 700, litFloor to 300), 0xFF1D1B20.toInt()).drawn).isTrue()
+    }
 }
