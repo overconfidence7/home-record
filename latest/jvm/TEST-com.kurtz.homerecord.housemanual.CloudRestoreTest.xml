@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.CloudRestoreTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:17.895Z" hostname="ip-10-0-131-22" time="0.53">
+  <properties/>
+  <testcase name="errorOffersRetryAndSetUpWithFullSizeTargets" classname="com.kurtz.homerecord.housemanual.CloudRestoreTest" time="0.205"/>
+  <testcase name="signingInRunsTheRestoreAndWaitsForTheHome" classname="com.kurtz.homerecord.housemanual.CloudRestoreTest" time="0.101"/>
+  <testcase name="noHomeAndFailureSaySoAndRetryTriesAgain" classname="com.kurtz.homerecord.housemanual.CloudRestoreTest" time="0.209"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.pdf.PanelLegendTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:18.899Z" hostname="ip-10-0-131-22" time="0.06">
+  <properties/>
+  <testcase name="aClashingBreakerStillPrints" classname="com.kurtz.homerecord.housemodel.pdf.PanelLegendTest" time="0.015"/>
+  <testcase name="aFullEightyFourSlotPageDrawsWithoutThrowing" classname="com.kurtz.homerecord.housemodel.pdf.PanelLegendTest" time="0.019"/>
+  <testcase name="headerSaysServiceSizeBrandAndSlots" classname="com.kurtz.homerecord.housemodel.pdf.PanelLegendTest" time="0.011"/>
+  <testcase name="oneRowPerSlotInOrderWithOpenSlotsSaid" classname="com.kurtz.homerecord.housemodel.pdf.PanelLegendTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

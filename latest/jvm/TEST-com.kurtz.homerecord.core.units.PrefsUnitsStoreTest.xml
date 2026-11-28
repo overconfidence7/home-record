@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.units.PrefsUnitsStoreTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:51.606Z" hostname="ip-10-0-131-22" time="0.076">
+  <properties/>
+  <testcase name="metricSticksAcrossRestarts" classname="com.kurtz.homerecord.core.units.PrefsUnitsStoreTest" time="0.031"/>
+  <testcase name="anUnknownValueReadsAsFeetAndInches" classname="com.kurtz.homerecord.core.units.PrefsUnitsStoreTest" time="0.014"/>
+  <testcase name="theStoredChoiceIsReadOffTheCallersThreadAndAPickMadeFirstWins" classname="com.kurtz.homerecord.core.units.PrefsUnitsStoreTest" time="0.014"/>
+  <testcase name="feetAndInchesByDefault" classname="com.kurtz.homerecord.core.units.PrefsUnitsStoreTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

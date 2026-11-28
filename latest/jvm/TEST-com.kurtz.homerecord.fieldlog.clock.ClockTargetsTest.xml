@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:33.433Z" hostname="ip-10-0-131-22" time="1.009">
+  <properties/>
+  <testcase name="breakButtonsAre64" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.113"/>
+  <testcase name="explainDialogButtonsAre56" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.127"/>
+  <testcase name="clockInIs64" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.178"/>
+  <testcase name="farReasonSaveIs56" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.126"/>
+  <testcase name="gpsSettingsIs56" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.245"/>
+  <testcase name="workingButtonsAre64" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.131"/>
+  <testcase name="todayClockActionIs64" classname="com.kurtz.homerecord.fieldlog.clock.ClockTargetsTest" time="0.082"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

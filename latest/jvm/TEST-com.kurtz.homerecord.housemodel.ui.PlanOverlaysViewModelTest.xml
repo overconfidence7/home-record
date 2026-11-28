@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:20.412Z" hostname="ip-10-0-131-22" time="0.307">
+  <properties/>
+  <testcase name="switchingFloorsWhileDrawingDropsTheRun" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.042"/>
+  <testcase name="overlaysModeLeavesRoomsAloneAndNeedsARoomToDrawIn" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.038"/>
+  <testcase name="openingOnAnOverlayStartsInOverlaysModeOnItsFloorWithItPicked" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.029"/>
+  <testcase name="editingKeepsThePointsAndChangesTheFields" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.037"/>
+  <testcase name="draggingAPointMovesItAndDeleteRemovesTheOverlay" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.037"/>
+  <testcase name="aRunDrawnOnThePlanIsSavedInWholePlanInchesUnderTheRoomItStartsIn" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.027"/>
+  <testcase name="theFloorShowsOnlyItsOwnPlanOverlays" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.033"/>
+  <testcase name="aSpotOutsideEveryRoomGoesToTheNearestRoomAndPointsAreNotClampedToAWall" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.029"/>
+  <testcase name="theModeThePointsAndTheFormSurviveProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.PlanOverlaysViewModelTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

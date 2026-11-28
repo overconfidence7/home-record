@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:47.723Z" hostname="ip-10-0-131-22" time="0.113">
+  <properties/>
+  <testcase name="receiptFromAnotherPhoneIsDownloadedAndShown" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.018"/>
+  <testcase name="aDeletedReceiptShowsTheErrorState" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.015"/>
+  <testcase name="newReceiptStartsTodayOnTheOnlyJobAndNeedsAnAmount" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.015"/>
+  <testcase name="saveWritesEveryFieldAndEditReopensIt" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.022"/>
+  <testcase name="typingSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.013"/>
+  <testcase name="aScanWithNoTotalSaysSoAndAFailedScanShowsTheError" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.014"/>
+  <testcase name="scanKeepsTheReceiptAndOffersItsTotal" classname="com.kurtz.homerecord.fieldlog.materials.MaterialFormViewModelTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

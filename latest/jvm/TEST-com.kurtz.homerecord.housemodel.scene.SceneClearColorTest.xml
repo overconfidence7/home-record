@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.279Z" hostname="ip-10-0-131-22" time="0.001">
+  <properties/>
+  <testcase name="whiteAndBlackStayAtTheEnds" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.001"/>
+  <testcase name="midGreyIsLinearised" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <testcase name="channelsKeepTheirOrderAndAlphaIsAlwaysOpaque" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <testcase name="theSurfaceClearIsLeftAlone" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <testcase name="sceneViewsBlackClearIsReapplied" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <testcase name="directOutputIsAlwaysOpaque" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <testcase name="directOutputKeepsTheStoredSurfaceColour" classname="com.kurtz.homerecord.housemodel.scene.SceneClearColorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.MappingScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:32.750Z" hostname="ip-10-0-131-22" time="0.554">
+  <properties/>
+  <testcase name="theAlarmHasOneLargeSilenceButton" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.092"/>
+  <testcase name="thePanelOffersMapBreakersOnceItHasBreakers" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.127"/>
+  <testcase name="pickingNeedsABreakerAndARoomOrItemBeforeSave" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.113"/>
+  <testcase name="startIsOfferedWhenThePanelHasBreakers" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.068"/>
+  <testcase name="saveIsOnOnceTheLinkIsComplete" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.081"/>
+  <testcase name="thePanelSharesItsLegendAndSaysWhenItFails" classname="com.kurtz.homerecord.housemanual.MappingScreenTest" time="0.066"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="121.112" timestamp="2026-11-28T15:56:38">
+    <testcase id="F11b-task-pin" name="F11b-task-pin" classname="F11b-task-pin" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F11b-task-pin.yaml" time="121.08" timestamp="2026-11-28T15:56:38" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

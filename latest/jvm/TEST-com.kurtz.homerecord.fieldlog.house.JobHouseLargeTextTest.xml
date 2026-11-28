@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.house.JobHouseLargeTextTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:40.426Z" hostname="ip-10-0-131-22" time="0.41">
+  <properties/>
+  <testcase name="atDoubleTextThePlanKeepsMostOfTheScreenAndTheRestOfTheActionsSitInAMenu" classname="com.kurtz.homerecord.fieldlog.house.JobHouseLargeTextTest" time="0.155"/>
+  <testcase name="handOffIsAnActionOnlyWhenTheJobOffersIt" classname="com.kurtz.homerecord.fieldlog.house.JobHouseLargeTextTest" time="0.096"/>
+  <testcase name="atNormalTextEveryActionIsAButtonAndTheHeaderStaysOff" classname="com.kurtz.homerecord.fieldlog.house.JobHouseLargeTextTest" time="0.056"/>
+  <testcase name="withoutTheHandoffThereIsNoHandOffButton" classname="com.kurtz.homerecord.fieldlog.house.JobHouseLargeTextTest" time="0.096"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

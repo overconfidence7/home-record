@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.462Z" hostname="ip-10-0-131-22" time="0.538">
+  <properties/>
+  <testcase name="buildsTheFloorWithRoomsAtItsCeilingHeight" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.052"/>
+  <testcase name="overlaysAndPlacedItemsBecomeMarkersShownByTheSharedLayerToggles" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.045"/>
+  <testcase name="theFloorAboveShowsOverAFadedMainAndAllFloorsSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.067"/>
+  <testcase name="theLayersOpenAsTheHouseTabLeftThem" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.023"/>
+  <testcase name="aNewWallPhotoShowsAtItsStageAndTheStageSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.056"/>
+  <testcase name="resetViewBumpsTheCounterAndAFailedBuildOffersRetry" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.055"/>
+  <testcase name="opensOnTheGivenFloorAndSwitchesFloors" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.083"/>
+  <testcase name="viewIn3DFromTheRoomPageOpensInsideTheRoom" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.041"/>
+  <testcase name="fieldLogOpensOnRoughInWithTheCrewsPhotoPaintedOn" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.036"/>
+  <testcase name="aRoomViewCountsOnlyThatRoomsWalls" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.037"/>
+  <testcase name="aTappedRoomPutsTheCameraInsideUntilBackToFloorAndSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.House3DViewModelTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,41 @@
+16:08:42.076 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+16:08:42.079 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+16:08:42.080 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+16:08:42.080 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+16:08:42.080 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run _3d-perf-open.yaml when id: hm_3d_reset is not visible RUNNING
+16:08:48.833 [ INFO] maestro.orchestra.Orchestra.executeCommands: [Command execution] CommandSkipped: null
+16:08:48.833 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run _3d-perf-open.yaml when id: hm_3d_reset is not visible SKIPPED
+16:08:48.834 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: hm_3d_scene is visible RUNNING
+16:08:48.966 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: hm_3d_scene is visible COMPLETED
+16:08:48.966 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Finished photos on 12 of 24 walls" is visible RUNNING
+16:08:49.011 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Finished photos on 12 of 24 walls" is visible COMPLETED
+16:08:49.012 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: hm_3d_floor_all RUNNING
+16:08:49.128 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=hm_3d_floor_all, clickable=true, bounds=[702,325][981,451], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[684,326][810,452], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=All floors, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[791,362][939,415], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[702,325][981,451], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.CheckBox, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=702, y=325, width=279, height=126))
+16:08:50.350 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+16:08:50.353 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (841, 388) using hierarchy based logic for wait
+16:08:51.847 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+16:08:51.847 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: hm_3d_floor_all COMPLETED
+16:08:51.847 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "All floors in 3D" is visible RUNNING
+16:08:52.019 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "All floors in 3D" is visible COMPLETED
+16:08:52.019 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Finished photos on 20 of .* walls" is visible RUNNING
+16:08:52.164 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Finished photos on 20 of .* walls" is visible COMPLETED
+16:08:52.168 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Swipe from (20%, 45%) to (80%, 45%) in 1500 ms RUNNING
+16:08:57.809 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Swipe from (20%, 45%) to (80%, 45%) in 1500 ms COMPLETED
+16:08:57.809 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Swipe from (80%, 50%) to (20%, 50%) in 1500 ms RUNNING
+16:09:00.808 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Swipe from (80%, 50%) to (20%, 50%) in 1500 ms COMPLETED
+16:09:00.809 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Swipe from (50%, 35%) to (50%, 55%) in 1000 ms RUNNING
+16:09:02.135 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Swipe from (50%, 35%) to (50%, 55%) in 1000 ms COMPLETED
+16:09:02.136 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: hm_3d_reset RUNNING
+16:09:02.218 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=hm_3d_reset, clickable=true, bounds=[650,1959][1038,2085], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=Reset view, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[797,1996][975,2049], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[650,1959][1038,2085], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.Button, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=650, y=1959, width=388, height=126))
+16:09:03.454 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+16:09:03.455 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (844, 2022) using hierarchy based logic for wait
+16:09:06.919 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+16:09:06.919 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: hm_3d_reset COMPLETED
+16:09:06.920 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: hm_3d_scene is visible RUNNING
+16:09:07.010 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: hm_3d_scene is visible COMPLETED
+16:09:07.010 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: hm_3d_scene_drawn is visible RUNNING
+16:09:07.090 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: hm_3d_scene_drawn is visible COMPLETED
+16:09:07.091 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot 3d-perf-all-floors RUNNING
+16:09:07.093 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+16:09:07.094 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+16:09:07.429 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot 3d-perf-all-floors COMPLETED

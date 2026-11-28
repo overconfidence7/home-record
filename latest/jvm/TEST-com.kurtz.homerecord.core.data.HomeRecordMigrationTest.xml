@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:36.706Z" hostname="ip-10-0-131-22" time="2.98">
+  <properties/>
+  <testcase name="v11ToV12GivesEveryChangeOrderNoPhotos" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.277"/>
+  <testcase name="v2ToV3AddsR2KeyToPhotoAndNote" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.112"/>
+  <testcase name="v3ToV4MovesBeforeOutOfThePhase" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.138"/>
+  <testcase name="v14ToV15AddsAnEmptyImportLedger" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.132"/>
+  <testcase name="v15ToV16AddsDocumentKey" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.152"/>
+  <testcase name="v7ToV8AddsTheWallPhotoKeys" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.144"/>
+  <testcase name="v8ToV9AddsTheItemWallSpot" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.07"/>
+  <testcase name="v12ToV13AddsSignatureStrokesAndLinkTargets" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.079"/>
+  <testcase name="v4ToV5AddsTaskOrderAndDoneTime" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.06"/>
+  <testcase name="v1ToV2DropsTheSingleCursorAndKeepsConfirmedRows" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.075"/>
+  <testcase name="v6ToV7AddsTheDailyLogSectionColumns" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.156"/>
+  <testcase name="latestIsTheCompiledVersion" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.051"/>
+  <testcase name="v5ToV6AddsTheConflictLog" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.089"/>
+  <testcase name="everyReleasedVersionMigratesToTheLatest" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="1.106"/>
+  <testcase name="v9ToV10GivesEveryWallPhotoItsRoom" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.118"/>
+  <testcase name="v13ToV14AddsMaterialReceiptKey" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.085"/>
+  <testcase name="v10ToV11AddsANullPhotoAuthor" classname="com.kurtz.homerecord.core.data.HomeRecordMigrationTest" time="0.116"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

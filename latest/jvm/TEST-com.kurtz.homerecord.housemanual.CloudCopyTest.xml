@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.CloudCopyTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:17.177Z" hostname="ip-10-0-131-22" time="0.707">
+  <properties/>
+  <testcase name="aFailureSaysWhyAndCanBeTriedAgain" classname="com.kurtz.homerecord.housemanual.CloudCopyTest" time="0.129"/>
+  <testcase name="theConfirmDialogSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.CloudCopyTest" time="0.094"/>
+  <testcase name="afterTheDeleteTheSignInFormSaysTheHomeIsStillHere" classname="com.kurtz.homerecord.housemanual.CloudCopyTest" time="0.08"/>
+  <testcase name="signedInAccountOffersDeleteCloudCopyAndAsksFirst" classname="com.kurtz.homerecord.housemanual.CloudCopyTest" time="0.321"/>
+  <testcase name="asksFirstThenDeletesAndRemembersItWasDeleted" classname="com.kurtz.homerecord.housemanual.CloudCopyTest" time="0.061"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

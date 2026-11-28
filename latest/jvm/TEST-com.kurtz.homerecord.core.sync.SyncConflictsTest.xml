@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.SyncConflictsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:49.314Z" hostname="ip-10-0-131-22" time="0.007">
+  <properties/>
+  <testcase name="bookkeepingFieldsAreNotLogged" classname="com.kurtz.homerecord.core.sync.SyncConflictsTest" time="0.001"/>
+  <testcase name="onePassesNotesForOneRecordBecomeOneLineNewestFirst" classname="com.kurtz.homerecord.core.sync.SyncConflictsTest" time="0.002"/>
+  <testcase name="reasonsMapToOutcomes" classname="com.kurtz.homerecord.core.sync.SyncConflictsTest" time="0.0"/>
+  <testcase name="fieldNamesReadAsPlainWords" classname="com.kurtz.homerecord.core.sync.SyncConflictsTest" time="0.0"/>
+  <testcase name="labelIsTheFirstNameLikeField" classname="com.kurtz.homerecord.core.sync.SyncConflictsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

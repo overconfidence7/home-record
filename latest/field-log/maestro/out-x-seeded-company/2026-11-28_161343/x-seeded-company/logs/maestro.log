@@ -1,0 +1,66 @@
+16:13:49.876 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+16:13:49.878 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+16:13:49.879 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+16:13:49.879 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+16:13:49.880 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Run _seed.yaml RUNNING
+16:13:49.881 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+16:13:49.881 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+16:13:49.881 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.kurtz.homerecord.fieldlog" with clear state RUNNING
+16:13:49.882 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.kurtz.homerecord.fieldlog
+16:13:51.632 [DEBUG] maestro.Maestro.setPermissionInternal: Failed to set permission com.android.vending.BILLING for app com.kurtz.homerecord.fieldlog: shell command failed (exit -1): 
+Exception occurred while executing 'grant':
+java.lang.IllegalArgumentException: Unknown permission com.android.vending.BILLING
+	at com.android.server.permission.access.permission.PermissionService.setRuntimePermissionGranted(PermissionService.kt:985)
+	at com.android.server.permission.access.permission.PermissionService.access$setRuntimePermissionGranted(PermissionService.kt:108)
+	at com.android.server.permission.access.permission.PermissionService.setRuntimePermissionGranted(PermissionService.kt:883)
+	at com.android.server.permission.access.permission.PermissionService.setRuntimePermissionGranted$default(PermissionService.kt:788)
+	at com.android.server.permission.access.permission.PermissionService.grantRuntimePermission(PermissionService.kt:750)
+	at com.android.server.pm.permission.PermissionManagerService.grantRuntimePermission(PermissionManagerService.java:599)
+	at android.permission.PermissionManager.grantRuntimePermissionInternal(PermissionManager.java:680)
+	at android.permission.PermissionManager.grantRuntimePermission(PermissionManager.java:643)
+	at com.android.server.pm.PackageManagerShellCommand.runGrantRevokePermission(PackageManagerShellCommand.java:2704)
+	at com.android.server.pm.PackageManagerShellCommand.onCommand(PackageManagerShellCommand.java:317)
+	at com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)
+	at android.os.ShellCommand.exec(ShellCommand.java:38)
+	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onShellCommand(PackageManagerService.java:6684)
+	at android.os.Binder.shellCommand(Binder.java:1151)
+	at android.os.Binder.onTransact(Binder.java:953)
+	at android.content.pm.IPackageManager$Stub.onTransact(IPackageManager.java:4729)
+	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onTransact(PackageManagerService.java:6668)
+	at android.os.Binder.execTransactInternal(Binder.java:1426)
+	at android.os.Binder.execTransact(Binder.java:1365)
+
+16:13:51.647 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.kurtz.homerecord.fieldlog
+16:13:51.647 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.kurtz.homerecord.fieldlog app during launch
+16:13:51.724 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.kurtz.homerecord.fieldlog" with clear state COMPLETED
+16:13:51.728 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Stop com.kurtz.homerecord.fieldlog RUNNING
+16:13:51.729 [ INFO] maestro.Maestro.stopApp$lambda$7: Stopping app com.kurtz.homerecord.fieldlog
+16:13:51.879 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Stop com.kurtz.homerecord.fieldlog COMPLETED
+16:13:51.879 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Open homerecord-qa-fl://seed?scenario=regression RUNNING
+16:13:51.892 [ INFO] maestro.Maestro.openLink: Opening link homerecord-qa-fl://seed?scenario=regression for app: com.kurtz.homerecord.fieldlog with autoVerify config as false
+16:13:53.029 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Open homerecord-qa-fl://seed?scenario=regression COMPLETED
+16:13:53.030 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_tab_today is visible RUNNING
+16:13:57.569 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_tab_today is visible COMPLETED
+16:13:57.570 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Run _seed.yaml COMPLETED
+16:13:57.570 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: fl_tab_more RUNNING
+16:13:57.804 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=fl_tab_more, clickable=true, bounds=[881,2127][1080,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[917,2211][1043,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[TreeNode(attributes={text=More, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[941,2253][1019,2295], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[949,2169][1012,2232], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[907,2138][1054,2264], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=false, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false), TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[881,2127][1080,2337], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=881, y=2127, width=199, height=210))
+16:13:59.369 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+16:13:59.372 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (980, 2232) using hierarchy based logic for wait
+16:14:00.250 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+16:14:00.251 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: fl_tab_more COMPLETED
+16:14:00.252 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_more_team is visible RUNNING
+16:14:00.353 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_more_team is visible COMPLETED
+16:14:00.354 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that id: fl_more_company is visible RUNNING
+16:14:00.437 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that id: fl_more_company is visible COMPLETED
+16:14:00.438 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on id: fl_more_team RUNNING
+16:14:01.149 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={text=, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=fl_more_team, clickable=true, bounds=[0,432][1080,579], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.view.View, important-for-accessibility=true, error=}, children=[TreeNode(attributes={text=Team, accessibilityText=, hintText=, ignoreBoundsFiltering=false, resource-id=, clickable=false, bounds=[147,474][257,537], enabled=true, focused=false, checked=false, scrollable=false, selected=false, class=android.widget.TextView, important-for-accessibility=true, error=}, children=[], clickable=false, enabled=true, focused=false, checked=false, selected=false)], clickable=true, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=0, y=432, width=1080, height=147))
+16:14:02.364 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via settled hierarchy
+16:14:02.365 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Tapping at (540, 505) using hierarchy based logic for wait
+16:14:03.469 [ INFO] maestro.Maestro.hierarchyBasedTap-ogj28Uc: Something has changed in the UI judging by view hierarchy. Proceed.
+16:14:03.469 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on id: fl_more_team COMPLETED
+16:14:03.469 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Casey Crew" is visible RUNNING
+16:14:03.585 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Casey Crew" is visible COMPLETED
+16:14:03.585 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot x-seeded-team RUNNING
+16:14:03.587 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+16:14:03.588 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+16:14:03.851 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot x-seeded-team COMPLETED

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.data.PhotoTakenQueryTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:39.910Z" hostname="ip-10-0-131-22" time="0.052">
+  <properties/>
+  <testcase name="onlyLivePhotosOnTheCompanysLiveJobsOldestFirst" classname="com.kurtz.homerecord.core.data.PhotoTakenQueryTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

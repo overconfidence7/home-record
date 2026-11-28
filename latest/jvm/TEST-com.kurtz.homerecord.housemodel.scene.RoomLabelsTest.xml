@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.RoomLabelsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.263Z" hostname="ip-10-0-131-22" time="0.001">
+  <properties/>
+  <testcase name="anchorsAtTheFootprintMiddleJustAboveTheFloor" classname="com.kurtz.homerecord.housemodel.scene.RoomLabelsTest" time="0.0"/>
+  <testcase name="placesNamesInPixelsWithYDownAndDropsRoomsOffViewOrBehind" classname="com.kurtz.homerecord.housemodel.scene.RoomLabelsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

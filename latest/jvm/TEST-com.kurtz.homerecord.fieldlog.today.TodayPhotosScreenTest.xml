@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:02.980Z" hostname="ip-10-0-131-22" time="0.361">
+  <properties/>
+  <testcase name="noPhotosNoRowAndNoLiveJobNoButton" classname="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" time="0.081"/>
+  <testcase name="theCameraButtonIsAFullTouchTarget" classname="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" time="0.044"/>
+  <testcase name="pickingAJobInTheSheetCapturesForIt" classname="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" time="0.091"/>
+  <testcase name="theCameraButtonAsksToCapture" classname="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" time="0.047"/>
+  <testcase name="recentPhotosOpenOnTapAndSayWhichJob" classname="com.kurtz.homerecord.fieldlog.today.TodayPhotosScreenTest" time="0.085"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

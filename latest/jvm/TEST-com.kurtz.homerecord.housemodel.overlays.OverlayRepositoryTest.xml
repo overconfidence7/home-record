@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:18.035Z" hostname="ip-10-0-131-22" time="0.149">
+  <properties/>
+  <testcase name="planOverlaysKeepPlanInches" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.02"/>
+  <testcase name="anEditCanChangeOrClearThePhotoAndTheLinkedItem" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.019"/>
+  <testcase name="aWallOverlayKeepsWallSpacePointsAndTheWallsRoom" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.018"/>
+  <testcase name="nothingToDrawOrNoWallIsRefused" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.018"/>
+  <testcase name="pointsDragAndFieldsEditAndDeleteRemovesIt" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.026"/>
+  <testcase name="twoTapsOnOneSpotMakeAPoint" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.024"/>
+  <testcase name="theItemsLinksListOnlyItsLiveOverlaysWithTheirPhotoAndItem" classname="com.kurtz.homerecord.housemodel.overlays.OverlayRepositoryTest" time="0.022"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

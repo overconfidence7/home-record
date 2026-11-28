@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:47.969Z" hostname="ip-10-0-131-22" time="0.49">
+  <properties/>
+  <testcase name="theHomeAnInviteJoinedIsPickedOverTheOwnedOne" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.023"/>
+  <testcase name="aPhoneThatHasAHomeIsLeftAlone" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.097"/>
+  <testcase name="offlineFailsAndPullsNothing" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.124"/>
+  <testcase name="anAccountWithNoHomeSaysSo" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.041"/>
+  <testcase name="anEditOnTheSecondPhoneReachesTheFirst" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.132"/>
+  <testcase name="theOwnedHomeIsPickedBeforeAShareOne" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.01"/>
+  <testcase name="signingInOnAnEmptyPhoneBringsTheHomeAndItsPhotoKeys" classname="com.kurtz.homerecord.core.sync.CloudHomeRestoreTest" time="0.043"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

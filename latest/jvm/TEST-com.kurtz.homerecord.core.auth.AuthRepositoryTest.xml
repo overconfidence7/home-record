@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.auth.AuthRepositoryTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:21.955Z" hostname="ip-10-0-131-22" time="0.026">
+  <properties/>
+  <testcase name="googleSignIn" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.009"/>
+  <testcase name="signOutDuringRestoreIsNotOverwritten" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.0"/>
+  <testcase name="deferredRestoreReadsTokenOnlyWhenAsked" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.0"/>
+  <testcase name="refreshWhileSignedOutIsIgnored" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.0"/>
+  <testcase name="startsSignedOutWithoutToken" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.0"/>
+  <testcase name="refreshedTokenReplacesStoredOne" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.002"/>
+  <testcase name="cancelledGoogleSignInFails" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.003"/>
+  <testcase name="wrongCodeStaysSignedOut" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.003"/>
+  <testcase name="signOutAndUnauthorizedClearToken" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.004"/>
+  <testcase name="signInPersistsAcrossRestart" classname="com.kurtz.homerecord.core.auth.AuthRepositoryTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

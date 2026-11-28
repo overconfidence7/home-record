@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.shell.SharedBoundsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:36.239Z" hostname="ip-10-0-131-22" time="0.56">
+  <properties/>
+  <testcase name="roomViewGrowsOutOfTheButtonThenFillsItsScreen" classname="com.kurtz.homerecord.coreui.shell.SharedBoundsTest" time="0.224"/>
+  <testcase name="outsideTheShellTheModifierChangesNothing" classname="com.kurtz.homerecord.coreui.shell.SharedBoundsTest" time="0.079"/>
+  <testcase name="backShrinksTheRoomViewIntoTheButton" classname="com.kurtz.homerecord.coreui.shell.SharedBoundsTest" time="0.246"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

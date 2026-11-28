@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:35.591Z" hostname="ip-10-0-131-22" time="0.217">
+  <properties/>
+  <testcase name="keepsTheSignedInPerson" classname="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" time="0.083"/>
+  <testcase name="aCacheFromBeforeTheRulesReadsTheDefaults" classname="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" time="0.035"/>
+  <testcase name="keepsTheClockRulesWithTheMembership" classname="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" time="0.028"/>
+  <testcase name="keepsTheEntitlementExpiry" classname="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" time="0.03"/>
+  <testcase name="keepsTheCompanyContactLine" classname="com.kurtz.homerecord.core.company.PrefsCompanyCacheTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

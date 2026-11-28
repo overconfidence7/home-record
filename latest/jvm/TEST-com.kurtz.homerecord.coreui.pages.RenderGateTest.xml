@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.pages.RenderGateTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:33.863Z" hostname="ip-10-0-131-22" time="0.019">
+  <properties/>
+  <testcase name="closeWaitsForTheRunningRenderThenRefusesNewOnes" classname="com.kurtz.homerecord.coreui.pages.RenderGateTest" time="0.015"/>
+  <testcase name="closeRunsOnce" classname="com.kurtz.homerecord.coreui.pages.RenderGateTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

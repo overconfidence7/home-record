@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:37.909Z" hostname="ip-10-0-131-22" time="0.627">
+  <properties/>
+  <testcase name="searchFindsByNameAcrossFolders" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.057"/>
+  <testcase name="unreadableFileShowsNotice" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.032"/>
+  <testcase name="addMenuOpensAndClosesOnEitherChoice" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.081"/>
+  <testcase name="failedScanShowsNotice" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.036"/>
+  <testcase name="scannedPdfIsNamedByDateAndNumberedInTheOpenFolder" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.035"/>
+  <testcase name="addedFileLandsInOpenFolderAndIsQueuedForUpload" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.03"/>
+  <testcase name="renameAndDeleteAskFirst" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.039"/>
+  <testcase name="duplicateFolderShowsNotice" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.019"/>
+  <testcase name="newFolderThenOpenItAndAddThere" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.019"/>
+  <testcase name="crewCannotAddRenameOrDelete" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.227"/>
+  <testcase name="scanNameSkipsTakenNamesIgnoringCase" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.011"/>
+  <testcase name="uploadStatusAndOfflineToggleReachTheRow" classname="com.kurtz.homerecord.fieldlog.files.FilesViewModelTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

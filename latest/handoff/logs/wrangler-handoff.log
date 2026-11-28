@@ -1,0 +1,62 @@
+
+ ⛅️ wrangler 4.151.2 (update available 4.169.0)
+───────────────────────────────────────────────
+
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+Using secrets defined in .dev.vars
+Your Worker has access to the following bindings:
+Binding                                                 Resource                  Mode
+env.CACHE (00000000000000000000000000000000)            KV Namespace              local
+env.DB (homerecord)                                     D1 Database               local
+env.MEDIA (homerecord-media)                            R2 Bucket                 local
+env.ENVIRONMENT ("(hidden)")                            Environment Variable      local
+env.JWT_SECRET ("(hidden)")                             Environment Variable      local
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mScheduled Workers are not automatically triggered during local development.[0m
+
+  To manually trigger a scheduled event, run:
+    curl "http://localhost:8787/cdn-cgi/local/scheduled"
+  For more details, see [4mhttps://developers.cloudflare.com/workers/configuration/cron-triggers/#test-cron-triggers-locally[0m
+
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://localhost:8787
+[wrangler:info] GET /health 200 OK (80ms)
+[wrangler:info] GET /health 200 OK (6ms)
+[wrangler:info] POST /dev/seed 200 OK (114ms)
+[dev] sign-in code for owner@qa.test: 519742
+[wrangler:info] POST /auth/email/start 200 OK (31ms)
+[wrangler:info] GET /dev/last-code 200 OK (6ms)
+[wrangler:info] POST /auth/email/verify 200 OK (17ms)
+[wrangler:info] POST /dev/reset 200 OK (16ms)
+[dev] sign-in code for qa-owner-x02@example.test: 858850
+[wrangler:info] POST /auth/email/start 200 OK (18ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (47ms)
+[wrangler:info] GET /me 200 OK (29ms)
+[wrangler:info] POST /companies 201 Created (9ms)
+[wrangler:info] GET /me 200 OK (8ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (8ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/members 200 OK (10ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/members 200 OK (26ms)
+[wrangler:info] POST /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/push 200 OK (34ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (7ms)
+[wrangler:info] POST /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/push 200 OK (18ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (30ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (7ms)
+[wrangler:info] POST /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/push 200 OK (24ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (6ms)
+[wrangler:info] POST /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/push 200 OK (12ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (6ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (41ms)
+[dev] handoff link for qa-homeowner-x02@example.test: http://10.0.2.2:8787/handoff/e-f8A4DDiJ_G7dWxZJyu00ullcZKMoBqGHgW6JOsZ8w
+[wrangler:info] POST /handoff 201 Created (52ms)
+[wrangler:info] GET /dev/last-handoff 200 OK (4ms)
+[wrangler:info] GET /companies/2c25dbce-2fe7-477d-8f57-b53d8e671784/sync/pull 200 OK (8ms)
+[dev] sign-in code for qa-homeowner-x02@example.test: 003809
+[wrangler:info] POST /auth/email/start 200 OK (16ms)
+[wrangler:info] GET /dev/last-code 200 OK (3ms)
+[wrangler:info] POST /auth/email/verify 200 OK (20ms)
+[wrangler:info] GET /me 200 OK (10ms)
+[wrangler:info] POST /handoff/e-f8A4DDiJ_G7dWxZJyu00ullcZKMoBqGHgW6JOsZ8w/claim 200 OK (23ms)
+[wrangler:info] GET /handoff/e-f8A4DDiJ_G7dWxZJyu00ullcZKMoBqGHgW6JOsZ8w/bundle 200 OK (16ms)

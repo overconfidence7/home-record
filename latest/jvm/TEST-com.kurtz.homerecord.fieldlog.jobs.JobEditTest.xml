@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:41.532Z" hostname="ip-10-0-131-22" time="0.798">
+  <properties/>
+  <testcase name="badClientEmailOrPhoneBlocksSave" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.026"/>
+  <testcase name="confirmingTheRemovalTakesTheRoomOffOnSave" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.052"/>
+  <testcase name="removingARoomInUseAsksFirstAndCancelKeepsIt" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.106"/>
+  <testcase name="unsavedTextSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.032"/>
+  <testcase name="clientPhoneAndEmailSaveOnTheClientAndReload" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.055"/>
+  <testcase name="phasesAndOfficeEmailsSaveAndReload" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.039"/>
+  <testcase name="phasesAndEmailsSurviveProcessDeath" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.085"/>
+  <testcase name="crewIsPickedSavedAndQueued" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.085"/>
+  <testcase name="clientDetailsSurviveProcessDeath" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.03"/>
+  <testcase name="mapLinkShowsOnlyWhileTheAddressMatchesTheResolvedOne" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.034"/>
+  <testcase name="roomsBecomeUnplacedRoomsOnTheJobsHome" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.042"/>
+  <testcase name="statusFollowsTheDates" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.011"/>
+  <testcase name="anExistingClientIsReusedIgnoringCase" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.026"/>
+  <testcase name="editingTheJobsClientUpdatesOrClearsItsDetails" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.025"/>
+  <testcase name="editingKeepsCoordinatesUntilTheAddressChanges" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.036"/>
+  <testcase name="aKnownClientKeepsItsDetailsWhenLeftBlank" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.068"/>
+  <testcase name="nameIsRequiredAndDatesMustBeInOrder" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.016"/>
+  <testcase name="savingANewJobCreatesTheClientAndQueuesBoth" classname="com.kurtz.homerecord.fieldlog.jobs.JobEditTest" time="0.025"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

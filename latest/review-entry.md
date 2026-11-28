@@ -1,0 +1,12 @@
+## QA auto 2026-11-28 (commit 1f04d878)
+
+Automated suite run at 2026-11-28 16:25 UTC. Full output (screenshots, logs, Maestro and instrumented results) is on the `qa-results` branch under `latest/`; a QA judge entry with the product verdict follows separately.
+
+- [ ] [Major] Flow F10-house-3d fails on field-log (regression of a fixed item) [auto:flow:field-log:F10-house-3d] - steps: automated, see qa-results branch latest/ for commit 1f04d878 - expected: walkthrough step F10 passes (qa/product-walkthrough.md) - actual: see qa-results latest/field-log/maestro/F10-house-3d.log - screenshot: qa-results:latest/field-log/screenshots/flow-F10-house-3d-F10-3d.png
+- [ ] [Major] Flow H03-blueprint-room fails on house-manual (regression of a fixed item) [auto:flow:house-manual:H03-blueprint-room] - steps: automated, see qa-results branch latest/ for commit 1f04d878 - expected: walkthrough step H03 passes (qa/product-walkthrough.md) - actual: see qa-results latest/house-manual/maestro/H03-blueprint-room.log - screenshot: qa-results:latest/house-manual/screenshots/flow-H03-blueprint-room-H01-home-after-onboarding.png
+
+Walkthrough steps exercised by flows: field-log F01 Pass, field-log F02 Pass, field-log F03 Pass, field-log F04 Pass, field-log F04b Pass, field-log F04c Pass, field-log F06 Pass, field-log F07 Pass, field-log F07b Pass, field-log F07c Pass, field-log F08 Pass, field-log F08b Pass, field-log F09 Pass, field-log F09b Pass, field-log F10 Fail, field-log F10b Pass, field-log F10c Pass, field-log F10d Pass, field-log F10e Pass, field-log F11 Pass, field-log F11b Pass, field-log F11c Pass, field-log F12 Pass, field-log F13 Pass, field-log F14 Pass, field-log F15 Pass, field-log F16 Pass, field-log F17 Pass, field-log F18 Pass, house-manual H01 Pass, house-manual H01b Pass, house-manual H02 Pass, house-manual H02b Pass, house-manual H03 Fail, house-manual H04 Pass, house-manual H05 Pass, house-manual H06 Pass, house-manual H07 Pass, house-manual H08 Pass, house-manual H09 Pass, house-manual H10 Pass, house-manual H11 Pass, house-manual H12 Pass, house-manual H13 Pass, house-manual H14 Pass, house-manual H15 Pass, house-manual H16 Pass, house-manual H17 Pass, house-manual H17b Pass, house-manual H18 Pass, house-manual H18b Pass, house-manual H19 Pass
+
+Not built yet or skipped: handoff variants (no _tour.yaml for handoff)
+
+Tested: 102 device stages, 2359 unit tests, 222 backend tests, coverage 495/495 ACs. Passed: 99. New issues: 2. Critical: 0. Product gaps: n/a (judge entry follows).

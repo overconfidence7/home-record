@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="72.516" timestamp="2026-11-28T15:28:05">
+    <testcase id="F04c-today-clock-in" name="F04c-today-clock-in" classname="F04c-today-clock-in" file="/home/runner/work/home-record/home-record/qa/flows/field-log/F04c-today-clock-in.yaml" time="72.489" timestamp="2026-11-28T15:28:05" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

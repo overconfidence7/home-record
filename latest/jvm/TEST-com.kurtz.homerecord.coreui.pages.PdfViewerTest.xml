@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.pages.PdfViewerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:33.098Z" hostname="ip-10-0-131-22" time="0.756">
+  <properties/>
+  <testcase name="singlePageHasNoThumbnailStrip" classname="com.kurtz.homerecord.coreui.pages.PdfViewerTest" time="0.096"/>
+  <testcase name="pageIndicatorAndSelectedThumbnailFollowThePageInView" classname="com.kurtz.homerecord.coreui.pages.PdfViewerTest" time="0.183"/>
+  <testcase name="multiPageDocumentHasThumbnailsThatJumpToAPage" classname="com.kurtz.homerecord.coreui.pages.PdfViewerTest" time="0.186"/>
+  <testcase name="landscapeFitsThePageToTheHeight" classname="com.kurtz.homerecord.coreui.pages.PdfViewerTest" time="0.089"/>
+  <testcase name="aTapBeforeThePageHasRenderedReportsNothing" classname="com.kurtz.homerecord.coreui.pages.PdfViewerTest" time="0.195"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

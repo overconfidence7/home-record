@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.qa.ScreenCatalogLabelsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:53.656Z" hostname="ip-10-0-131-22" time="3.151">
+  <properties/>
+  <testcase name="everyClickableControlOnEveryCatalogScreenHasALabel" classname="com.kurtz.homerecord.fieldlog.qa.ScreenCatalogLabelsTest" time="3.149"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

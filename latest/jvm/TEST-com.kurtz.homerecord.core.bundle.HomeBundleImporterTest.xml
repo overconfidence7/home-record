@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:33.338Z" hostname="ip-10-0-131-22" time="1.066">
+  <properties/>
+  <testcase name="firstImportAddsTheHouseWithWallPhotosAndOverlays" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.132"/>
+  <testcase name="entityTypesThisVersionDoesNotKnowAreSkipped" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.125"/>
+  <testcase name="aFloorWithANewNameStillArrivesAsItsOwnFloor" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.121"/>
+  <testcase name="aSameNamedFloorJoinsTheHomesFloorInsteadOfAddingASecond" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.119"/>
+  <testcase name="retargetedBundleJoinsTheHomeAlreadyOnThisPhone" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.09"/>
+  <testcase name="crewChangeOnlyUpdatesAndBothChangedIsAConflictThatKeepsMine" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.199"/>
+  <testcase name="importingTheSameBundleAgainChangesNothing" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.103"/>
+  <testcase name="eachWrittenRecordIsReportedForSync" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.075"/>
+  <testcase name="useImportedOverwritesTheConflict" classname="com.kurtz.homerecord.core.bundle.HomeBundleImporterTest" time="0.094"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

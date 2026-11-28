@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.OfflineScenarioTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:48.837Z" hostname="ip-10-0-131-22" time="0.322">
+  <properties/>
+  <testcase name="inTheBackgroundAWriteStillGoesOutAndAPhoneOnlyPullsWhenItSyncs" classname="com.kurtz.homerecord.core.sync.OfflineScenarioTest" time="0.105"/>
+  <testcase name="reconnectingSendsEverythingWithin60SecondsWithNoDuplicates" classname="com.kurtz.homerecord.core.sync.OfflineScenarioTest" time="0.093"/>
+  <testcase name="twoPhonesSeeEachOthersPhotoAndTheOwnersPunchEditWithin60Seconds" classname="com.kurtz.homerecord.core.sync.OfflineScenarioTest" time="0.071"/>
+  <testcase name="inAirplaneModeEveryFieldWriteSavesAndQueuesExactlyOneChange" classname="com.kurtz.homerecord.core.sync.OfflineScenarioTest" time="0.044"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

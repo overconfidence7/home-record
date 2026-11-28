@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:02.207Z" hostname="ip-10-0-131-22" time="0.016">
+  <properties/>
+  <testcase name="oneRowPerPersonWithPunchesSortedByName" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" time="0.007"/>
+  <testcase name="approvedWeekIsMarkedAndKeptEvenWithoutPunches" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" time="0.001"/>
+  <testcase name="flagsShowOnThePersonsWeek" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" time="0.0"/>
+  <testcase name="punchesOutsideTheWeekAreLeftOut" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" time="0.0"/>
+  <testcase name="editedPunchCarriesItsAuditEntries" classname="com.kurtz.homerecord.fieldlog.timesheets.TimesheetsBuilderTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

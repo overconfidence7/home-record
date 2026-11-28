@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.315Z" hostname="ip-10-0-131-22" time="0.061">
+  <properties/>
+  <testcase name="aPhotoThatCannotBeCopiedSaysSo" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.039"/>
+  <testcase name="listsTheRoomsByFloorWithTheirWallProgress" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.003"/>
+  <testcase name="roomThenWallThenCameraOutlinesTheFirstPhotoAtRoughIn" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.002"/>
+  <testcase name="aCancelledCameraDiscardsTheEmptyFile" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.001"/>
+  <testcase name="aRoomRemovedFromThePlanShowsAsMissing" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.002"/>
+  <testcase name="noRoomsIsTheEmptyState" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.0"/>
+  <testcase name="theSecondCaptureOnTheSameWallAfterDrywallIsFinished" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.002"/>
+  <testcase name="openPhotoSheetSurvivesProcessDeath" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.004"/>
+  <testcase name="backFromTheWallsGoesToTheRoomsThenLeaves" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.002"/>
+  <testcase name="aCameraResultAfterProcessDeathLandsOnTheSameWallAndStage" classname="com.kurtz.homerecord.housemodel.ui.BehindWallViewModelTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

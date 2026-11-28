@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="88.3" timestamp="2026-11-28T15:52:13">
+    <testcase id="H16-backup-restore" name="H16-backup-restore" classname="H16-backup-restore" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H16-backup-restore.yaml" time="88.27" timestamp="2026-11-28T15:52:13" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

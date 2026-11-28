@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.more.DeleteAccountRowTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:48.060Z" hostname="ip-10-0-131-22" time="0.228">
+  <properties/>
+  <testcase name="confirmDeletesTheAccount" classname="com.kurtz.homerecord.fieldlog.more.DeleteAccountRowTest" time="0.089"/>
+  <testcase name="cancelDeletesNothing" classname="com.kurtz.homerecord.fieldlog.more.DeleteAccountRowTest" time="0.062"/>
+  <testcase name="anOfflineTrySaysSo" classname="com.kurtz.homerecord.fieldlog.more.DeleteAccountRowTest" time="0.075"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

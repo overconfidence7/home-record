@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.295Z" hostname="ip-10-0-131-22" time="0.017">
+  <properties/>
+  <testcase name="findsAnItemByModelNumberAndByConsumableSpec" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.004"/>
+  <testcase name="findsContactsAndDocuments" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.0"/>
+  <testcase name="findsAnItemByItsTypeName" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.001"/>
+  <testcase name="findsOverlaysByTheirRoom" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.0"/>
+  <testcase name="findsABreakerByLabelNumberAndPanelAndOpensItsPanelAtTheSlot" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.01"/>
+  <testcase name="findsOverlaysByLabelAndByKindNameAndWords" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.0"/>
+  <testcase name="findsARoomAndItsItems" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.001"/>
+  <testcase name="anUnlabeledOverlayIsTitledByItsKindAndCarriesItsKindForTheIcon" classname="com.kurtz.homerecord.housemodel.search.SearchIndexBuilderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.FormScreenDialogTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:23.942Z" hostname="ip-10-0-131-22" time="0.565">
+  <properties/>
+  <testcase name="dirtyFormAsksBeforeDiscarding" classname="com.kurtz.homerecord.housemanual.FormScreenDialogTest" time="0.388"/>
+  <testcase name="cleanFormClosesAtOnceWithSaveOff" classname="com.kurtz.homerecord.housemanual.FormScreenDialogTest" time="0.169"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

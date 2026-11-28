@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.schedule.ScheduleScreenTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:57.829Z" hostname="ip-10-0-131-22" time="0.41">
+  <properties/>
+  <testcase name="crewWeekHasNoAssignButtons" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleScreenTest" time="0.06"/>
+  <testcase name="teamDayShowsChipsConflictAndAssign" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleScreenTest" time="0.088"/>
+  <testcase name="crewWithNothingThisWeekGetTheEmptyState" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleScreenTest" time="0.058"/>
+  <testcase name="pickerSheetListsTheJobs" classname="com.kurtz.homerecord.fieldlog.schedule.ScheduleScreenTest" time="0.197"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

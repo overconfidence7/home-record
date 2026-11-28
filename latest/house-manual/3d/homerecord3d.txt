@@ -1,0 +1,16 @@
+--------- beginning of main
+11-28 16:08:44.676 26585 26585 I HomeRecord3D: on screen: true; 72% of the view stands out (copy 0)
+11-28 16:08:47.680 26585 26585 I HomeRecord3D: on screen: true; 72% of the view stands out (copy 0)
+11-28 16:08:52.865 26585 26585 I HomeRecord3D: first frame 23834 ms; 60.0 fps; 2 frames; 53 draws; 20 textures at 512 px
+11-28 16:08:54.233 26585 26585 I HomeRecord3D: on screen: true; 19% of the view stands out (copy 0)
+11-28 16:08:54.970 26585 26585 I HomeRecord3D: first frame 23834 ms; 7.8 fps; 10 frames; 53 draws; 20 textures at 512 px
+11-28 16:08:55.938 26585 26585 I HomeRecord3D: on screen: true; 55% of the view stands out (copy 0)
+11-28 16:08:57.055 26585 26585 I HomeRecord3D: first frame 23834 ms; 8.6 fps; 28 frames; 53 draws; 20 textures at 512 px
+11-28 16:08:59.155 26585 26585 I HomeRecord3D: first frame 23834 ms; 6.8 fps; 42 frames; 53 draws; 20 textures at 512 px
+11-28 16:08:59.390 26585 26585 I HomeRecord3D: on screen: true; 67% of the view stands out (copy 0)
+11-28 16:09:01.156 26585 26585 I HomeRecord3D: first frame 23834 ms; 8.3 fps; 51 frames; 53 draws; 20 textures at 512 px
+11-28 16:09:02.398 26585 26585 I HomeRecord3D: on screen: true; 76% of the view stands out (copy 0)
+11-28 16:09:04.028 26585 26585 I HomeRecord3D: on screen: true; 84% of the view stands out (copy 0)
+11-28 16:09:05.157 26585 26585 I HomeRecord3D: first frame 23834 ms; 8.1 fps; 65 frames; 53 draws; 20 textures at 512 px
+11-28 16:09:05.579 26585 26585 I HomeRecord3D: on screen: true; 63% of the view stands out (copy 0)
+11-28 16:09:07.159 26585 26585 I HomeRecord3D: first frame 23834 ms; 8.7 fps; 76 frames; 53 draws; 20 textures at 512 px

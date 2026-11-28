@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:46.010Z" hostname="ip-10-0-131-22" time="0.956">
+  <properties/>
+  <testcase name="savingUnchangedWorkDoneOrHoursLeavesTheSectionAutomatic" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.024"/>
+  <testcase name="delaysWithoutIdsAreRemovedByWhatTheySay" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.024"/>
+  <testcase name="aPhotoLeftOutAfterConfirmStaysOutOnReopeningUntilPutBack" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.094"/>
+  <testcase name="editedWorkDoneAndHoursSurviveReopeningTheDay" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.103"/>
+  <testcase name="offlineWithNoSnapshotSaysNoWeatherOffline" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.04"/>
+  <testcase name="aSentLogChangedLaterSaysChangedSinceSent" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.045"/>
+  <testcase name="crewReadTheSavedLogButNeverBuildOrChangeOne" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.035"/>
+  <testcase name="anOpenSheetKeepsItsDayWhenMidnightPasses" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.032"/>
+  <testcase name="dayBarMovesBackButNeverPastTodayAndTheOpenSheetSurvivesProcessDeath" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.135"/>
+  <testcase name="todayMovesOnAtMidnightAndSomeoneOnTodayFollowsIt" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.073"/>
+  <testcase name="openingTheDayBuildsTheDraftWithCrewWorkPhotosAndWeather" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.045"/>
+  <testcase name="crewCannotLeaveLinesOut" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.057"/>
+  <testcase name="delayNeedsAReasonThenSavesWithItsNoteAndRemovesAfterConfirm" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.047"/>
+  <testcase name="editsMarkTheirSectionAndZeroHoursTakesAPersonOff" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.021"/>
+  <testcase name="hoursThatDoNotReadAsATimeKeepTheDialogOpen" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.04"/>
+  <testcase name="aDelayTappedInReportsOpensItsDayNeverPastTodayAndTheDayChosenLaterWins" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.062"/>
+  <testcase name="removeDelayTakesOffTheDelayAskedAboutEvenWhenTheListShifted" classname="com.kurtz.homerecord.fieldlog.log.LogViewModelTest" time="0.067"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

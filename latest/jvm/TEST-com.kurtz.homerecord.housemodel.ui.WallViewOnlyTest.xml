@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.ui.WallViewOnlyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:21.598Z" hostname="ip-10-0-131-22" time="0.01">
+  <properties/>
+  <testcase name="onThePlanAViewerMovesAroundAndPicksButEditsNothing" classname="com.kurtz.homerecord.housemodel.ui.WallViewOnlyTest" time="0.008"/>
+  <testcase name="drawingMovingEditingAndDeletingAreDropped" classname="com.kurtz.homerecord.housemodel.ui.WallViewOnlyTest" time="0.001"/>
+  <testcase name="lookingAndPickingAreAllowed" classname="com.kurtz.homerecord.housemodel.ui.WallViewOnlyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

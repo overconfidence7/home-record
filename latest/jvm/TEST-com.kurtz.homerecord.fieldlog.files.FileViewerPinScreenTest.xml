@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:36.411Z" hostname="ip-10-0-131-22" time="0.444">
+  <properties/>
+  <testcase name="chooserOffersNewTaskHereAndTheOpenTasks" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" time="0.092"/>
+  <testcase name="outsidePinModeATapOnThePageDoesNothingAndCrewHaveNoPinAction" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" time="0.122"/>
+  <testcase name="pinIsAFullTouchTargetThatOpensItsTask" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" time="0.055"/>
+  <testcase name="taskFormShowsTheFilePinAndRemovesIt" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" time="0.105"/>
+  <testcase name="pinATaskEntersPinModeAndATapOnThePageReportsTheSpot" classname="com.kurtz.homerecord.fieldlog.files.FileViewerPinScreenTest" time="0.065"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

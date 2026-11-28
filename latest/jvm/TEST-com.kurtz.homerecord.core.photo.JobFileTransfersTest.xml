@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.JobFileTransfersTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:45.182Z" hostname="ip-10-0-131-22" time="0.479">
+  <properties/>
+  <testcase name="offlineWithoutNetworkAsksToDownloadLater" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.06"/>
+  <testcase name="availableOfflineKeepsTheFileThroughFreeUp" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.033"/>
+  <testcase name="downloadSignsAGetForTheRowsKeyAndARefusalIsNotANetworkProblem" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.027"/>
+  <testcase name="uploadStatusFollowsTheQueueRow" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.068"/>
+  <testcase name="opensARemoteFileByDownloadingItOnce" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.071"/>
+  <testcase name="freeUpDropsDownloadsAndTheNextOpenDownloadsAgain" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.108"/>
+  <testcase name="turningOfflineOffHandsTheFileBackToTheCache" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.077"/>
+  <testcase name="aFileNeverUploadedHasNothingToDownload" classname="com.kurtz.homerecord.core.photo.JobFileTransfersTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

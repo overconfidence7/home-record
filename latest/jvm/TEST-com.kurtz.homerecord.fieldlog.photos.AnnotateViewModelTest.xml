@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:48.860Z" hostname="ip-10-0-131-22" time="0.126">
+  <properties/>
+  <testcase name="loads the photo with its aspect and reports a missing one" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.028"/>
+  <testcase name="drags add marks and undo removes the last" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.026"/>
+  <testcase name="save writes a copy and keeps the original" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.018"/>
+  <testcase name="nothing to save and a failed render are reported" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.016"/>
+  <testcase name="marks and tool survive process death" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.014"/>
+  <testcase name="text and measure ask for a value before adding" classname="com.kurtz.homerecord.fieldlog.photos.AnnotateViewModelTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

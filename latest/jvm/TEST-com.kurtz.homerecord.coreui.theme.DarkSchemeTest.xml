@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.theme.DarkSchemeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:37.710Z" hostname="ip-10-0-131-22" time="0.054">
+  <properties/>
+  <testcase name="followsTheThemeNotTheSystemSetting" classname="com.kurtz.homerecord.coreui.theme.DarkSchemeTest" time="0.052"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

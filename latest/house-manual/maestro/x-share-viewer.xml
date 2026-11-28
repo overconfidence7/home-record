@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="100.871" timestamp="2026-11-28T16:04:45">
+    <testcase id="x-share-viewer" name="x-share-viewer" classname="x-share-viewer" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/x-share-viewer.yaml" time="100.844" timestamp="2026-11-28T16:04:45" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

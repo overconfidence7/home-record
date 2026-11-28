@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.billing.LimitGateTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:22.498Z" hostname="ip-10-0-131-22" time="0.007">
+  <properties/>
+  <testcase name="proHasNoLimits" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.001"/>
+  <testcase name="sharingIsPro" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="limitsLiftWithoutRestartWhenProFlips" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.001"/>
+  <testcase name="freeTierAllowsOneHomeAndOnePanel" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.004"/>
+  <testcase name="freeTierAllowsFifteenItemsNotSixteen" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="freeTierHasNoCloudSync" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="aFreePhoneSyncsOnlyAProHome" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="homeReportIsPro" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.0"/>
+  <testcase name="unavailableBillingStaysFree" classname="com.kurtz.homerecord.core.billing.LimitGateTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

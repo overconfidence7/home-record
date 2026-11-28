@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.media.UploadedKeysTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:44.711Z" hostname="ip-10-0-131-22" time="0.2">
+  <properties/>
+  <testcase name="photoNoteAndFileGetTheirKeyAndAreQueuedForSync" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.047"/>
+  <testcase name="sameKeyAgainMissingRowOrUnknownEntityChangesNothing" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.019"/>
+  <testcase name="documentGetsItsKey" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.021"/>
+  <testcase name="receiptGetsItsKey" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.028"/>
+  <testcase name="wallPhotoOriginalAndTextureEachGetTheirKey" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.04"/>
+  <testcase name="wallPhotoFileNamesKeepTheExtensionAndType" classname="com.kurtz.homerecord.core.media.UploadedKeysTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

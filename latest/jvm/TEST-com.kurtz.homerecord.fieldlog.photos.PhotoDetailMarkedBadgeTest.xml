@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.PhotoDetailMarkedBadgeTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:49.209Z" hostname="ip-10-0-131-22" time="0.109">
+  <properties/>
+  <testcase name="aMarkedUpPhotoCarriesTheBadgeInsideThePhotoFrame" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailMarkedBadgeTest" time="0.069"/>
+  <testcase name="anUnmarkedPhotoHasNoBadge" classname="com.kurtz.homerecord.fieldlog.photos.PhotoDetailMarkedBadgeTest" time="0.038"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

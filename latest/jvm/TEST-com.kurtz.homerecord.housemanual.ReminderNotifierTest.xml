@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ReminderNotifierTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:41.944Z" hostname="ip-10-0-131-22" time="0.189">
+  <properties/>
+  <testcase name="withoutThePermissionNothingIsPosted" classname="com.kurtz.homerecord.housemanual.ReminderNotifierTest" time="0.037"/>
+  <testcase name="theSummaryNamesUpToThreeAndCountsTheRest" classname="com.kurtz.homerecord.housemanual.ReminderNotifierTest" time="0.021"/>
+  <testcase name="theNotificationOpensReminders" classname="com.kurtz.homerecord.housemanual.ReminderNotifierTest" time="0.107"/>
+  <testcase name="aMaestroStringArgumentAlsoOpensReminders" classname="com.kurtz.homerecord.housemanual.ReminderNotifierTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

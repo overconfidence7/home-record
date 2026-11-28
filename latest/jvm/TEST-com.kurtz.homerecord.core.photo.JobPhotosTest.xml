@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.photo.JobPhotosTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:45.954Z" hostname="ip-10-0-131-22" time="0.297">
+  <properties/>
+  <testcase name="missingJobSavesNothing" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.029"/>
+  <testcase name="signedOutKeepsPhotoButQueuesNoUpload" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.02"/>
+  <testcase name="lensLimiter" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.018"/>
+  <testcase name="noPermissionStillSavesWithoutGps" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.019"/>
+  <testcase name="shutterSavesTagsFixAndQueuesUpload" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.033"/>
+  <testcase name="afterPhotoLinksToBefore" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.039"/>
+  <testcase name="lateFixFillsOnlyMissingLocationAndKeepsOtherEdits" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.049"/>
+  <testcase name="groupsByDayNewestFirst" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.039"/>
+  <testcase name="stampsTheSignedInMemberAsAuthor" classname="com.kurtz.homerecord.core.photo.JobPhotosTest" time="0.04"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:14.329Z" hostname="ip-10-0-131-22" time="2.786">
+  <properties/>
+  <testcase name="aNameThatFitsKeepsTheFullSize" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="2.576"/>
+  <testcase name="aNarrowRoomNeverSplitsAWord" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="0.054"/>
+  <testcase name="aNameTooWideAtTheSmallSizeShrinksInsteadOfDisappearing" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="0.03"/>
+  <testcase name="aRoomTooSmallForEvenHalfSizeShowsNoName" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="0.027"/>
+  <testcase name="shrinkStepsEndAtHalfTheSmallSize" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="0.013"/>
+  <testcase name="wrapsOnlyBetweenWords" classname="com.kurtz.homerecord.housemodel.blueprint.RoomNameLayoutTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

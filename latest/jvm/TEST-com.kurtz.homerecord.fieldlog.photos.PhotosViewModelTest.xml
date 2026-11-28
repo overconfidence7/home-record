@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:49.964Z" hostname="ip-10-0-131-22" time="0.196">
+  <properties/>
+  <testcase name="after shot pairs with its before and annotated copy is flagged" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.033"/>
+  <testcase name="owner gets a gallery link once there is a photo and crew never do" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.038"/>
+  <testcase name="empty job shows no days once loaded" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.022"/>
+  <testcase name="photos group by day newest first with room names" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.032"/>
+  <testcase name="a failed read shows the error state and retry reads again" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.032"/>
+  <testcase name="photo from another phone shows a placeholder and downloads once" classname="com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Nov 28, 2026 2:23:50 PM com.kurtz.homerecord.core.data.Reloadable _init_$lambda$0
+WARNING: Photos failed to load
+java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invokeSuspend(PhotosViewModelTest.kt:157)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invoke(PhotosViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invoke(PhotosViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModel$special$$inlined$map$1$2.emit(Emitters.kt:218)
+	at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2.emit(Emitters.kt:219)
+	at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2$1.invokeSuspend(Emitters.kt)
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModel$special$$inlined$map$1.collect(PhotosViewModel.kt:112)
+	at kotlinx.coroutines.flow.internal.CombineKt$combineInternal$2$1.invokeSuspend(Combine.kt:28)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt.catchImpl(Errors.kt:152)
+	at kotlinx.coroutines.flow.FlowKt__ErrorsKt$catch$$inlined$unsafeFlow$1.collect(Errors.kt:112)
+	at com.kurtz.homerecord.core.data.Reloadable$wrap$$inlined$flatMapLatest$1.invokeSuspend(Reloadable.kt:189)
+	at kotlinx.coroutines.flow.internal.ChannelFlowTransformLatest$flowCollect$3$1$2.invokeSuspend(Merge.kt:30)
+Caused by: java.lang.IllegalStateException: database disk image is malformed
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invokeSuspend(PhotosViewModelTest.kt:157)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invoke(PhotosViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModelTest$a failed read shows the error state and retry reads again$1$model$1.invoke(PhotosViewModelTest.kt)
+	at com.kurtz.homerecord.fieldlog.photos.PhotosViewModel$special$$inlined$map$1$2.emit(Emitters.kt:218)
+	at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2.emit(Emitters.kt:219)
+	at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2$1.invokeSuspend(Emitters.kt)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.internal.DispatchedContinuationKt.resumeCancellableWithInternal(DispatchedContinuation.kt:384)
+	at kotlinx.coroutines.DispatchedCoroutine.afterResume(Builders.common.kt:588)
+	at kotlinx.coroutines.AbstractCoroutine.resumeWith(AbstractCoroutine.kt:101)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:47)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+]]></system-err>
+</testsuite>

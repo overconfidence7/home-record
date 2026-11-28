@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:34.769Z" hostname="ip-10-0-131-22" time="0.781">
+  <properties/>
+  <testcase name="aSignedOrderCannotBeEditedOrDeleted" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.088"/>
+  <testcase name="addKeepsEveryFieldComputesTheTotalAndQueuesOneChange" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.063"/>
+  <testcase name="deleteRemovesADraftAndListIsNewestFirst" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.16"/>
+  <testcase name="duplicateMakesADraftCopyWithoutTheSignature" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.082"/>
+  <testcase name="signStoresSignerTimeAndImageAndLocksTheOrder" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.049"/>
+  <testcase name="photosKeepTheJobsOwnInOrderOnce" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.077"/>
+  <testcase name="signatureStrokesSyncAndAWebSignedOrderGetsItsImageDrawnOnce" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.073"/>
+  <testcase name="blankTitleOrMissingJobSavesNothing" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.063"/>
+  <testcase name="updateSavesADraftAndRecomputesTheTotal" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.062"/>
+  <testcase name="emptyLinesAreDroppedAndBlankFieldsCleared" classname="com.kurtz.homerecord.core.changeorder.JobChangeOrdersTest" time="0.042"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

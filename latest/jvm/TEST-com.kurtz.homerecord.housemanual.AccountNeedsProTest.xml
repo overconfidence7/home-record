@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.AccountNeedsProTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:22:56.086Z" hostname="ip-10-0-131-22" time="12.645">
+  <properties/>
+  <testcase name="aSignedInFreePhoneSyncsOnlyAProHome" classname="com.kurtz.homerecord.housemanual.AccountNeedsProTest" time="8.573"/>
+  <testcase name="proShowsTheSignInForm" classname="com.kurtz.homerecord.housemanual.AccountNeedsProTest" time="2.02"/>
+  <testcase name="onlyASignedOutFreePhoneNeedsPro" classname="com.kurtz.homerecord.housemanual.AccountNeedsProTest" time="0.184"/>
+  <testcase name="signInOnTheFreeTierOpensThePaywall" classname="com.kurtz.homerecord.housemanual.AccountNeedsProTest" time="0.523"/>
+  <testcase name="syncOffNoteOpensPro" classname="com.kurtz.homerecord.housemanual.AccountNeedsProTest" time="0.197"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

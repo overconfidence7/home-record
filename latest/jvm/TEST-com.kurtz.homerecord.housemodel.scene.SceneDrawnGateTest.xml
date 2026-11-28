@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemodel.scene.SceneDrawnGateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:24:19.281Z" hostname="ip-10-0-131-22" time="0.0">
+  <properties/>
+  <testcase name="resetForANewCameraForgetsEarlierChecks" classname="com.kurtz.homerecord.housemodel.scene.SceneDrawnGateTest" time="0.0"/>
+  <testcase name="aBlankCheckBetweenGoodOnesStartsAgain" classname="com.kurtz.homerecord.housemodel.scene.SceneDrawnGateTest" time="0.0"/>
+  <testcase name="oneGoodCheckIsNotEnough" classname="com.kurtz.homerecord.housemodel.scene.SceneDrawnGateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

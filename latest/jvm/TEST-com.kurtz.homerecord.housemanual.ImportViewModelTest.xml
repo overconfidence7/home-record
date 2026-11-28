@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ImportViewModelTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:28.426Z" hostname="ip-10-0-131-22" time="0.03">
+  <properties/>
+  <testcase name="unreadableFileAndFailedImportSayWhat" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.013"/>
+  <testcase name="doneSummaryNamesOnlyTheKindsImported" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.0"/>
+  <testcase name="theSweepDeletesReadsADayOldAndKeepsNewerOnes" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.004"/>
+  <testcase name="conflictsKeepMineUnlessUseImportedIsPicked" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.006"/>
+  <testcase name="sameBundleAgainHasNothingNew" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.0"/>
+  <testcase name="leavingWithoutImportingDiscardsTheReadButAnImportDoesNot" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.005"/>
+  <testcase name="previewCountsWhatIsNewPerKind" classname="com.kurtz.homerecord.housemanual.ImportViewModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

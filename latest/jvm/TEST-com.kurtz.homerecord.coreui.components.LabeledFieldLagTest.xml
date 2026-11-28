@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:28.510Z" hostname="ip-10-0-131-22" time="2.352">
+  <properties/>
+  <testcase name="keysTypedWhileTheValueLagsAllLand" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="1.183"/>
+  <testcase name="hardwareKeysAfterTheErrorClearsAllLand" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="0.233"/>
+  <testcase name="aFilteredKeyIsDroppedFromTheField" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="0.207"/>
+  <testcase name="clearingTheErrorOnTheFirstKeyKeepsFocus" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="0.289"/>
+  <testcase name="aValueSetFromOutsideReplacesTheText" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="0.221"/>
+  <testcase name="moneyFieldKeepsFocusBesideAButtonWhenItsErrorClears" classname="com.kurtz.homerecord.coreui.components.LabeledFieldLagTest" time="0.203"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

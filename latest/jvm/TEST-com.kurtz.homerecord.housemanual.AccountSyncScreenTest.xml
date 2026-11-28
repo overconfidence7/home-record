@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.AccountSyncScreenTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:08.740Z" hostname="ip-10-0-131-22" time="1.233">
+  <properties/>
+  <testcase name="signedInAccountExplainsSyncAndSignsOut" classname="com.kurtz.homerecord.housemanual.AccountSyncScreenTest" time="0.46"/>
+  <testcase name="moreScrollsSoTheLastRowIsReachableAt200Percent" classname="com.kurtz.homerecord.housemanual.AccountSyncScreenTest" time="0.526"/>
+  <testcase name="moreAccountRowOpensAccount" classname="com.kurtz.homerecord.housemanual.AccountSyncScreenTest" time="0.237"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

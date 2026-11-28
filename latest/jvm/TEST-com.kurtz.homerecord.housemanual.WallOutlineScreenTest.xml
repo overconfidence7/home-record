@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:44.290Z" hostname="ip-10-0-131-22" time="0.587">
+  <properties/>
+  <testcase name="crossedCornersExplainThemselves" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.065"/>
+  <testcase name="draggingAHandleSendsItsMovesAndTheLoupeShowsWhileDragging" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.064"/>
+  <testcase name="anUnreadablePhotoOffersBack" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.054"/>
+  <testcase name="savingWaitsAndAnErrorSaysWhatToDo" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.039"/>
+  <testcase name="showsFourHandlesTheWallsShapeAndUse" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.061"/>
+  <testcase name="photographOpensTheCameraOrGallerySheet" classname="com.kurtz.homerecord.housemanual.WallOutlineScreenTest" time="0.301"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

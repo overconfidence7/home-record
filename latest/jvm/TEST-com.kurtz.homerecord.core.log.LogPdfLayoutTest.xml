@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.log.LogPdfLayoutTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:41.707Z" hostname="ip-10-0-131-22" time="0.009">
+  <properties/>
+  <testcase name="photosFillAThreeAcrossGridInsideTheMargins" classname="com.kurtz.homerecord.core.log.LogPdfLayoutTest" time="0.003"/>
+  <testcase name="firstPageHasTheLogoCompanyJobDateAndSections" classname="com.kurtz.homerecord.core.log.LogPdfLayoutTest" time="0.001"/>
+  <testcase name="aLongLogRunsOnToMorePagesAndNothingCrossesTheFooter" classname="com.kurtz.homerecord.core.log.LogPdfLayoutTest" time="0.005"/>
+  <testcase name="withoutALogoTheCompanyNameStartsAtTheMargin" classname="com.kurtz.homerecord.core.log.LogPdfLayoutTest" time="0.0"/>
+  <testcase name="wrapKeepsLinesInsideTheWidthAndBreaksAWordTooLongForOne" classname="com.kurtz.homerecord.core.log.LogPdfLayoutTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

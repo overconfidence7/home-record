@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.billing.FieldLogPlanTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:22.491Z" hostname="ip-10-0-131-22" time="0.005">
+  <properties/>
+  <testcase name="theNextChangeIsTheEarliestFutureEndOfAPaidPlanOrTheTrial" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.002"/>
+  <testcase name="theTrialIsEverythingOnWithDaysLeftRoundedUp" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.001"/>
+  <testcase name="aCompanyThatMovedToSoloKeepsItsPeopleAndShowsHowManyAreOver" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.0"/>
+  <testcase name="soloIsTheOwnerAloneAndCrewIsTen" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.001"/>
+  <testcase name="readsFromTheMembership" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.001"/>
+  <testcase name="aLapsedPlanSendsTheOwnerToThePaywallAndCrewToReadOnly" classname="com.kurtz.homerecord.core.billing.FieldLogPlanTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

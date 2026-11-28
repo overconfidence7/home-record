@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.log.LogPdfTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:43.372Z" hostname="ip-10-0-131-22" time="0.412">
+  <properties/>
+  <testcase name="theLocalCompanyRowWinsAndOnlyTheJobsCompanyFillsItsBlanks" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.123"/>
+  <testcase name="aCompanyMadeOnTheWelcomeScreenHeadsThePdfFromItsMembership" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.028"/>
+  <testcase name="fileNameKeepsTheJobAndDayAndDropsCharactersAFileCannotHold" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.02"/>
+  <testcase name="emptySectionsAreLeftOutAndAMissingCompanyFallsBackToTheAppName" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.035"/>
+  <testcase name="aPortraitPhotoStoredSidewaysWithAnExifTurnPrintsUpright" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.076"/>
+  <testcase name="headerCarriesCompanyLogoJobClientAndDate" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.033"/>
+  <testcase name="writerDrawsEveryPageWithPhotosAndAMissingLogoWithoutThrowing" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.054"/>
+  <testcase name="sectionsComeInTheLogTabsOrderWithTheirLines" classname="com.kurtz.homerecord.fieldlog.log.LogPdfTest" time="0.035"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.PushBatchesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:49.164Z" hostname="ip-10-0-131-22" time="0.144">
+  <properties/>
+  <testcase name="encodedSizeCountsUtf8Bytes" classname="com.kurtz.homerecord.core.sync.PushBatchesTest" time="0.004"/>
+  <testcase name="largeOpsStopAtTheByteBudget" classname="com.kurtz.homerecord.core.sync.PushBatchesTest" time="0.046"/>
+  <testcase name="aSingleOpOverTheBudgetStillGoesOutAlone" classname="com.kurtz.homerecord.core.sync.PushBatchesTest" time="0.089"/>
+  <testcase name="payloadOverTheWorkerLimitIsTooLarge" classname="com.kurtz.homerecord.core.sync.PushBatchesTest" time="0.001"/>
+  <testcase name="smallOpsFillABatchUpToTheOpLimit" classname="com.kurtz.homerecord.core.sync.PushBatchesTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

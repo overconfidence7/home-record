@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.reports.JobSummaryPdfTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:56.813Z" hostname="ip-10-0-131-22" time="0.086">
+  <properties/>
+  <testcase name="laysOutOnOnePageWithTheFooterAndAFileNameForTheJob" classname="com.kurtz.homerecord.fieldlog.reports.JobSummaryPdfTest" time="0.037"/>
+  <testcase name="summaryCarriesHoursVsBudgetChangeOrdersTasksDaysAndDelays" classname="com.kurtz.homerecord.fieldlog.reports.JobSummaryPdfTest" time="0.027"/>
+  <testcase name="aNewJobSaysWhatIsMissingInsteadOfZeros" classname="com.kurtz.homerecord.fieldlog.reports.JobSummaryPdfTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

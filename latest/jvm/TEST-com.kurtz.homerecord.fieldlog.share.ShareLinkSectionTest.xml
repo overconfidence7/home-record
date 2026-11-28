@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.share.ShareLinkSectionTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:58.603Z" hostname="ip-10-0-131-22" time="0.155">
+  <properties/>
+  <testcase name="shareLinkThenTurnOffAsksFirst" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkSectionTest" time="0.069"/>
+  <testcase name="crewSeeNoShareLinkAndWorkingDisablesIt" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkSectionTest" time="0.038"/>
+  <testcase name="aLinkBeingMadeCannotBeTappedTwiceAndAFailureSaysSo" classname="com.kurtz.homerecord.fieldlog.share.ShareLinkSectionTest" time="0.045"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

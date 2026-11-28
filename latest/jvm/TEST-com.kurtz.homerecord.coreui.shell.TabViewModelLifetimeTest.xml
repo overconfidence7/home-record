@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.coreui.shell.TabViewModelLifetimeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:36.808Z" hostname="ip-10-0-131-22" time="0.878">
+  <properties/>
+  <testcase name="hiddenTabsScreenAndSavedStateSurviveProcessDeath" classname="com.kurtz.homerecord.coreui.shell.TabViewModelLifetimeTest" time="0.307"/>
+  <testcase name="aScreenLeavingItsTabsStackIsCleared" classname="com.kurtz.homerecord.coreui.shell.TabViewModelLifetimeTest" time="0.215"/>
+  <testcase name="switchingToATabCreatesItsViewModelOnce" classname="com.kurtz.homerecord.coreui.shell.TabViewModelLifetimeTest" time="0.181"/>
+  <testcase name="returningToATabKeepsItsViewModel" classname="com.kurtz.homerecord.coreui.shell.TabViewModelLifetimeTest" time="0.162"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.sync.HomeCloudCopyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:48.462Z" hostname="ip-10-0-131-22" time="0.271">
+  <properties/>
+  <testcase name="deleteSignsOutKeepsTheHomeAndTheNextSignInUploadsItAll" classname="com.kurtz.homerecord.core.sync.HomeCloudCopyTest" time="0.127"/>
+  <testcase name="aFailedDeleteChangesNothing" classname="com.kurtz.homerecord.core.sync.HomeCloudCopyTest" time="0.055"/>
+  <testcase name="otherHomesOutboxIsLeftAlone" classname="com.kurtz.homerecord.core.sync.HomeCloudCopyTest" time="0.086"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

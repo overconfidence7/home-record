@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.log.PhotoReportTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:41.735Z" hostname="ip-10-0-131-22" time="0.015">
+  <properties/>
+  <testcase name="countsEachJobsPhotosInTheDates" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.007"/>
+  <testcase name="spansEachJobsPhotosFirstToLast" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.001"/>
+  <testcase name="noPhotosStillMakesOnePage" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.001"/>
+  <testcase name="aLongNoteIsCutToThreeLinesEndingInAnEllipsis" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.001"/>
+  <testcase name="picksTheJobsPhotosInTheDatesOldestFirstAndCountsTheOnesNotHere" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.002"/>
+  <testcase name="nothingButTheFooterGoesBelowTheBottomAndPhotosDoNotOverlap" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.001"/>
+  <testcase name="putsAtMostFourPhotosOnAPageWithTheirCaptions" classname="com.kurtz.homerecord.core.log.PhotoReportTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

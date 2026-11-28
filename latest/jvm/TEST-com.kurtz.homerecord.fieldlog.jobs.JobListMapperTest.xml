@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:42.561Z" hostname="ip-10-0-131-22" time="0.013">
+  <properties/>
+  <testcase name="groupsActiveByNextScheduledDayThenUnscheduled" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.01"/>
+  <testcase name="supportingJoinsClientAndAddressOnceAndIsNullWhenBothMissing" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.001"/>
+  <testcase name="nextDaySkipsPastDaysAndClientNameJoins" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.001"/>
+  <testcase name="searchMatchesNameClientAndAddressIgnoringCase" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.001"/>
+  <testcase name="storedStatusIsReadForToday" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.0"/>
+  <testcase name="archivedOnlyWhenAsked" classname="com.kurtz.homerecord.fieldlog.jobs.JobListMapperTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:32.703Z" hostname="ip-10-0-131-22" time="0.631">
+  <properties/>
+  <testcase name="unknownOrDeletedHomeExportsNothing" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.14"/>
+  <testcase name="localPathsBecomeMediaNamesAndMissingFilesAreLeftOut" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.14"/>
+  <testcase name="exportWritesAndReadsBackThroughTheCodec" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.097"/>
+  <testcase name="portableLocalSideMatchesTheExportedShape" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.028"/>
+  <testcase name="ledgerFromAnAppliedPlanMakesTheSameImportANoOp" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.1"/>
+  <testcase name="exportsTheWholeHouseModelOfOneHomeOnly" classname="com.kurtz.homerecord.core.bundle.HomeBundleExporterTest" time="0.118"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

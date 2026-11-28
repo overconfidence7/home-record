@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="1" time="139.943" timestamp="2026-11-28T15:25:26">
+    <testcase id="H03-blueprint-room" name="H03-blueprint-room" classname="H03-blueprint-room" file="/home/runner/work/home-record/home-record/qa/flows/house-manual/H03-blueprint-room.yaml" time="139.898" timestamp="2026-11-28T15:25:26" status="ERROR">
+      <failure>Assertion is false: id: hm_3d_scene_drawn is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

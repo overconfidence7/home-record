@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:30.364Z" hostname="ip-10-0-131-22" time="0.876">
+  <properties/>
+  <testcase name="onAWallShowsTheRoomsWallsAndATapHangsTheItem" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.11"/>
+  <testcase name="theMarkerDragsAndOtherItemsAreNotTappable" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.07"/>
+  <testcase name="theWhereRowSaysIfTheItemIsOnThePlanAndOpensPlaceOnPlan" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.099"/>
+  <testcase name="inLandscapeThePlanTakesTheFullHeightWithTheControlsBeside" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.103"/>
+  <testcase name="onAWallIsOfferedOnceTheRoomHasWalls" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.085"/>
+  <testcase name="aHungItemShowsItsMarkerOnItsWall" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.077"/>
+  <testcase name="theWhereRowNamesTheWallAHungItemIsOn" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.066"/>
+  <testcase name="aPlacedItemSaysWhereItIsAndCanBeRemoved" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.065"/>
+  <testcase name="aFloorWithNoRoomsOffersTheEditor" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.069"/>
+  <testcase name="aTapOnThePlanPlacesTheItem" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.071"/>
+  <testcase name="anExteriorItemStaysOffThePlan" classname="com.kurtz.homerecord.housemanual.ItemPlaceScreenTest" time="0.049"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

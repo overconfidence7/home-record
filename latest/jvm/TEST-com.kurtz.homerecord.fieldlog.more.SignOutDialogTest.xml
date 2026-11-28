@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.more.SignOutDialogTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:48.305Z" hostname="ip-10-0-131-22" time="0.195">
+  <properties/>
+  <testcase name="unsentChangesAreNamed" classname="com.kurtz.homerecord.fieldlog.more.SignOutDialogTest" time="0.083"/>
+  <testcase name="cancelKeepsTheSession" classname="com.kurtz.homerecord.fieldlog.more.SignOutDialogTest" time="0.057"/>
+  <testcase name="confirmSignsOut" classname="com.kurtz.homerecord.fieldlog.more.SignOutDialogTest" time="0.053"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

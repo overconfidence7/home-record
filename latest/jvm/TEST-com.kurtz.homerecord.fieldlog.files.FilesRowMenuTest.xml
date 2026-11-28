@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.files.FilesRowMenuTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:37.586Z" hostname="ip-10-0-131-22" time="0.318">
+  <properties/>
+  <testcase name="longPressOpensTheSameMenu" classname="com.kurtz.homerecord.fieldlog.files.FilesRowMenuTest" time="0.147"/>
+  <testcase name="actionsLiveInTheRowMenu" classname="com.kurtz.homerecord.fieldlog.files.FilesRowMenuTest" time="0.167"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

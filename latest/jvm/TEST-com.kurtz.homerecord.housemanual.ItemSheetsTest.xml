@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.ItemSheetsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:31.253Z" hostname="ip-10-0-131-22" time="0.241">
+  <properties/>
+  <testcase name="plateSheetShowsRepeatedLinesWithoutCrashing" classname="com.kurtz.homerecord.housemanual.ItemSheetsTest" time="0.081"/>
+  <testcase name="attachSheetReachesTheLastDocumentAt200PercentText" classname="com.kurtz.homerecord.housemanual.ItemSheetsTest" time="0.155"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

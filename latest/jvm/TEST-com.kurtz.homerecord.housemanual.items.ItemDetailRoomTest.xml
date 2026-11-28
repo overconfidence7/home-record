@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.items.ItemDetailRoomTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:46.523Z" hostname="ip-10-0-131-22" time="0.237">
+  <properties/>
+  <testcase name="theSheetChecksTheCurrentRoomAndPickingAnotherMovesIt" classname="com.kurtz.homerecord.housemanual.items.ItemDetailRoomTest" time="0.044"/>
+  <testcase name="exteriorIsALabelNotALink" classname="com.kurtz.homerecord.housemanual.items.ItemDetailRoomTest" time="0.044"/>
+  <testcase name="overflowOffersMoveToRoom" classname="com.kurtz.homerecord.housemanual.items.ItemDetailRoomTest" time="0.09"/>
+  <testcase name="theRoomChipOpensTheRoom" classname="com.kurtz.homerecord.housemanual.items.ItemDetailRoomTest" time="0.049"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

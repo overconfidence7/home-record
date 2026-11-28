@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.housemanual.PanelViewModelTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:35.305Z" hostname="ip-10-0-131-22" time="0.692">
+  <properties/>
+  <testcase name="tappingAnOpenSlotAddsALabeledBreakerThatFeedsARoomAndAnItem" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.068"/>
+  <testcase name="aDeletedItemShowsTheMissingStateAndMakesNoPanel" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.027"/>
+  <testcase name="panelDetailsSaveSlotCountMainAmpsAndBrandButNotBelowTheBreakersInUse" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.056"/>
+  <testcase name="touchAndHoldOnASinglePoleBreakerAddsATandemInTheSameSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.049"/>
+  <testcase name="openedFromABreakerChipTheSlotIsMarkedForTwoSecondsAndNotAgainAfterRotation" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.034"/>
+  <testcase name="openedFromMoreThePanelMarksNoSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.023"/>
+  <testcase name="twoPolesIntoATakenSlotSaysWhichSlotAndDoesNotSave" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.031"/>
+  <testcase name="openingAPanelItemMakesItsFortySlotPanelOnceAndNamesTheScreenAfterTheItem" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.063"/>
+  <testcase name="openPhotoSheetSurvivesProcessDeath" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.081"/>
+  <testcase name="aPanelPhotoComesFromTheCameraOrThePickerAndCanBeRemoved" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.066"/>
+  <testcase name="aTwoPoleBreakerShowsAsOneTallCellAndATandemAsTwoHalves" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.038"/>
+  <testcase name="editingABreakerSurvivesProcessDeathAndDeleteAsksThenFreesTheSlot" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.084"/>
+  <testcase name="shareLegendExportsThePanelWithFeedsAndClearsAfterHandled" classname="com.kurtz.homerecord.housemanual.PanelViewModelTest" time="0.063"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

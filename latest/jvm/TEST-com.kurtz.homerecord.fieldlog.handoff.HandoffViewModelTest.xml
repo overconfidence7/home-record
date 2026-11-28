@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:23:39.624Z" hostname="ip-10-0-131-22" time="0.019">
+  <properties/>
+  <testcase name="aFileThatCannotBeWrittenSaysSoAndExportCanBeTriedAgain" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.009"/>
+  <testcase name="exportReadsTheHouseAgainAndHandsTheFileToTheShareSheet" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="offlineAndTooLargeAreToldAndSendCanBeTriedAgain" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.004"/>
+  <testcase name="aBadAddressIsCaughtBeforeAnythingIsSent" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="sendToHomeownerPrefillsTheClientsEmailAndSaysWhereItWentAndUntilWhen" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="theTypedAddressAndAFinishedSendSurviveProcessDeath" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="anEmptyHouseIsNotSent" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="anEmptyHouseOrAMissingOneIsNotExported" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.001"/>
+  <testcase name="loadsTheSummaryOfTheJobsHouse" classname="com.kurtz.homerecord.fieldlog.handoff.HandoffViewModelTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

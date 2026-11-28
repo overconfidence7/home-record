@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kurtz.homerecord.core.share.HomeAccessTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-28T14:21:47.569Z" hostname="ip-10-0-131-22" time="0.03">
+  <properties/>
+  <testcase name="refreshKeepsTheHomesProStateAndHoldsItOffline" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.005"/>
+  <testcase name="refreshTakesTheRoleFromTheAccountAndKeepsItWhenOffline" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.006"/>
+  <testcase name="restoringASharedHomeRecordsTheRoleBeforeItsRowsArrive" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.007"/>
+  <testcase name="aHomeNotOnTheAccountKeepsItsLastRole" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.002"/>
+  <testcase name="aHomeNeverSeenOnTheServerIsEditable" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.008"/>
+  <testcase name="aViewerCannotEditAndFamilyCan" classname="com.kurtz.homerecord.core.share.HomeAccessTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
