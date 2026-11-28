@@ -36,3 +36,35 @@ class RoomLabelsTest {
         assertThat(RoomLabels.place(rooms, 0, 0, toClip)).isEmpty()
     }
 }
+
+// [judge:hm-3d-labels-overlap]: overlapping names are left out, rooms on higher floors first, then plan order.
+class RoomLabelsOverlapTest {
+    private fun room(id: String, name: String, x0: Float, z0: Float, x1: Float, z1: Float, floorY: Float = 0f) =
+        SceneRoom(id, name, listOf(x0 to z0, x1 to z0, x1 to z1, x0 to z1), floorY, floorY + 2.4f)
+
+    // Top-down: x to the right, z down the screen, height ignored, 100 px per meter.
+    private val topDown: (Float, Float, Float) -> FloatArray = { x, _, z -> floatArrayOf(x / 10f, -z / 10f, 0f, 1f) }
+    private val size: (String) -> Pair<Float, Float> = { name -> name.length * 10f to 20f }
+
+    @AcceptanceCriterion("AC-C20")
+    @Test fun anUpperFloorNameWinsOverTheRoomBelowAndSeparateNamesStay() {
+        val rooms = listOf(
+            room("k", "Kitchen", 0f, 0f, 4f, 4f), // main floor
+            room("l", "Living room", 6f, 0f, 9f, 4f), // main floor, far enough to the right
+            room("b2", "Bedroom 2", 0f, 0f, 4f, 4f, floorY = 3f), // straight above the kitchen
+        )
+        val labels = RoomLabels.place(rooms, 2000, 2000, size, topDown)
+        assertThat(labels.map { it.id }).containsExactly("l", "b2")
+    }
+
+    @AcceptanceCriterion("AC-C20")
+    @Test fun onOneFloorTheFirstRoomInPlanOrderKeepsItsName() {
+        val rooms = listOf(
+            room("k", "Kitchen", 0f, 0f, 4f, 4f),
+            room("p", "Pantry", 0.2f, 0.1f, 4.2f, 4.1f),
+        )
+        assertThat(RoomLabels.place(rooms, 2000, 2000, size, topDown).map { it.id }).containsExactly("k")
+        // Without a size every name is placed, as before.
+        assertThat(RoomLabels.place(rooms, 2000, 2000, topDown).map { it.id }).containsExactly("k", "p")
+    }
+}

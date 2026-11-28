@@ -209,6 +209,21 @@ fun FloorSceneView(
     val renderer = io.github.sceneview.rememberRenderer(engine)
     var labels by remember { mutableStateOf(emptyList<RoomLabel>()) }
     val labelRooms by rememberUpdatedState(if (room == null) scene.rooms.values else emptyList())
+    // A label's size estimated from its text style (labelMedium, padded 6 by 2 dp) so overlapping names are left out
+    // ([judge:hm-3d-labels-overlap]); a little generous, as glyphs average about 0.6 of the font size across.
+    val labelStyle = androidx.compose.material3.MaterialTheme.typography.labelMedium
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val labelSize = remember(labelStyle, density) {
+        with(density) {
+            val fontPx = labelStyle.fontSize.toPx()
+            val lineHeight = labelStyle.lineHeight
+            val linePx = if (lineHeight.isSp) lineHeight.toPx() else fontPx * 1.4f
+            val padX = 12.dp.toPx()
+            val padY = 4.dp.toPx()
+            val estimate: (String) -> Pair<Float, Float> = { name -> (name.length * fontPx * 0.6f + padX) to (linePx + padY) }
+            estimate
+        }
+    }
     Box(
         modifier
             .onSizeChanged {
@@ -289,7 +304,7 @@ fun FloorSceneView(
                     }
                 }
                 val clip = cameraNode.projectionTransform * cameraNode.viewTransform
-                val next = RoomLabels.place(labelRooms, viewSize.width, viewSize.height) { x, y, z ->
+                val next = RoomLabels.place(labelRooms, viewSize.width, viewSize.height, labelSize) { x, y, z ->
                     val c = clip * dev.romainguy.kotlin.math.Float4(x, y, z, 1f)
                     floatArrayOf(c.x, c.y, c.z, c.w)
                 }.map { it.copy(x = kotlin.math.round(it.x), y = kotlin.math.round(it.y)) }
